@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+    <PawnEditor.EditCharacters>Edit characters</PawnEditor.EditCharacters>
+    <PawnEditor.UsePointLimit>Use point limit</PawnEditor.UsePointLimit>
+    <PawnEditor.PointsRemaining>Remaining points:</PawnEditor.PointsRemaining>
+    <PawnEditor.SelectedFaction>Selected faction</PawnEditor.SelectedFaction>
+    <PawnEditor.SelectFaction>Select faction</PawnEditor.SelectFaction>
+    <PawnEditor.ClickFactionOverview>Click for faction overview</PawnEditor.ClickFactionOverview>
+    <PawnEditor.SelectedCategory>Selected category</PawnEditor.SelectedCategory>
+    <PawnEditor.PawnCategory.Colonists>colonist</PawnEditor.PawnCategory.Colonists>
+    <PawnEditor.PawnCategory.Humans>human</PawnEditor.PawnCategory.Humans>
+    <PawnEditor.PawnCategory.Animals>animal</PawnEditor.PawnCategory.Animals>
+    <PawnEditor.PawnCategory.Mechs>mech</PawnEditor.PawnCategory.Mechs>
+    <PawnEditor.ReallyDelete>Really delete {0}?</PawnEditor.ReallyDelete>
+    <PawnEditor.Add.PawnKind>Add pawn from PawnKindDef</PawnEditor.Add.PawnKind>
+    <PawnEditor.Add.Saved>Add saved {0}</PawnEditor.Add.Saved>
+    <PawnEditor.Add.Random>Add random {0} ({1} points)</PawnEditor.Add.Random>
+    <PawnEditor.Add.OtherSave>Add pawn from other save</PawnEditor.Add.OtherSave>
+    <PawnEditor.Teleport>Teleport</PawnEditor.Teleport>
+</LanguageData>

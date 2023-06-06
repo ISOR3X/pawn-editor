@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
@@ -31,6 +32,7 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -62,8 +64,14 @@
     <None Include="C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Data\**\*.xml" Visible="false" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LeftPanel.cs" />
+    <Compile Include="PawnCategory.cs" />
     <Compile Include="PawnEditorMod.cs" />
+    <Compile Include="PawnEditorUI.cs" />
+    <Compile Include="PawnList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TexPawnEditor.cs" />
+    <Compile Include="UIUtility.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
