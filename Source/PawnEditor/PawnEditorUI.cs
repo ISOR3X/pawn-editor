@@ -24,9 +24,9 @@ public static partial class PawnEditor
         var headerRect = inRect.TakeTopPart(50f);
         headerRect.xMax -= 10f;
         headerRect.yMax -= 20f;
-        using (new TextBlock(GameFont.Medium, TextAnchor.MiddleLeft, null))
+        using (new TextBlock(GameFont.Medium))
             Widgets.Label(headerRect, $"{(pregame ? "Create" : "PawnEditor.Edit")}Characters".Translate());
-        
+
         if (ModsConfig.IdeologyActive)
         {
             string text = "ShowHeadgear".Translate();
@@ -44,7 +44,7 @@ public static partial class PawnEditor
         var num = Text.CalcSize(text4).x;
         var width2 = Mathf.Max(Text.CalcSize(text3).x, num) + 4f + Mathf.Max(Text.CalcSize(text3).x, 24f);
         var rect3 = headerRect.TakeRightPart(width2).TopPartPixels(Text.LineHeight * 2f);
-        Widgets.CheckboxLabeled(rect3.TopHalf(), text3, ref usePointLimit, placeCheckboxNearText: true);
+        UIUtility.CheckboxLabeledCentered(rect3.TopHalf(), text3, ref usePointLimit);
         rect3 = rect3.BottomHalf();
         Widgets.Label(rect3.TakeLeftPart(num), text4);
         using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(ColoredText.CurrencyColor));
@@ -80,6 +80,7 @@ public static partial class PawnEditor
                             })))
                            .ToList()));
                 });
+
         inRect.yMin -= 10f;
         DoLeftPanel(inRect.TakeLeftPart(134), pregame);
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+    <PawnEditor>Pawn Editor</PawnEditor>
+    <PawnEdtior.OverrideVanilla>Override vanilla window</PawnEdtior.OverrideVanilla>
+    <PawnEditor.OverrideVanilla.Desc>Override the vanilla character creation screen with the pawn editor screen. If false, there will be a Pawn Editor button on the bottom the screen to open the editor.</PawnEditor.OverrideVanilla.Desc>
+</LanguageData>

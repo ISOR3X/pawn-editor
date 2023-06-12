@@ -15,13 +15,37 @@ public class PawnEditorMod : Mod
     {
         Harm = new Harmony("legodude17.pawneditor");
         Settings = GetSettings<PawnEditorSettings>();
-        Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)),
-            new HarmonyMethod(GetType(), nameof(OverrideVanilla)));
+        ApplySettings();
+    }
+
+    public override string SettingsCategory() => "PawnEditor".Translate();
+
+    public override void DoSettingsWindowContents(Rect inRect)
+    {
+        base.DoSettingsWindowContents(inRect);
+        var listing = new Listing_Standard();
+        listing.Begin(inRect);
+        listing.CheckboxLabeled("PawnEdtior.OverrideVanilla".Translate(), ref Settings.OverrideVanilla, "PawnEditor.OverrideVanilla.Desc".Translate());
+        listing.End();
+    }
+
+    private void ApplySettings()
+    {
+        Harm.Unpatch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)),
+            AccessTools.Method(GetType(), nameof(OverrideVanilla)));
+        if (Settings.OverrideVanilla)
+            Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)),
+                new HarmonyMethod(GetType(), nameof(OverrideVanilla)));
+    }
+
+    public override void WriteSettings()
+    {
+        base.WriteSettings();
+        ApplySettings();
     }
 
     public static bool OverrideVanilla(Rect rect, Page_ConfigureStartingPawns __instance)
     {
-        if (!Settings.OverrideVanilla) return true;
         PawnEditor.DoUI(rect, __instance.DoBack, __instance.DoNext, true);
         return false;
     }
