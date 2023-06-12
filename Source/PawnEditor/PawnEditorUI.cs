@@ -22,9 +22,11 @@ public static partial class PawnEditor
     public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
     {
         var headerRect = inRect.TakeTopPart(50f);
+        headerRect.xMax -= 10f;
+        headerRect.yMax -= 20f;
         using (new TextBlock(GameFont.Medium, TextAnchor.MiddleLeft, null))
             Widgets.Label(headerRect, $"{(pregame ? "Create" : "PawnEditor.Edit")}Characters".Translate());
-
+        
         if (ModsConfig.IdeologyActive)
         {
             string text = "ShowHeadgear".Translate();
@@ -78,8 +80,8 @@ public static partial class PawnEditor
                             })))
                            .ToList()));
                 });
-        inRect.TakeBottomPart(3);
-        DoLeftPanel(inRect.TakeLeftPart(180), pregame);
+        inRect.yMin -= 10f;
+        DoLeftPanel(inRect.TakeLeftPart(134), pregame);
     }
 
     public static void DoBottomButtons(Rect inRect, string leftButtonLabel, Action onLeftButton, string rightButtonLabel, Action onRightButton)

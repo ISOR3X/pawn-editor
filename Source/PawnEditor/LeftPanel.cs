@@ -21,13 +21,13 @@ public static partial class PawnEditor
                     new FloatMenuOption(faction.Name, () => selectedFaction = faction, faction.def.FactionIcon, faction.color ?? Color.white))
                .ToList()));
 
-        var factionRect = inRect.TakeTopPart(68f).ContractedBy(4f);
+        var factionRect = inRect.TakeTopPart(54f);
         Widgets.DrawOptionBackground(factionRect, showFactionInfo);
         MouseoverSounds.DoRegion(factionRect);
         var color = selectedFaction.Color;
         color.a = 0.2f;
         GUI.color = color;
-        GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.2f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
+        GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
         GUI.color = Color.white;
         using (new TextBlock(GameFont.Small))
             Widgets.Label(factionRect.ContractedBy(2f).TopPart(0.5f).Rounded(), selectedFaction.Name);
@@ -112,6 +112,7 @@ public static partial class PawnEditor
             onDelete = pawn => pawn.Destroy();
         }
 
-        DoPawnList(inRect, pawns, sections, onReorder, onDelete);
+        inRect.yMin += 12f;
+        DoPawnList(inRect.TakeTopPart(415f), pawns, sections, onReorder, onDelete);
     }
 }
