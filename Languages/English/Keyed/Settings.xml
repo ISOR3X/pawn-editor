@@ -3,4 +3,6 @@
     <PawnEditor>Pawn Editor</PawnEditor>
     <PawnEdtior.OverrideVanilla>Override vanilla window</PawnEdtior.OverrideVanilla>
     <PawnEditor.OverrideVanilla.Desc>Override the vanilla character creation screen with the pawn editor screen. If false, there will be a Pawn Editor button on the bottom the screen to open the editor.</PawnEditor.OverrideVanilla.Desc>
+    <PawnEditor.InGameDevButton>In-game dev button</PawnEditor.InGameDevButton>
+    <PawnEditor.InGameDevButton.Desc>Enable the button in dev mode to open the pawn editor window.</PawnEditor.InGameDevButton.Desc>
 </LanguageData>

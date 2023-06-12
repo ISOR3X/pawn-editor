@@ -18,7 +18,11 @@ public static partial class PawnEditor
         if (selectedFaction == null || pregame) selectedFaction = Faction.OfPlayer;
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Select(faction =>
-                    new FloatMenuOption(faction.Name, () => selectedFaction = faction, faction.def.FactionIcon, faction.color ?? Color.white))
+                    new FloatMenuOption(faction.Name, delegate
+                    {
+                        selectedFaction = faction;
+                        RecachePawnList();
+                    }, faction.def.FactionIcon, faction.Color))
                .ToList()));
 
         var factionRect = inRect.TakeTopPart(54f);
@@ -30,7 +34,7 @@ public static partial class PawnEditor
         GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
         GUI.color = Color.white;
         using (new TextBlock(GameFont.Small))
-            Widgets.Label(factionRect.ContractedBy(2f).TopPart(0.5f).Rounded(), selectedFaction.Name);
+            Widgets.Label(factionRect.ContractedBy(2f), selectedFaction.Name);
         if (Widgets.ButtonInvisible(factionRect)) showFactionInfo = !showFactionInfo;
 
         using (new TextBlock(GameFont.Tiny))
@@ -44,7 +48,11 @@ public static partial class PawnEditor
             Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
                .Cast<PawnCategory>()
                .Select(category =>
-                    new FloatMenuOption(category.LabelCapPlural(), () => selectedCategory = category))
+                    new FloatMenuOption(category.LabelCapPlural(), delegate
+                    {
+                        selectedCategory = category;
+                        RecachePawnList();
+                    }))
                .ToList()));
 
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst()))
@@ -86,7 +94,7 @@ public static partial class PawnEditor
 
         List<Pawn> pawns;
         List<string> sections;
-        Action<Pawn, int> onReorder;
+        Action<Pawn, int, int> onReorder;
         Action<Pawn> onDelete;
         if (pregame)
         {
@@ -94,9 +102,8 @@ public static partial class PawnEditor
             sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
             sections[0] = "StartingPawnsSelected".Translate();
             sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
-            onReorder = delegate(Pawn item, int to)
+            onReorder = delegate(Pawn item, int from, int to)
             {
-                var from = Find.GameInitData.startingAndOptionalPawns.IndexOf(item);
                 StartingPawnUtility.ReorderRequests(from, to);
                 TutorSystem.Notify_Event("ReorderPawn");
                 if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
@@ -106,10 +113,9 @@ public static partial class PawnEditor
         }
         else
         {
-            pawns = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_Colonists;
-            sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
-            onReorder = (pawn, to) => { };
-            onDelete = pawn => pawn.Destroy();
+            (pawns, sections) = PawnLister.GetLists();
+            onReorder = PawnLister.OnReorder;
+            onDelete = PawnLister.OnDelete;
         }
 
         inRect.yMin += 12f;

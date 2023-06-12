@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
@@ -55,29 +54,9 @@ public static partial class PawnEditor
                 : () =>
                 {
                     if (!showFactionInfo && selectedPawn != null)
-                        Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => new FloatMenuOption(map.Parent.LabelCap, () =>
-                            {
-                                if (selectedPawn.Spawned)
-                                {
-                                    selectedPawn.teleporting = true;
-                                    selectedPawn.ExitMap(false, Rot4.Invalid);
-                                }
-
-                                GenSpawn.Spawn(selectedPawn, CellFinder.RandomCell(map), map);
-                                selectedPawn.teleporting = false;
-                            }))
-                           .Concat(Find.WorldObjects.Caravans.Select(caravan => new FloatMenuOption(caravan.Name, () =>
-                            {
-                                if (selectedPawn.Spawned)
-                                {
-                                    selectedPawn.teleporting = true;
-                                    selectedPawn.ExitMap(false, Rot4.Invalid);
-                                }
-
-                                Find.WorldPawns.PassToWorld(selectedPawn, PawnDiscardDecideMode.KeepForever);
-                                caravan.AddPawn(selectedPawn, true);
-                                selectedPawn.teleporting = false;
-                            })))
+                        Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnLister.GetTeleportOption(map, selectedPawn))
+                           .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnLister.GetTeleportOption(caravan, selectedPawn)))
+                           .Append(PawnLister.GetTeleportOption(Find.World, selectedPawn))
                            .ToList()));
                 });
 
@@ -120,5 +99,11 @@ public static partial class PawnEditor
         buttonRect.x += buttonRect.width * 2 + 10;
 
         if (Widgets.ButtonText(buttonRect, "Load".Translate())) { }
+    }
+
+    public static void RecachePawnList()
+    {
+        if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
+        PawnLister.UpdateCache(selectedFaction, selectedCategory);
     }
 }

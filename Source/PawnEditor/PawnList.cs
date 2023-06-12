@@ -12,7 +12,7 @@ public static partial class PawnEditor
     private static Vector2 pawnListScrollPos;
     private static int reorderableGroupID;
 
-    private static void DoPawnList(Rect inRect, List<Pawn> pawns, List<string> sections, Action<Pawn, int> onReorder, Action<Pawn> onDelete)
+    private static void DoPawnList(Rect inRect, List<Pawn> pawns, List<string> sections, Action<Pawn, int, int> onReorder, Action<Pawn> onDelete)
     {
         var height = pawns.Count * 60f + sections.Count * 20f;
         using (new TextBlock(GameFont.Tiny))
@@ -27,7 +27,7 @@ public static partial class PawnEditor
                 var item = pawns[from];
                 pawns.Insert(to, item);
                 pawns.RemoveAt(from < to ? from : from + 1);
-                onReorder(item, from);
+                onReorder(item, from, to);
             }, ReorderableDirection.Vertical, viewRect, -1f, null, false);
         for (var i = 0; i < pawns.Count; i++)
         {
@@ -51,8 +51,9 @@ public static partial class PawnEditor
             using (new TextBlock(TextAnchor.MiddleLeft))
             {
                 Widgets.Label(rect.TopPart(0.5f).Rounded(), label);
-                Widgets.Label(rect.BottomPart(0.5f).Rounded(),
-                    Text.CalcSize(pawn.story.TitleCap).x > rect.width ? pawn.story.TitleShortCap : pawn.story.TitleCap);
+                if (pawn.story != null)
+                    Widgets.Label(rect.BottomPart(0.5f).Rounded(),
+                        Text.CalcSize(pawn.story.TitleCap).x > rect.width ? pawn.story.TitleShortCap : pawn.story.TitleCap);
             }
 
             if (Mouse.IsOver(rect))
@@ -64,9 +65,9 @@ public static partial class PawnEditor
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
                         () =>
                         {
+                            onDelete(pawn);
                             pawns.RemoveAt(index);
                             sections.RemoveAt(index);
-                            onDelete(pawn);
                         }, true));
                 }
                 else if (Event.current.type == EventType.MouseDown)
