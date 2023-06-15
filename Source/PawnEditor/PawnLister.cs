@@ -46,7 +46,6 @@ public static class PawnLister
     {
         var from = locations[fromIndex];
         var to = locations[toIndex];
-        Log.Message($"Reordering {pawn} from {from} ({fromIndex}) to {to} ({toIndex})");
         locations.Insert(toIndex, to);
         locations.RemoveAt(fromIndex < toIndex ? fromIndex : fromIndex + 1);
         if (sections[toIndex] != null) toIndex++;
@@ -75,7 +74,6 @@ public static class PawnLister
 
     public static void TeleportFromTo(Pawn pawn, object from, object to)
     {
-        Log.Message($"Teleporting {pawn} from {from} to {to}");
         if (to == from) return;
         if (pawns.Contains(pawn))
         {
@@ -100,7 +98,6 @@ public static class PawnLister
 
     private static void DoTeleport(Pawn pawn, object from, object to)
     {
-        Log.Message($"Moving {pawn} from {from} to {to}");
         pawn.teleporting = true;
         FullyRemove(pawn);
         if (to is Map map) GenSpawn.Spawn(pawn, CellFinder.RandomCell(map), map);

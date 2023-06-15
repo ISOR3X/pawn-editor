@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -12,11 +13,13 @@ public static partial class PawnEditor
     private static bool renderClothes = true;
     private static bool renderHeadgear = true;
     private static bool usePointLimit;
-
+    private static float remainingPoints = 100000;
     private static Faction selectedFaction;
     private static Pawn selectedPawn;
     private static bool showFactionInfo;
     private static PawnCategory selectedCategory;
+    private static float cachedPawnValue;
+    private static List<Pawn> cachedPawnList;
 
     public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
     {
@@ -39,7 +42,7 @@ public static partial class PawnEditor
 
         string text3 = "PawnEditor.UsePointLimit".Translate();
         string text4 = "PawnEditor.PointsRemaining".Translate();
-        var text5 = 100000f.ToStringMoney();
+        var text5 = remainingPoints.ToStringMoney();
         var num = Text.CalcSize(text4).x;
         var width2 = Mathf.Max(Text.CalcSize(text3).x, num) + 4f + Mathf.Max(Text.CalcSize(text3).x, 24f);
         var rect3 = headerRect.TakeRightPart(width2).TopPartPixels(Text.LineHeight * 2f);
@@ -105,5 +108,26 @@ public static partial class PawnEditor
     {
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
         PawnLister.UpdateCache(selectedFaction, selectedCategory);
+        ResetPoints();
+    }
+
+    public static void ResetPoints()
+    {
+        remainingPoints = 100000;
+        cachedPawnValue = 0;
+        cachedPawnList = null;
+        Notify_PointsUsed();
+    }
+
+    public static void Notify_PointsUsed(float? amount = null)
+    {
+        if (amount.HasValue)
+            remainingPoints -= amount.Value;
+        else if (cachedPawnList?.Count > 0)
+        {
+            var pawnValue = cachedPawnList.Sum(p => p.GetStatValue(StatDefOf.MarketValue));
+            remainingPoints -= pawnValue - cachedPawnValue;
+            cachedPawnValue = pawnValue;
+        }
     }
 }

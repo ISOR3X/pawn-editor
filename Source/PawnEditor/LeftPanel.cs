@@ -118,6 +118,12 @@ public static partial class PawnEditor
             onDelete = PawnLister.OnDelete;
         }
 
+        if (cachedPawnList == null)
+        {
+            cachedPawnList = pawns;
+            Notify_PointsUsed();
+        }
+
         inRect.yMin += 12f;
         DoPawnList(inRect.TakeTopPart(415f), pawns, sections, onReorder, onDelete);
     }
