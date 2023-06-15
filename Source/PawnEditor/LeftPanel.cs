@@ -60,7 +60,10 @@ public static partial class PawnEditor
             void AddPawn(Pawn addedPawn)
             {
                 if (pregame)
-                    Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
+                    if (selectedCategory is PawnCategory.Colonists or PawnCategory.Humans)
+                        Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
+                    else
+                        StartingThingsManager.AddPawn(selectedCategory, addedPawn);
                 else
                     Find.WorldPawns.PassToWorld(addedPawn, PawnDiscardDecideMode.KeepForever);
             }
@@ -74,9 +77,7 @@ public static partial class PawnEditor
 
             var list = new List<FloatMenuOption>
             {
-                new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate { }),
-                new("PawnEditor.Add.Random".Translate(selectedCategory.Label(), 1000), () => AddPawnKind(selectedFaction.RandomPawnKind())),
-                new("PawnEditor.Add.Random".Translate(selectedCategory.Label(), 10000), () => AddPawnKind(selectedFaction.RandomPawnKind()))
+                new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate { })
             };
 
             if (selectedCategory is PawnCategory.Colonists or PawnCategory.Humans)
@@ -98,18 +99,29 @@ public static partial class PawnEditor
         Action<Pawn> onDelete;
         if (pregame)
         {
-            pawns = Find.GameInitData.startingAndOptionalPawns;
-            sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
-            sections[0] = "StartingPawnsSelected".Translate();
-            sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
-            onReorder = delegate(Pawn item, int from, int to)
+            if (selectedCategory is PawnCategory.Colonists or PawnCategory.Humans)
             {
-                StartingPawnUtility.ReorderRequests(from, to);
-                TutorSystem.Notify_Event("ReorderPawn");
-                if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
-                    TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
-            };
-            onDelete = pawn => pawn.Discard(true);
+                pawns = Find.GameInitData.startingAndOptionalPawns;
+                sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
+                sections[0] = "StartingPawnsSelected".Translate();
+                sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
+                onReorder = delegate(Pawn item, int from, int to)
+                {
+                    StartingPawnUtility.ReorderRequests(from, to);
+                    TutorSystem.Notify_Event("ReorderPawn");
+                    if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
+                        TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
+                };
+                onDelete = pawn => pawn.Discard(true);
+            }
+            else
+            {
+                pawns = StartingThingsManager.GetPawns(selectedCategory);
+                sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
+                sections[0] = "StartingPawnsSelected".Translate();
+                onReorder = (pawn, from, to) => { };
+                onDelete = pawn => pawn.Discard(true);
+            }
         }
         else
         {

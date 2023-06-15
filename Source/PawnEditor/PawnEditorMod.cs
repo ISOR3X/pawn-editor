@@ -6,6 +6,7 @@ using Verse;
 
 namespace PawnEditor;
 
+[HotSwappable]
 public class PawnEditorMod : Mod
 {
     public static Harmony Harm;
@@ -43,6 +44,14 @@ public class PawnEditorMod : Mod
         if (Settings.InGameDevButton)
             Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)),
                 postfix: new HarmonyMethod(GetType(), nameof(AddDevButton)));
+
+        Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.PreOpen)),
+            new HarmonyMethod(GetType(), nameof(Notify_ConfigurePawns)));
+
+        Harm.Patch(AccessTools.Method(typeof(Page_SelectScenario), nameof(Page_SelectScenario.PreOpen)),
+            new HarmonyMethod(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
+        Harm.Patch(AccessTools.Method(typeof(Game), nameof(Game.InitNewGame)),
+            postfix: new HarmonyMethod(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
     }
 
     public override void WriteSettings()
@@ -91,6 +100,12 @@ public class PawnEditorMod : Mod
         if (Current.ProgramState == ProgramState.Playing
          && __instance.widgetRow.ButtonIcon(TexPawnEditor.OpenPawnEditor, "PawnEditor.CharacterEditor".Translate()))
             Find.WindowStack.Add(new Dialog_PawnEditor_InGame());
+    }
+
+    public static void Notify_ConfigurePawns()
+    {
+        StartingThingsManager.ProcessScenario();
+        PawnEditor.ResetPoints();
     }
 }
 

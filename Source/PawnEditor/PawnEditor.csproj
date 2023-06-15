@@ -72,6 +72,7 @@
     <Compile Include="PawnList.cs" />
     <Compile Include="PawnLister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StartingThingsManager.cs" />
     <Compile Include="TexPawnEditor.cs" />
     <Compile Include="UIUtility.cs" />
   </ItemGroup>
