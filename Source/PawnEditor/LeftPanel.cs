@@ -34,7 +34,7 @@ public static partial class PawnEditor
         GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
         GUI.color = Color.white;
         using (new TextBlock(GameFont.Small))
-            Widgets.Label(factionRect.ContractedBy(2f), selectedFaction.Name);
+            Widgets.Label(factionRect.ContractedBy(5f), selectedFaction.Name);
         if (Widgets.ButtonInvisible(factionRect)) showFactionInfo = !showFactionInfo;
 
         using (new TextBlock(GameFont.Tiny))
@@ -95,6 +95,7 @@ public static partial class PawnEditor
 
         List<Pawn> pawns;
         List<string> sections;
+        int sectionCount;
         Action<Pawn, int, int> onReorder;
         Action<Pawn> onDelete;
         if (pregame)
@@ -105,6 +106,7 @@ public static partial class PawnEditor
                 sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
                 sections[0] = "StartingPawnsSelected".Translate();
                 sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
+                sectionCount = 2;
                 onReorder = delegate(Pawn item, int from, int to)
                 {
                     StartingPawnUtility.ReorderRequests(from, to);
@@ -119,13 +121,14 @@ public static partial class PawnEditor
                 pawns = StartingThingsManager.GetPawns(selectedCategory);
                 sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
                 sections[0] = "StartingPawnsSelected".Translate();
+                sectionCount = 1;
                 onReorder = (pawn, from, to) => { };
                 onDelete = pawn => pawn.Discard(true);
             }
         }
         else
         {
-            (pawns, sections) = PawnLister.GetLists();
+            (pawns, sections, sectionCount) = PawnLister.GetLists();
             onReorder = PawnLister.OnReorder;
             onDelete = PawnLister.OnDelete;
         }
@@ -137,6 +140,6 @@ public static partial class PawnEditor
         }
 
         inRect.yMin += 12f;
-        DoPawnList(inRect.TakeTopPart(415f), pawns, sections, onReorder, onDelete);
+        DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
     }
 }

@@ -12,7 +12,7 @@ public abstract class Dialog_PawnEditor : Window
         forcePause = true;
         absorbInputAroundWindow = true;
         closeOnAccept = false;
-        closeOnCancel = false;
+        closeOnCancel = true;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
     }
 

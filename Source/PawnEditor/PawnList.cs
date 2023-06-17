@@ -12,11 +12,10 @@ public static partial class PawnEditor
     private static Vector2 pawnListScrollPos;
     private static int reorderableGroupID;
 
-    private static void DoPawnList(Rect inRect, List<Pawn> pawns, List<string> sections, Action<Pawn, int, int> onReorder, Action<Pawn> onDelete)
+    private static void DoPawnList(Rect inRect, List<Pawn> pawns, List<string> sections, int sectionCount, Action<Pawn, int, int> onReorder,
+        Action<Pawn> onDelete)
     {
-        var height = pawns.Count * 60f + sections.Count * 20f;
-        using (new TextBlock(GameFont.Tiny))
-            Widgets.Label(inRect.TakeBottomPart(20f), "DragToReorder".Translate().Colorize(ColoredText.SubtleGrayColor));
+        var height = pawns.Count * 60f + sectionCount * 20f + 10f;
 
         var viewRect = new Rect(0, 0, inRect.width, height);
         inRect.xMax += 16f;
@@ -82,6 +81,9 @@ public static partial class PawnEditor
             if (ReorderableWidget.Reorderable(reorderableGroupID, outerRect))
                 Widgets.DrawRectFast(outerRect.ContractedBy(3), Widgets.WindowBGFillColor * new Color(1f, 1f, 1f, 0.5f));
         }
+
+        using (new TextBlock(GameFont.Tiny))
+            Widgets.Label(viewRect.TakeTopPart(20f), "DragToReorder".Translate().Colorize(ColoredText.SubtleGrayColor));
 
         Widgets.EndScrollView();
     }

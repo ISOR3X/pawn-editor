@@ -10,6 +10,7 @@ public static class PawnLister
     private static readonly List<Pawn> pawns = new();
     private static readonly List<string> sections = new();
     private static readonly List<object> locations = new();
+    private static int sectionCount;
 
     public static void UpdateCache(Faction faction, PawnCategory category)
     {
@@ -26,11 +27,13 @@ public static class PawnLister
         pawns.Clear();
         sections.Clear();
         locations.Clear();
+        sectionCount = 0;
     }
 
     private static void AddLocation(object location, IEnumerable<Pawn> occupants, Faction faction, PawnCategory category)
     {
         sections.Add(LocationLabel(location));
+        sectionCount++;
         foreach (var pawn in occupants)
         {
             if (pawn.Faction != faction || !category.Includes(pawn)) continue;
@@ -54,7 +57,7 @@ public static class PawnLister
         DoTeleport(pawn, from, to);
     }
 
-    public static (List<Pawn>, List<string>) GetLists() => (pawns, sections);
+    public static (List<Pawn>, List<string>, int) GetLists() => (pawns, sections, sectionCount);
 
     public static void OnDelete(Pawn pawn)
     {
