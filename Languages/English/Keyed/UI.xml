@@ -7,8 +7,7 @@
     <PawnEditor.SelectFaction>Select faction</PawnEditor.SelectFaction>
     <PawnEditor.ClickFactionOverview>Click for faction overview</PawnEditor.ClickFactionOverview>
     <PawnEditor.SelectedCategory>Selected category</PawnEditor.SelectedCategory>
-    <PawnEditor.PawnCategory.Colonists>colonist</PawnEditor.PawnCategory.Colonists>
-    <PawnEditor.PawnCategory.Humans>human</PawnEditor.PawnCategory.Humans>
+    <PawnEditor.PawnCategory.Humans>humanlike</PawnEditor.PawnCategory.Humans>
     <PawnEditor.PawnCategory.Animals>animal</PawnEditor.PawnCategory.Animals>
     <PawnEditor.PawnCategory.Mechs>mech</PawnEditor.PawnCategory.Mechs>
     <PawnEditor.ReallyDelete>Really delete {0}?</PawnEditor.ReallyDelete>
@@ -18,4 +17,7 @@
     <PawnEditor.Add.OtherSave>Add pawn from other save</PawnEditor.Add.OtherSave>
     <PawnEditor.Teleport>Teleport</PawnEditor.Teleport>
     <PawnEditor.CharacterEditor>Character editor</PawnEditor.CharacterEditor>
+    <PawnEditor.Selected>selected</PawnEditor.Selected>
+    <PawnEditor.Colony>colony</PawnEditor.Colony>
+    <PawnEditor.Selection>selection</PawnEditor.Selection>
 </LanguageData>

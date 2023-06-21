@@ -138,20 +138,10 @@ public static class StartingThingsManager
                     yield return GenLabel.ThingLabel(thing, thing.stackCount, false).CapitalizeFirst();
         }
 
-        public override IEnumerable<Thing> PlayerStartingThings()
-        {
-            Log.Message("Getting starting things");
-            GenDebug.LogList(startingThings);
-            GenDebug.LogList(startingAnimals);
-            GenDebug.LogList(startingMechs);
-            return startingThings.Concat(startingAnimals).Concat(startingMechs);
-        }
+        public override IEnumerable<Thing> PlayerStartingThings() => startingThings.Concat(startingAnimals).Concat(startingMechs);
 
         public override void GenerateIntoMap(Map map)
         {
-            Log.Message("Generating into map!");
-            GenDebug.LogList(startingThingsNear);
-            GenDebug.LogList(startingThingsFar);
             var thingsNear = new Dictionary<(ThingDef, ThingDef), int>();
             var thingsFar = new Dictionary<(ThingDef, ThingDef), int>();
 
@@ -198,6 +188,60 @@ public static class StartingThingsManager
                     clusterSize = thingDef.category == ThingCategory.Building ? 1 : 4,
                     allowRoofed = true
                 }.Generate(map, default);
+        }
+    }
+
+    public class StartingPreset : IExposable
+    {
+        private List<Pawn> animals;
+        private List<Pawn> humans;
+        private List<Pawn> mechs;
+        private int takingCount;
+        private List<Thing> thingsFar;
+        private List<Thing> thingsNear;
+        private List<Thing> thingsPossessions;
+
+        public StartingPreset()
+        {
+            humans = Find.GameInitData.startingAndOptionalPawns.ListFullCopy();
+            takingCount = Find.GameInitData.startingPawnCount;
+            animals = startingAnimals.ListFullCopy();
+            mechs = startingMechs.ListFullCopy();
+            thingsPossessions = startingThings.ListFullCopy();
+            thingsNear = startingThingsNear.ListFullCopy();
+            thingsFar = startingThingsFar.ListFullCopy();
+        }
+
+        public void ExposeData()
+        {
+            Scribe_Collections.Look(ref humans, nameof(humans), LookMode.Deep);
+            Scribe_Collections.Look(ref animals, nameof(animals), LookMode.Deep);
+            Scribe_Collections.Look(ref mechs, nameof(mechs), LookMode.Deep);
+            Scribe_Collections.Look(ref thingsPossessions, nameof(thingsPossessions), LookMode.Deep);
+            Scribe_Collections.Look(ref thingsNear, nameof(thingsNear), LookMode.Deep);
+            Scribe_Collections.Look(ref thingsFar, nameof(thingsFar), LookMode.Deep);
+            Scribe_Values.Look(ref takingCount, nameof(takingCount));
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit) Apply();
+        }
+
+        public void Apply()
+        {
+            Log.Message("Applying starting preset!");
+            Find.GameInitData.startingAndOptionalPawns.Clear();
+            Find.GameInitData.startingAndOptionalPawns.AddRange(humans);
+            Find.GameInitData.startingPawnCount = takingCount;
+            startingAnimals.Clear();
+            startingMechs.Clear();
+            startingThings.Clear();
+            startingThingsNear.Clear();
+            startingThingsFar.Clear();
+            startingAnimals.AddRange(animals);
+            startingMechs.AddRange(mechs);
+            startingThings.AddRange(thingsPossessions);
+            startingThingsNear.AddRange(thingsNear);
+            startingThingsFar.AddRange(thingsFar);
+            PawnEditor.RecachePawnList();
         }
     }
 }

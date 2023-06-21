@@ -5,10 +5,7 @@ namespace PawnEditor;
 
 public enum PawnCategory
 {
-    Colonists,
-    Humans,
-    Animals,
-    Mechs
+    Humans, Animals, Mechs
 }
 
 public static class PawnCategoryExtensions
@@ -22,7 +19,6 @@ public static class PawnCategoryExtensions
     {
         return category switch
         {
-            PawnCategory.Colonists => pawn.IsColonist,
             PawnCategory.Humans => pawn.RaceProps.Humanlike,
             PawnCategory.Animals => pawn.RaceProps.Animal,
             PawnCategory.Mechs => pawn.RaceProps.IsMechanoid,

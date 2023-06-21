@@ -82,8 +82,9 @@ public static partial class PawnEditor
                 Widgets.DrawRectFast(outerRect.ContractedBy(3), Widgets.WindowBGFillColor * new Color(1f, 1f, 1f, 0.5f));
         }
 
-        using (new TextBlock(GameFont.Tiny))
-            Widgets.Label(viewRect.TakeTopPart(20f), "DragToReorder".Translate().Colorize(ColoredText.SubtleGrayColor));
+        if (pawns.Count > 0)
+            using (new TextBlock(GameFont.Tiny))
+                Widgets.Label(viewRect.TakeTopPart(20f), "DragToReorder".Translate().Colorize(ColoredText.SubtleGrayColor));
 
         Widgets.EndScrollView();
     }

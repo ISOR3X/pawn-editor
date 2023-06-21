@@ -51,27 +51,26 @@ public static partial class PawnEditor
         Widgets.Label(rect3.TakeLeftPart(num), text4);
         using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(ColoredText.CurrencyColor));
 
-        DoBottomButtons(inRect.TakeBottomPart(Page.BottomButHeight), pregame ? "Back".Translate() : "Close".Translate(), onClose,
-            pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate(), pregame
-                ? onNext
-                : () =>
-                {
-                    if (!showFactionInfo && selectedPawn != null)
-                        Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnLister.GetTeleportOption(map, selectedPawn))
-                           .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnLister.GetTeleportOption(caravan, selectedPawn)))
-                           .Append(PawnLister.GetTeleportOption(Find.World, selectedPawn))
-                           .ToList()));
-                });
+        DoBottomButtons(inRect.TakeBottomPart(Page.BottomButHeight), onClose, pregame
+            ? onNext
+            : () =>
+            {
+                if (!showFactionInfo && selectedPawn != null)
+                    Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnLister.GetTeleportOption(map, selectedPawn))
+                       .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnLister.GetTeleportOption(caravan, selectedPawn)))
+                       .Append(PawnLister.GetTeleportOption(Find.World, selectedPawn))
+                       .ToList()));
+            }, pregame);
 
         inRect.yMin -= 10f;
         DoLeftPanel(inRect.TakeLeftPart(134), pregame);
     }
 
-    public static void DoBottomButtons(Rect inRect, string leftButtonLabel, Action onLeftButton, string rightButtonLabel, Action onRightButton)
+    public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton, bool pregame)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), leftButtonLabel)) onLeftButton();
+        if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), pregame ? "Back".Translate() : "Close".Translate())) onLeftButton();
 
-        if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), rightButtonLabel)) onRightButton();
+        if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())) onRightButton();
 
         var randomRect = new Rect(Vector2.zero, Page.BottomButSize).CenteredOnXIn(inRect).CenteredOnYIn(inRect);
 
@@ -97,11 +96,29 @@ public static partial class PawnEditor
 
         buttonRect.x -= 5 + buttonRect.width;
 
-        if (Widgets.ButtonText(buttonRect, "Save".Translate())) { }
+        if (Widgets.ButtonText(buttonRect, "Save".Translate()))
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems(pregame).Select(item => item.MakeSaveOption()).ToList()));
 
         buttonRect.x += buttonRect.width * 2 + 10;
 
-        if (Widgets.ButtonText(buttonRect, "Load".Translate())) { }
+        if (Widgets.ButtonText(buttonRect, "Load".Translate()))
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems(pregame).Select(item => item.MakeLoadOption()).ToList()));
+    }
+
+    private static IEnumerable<SaveLoadItem> GetSaveLoadItems(bool pregame)
+    {
+        if (showFactionInfo)
+            yield return new SaveLoadItem<Faction>("PawnEditor.Selected".Translate(), selectedFaction);
+        else
+            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn);
+
+        if (pregame)
+            yield return new SaveLoadItem<StartingThingsManager.StartingPreset>("PawnEditor.Selection".Translate(), new StartingThingsManager.StartingPreset());
+        else
+            yield return new SaveLoadItem<Map>("PawnEditor.Colony".Translate(), Find.CurrentMap, new SaveLoadParms<Map>
+            {
+                OnLoad = map => map.FinalizeLoading()
+            });
     }
 
     public static void RecachePawnList()

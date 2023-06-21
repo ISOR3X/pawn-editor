@@ -17,6 +17,7 @@ public static partial class PawnEditor
 
         if (selectedFaction == null || pregame) selectedFaction = Faction.OfPlayer;
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
+        {
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
@@ -24,8 +25,10 @@ public static partial class PawnEditor
                         RecachePawnList();
                     }, faction.def.FactionIcon, faction.Color))
                .ToList()));
+            inRect.yMin += 2;
+        }
 
-        var factionRect = inRect.TakeTopPart(54f);
+        var factionRect = inRect.TakeTopPart(54f).ContractedBy(3);
         Widgets.DrawOptionBackground(factionRect, showFactionInfo);
         MouseoverSounds.DoRegion(factionRect);
         var color = selectedFaction.Color;
@@ -57,30 +60,23 @@ public static partial class PawnEditor
 
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst()))
         {
-            void AddPawn(Pawn addedPawn)
-            {
-                if (pregame)
-                    if (selectedCategory is PawnCategory.Colonists or PawnCategory.Humans)
-                        Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
-                    else
-                        StartingThingsManager.AddPawn(selectedCategory, addedPawn);
-                else
-                    Find.WorldPawns.PassToWorld(addedPawn, PawnDiscardDecideMode.KeepForever);
-            }
-
             void AddPawnKind(PawnKindDef pawnKind)
             {
                 AddPawn(PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, selectedFaction,
-                    pregame ? PawnGenerationContext.PlayerStarter : selectedFaction.IsPlayer ? PawnGenerationContext.All : PawnGenerationContext.NonPlayer,
-                    forceGenerateNewPawn: true)));
+                    pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
+                    forceGenerateNewPawn: true)), pregame);
             }
 
             var list = new List<FloatMenuOption>
             {
-                new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate { })
+                new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate
+                {
+                    var pawn = new Pawn();
+                    SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, pregame));
+                })
             };
 
-            if (selectedCategory is PawnCategory.Colonists or PawnCategory.Humans)
+            if (selectedCategory == PawnCategory.Humans)
                 list.Insert(0, new FloatMenuOption("PawnEditor.Add.PawnKind".Translate(), delegate
                 {
                     Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
@@ -100,14 +96,14 @@ public static partial class PawnEditor
         Action<Pawn> onDelete;
         if (pregame)
         {
-            if (selectedCategory is PawnCategory.Colonists or PawnCategory.Humans)
+            if (selectedCategory == PawnCategory.Humans)
             {
                 pawns = Find.GameInitData.startingAndOptionalPawns;
                 sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
                 sections[0] = "StartingPawnsSelected".Translate();
                 sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
                 sectionCount = 2;
-                onReorder = delegate(Pawn item, int from, int to)
+                onReorder = delegate(Pawn _, int from, int to)
                 {
                     StartingPawnUtility.ReorderRequests(from, to);
                     TutorSystem.Notify_Event("ReorderPawn");
@@ -122,7 +118,7 @@ public static partial class PawnEditor
                 sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
                 sections[0] = "StartingPawnsSelected".Translate();
                 sectionCount = 1;
-                onReorder = (pawn, from, to) => { };
+                onReorder = (_, _, _) => { };
                 onDelete = pawn => pawn.Discard(true);
             }
         }
@@ -141,5 +137,21 @@ public static partial class PawnEditor
 
         inRect.yMin += 12f;
         DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
+    }
+
+    private static void AddPawn(Pawn addedPawn, bool pregame)
+    {
+        if (pregame)
+            if (selectedCategory == PawnCategory.Humans)
+                Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
+            else
+                StartingThingsManager.AddPawn(selectedCategory, addedPawn);
+        else
+        {
+            addedPawn.teleporting = true;
+            Find.WorldPawns.PassToWorld(addedPawn, PawnDiscardDecideMode.KeepForever);
+            addedPawn.teleporting = false;
+            PawnLister.UpdateCache(selectedFaction, selectedCategory);
+        }
     }
 }
