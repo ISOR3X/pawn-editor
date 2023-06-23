@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Defs>
+    <PawnEditor.TabDef>
+        <defName>Bio_Humanlike</defName>
+        <label>bio</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Gear</defName>
+        <label>gear</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Needs</defName>
+        <label>needs</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Health_Humanlike</defName>
+        <label>health</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Social</defName>
+        <label>social</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Bio_AnimalMech</defName>
+        <label>bio</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Health_AnimalMech</defName>
+        <label>health</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>FactionOverviewPlayer</defName>
+        <label>overview</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>AnimalsMechs</defName>
+        <label>animals &amp; mechs</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>EquipmentLoot</defName>
+        <label>equipment &amp; scattered loot</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>FactionOverviewNPC</defName>
+        <label>overview</label>
+    </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>Settlements</defName>
+        <label>settlements</label>
+    </PawnEditor.TabDef>
+</Defs>

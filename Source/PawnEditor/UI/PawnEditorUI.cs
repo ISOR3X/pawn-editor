@@ -20,6 +20,7 @@ public static partial class PawnEditor
     private static PawnCategory selectedCategory;
     private static float cachedPawnValue;
     private static List<Pawn> cachedPawnList;
+    private static FloatMenuOption lastRandomization;
 
     public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
     {
@@ -76,23 +77,26 @@ public static partial class PawnEditor
 
         var buttonRect = new Rect(randomRect);
 
-        var rect = randomRect.TakeRightPart(20);
-        var atlas = Widgets.ButtonBGAtlas;
-        if (Mouse.IsOver(rect))
+        if (lastRandomization != null)
         {
-            atlas = Widgets.ButtonBGAtlasMouseover;
-            if (Input.GetMouseButton(0)) atlas = Widgets.ButtonBGAtlasClick;
+            var rect = randomRect.TakeRightPart(20);
+            var atlas = Widgets.ButtonBGAtlas;
+            if (Mouse.IsOver(rect))
+            {
+                atlas = Widgets.ButtonBGAtlasMouseover;
+                if (Input.GetMouseButton(0)) atlas = Widgets.ButtonBGAtlasClick;
+            }
+
+            Widgets.DrawAtlas(rect, atlas);
+
+            GUI.DrawTexture(new Rect(Vector2.zero, Vector2.one * 12).CenteredOnXIn(rect).CenteredOnYIn(rect), TexUI.RotRightTex);
+
+            if (Widgets.ButtonInvisible(rect)) lastRandomization.action();
         }
-
-        Widgets.DrawAtlas(rect, atlas);
-
-        GUI.DrawTexture(new Rect(Vector2.zero, Vector2.one * 12).CenteredOnXIn(rect).CenteredOnYIn(rect), TexUI.RotRightTex);
-
-        if (Widgets.ButtonInvisible(rect)) { }
 
         randomRect.TakeRightPart(1);
 
-        if (Widgets.ButtonText(randomRect, "Randomize".Translate())) { }
+        if (Widgets.ButtonText(randomRect, "Randomize".Translate())) Find.WindowStack.Add(new FloatMenu(GetRandomizationOptions().ToList()));
 
         buttonRect.x -= 5 + buttonRect.width;
 
@@ -119,6 +123,11 @@ public static partial class PawnEditor
             {
                 OnLoad = map => map.FinalizeLoading()
             });
+    }
+
+    private static IEnumerable<FloatMenuOption> GetRandomizationOptions()
+    {
+        yield break;
     }
 
     public static void RecachePawnList()

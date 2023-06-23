@@ -60,23 +60,26 @@
     <Publicize Include="Assembly-CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dialog_PawnEditor.cs" />
-    <Compile Include="Dialog_PawnEditorFiles.cs" />
-    <Compile Include="LeftPanel.cs" />
-    <Compile Include="PawnCategory.cs" />
+    <Compile Include="Defs\Defs.cs" />
+    <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
+    <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
+    <Compile Include="UI\LeftPanel.cs" />
+    <Compile Include="UI\PawnCategory.cs" />
+    <Compile Include="Defs\PawnEditorDefOf.cs" />
     <Compile Include="PawnEditorMod.cs" />
-    <Compile Include="PawnEditorUI.cs" />
-    <Compile Include="PawnList.cs" />
-    <Compile Include="PawnLister.cs" />
+    <Compile Include="UI\PawnEditorUI.cs" />
+    <Compile Include="UI\PawnList.cs" />
+    <Compile Include="Utils\PawnLister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReferenceManager.cs" />
-    <Compile Include="SaveLoadItem.cs" />
-    <Compile Include="SaveLoadPatches.cs" />
-    <Compile Include="SaveLoadUtility.cs" />
-    <Compile Include="StartingThingsManager.cs" />
-    <Compile Include="TexPawnEditor.cs" />
-    <Compile Include="UIUtility.cs" />
-    <Compile Include="Utilities.cs" />
+    <Compile Include="SaveLoad\ReferenceManager.cs" />
+    <Compile Include="SaveLoad\SaveLoadItem.cs" />
+    <Compile Include="SaveLoad\SaveLoadPatches.cs" />
+    <Compile Include="SaveLoad\SaveLoadUtility.cs" />
+    <Compile Include="Utils\StartingThingsManager.cs" />
+    <Compile Include="UI\TexPawnEditor.cs" />
+    <Compile Include="Utils\UIUtility.cs" />
+    <Compile Include="Utils\Utilities.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

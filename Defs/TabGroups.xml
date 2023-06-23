@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Defs>
+    <PawnEditor.TabGroupDef>
+        <defName>Humanlike</defName>
+        <tabs>
+            <li>Bio_Humanlike</li>
+            <li>Gear</li>
+            <li>Needs</li>
+            <li>Health_Humanlike</li>
+            <li>Social</li>
+        </tabs>
+    </PawnEditor.TabGroupDef>
+    <PawnEditor.TabGroupDef>
+        <defName>AnimalMech</defName>
+        <tabs>
+            <li>Bio_AnimalMech</li>
+            <li>Health_AnimalMech</li>
+        </tabs>
+    </PawnEditor.TabGroupDef>
+    <PawnEditor.TabGroupDef>
+        <defName>PlayerFaction</defName>
+        <tabs>
+            <li>FactionOverviewPlayer</li>
+        </tabs>
+    </PawnEditor.TabGroupDef>
+    <PawnEditor.TabGroupDef>
+        <defName>NPCFaction</defName>
+    </PawnEditor.TabGroupDef>
+</Defs>
