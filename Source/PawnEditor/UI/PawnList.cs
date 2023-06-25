@@ -57,7 +57,7 @@ public static partial class PawnEditor
             GUI.color = new Color(1f, 1f, 1f, 0.2f);
             var portraitSize = Page_ConfigureStartingPawns.PawnSelectorPortraitSize;
             GUI.DrawTexture(new Rect(105f - portraitSize.x / 2f, 40f - portraitSize.y / 2f, portraitSize.x, portraitSize.y),
-                PortraitsCache.Get(pawn, portraitSize, Rot4.South));
+                PortraitsCache.Get(pawn, portraitSize, selectedCategory == PawnCategory.Humans ? Rot4.South : Rot4.East));
             GUI.color = Color.white;
             var label = pawn.Name is NameTriple nameTriple ? nameTriple.Nick.NullOrEmpty() ? nameTriple.First : nameTriple.Nick : pawn.LabelShort;
             using (new TextBlock(TextAnchor.MiddleLeft))
@@ -66,6 +66,8 @@ public static partial class PawnEditor
                 if (pawn.story != null)
                     Widgets.Label(rect.BottomPart(0.5f).Rounded(),
                         Text.CalcSize(pawn.story.TitleCap).x > rect.width ? pawn.story.TitleShortCap : pawn.story.TitleCap);
+                else
+                    Widgets.Label(rect.BottomPart(0.5f).Rounded(), pawn.KindLabel);
             }
 
             if (Mouse.IsOver(rect))

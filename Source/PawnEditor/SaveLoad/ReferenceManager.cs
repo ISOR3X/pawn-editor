@@ -64,6 +64,8 @@ public static partial class SaveLoadUtility
                     return outfit.label;
                 case DrugPolicy policy:
                     return policy.label;
+                case FoodRestriction restriction:
+                    return restriction.label;
                 case Ideo ideo when currentPawn is { Faction.ideos: not null } ideoPawn && ideoPawn.Faction.ideos.PrimaryIdeo == ideo:
                     return "__FACTIONIDEO";
                 case Ideo ideo:
@@ -88,6 +90,13 @@ public static partial class SaveLoadUtility
                                            + LocalTargetInfoToString(job.targetA) + ","
                                            + LocalTargetInfoToString(job.targetB) + ","
                                            + LocalTargetInfoToString(job.targetC) + "." + job.count;
+                case Ability ability:
+                    return ability.sourcePrecept == null
+                        ? ability.def.defName + "," + GetReferenceData(ability.pawn)
+                        : ability.def.defName + "," + GetReferenceData(ability.pawn) + "," + GetReferenceData(ability.sourcePrecept);
+                case Gene gene:
+                    return gene.def.defName + "," + GetReferenceData(gene.pawn);
+                case Battle or LogEntry or Tale: return null; // These are not necessary and should just be ignored
                 default:
                     Log.Error($"Unhandled saving item {refee} with type {refee.GetType()}");
                     break;
@@ -107,6 +116,7 @@ public static partial class SaveLoadUtility
             if (data == "__CURRENTMAPPARENT") return Find.CurrentMap.Parent;
             if (type == typeof(Outfit)) return Current.Game?.outfitDatabase?.AllOutfits.FirstOrDefault(x => x.label == data);
             if (type == typeof(DrugPolicy)) return Current.Game?.drugPolicyDatabase?.AllPolicies.FirstOrDefault(x => x.label == data);
+            if (type == typeof(FoodRestriction)) return Current.Game?.foodRestrictionDatabase?.AllFoodRestrictions.FirstOrDefault(x => x.label == data);
             if (type == typeof(Ideo))
             {
                 if (data == "__FACTIONIDEO") return currentPawn?.Faction?.ideos?.PrimaryIdeo;
@@ -147,7 +157,7 @@ public static partial class SaveLoadUtility
                         if ((pawn.Name == null ? pawn.KindLabel : pawn.Name.ToStringFull) == data)
                             return pawn;
 
-                Log.Error($"Failed to find pawn from data {data}");
+                Log.Warning($"[PawnEditor] Failed to find pawn with name {data}");
                 return null;
             }
 
@@ -185,6 +195,30 @@ public static partial class SaveLoadUtility
                 job.targetA = LocalTargetInfoFromString(arr3[0]);
                 job.targetB = LocalTargetInfoFromString(arr3[1]);
                 job.targetC = LocalTargetInfoFromString(arr3[2]);
+                return job;
+            }
+
+            if (typeof(Ability).IsAssignableFrom(type))
+            {
+                var arr = data.Split(',');
+                var def = DefDatabase<AbilityDef>.GetNamed(arr[0]);
+                if (def == null) return null;
+                var pawn = (Pawn)LoadReferenceData(arr[1], typeof(Pawn));
+                if (pawn == null) return null;
+                if (arr.Length == 2)
+                    return AbilityUtility.MakeAbility(def, pawn);
+                var precept = (Precept)LoadReferenceData(arr[2], typeof(Precept));
+                return AbilityUtility.MakeAbility(def, pawn, precept);
+            }
+
+            if (typeof(Gene).IsAssignableFrom(type))
+            {
+                var arr = data.Split(',');
+                var def = DefDatabase<GeneDef>.GetNamed(arr[0]);
+                if (def == null) return null;
+                var pawn = (Pawn)LoadReferenceData(arr[1], typeof(Pawn));
+                if (pawn == null) return null;
+                return GeneMaker.MakeGene(def, pawn);
             }
         }
         catch (Exception e) { Log.Error($"Error while loading reference to a {type.FullName} with data {data}: {e}"); }
