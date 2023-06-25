@@ -112,9 +112,15 @@ public static partial class PawnEditor
     private static IEnumerable<SaveLoadItem> GetSaveLoadItems(bool pregame)
     {
         if (showFactionInfo)
-            yield return new SaveLoadItem<Faction>("PawnEditor.Selected".Translate(), selectedFaction);
+            yield return new SaveLoadItem<Faction>("PawnEditor.Selected".Translate(), selectedFaction, new SaveLoadParms<Faction>
+            {
+                LoadLabel = "PawnEditor.LoadFaction".Translate()
+            });
         else
-            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn);
+            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn, new SaveLoadParms<Pawn>
+            {
+                LoadLabel = "PawnEditor.LoadPawn".Translate()
+            });
 
         if (pregame)
             yield return new SaveLoadItem<StartingThingsManager.StartingPreset>("PawnEditor.Selection".Translate(), new StartingThingsManager.StartingPreset());
@@ -134,6 +140,7 @@ public static partial class PawnEditor
     {
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
         PawnLister.UpdateCache(selectedFaction, selectedCategory);
+        PortraitsCache.Clear();
         ResetPoints();
     }
 

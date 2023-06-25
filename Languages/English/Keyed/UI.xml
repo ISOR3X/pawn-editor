@@ -20,4 +20,6 @@
     <PawnEditor.Selected>selected</PawnEditor.Selected>
     <PawnEditor.Colony>colony</PawnEditor.Colony>
     <PawnEditor.Selection>selection</PawnEditor.Selection>
+    <PawnEditor.LoadPawn>Load pawn</PawnEditor.LoadPawn>
+    <PawnEditor.LoadFaction>Load faction</PawnEditor.LoadFaction>
 </LanguageData>

@@ -22,9 +22,9 @@ public class SaveLoadItem<T> : SaveLoadItem where T : IExposable, new()
         this.parms = parms;
     }
 
-    public override FloatMenuOption MakeSaveOption() => new("Save".Translate() + " " + label, Save);
+    public override FloatMenuOption MakeSaveOption() => new(parms.SaveLabel ?? "Save".Translate() + " " + label, Save);
 
-    public override FloatMenuOption MakeLoadOption() => new("Load".Translate() + " " + label, Load);
+    public override FloatMenuOption MakeLoadOption() => new(parms.LoadLabel ?? "Load".Translate() + " " + label, Load);
 
     private void Save()
     {
@@ -41,5 +41,7 @@ public struct SaveLoadParms<T> where T : IExposable
 {
     public Action<T> OnSave;
     public Action<T> OnLoad;
+    public string SaveLabel;
+    public string LoadLabel;
     public Pawn ParentPawn;
 }
