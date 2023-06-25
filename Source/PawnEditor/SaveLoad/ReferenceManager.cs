@@ -96,7 +96,11 @@ public static partial class SaveLoadUtility
                         : ability.def.defName + "," + GetReferenceData(ability.pawn) + "," + GetReferenceData(ability.sourcePrecept);
                 case Gene gene:
                     return gene.def.defName + "," + GetReferenceData(gene.pawn);
-                case Battle or LogEntry or Tale: return null; // These are not necessary and should just be ignored
+                case Battle or LogEntry or Tale:
+
+                    Log.Warning(
+                        $"[PawnEditor] Found reference to {GenTypes.GetTypeNameWithoutIgnoredNamespaces(refee.GetType())}, which will be ignored. This shouldn't cause issues on load.");
+                    return null;
                 default:
                     Log.Error($"Unhandled saving item {refee} with type {refee.GetType()}");
                     break;
