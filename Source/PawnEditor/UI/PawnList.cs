@@ -59,7 +59,7 @@ public static partial class PawnEditor
             GUI.DrawTexture(new Rect(105f - portraitSize.x / 2f, 40f - portraitSize.y / 2f, portraitSize.x, portraitSize.y),
                 PortraitsCache.Get(pawn, portraitSize, selectedCategory == PawnCategory.Humans ? Rot4.South : Rot4.East,
                     selectedCategory == PawnCategory.Humans ? default : new Vector3(-0.01f, 0, 0),
-                    selectedCategory == PawnCategory.Humans ? 1 : 1 / pawn.BodySize));
+                    1 / Mathf.Clamp(pawn.BodySize, 1, 5)));
             GUI.color = Color.white;
             var label = pawn.Name is NameTriple nameTriple ? nameTriple.Nick.NullOrEmpty() ? nameTriple.First : nameTriple.Nick : pawn.LabelShort;
             using (new TextBlock(TextAnchor.MiddleLeft))
