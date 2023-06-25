@@ -28,12 +28,12 @@ public class SaveLoadItem<T> : SaveLoadItem where T : IExposable, new()
 
     private void Save()
     {
-        SaveLoadUtility.SaveItem(item, parms.OnSave, parms.ParentPawn);
+        SaveLoadUtility.SaveItem(item, parms.OnSave, parms.ParentPawn, parms.PrepareSave);
     }
 
     private void Load()
     {
-        SaveLoadUtility.LoadItem(item, parms.OnLoad, parms.ParentPawn);
+        SaveLoadUtility.LoadItem(item, parms.OnLoad, parms.ParentPawn, parms.PrepareLoad);
     }
 }
 
@@ -41,6 +41,8 @@ public struct SaveLoadParms<T> where T : IExposable
 {
     public Action<T> OnSave;
     public Action<T> OnLoad;
+    public Action<T> PrepareSave;
+    public Action<T> PrepareLoad;
     public string SaveLabel;
     public string LoadLabel;
     public Pawn ParentPawn;

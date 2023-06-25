@@ -127,6 +127,13 @@ public static partial class PawnEditor
         else
             yield return new SaveLoadItem<Map>("PawnEditor.Colony".Translate(), Find.CurrentMap, new SaveLoadParms<Map>
             {
+                PrepareLoad = map =>
+                {
+                    MapDeiniter.DoQueuedPowerTasks(map);
+                    map.weatherManager.EndAllSustainers();
+                    Find.SoundRoot.sustainerManager.EndAllInMap(map);
+                    Find.TickManager.RemoveAllFromMap(map);
+                },
                 OnLoad = map => map.FinalizeLoading()
             });
     }

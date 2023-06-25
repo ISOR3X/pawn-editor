@@ -28,7 +28,7 @@ public static partial class SaveLoadUtility
     public static int CountWithName(string type, string name) =>
         new DirectoryInfo(SaveFolderForItemType(type)).GetFiles().Count(f => f.Extension == ".xml" && f.Name.StartsWith(name));
 
-    public static void SaveItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null) where T : IExposable
+    public static void SaveItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null) where T : IExposable
     {
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Save(type, path =>
@@ -37,6 +37,7 @@ public static partial class SaveLoadUtility
             currentItem = item as ILoadReferenceable;
             currentPawn = parentPawn;
             savedItems.Clear();
+            prepare?.Invoke(item);
             ApplyPatches();
 
             var tempFile = Path.GetTempFileName();
@@ -65,7 +66,7 @@ public static partial class SaveLoadUtility
         }));
     }
 
-    public static void LoadItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null) where T : IExposable, new()
+    public static void LoadItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null) where T : IExposable, new()
     {
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Load(type, path =>
@@ -82,6 +83,7 @@ public static partial class SaveLoadUtility
                 playing = true;
             }
 
+            prepare?.Invoke(item);
             ApplyPatches();
             Scribe.loader.InitLoading(path);
             ScribeMetaHeaderUtility.LoadGameDataHeader(ScribeMetaHeaderUtility.ScribeHeaderMode.None, true);
