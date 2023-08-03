@@ -37,6 +37,7 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
     {
         base.PreOpen();
         PawnEditor.RecachePawnList();
+        PawnEditor.CheckChangeTabGroup();
     }
 
     public override void PostClose()

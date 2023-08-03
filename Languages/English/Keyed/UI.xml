@@ -22,4 +22,24 @@
     <PawnEditor.Selection>selection</PawnEditor.Selection>
     <PawnEditor.LoadPawn>Load pawn</PawnEditor.LoadPawn>
     <PawnEditor.LoadFaction>Load faction</PawnEditor.LoadFaction>
+    <PawnEditor.Randomize>Randomize</PawnEditor.Randomize>
+    <PawnEditor.EditAppearance>Edit appearance</PawnEditor.EditAppearance>
+    <PawnEditor.Shape>Shape</PawnEditor.Shape>
+    <PawnEditor.Sex>Sex</PawnEditor.Sex>
+    <PawnEditor.Basic>Basic</PawnEditor.Basic>
+    <PawnEditor.Age>Age</PawnEditor.Age>
+    <PawnEditor.Biological>Biological</PawnEditor.Biological>
+    <PawnEditor.Chronological>Chronological</PawnEditor.Chronological>
+    <PawnEditor.EmpireTitle>Empire title</PawnEditor.EmpireTitle>
+    <PawnEditor.Honor>Honor</PawnEditor.Honor>
+    <PawnEditor.SelectIdeo>Select ideology</PawnEditor.SelectIdeo>
+    <PawnEditor.Groups>Groups</PawnEditor.Groups>
+    <PawnEditor.Extras>Extra</PawnEditor.Extras>
+    <PawnEditor.FavColor>Favorite color</PawnEditor.FavColor>
+    <PawnEditor.PickColor>Pick color</PawnEditor.PickColor>
+    <PawnEditor.Preset>Preset</PawnEditor.Preset>
+    <PawnEditor.SetAllTo>Set all {0} to {1}</PawnEditor.SetAllTo>
+    <PawnEditor.Max>max</PawnEditor.Max>
+    <PawnEditor.Passions>passions</PawnEditor.Passions>
+    <PawnEditor.Shape>Shape</PawnEditor.Shape>
 </LanguageData>

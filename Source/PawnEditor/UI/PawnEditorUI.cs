@@ -21,6 +21,9 @@ public static partial class PawnEditor
     private static float cachedPawnValue;
     private static List<Pawn> cachedPawnList;
     private static FloatMenuOption lastRandomization;
+    private static TabGroupDef tabGroup;
+    private static List<TabRecord> tabs;
+    private static TabDef curTab;
 
     public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
     {
@@ -65,6 +68,16 @@ public static partial class PawnEditor
 
         inRect.yMin -= 10f;
         DoLeftPanel(inRect.TakeLeftPart(134), pregame);
+        inRect = inRect.ContractedBy(6);
+        inRect.TakeTopPart(40);
+        Widgets.DrawMenuSection(inRect);
+        if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs, 1);
+        inRect = inRect.ContractedBy(6);
+        if (curTab != null)
+            if (showFactionInfo)
+                curTab.DrawTabContents(inRect, selectedFaction);
+            else
+                curTab.DrawTabContents(inRect, selectedPawn);
     }
 
     public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton, bool pregame)
@@ -77,22 +90,8 @@ public static partial class PawnEditor
 
         var buttonRect = new Rect(randomRect);
 
-        if (lastRandomization != null)
-        {
-            var rect = randomRect.TakeRightPart(20);
-            var atlas = Widgets.ButtonBGAtlas;
-            if (Mouse.IsOver(rect))
-            {
-                atlas = Widgets.ButtonBGAtlasMouseover;
-                if (Input.GetMouseButton(0)) atlas = Widgets.ButtonBGAtlasClick;
-            }
-
-            Widgets.DrawAtlas(rect, atlas);
-
-            GUI.DrawTexture(new Rect(Vector2.zero, Vector2.one * 12).CenteredOnXIn(rect).CenteredOnYIn(rect), TexUI.RotRightTex);
-
-            if (Widgets.ButtonInvisible(rect)) lastRandomization.action();
-        }
+        if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
+            lastRandomization.action();
 
         randomRect.TakeRightPart(1);
 
@@ -136,16 +135,31 @@ public static partial class PawnEditor
                 },
                 OnLoad = map => map.FinalizeLoading()
             });
+
+        if (curTab != null)
+            if (showFactionInfo)
+                foreach (var item in curTab.GetSaveLoadItems(selectedFaction))
+                    yield return item;
+            else
+                foreach (var item in curTab.GetSaveLoadItems(selectedPawn))
+                    yield return item;
     }
 
     private static IEnumerable<FloatMenuOption> GetRandomizationOptions()
     {
-        yield break;
+        if (curTab == null) return Enumerable.Empty<FloatMenuOption>();
+        return (showFactionInfo ? curTab.GetRandomizationOptions(selectedFaction) : curTab.GetRandomizationOptions(selectedPawn))
+           .Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
+            {
+                lastRandomization = option;
+                option.action();
+            }));
     }
 
     public static void RecachePawnList()
     {
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
+        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
         PawnLister.UpdateCache(selectedFaction, selectedCategory);
         PortraitsCache.Clear();
         ResetPoints();
@@ -170,4 +184,26 @@ public static partial class PawnEditor
             cachedPawnValue = pawnValue;
         }
     }
+
+    private static void SetTabGroup(TabGroupDef def)
+    {
+        tabGroup = def;
+        curTab = def?.tabs?.FirstOrDefault();
+        tabs = def?.tabs?.Select(static tab => new TabRecord(tab.LabelCap, () => curTab = tab, () => curTab == tab)).ToList() ?? new List<TabRecord>();
+    }
+
+    public static void CheckChangeTabGroup()
+    {
+        TabGroupDef desiredTabGroup;
+
+        if (showFactionInfo && selectedFaction != null) desiredTabGroup = selectedFaction.IsPlayer ? TabGroupDefOf.PlayerFaction : TabGroupDefOf.NPCFaction;
+        else if (selectedPawn != null) desiredTabGroup = selectedCategory == PawnCategory.Humans ? TabGroupDefOf.Humanlike : TabGroupDefOf.AnimalMech;
+        else desiredTabGroup = null;
+
+        if (desiredTabGroup != tabGroup) SetTabGroup(desiredTabGroup);
+    }
+
+    public static RenderTexture GetPawnTex(Pawn pawn, Vector2 portraitSize, Rot4 dir, Vector3 cameraOffset = default, float cameraZoom = 1f) =>
+        PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom, renderHeadgear: renderHeadgear, renderClothes: renderClothes,
+            stylingStation: true);
 }

@@ -15,7 +15,12 @@ public static partial class PawnEditor
     {
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.SelectedFaction".Translate());
 
-        if (selectedFaction == null || pregame) selectedFaction = Faction.OfPlayer;
+        if (selectedFaction == null || pregame)
+        {
+            selectedFaction = Faction.OfPlayer;
+            CheckChangeTabGroup();
+        }
+
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
         {
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Select(faction =>
@@ -23,6 +28,7 @@ public static partial class PawnEditor
                     {
                         selectedFaction = faction;
                         RecachePawnList();
+                        CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
                .ToList()));
             inRect.yMin += 2;
@@ -38,7 +44,11 @@ public static partial class PawnEditor
         GUI.color = Color.white;
         using (new TextBlock(GameFont.Small))
             Widgets.Label(factionRect.ContractedBy(5f), selectedFaction.Name);
-        if (Widgets.ButtonInvisible(factionRect)) showFactionInfo = !showFactionInfo;
+        if (Widgets.ButtonInvisible(factionRect))
+        {
+            showFactionInfo = !showFactionInfo;
+            CheckChangeTabGroup();
+        }
 
         using (new TextBlock(GameFont.Tiny))
             Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.ClickFactionOverview".Translate().Colorize(ColoredText.SubtleGrayColor));
@@ -55,6 +65,7 @@ public static partial class PawnEditor
                     {
                         selectedCategory = category;
                         RecachePawnList();
+                        CheckChangeTabGroup();
                     }))
                .ToList()));
 

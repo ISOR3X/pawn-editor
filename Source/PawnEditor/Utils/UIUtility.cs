@@ -1,10 +1,12 @@
-﻿using RimWorld;
+﻿using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
 namespace PawnEditor;
 
+[HotSwappable]
 public static class UIUtility
 {
     public static Rect TakeTopPart(ref this Rect rect, float pixels)
@@ -51,5 +53,22 @@ public static class UIUtility
             Widgets.Label(rect.TakeLeftPart(Text.CalcSize(label).x), label);
 
         Widgets.CheckboxDraw(rect.x + rect.width / 2 - 12f, rect.y + rect.height / 2 - 12f, checkOn, disabled, size, texChecked, texUnchecked);
+    }
+
+    public static Rect[] Split1D(this Rect rect, int count, bool vertical, float padding = 0)
+    {
+        var result = new Rect[count];
+        var size = ((vertical ? rect.height : rect.width) - padding * (count - 1)) / count;
+        for (var i = 0; i < count; i++)
+            result[i] = vertical
+                ? new Rect(rect.x, rect.y + (size + padding) * i, rect.width, size)
+                : new Rect(rect.x + (size + padding) * i, rect.y, size, rect.height);
+
+        return result;
+    }
+
+    public static float ColumnWidth(float padding, params string[] labels)
+    {
+        return labels.Max(str => Text.CalcSize(str).x) + padding;
     }
 }

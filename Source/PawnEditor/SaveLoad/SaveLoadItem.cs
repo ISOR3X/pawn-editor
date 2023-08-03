@@ -9,7 +9,7 @@ public abstract class SaveLoadItem
     public abstract FloatMenuOption MakeLoadOption();
 }
 
-public class SaveLoadItem<T> : SaveLoadItem where T : IExposable, new()
+public class SaveLoadItem<T> : SaveLoadItem where T : IExposable
 {
     private readonly T item;
     private readonly string label;
@@ -17,7 +17,7 @@ public class SaveLoadItem<T> : SaveLoadItem where T : IExposable, new()
 
     public SaveLoadItem(string label, T item, SaveLoadParms<T> parms = default)
     {
-        this.label = label;
+        this.label = label.ToLower();
         this.item = item;
         this.parms = parms;
     }

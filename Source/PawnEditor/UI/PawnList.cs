@@ -57,7 +57,7 @@ public static partial class PawnEditor
             GUI.color = new Color(1f, 1f, 1f, 0.2f);
             var portraitSize = Page_ConfigureStartingPawns.PawnSelectorPortraitSize;
             GUI.DrawTexture(new Rect(105f - portraitSize.x / 2f, 40f - portraitSize.y / 2f, portraitSize.x, portraitSize.y),
-                PortraitsCache.Get(pawn, portraitSize, selectedCategory == PawnCategory.Humans ? Rot4.South : Rot4.East,
+                GetPawnTex(pawn, portraitSize, selectedCategory == PawnCategory.Humans ? Rot4.South : Rot4.East,
                     selectedCategory == PawnCategory.Humans ? default : new Vector3(-0.01f, 0, 0),
                     1 / Mathf.Clamp(pawn.BodySize, 1, 5)));
             GUI.color = Color.white;
@@ -90,6 +90,7 @@ public static partial class PawnEditor
                 {
                     selectedPawn = pawn;
                     showFactionInfo = false;
+                    CheckChangeTabGroup();
                 }
             }
 

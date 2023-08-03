@@ -63,6 +63,12 @@
     <Compile Include="Defs\Defs.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
+    <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />
+    <Compile Include="Tabs\Humanlike\Bio\Groups.cs" />
+    <Compile Include="Tabs\Humanlike\Bio\LeftList.cs" />
+    <Compile Include="Tabs\Humanlike\Bio\Randomization.cs" />
+    <Compile Include="Tabs\Humanlike\Bio\TabWorker_Bio_Humanlike.cs" />
+    <Compile Include="Tabs\Humanlike\Bio\TopRightButtons.cs" />
     <Compile Include="UI\LeftPanel.cs" />
     <Compile Include="UI\PawnCategory.cs" />
     <Compile Include="Defs\PawnEditorDefOf.cs" />

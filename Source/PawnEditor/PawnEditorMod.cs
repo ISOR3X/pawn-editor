@@ -139,6 +139,7 @@ public class PawnEditorMod : Mod
     {
         StartingThingsManager.ProcessScenario();
         PawnEditor.ResetPoints();
+        PawnEditor.CheckChangeTabGroup();
     }
 }
 

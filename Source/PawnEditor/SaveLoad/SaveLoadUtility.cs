@@ -66,7 +66,7 @@ public static partial class SaveLoadUtility
         }));
     }
 
-    public static void LoadItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null) where T : IExposable, new()
+    public static void LoadItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null) where T : IExposable
     {
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Load(type, path =>
