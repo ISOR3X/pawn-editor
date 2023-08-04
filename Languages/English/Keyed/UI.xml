@@ -16,7 +16,7 @@
     <PawnEditor.Add.Random>Add random {0} ({1} points)</PawnEditor.Add.Random>
     <PawnEditor.Add.OtherSave>Add pawn from other save</PawnEditor.Add.OtherSave>
     <PawnEditor.Teleport>Teleport</PawnEditor.Teleport>
-    <PawnEditor.CharacterEditor>Character editor</PawnEditor.CharacterEditor>
+    <PawnEditor.CharacterEditor>Pawn editor</PawnEditor.CharacterEditor>
     <PawnEditor.Selected>selected</PawnEditor.Selected>
     <PawnEditor.Colony>colony</PawnEditor.Colony>
     <PawnEditor.Selection>selection</PawnEditor.Selection>
