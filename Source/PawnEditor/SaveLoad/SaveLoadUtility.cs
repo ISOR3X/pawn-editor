@@ -87,6 +87,7 @@ public static partial class SaveLoadUtility
             ApplyPatches();
             Scribe.loader.InitLoading(path);
             ScribeMetaHeaderUtility.LoadGameDataHeader(ScribeMetaHeaderUtility.ScribeHeaderMode.None, true);
+            Scribe.loader.curParent = item;
             item.ExposeData();
             if (item is IExposable exposable)
             {

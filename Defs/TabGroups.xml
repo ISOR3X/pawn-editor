@@ -6,7 +6,7 @@
             <li>Bio_Humanlike</li>
             <li>Gear</li>
             <li>Needs</li>
-            <li>Health_Humanlike</li>
+            <li>Health</li>
             <li>Social</li>
         </tabs>
     </PawnEditor.TabGroupDef>
@@ -14,7 +14,7 @@
         <defName>AnimalMech</defName>
         <tabs>
             <li>Bio_AnimalMech</li>
-            <li>Health_AnimalMech</li>
+            <li>Health</li>
         </tabs>
     </PawnEditor.TabGroupDef>
     <PawnEditor.TabGroupDef>

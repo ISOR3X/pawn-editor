@@ -71,4 +71,10 @@ public static class UIUtility
     {
         return labels.Max(str => Text.CalcSize(str).x) + padding;
     }
+
+    public static void ListSeparator(this Listing listing, string label)
+    {
+        listing.NewColumnIfNeeded(25);
+        Widgets.ListSeparator(ref listing.curY, listing.ColumnWidth, label);
+    }
 }

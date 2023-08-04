@@ -25,6 +25,8 @@ public static partial class PawnEditor
     private static List<TabRecord> tabs;
     private static TabDef curTab;
 
+    private static Rot4 curRot = Rot4.South;
+
     public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
     {
         var headerRect = inRect.TakeTopPart(50f);
@@ -206,4 +208,18 @@ public static partial class PawnEditor
     public static RenderTexture GetPawnTex(Pawn pawn, Vector2 portraitSize, Rot4 dir, Vector3 cameraOffset = default, float cameraZoom = 1f) =>
         PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom, renderHeadgear: renderHeadgear, renderClothes: renderClothes,
             stylingStation: true);
+
+    public static void DrawPawnPortrait(Rect rect)
+    {
+        var image = GetPawnTex(selectedPawn, rect.size, curRot);
+        GUI.color = Command.LowLightBgColor;
+        Widgets.DrawBox(rect);
+        GUI.color = Color.white;
+        GUI.DrawTexture(rect, Command.BGTex);
+        GUI.DrawTexture(rect, image);
+        if (Widgets.ButtonImage(rect.ContractedBy(3).RightPartPixels(16).TopPartPixels(16), TexUI.RotRightTex))
+            curRot.Rotate(RotationDirection.Counterclockwise);
+
+        if (Widgets.InfoCardButtonWorker(rect.ContractedBy(3).LeftPartPixels(16).TopPartPixels(16))) Find.WindowStack.Add(new Dialog_InfoCard(selectedPawn));
+    }
 }

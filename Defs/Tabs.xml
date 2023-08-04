@@ -8,14 +8,16 @@
     <PawnEditor.TabDef>
         <defName>Gear</defName>
         <label>gear</label>
+        <workerClass>PawnEditor.TabWorker_Gear</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>Needs</defName>
         <label>needs</label>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
-        <defName>Health_Humanlike</defName>
+        <defName>Health</defName>
         <label>health</label>
+        <workerClass>PawnEditor.TabWorker_Health</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>Social</defName>
@@ -24,10 +26,6 @@
     <PawnEditor.TabDef>
         <defName>Bio_AnimalMech</defName>
         <label>bio</label>
-    </PawnEditor.TabDef>
-    <PawnEditor.TabDef>
-        <defName>Health_AnimalMech</defName>
-        <label>health</label>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>FactionOverviewPlayer</defName>

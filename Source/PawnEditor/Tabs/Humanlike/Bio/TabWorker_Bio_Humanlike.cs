@@ -11,7 +11,6 @@ namespace PawnEditor;
 public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
 {
     private float abilitiesLastHeight = 120;
-    private Rot4 curRot = Rot4.South;
     private float incapableLastHeight = 60;
     private float leftLastHeight;
     private Vector2 leftScrollPos;
@@ -21,17 +20,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
     {
         var headerRect = rect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
-        var image = PawnEditor.GetPawnTex(pawn, portraitRect.size, curRot);
-        GUI.color = Command.LowLightBgColor;
-        Widgets.DrawBox(portraitRect);
-        GUI.color = Color.white;
-        GUI.DrawTexture(portraitRect, Command.BGTex);
-        GUI.DrawTexture(portraitRect, image);
-        if (Widgets.ButtonImage(portraitRect.ContractedBy(3).RightPartPixels(16).TopPartPixels(16), TexUI.RotRightTex))
-            curRot.Rotate(RotationDirection.Counterclockwise);
-
-        if (Widgets.InfoCardButtonWorker(portraitRect.ContractedBy(3).LeftPartPixels(16).TopPartPixels(16))) Find.WindowStack.Add(new Dialog_InfoCard(pawn));
-
+        PawnEditor.DrawPawnPortrait(portraitRect);
         DoButtons(headerRect.TakeRightPart(212).TopPartPixels(150), pawn);
         headerRect.xMin += 3;
         DoBasics(headerRect.ContractedBy(5, 0), pawn);
