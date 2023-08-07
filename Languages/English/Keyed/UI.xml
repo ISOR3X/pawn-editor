@@ -52,5 +52,10 @@
     <PawnEditor.CancelBreakdown>Cancel breakdown</PawnEditor.CancelBreakdown>
     <PawnEditor.Thoughts>Thoughts</PawnEditor.Thoughts>
     <PawnEditor.AddThought>Add thought</PawnEditor.AddThought>
-    <PawnEditor.RemoveNegative>Remove all negative thoughts</PawnEditor.RemoveNegative>
+    <PawnEditor.RemoveNegative.Thoughts>Remove all negative thoughts</PawnEditor.RemoveNegative.Thoughts>
+    <PawnEditor.AddHediff>Add hediff</PawnEditor.AddHediff>
+    <PawnEditor.TendAll>Tend all</PawnEditor.TendAll>
+    <PawnEditor.RemoveNegative.Hediffs>Remove all negative effects</PawnEditor.RemoveNegative.Hediffs>
+    <PawnEditor.ShowHidden.Hediffs>Show hidden hediffs</PawnEditor.ShowHidden.Hediffs>
+    <PawnEditor.HediffType>Hediff type</PawnEditor.HediffType>
 </LanguageData>

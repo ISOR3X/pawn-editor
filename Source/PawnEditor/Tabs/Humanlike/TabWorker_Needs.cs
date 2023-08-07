@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -138,15 +139,9 @@ public class TabWorker_Needs : TabWorker<Pawn>
                 var durationTicks = thoughtGroup.DurationTicks;
                 if (durationTicks > 5 && leadingThought is Thought_Memory thought_Memory)
                 {
-                    var age = int.MaxValue;
-                    if (NeedsCardUtility.thoughtGroup.Count == 1)
-                        age = thought_Memory.age;
-                    else
-                        foreach (var thought in NeedsCardUtility.thoughtGroup)
-                        {
-                            var thought_Memory2 = (Thought_Memory)thought;
-                            age = Mathf.Min(age, thought_Memory2.age);
-                        }
+                    var age = NeedsCardUtility.thoughtGroup.Count == 1
+                        ? thought_Memory.age
+                        : NeedsCardUtility.thoughtGroup.Cast<Thought_Memory>().Aggregate(int.MaxValue, (current, memory) => Mathf.Min(current, memory.age));
 
                     Widgets.Label(expiresRect, (durationTicks - age).ToStringTicksToDays());
                 }
@@ -163,7 +158,7 @@ public class TabWorker_Needs : TabWorker<Pawn>
 
         if (Widgets.ButtonText(buttonsRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddThought".Translate())) { }
 
-        if (Widgets.ButtonText(buttonsRect.TakeLeftPart(250).ContractedBy(5), "PawnEditor.RemoveNegative".Translate()))
+        if (Widgets.ButtonText(buttonsRect.TakeLeftPart(250).ContractedBy(5), "PawnEditor.RemoveNegative.Thoughts".Translate()))
         {
             var memories = pawn.needs.mood.thoughts.memories;
             for (var i = memories.Memories.Count; i-- > 0;)
