@@ -13,6 +13,7 @@
     <PawnEditor.TabDef>
         <defName>Needs</defName>
         <label>needs</label>
+        <workerClass>PawnEditor.TabWorker_Needs</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>Health</defName>

@@ -47,4 +47,10 @@
     <PawnEditor.Possession>possession</PawnEditor.Possession>
     <PawnEditor.FromKind>from PawnKindDef</PawnEditor.FromKind>
     <PawnEditor.SelectPawnKindDef>Select PawnKindDef</PawnEditor.SelectPawnKindDef>
+    <PawnEditor.QuickActions>Quick actions</PawnEditor.QuickActions>
+    <PawnEditor.RefillNeeds>Refill needs to max</PawnEditor.RefillNeeds>
+    <PawnEditor.CancelBreakdown>Cancel breakdown</PawnEditor.CancelBreakdown>
+    <PawnEditor.Thoughts>Thoughts</PawnEditor.Thoughts>
+    <PawnEditor.AddThought>Add thought</PawnEditor.AddThought>
+    <PawnEditor.RemoveNegative>Remove all negative thoughts</PawnEditor.RemoveNegative>
 </LanguageData>
