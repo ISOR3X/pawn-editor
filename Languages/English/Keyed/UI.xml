@@ -46,4 +46,5 @@
     <PawnEditor.Hitpoints>Hitpoints</PawnEditor.Hitpoints>
     <PawnEditor.Possession>possession</PawnEditor.Possession>
     <PawnEditor.FromKind>from PawnKindDef</PawnEditor.FromKind>
+    <PawnEditor.SelectPawnKindDef>Select PawnKindDef</PawnEditor.SelectPawnKindDef>
 </LanguageData>

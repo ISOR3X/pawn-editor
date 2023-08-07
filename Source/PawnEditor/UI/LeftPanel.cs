@@ -9,6 +9,7 @@ using Verse.Sound;
 
 namespace PawnEditor;
 
+
 public static partial class PawnEditor
 {
     private static void DoLeftPanel(Rect inRect, bool pregame)
@@ -90,9 +91,10 @@ public static partial class PawnEditor
             if (selectedCategory == PawnCategory.Humans)
                 list.Insert(0, new FloatMenuOption("PawnEditor.Add.PawnKind".Translate(), delegate
                 {
-                    Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
-                       .Select(pk => new FloatMenuOption(pk.LabelCap, () => AddPawnKind(pk)))
-                       .ToList()));
+                    Find.WindowStack.Add(new Dialog_ChoosePawnKindDef((Action<PawnKindDef>) (AddPawnKind)));
+                    // Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
+                    //    .Select(pk => new FloatMenuOption(pk.LabelCap, () => AddPawnKind(pk)))
+                    //    .ToList()));
                 }));
 
             list.Add(new FloatMenuOption("PawnEditor.Add.OtherSave".Translate(), delegate { }));
