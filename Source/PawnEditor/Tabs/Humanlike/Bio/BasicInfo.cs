@@ -18,7 +18,7 @@ public partial class TabWorker_Bio_Humanlike
         var age = "PawnEditor.Age".Translate();
         var childhood = "Childhood".Translate();
         var adulthood = "Adulthood".Translate();
-        var leftWidth = UIUtility.ColumnWidth(3, name, age, childhood, adulthood);
+        var leftWidth = UIUtility.ColumnWidth(3, name, age, childhood, adulthood) + 32f;
         var nameRect = inRect.TakeTopPart(30);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(nameRect.TakeLeftPart(leftWidth), name);
         if (pawn.Name is NameTriple nameTriple)
@@ -61,7 +61,7 @@ public partial class TabWorker_Bio_Humanlike
         inRect.yMin += 3;
         var ageRect = inRect.TakeTopPart(50);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(ageRect.TakeLeftPart(leftWidth), age);
-        var bio = ageRect.LeftHalf().LeftHalf();
+        var bio = ageRect.LeftPart(0.6f).LeftHalf();
         using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter, null))
             Widgets.Label(bio.TakeTopPart(Text.LineHeight), "PawnEditor.Biological".Translate());
         var ageBio = pawn.ageTracker.AgeBiologicalYears;
@@ -79,7 +79,7 @@ public partial class TabWorker_Bio_Humanlike
 
         Widgets.TextFieldNumeric(bio, ref ageBio, ref ageBiologicalBuffer);
         if (ageBio != pawn.ageTracker.AgeBiologicalYears) pawn.ageTracker.AgeBiologicalTicks = ageBio * 3600000L;
-        var chrono = ageRect.LeftHalf().RightHalf();
+        var chrono = ageRect.LeftPart(0.6f).RightHalf();
         using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter, null))
             Widgets.Label(chrono.TakeTopPart(Text.LineHeight), "PawnEditor.Chronological".Translate());
         var ageChrono = pawn.ageTracker.AgeChronologicalYears;
@@ -103,7 +103,7 @@ public partial class TabWorker_Bio_Humanlike
             inRect.yMin += 3;
             var childRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(childRect.TakeLeftPart(leftWidth), childhood);
-            if (Widgets.ButtonText(childRect.LeftHalf(), pawn.story.Childhood.TitleCapFor(pawn.gender))) { }
+            if (Widgets.ButtonText(childRect.LeftPart(0.6f), pawn.story.Childhood.TitleCapFor(pawn.gender))) { }
         }
 
         if (pawn.story.Adulthood != null)
@@ -111,7 +111,7 @@ public partial class TabWorker_Bio_Humanlike
             inRect.yMin += 3;
             var adultRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(adultRect.TakeLeftPart(leftWidth), adulthood);
-            if (Widgets.ButtonText(adultRect.LeftHalf(), pawn.story.Adulthood.TitleCapFor(pawn.gender))) { }
+            if (Widgets.ButtonText(adultRect.LeftPart(0.6f), pawn.story.Adulthood.TitleCapFor(pawn.gender))) { }
         }
     }
 }

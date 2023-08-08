@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,6 +8,7 @@ namespace PawnEditor;
 
 public partial class TabWorker_Bio_Humanlike
 {
+
     private void DoLeft(Rect inRect, Pawn pawn)
     {
         if (leftLastHeight == 0) leftLastHeight = inRect.height;
@@ -123,7 +125,7 @@ public partial class TabWorker_Bio_Humanlike
                 }, _ => 32f)
                .height;
 
-        abilitiesLastHeight = Mathf.Max(100, abilitiesLastHeight);
+        abilitiesLastHeight = Mathf.Max(45, abilitiesLastHeight);
 
         GUI.color = Color.white;
 
@@ -139,7 +141,6 @@ public partial class TabWorker_Bio_Humanlike
             var relationsRect = viewRect.TakeTopPart(relationsHeight + 14).ContractedBy(7);
             GUI.color = Color.gray;
             if (Mouse.IsOver(relationsRect)) Widgets.DrawHighlight(relationsRect);
-
             Widgets.Label(relationsRect, "None".Translate());
             TooltipHandler.TipRegionByKey(relationsRect, "None");
         }
@@ -147,27 +148,33 @@ public partial class TabWorker_Bio_Humanlike
         {
             relationsHeight = relations.Count * (Text.LineHeight + 4);
             var relationsRect = viewRect.TakeTopPart(relationsHeight + 14).ContractedBy(7);
+            var index = 0;
             foreach (var relation in relations)
             {
-                var relationRect = relationsRect.TakeTopPart(Text.LineHeight + 4).ContractedBy(2);
+                var relationRect = relationsRect.TakeTopPart(Text.LineHeight + 4);
                 Widgets.DrawHighlightIfMouseover(relationRect);
+                if (index % 2 == 1) {Widgets.DrawHighlight(relationRect);}
+                string str =
+                    (relation.def.GetGenderSpecificLabelCap(relation.otherPawn) + ": ").Colorize(ColoredText
+                        .SubtleGrayColor)
+                    + relation.otherPawn.Name.ToStringFull;
                 using (new TextBlock(TextAnchor.MiddleLeft))
-                    Widgets.Label(relationRect,
-                        (relation.def.GetGenderSpecificLabelCap(relation.otherPawn) + ": ").Colorize(ColoredText.SubtleGrayColor)
-                      + relation.otherPawn.Name.ToStringFull);
+                    Widgets.Label(relationRect.ContractedBy(4f, 0f),
+                        str.Truncate(160f, truncateCache));
 
                 using (new TextBlock(TextAnchor.MiddleRight))
                 {
                     var opinionOf = relation.otherPawn.relations.OpinionOf(pawn);
                     var opinionFrom = pawn.relations.OpinionOf(relation.otherPawn);
-                    Widgets.Label(relationRect,
+                    Widgets.Label(relationRect.ContractedBy(4f, 0f),
                         opinionOf.ToStringWithSign().Colorize(opinionOf < 0 ? ColorLibrary.RedReadable : opinionOf > 0 ? ColorLibrary.Green : Color.white)
-                      + $"({opinionFrom.ToStringWithSign()})".Colorize(opinionFrom < 0 ? ColorLibrary.RedReadable :
-                            opinionFrom > 0 ? ColorLibrary.Green : Color.white));
+                      + $" ({opinionFrom.ToStringWithSign()})".Colorize(opinionFrom < 0 ? ColorLibrary.Red.FadedColor(0.4f) :
+                            opinionFrom > 0 ? ColorLibrary.Green.FadedColor(0.4f) : Color.white.FadedColor(0.4f)));
                 }
 
                 if (Mouse.IsOver(relationRect) && Widgets.ButtonImage(relationRect.RightPartPixels(relationRect.height).ContractedBy(4), TexButton.DeleteX))
                     pawn.relations.RemoveDirectRelation(relation);
+                index++;
             }
         }
 

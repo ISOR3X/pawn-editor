@@ -77,4 +77,9 @@ public static class UIUtility
         listing.NewColumnIfNeeded(25);
         Widgets.ListSeparator(ref listing.curY, listing.ColumnWidth, label);
     }
+
+    public static Color FadedColor(this Color color, float alpha)
+    {
+        return new Color(color.r, color.g, color.b, alpha);
+    }
 }

@@ -12,13 +12,15 @@ public partial class TabWorker_Bio_Humanlike
     {
         Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.Groups".Translate().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 6;
+        inRect.yMin += 4f;
 
         var faction = "Faction".Translate();
         var ideo = "DifficultyIdeologySection".Translate();
         var certainty = "Certainty".Translate().CapitalizeFirst();
         var title = "PawnEditor.EmpireTitle".Translate();
         var honor = "PawnEditor.Honor".Translate();
-        var leftWidth = UIUtility.ColumnWidth(3, faction, ideo, certainty, title, honor);
+        var favColor = "PawnEditor.FavColor".Translate();
+        var leftWidth = UIUtility.ColumnWidth(3, faction, ideo, certainty, title, honor, favColor) + 4f;
         if (pawn.Faction != null)
         {
             var factionRect = inRect.TakeTopPart(30);
@@ -102,16 +104,17 @@ public partial class TabWorker_Bio_Humanlike
                 pawn.royalty.SetFavor(empire, (int)favor, false);
             }
         }
-
+        
+        inRect.yMin += 16f;
         inRect.xMin -= 2;
         Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.Extras".Translate().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 2;
         inRect.yMin += 4;
 
-        var text = "PawnEditor.FavColor".Translate();
+        
         var colorRect = inRect.TakeTopPart(30);
         inRect.yMin += 4;
-        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(Text.CalcSize(text).x), text);
+        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(leftWidth), favColor);
         Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor ?? Color.white);
         if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate())) { }
     }

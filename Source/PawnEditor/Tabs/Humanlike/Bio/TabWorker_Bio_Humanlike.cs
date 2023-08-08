@@ -15,6 +15,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
     private float leftLastHeight;
     private Vector2 leftScrollPos;
     private float traitsLastHeight = 60;
+    private readonly Dictionary<string, string> truncateCache = new();
 
     public override void DrawTabContents(Rect rect, Pawn pawn)
     {
@@ -56,11 +57,12 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
             }));
 
         inRect.xMin += 4;
-        var leftWidth = SkillUI.skillDefsInListOrderCached.Select(def => Text.CalcSize(def.LabelCap.Resolve()).x).Max() + 4;
+        inRect.yMin += 4f;
+        var leftWidth = SkillUI.skillDefsInListOrderCached.Select(def => Text.CalcSize(def.LabelCap.Resolve()).x).Max() + 16f;
         using (new TextBlock(TextAnchor.MiddleLeft))
             foreach (var def in SkillUI.skillDefsInListOrderCached)
             {
-                var rect = inRect.TakeTopPart(30);
+                var rect = inRect.TakeTopPart(26f);
                 var skill = pawn.skills.GetSkill(def);
                 Widgets.DrawHighlightIfMouseover(rect);
                 TooltipHandler.TipRegion(rect, () => SkillUI.GetSkillDescription(skill), def.GetHashCode() * 397945);
@@ -86,6 +88,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
                 if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus)) skill.Level++;
                 if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus)) skill.Level--;
+                inRect.yMin += 4;
             }
     }
 

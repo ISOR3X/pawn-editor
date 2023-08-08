@@ -37,6 +37,7 @@ public static partial class PawnEditor
 
         if (ModsConfig.IdeologyActive)
         {
+            Text.Font = GameFont.Small;
             string text = "ShowHeadgear".Translate();
             string text2 = "ShowApparel".Translate();
             var width = Mathf.Max(Text.CalcSize(text).x, Text.CalcSize(text2).x) + 4f + 24f;
@@ -84,6 +85,7 @@ public static partial class PawnEditor
 
     public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton, bool pregame)
     {
+        Text.Font = GameFont.Small;
         if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), pregame ? "Back".Translate() : "Close".Translate())) onLeftButton();
 
         if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())) onRightButton();
