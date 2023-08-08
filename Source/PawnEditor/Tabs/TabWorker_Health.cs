@@ -33,7 +33,8 @@ public class TabWorker_Health : TabWorker<Pawn>
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
     {
         yield return new FloatMenuOption("PawnEditor.Hediffs".Translate(), () => { });
-        yield return new FloatMenuOption("PawnEditor.Prosthetics".Translate(), () => { });
+        if (pawn.RaceProps.Humanlike)
+            yield return new FloatMenuOption("PawnEditor.Prosthetics".Translate(), () => { });
     }
 
     private static void DoBottomOptions(Rect inRect, Pawn pawn)

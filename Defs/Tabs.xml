@@ -28,6 +28,7 @@
     <PawnEditor.TabDef>
         <defName>Bio_AnimalMech</defName>
         <label>bio</label>
+        <workerClass>PawnEditor.TabWorker_Bio_AnimalMech</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>FactionOverviewPlayer</defName>

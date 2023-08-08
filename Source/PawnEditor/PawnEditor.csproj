@@ -64,6 +64,7 @@
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
     <Compile Include="Dialogs\Dialog_ChoosePawnKindDef.cs" />
+    <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Gear.cs" />
     <Compile Include="Tabs\Humanlike\Bio\Groups.cs" />
