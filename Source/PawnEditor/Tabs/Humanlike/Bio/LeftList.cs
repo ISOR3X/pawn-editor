@@ -153,7 +153,7 @@ public partial class TabWorker_Bio_Humanlike
             {
                 var relationRect = relationsRect.TakeTopPart(Text.LineHeight + 4);
                 Widgets.DrawHighlightIfMouseover(relationRect);
-                if (index % 2 == 1) {Widgets.DrawHighlight(relationRect);}
+                if (index % 2 == 1) {Widgets.DrawLightHighlight(relationRect);}
                 string str =
                     (relation.def.GetGenderSpecificLabelCap(relation.otherPawn) + ": ").Colorize(ColoredText
                         .SubtleGrayColor)
