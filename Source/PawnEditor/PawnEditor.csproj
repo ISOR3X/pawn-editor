@@ -72,6 +72,7 @@
     <Compile Include="Tabs\Humanlike\Bio\TabWorker_Bio_Humanlike.cs" />
     <Compile Include="Tabs\Humanlike\Bio\TopRightButtons.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Needs.cs" />
+    <Compile Include="Tabs\Humanlike\TabWorker_Social.cs" />
     <Compile Include="Tabs\TabWorker_Health.cs" />
     <Compile Include="UI\LeftPanel.cs" />
     <Compile Include="UI\PawnCategory.cs" />

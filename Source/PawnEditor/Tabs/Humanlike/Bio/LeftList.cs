@@ -161,9 +161,9 @@ public partial class TabWorker_Bio_Humanlike
                     var opinionOf = relation.otherPawn.relations.OpinionOf(pawn);
                     var opinionFrom = pawn.relations.OpinionOf(relation.otherPawn);
                     Widgets.Label(relationRect,
-                        opinionOf.ToStringWithSign().Colorize(opinionOf < 0 ? ColorLibrary.RedReadable : opinionOf > 0 ? ColorLibrary.Green : Color.white) + "("
-                      + opinionFrom.ToStringWithSign().Colorize(opinionFrom < 0 ? ColorLibrary.RedReadable : opinionFrom > 0 ? ColorLibrary.Green : Color.white)
-                      + ")");
+                        opinionOf.ToStringWithSign().Colorize(opinionOf < 0 ? ColorLibrary.RedReadable : opinionOf > 0 ? ColorLibrary.Green : Color.white)
+                      + $"({opinionFrom.ToStringWithSign()})".Colorize(opinionFrom < 0 ? ColorLibrary.RedReadable :
+                            opinionFrom > 0 ? ColorLibrary.Green : Color.white));
                 }
 
                 if (Mouse.IsOver(relationRect) && Widgets.ButtonImage(relationRect.RightPartPixels(relationRect.height).ContractedBy(4), TexButton.DeleteX))

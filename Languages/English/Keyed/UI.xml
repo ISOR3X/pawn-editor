@@ -58,4 +58,7 @@
     <PawnEditor.RemoveNegative.Hediffs>Remove all negative effects</PawnEditor.RemoveNegative.Hediffs>
     <PawnEditor.ShowHidden.Hediffs>Show hidden hediffs</PawnEditor.ShowHidden.Hediffs>
     <PawnEditor.HediffType>Hediff type</PawnEditor.HediffType>
+    <PawnEditor.Hediffs>hediffs</PawnEditor.Hediffs>
+    <PawnEditor.Prosthetics>prosthetics</PawnEditor.Prosthetics>
+    <PawnEditor.Opinion>opinion</PawnEditor.Opinion>
 </LanguageData>

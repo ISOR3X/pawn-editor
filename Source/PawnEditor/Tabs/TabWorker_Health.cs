@@ -22,6 +22,20 @@ public class TabWorker_Health : TabWorker<Pawn>
         DoHediffs(rect, pawn);
     }
 
+    public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Pawn pawn)
+    {
+        yield return new SaveLoadItem<HediffSet>("PawnEditor.Hediffs".Translate(), pawn.health.hediffSet, new SaveLoadParms<HediffSet>
+        {
+            OnLoad = _ => pawn.health.CheckForStateChange(null, null)
+        });
+    }
+
+    public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
+    {
+        yield return new FloatMenuOption("PawnEditor.Hediffs".Translate(), () => { });
+        yield return new FloatMenuOption("PawnEditor.Prosthetics".Translate(), () => { });
+    }
+
     private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
         if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddHediff".Translate())) { }
