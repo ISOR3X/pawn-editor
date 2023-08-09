@@ -43,6 +43,7 @@
     <PawnEditor.Passions>passions</PawnEditor.Passions>
     <PawnEditor.Shape>Shape</PawnEditor.Shape>
     <PawnEditor.Weight>Weight</PawnEditor.Weight>
+    <PawnEditor.Name>Name</PawnEditor.Name>
     <PawnEditor.Hitpoints>Hitpoints</PawnEditor.Hitpoints>
     <PawnEditor.Possession>possession</PawnEditor.Possession>
     <PawnEditor.FromKind>from PawnKindDef</PawnEditor.FromKind>

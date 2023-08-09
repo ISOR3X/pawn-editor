@@ -60,23 +60,28 @@ public class Dialog_ChoosePawnKindDef : Window
 
     public override void DoWindowContents(Rect rect)
     {
-        Rect rect1 = rect;
-        rect1.yMax -= ButSize.y + 4f;
         float headerHeight = DrawHeader(rect);
-
+        
+        Rect rect1 = rect;
         rect1.yMin += headerHeight;
+        rect1.yMax -= ButSize.y + 2 * 4f + Text.LineHeightOf(GameFont.Small);
         DisplayPawnKindDefs(rect1);
 
         Rect rect2 = rect;
-        rect2.yMin = rect2.yMax - ButSize.y;
+        rect2.yMin += rect1.yMax + 4f;
+        var selected = (_selectedPawnKindDef != null) ? _selectedPawnKindDef.LabelCap.ToString() : "None"; 
+        Widgets.Label(rect2, $"Selected: ".Colorize(ColoredText.SubtleGrayColor) + selected);
+        
+        Rect rect3 = rect;
+        rect3.yMin = rect3.yMax - ButSize.y;
         if (_selectedPawnKindDef != null)
         {
             if (Widgets.ButtonText(
-                    new Rect(rect2.xMax - ButSize.x, rect2.y, ButSize.x, ButSize.y), 
+                    new Rect(rect3.xMax - ButSize.x, rect3.y, ButSize.x, ButSize.y), 
                     "Accept".Translate()))
                 Accept();
             if (!Widgets.ButtonText(
-                    new Rect(rect2.x, rect2.y, ButSize.x, ButSize.y), 
+                    new Rect(rect3.x, rect3.y, ButSize.x, ButSize.y), 
                     "Close".Translate()))
                 return;
             Close();
@@ -84,7 +89,7 @@ public class Dialog_ChoosePawnKindDef : Window
         else
         {
             if (!Widgets.ButtonText(
-                    new Rect((float)((rect2.width - (double)ButSize.x) / 2.0), rect2.y, ButSize.x, ButSize.y),
+                    new Rect((float)((rect3.width - (double)ButSize.x) / 2.0), rect3.y, ButSize.x, ButSize.y),
                     "Close".Translate()))
                 return;
             Close();
