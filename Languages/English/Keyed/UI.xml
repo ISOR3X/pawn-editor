@@ -63,4 +63,9 @@
     <PawnEditor.Prosthetics>prosthetics</PawnEditor.Prosthetics>
     <PawnEditor.Opinion>opinion</PawnEditor.Opinion>
     <PawnEditor.Bonded>Bonded</PawnEditor.Bonded>
+    <PawnEditor.FactionName>Faction name</PawnEditor.FactionName>
+    <PawnEditor.FactionTechLevel>Faction tech level</PawnEditor.FactionTechLevel>
+    <PawnEditor.SettlementName>Settlement name</PawnEditor.SettlementName>
+    <PawnEditor.FactionIcon>Faction icon</PawnEditor.FactionIcon>
+    <PawnEditor.AddColonist>Add colonist</PawnEditor.AddColonist>
 </LanguageData>

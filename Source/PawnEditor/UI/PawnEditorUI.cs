@@ -27,8 +27,11 @@ public static partial class PawnEditor
 
     private static Rot4 curRot = Rot4.South;
 
+    public static bool Pregame;
+
     public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
     {
+        Pregame = pregame;
         var headerRect = inRect.TakeTopPart(50f);
         headerRect.xMax -= 10f;
         headerRect.yMax -= 20f;

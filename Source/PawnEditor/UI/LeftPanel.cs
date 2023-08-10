@@ -9,7 +9,6 @@ using Verse.Sound;
 
 namespace PawnEditor;
 
-
 public static partial class PawnEditor
 {
     private static void DoLeftPanel(Rect inRect, bool pregame)
@@ -70,37 +69,7 @@ public static partial class PawnEditor
                     }))
                .ToList()));
 
-        if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst()))
-        {
-            void AddPawnKind(PawnKindDef pawnKind)
-            {
-                AddPawn(PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, selectedFaction,
-                    pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
-                    forceGenerateNewPawn: true)), pregame);
-            }
-
-            var list = new List<FloatMenuOption>
-            {
-                new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate
-                {
-                    var pawn = new Pawn();
-                    SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, pregame));
-                })
-            };
-
-            if (selectedCategory == PawnCategory.Humans)
-                list.Insert(0, new FloatMenuOption("PawnEditor.Add.PawnKind".Translate(), delegate
-                {
-                    Find.WindowStack.Add(new Dialog_ChoosePawnKindDef((Action<PawnKindDef>) (AddPawnKind)));
-                    // Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
-                    //    .Select(pk => new FloatMenuOption(pk.LabelCap, () => AddPawnKind(pk)))
-                    //    .ToList()));
-                }));
-
-            list.Add(new FloatMenuOption("PawnEditor.Add.OtherSave".Translate(), delegate { }));
-
-            Find.WindowStack.Add(new FloatMenu(list));
-        }
+        if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn();
 
         List<Pawn> pawns;
         List<string> sections;
@@ -150,6 +119,38 @@ public static partial class PawnEditor
 
         inRect.yMin += 12f;
         DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
+    }
+
+    public static void AddPawn()
+    {
+        static void AddPawnKind(PawnKindDef pawnKind)
+        {
+            AddPawn(PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, selectedFaction,
+                Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
+                forceGenerateNewPawn: true)), Pregame);
+        }
+
+        var list = new List<FloatMenuOption>
+        {
+            new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate
+            {
+                var pawn = new Pawn();
+                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, Pregame));
+            })
+        };
+
+        if (selectedCategory == PawnCategory.Humans)
+            list.Insert(0, new FloatMenuOption("PawnEditor.Add.PawnKind".Translate(), delegate
+            {
+                Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind));
+                // Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
+                //    .Select(pk => new FloatMenuOption(pk.LabelCap, () => AddPawnKind(pk)))
+                //    .ToList()));
+            }));
+
+        list.Add(new FloatMenuOption("PawnEditor.Add.OtherSave".Translate(), delegate { }));
+
+        Find.WindowStack.Add(new FloatMenu(list));
     }
 
     private static void AddPawn(Pawn addedPawn, bool pregame)

@@ -33,6 +33,7 @@
     <PawnEditor.TabDef>
         <defName>FactionOverviewPlayer</defName>
         <label>overview</label>
+        <workerClass>PawnEditor.TabWorker_PlayerFactionOverview</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>AnimalsMechs</defName>

@@ -25,7 +25,7 @@ public class TabWorker_Social : TabWorker<Pawn>
         const float nameWidth = 220;
         const float opinionWidth = 140;
         var headerRect = viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium));
-        using (new TextBlock(GameFont.Medium)) Widgets.Label(headerRect.TakeLeftPart(nameWidth + 42), "Health".Translate());
+        using (new TextBlock(GameFont.Medium)) Widgets.Label(headerRect.TakeLeftPart(nameWidth + 42), "Relations".Translate());
         headerRect.xMax -= 134;
         using (new TextBlock(TextAnchor.MiddleCenter))
             Widgets.Label(headerRect.TakeRightPart(opinionWidth), "PawnEditor.Opinion".Translate());
