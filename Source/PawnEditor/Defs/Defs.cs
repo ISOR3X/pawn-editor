@@ -23,7 +23,7 @@ public class TabGroupDef : Def
     public override void ResolveReferences()
     {
         base.ResolveReferences();
-        tabs ??= new List<TabDef>();
+        tabs ??= new();
         foreach (var def in DefDatabase<TabDef>.AllDefs)
             if (def.tabGroup == this)
                 tabs.Add(def);
@@ -59,6 +59,8 @@ public abstract class TabWorker<T>
     {
         yield break;
     }
+
+    public virtual void Initialize() { }
 }
 
 public class TabDef : Def
@@ -95,9 +97,17 @@ public class TabDef : Def
     public override void PostLoad()
     {
         base.PostLoad();
+        LongEventHandler.ExecuteWhenFinished(Initialize);
+    }
+
+    private void Initialize()
+    {
         if (workerClass != null)
         {
             worker = Activator.CreateInstance(workerClass);
+            try { AccessTools.Method(workerClass, "Initialize").Invoke(worker, Array.Empty<object>()); }
+            catch { Log.Error("Failed to initialize tab worker."); }
+
             try { drawer = AccessTools.Method(workerClass, "DrawTabContents").CreateDelegate<Action<Rect, object>>(worker); }
             catch { Log.Error("Failed to instantiate tab drawer."); }
 

@@ -111,7 +111,7 @@ public static class PawnLister
 
     public static FloatMenuOption GetTeleportOption(object location, Pawn pawn)
     {
-        return new FloatMenuOption(LocationLabel(location), () => TeleportFromTo(pawn, GetLocation(pawn), location));
+        return new(LocationLabel(location), () => TeleportFromTo(pawn, GetLocation(pawn), location));
     }
 
     private static object GetLocation(Pawn pawn)

@@ -68,4 +68,8 @@
     <PawnEditor.SettlementName>Settlement name</PawnEditor.SettlementName>
     <PawnEditor.FactionIcon>Faction icon</PawnEditor.FactionIcon>
     <PawnEditor.AddColonist>Add colonist</PawnEditor.AddColonist>
+    <PawnEditor.AddRelation>Add relation</PawnEditor.AddRelation>
+    <PawnEditor.ForceRomance>Force romance</PawnEditor.ForceRomance>
+    <PawnEditor.Relation>Relation</PawnEditor.Relation>
+    <PawnEditor.ShowAll.Relations>Show all relations</PawnEditor.ShowAll.Relations>
 </LanguageData>

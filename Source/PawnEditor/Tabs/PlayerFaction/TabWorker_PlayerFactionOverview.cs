@@ -46,7 +46,9 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
     private static Pawn FindBestSkillOwner(SkillDef skill, Faction faction)
     {
         var map = Find.CurrentMap ?? Find.AnyPlayerHomeMap;
-        var pawns = map?.mapPawns.PawnsInFaction(faction) ?? Find.GameInitData.startingAndOptionalPawns;
+        var pawns = PawnEditor.Pregame
+            ? Find.GameInitData.startingAndOptionalPawns
+            : map?.mapPawns.PawnsInFaction(faction) ?? PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists;
         var pawn = pawns[0];
         var skillRecord = pawn.skills.GetSkill(skill);
         for (var i = 1; i < pawns.Count; i++)

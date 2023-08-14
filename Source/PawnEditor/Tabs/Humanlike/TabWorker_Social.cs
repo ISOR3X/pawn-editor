@@ -1,11 +1,14 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public class TabWorker_Social : TabWorker<Pawn>
+public class TabWorker_Social : TabWorker_Table<Pawn>
 {
     private Vector2 scrollPos;
 
@@ -14,60 +17,97 @@ public class TabWorker_Social : TabWorker<Pawn>
         var headerRect = rect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
         PawnEditor.DrawPawnPortrait(portraitRect);
+        DoBottomOptions(rect.TakeBottomPart(40), pawn);
         DoRelations(rect, pawn);
+    }
+
+    private void DoBottomOptions(Rect inRect, Pawn pawn)
+    {
+        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddRelation".Translate())) { }
+
+        if (Widgets.ButtonText(inRect.TakeLeftPart(220).ContractedBy(5), "PawnEditor.ForceRomance".Translate() + "..."))
+        {
+            static void DoRomance(Pawn initiator, Pawn recipient)
+            {
+                initiator.relations.TryRemoveDirectRelation(PawnRelationDefOf.ExLover, recipient);
+                initiator.relations.AddDirectRelation(PawnRelationDefOf.Lover, recipient);
+                TaleRecorder.RecordTale(TaleDefOf.BecameLover, initiator, recipient);
+            }
+
+            var pawns = PawnEditor.Pregame
+                ? Find.GameInitData.startingAndOptionalPawns
+                : pawn.MapHeld?.mapPawns.AllPawns
+               ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
+                     .AllCaravansAndTravelingTransportPods_Alive;
+
+            Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
+               .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+               .ToList()));
+        }
+
+        var oldShowAll = SocialCardUtility.showAllRelations;
+        Widgets.CheckboxLabeled(inRect.ContractedBy(5), "PawnEditor.ShowAll.Relations".Translate(), ref SocialCardUtility.showAllRelations,
+            placeCheckboxNearText: true);
+        if (oldShowAll != SocialCardUtility.showAllRelations) table.ClearCache();
     }
 
     private void DoRelations(Rect inRect, Pawn pawn)
     {
-        var relations = pawn.relations.DirectRelations.ToList();
-        var viewRect = new Rect(0, 0, inRect.width - 20, relations.Count * 30 + Text.LineHeightOf(GameFont.Medium));
+        var viewRect = new Rect(0, 0, inRect.width - 20, SocialCardUtility.cachedEntries.Count * 30 + Text.LineHeightOf(GameFont.Medium));
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
-        const float nameWidth = 220;
-        const float opinionWidth = 140;
-        var headerRect = viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium));
-        using (new TextBlock(GameFont.Medium)) Widgets.Label(headerRect.TakeLeftPart(nameWidth + 42), "Relations".Translate());
-        headerRect.xMax -= 134;
-        using (new TextBlock(TextAnchor.MiddleCenter))
-            Widgets.Label(headerRect.TakeRightPart(opinionWidth), "PawnEditor.Opinion".Translate());
-        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(headerRect, "PawnEditor.HediffType".Translate());
+        table.OnGUI(viewRect, pawn);
+        Widgets.EndScrollView();
+    }
 
-        for (var i = 0; i < relations.Count; i++)
+    protected override List<UITable<Pawn>.Heading> GetHeadings() =>
+        new()
         {
-            var rect = viewRect.TakeTopPart(30);
-            rect.xMin += 10;
-            var fullRect = new Rect(rect);
-            if (i % 2 == 1) Widgets.DrawLightHighlight(fullRect);
-            var relation = relations[i];
-            if (Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(2.5f), TexButton.DeleteX)) pawn.relations.RemoveDirectRelation(relation);
-            rect.xMax -= 4;
-            if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "...")) { }
+            new("Relations".Translate(), 242),
+            new("PawnEditor.Relation".Translate()),
+            new("PawnEditor.Opinion".Translate().CapitalizeFirst(), 140),
+            new(100),
+            new(30)
+        };
 
-            rect.xMin += 2;
-            if (Mouse.IsOver(rect))
+    protected override List<UITable<Pawn>.Row> GetRows(Pawn pawn)
+    {
+        SocialCardUtility.CheckRecache(pawn);
+        var result = new List<UITable<Pawn>.Row>(SocialCardUtility.cachedEntries.Count);
+        for (var i = 0; i < SocialCardUtility.cachedEntries.Count; i++)
+        {
+            var items = new List<UITable<Pawn>.Row.Item>(5);
+            var entry = SocialCardUtility.cachedEntries[i];
+            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), Widgets.PlaceholderIconTex, i));
+            items.Add(new(SocialCardUtility.GetRelationsString(entry, pawn)));
+            items.Add(new(opinionRect =>
             {
-                Widgets.DrawHighlight(fullRect);
-                TooltipHandler.TipRegion(fullRect, null);
-            }
+                opinionRect.xMin += 15;
+                opinionRect.xMax -= 15;
+                var opinionOf = entry.otherPawn.relations.OpinionOf(pawn);
+                var opinionFrom = pawn.relations.OpinionOf(entry.otherPawn);
+                using (new TextBlock(TextAnchor.MiddleLeft))
+                    Widgets.Label(opinionRect,
+                        opinionOf.ToStringWithSign().Colorize(opinionOf < 0 ? ColorLibrary.RedReadable : opinionOf > 0 ? ColorLibrary.Green : Color.white));
+                using (new TextBlock(TextAnchor.MiddleRight))
+                    Widgets.Label(opinionRect,
+                        $"({opinionFrom.ToStringWithSign()})".Colorize((opinionFrom < 0 ? ColorLibrary.RedReadable :
+                            opinionFrom > 0 ? ColorLibrary.Green : Color.white).FadedColor(0.8f)));
+            }, entry.otherPawn.relations.OpinionOf(pawn)));
+            items.Add(new("Edit".Translate() + "...", () => { }));
+            if (entry.relations.Any(relation => !relation.implied))
+                items.Add(new(TexButton.DeleteX, () =>
+                {
+                    foreach (var relation in entry.relations.Where(static relation => !relation.implied))
+                        pawn.relations.TryRemoveDirectRelation(relation, entry.otherPawn);
+                    table.ClearCache();
+                }));
+            else
+                items.Add(new());
 
-            var opinionRect = rect.TakeRightPart(opinionWidth).ContractedBy(10, 0);
-            var opinionOf = relation.otherPawn.relations.OpinionOf(pawn);
-            var opinionFrom = pawn.relations.OpinionOf(relation.otherPawn);
-            using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(opinionRect,
-                    opinionOf.ToStringWithSign().Colorize(opinionOf < 0 ? ColorLibrary.RedReadable : opinionOf > 0 ? ColorLibrary.Green : Color.white));
-            using (new TextBlock(TextAnchor.MiddleRight))
-                Widgets.Label(opinionRect,
-                    $"({opinionFrom.ToStringWithSign()})".Colorize((opinionOf < 0 ? ColorLibrary.RedReadable :
-                        opinionOf > 0 ? ColorLibrary.Green : Color.white).SaturationChanged(-0.25f)));
 
-            GUI.DrawTexture(rect.TakeLeftPart(30).ContractedBy(10f), BaseContent.GreyTex);
-            using (new TextBlock(TextAnchor.MiddleLeft))
-            {
-                Widgets.Label(rect.TakeLeftPart(nameWidth), relation.otherPawn.Name.ToStringShort);
-                Widgets.Label(rect, relation.def.GetGenderSpecificLabelCap(relation.otherPawn).Colorize(ColoredText.SubtleGrayColor));
-            }
+            result.Add(new(items, SocialCardUtility.GetPawnRowTooltip(entry, pawn)));
         }
 
-        Widgets.EndScrollView();
+        return result;
     }
 }
