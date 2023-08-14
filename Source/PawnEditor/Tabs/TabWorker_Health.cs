@@ -24,10 +24,11 @@ public class TabWorker_Health : TabWorker<Pawn>
 
     public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Pawn pawn)
     {
-        yield return new SaveLoadItem<HediffSet>("PawnEditor.Hediffs".Translate(), pawn.health.hediffSet, new SaveLoadParms<HediffSet>
-        {
-            OnLoad = _ => pawn.health.CheckForStateChange(null, null)
-        });
+        yield return new SaveLoadItem<HediffSet>("PawnEditor.Hediffs".Translate(), pawn.health.hediffSet,
+            new SaveLoadParms<HediffSet>
+            {
+                OnLoad = _ => pawn.health.CheckForStateChange(null, null)
+            });
     }
 
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
@@ -39,7 +40,9 @@ public class TabWorker_Health : TabWorker<Pawn>
 
     private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddHediff".Translate())) { }
+        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddHediff".Translate()))
+        {
+        }
 
         if (Widgets.ButtonText(inRect.TakeLeftPart(100).ContractedBy(5), "PawnEditor.TendAll".Translate()))
         {
@@ -47,24 +50,28 @@ public class TabWorker_Health : TabWorker<Pawn>
             foreach (var hediff in pawn.health.hediffSet.GetHediffsTendable()) hediff.Tended(1, 1, ++i);
         }
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(250).ContractedBy(5), "PawnEditor.RemoveNegative.Hediffs".Translate()))
+        if (Widgets.ButtonText(inRect.TakeLeftPart(250).ContractedBy(5),
+                "PawnEditor.RemoveNegative.Hediffs".Translate()))
         {
             var bad = pawn.health.hediffSet.hediffs.Where(hediff => hediff.def.isBad).ToList();
             foreach (var hediff in bad) pawn.health.RemoveHediff(hediff);
         }
 
-        Widgets.CheckboxLabeled(inRect.ContractedBy(5), "PawnEditor.ShowHidden.Hediffs".Translate(), ref HealthCardUtility.showAllHediffs,
+        Widgets.CheckboxLabeled(inRect.ContractedBy(5), "PawnEditor.ShowHidden.Hediffs".Translate(),
+            ref HealthCardUtility.showAllHediffs,
             placeCheckboxNearText: true);
     }
 
     private void DoHediffs(Rect inRect, Pawn pawn)
     {
-        var hediffs = HealthCardUtility.VisibleHediffs(pawn, true).OrderByDescending(hediff => HealthCardUtility.GetListPriority(hediff.Part)).ToList();
+        var hediffs = HealthCardUtility.VisibleHediffs(pawn, true)
+            .OrderByDescending(hediff => HealthCardUtility.GetListPriority(hediff.Part)).ToList();
         var viewRect = new Rect(0, 0, inRect.width - 20, hediffs.Count * 30 + Text.LineHeightOf(GameFont.Medium));
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
         const int partWidth = 220;
         var headerRect = viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium));
-        using (new TextBlock(GameFont.Medium)) Widgets.Label(headerRect.TakeLeftPart(partWidth + 42), "Health".Translate());
+        using (new TextBlock(GameFont.Medium))
+            Widgets.Label(headerRect.TakeLeftPart(partWidth + 42), "Health".Translate());
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(headerRect, "PawnEditor.HediffType".Translate());
         for (var i = 0; i < hediffs.Count; i++)
         {
@@ -73,9 +80,12 @@ public class TabWorker_Health : TabWorker<Pawn>
             var fullRect = new Rect(rect);
             if (i % 2 == 1) Widgets.DrawLightHighlight(fullRect);
             var hediff = hediffs[i];
-            if (Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(2.5f), TexButton.DeleteX)) pawn.health.RemoveHediff(hediff);
+            if (Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(2.5f), TexButton.DeleteX))
+                pawn.health.RemoveHediff(hediff);
             rect.xMax -= 4;
-            if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "...")) { }
+            if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "..."))
+            {
+            }
 
             rect.xMin += 2;
             if (Mouse.IsOver(rect))
@@ -91,7 +101,8 @@ public class TabWorker_Health : TabWorker<Pawn>
                     Widgets.Label(rect.TakeLeftPart(partWidth), hediff.Part.LabelCap.Colorize(
                         HealthUtility.GetPartConditionLabel(pawn, hediff.Part).Second));
                 else
-                    Widgets.Label(rect.TakeLeftPart(partWidth), "WholeBody".Translate().Colorize(HealthUtility.RedColor));
+                    Widgets.Label(rect.TakeLeftPart(partWidth),
+                        "WholeBody".Translate().Colorize(HealthUtility.RedColor));
 
                 Widgets.Label(rect, hediff.LabelCap.Colorize(hediff.LabelColor));
             }
@@ -127,20 +138,16 @@ public class TabWorker_Health : TabWorker<Pawn>
                 var activityLocal = pawnCapacityDef;
                 var efficiencyLabel = HealthCardUtility.GetEfficiencyLabel(pawn, pawnCapacityDef);
                 var rect = listing.GetRect(20);
-                if (Mouse.IsOver(rect))
-                {
-                    GUI.color = HealthCardUtility.HighlightColor;
-                    GUI.DrawTexture(rect, TexUI.HighlightTex);
-                }
-
+                Widgets.DrawHighlightIfMouseover(rect);
                 Widgets.Label(new Rect(rect.x, rect.y, rect.width * 0.65f, 30f),
                     pawnCapacityDef.GetLabelFor(pawn.RaceProps.IsFlesh, pawn.RaceProps.Humanlike).CapitalizeFirst());
-                Widgets.Label(new Rect(rect.x + rect.width * 0.65f, rect.y, rect.width * 0.35f, 30f), efficiencyLabel.First.Colorize(efficiencyLabel.Second));
+                Widgets.Label(new Rect(rect.x + rect.width * 0.65f, rect.y, rect.width * 0.35f, 30f),
+                    efficiencyLabel.First.Colorize(efficiencyLabel.Second));
                 if (Mouse.IsOver(rect))
-                    TooltipHandler.TipRegion(rect, () => pawn.Dead ? "" : HealthCardUtility.GetPawnCapacityTip(pawn, activityLocal),
+                    TooltipHandler.TipRegion(rect,
+                        () => pawn.Dead ? "" : HealthCardUtility.GetPawnCapacityTip(pawn, activityLocal),
                         pawn.thingIDNumber ^ pawnCapacityDef.index);
             }
-
         listing.End();
     }
 }

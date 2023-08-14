@@ -222,9 +222,9 @@ public static partial class PawnEditor
         GUI.color = Color.white;
         GUI.DrawTexture(rect, Command.BGTex);
         GUI.DrawTexture(rect, image);
-        if (Widgets.ButtonImage(rect.ContractedBy(3).RightPartPixels(16).TopPartPixels(16), TexUI.RotRightTex))
+        if (Widgets.ButtonImage(rect.ContractedBy(8).RightPartPixels(16).TopPartPixels(16), TexUI.RotRightTex))
             curRot.Rotate(RotationDirection.Counterclockwise);
 
-        if (Widgets.InfoCardButtonWorker(rect.ContractedBy(3).LeftPartPixels(16).TopPartPixels(16))) Find.WindowStack.Add(new Dialog_InfoCard(selectedPawn));
+        if (Widgets.InfoCardButtonWorker(rect.ContractedBy(8).LeftPartPixels(16).TopPartPixels(16))) Find.WindowStack.Add(new Dialog_InfoCard(selectedPawn));
     }
 }

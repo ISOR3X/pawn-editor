@@ -140,7 +140,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
                 Widgets.Label(headerRect.TakeRightPart(hpWidth), "PawnEditor.Hitpoints".Translate());
                 Widgets.Label(headerRect.TakeRightPart(weightWidth), "PawnEditor.Weight".Translate());
                 GUI.color = Widgets.SeparatorLineColor;
-                Widgets.DrawLineHorizontal(inRect.x, inRect.y - 1, inRect.width);
+                Widgets.DrawLineHorizontal(inRect.x, inRect.y, inRect.width);
                 GUI.color = Color.white;
             }
         }
