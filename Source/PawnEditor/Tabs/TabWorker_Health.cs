@@ -40,23 +40,25 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
 
     private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddHediff".Translate())) { }
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.QuickActions".Translate()))
+            Find.WindowStack.Add(new FloatMenu(new()
+            {
+                new("PawnEditor.TendAll".Translate(), () =>
+                {
+                    var i = 0;
+                    foreach (var hediff in pawn.health.hediffSet.GetHediffsTendable()) hediff.Tended(1, 1, ++i);
+                }),
+                new("PawnEditor.RemoveNegative.Hediffs".Translate(),
+                    () =>
+                    {
+                        var bad = pawn.health.hediffSet.hediffs.Where(hediff => hediff.def.isBad).ToList();
+                        foreach (var hediff in bad) pawn.health.RemoveHediff(hediff);
+                    })
+            }));
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(100).ContractedBy(5), "PawnEditor.TendAll".Translate()))
-        {
-            var i = 0;
-            foreach (var hediff in pawn.health.hediffSet.GetHediffsTendable()) hediff.Tended(1, 1, ++i);
-        }
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddHediff".Translate())) { }
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(250).ContractedBy(5),
-                "PawnEditor.RemoveNegative.Hediffs".Translate()))
-        {
-            var bad = pawn.health.hediffSet.hediffs.Where(hediff => hediff.def.isBad).ToList();
-            foreach (var hediff in bad) pawn.health.RemoveHediff(hediff);
-        }
-
-        Widgets.CheckboxLabeled(inRect.ContractedBy(5), "PawnEditor.ShowHidden.Hediffs".Translate(),
-            ref HealthCardUtility.showAllHediffs,
+        Widgets.CheckboxLabeled(inRect.ContractedBy(4), "PawnEditor.ShowHidden.Hediffs".Translate(), ref HealthCardUtility.showAllHediffs,
             placeCheckboxNearText: true);
     }
 

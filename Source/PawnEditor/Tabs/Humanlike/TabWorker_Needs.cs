@@ -29,34 +29,18 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
     private static void DrawBottomButtons(Rect inRect, Pawn pawn)
     {
-        var rect = inRect.ContractedBy(4f);
-        var listing = new Listing_Standard();
-        listing.Begin(rect);
-        listing.ColumnWidth /= 4;
-
-
-        if (listing.ButtonText("PawnEditor.QuickActions".Translate()))
-        {
-            var floatMenuOptionList = new List<FloatMenuOption>();
-
-            void RefillAllNeeds()
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.QuickActions".Translate()))
+            Find.WindowStack.Add(new FloatMenu(new()
             {
-                foreach (var need in pawn.needs.AllNeeds) need.CurLevelPercentage = 1f;
-            }
+                new("PawnEditor.RefillNeeds".Translate(), () =>
+                {
+                    foreach (var need in pawn.needs.AllNeeds) need.CurLevelPercentage = 1f;
+                }),
+                new("PawnEditor.CancelBreakdown".Translate(),
+                    () => pawn.mindState.mentalStateHandler.CurState?.RecoverFromState())
+            }));
 
-            floatMenuOptionList.Add(new("PawnEditor.RefillNeeds".Translate(), RefillAllNeeds));
-            floatMenuOptionList.Add(new("PawnEditor.CancelBreakdown".Translate(),
-                () => pawn.mindState.mentalStateHandler.CurState?.RecoverFromState()));
-
-            if (!floatMenuOptionList.Any())
-                return;
-            Find.WindowStack.Add(new FloatMenu(floatMenuOptionList));
-        }
-
-        listing.Indent(-12f);
-        if (listing.ButtonText("PawnEditor.AddThought".Translate(), widthPct: 0.75f))
-            pawn.mindState.mentalStateHandler.CurState?.RecoverFromState();
-        listing.End();
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddThought".Translate())) { }
     }
 
     private void DrawNeeds(Rect inRect, Pawn pawn)

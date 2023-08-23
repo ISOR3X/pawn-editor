@@ -23,30 +23,34 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
     private void DoBottomOptions(Rect inRect, Pawn pawn)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddRelation".Translate())) { }
-
-        if (Widgets.ButtonText(inRect.TakeLeftPart(220).ContractedBy(5), "PawnEditor.ForceRomance".Translate() + "..."))
-        {
-            static void DoRomance(Pawn initiator, Pawn recipient)
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.QuickActions".Translate()))
+            Find.WindowStack.Add(new FloatMenu(new()
             {
-                initiator.relations.TryRemoveDirectRelation(PawnRelationDefOf.ExLover, recipient);
-                initiator.relations.AddDirectRelation(PawnRelationDefOf.Lover, recipient);
-                TaleRecorder.RecordTale(TaleDefOf.BecameLover, initiator, recipient);
-            }
+                new("PawnEditor.ForceRomance".Translate(), () =>
+                {
+                    static void DoRomance(Pawn initiator, Pawn recipient)
+                    {
+                        initiator.relations.TryRemoveDirectRelation(PawnRelationDefOf.ExLover, recipient);
+                        initiator.relations.AddDirectRelation(PawnRelationDefOf.Lover, recipient);
+                        TaleRecorder.RecordTale(TaleDefOf.BecameLover, initiator, recipient);
+                    }
 
-            var pawns = PawnEditor.Pregame
-                ? Find.GameInitData.startingAndOptionalPawns
-                : pawn.MapHeld?.mapPawns.AllPawns
-               ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
-                     .AllCaravansAndTravelingTransportPods_Alive;
+                    var pawns = PawnEditor.Pregame
+                        ? Find.GameInitData.startingAndOptionalPawns
+                        : pawn.MapHeld?.mapPawns.AllPawns
+                       ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
+                             .AllCaravansAndTravelingTransportPods_Alive;
 
-            Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
-               .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
-               .ToList()));
-        }
+                    Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
+                       .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+                       .ToList()));
+                })
+            }));
+
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddRelation".Translate())) { }
 
         var oldShowAll = SocialCardUtility.showAllRelations;
-        Widgets.CheckboxLabeled(inRect.ContractedBy(5), "PawnEditor.ShowAll.Relations".Translate(), ref SocialCardUtility.showAllRelations,
+        Widgets.CheckboxLabeled(inRect.ContractedBy(4), "PawnEditor.ShowAll.Relations".Translate(), ref SocialCardUtility.showAllRelations,
             placeCheckboxNearText: true);
         if (oldShowAll != SocialCardUtility.showAllRelations) table.ClearCache();
     }
