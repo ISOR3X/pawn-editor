@@ -78,7 +78,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             return;
         }
 
-        var headerRect = inRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium));
+        var headerRect = inRect.TakeTopPart(Heading.Height);
         for (var i = 0; i < headings.Count; i++)
         {
             var rect = headings[i].Draw(ref headerRect, i == 0, firstHasIcon, cachedWidths[i]);
@@ -173,7 +173,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         public readonly struct Item
         {
             private readonly string label;
-            private readonly Texture2D icon;
+            private readonly Texture icon;
             private readonly int sortIndex;
             private readonly Action<Rect> customDrawer;
             private readonly Action buttonClicked;
@@ -199,20 +199,20 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 this.sortIndex = sortIndex;
             }
 
-            public Item(string label, Texture2D icon, int sortIndex = -1)
+            public Item(string label, Texture icon, int sortIndex = -1)
             {
                 this.label = label;
                 this.icon = icon;
                 this.sortIndex = sortIndex;
             }
 
-            public Item(Texture2D icon, int sortIndex = -1)
+            public Item(Texture icon, int sortIndex = -1)
             {
                 this.icon = icon;
                 this.sortIndex = sortIndex;
             }
 
-            public Item(Texture2D icon, Action buttonClicked)
+            public Item(Texture icon, Action buttonClicked)
             {
                 this.icon = icon;
                 this.buttonClicked = buttonClicked;
@@ -242,14 +242,23 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     }
                     else if (icon != null)
                     {
-                        if (Widgets.ButtonImage(inRect, icon)) buttonClicked();
+                        GUI.color = Mouse.IsOver(inRect) ? GenUI.MouseoverColor : Color.white;
+                        GUI.DrawTexture(inRect, icon);
+                        GUI.color = Color.white;
+                        if (Widgets.ButtonInvisible(inRect)) buttonClicked();
                     }
                     else if (!label.NullOrEmpty())
                         if (Widgets.ButtonText(inRect, label))
                             buttonClicked();
                 }
                 else if (icon != null && label.NullOrEmpty())
-                    GUI.DrawTexture(inRect.ContractedBy(2.5f), icon);
+                {
+                    var scale = inRect.height / icon.height;
+                    GUI.DrawTexture(new Rect(0, 0, icon.width * scale, icon.height * scale)
+                       .CenteredOnXIn(inRect)
+                       .CenteredOnYIn(inRect)
+                       .ContractedBy(2.5f), icon);
+                }
                 else if (!label.NullOrEmpty())
                 {
                     if (icon != null)
@@ -269,6 +278,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>
     {
         private readonly string label;
         private readonly Texture2D icon;
+        private readonly float scale;
+
+        public static float Height => Text.LineHeightOf(GameFont.Medium);
 
         public Heading() => Expandable = true;
 
@@ -286,6 +298,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             this.icon = icon;
             Expandable = width == null;
             Width = width ?? icon.width;
+            scale = Height / icon.height;
         }
 
         public bool Visible => !label.NullOrEmpty() || icon != null;
@@ -299,7 +312,8 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             if (first) rect.TakeLeftPart(skipIcon ? 34 : 4);
             if (icon != null)
             {
-                rect = new Rect(0, 0, icon.width, icon.height).CenteredOnXIn(rect).CenteredOnYIn(rect);
+                rect = new Rect(0, 0, icon.width * scale, icon.height * scale).CenteredOnXIn(rect).CenteredOnYIn(rect);
+                if (Math.Abs(rect.height - outerRect.height) < 1f) rect = rect.ContractedBy(2.5f);
                 GUI.DrawTexture(rect, icon);
                 rect = rect.ExpandedBy(2);
             }

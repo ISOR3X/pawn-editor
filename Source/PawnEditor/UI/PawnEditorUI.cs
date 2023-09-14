@@ -118,20 +118,20 @@ public static partial class PawnEditor
     private static IEnumerable<SaveLoadItem> GetSaveLoadItems(bool pregame)
     {
         if (showFactionInfo)
-            yield return new SaveLoadItem<Faction>("PawnEditor.Selected".Translate(), selectedFaction, new SaveLoadParms<Faction>
+            yield return new SaveLoadItem<Faction>("PawnEditor.Selected".Translate(), selectedFaction, new()
             {
                 LoadLabel = "PawnEditor.LoadFaction".Translate()
             });
         else
-            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn, new SaveLoadParms<Pawn>
+            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn, new()
             {
                 LoadLabel = "PawnEditor.LoadPawn".Translate()
             });
 
         if (pregame)
-            yield return new SaveLoadItem<StartingThingsManager.StartingPreset>("PawnEditor.Selection".Translate(), new StartingThingsManager.StartingPreset());
+            yield return new SaveLoadItem<StartingThingsManager.StartingPreset>("PawnEditor.Selection".Translate(), new());
         else
-            yield return new SaveLoadItem<Map>("PawnEditor.Colony".Translate(), Find.CurrentMap, new SaveLoadParms<Map>
+            yield return new SaveLoadItem<Map>("PawnEditor.Colony".Translate(), Find.CurrentMap, new()
             {
                 PrepareLoad = map =>
                 {
@@ -208,6 +208,22 @@ public static partial class PawnEditor
         else desiredTabGroup = null;
 
         if (desiredTabGroup != tabGroup) SetTabGroup(desiredTabGroup);
+    }
+
+    public static void Select(Pawn pawn)
+    {
+        selectedPawn = pawn;
+        selectedFaction = pawn.Faction;
+        showFactionInfo = false;
+        CheckChangeTabGroup();
+    }
+
+    public static void Select(Faction faction)
+    {
+        selectedFaction = faction;
+        selectedPawn = null;
+        showFactionInfo = true;
+        CheckChangeTabGroup();
     }
 
     public static RenderTexture GetPawnTex(Pawn pawn, Vector2 portraitSize, Rot4 dir, Vector3 cameraOffset = default, float cameraZoom = 1f) =>

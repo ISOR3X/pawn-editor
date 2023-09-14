@@ -117,6 +117,8 @@ public static partial class PawnEditor
             Notify_PointsUsed();
         }
 
+        TabWorker_PlayerFactionOverview.CheckPawnList(pawns, sections, sectionCount);
+
         inRect.yMin += 12f;
         DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
     }
@@ -125,7 +127,7 @@ public static partial class PawnEditor
     {
         static void AddPawnKind(PawnKindDef pawnKind)
         {
-            AddPawn(PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, selectedFaction,
+            AddPawn(PawnGenerator.GeneratePawn(new(pawnKind, selectedFaction,
                 Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
                 forceGenerateNewPawn: true)), Pregame);
         }
@@ -140,7 +142,7 @@ public static partial class PawnEditor
         };
 
         if (selectedCategory == PawnCategory.Humans)
-            list.Insert(0, new FloatMenuOption("PawnEditor.Add.PawnKind".Translate(), delegate
+            list.Insert(0, new("PawnEditor.Add.PawnKind".Translate(), delegate
             {
                 Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind));
                 // Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
@@ -148,7 +150,7 @@ public static partial class PawnEditor
                 //    .ToList()));
             }));
 
-        list.Add(new FloatMenuOption("PawnEditor.Add.OtherSave".Translate(), delegate { }));
+        list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));
 
         Find.WindowStack.Add(new FloatMenu(list));
     }
