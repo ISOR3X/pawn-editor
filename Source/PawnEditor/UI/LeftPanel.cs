@@ -69,7 +69,7 @@ public static partial class PawnEditor
                     }))
                .ToList()));
 
-        if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn();
+        if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn(selectedCategory);
 
         List<Pawn> pawns;
         List<string> sections;
@@ -106,9 +106,9 @@ public static partial class PawnEditor
         }
         else
         {
-            (pawns, sections, sectionCount) = PawnLister.GetLists();
-            onReorder = PawnLister.OnReorder;
-            onDelete = PawnLister.OnDelete;
+            (pawns, sections, sectionCount) = PawnList.GetLists();
+            onReorder = PawnList.OnReorder;
+            onDelete = PawnList.OnDelete;
         }
 
         if (cachedPawnList == null)
@@ -117,31 +117,29 @@ public static partial class PawnEditor
             Notify_PointsUsed();
         }
 
-        TabWorker_PlayerFactionOverview.CheckPawnList(pawns, sections, sectionCount);
-
         inRect.yMin += 12f;
         DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
     }
 
-    public static void AddPawn()
+    public static void AddPawn(PawnCategory category)
     {
-        static void AddPawnKind(PawnKindDef pawnKind)
+        void AddPawnKind(PawnKindDef pawnKind)
         {
             AddPawn(PawnGenerator.GeneratePawn(new(pawnKind, selectedFaction,
                 Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
-                forceGenerateNewPawn: true)), Pregame);
+                forceGenerateNewPawn: true)), category);
         }
 
         var list = new List<FloatMenuOption>
         {
-            new("PawnEditor.Add.Saved".Translate(selectedCategory.Label()), delegate
+            new("PawnEditor.Add.Saved".Translate(category.Label()), delegate
             {
                 var pawn = new Pawn();
-                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, Pregame));
+                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category));
             })
         };
 
-        if (selectedCategory == PawnCategory.Humans)
+        if (category == PawnCategory.Humans)
             list.Insert(0, new("PawnEditor.Add.PawnKind".Translate(), delegate
             {
                 Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind));
@@ -155,19 +153,19 @@ public static partial class PawnEditor
         Find.WindowStack.Add(new FloatMenu(list));
     }
 
-    private static void AddPawn(Pawn addedPawn, bool pregame)
+    private static void AddPawn(Pawn addedPawn, PawnCategory category)
     {
-        if (pregame)
-            if (selectedCategory == PawnCategory.Humans)
+        if (Pregame)
+            if (category == PawnCategory.Humans)
                 Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
             else
-                StartingThingsManager.AddPawn(selectedCategory, addedPawn);
+                StartingThingsManager.AddPawn(category, addedPawn);
         else
         {
             addedPawn.teleporting = true;
             Find.WorldPawns.PassToWorld(addedPawn, PawnDiscardDecideMode.KeepForever);
             addedPawn.teleporting = false;
-            PawnLister.UpdateCache(selectedFaction, selectedCategory);
+            PawnList.UpdateCache(selectedFaction, category);
         }
     }
 }

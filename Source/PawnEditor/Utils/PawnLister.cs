@@ -5,32 +5,44 @@ using Verse;
 
 namespace PawnEditor;
 
-public static class PawnLister
+public class PawnLister
 {
-    private static readonly List<Pawn> pawns = new();
-    private static readonly List<string> sections = new();
-    private static readonly List<object> locations = new();
-    private static int sectionCount;
+    private static readonly List<PawnLister> allLists = new();
+    private readonly List<object> locations = new();
+    private readonly List<Pawn> pawns = new();
+    private readonly List<string> sections = new();
+    private PawnCategory category;
+    private Faction faction;
+    private int sectionCount;
 
-    public static void UpdateCache(Faction faction, PawnCategory category)
+    public PawnLister()
     {
-        ClearCache();
-        foreach (var map in Find.Maps) AddLocation(map, map.mapPawns.AllPawns, faction, category);
-
-        foreach (var caravan in Find.WorldObjects.Caravans) AddLocation(caravan, caravan.PawnsListForReading, faction, category);
-
-        AddLocation(Find.World, Find.WorldPawns.AllPawnsAliveOrDead, faction, category);
+        allLists.Add(this);
     }
 
-    public static void ClearCache()
+    public void UpdateCache(Faction faction, PawnCategory category)
+    {
+        ClearCache();
+        this.faction = faction;
+        this.category = category;
+        foreach (var map in Find.Maps) AddLocation(map, map.mapPawns.AllPawns);
+
+        foreach (var caravan in Find.WorldObjects.Caravans) AddLocation(caravan, caravan.PawnsListForReading);
+
+        AddLocation(Find.World, Find.WorldPawns.AllPawnsAliveOrDead);
+    }
+
+    public void ClearCache()
     {
         pawns.Clear();
         sections.Clear();
         locations.Clear();
         sectionCount = 0;
+        faction = null;
+        category = PawnCategory.Humans;
     }
 
-    private static void AddLocation(object location, IEnumerable<Pawn> occupants, Faction faction, PawnCategory category)
+    private void AddLocation(object location, IEnumerable<Pawn> occupants)
     {
         sections.Add(LocationLabel(location));
         sectionCount++;
@@ -45,7 +57,7 @@ public static class PawnLister
         sections.RemoveLast();
     }
 
-    public static void OnReorder(Pawn pawn, int fromIndex, int toIndex)
+    public void OnReorder(Pawn pawn, int fromIndex, int toIndex)
     {
         var from = locations[fromIndex];
         var to = locations[toIndex];
@@ -55,18 +67,27 @@ public static class PawnLister
         sections.Insert(toIndex, null);
         sections.RemoveLast();
         DoTeleport(pawn, from, to);
+        NotifyOthers();
     }
 
-    public static (List<Pawn>, List<string>, int) GetLists() => (pawns, sections, sectionCount);
+    public (List<Pawn>, List<string>, int) GetLists() => (pawns, sections, sectionCount);
 
-    public static void OnDelete(Pawn pawn)
+    public void OnDelete(Pawn pawn)
     {
         FullyRemove(pawn);
         pawn.Discard(true);
         RemoveFromList(pawn);
+        NotifyOthers();
     }
 
-    private static void RemoveFromList(Pawn pawn)
+    private void NotifyOthers()
+    {
+        foreach (var lister in allLists.Except(this))
+            if (lister.faction == faction && lister.category == category)
+                lister.UpdateCache(faction, category);
+    }
+
+    private void RemoveFromList(Pawn pawn)
     {
         var index = pawns.IndexOf(pawn);
         locations.RemoveAt(index);
@@ -75,7 +96,7 @@ public static class PawnLister
         if (sections[index] != null && sections[nextIndex] == null) sections[nextIndex] = sections[index];
     }
 
-    public static void TeleportFromTo(Pawn pawn, object from, object to)
+    public void TeleportFromTo(Pawn pawn, object from, object to)
     {
         if (to == from) return;
         if (pawns.Contains(pawn))
@@ -99,7 +120,7 @@ public static class PawnLister
         DoTeleport(pawn, from, to);
     }
 
-    private static void DoTeleport(Pawn pawn, object from, object to)
+    private void DoTeleport(Pawn pawn, object from, object to)
     {
         pawn.teleporting = true;
         FullyRemove(pawn);
@@ -109,12 +130,12 @@ public static class PawnLister
         pawn.teleporting = false;
     }
 
-    public static FloatMenuOption GetTeleportOption(object location, Pawn pawn)
+    public FloatMenuOption GetTeleportOption(object location, Pawn pawn)
     {
         return new(LocationLabel(location), () => TeleportFromTo(pawn, GetLocation(pawn), location));
     }
 
-    private static object GetLocation(Pawn pawn)
+    private object GetLocation(Pawn pawn)
     {
         if (pawns.Contains(pawn)) return locations[pawns.IndexOf(pawn)];
         if (pawn.SpawnedOrAnyParentSpawned) return pawn.MapHeld;

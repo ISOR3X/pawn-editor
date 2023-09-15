@@ -13,6 +13,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
     private static List<Pawn> cachedPawns;
     private static List<string> cachedSections;
     private static int cachedSectionCount;
+    private static readonly PawnLister colonistList = new();
     private static Dictionary<string, UITable<Faction>> pawnLocationTables = new();
     private static List<SkillDef> skillsForSummary;
     private static readonly QuickSearchWidget searchWidget = new();
@@ -43,16 +44,23 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
         Widgets.EndScrollView();
     }
 
-    public static void CheckPawnList(List<Pawn> pawns, List<string> sections, int sectionCount)
+    public static void RecachePawns(Faction faction)
     {
-        if (cachedPawns == null || cachedSections == null || !pawns.SequenceEqual(cachedPawns) || !sections.SequenceEqual(cachedSections)
-         || sectionCount != cachedSectionCount)
+        if (PawnEditor.Pregame)
         {
-            cachedPawns = pawns;
-            cachedSections = sections;
-            cachedSectionCount = sectionCount;
-            CreateLocationTables(pawns, sections);
+            cachedPawns = Find.GameInitData.startingAndOptionalPawns;
+            cachedSections = Enumerable.Repeat<string>(null, cachedPawns.Count).ToList();
+            cachedSections[0] = "StartingPawnsSelected".Translate();
+            cachedSections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
+            cachedSectionCount = 2;
         }
+        else
+        {
+            colonistList.UpdateCache(faction, PawnCategory.Humans);
+            (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
+        }
+
+        CreateLocationTables(cachedPawns, cachedSections);
     }
 
     private static void CreateLocationTables(List<Pawn> pawns, List<string> sections)
@@ -107,8 +115,8 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
                         Find.GameInitData.startingAndOptionalPawns.Remove(pawn);
                     else
                     {
-                        var (pawns, sections, _) = PawnLister.GetLists();
-                        PawnLister.OnDelete(pawn);
+                        var (pawns, sections, _) = PawnEditor.PawnList.GetLists();
+                        PawnEditor.PawnList.OnDelete(pawn);
                         var i = pawns.IndexOf(pawn);
                         pawns.RemoveAt(i);
                         sections.RemoveAt(i);
@@ -119,7 +127,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
 
     private static void DoBottomButtons(Rect inRect)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddColonist".Translate())) PawnEditor.AddPawn();
+        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddColonist".Translate())) PawnEditor.AddPawn(PawnCategory.Humans);
         searchWidget.OnGUI(inRect.TakeRightPart(250).ContractedBy(5), static () => { CreateLocationTables(cachedPawns, cachedSections); });
     }
 

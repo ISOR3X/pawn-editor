@@ -223,6 +223,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
 
             public void Draw(Rect inRect)
             {
+                inRect.x -= 4;
                 if (customDrawer != null) customDrawer(inRect);
                 else if (buttonClicked != null)
                 {
@@ -312,8 +313,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             if (first) rect.TakeLeftPart(skipIcon ? 34 : 4);
             if (icon != null)
             {
-                rect = new Rect(0, 0, icon.width * scale, icon.height * scale).CenteredOnXIn(rect).CenteredOnYIn(rect);
-                if (Math.Abs(rect.height - outerRect.height) < 1f) rect = rect.ContractedBy(2.5f);
+                rect = new Rect(0, 0, icon.width * scale, icon.height * scale).CenteredOnXIn(rect).CenteredOnYIn(rect).ContractedBy(2.5f);
                 GUI.DrawTexture(rect, icon);
                 rect = rect.ExpandedBy(2);
             }

@@ -43,7 +43,7 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
     public override void PostClose()
     {
         base.PostClose();
-        PawnLister.ClearCache();
+        PawnEditor.PawnList.ClearCache();
     }
 
     public override void DoWindowContents(Rect inRect)

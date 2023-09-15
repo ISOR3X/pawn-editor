@@ -38,6 +38,7 @@
     <PawnEditor.TabDef>
         <defName>AnimalsMechs</defName>
         <label>animals &amp; mechs</label>
+        <workerClass>PawnEditor.TabWorker_AnimalMech</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>EquipmentLoot</defName>

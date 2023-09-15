@@ -21,9 +21,15 @@
         <defName>PlayerFaction</defName>
         <tabs>
             <li>FactionOverviewPlayer</li>
+            <li>AnimalsMechs</li>
+            <li>EquipmentLoot</li>
         </tabs>
     </PawnEditor.TabGroupDef>
     <PawnEditor.TabGroupDef>
         <defName>NPCFaction</defName>
+        <tabs>
+            <li>FactionOverviewNPC</li>
+            <li>Settlements</li>
+        </tabs>
     </PawnEditor.TabGroupDef>
 </Defs>

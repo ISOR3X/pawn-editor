@@ -24,6 +24,7 @@ public static partial class PawnEditor
     private static TabGroupDef tabGroup;
     private static List<TabRecord> tabs;
     private static TabDef curTab;
+    public static PawnLister PawnList = new();
 
     private static Rot4 curRot = Rot4.South;
 
@@ -66,9 +67,9 @@ public static partial class PawnEditor
             : () =>
             {
                 if (!showFactionInfo && selectedPawn != null)
-                    Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnLister.GetTeleportOption(map, selectedPawn))
-                       .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnLister.GetTeleportOption(caravan, selectedPawn)))
-                       .Append(PawnLister.GetTeleportOption(Find.World, selectedPawn))
+                    Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnList.GetTeleportOption(map, selectedPawn))
+                       .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnList.GetTeleportOption(caravan, selectedPawn)))
+                       .Append(PawnList.GetTeleportOption(Find.World, selectedPawn))
                        .ToList()));
             }, pregame);
 
@@ -167,7 +168,8 @@ public static partial class PawnEditor
     {
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
         if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
-        PawnLister.UpdateCache(selectedFaction, selectedCategory);
+        PawnList.UpdateCache(selectedFaction, selectedCategory);
+        TabWorker_PlayerFactionOverview.RecachePawns(selectedFaction);
         PortraitsCache.Clear();
         ResetPoints();
     }
@@ -215,6 +217,12 @@ public static partial class PawnEditor
         selectedPawn = pawn;
         selectedFaction = pawn.Faction;
         showFactionInfo = false;
+        if (!selectedCategory.Includes(pawn))
+        {
+            selectedCategory = pawn.RaceProps.Humanlike ? PawnCategory.Humans : pawn.RaceProps.IsMechanoid ? PawnCategory.Mechs : PawnCategory.Animals;
+            RecachePawnList();
+        }
+
         CheckChangeTabGroup();
     }
 
