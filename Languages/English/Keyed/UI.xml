@@ -73,4 +73,6 @@
     <PawnEditor.Relation>Relation</PawnEditor.Relation>
     <PawnEditor.ShowAll.Relations>Show all relations</PawnEditor.ShowAll.Relations>
     <PawnEditor.TrainedLevel>Trained level</PawnEditor.TrainedLevel>
+    <PawnEditor.ScatteredLoot>scattered loot</PawnEditor.ScatteredLoot>
+    <PawnEditor.EquipmentLootDesc>Equipment is spawned in the vicinity of colonists, scattered loot (or structures), are randomly spread around the map.</PawnEditor.EquipmentLootDesc>
 </LanguageData>

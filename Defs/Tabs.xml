@@ -43,6 +43,7 @@
     <PawnEditor.TabDef>
         <defName>EquipmentLoot</defName>
         <label>equipment &amp; scattered loot</label>
+        <workerClass>PawnEditor.TabWorker_EquipmentLoot</workerClass>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
         <defName>FactionOverviewNPC</defName>

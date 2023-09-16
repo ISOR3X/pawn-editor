@@ -105,7 +105,7 @@ public class TabDef : Def
         if (workerClass != null)
         {
             worker = Activator.CreateInstance(workerClass);
-            try { AccessTools.Method(workerClass, "Initialize").Invoke(worker, Array.Empty<object>()); }
+            try { AccessTools.Method(workerClass, "Initialize")?.Invoke(worker, Array.Empty<object>()); }
             catch { Log.Error("Failed to initialize tab worker."); }
 
             try { drawer = AccessTools.Method(workerClass, "DrawTabContents").CreateDelegate<Action<Rect, object>>(worker); }

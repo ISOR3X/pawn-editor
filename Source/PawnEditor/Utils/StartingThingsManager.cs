@@ -65,7 +65,7 @@ public static class StartingThingsManager
 
         Find.Scenario.parts.Add(new ScenPart_StartingThingsFromPawnEditor
         {
-            def = new ScenPartDef
+            def = new()
             {
                 defName = "PawnEditor_Hook",
                 category = ScenPartCategory.StartingImportant,
@@ -101,7 +101,7 @@ public static class StartingThingsManager
         {
             PawnCategory.Animals => startingAnimals,
             PawnCategory.Mechs => startingMechs,
-            _ => new List<Pawn>()
+            _ => new()
         };
 
     public static void AddPawn(PawnCategory category, Pawn pawn)
@@ -112,8 +112,8 @@ public static class StartingThingsManager
             startingMechs.Add(pawn);
     }
 
-    // TODO: Probably need to change this when I add the starting things editor
-    public static IEnumerable<Thing> GetThings() => startingThings.Concat(startingThingsNear).Concat(startingThingsFar);
+    public static List<Thing> GetStartingThingsNear() => startingThingsNear;
+    public static List<Thing> GetStartingThingsFar() => startingThingsFar;
 
     public class ScenPart_StartingThingsFromPawnEditor : ScenPart
     {

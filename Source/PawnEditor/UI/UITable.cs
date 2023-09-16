@@ -26,6 +26,8 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         this.getRows = getRows;
     }
 
+    public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2 + rows.Count * 34;
+
     public int Compare(Row x, Row y) => sortIndex == -1 ? 0 : x.Items[sortIndex].SortIndex.CompareTo(y.Items[sortIndex].SortIndex) * sortDirection;
 
     private void RecacheRows()
@@ -243,10 +245,15 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     }
                     else if (icon != null)
                     {
+                        var scale = inRect.height / icon.height;
+                        var rect = new Rect(0, 0, icon.width * scale, icon.height * scale)
+                           .CenteredOnXIn(inRect)
+                           .CenteredOnYIn(inRect)
+                           .ContractedBy(2.5f);
                         GUI.color = Mouse.IsOver(inRect) ? GenUI.MouseoverColor : Color.white;
-                        GUI.DrawTexture(inRect, icon);
+                        GUI.DrawTexture(rect, icon);
                         GUI.color = Color.white;
-                        if (Widgets.ButtonInvisible(inRect)) buttonClicked();
+                        if (Widgets.ButtonInvisible(rect)) buttonClicked();
                     }
                     else if (!label.NullOrEmpty())
                         if (Widgets.ButtonText(inRect, label))

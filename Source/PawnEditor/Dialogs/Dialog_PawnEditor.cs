@@ -25,6 +25,12 @@ public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
 
     public Dialog_PawnEditor_Pregame(Action doNext) => this.doNext = doNext;
 
+    public override void PreOpen()
+    {
+        base.PreOpen();
+        PawnEditor.Pregame = true;
+    }
+
     public override void DoWindowContents(Rect inRect)
     {
         PawnEditor.DoUI(inRect, () => Close(), doNext, true);
@@ -36,8 +42,10 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
     public override void PreOpen()
     {
         base.PreOpen();
+        PawnEditor.Pregame = false;
         PawnEditor.RecachePawnList();
         PawnEditor.CheckChangeTabGroup();
+        ColonyInventory.RecacheItems();
     }
 
     public override void PostClose()

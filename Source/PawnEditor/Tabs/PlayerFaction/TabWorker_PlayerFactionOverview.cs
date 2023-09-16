@@ -13,8 +13,8 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
     private static List<Pawn> cachedPawns;
     private static List<string> cachedSections;
     private static int cachedSectionCount;
-    private static readonly PawnLister colonistList = new();
-    private static Dictionary<string, UITable<Faction>> pawnLocationTables = new();
+    private static PawnLister colonistList;
+    private static Dictionary<string, UITable<Faction>> pawnLocationTables;
     private static List<SkillDef> skillsForSummary;
     private static readonly QuickSearchWidget searchWidget = new();
     private static int skillsPerColumn = -1;
@@ -40,7 +40,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
         var height = cachedPawns.Count * 34 + cachedSectionCount * Text.LineHeightOf(GameFont.Medium);
         var viewRect = new Rect(0, 0, inRect.width - 20, height);
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
-        foreach (var (_, table) in pawnLocationTables) table.OnGUI(viewRect, faction);
+        foreach (var (_, table) in pawnLocationTables) table.OnGUI(viewRect.TakeTopPart(table.Height), faction);
         Widgets.EndScrollView();
     }
 
@@ -56,6 +56,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
         }
         else
         {
+            colonistList ??= new();
             colonistList.UpdateCache(faction, PawnCategory.Humans);
             (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
         }
@@ -185,11 +186,14 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
             Widgets.Label(factionNameRect.TakeLeftPart(leftLeftWidth), factionName);
             faction.Name = Widgets.TextField(factionNameRect, faction.Name);
 
-            var settlementNameRect = inRect.RightHalf();
-            settlementNameRect.width *= 0.75f;
-            Widgets.Label(settlementNameRect.TakeLeftPart(rightLeftWidth), settlementName);
-            if ((Find.CurrentMap ?? Find.AnyPlayerHomeMap)?.Parent is Settlement settlement)
-                settlement.Name = Widgets.TextField(settlementNameRect, settlement.Name);
+            if (!PawnEditor.Pregame)
+            {
+                var settlementNameRect = inRect.RightHalf();
+                settlementNameRect.width *= 0.75f;
+                Widgets.Label(settlementNameRect.TakeLeftPart(rightLeftWidth), settlementName);
+                if ((Find.CurrentMap ?? Find.AnyPlayerHomeMap)?.Parent is Settlement settlement)
+                    settlement.Name = Widgets.TextField(settlementNameRect, settlement.Name);
+            }
         }
     }
 }
