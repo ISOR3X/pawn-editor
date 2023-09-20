@@ -196,4 +196,48 @@ public class TabWorker_PlayerFactionOverview : TabWorker<Faction>
             }
         }
     }
+
+    public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)
+    {
+        if (PawnEditor.Pregame)
+            yield return new SaveLoadItem<ColonistList>("ColonistsSection".Translate(), new(cachedPawns, cachedSections), new()
+            {
+                OnLoad = list =>
+                {
+                    cachedPawns = list.Colonists;
+                    cachedSections = list.Sections;
+                    cachedSectionCount = cachedSections.Count(str => !str.NullOrEmpty());
+                    Find.GameInitData.startingAndOptionalPawns = cachedPawns;
+                    Find.GameInitData.startingPawnCount = cachedSections.IndexOf("StartingPawnsLeftBehind".Translate());
+                    CreateLocationTables(cachedPawns, cachedSections);
+                }
+            });
+    }
+
+    public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Faction faction)
+    {
+        yield return new("PawnEditor.FactionName".Translate(),
+            () => { faction.Name = NameGenerator.GenerateName(faction.def.factionNameMaker, NamePlayerFactionDialogUtility.IsValidName); });
+        if (!PawnEditor.Pregame && (Find.CurrentMap ?? Find.AnyPlayerHomeMap)?.Parent is Settlement settlement)
+            yield return new("PawnEditor.SettlementName".Translate(),
+                () => { settlement.Name = NameGenerator.GenerateName(faction.def.settlementNameMaker, NamePlayerSettlementDialogUtility.IsValidName); });
+    }
+
+    private struct ColonistList : IExposable
+    {
+        public List<Pawn> Colonists;
+        public List<string> Sections;
+
+        public ColonistList(IEnumerable<Pawn> pawns, IEnumerable<string> sections)
+        {
+            Colonists = pawns.ToList();
+            Sections = sections.ToList();
+        }
+
+        public void ExposeData()
+        {
+            Scribe_Collections.Look(ref Colonists, "colonists", LookMode.Deep);
+            Scribe_Collections.Look(ref Sections, "sections", LookMode.Value);
+        }
+    }
 }

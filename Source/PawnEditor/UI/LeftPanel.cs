@@ -99,7 +99,8 @@ public static partial class PawnEditor
             {
                 pawns = StartingThingsManager.GetPawns(selectedCategory);
                 sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
-                sections[0] = "StartingPawnsSelected".Translate();
+                if (sections.Count > 0)
+                    sections[0] = "StartingPawnsSelected".Translate();
                 sectionCount = 1;
                 onReorder = (_, _, _) => { };
                 onDelete = pawn => pawn.Discard(true);

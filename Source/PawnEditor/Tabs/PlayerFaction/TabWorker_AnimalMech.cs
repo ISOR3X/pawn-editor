@@ -172,6 +172,34 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         Widgets.EndScrollView();
     }
 
+    public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)
+    {
+        if (PawnEditor.Pregame)
+        {
+            yield return new SaveLoadItem<PawnList>("AnimalsSection".Translate(), new(
+                StartingThingsManager.GetPawns(PawnCategory.Animals)), new()
+            {
+                OnLoad = pawnList =>
+                {
+                    var list = StartingThingsManager.GetPawns(PawnCategory.Animals);
+                    list.Clear();
+                    list.AddRange(pawnList.Pawns);
+                }
+            });
+
+            yield return new SaveLoadItem<PawnList>("MechsSection".Translate(), new(
+                StartingThingsManager.GetPawns(PawnCategory.Mechs)), new()
+            {
+                OnLoad = pawnList =>
+                {
+                    var list = StartingThingsManager.GetPawns(PawnCategory.Mechs);
+                    list.Clear();
+                    list.AddRange(pawnList.Pawns);
+                }
+            });
+        }
+    }
+
     private void DoBottomButtons(Rect inRect)
     {
         if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
@@ -183,5 +211,17 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
             animalTable.ClearCache();
             mechTable.ClearCache();
         });
+    }
+
+    private struct PawnList : IExposable
+    {
+        public List<Pawn> Pawns;
+
+        public PawnList(IEnumerable<Pawn> pawns) => Pawns = pawns.ToList();
+
+        public void ExposeData()
+        {
+            Scribe_Collections.Look(ref Pawns, "pawns", LookMode.Deep);
+        }
     }
 }

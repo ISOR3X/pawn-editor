@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -18,7 +19,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
         base.Initialize();
         equipmentTable = new(GetHeadings("Equipment".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsNear()));
         lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsFar()));
-        itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(Find.CurrentMap.listerHaulables.ThingsPotentiallyNeedingHauling()));
+        itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(ColonyInventory.AllItemsInInventory()));
     }
 
     private List<UITable<Faction>.Heading> GetHeadings(string heading) =>
@@ -99,12 +100,51 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
             itemsTable.OnGUI(inRect, faction);
     }
 
-    private void DoBottomButtons(Rect inRect)
+    public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)
+    {
+        if (PawnEditor.Pregame)
+        {
+            yield return new SaveLoadItem<ThingList>("Equipment".Translate(), new(StartingThingsManager.GetStartingThingsNear()),
+                new()
+                {
+                    OnLoad = thingList =>
+                    {
+                        var list = StartingThingsManager.GetStartingThingsNear();
+                        list.Clear();
+                        list.AddRange(thingList.Things);
+                    }
+                });
+            yield return new SaveLoadItem<ThingList>("ScatteredLoot".Translate(), new(StartingThingsManager.GetStartingThingsFar()),
+                new()
+                {
+                    OnLoad = thingList =>
+                    {
+                        var list = StartingThingsManager.GetStartingThingsFar();
+                        list.Clear();
+                        list.AddRange(thingList.Things);
+                    }
+                });
+        }
+    }
+
+    private static void DoBottomButtons(Rect inRect)
     {
         if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                 "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate())) { }
 
         if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate())) { }
+    }
+
+    private struct ThingList : IExposable
+    {
+        public List<Thing> Things;
+
+        public ThingList(IEnumerable<Thing> things) => Things = things.ToList();
+
+        public void ExposeData()
+        {
+            Scribe_Collections.Look(ref Things, "things", LookMode.Deep);
+        }
     }
 }
