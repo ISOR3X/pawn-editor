@@ -140,7 +140,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         }
 
         GUI.color = Widgets.SeparatorLineColor;
-        Widgets.DrawLineHorizontal(inRect.x, inRect.y + 1, inRect.width);
+        Widgets.DrawLineHorizontal(inRect.x + 4f, inRect.y + 1, inRect.width - 5f);
         GUI.color = Color.white;
         inRect.yMin += 2;
 

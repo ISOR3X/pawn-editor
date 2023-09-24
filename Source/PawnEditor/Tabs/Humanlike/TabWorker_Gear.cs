@@ -26,7 +26,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         DoAddButtons(rect.TakeBottomPart(30), pawn);
 
         rect.xMin += 4;
-
+        
         var apparel = pawn.apparel.WornApparel;
         var equipment = pawn.equipment.AllEquipmentListForReading;
         var possessions = pawn.inventory.innerContainer.ToList();
@@ -131,7 +131,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         {
             using (new TextBlock(TextAnchor.LowerLeft))
                 Widgets.Label(headerRect.ContractedBy(ItemHeight + 4f, 0f), "PawnEditor.Name".Translate());
-            
+
             using (new TextBlock(TextAnchor.LowerCenter))
             {
                 headerRect.xMax -= buttonsWidth;
@@ -166,8 +166,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
             if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "..."))
             {
             }
-
-            if (doCount)
+            
+            if (doCount && !Utilities.SubMenuOpen)
             {
                 var countRect = rect.TakeRightPart(countWidth);
                 ref var count = ref thing.stackCount;
@@ -177,13 +177,13 @@ public class TabWorker_Gear : TabWorker<Pawn>
                     count--;
                     countBufferArr[i] = null;
                 }
-
+            
                 if (Widgets.ButtonImage(countRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalf))
                 {
                     count++;
                     countBufferArr[i] = null;
                 }
-
+            
                 Widgets.TextFieldNumeric(countRect, ref count, ref countBufferArr[i]);
             }
 
@@ -205,13 +205,12 @@ public class TabWorker_Gear : TabWorker<Pawn>
                 Widgets.Label(rect.TakeRightPart(weightWidth),
                     (thing.GetStatValue(StatDefOf.Mass) * thing.stackCount).ToStringMass());
                 GUI.color = Color.white;
-                ;
             }
 
             Widgets.ThingIcon(rect.TakeLeftPart(ItemHeight).ContractedBy(2.5f), thing);
 
             using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(rect, thing.LabelCap.Colorize(ColoredText.SubtleGrayColor));
+                Widgets.Label(rect, thing.LabelCap);
         }
 
         inRect.yMin += Text.LineHeightOf(GameFont.Small);
@@ -223,16 +222,24 @@ public class TabWorker_Gear : TabWorker<Pawn>
         var (apparel, equipment, possessions) = inRect.Split1D(3, false, 6);
         if (Widgets.ButtonText(apparel, "Add".Translate().CapitalizeFirst() + " " + "Apparel".Translate().ToLower()))
         {
+            IEnumerable<Thing> curApparel = pawn.apparel.WornApparel;
+            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel).ToList(), pawn, ref curApparel, ThingCategoryNodeDatabase.allThingCategoryNodes
+                .FirstOrDefault(tc => tc.catDef == ThingCategoryDefOf.Apparel), thingCategoryLabel: "Apparel", itemType: Dialog_SelectItem.ItemType.Apparel));
         }
 
         if (Widgets.ButtonText(equipment,
                 "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate().ToLower()))
         {
+            IEnumerable<Thing> curEquipment = pawn.equipment.AllEquipmentListForReading;
+            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.comps.Any(c => c.compClass == typeof(CompEquippable))).ToList(), pawn, ref curEquipment,
+                thingCategoryLabel: "Equipment", itemType: Dialog_SelectItem.ItemType.Equipment));
         }
 
         if (Widgets.ButtonText(possessions,
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.Possession".Translate()))
         {
+            IEnumerable<Thing> curPossessions = pawn.inventory.innerContainer;
+            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.category == ThingCategory.Item).ToList(), pawn, ref curPossessions, thingCategoryLabel: "PawnEditor.Possession"));
         }
     }
 

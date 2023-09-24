@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -17,7 +16,7 @@ public partial class TabWorker_Bio_Humanlike
         var add = "Add".Translate().CapitalizeFirst();
         var headerRect = viewRect.TakeTopPart(Text.LineHeight);
         Widgets.Label(headerRect, "Traits".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { }
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { Find.WindowStack.Add(new Dialog_SelectPawnTrait(pawn)); }
 
         var traitRect = viewRect.TakeTopPart(traitsLastHeight + 14).ContractedBy(7);
         var traits = pawn.story.traits.allTraits;
@@ -93,7 +92,7 @@ public partial class TabWorker_Bio_Humanlike
 
         headerRect = viewRect.TakeTopPart(Text.LineHeight);
         Widgets.Label(headerRect, "Abilities".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { }
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { Find.WindowStack.Add(new Dialog_SelectPawnAbility(pawn)); }
 
         var abilities = (from a in pawn.abilities.abilities
             orderby a.def.level, a.def.EntropyGain
@@ -111,7 +110,7 @@ public partial class TabWorker_Bio_Humanlike
         else
             abilitiesLastHeight = GenUI.DrawElementStack(abilitiesRect, 32f, abilities, delegate(Rect r, Ability abil)
                 {
-                    GUI.DrawTexture(r, Command.BGTexShrunk);
+                    // GUI.DrawTexture(r, Command.BGTexShrunk);
                     if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
 
                     if (Widgets.ButtonImage(r, abil.def.uiIcon, false)) Find.WindowStack.Add(new Dialog_InfoCard(abil.def));

@@ -33,7 +33,7 @@ public partial class TabWorker_Bio_Humanlike
                             pawn.SetFaction(newFaction);
                             PawnEditor.RecachePawnList();
                         }, newFaction.def.FactionIcon, newFaction.Color))
-                   .ToList()));
+                    .ToList()));
             factionRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
             factionRect.TakeLeftPart(leftWidth);
@@ -56,7 +56,7 @@ public partial class TabWorker_Bio_Humanlike
             if (Widgets.ButtonText(ideoRect, "PawnEditor.SelectIdeo".Translate()))
                 Find.WindowStack.Add(new FloatMenu(Find.IdeoManager.IdeosInViewOrder.Select(newIdeo =>
                         new FloatMenuOption(newIdeo.name, delegate { pawn.ideo.SetIdeo(newIdeo); }, newIdeo.Icon, newIdeo.Color))
-                   .ToList()));
+                    .ToList()));
 
             ideoRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
@@ -104,18 +104,24 @@ public partial class TabWorker_Bio_Humanlike
                 pawn.royalty.SetFavor(empire, (int)favor, false);
             }
         }
-        
+
         inRect.yMin += 16f;
         inRect.xMin -= 2;
         Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.Extras".Translate().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 2;
         inRect.yMin += 4;
 
-        
+
         var colorRect = inRect.TakeTopPart(30);
         inRect.yMin += 4;
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(leftWidth), favColor);
         Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor ?? Color.white);
-        if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate())) { }
+        if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
+        {
+            Color currentColor = pawn.story.favoriteColor ?? Color.white;
+            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor = color, DefDatabase<ColorDef>.AllDefs
+                    .Select(cd => cd.color).ToList(),
+                currentColor));
+        }
     }
 }

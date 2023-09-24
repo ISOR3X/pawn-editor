@@ -144,10 +144,12 @@ public static partial class PawnEditor
         if (category == PawnCategory.Humans)
             list.Insert(0, new("PawnEditor.Add.PawnKind".Translate(), delegate
             {
-                Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind));
-                // Find.WindowStack.Add(new FloatMenu(DefDatabase<PawnKindDef>.AllDefs.Where(pk => pk.RaceProps.Humanlike)
-                //    .Select(pk => new FloatMenuOption(pk.LabelCap, () => AddPawnKind(pk)))
-                //    .ToList()));
+                Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, PawnCategory.Humans));
+            }));
+        else if (selectedCategory is PawnCategory.Animals or PawnCategory.Mechs)
+            list.Insert(0, new FloatMenuOption($"{"Add".Translate().CapitalizeFirst()} {selectedCategory.Label()}", delegate
+            {
+                Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, selectedCategory));
             }));
 
         list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));

@@ -12,6 +12,8 @@ namespace PawnEditor;
 public class Dialog_ChoosePawnKindDef : Window
 {
     private List<PawnKindDef> _pawnKindDefs = new();
+    private List<PawnKindDef> _filteredPawnKindDefs = new();
+    private PawnCategory _pawnCategory;
     private PawnKindDef _selectedPawnKindDef;
     private readonly Action<PawnKindDef> _onSelect;
     private string _filter = "";
@@ -19,28 +21,19 @@ public class Dialog_ChoosePawnKindDef : Window
 
     private Vector2 _scrollPosition;
     private float _scrollViewHeight;
-    private const float SearchBarSize = 30f;
-    private static readonly Vector2 ButSize = new(150f, 38f);
     private readonly Dictionary<string, string> _truncateCache = new();
 
     private readonly QuickSearchWidget _quickSearchWidget = new();
 
     public override Vector2 InitialSize => new(500f, 600f);
 
-    public Dialog_ChoosePawnKindDef(Action<PawnKindDef> onSelect)
-    {
-        _onSelect = onSelect;
-        closeOnAccept = false;
-        absorbInputAroundWindow = true;
-    }
-
     private List<PawnKindDef> PawnKindDefsInOrder()
     {
         if (_listDirty)
         {
-            _pawnKindDefs.Clear();
-            _pawnKindDefs = DefDatabase<PawnKindDef>.AllDefsListForReading
-                .Where(pk => pk.RaceProps.Humanlike && pk.LabelCap.rawText.ToLower().Contains(_filter.ToLower()))
+            _filteredPawnKindDefs.Clear();
+            _filteredPawnKindDefs = _pawnKindDefs
+                .Where(pk => pk.LabelCap.rawText.ToLower().Contains(_filter.ToLower()))
                 .GroupBy(item => item.LabelCap.rawText)
                 .Select(group => group.First())
                 .OrderBy(item => item.LabelCap.rawText)
@@ -48,40 +41,106 @@ public class Dialog_ChoosePawnKindDef : Window
             _listDirty = false;
         }
 
-        return _pawnKindDefs;
+        return _filteredPawnKindDefs;
+    }
+
+    public Dialog_ChoosePawnKindDef(Action<PawnKindDef> onSelect, PawnCategory pawnCategory)
+    {
+        _onSelect = onSelect;
+        closeOnAccept = false;
+        absorbInputAroundWindow = true;
+        _pawnCategory = pawnCategory;
     }
 
     public override void PreOpen()
     {
         base.PreOpen();
+
+        switch (_pawnCategory)
+        {
+            case PawnCategory.Animals:
+            {
+                _pawnKindDefs = DefDatabase<PawnKindDef>.AllDefs
+                    .Where(pkd => pkd.race.race.Animal && !pkd.race.race.Dryad)
+                    .ToList();
+                break;
+            }
+            case PawnCategory.Mechs
+                : // Right now mechanoids are found based on their maskPath but this seems a bit weird.
+            {
+                _pawnKindDefs = DefDatabase<PawnKindDef>.AllDefs
+                    .Where(pkd =>
+                        pkd.race.race.IsMechanoid &&
+                        pkd.lifeStages.LastOrDefault()!.bodyGraphicData.maskPath != null)
+                    .ToList();
+                break;
+            }
+            default: // Humans
+            {
+                _pawnKindDefs = DefDatabase<PawnKindDef>.AllDefs
+                    .Where(pk => pk.RaceProps.Humanlike)
+                    .ToList();
+                break;
+            }
+        }
+
         _quickSearchWidget.Reset();
         _listDirty = true;
     }
 
-    public override void DoWindowContents(Rect rect)
+    public override void DoWindowContents(Rect inRect)
     {
-        float headerHeight = DrawHeader(rect);
-        
-        Rect rect1 = rect;
-        rect1.yMin += headerHeight;
-        rect1.yMax -= ButSize.y + 2 * 4f + Text.LineHeightOf(GameFont.Small);
-        DisplayPawnKindDefs(rect1);
+        Rect headerRect = inRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium) + 12);
+        using (new TextBlock(GameFont.Medium))
+        {
+            string str = "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate();
+            Widgets.Label(headerRect, str);
+        }
 
-        Rect rect2 = rect;
-        rect2.yMin += rect1.yMax + 4f;
-        var selected = (_selectedPawnKindDef != null) ? _selectedPawnKindDef.LabelCap.ToString() : "None"; 
-        Widgets.Label(rect2, $"Selected: ".Colorize(ColoredText.SubtleGrayColor) + selected);
-        
-        Rect rect3 = rect;
-        rect3.yMin = rect3.yMax - ButSize.y;
+        DoBottomButtons(inRect.TakeBottomPart(UIUtility.BottomButtonSize.y));
+        inRect.yMax -= 4f;
+        DoSelectedLabel(inRect.TakeBottomPart(Text.LineHeightOf(GameFont.Small)));
+        inRect.yMax -= 4f;
+        DisplayPawnKindDefs(inRect);
+    }
+
+    private void DoSelectedLabel(Rect inRect)
+    {
+        using (new TextBlock(TextAnchor.MiddleLeft))
+        {
+            if (_selectedPawnKindDef != null)
+            {
+                String tooltipTitle = _selectedPawnKindDef.LabelCap;
+                String tooltipDesc = _selectedPawnKindDef.race.description;
+                TooltipHandler.TipRegion(inRect,
+                    $"{tooltipTitle.Colorize(ColoredText.TipSectionTitleColor)}\n\n{tooltipDesc}");
+            }
+
+            string labelStr = $"{"StartingPawnsSelected".Translate()}: ";
+            string selectedStr = _selectedPawnKindDef?.LabelCap ?? "None";
+            float labelWidth = Text.CalcSize(labelStr).x;
+            inRect.xMin += 4f;
+            Widgets.Label(inRect, labelStr.Colorize(ColoredText.SubtleGrayColor));
+            inRect.xMin += labelWidth;
+            float height = Text.LineHeightOf(GameFont.Small);
+            Widgets.DrawTextureFitted(new Rect(inRect.x, inRect.y, height, height),
+                GetTexture(_selectedPawnKindDef), 1f);
+            inRect.xMin += height;
+            Widgets.Label(inRect, selectedStr);
+        }
+    }
+
+    private void DoBottomButtons(Rect inRect)
+    {
         if (_selectedPawnKindDef != null)
         {
             if (Widgets.ButtonText(
-                    new Rect(rect3.xMax - ButSize.x, rect3.y, ButSize.x, ButSize.y), 
+                    new Rect(inRect.xMax - UIUtility.BottomButtonSize.x,
+                        inRect.y, UIUtility.BottomButtonSize.x, UIUtility.BottomButtonSize.y),
                     "Accept".Translate()))
                 Accept();
             if (!Widgets.ButtonText(
-                    new Rect(rect3.x, rect3.y, ButSize.x, ButSize.y), 
+                    new Rect(inRect.x, inRect.y, UIUtility.BottomButtonSize.x, UIUtility.BottomButtonSize.y),
                     "Close".Translate()))
                 return;
             Close();
@@ -89,21 +148,12 @@ public class Dialog_ChoosePawnKindDef : Window
         else
         {
             if (!Widgets.ButtonText(
-                    new Rect((float)((rect3.width - (double)ButSize.x) / 2.0), rect3.y, ButSize.x, ButSize.y),
+                    new Rect((float)((inRect.width - (double)UIUtility.BottomButtonSize.x) / 2.0), inRect.y,
+                        UIUtility.BottomButtonSize.x, UIUtility.BottomButtonSize.y),
                     "Close".Translate()))
                 return;
             Close();
         }
-    }
-
-    private float DrawHeader(Rect rect)
-    {
-        Text.Font = GameFont.Medium;
-        string str = "PawnEditor.SelectPawnKindDef".Translate();
-        float height = Text.CalcHeight(str, rect.width);
-        Widgets.Label(rect, str);
-        Text.Font = GameFont.Small;
-        return height + 10f;
     }
 
     private void DisplayPawnKindDefs(Rect rect)
@@ -113,7 +163,7 @@ public class Dialog_ChoosePawnKindDef : Window
 
         Rect viewRect = new Rect(0.0f, 0.0f, rect.width - 16f, _scrollViewHeight);
         Rect outRect = rect.AtZero();
-        outRect.yMax -= (SearchBarSize + 4f);
+        outRect.yMax -= (UIUtility.SearchBarHeight + 4f);
 
         GUI.BeginGroup(rect);
         float y = 0.0f;
@@ -132,7 +182,8 @@ public class Dialog_ChoosePawnKindDef : Window
         Widgets.EndScrollView();
 
         GUI.EndGroup();
-        _quickSearchWidget.OnGUI(new Rect(rect.x, rect.yMax - SearchBarSize, rect.width, SearchBarSize));
+        _quickSearchWidget.OnGUI(new Rect(rect.x, rect.yMax - UIUtility.SearchBarHeight, rect.width,
+            UIUtility.SearchBarHeight));
         if (_quickSearchWidget.filter.Text != _filter)
             _listDirty = true;
         _filter = _quickSearchWidget.filter.Text;
@@ -150,13 +201,24 @@ public class Dialog_ChoosePawnKindDef : Window
             Widgets.DrawHighlightSelected(rect);
 
         rect.xMin += 4f;
-        Text.Anchor = TextAnchor.MiddleLeft;
-        Widgets.Label(rect, pawnKindDef.LabelCap.rawText.Truncate(rect.width, _truncateCache));
-        Text.Anchor = TextAnchor.UpperLeft;
+        String tooltipTitle = pawnKindDef.LabelCap;
+        String tooltipDesc = pawnKindDef.race.description;
+        TooltipHandler.TipRegion(rect, $"{tooltipTitle.Colorize(ColoredText.TipSectionTitleColor)}\n\n{tooltipDesc}");
+        Widgets.DrawTextureFitted(new Rect(rect.x, rect.y, 32f, 32f), GetTexture(pawnKindDef), .8f);
+        rect.xMin += (32f + 8f);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(rect, pawnKindDef.LabelCap.rawText.Truncate(rect.width, _truncateCache));
 
         if (!Widgets.ButtonInvisible(rect))
             return;
         _selectedPawnKindDef = pawnKindDef;
+    }
+
+    private Texture GetTexture(PawnKindDef pawnKindDef)
+    {
+        return _pawnCategory == PawnCategory.Humans || pawnKindDef == null
+            ? Widgets.PlaceholderIconTex
+            : ContentFinder<Texture2D>.Get(pawnKindDef.lifeStages.LastOrDefault()?.bodyGraphicData.texPath + "_east");
     }
 
     private void Accept()

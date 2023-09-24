@@ -6,6 +6,7 @@ namespace PawnEditor;
 
 public static class Utilities
 {
+    public static bool SubMenuOpen = false;
     public static void Set<T>(this List<T> list, int index, T item)
     {
         while (list.Count <= index) list.Add(default);

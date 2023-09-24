@@ -15,7 +15,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\Assemblies</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -61,9 +61,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Defs\Defs.cs" />
+    <Compile Include="Dialogs\Dialog_ColorPicker.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
     <Compile Include="Dialogs\Dialog_ChoosePawnKindDef.cs" />
+    <Compile Include="Dialogs\Dialog_Select\Dialog_SelectBackstory.cs" />
+    <Compile Include="Dialogs\Dialog_Select\Dialog_SelectItem.cs" />
+    <Compile Include="Dialogs\Dialog_Select\Dialog_SelectPawnAbility.cs" />
+    <Compile Include="Dialogs\Dialog_Select\Dialog_SelectPawnTrait.cs" />
+    <Compile Include="Dialogs\Dialog_Select\Dialog_SelectThing.cs" />
     <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Gear.cs" />
@@ -88,6 +94,8 @@
     <Compile Include="UI\PawnEditorUI.cs" />
     <Compile Include="UI\PawnList.cs" />
     <Compile Include="UI\UITable.cs" />
+    <Compile Include="Utils\Listing_Thing.cs" />
+    <Compile Include="Utils\Listing_TreeThing.cs" />
     <Compile Include="Utils\ColonyInventory.cs" />
     <Compile Include="Utils\PawnLister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -97,9 +105,9 @@
     <Compile Include="SaveLoad\SaveLoadUtility.cs" />
     <Compile Include="Utils\StartingThingsManager.cs" />
     <Compile Include="UI\TexPawnEditor.cs" />
+    <Compile Include="Utils\TFilter.cs" />
     <Compile Include="Utils\UIUtility.cs" />
     <Compile Include="Utils\Utilities.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
