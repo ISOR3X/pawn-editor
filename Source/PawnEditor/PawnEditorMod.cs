@@ -17,15 +17,15 @@ public class PawnEditorMod : Mod
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
-        Harm = new Harmony("legodude17.pawneditor");
+        Harm = new("legodude17.pawneditor");
         Settings = GetSettings<PawnEditorSettings>();
 
         Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.PreOpen)),
-            new HarmonyMethod(GetType(), nameof(Notify_ConfigurePawns)));
+            new(GetType(), nameof(Notify_ConfigurePawns)));
         Harm.Patch(AccessTools.Method(typeof(Page_SelectScenario), nameof(Page_SelectScenario.PreOpen)),
-            new HarmonyMethod(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
+            new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
         Harm.Patch(AccessTools.Method(typeof(Game), nameof(Game.InitNewGame)),
-            postfix: new HarmonyMethod(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
+            postfix: new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
 
         LongEventHandler.ExecuteWhenFinished(ApplySettings);
     }
@@ -49,14 +49,14 @@ public class PawnEditorMod : Mod
         Harm.Unpatch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)), HarmonyPatchType.Transpiler, Harm.Id);
         if (Settings.OverrideVanilla)
             Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)),
-                new HarmonyMethod(GetType(), nameof(OverrideVanilla)));
+                new(GetType(), nameof(OverrideVanilla)));
         else
             Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DrawXenotypeEditorButton)),
-                new HarmonyMethod(GetType(), nameof(AddEditorButton)));
+                new(GetType(), nameof(AddEditorButton)));
 
         if (Settings.InGameDevButton)
             Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)),
-                transpiler: new HarmonyMethod(GetType(), nameof(AddDevButton)));
+                transpiler: new(GetType(), nameof(AddDevButton)));
     }
 
     public override void WriteSettings()
@@ -79,7 +79,7 @@ public class PawnEditorMod : Mod
             Text.Font = GameFont.Small;
             x = rect.x + rect.width / 2 + 2;
             y = rect.y + rect.height - 38f;
-            if (Widgets.ButtonText(new Rect(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "XenotypeEditor".Translate()))
+            if (Widgets.ButtonText(new(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "XenotypeEditor".Translate()))
                 Find.WindowStack.Add(new Dialog_CreateXenotype(StartingPawnUtility.PawnIndex(__instance.curPawn), delegate
                 {
                     CharacterCardUtility.cachedCustomXenotypes = null;
@@ -94,7 +94,7 @@ public class PawnEditorMod : Mod
             y = rect.y + rect.height - 38f;
         }
 
-        if (Widgets.ButtonText(new Rect(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "PawnEditor.CharacterEditor".Translate()))
+        if (Widgets.ButtonText(new(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "PawnEditor.CharacterEditor".Translate()))
             Find.WindowStack.Add(new Dialog_PawnEditor_Pregame(__instance.DoNext));
 
         return false;
