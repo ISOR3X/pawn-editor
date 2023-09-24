@@ -169,7 +169,7 @@ public static partial class PawnEditor
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
         if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
         PawnList.UpdateCache(selectedFaction, selectedCategory);
-        TabWorker_PlayerFactionOverview.RecachePawns(selectedFaction);
+        TabWorker_FactionOverview.RecachePawns(selectedFaction);
         PortraitsCache.Clear();
         ResetPoints();
     }

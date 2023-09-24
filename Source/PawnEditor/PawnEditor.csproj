@@ -74,9 +74,12 @@
     <Compile Include="Tabs\Humanlike\Bio\TopRightButtons.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Needs.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Social.cs" />
+    <Compile Include="Tabs\NPCFaction\TabWorker_FactionSettlements.cs" />
+    <Compile Include="Tabs\NPCFaction\TabWorker_NPCFactionOverview.cs" />
     <Compile Include="Tabs\PlayerFaction\TabWorker_AnimalMech.cs" />
     <Compile Include="Tabs\PlayerFaction\TabWorker_EquipmentLoot.cs" />
     <Compile Include="Tabs\PlayerFaction\TabWorker_PlayerFactionOverview.cs" />
+    <Compile Include="Tabs\TabWorker_FactionOverview.cs" />
     <Compile Include="Tabs\TabWorker_Health.cs" />
     <Compile Include="UI\LeftPanel.cs" />
     <Compile Include="UI\PawnCategory.cs" />
