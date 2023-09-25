@@ -14,6 +14,8 @@ public class Dialog_ColorPicker : Window
     private readonly List<Color> _colors;
     private readonly Color _oldColor;
     private readonly Action<Color> _onSelect;
+    private readonly Color? _defaultColor;
+    private readonly Color? _favoriteColor;
 
     private readonly string[] _textfieldBuffers = new string[3];
     private bool _hsvColorWheelDragging;
@@ -34,8 +36,8 @@ public class Dialog_ColorPicker : Window
         absorbInputAroundWindow = true;
 
         _colors = DefDatabase<ColorDef>.AllDefs.Where(cd => cd.colorType == colorType)
-           .Select(cd => cd.color)
-           .ToList();
+            .Select(cd => cd.color)
+            .ToList();
     }
 
     public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor)
@@ -44,30 +46,40 @@ public class Dialog_ColorPicker : Window
         _oldColor = oldColor;
         _selectedColor = oldColor;
         _colors = colors
-           .OrderBy(color =>
+            .OrderBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorSat < 0.1 ? 1 : 0; // Place colors with saturation 0 at the end
             })
-           .ThenBy(color =>
+            .ThenBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorHue;
             })
-           .ThenBy(color =>
+            .ThenBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorSat;
             })
-           .ThenBy(color =>
+            .ThenBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorVal;
             })
-           .ToList();
+            .ToList();
 
         closeOnAccept = false;
         absorbInputAroundWindow = true;
+    }
+
+    public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor, Color defaultColor) : this(onSelect, colors, oldColor)
+    {
+        _defaultColor = defaultColor;
+    }
+
+    public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor, Color defaultColor, Color favoriteColor) : this(onSelect, colors, oldColor, defaultColor)
+    {
+        _favoriteColor = favoriteColor;
     }
 
     public override Vector2 InitialSize => new(600f, 450f);
@@ -113,8 +125,8 @@ public class Dialog_ColorPicker : Window
 
     private static void ColorReadback(ref RectDivider layout, Color color, Color oldColor)
     {
-        var rectDivider1 = layout.NewRow(Text.LineHeightOf(GameFont.Small) * 2 + 26f, VerticalJustification.Bottom);
-
+        var rectDivider1 = layout.NewRow(Text.LineHeightOf(GameFont.Small) * 2 + 26f + 8f, VerticalJustification.Bottom);
+        // Widgets.DrawRectFast(rectDivider1.Rect, Color.green);
         var label1 = "CurrentColor".Translate().CapitalizeFirst();
         var label2 = "OldColor".Translate().CapitalizeFirst();
 
@@ -134,14 +146,50 @@ public class Dialog_ColorPicker : Window
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
         {
-            float height = _colors.Count / 10 * 24;
-            var rectDivider1 = layout.NewCol(layout.Rect.width / 2, HorizontalJustification.Right);
-            var viewRect = rectDivider1.Rect;
-            var outRect = new Rect(rectDivider1.Rect.x, rectDivider1.Rect.y, rectDivider1.Rect.width + 16f, rectDivider1.Rect.height);
-            viewRect.height = height;
+            const int columnCount = 10; // 10 colors per row
+            const float rowHeight = 22f + 4f + 2f; // 22f for the color box, 4f for the margin, 2f for the divider
+            int rowCount = (int)Math.Ceiling((float)_colors.Count / columnCount);
+            int maxRows = (_favoriteColor != null || _defaultColor != null) ? 10 : 12; // More rows if no quick set buttons are added.
+            float maxHeight = Math.Min(rowCount * rowHeight, maxRows * rowHeight);
+
+            var rectDivider1 = layout.NewCol(columnCount * rowHeight + 16f, HorizontalJustification.Right);
+            var rectDivider3 = rectDivider1.NewRow(maxHeight);
+
+            var outRect = new Rect(rectDivider3.Rect.x, rectDivider3.Rect.y, rectDivider3.Rect.width, rectDivider3.Rect.height);
+            var viewRect = rectDivider3.CreateViewRect(rowCount, (rowHeight - 4f));
             Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
-            Widgets.ColorSelector(rectDivider1, ref color, _colors, out height);
+
+            Widgets.ColorSelector(viewRect, ref color, _colors, out _);
             Widgets.EndScrollView();
+
+            if (_favoriteColor != null && _defaultColor != null)
+            {
+                var rectDivider2 = rectDivider1.NewRow(UIUtility.RegularButtonHeight);
+
+                Rect rect = rectDivider2.Rect;
+
+                string label1 = "PawnEditor.DefaultColor".Translate();
+                string label2 = "PawnEditor.FavoriteColor".Translate();
+                float width1 = Text.CalcSize(label1).x;
+                float width2 = Text.CalcSize(label2).x;
+                if (_defaultColor != null)
+                {
+                    if (Widgets.ButtonText(rect.TakeLeftPart(width1 + 32f), label1))
+                    {
+                        color = _defaultColor.Value;
+                    }
+
+                    rect.xMin += 8f;
+                }
+
+                if (_favoriteColor != null)
+                {
+                    if (Widgets.ButtonText(rect.TakeLeftPart(width2 + 32f), label2))
+                    {
+                        color = _favoriteColor.Value;
+                    }
+                }
+            }
         }
     }
 
@@ -182,13 +230,6 @@ public class Dialog_ColorPicker : Window
         }
         else _textfieldColorBuffer = _selectedColor;
 
-        //        var rectAggregator = new RectAggregator(new(rectDivider1.Rect.position, new(125f, 0f)), 195906069);
-//        if (Widgets.ColorTextfields(ref rectAggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer,
-//                _previousFocusedControlName, "colorTextfields")) { }
-//
-//       var size = rectAggregator.Rect.size;
-//
-//        rectDivider1.NewRow(size.y);
         var rectDivider5 = rectDivider1.NewRow(UIUtility.RegularButtonHeight);
         if (Widgets.ButtonText(rectDivider5, "Random".Translate())) _selectedColor = Random.ColorHSV();
     }

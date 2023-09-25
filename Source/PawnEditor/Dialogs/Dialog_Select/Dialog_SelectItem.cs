@@ -219,10 +219,12 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
                 colorRect.height = 24f;
                 colorRect.y += 3f;
                 Color curColor = apparel2.GetComp<CompColorable>().color;
+                curColor = curColor == Color.white? apparel2.Stuff.stuffProps.color : curColor;
 
                 if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
                 {
-                    Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color), DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor));
+                    Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color), DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, apparel2.Stuff.stuffProps.color,
+                        CurPawn.story.favoriteColor.Value));
                 }
 
                 Widgets.DrawRectFast(colorRect, curColor);
