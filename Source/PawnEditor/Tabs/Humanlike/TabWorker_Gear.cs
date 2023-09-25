@@ -26,7 +26,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         DoAddButtons(rect.TakeBottomPart(30), pawn);
 
         rect.xMin += 4;
-        
+
         var apparel = pawn.apparel.WornApparel;
         var equipment = pawn.equipment.AllEquipmentListForReading;
         var possessions = pawn.inventory.innerContainer.ToList();
@@ -37,11 +37,11 @@ public class TabWorker_Gear : TabWorker<Pawn>
         Widgets.BeginScrollView(rect, ref scrollPos, viewRect);
         viewRect.yMin += 4f;
         DoEquipmentList(viewRect.TakeTopPart(textHeight + (apparel.Count + 1) * ItemHeight), apparel,
-            "Apparel".Translate(), thing => pawn.apparel.TryDrop(thing));
+            "Apparel".Translate(), thing => pawn.apparel.TryDrop(thing), Dialog_SelectItem.ItemType.Apparel, pawn);
         DoEquipmentList(viewRect.TakeTopPart(textHeight + (equipment.Count + 1) * ItemHeight), equipment,
-            "Equipment".Translate(), pawn.equipment.Remove);
+            "Equipment".Translate(), pawn.equipment.Remove, Dialog_SelectItem.ItemType.Equipment, pawn);
         DoEquipmentList(viewRect, possessions, "Possessions".Translate(),
-            thing => pawn.inventory.DropCount(thing.def, thing.stackCount), true);
+            thing => pawn.inventory.DropCount(thing.def, thing.stackCount), Dialog_SelectItem.ItemType.Inventory, pawn, true);
         Widgets.EndScrollView();
     }
 
@@ -54,7 +54,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             MassUtility.Capacity(pawn).ToString("0.##")));
         listing.Label("ComfyTemperatureRange".Translate() + ": " +
                       pawn.GetStatValue(StatDefOf.ComfyTemperatureMin).ToStringTemperature("F0") + " ~ "
-                      + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
+                    + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
         listing.Gap(15);
         listing.ColumnWidth /= 2;
         listing.ListSeparator("OverallArmor".Translate());
@@ -109,7 +109,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         return (weightWidth, hpWidth, valueWidth, countWidth);
     }
 
-    private void DoEquipmentList<T>(Rect inRect, List<T> equipment, string label, Action<T> remove,
+    private void DoEquipmentList<T>(Rect inRect, List<T> equipment, string label, Action<T> remove, Dialog_SelectItem.ItemType itemType, Pawn pawn,
         bool doCount = false) where T : Thing
     {
         if (!countBuffers.TryGetValue(label, out var countBufferArr) || countBufferArr.Length != equipment.Count)
@@ -165,8 +165,29 @@ public class TabWorker_Gear : TabWorker<Pawn>
             rect.xMax -= 4;
             if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "..."))
             {
+                var current = itemType switch
+                {
+                    Dialog_SelectItem.ItemType.Apparel => pawn.apparel.WornApparel,
+                    Dialog_SelectItem.ItemType.Equipment => pawn.equipment.AllEquipmentListForReading,
+                    Dialog_SelectItem.ItemType.Inventory => pawn.inventory.innerContainer,
+                    _ => pawn.apparel.WornApparel.Concat(pawn.equipment.AllEquipmentListForReading).Concat(pawn.inventory.innerContainer)
+                };
+                var possible = DefDatabase<ThingDef>.AllDefs.Where(itemType switch
+                    {
+                        Dialog_SelectItem.ItemType.Apparel => td => td.IsApparel,
+                        Dialog_SelectItem.ItemType.Equipment => td => td.HasComp(typeof(CompEquippable)),
+                        Dialog_SelectItem.ItemType.Inventory => td => td.category == ThingCategory.Item,
+                        _ => _ => true
+                    })
+                   .ToList();
+                Find.WindowStack.Add(new Dialog_SelectItem(possible, pawn, ref current,
+                    itemType == Dialog_SelectItem.ItemType.Apparel
+                        ? ThingCategoryNodeDatabase.allThingCategoryNodes
+                           .FirstOrDefault(tc => tc.catDef == ThingCategoryDefOf.Apparel)
+                        : null, label,
+                    itemType, thing));
             }
-            
+
             if (doCount && !Utilities.SubMenuOpen)
             {
                 var countRect = rect.TakeRightPart(countWidth);
@@ -177,13 +198,13 @@ public class TabWorker_Gear : TabWorker<Pawn>
                     count--;
                     countBufferArr[i] = null;
                 }
-            
+
                 if (Widgets.ButtonImage(countRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalf))
                 {
                     count++;
                     countBufferArr[i] = null;
                 }
-            
+
                 Widgets.TextFieldNumeric(countRect, ref count, ref countBufferArr[i]);
             }
 
@@ -223,15 +244,17 @@ public class TabWorker_Gear : TabWorker<Pawn>
         if (Widgets.ButtonText(apparel, "Add".Translate().CapitalizeFirst() + " " + "Apparel".Translate().ToLower()))
         {
             IEnumerable<Thing> curApparel = pawn.apparel.WornApparel;
-            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel).ToList(), pawn, ref curApparel, ThingCategoryNodeDatabase.allThingCategoryNodes
-                .FirstOrDefault(tc => tc.catDef == ThingCategoryDefOf.Apparel), thingCategoryLabel: "Apparel", itemType: Dialog_SelectItem.ItemType.Apparel));
+            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel).ToList(), pawn, ref curApparel,
+                ThingCategoryNodeDatabase.allThingCategoryNodes
+                   .FirstOrDefault(tc => tc.catDef == ThingCategoryDefOf.Apparel), "Apparel", Dialog_SelectItem.ItemType.Apparel));
         }
 
         if (Widgets.ButtonText(equipment,
                 "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate().ToLower()))
         {
             IEnumerable<Thing> curEquipment = pawn.equipment.AllEquipmentListForReading;
-            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.comps.Any(c => c.compClass == typeof(CompEquippable))).ToList(), pawn, ref curEquipment,
+            Find.WindowStack.Add(new Dialog_SelectItem(
+                DefDatabase<ThingDef>.AllDefs.Where(td => td.comps.Any(c => c.compClass == typeof(CompEquippable))).ToList(), pawn, ref curEquipment,
                 thingCategoryLabel: "Equipment", itemType: Dialog_SelectItem.ItemType.Equipment));
         }
 
@@ -239,7 +262,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.Possession".Translate()))
         {
             IEnumerable<Thing> curPossessions = pawn.inventory.innerContainer;
-            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.category == ThingCategory.Item).ToList(), pawn, ref curPossessions, thingCategoryLabel: "PawnEditor.Possession"));
+            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.category == ThingCategory.Item).ToList(), pawn,
+                ref curPossessions, thingCategoryLabel: "PawnEditor.Possession", itemType: Dialog_SelectItem.ItemType.Inventory));
         }
     }
 
@@ -252,7 +276,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
 
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
     {
-        yield return new FloatMenuOption("Apparel".Translate(), () =>
+        yield return new("Apparel".Translate(), () =>
         {
             pawn.apparel.DestroyAll();
             var apparelCandidates = PawnApparelGenerator.allApparelPairs.ListFullCopy();
@@ -265,7 +289,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             ThingStuffPair workingPair;
 
             while (Rand.Value >= PawnApparelGenerator.workingSet.Count / 10f
-                   && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
+                && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
                        out workingPair))
             {
                 PawnApparelGenerator.workingSet.Add(workingPair);
@@ -274,10 +298,10 @@ public class TabWorker_Gear : TabWorker<Pawn>
                         PawnApparelGenerator.usableApparel.RemoveAt(k);
             }
         });
-        yield return new FloatMenuOption("Apparel".Translate() + " " + "PawnEditor.FromKind".Translate(), () =>
+        yield return new("Apparel".Translate() + " " + "PawnEditor.FromKind".Translate(), () =>
             PawnApparelGenerator.GenerateStartingApparelFor(
-                pawn, new PawnGenerationRequest(pawn.kindDef, pawn.Faction)));
-        yield return new FloatMenuOption("Equipment".Translate(), () =>
+                pawn, new(pawn.kindDef, pawn.Faction)));
+        yield return new("Equipment".Translate(), () =>
         {
             pawn.equipment.DestroyAllEquipment();
             var thingStuffPair = PawnWeaponGenerator.allWeaponPairs.RandomElement();
@@ -292,16 +316,16 @@ public class TabWorker_Gear : TabWorker<Pawn>
 
             pawn.equipment.AddEquipment(thingWithComps);
         });
-        yield return new FloatMenuOption("Equipment".Translate() + " " + "PawnEditor.FromKind".Translate(),
+        yield return new("Equipment".Translate() + " " + "PawnEditor.FromKind".Translate(),
             () =>
             {
                 pawn.equipment.DestroyAllEquipment();
-                PawnWeaponGenerator.TryGenerateWeaponFor(pawn, new PawnGenerationRequest(pawn.kindDef, pawn.Faction));
+                PawnWeaponGenerator.TryGenerateWeaponFor(pawn, new(pawn.kindDef, pawn.Faction));
             });
-        yield return new FloatMenuOption("Possessions".Translate(), () =>
+        yield return new("Possessions".Translate(), () =>
         {
             pawn.inventory.DestroyAll();
-            PawnInventoryGenerator.GenerateInventoryFor(pawn, new PawnGenerationRequest(pawn.kindDef, pawn.Faction));
+            PawnInventoryGenerator.GenerateInventoryFor(pawn, new(pawn.kindDef, pawn.Faction));
         });
     }
 }

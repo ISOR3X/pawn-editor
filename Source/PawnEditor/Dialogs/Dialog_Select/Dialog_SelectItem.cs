@@ -12,22 +12,6 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
 {
-    protected override string PageTitle => "ChooseStuffForRelic".Translate() + " " + _thingCategoryLabel.Translate().ToLower();
-    private readonly string _thingCategoryLabel;
-
-    private Vector2 _scrollPosition;
-    private Thing _selected;
-    private readonly IEnumerable<Thing> _activeItems;
-    private readonly ItemType _itemType;
-    private static readonly HashSet<ThingStyle> thingStyles = new();
-    private string[] _countBuffer;
-
-    private struct ThingStyle
-    {
-        public ThingDef ThingDef;
-        public Dictionary<ThingStyleDef, StyleCategoryDef> StyleDefs;
-    }
-
     public enum ItemType
     {
         Apparel,
@@ -36,34 +20,40 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         All
     }
 
-    public override Vector2 InitialSize => new(900f, 700);
+    private static readonly HashSet<ThingStyle> thingStyles = new();
+    private readonly IEnumerable<Thing> _activeItems;
+    private readonly ItemType _itemType;
+    private readonly string _thingCategoryLabel;
+    private string[] _countBuffer;
+
+    private Vector2 _scrollPosition;
+    private Thing _selected;
 
     static Dialog_SelectItem()
     {
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
+        foreach (var thingDefStyle in styleCategoryDef.thingDefStyles)
         {
-            foreach (var thingDefStyle in styleCategoryDef.thingDefStyles)
+            if (thingStyles.Select(ts => ts.ThingDef).Contains(thingDefStyle.thingDef))
             {
-                if (thingStyles.Select(ts => ts.ThingDef).Contains(thingDefStyle.thingDef))
-                {
-                    thingStyles.FirstOrDefault(ts => ts.ThingDef == thingDefStyle.thingDef).StyleDefs.Add(thingDefStyle.styleDef, styleCategoryDef);
-                    continue;
-                }
-
-                thingStyles.Add(new ThingStyle()
-                {
-                    ThingDef = thingDefStyle.thingDef,
-                    StyleDefs = new Dictionary<ThingStyleDef, StyleCategoryDef>
-                    {
-                        { thingDefStyle.styleDef, styleCategoryDef }
-                    }
-                });
+                thingStyles.FirstOrDefault(ts => ts.ThingDef == thingDefStyle.thingDef).StyleDefs.Add(thingDefStyle.styleDef, styleCategoryDef);
+                continue;
             }
+
+            thingStyles.Add(new()
+            {
+                ThingDef = thingDefStyle.thingDef,
+                StyleDefs = new()
+                {
+                    { thingDefStyle.styleDef, styleCategoryDef }
+                }
+            });
         }
     }
 
-    public Dialog_SelectItem(List<ThingDef> thingList, Pawn curPawn, ref IEnumerable<Thing> activeItems, TreeNode_ThingCategory treeNodeThingCategory = null, string thingCategoryLabel = "ItemsTab",
-        ItemType itemType = ItemType.Inventory) : base(thingList,
+    public Dialog_SelectItem(List<ThingDef> thingList, Pawn curPawn, ref IEnumerable<Thing> activeItems, TreeNode_ThingCategory treeNodeThingCategory = null,
+        string thingCategoryLabel = "ItemsTab",
+        ItemType itemType = ItemType.Inventory, Thing selected = null) : base(thingList,
         curPawn)
     {
         _thingCategoryLabel = thingCategoryLabel;
@@ -74,8 +64,29 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         _itemType = itemType;
         _activeItems = activeItems;
 
-        _selected = _activeItems.FirstOrDefault();
+        _selected = selected ?? _activeItems.FirstOrDefault();
         OnSelected = AddItem;
+    }
+
+    protected override string PageTitle => "ChooseStuffForRelic".Translate() + " " + _thingCategoryLabel.Translate().ToLower();
+
+    public override Vector2 InitialSize => new(900f, 700);
+
+    protected override List<TFilter<ThingDef>> Filters()
+    {
+        var filters = base.Filters();
+        filters.Add(new("PawnEditor.HasStyle".Translate(), false, def => def.CanBeStyled()));
+        filters.Add(new("PawnEditor.HasStuff".Translate(), false, def => def.MadeFromStuff));
+
+        if (_itemType == ItemType.Apparel)
+        {
+            var bodyPartDict = DefDatabase<BodyPartGroupDef>.AllDefs.ToDictionary<BodyPartGroupDef, FloatMenuOption, Func<ThingDef, bool>>(
+                def => new(def.LabelCap, () => { }),
+                def => td => td.apparel.bodyPartGroups.Contains(def));
+            filters.Add(new("PawnEditor.WornOnBodyPart".Translate(), false, bodyPartDict));
+        }
+
+        return filters;
     }
 
     protected override void DrawInfoCard(ref Rect inRect)
@@ -85,37 +96,29 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         if (!_activeItems.Any()) return;
         _countBuffer = new string[_activeItems.Count()];
 
-        Rect viewRect = new Rect(inRect.x, inRect.y, inRect.width, 32 * _activeItems.Count());
-        Rect outRect = inRect.TakeTopPart(Mathf.Min(32f * 5, _activeItems.Count() * 32f)).ExpandedBy(4f);
+        var viewRect = new Rect(inRect.x, inRect.y, inRect.width, 32 * _activeItems.Count());
+        var outRect = inRect.TakeTopPart(Mathf.Min(32f * 5, _activeItems.Count() * 32f)).ExpandedBy(4f);
 
         Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
 
         using (new TextBlock(TextAnchor.MiddleLeft))
         {
-            List<Thing> itemsToRemove = new List<Thing>();
+            var itemsToRemove = new List<Thing>();
 
-            for (int i = 0; i < _activeItems.Count(); i++)
+            for (var i = 0; i < _activeItems.Count(); i++)
             {
                 var thing = _activeItems.ToList()[i];
-                Rect rowRect = viewRect.TakeTopPart(32f);
+                var rowRect = viewRect.TakeTopPart(32f);
                 Widgets.ThingIcon(rowRect.TakeLeftPart(32f).ContractedBy(2.5f), thing);
 
-                if (Widgets.ButtonImage(rowRect.TakeRightPart(32f).ContractedBy(2.5f), TexButton.DeleteX))
-                {
-                    itemsToRemove.Add(thing);
-                }
+                if (Widgets.ButtonImage(rowRect.TakeRightPart(32f).ContractedBy(2.5f), TexButton.DeleteX)) itemsToRemove.Add(thing);
 
-                if (Widgets.ButtonImage(rowRect.TakeRightPart(32f).ContractedBy(2.5f), TexButton.Info))
-                {
-                    Find.WindowStack.Add(new Dialog_InfoCard(thing.def));
-                }
+                if (Widgets.ButtonImage(rowRect.TakeRightPart(32f).ContractedBy(2.5f), TexButton.Info)) Find.WindowStack.Add(new Dialog_InfoCard(thing.def));
 
-                if (Widgets.RadioButton(rowRect.xMax - 32f, rowRect.y + (32f - Widgets.RadioButtonSize) / 2, (_selected != null && _selected.def == thing.def)))
-                {
-                    _selected = thing;
-                }
+                if (Widgets.RadioButton(rowRect.xMax - 32f, rowRect.y + (32f - Widgets.RadioButtonSize) / 2,
+                        _selected != null && _selected.def == thing.def)) _selected = thing;
 
-                rowRect.xMax -= (32f + 16f); // 32f from radiobutton, and 16f for spacing
+                rowRect.xMax -= 32f + 16f; // 32f from radiobutton, and 16f for spacing
 
                 if (_itemType == ItemType.Inventory)
                 {
@@ -125,16 +128,10 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
 
                 Widgets.Label(rowRect, thing.LabelCap);
 
-                if (Mouse.IsOver(rowRect))
-                {
-                    Widgets.DrawHighlight(rowRect);
-                }
+                if (Mouse.IsOver(rowRect)) Widgets.DrawHighlight(rowRect);
 
                 // ToDo: Combine with radiobutton
-                if (Widgets.ButtonInvisible(rowRect))
-                {
-                    _selected = thing;
-                }
+                if (Widgets.ButtonInvisible(rowRect)) _selected = thing;
             }
 
 
@@ -154,28 +151,22 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         const float labelWidthPct = 0.3f;
         if (_selected == null) return;
 
-        int cellCount = 0;
+        var cellCount = 0;
         using (new TextBlock(TextAnchor.MiddleLeft))
         {
             // Stuff
             Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "StatsReport_Material".Translate());
             if (_selected.def.stuffCategories is { Count: > 1 })
             {
-                List<FloatMenuOption> options = new List<FloatMenuOption>();
-                foreach (ThingDef stuff in GenStuff.AllowedStuffsFor(_selected.def))
-                {
-                    options.Add(new FloatMenuOption(stuff.LabelCap, () => { _selected.SetStuffDirect(stuff); }, Widgets.GetIconFor(stuff), stuff.uiIconColor));
-                }
+                var options = new List<FloatMenuOption>();
+                foreach (var stuff in GenStuff.AllowedStuffsFor(_selected.def))
+                    options.Add(new(stuff.LabelCap, () => { _selected.SetStuffDirect(stuff); }, Widgets.GetIconFor(stuff), stuff.uiIconColor));
 
                 if (UIUtility.ButtonTextImage(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct), _selected.Stuff))
-                {
                     Find.WindowStack.Add(new FloatMenu(options));
-                }
             }
             else
-            {
                 NoOption(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct));
-            }
 
             cellCount++;
 
@@ -183,28 +174,22 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "Quality".Translate());
             if (_selected.TryGetComp<CompQuality>() != null)
             {
-                CompQuality compQuality = _selected.TryGetComp<CompQuality>();
-                string buttonLabel = compQuality.Quality.GetLabel().CapitalizeFirst();
+                var compQuality = _selected.TryGetComp<CompQuality>();
+                var buttonLabel = compQuality.Quality.GetLabel().CapitalizeFirst();
 
-                List<FloatMenuOption> options3 = new List<FloatMenuOption>();
-                foreach (QualityCategory quality in QualityUtility.AllQualityCategories)
-                {
-                    options3.Add(new FloatMenuOption(quality.GetLabel().CapitalizeFirst(), () =>
+                var options3 = new List<FloatMenuOption>();
+                foreach (var quality in QualityUtility.AllQualityCategories)
+                    options3.Add(new(quality.GetLabel().CapitalizeFirst(), () =>
                     {
                         buttonLabel = quality.GetLabel().CapitalizeFirst();
                         compQuality.SetQuality(quality, ArtGenerationContext.Outsider);
                     }));
-                }
 
                 if (Widgets.ButtonText(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct), buttonLabel))
-                {
                     Find.WindowStack.Add(new FloatMenu(options3));
-                }
             }
             else
-            {
                 NoOption(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct));
-            }
 
             cellCount++;
 
@@ -213,26 +198,23 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "Color".Translate());
             if (_selected is Apparel apparel2 && _selected.TryGetComp<CompColorable>() != null)
             {
-                Rect widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
-                Rect colorRect = widgetRect.TakeRightPart(24f);
+                var widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
+                var colorRect = widgetRect.TakeRightPart(24f);
                 widgetRect.xMax -= 4f;
                 colorRect.height = 24f;
                 colorRect.y += 3f;
-                Color curColor = apparel2.GetComp<CompColorable>().color;
-                curColor = curColor == Color.white? apparel2.Stuff.stuffProps.color : curColor;
+                var curColor = apparel2.GetComp<CompColorable>().color;
+                curColor = curColor == Color.white ? apparel2.Stuff.stuffProps.color : curColor;
 
                 if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
-                {
-                    Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color), DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, apparel2.Stuff.stuffProps.color,
-                        CurPawn.story.favoriteColor.Value));
-                }
+                    Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),
+                        DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, apparel2.Stuff.stuffProps.color,
+                        CurPawn.story.favoriteColor));
 
                 Widgets.DrawRectFast(colorRect, curColor);
             }
             else
-            {
                 NoOption(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct));
-            }
 
             cellCount++;
 
@@ -243,29 +225,23 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
                 List<FloatMenuOption> options2 = new();
                 var styleOptions = thingStyles.FirstOrDefault(ts => ts.ThingDef == _selected.def).StyleDefs;
                 foreach (var style in styleOptions)
-                {
-                    options2.Add(new FloatMenuOption(style.Value.LabelCap, () =>
+                    options2.Add(new(style.Value.LabelCap, () =>
                     {
                         _selected.SetStyleDef(style.Key);
                         _selected.Notify_ColorChanged();
                     }, style.Value.Icon, Color.white));
-                }
 
-                options2.Add(new FloatMenuOption("None", () =>
+                options2.Add(new("None", () =>
                 {
                     _selected.SetStyleDef(null);
                     _selected.Notify_ColorChanged();
                 }));
 
-                if (UIUtility.ButtonTextImage(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct), styleOptions.FirstOrDefault(so => so.Key == _selected.GetStyleDef()).Value))
-                {
-                    Find.WindowStack.Add(new FloatMenu(options2));
-                }
+                if (UIUtility.ButtonTextImage(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct),
+                        styleOptions.FirstOrDefault(so => so.Key == _selected.GetStyleDef()).Value)) Find.WindowStack.Add(new FloatMenu(options2));
             }
             else
-            {
                 NoOption(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct));
-            }
 
             cellCount++;
 
@@ -273,9 +249,9 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             // Hit Points
             Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "HitPointsBasic".Translate().CapitalizeFirst());
             float hitPoints = _selected.HitPoints;
-            Rect widgetRect2 = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
+            var widgetRect2 = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
             widgetRect2.y += widgetRect2.height / 2f;
-            Widgets.HorizontalSlider(widgetRect2, ref hitPoints, new FloatRange(0, _selected.MaxHitPoints));
+            Widgets.HorizontalSlider(widgetRect2, ref hitPoints, new(0, _selected.MaxHitPoints));
             _selected.HitPoints = (int)hitPoints;
             cellCount++;
 
@@ -283,15 +259,13 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "PawnEditor.Tainted".Translate());
             if (_selected is Apparel apparel)
             {
-                Rect widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
-                bool isTainted = apparel.WornByCorpse;
-                Widgets.Checkbox(new Vector2(widgetRect.x + (widgetRect.width - Widgets.CheckboxSize) / 2, widgetRect.y + 3f), ref isTainted);
+                var widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
+                var isTainted = apparel.WornByCorpse;
+                Widgets.Checkbox(new(widgetRect.x + (widgetRect.width - Widgets.CheckboxSize) / 2, widgetRect.y + 3f), ref isTainted);
                 apparel.wornByCorpseInt = isTainted;
             }
             else
-            {
                 NoOption(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct));
-            }
 
             cellCount++;
         }
@@ -315,24 +289,15 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         switch (_itemType)
         {
             case ItemType.Apparel:
-                foreach (Thing thing in things)
-                {
-                    CurPawn.apparel.Remove((Apparel)thing);
-                }
+                foreach (var thing in things) CurPawn.apparel.Remove((Apparel)thing);
 
                 break;
             case ItemType.Equipment:
-                foreach (Thing thing in things)
-                {
-                    CurPawn.equipment.Remove((ThingWithComps)thing);
-                }
+                foreach (var thing in things) CurPawn.equipment.Remove((ThingWithComps)thing);
 
                 break;
             case ItemType.Inventory:
-                foreach (Thing thing in things)
-                {
-                    CurPawn.inventory.RemoveCount(thing.def, thing.stackCount);
-                }
+                foreach (var thing in things) CurPawn.inventory.RemoveCount(thing.def, thing.stackCount);
 
                 break;
             default:
@@ -348,8 +313,8 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
                 if (thingDef.IsApparel)
                 {
                     // ApparelUtility.CanWearTogether()
-                    PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out ThingStuffPair thingStuffPair);
-                    Apparel apparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+                    PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair);
+                    var apparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
                     CurPawn.apparel.Wear(apparel, false);
                 }
 
@@ -357,17 +322,23 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             case ItemType.Equipment:
                 if (thingDef.equipmentType != EquipmentType.None)
                 {
-                    PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out ThingStuffPair thingStuffPair);
-                    ThingWithComps equipment = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+                    PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair);
+                    var equipment = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
                     CurPawn.equipment.MakeRoomFor(equipment);
                     CurPawn.equipment.AddEquipment(equipment);
                 }
 
                 break;
             case ItemType.Inventory:
-                Thing thing = ThingMaker.MakeThing(thingDef, thingDef.defaultStuff);
+                var thing = ThingMaker.MakeThing(thingDef, thingDef.defaultStuff);
                 CurPawn.inventory.innerContainer.TryAdd(thing, 1);
                 break;
         }
+    }
+
+    private struct ThingStyle
+    {
+        public ThingDef ThingDef;
+        public Dictionary<ThingStyleDef, StyleCategoryDef> StyleDefs;
     }
 }

@@ -129,6 +129,9 @@
     <PawnEditor.SkillLoseDesc>Hide backstories that have disabled work types.</PawnEditor.SkillLoseDesc>
     <PawnEditor.MinAbilityLevel>Min. level</PawnEditor.MinAbilityLevel>
     <PawnEditor.MinAbilityLevelDesc>Set the minimum level the psycast should be.</PawnEditor.MinAbilityLevelDesc>
+    <PawnEditor.HasStyle>Has style</PawnEditor.HasStyle>
+    <PawnEditor.HasStuff>Has stuff</PawnEditor.HasStuff>
+    <PawnEditor.WornOnBodyPart>Worn on body part</PawnEditor.WornOnBodyPart>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
