@@ -111,6 +111,9 @@
 
     <!-- Color Picker -->
     <PawnEditor.Hex>Hex</PawnEditor.Hex>
+    <PawnEditor.DefaultColor>Default color</PawnEditor.DefaultColor>
+    <PawnEditor.FavoriteColor>Favorite color</PawnEditor.FavoriteColor>
+
 
     <!-- Filters -->
     <PawnEditor.Filters>Filters</PawnEditor.Filters>

@@ -16,6 +16,7 @@ public abstract class Dialog_SelectThing<T> : Window
     protected bool HasOptions = false;
 
     private Vector2 _scrollPosition;
+    protected Dictionary<string, string> truncateCache = new();
     protected TreeNode_ThingCategory TreeNodeThingCategory;
     protected readonly QuickSearchWidget _quickSearchWidget = new();
 

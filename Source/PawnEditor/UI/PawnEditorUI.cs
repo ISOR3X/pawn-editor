@@ -75,6 +75,7 @@ public static partial class PawnEditor
 
         inRect.yMin -= 10f;
         DoLeftPanel(inRect.TakeLeftPart(134), pregame);
+        inRect.xMin += 12f;
         inRect = inRect.ContractedBy(6);
         inRect.TakeTopPart(40);
         Widgets.DrawMenuSection(inRect);

@@ -29,6 +29,8 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
     private Vector2 _scrollPosition;
     private Thing _selected;
 
+    private IEnumerable<BodyPartGroupDef> occupiableGroupsDefs;
+
     static Dialog_SelectItem()
     {
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
@@ -61,6 +63,12 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         Listing = new Listing_TreeThing(_quickSearchWidget.filter, ThingList);
         HasOptions = true;
 
+        occupiableGroupsDefs = CurPawn.def.race.body.cachedAllParts.SelectMany(p => p.groups)
+            .Distinct()
+            .Where(bp => ThingList.Select(td => td.apparel.bodyPartGroups)
+                .Any(bpg => bpg.Contains(bp)));
+
+
         _itemType = itemType;
         _activeItems = activeItems;
 
@@ -75,12 +83,12 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
     protected override List<TFilter<ThingDef>> Filters()
     {
         var filters = base.Filters();
-        filters.Add(new("PawnEditor.HasStyle".Translate(), false, def => def.CanBeStyled()));
+        filters.Add(new("PawnEditor.HasStyle".Translate(), false, def => thingStyles.Select(ts => ts.ThingDef).Contains(def)));
         filters.Add(new("PawnEditor.HasStuff".Translate(), false, def => def.MadeFromStuff));
-
+        
         if (_itemType == ItemType.Apparel)
         {
-            var bodyPartDict = DefDatabase<BodyPartGroupDef>.AllDefs.ToDictionary<BodyPartGroupDef, FloatMenuOption, Func<ThingDef, bool>>(
+            var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, FloatMenuOption, Func<ThingDef, bool>>(
                 def => new(def.LabelCap, () => { }),
                 def => td => td.apparel.bodyPartGroups.Contains(def));
             filters.Add(new("PawnEditor.WornOnBodyPart".Translate(), false, bodyPartDict));
@@ -96,8 +104,9 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         if (!_activeItems.Any()) return;
         _countBuffer = new string[_activeItems.Count()];
 
-        var viewRect = new Rect(inRect.x, inRect.y, inRect.width, 32 * _activeItems.Count());
+        var viewRect = new Rect(inRect.x, inRect.y, inRect.width - 16f, 32 * _activeItems.Count());
         var outRect = inRect.TakeTopPart(Mathf.Min(32f * 5, _activeItems.Count() * 32f)).ExpandedBy(4f);
+        outRect.xMax -= 8f;
 
         Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
 
@@ -129,20 +138,32 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
                 Widgets.Label(rowRect, thing.LabelCap);
 
                 if (Mouse.IsOver(rowRect)) Widgets.DrawHighlight(rowRect);
-
-                // ToDo: Combine with radiobutton
                 if (Widgets.ButtonInvisible(rowRect)) _selected = thing;
             }
-
 
             RemoveItems(itemsToRemove);
             itemsToRemove.Clear();
             _countBuffer = null;
         }
 
-        inRect.TakeTopPart(16f);
         // UpdateInventory();
         Widgets.EndScrollView();
+
+        // Free BodyPartGroups label
+        inRect.yMin += 8f;
+        var occupiedGroups = occupiableGroupsDefs.Where(bp => CurPawn.apparel.WornApparel.Any(a => a.def.apparel.bodyPartGroups.Contains(bp)));
+        var allGroups = occupiableGroupsDefs;
+        var freeGroups = allGroups.Except(occupiedGroups);
+        var freeGroupsString = string.Join(", ", freeGroups.Select(g => g.LabelCap));
+
+        Rect labelRect = inRect.TakeTopPart(Text.LineHeight);
+        string label = $"Unoccupied body parts: {freeGroupsString}";
+        using (new TextBlock(GameFont.Tiny))
+            Widgets.Label(labelRect, label.Truncate(inRect.width, truncateCache).Colorize(ColoredText.SubtleGrayColor));
+        TooltipHandler.TipRegion(labelRect, label);
+
+
+        inRect.TakeTopPart(16f);
     }
 
     protected override void DrawOptions(ref Rect inRect)
@@ -160,7 +181,11 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             {
                 var options = new List<FloatMenuOption>();
                 foreach (var stuff in GenStuff.AllowedStuffsFor(_selected.def))
-                    options.Add(new(stuff.LabelCap, () => { _selected.SetStuffDirect(stuff); }, Widgets.GetIconFor(stuff), stuff.uiIconColor));
+                    options.Add(new(stuff.LabelCap, () =>
+                    {
+                        _selected.SetStuffDirect(stuff);
+                        _selected.Notify_ColorChanged();
+                    }, Widgets.GetIconFor(stuff), stuff.uiIconColor));
 
                 if (UIUtility.ButtonTextImage(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct), _selected.Stuff))
                     Find.WindowStack.Add(new FloatMenu(options));
