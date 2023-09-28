@@ -66,6 +66,7 @@
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
     <Compile Include="Dialogs\Dialog_ChoosePawnKindDef.cs" />
     <Compile Include="Dialogs\Dialog_Select\Dialog_SelectBackstory.cs" />
+    <Compile Include="Dialogs\Dialog_Select\Dialog_SelectHediff.cs" />
     <Compile Include="Dialogs\Dialog_Select\Dialog_SelectItem.cs" />
     <Compile Include="Dialogs\Dialog_Select\Dialog_SelectPawnAbility.cs" />
     <Compile Include="Dialogs\Dialog_Select\Dialog_SelectPawnTrait.cs" />

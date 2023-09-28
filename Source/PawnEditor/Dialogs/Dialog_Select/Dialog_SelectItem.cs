@@ -29,7 +29,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
     private Vector2 _scrollPosition;
     private Thing _selected;
 
-    private IEnumerable<BodyPartGroupDef> occupiableGroupsDefs;
+    private readonly IEnumerable<BodyPartGroupDef> occupiableGroupsDefs;
 
     static Dialog_SelectItem()
     {
@@ -64,9 +64,9 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         HasOptions = true;
 
         occupiableGroupsDefs = CurPawn.def.race.body.cachedAllParts.SelectMany(p => p.groups)
-            .Distinct()
-            .Where(bp => ThingList.Select(td => td.apparel.bodyPartGroups)
-                .Any(bpg => bpg.Contains(bp)));
+           .Distinct()
+           .Where(bp => ThingList.Select(td => td.apparel.bodyPartGroups)
+               .Any(bpg => bpg.Contains(bp)));
 
 
         _itemType = itemType;
@@ -85,7 +85,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         var filters = base.Filters();
         filters.Add(new("PawnEditor.HasStyle".Translate(), false, def => thingStyles.Select(ts => ts.ThingDef).Contains(def)));
         filters.Add(new("PawnEditor.HasStuff".Translate(), false, def => def.MadeFromStuff));
-        
+
         if (_itemType == ItemType.Apparel)
         {
             var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, FloatMenuOption, Func<ThingDef, bool>>(
@@ -156,8 +156,8 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         var freeGroups = allGroups.Except(occupiedGroups);
         var freeGroupsString = string.Join(", ", freeGroups.Select(g => g.LabelCap));
 
-        Rect labelRect = inRect.TakeTopPart(Text.LineHeight);
-        string label = $"Unoccupied body parts: {freeGroupsString}";
+        var labelRect = inRect.TakeTopPart(Text.LineHeight);
+        var label = $"Unoccupied body parts: {freeGroupsString}";
         using (new TextBlock(GameFont.Tiny))
             Widgets.Label(labelRect, label.Truncate(inRect.width, truncateCache).Colorize(ColoredText.SubtleGrayColor));
         TooltipHandler.TipRegion(labelRect, label);
@@ -295,7 +295,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             cellCount++;
         }
 
-        inRect.TakeTopPart((int)Math.Ceiling(cellCount / 2f) * 38f + 16f);
+        inRect.TakeTopPart(Mathf.CeilToInt(cellCount / 2f) * 38f + 16f);
     }
 
     private static void NoOption(Rect inRect)

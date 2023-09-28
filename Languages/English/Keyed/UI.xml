@@ -135,11 +135,19 @@
     <PawnEditor.HasStyle>Has style</PawnEditor.HasStyle>
     <PawnEditor.HasStuff>Has stuff</PawnEditor.HasStuff>
     <PawnEditor.WornOnBodyPart>Worn on body part</PawnEditor.WornOnBodyPart>
+    <PawnEditor.Prosthetic>Is prosthetic</PawnEditor.Prosthetic>
+    <PawnEditor.TechLevel>Tech level</PawnEditor.TechLevel>
+    <PawnEditor.IsInjury>Is injury</PawnEditor.IsInjury>
+    <PawnEditor.IsImplant>Is implant</PawnEditor.IsImplant>
+    <PawnEditor.IsDisease>Is disease</PawnEditor.IsDisease>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
     <PawnEditor.Unavailable>Unavailable</PawnEditor.Unavailable>
     <PawnEditor.UnavailableDesc>This option is not available for the current selected item.</PawnEditor.UnavailableDesc>
+    <PawnEditor.Severity>Severity</PawnEditor.Severity>
+    <PawnEditor.IsPermanent>Is permanent</PawnEditor.IsPermanent>
+    <PawnEditor.BodyPart>Body part</PawnEditor.BodyPart>
 
     <!-- Unsorted -->
     <PawnEditor.ScatteredLoot>scattered loot</PawnEditor.ScatteredLoot>
@@ -148,5 +156,6 @@
     <PawnEditor.Settlements>Settlements</PawnEditor.Settlements>
     <PawnEditor.DistanceFromColony>Distance from colony</PawnEditor.DistanceFromColony>
     <PawnEditor.DistanceFromColony.Calculate>Calculate distance from colony</PawnEditor.DistanceFromColony.Calculate>
+    <PawnEditor.Hediff>hediff</PawnEditor.Hediff>
 
 </LanguageData>

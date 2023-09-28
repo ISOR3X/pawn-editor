@@ -56,7 +56,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                     })
             }));
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddHediff".Translate())) { }
+        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddHediff".Translate()))
+            Find.WindowStack.Add(new Dialog_SelectHediff(DefDatabase<HediffDef>.AllDefsListForReading, pawn));
 
         Widgets.CheckboxLabeled(inRect.ContractedBy(4), "PawnEditor.ShowHidden.Hediffs".Translate(), ref HealthCardUtility.showAllHediffs,
             placeCheckboxNearText: true);
@@ -140,7 +141,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 items.Add(new(hediff.Part.LabelCap.Colorize(HealthUtility.GetPartConditionLabel(pawn, hediff.Part).Second), hediff.Part.Index));
             else
                 items.Add(new("WholeBody".Translate().Colorize(HealthUtility.RedColor)));
-            items.Add(new("Edit".Translate() + "...", () => { }));
+            items.Add(new("Edit".Translate() + "...",
+                () => { Find.WindowStack.Add(new Dialog_SelectHediff(DefDatabase<HediffDef>.AllDefsListForReading, pawn, hediff)); }));
             items.Add(new(TexButton.DeleteX, () =>
             {
                 pawn.health.RemoveHediff(hediff);
