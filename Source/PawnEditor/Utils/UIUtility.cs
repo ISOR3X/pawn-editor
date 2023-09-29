@@ -4,6 +4,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+
 // ReSharper disable PossibleLossOfFraction
 
 namespace PawnEditor;
@@ -67,7 +68,7 @@ public static class UIUtility
         var size = ((vertical ? rect.height : rect.width) - padding * (count - 1)) / count;
         for (var i = 0; i < count; i++)
             result[i] = vertical
-                ? new Rect(rect.x, rect.y + (size + padding) * i, rect.width, size)
+                ? new(rect.x, rect.y + (size + padding) * i, rect.width, size)
                 : new Rect(rect.x + (size + padding) * i, rect.y, size, rect.height);
 
         return result;
@@ -86,8 +87,8 @@ public static class UIUtility
 
     public static void ListSeparator(Rect inRect, string label)
     {
-        Rect rect = inRect.TakeTopPart(30f);
-        Color color = GUI.color;
+        var rect = inRect.TakeTopPart(30f);
+        var color = GUI.color;
         GUI.color = Widgets.SeparatorLabelColor;
         using (new TextBlock(Text.Anchor = TextAnchor.UpperLeft))
             Widgets.Label(rect, label);
@@ -100,24 +101,21 @@ public static class UIUtility
     public static bool ButtonTextImage(Rect inRect, [CanBeNull] Def def)
     {
         // Dictionary<string, TaggedString> truncateCache = new();
-        bool flag = Widgets.ButtonText(inRect, "");
+        var flag = Widgets.ButtonText(inRect, "");
 
         if (def != null)
         {
-            if (Mouse.IsOver(inRect))
-            {
-                TooltipHandler.TipRegion(inRect, def.LabelCap);
-            }
+            if (Mouse.IsOver(inRect)) TooltipHandler.TipRegion(inRect, def.LabelCap);
 
             using (new TextBlock(TextAnchor.MiddleLeft))
             {
                 const float iconSize = 24f;
-                float labelSize = Text.CalcSize(def.LabelCap).x;
-                Rect middleRect = inRect;
+                var labelSize = Text.CalcSize(def.LabelCap).x;
+                var middleRect = inRect;
                 middleRect.width = labelSize + (iconSize + 4f);
                 middleRect.x += (inRect.width - middleRect.width) / 2;
-                Rect labelRect = middleRect.TakeLeftPart(labelSize);
-                Rect iconRect = middleRect.TakeRightPart(iconSize);
+                var labelRect = middleRect.TakeLeftPart(labelSize);
+                var iconRect = middleRect.TakeRightPart(iconSize);
                 iconRect.height = iconSize;
                 iconRect.yMin += 4f;
                 Widgets.Label(labelRect, def.LabelCap);
@@ -134,22 +132,16 @@ public static class UIUtility
             }
         }
 
-        using (new TextBlock(TextAnchor.MiddleCenter))
-        {
-            Widgets.Label(inRect, "None");
-        }
+        using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(inRect, "None");
 
         return flag;
     }
 
     public static bool ButtonTextImage(Listing_Standard listing, [CanBeNull] Def def)
     {
-        Rect rect = listing.GetRect(30f, 1f);
-        bool flag = false;
-        if (!listing.BoundingRectCached.HasValue || rect.Overlaps(listing.BoundingRectCached.Value))
-        {
-            flag = ButtonTextImage(rect.TakeTopPart(30f), def);
-        }
+        var rect = listing.GetRect(30f);
+        var flag = false;
+        if (!listing.BoundingRectCached.HasValue || rect.Overlaps(listing.BoundingRectCached.Value)) flag = ButtonTextImage(rect.TakeTopPart(30f), def);
 
         listing.Gap(listing.verticalSpacing);
         return flag;
@@ -165,9 +157,7 @@ public static class UIUtility
                 buffer = null;
             }
             else
-            {
-                Messages.Message(new Message("Reached limit of input", MessageTypeDefOf.RejectInput));
-            }
+                Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
         }
 
         if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalf))
@@ -178,25 +168,28 @@ public static class UIUtility
                 buffer = null;
             }
             else
-            {
-                Messages.Message(new Message("Reached limit of input", MessageTypeDefOf.RejectInput));
-            }
+                Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
         }
-        
+
         Widgets.TextFieldNumeric(inRect.ContractedBy(0f, 4f), ref value, ref buffer, min, max);
     }
 
     public static Rect CellRect(int cell, Rect inRect)
     {
-        float cellWidth = inRect.width / 2f - 16f;
-        float cellHeight = 30f;
-        float x = cell % 2 == 0 ? 0f : cellWidth + 32f;
-        float y = cell / 2 * (cellHeight + 8f);
-        return new Rect(inRect.x + x, inRect.y + y, cellWidth, cellHeight);
+        var cellWidth = inRect.width / 2f - 16f;
+        var cellHeight = 30f;
+        var x = cell % 2 == 0 ? 0f : cellWidth + 32f;
+        var y = cell / 2 * (cellHeight + 8f);
+        return new(inRect.x + x, inRect.y + y, cellWidth, cellHeight);
     }
 
-    public static Color FadedColor(this Color color, float alpha)
+    public static Color FadedColor(this Color color, float alpha) => new(color.r, color.g, color.b, alpha);
+
+    public static void LabelWithIcon(Rect rect, string label, Texture labelIcon, float labelIconScale = 1f)
     {
-        return new Color(color.r, color.g, color.b, alpha);
+        var outerRect = new Rect(rect.x, rect.y, labelIcon.width, rect.height);
+        rect.xMin += labelIcon.width;
+        Widgets.DrawTextureFitted(outerRect, labelIcon, labelIconScale);
+        Widgets.Label(rect, label);
     }
 }

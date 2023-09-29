@@ -10,8 +10,8 @@ namespace PawnEditor;
 [HotSwappable]
 public static partial class PawnEditor
 {
-    private static bool renderClothes = true;
-    private static bool renderHeadgear = true;
+    public static bool RenderClothes = true;
+    public static bool RenderHeadgear = true;
     private static bool usePointLimit;
     private static float remainingPoints = 100000;
     private static Faction selectedFaction;
@@ -46,8 +46,8 @@ public static partial class PawnEditor
             string text2 = "ShowApparel".Translate();
             var width = Mathf.Max(Text.CalcSize(text).x, Text.CalcSize(text2).x) + 4f + 24f;
             var rect2 = headerRect.TakeRightPart(width).TopPartPixels(Text.LineHeight * 2f);
-            Widgets.CheckboxLabeled(rect2.TopHalf(), text, ref renderHeadgear);
-            Widgets.CheckboxLabeled(rect2.BottomHalf(), text2, ref renderClothes);
+            Widgets.CheckboxLabeled(rect2.TopHalf(), text, ref RenderHeadgear);
+            Widgets.CheckboxLabeled(rect2.BottomHalf(), text2, ref RenderClothes);
             headerRect.xMax -= 4f;
         }
 
@@ -235,8 +235,13 @@ public static partial class PawnEditor
         CheckChangeTabGroup();
     }
 
+    public static void GotoTab(TabDef tab)
+    {
+        curTab = tab;
+    }
+
     public static RenderTexture GetPawnTex(Pawn pawn, Vector2 portraitSize, Rot4 dir, Vector3 cameraOffset = default, float cameraZoom = 1f) =>
-        PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom, renderHeadgear: renderHeadgear, renderClothes: renderClothes,
+        PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom, renderHeadgear: RenderHeadgear, renderClothes: RenderClothes,
             stylingStation: true);
 
     public static void DrawPawnPortrait(Rect rect)

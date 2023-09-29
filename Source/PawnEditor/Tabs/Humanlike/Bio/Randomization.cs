@@ -10,12 +10,12 @@ public partial class TabWorker_Bio_Humanlike
 {
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
     {
-        yield return new FloatMenuOption("All".Translate(), () => RandomizeAll(pawn));
-        yield return new FloatMenuOption("Appearance".Translate(), () => RandomizeAppearance(pawn));
-        yield return new FloatMenuOption("PawnEditor.Shape".Translate(), () => RandomizeShape(pawn));
-        yield return new FloatMenuOption("Relations".Translate(), () => RandomizeRelations(pawn));
-        yield return new FloatMenuOption("Traits".Translate(), () => RandomizeTraits(pawn));
-        yield return new FloatMenuOption("Skills".Translate(), () => RandomizeSkills(pawn));
+        yield return new("All".Translate(), () => RandomizeAll(pawn));
+        yield return new("Appearance".Translate(), () => RandomizeAppearance(pawn));
+        yield return new("PawnEditor.Shape".Translate(), () => RandomizeShape(pawn));
+        yield return new("Relations".Translate(), () => RandomizeRelations(pawn));
+        yield return new("Traits".Translate(), () => RandomizeTraits(pawn));
+        yield return new("Skills".Translate(), () => RandomizeSkills(pawn));
     }
 
     private static void RandomizeAll(Pawn pawn)
@@ -26,7 +26,7 @@ public partial class TabWorker_Bio_Humanlike
         RandomizeSkills(pawn);
     }
 
-    private static void RandomizeAppearance(Pawn pawn)
+    public static void RandomizeAppearance(Pawn pawn)
     {
         pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(pawn);
         if (ModLister.IdeologyInstalled)
@@ -51,7 +51,7 @@ public partial class TabWorker_Bio_Humanlike
         RandomizeShape(pawn);
     }
 
-    private static void RandomizeShape(Pawn pawn)
+    public static void RandomizeShape(Pawn pawn)
     {
         pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
         pawn.story.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
@@ -90,7 +90,7 @@ public partial class TabWorker_Bio_Humanlike
 
         if (LovePartnerRelationUtility.HasAnyLovePartnerOfTheSameGender(pawn)
          || LovePartnerRelationUtility.HasAnyExLovePartnerOfTheSameGender(pawn))
-            pawn.story.traits.GainTrait(new Trait(TraitDefOf.Gay, PawnGenerator.RandomTraitDegree(TraitDefOf.Gay)));
+            pawn.story.traits.GainTrait(new(TraitDefOf.Gay, PawnGenerator.RandomTraitDegree(TraitDefOf.Gay)));
 
         if (!ModsConfig.BiotechActive || pawn.ageTracker.AgeBiologicalYears >= 13) PawnGenerator.TryGenerateSexualityTraitFor(pawn, true);
     }
@@ -104,6 +104,6 @@ public partial class TabWorker_Bio_Humanlike
 
     private static void RandomizeSkills(Pawn pawn)
     {
-        PawnGenerator.GenerateSkills(pawn, new PawnGenerationRequest(pawn.kindDef, pawn.Faction));
+        PawnGenerator.GenerateSkills(pawn, new(pawn.kindDef, pawn.Faction));
     }
 }

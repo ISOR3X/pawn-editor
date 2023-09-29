@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Defs\Defs.cs" />
+    <Compile Include="Dialogs\Dialog_AppearanceEditor.cs" />
     <Compile Include="Dialogs\Dialog_ColorPicker.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />

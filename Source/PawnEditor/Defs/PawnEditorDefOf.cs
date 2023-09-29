@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using Verse;
 
 namespace PawnEditor;
 
@@ -9,6 +10,9 @@ public static class PawnEditorDefOf
     public static TabGroupDef AnimalMech;
     public static TabGroupDef PlayerFaction;
     public static TabGroupDef NPCFaction;
+    public static TabDef Gear;
+    public static BodyPartGroupDef Hands;
+    public static BodyPartDef Tail;
 
     static PawnEditorDefOf()
     {

@@ -48,6 +48,17 @@
     <PawnEditor.Chronological>Chronological</PawnEditor.Chronological>
     <PawnEditor.EmpireTitle>Empire title</PawnEditor.EmpireTitle>
     <PawnEditor.Honor>Honor</PawnEditor.Honor>
+    <PawnEditor.GotoGearTab>Go to gear tab...</PawnEditor.GotoGearTab>
+    <PawnEditor.NoStyles>No styles available for the selected item.</PawnEditor.NoStyles>
+    <PawnEditor.Body>Body</PawnEditor.Body>
+    <PawnEditor.Head>Head</PawnEditor.Head>
+    <PawnEditor.IgnoreXenotype>Ignore xenotype restrictions</PawnEditor.IgnoreXenotype>
+    <PawnEditor.NoOptions>No options available</PawnEditor.NoOptions>
+    <PawnEditor.Ears>Ears</PawnEditor.Ears>
+    <PawnEditor.Headbone>Forehead (horns)</PawnEditor.Headbone>
+    <PawnEditor.BodyType>Body type</PawnEditor.BodyType>
+    <PawnEditor.Voice>Voice</PawnEditor.Voice>
+    <PawnEditor.Fur>Skin (fur)</PawnEditor.Fur>
 
     <!-- Ideology and Groups -->
     <PawnEditor.SelectIdeo>Select ideology</PawnEditor.SelectIdeo>
@@ -114,7 +125,6 @@
     <PawnEditor.DefaultColor>Default color</PawnEditor.DefaultColor>
     <PawnEditor.FavoriteColor>Favorite color</PawnEditor.FavoriteColor>
 
-
     <!-- Filters -->
     <PawnEditor.Filters>Filters</PawnEditor.Filters>
     <PawnEditor.Filter>Filter</PawnEditor.Filter>
@@ -157,5 +167,4 @@
     <PawnEditor.DistanceFromColony>Distance from colony</PawnEditor.DistanceFromColony>
     <PawnEditor.DistanceFromColony.Calculate>Calculate distance from colony</PawnEditor.DistanceFromColony.Calculate>
     <PawnEditor.Hediff>hediff</PawnEditor.Hediff>
-
 </LanguageData>

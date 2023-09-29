@@ -14,7 +14,8 @@ public partial class TabWorker_Bio_Humanlike
         using var block = new TextBlock(TextAnchor.MiddleCenter);
         Widgets.DrawHighlight(buttonsRect);
         buttonsRect = buttonsRect.ContractedBy(6);
-        if (Widgets.ButtonText(buttonsRect.TakeBottomPart(25), "PawnEditor.EditAppearance".Translate())) { }
+        if (Widgets.ButtonText(buttonsRect.TakeBottomPart(25), "PawnEditor.EditAppearance".Translate()))
+            Find.WindowStack.Add(new Dialog_AppearanceEditor(pawn));
 
         var devStageRect = buttonsRect.TopHalf().LeftHalf().ContractedBy(2);
         var text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
@@ -57,7 +58,7 @@ public partial class TabWorker_Bio_Humanlike
             foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
             {
                 var xenotype = item;
-                list.Add(new FloatMenuOption(xenotype.LabelCap,
+                list.Add(new(xenotype.LabelCap,
                     () => pawn.genes.SetXenotype(xenotype), xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
                     r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
                     r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
@@ -66,7 +67,7 @@ public partial class TabWorker_Bio_Humanlike
             foreach (var customXenotype in CharacterCardUtility.CustomXenotypes)
             {
                 var customInner = customXenotype;
-                list.Add(new FloatMenuOption(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
+                list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
                     delegate
                     {
                         if (!pawn.IsBaseliner()) pawn.genes.SetXenotype(XenotypeDefOf.Baseliner);
@@ -75,7 +76,7 @@ public partial class TabWorker_Bio_Humanlike
                         foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
                     }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
                     {
-                        if (Widgets.ButtonImage(new Rect(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
+                        if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
                         {
                             Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), delegate
                             {
@@ -93,7 +94,7 @@ public partial class TabWorker_Bio_Humanlike
                     }, extraPartRightJustified: true));
             }
 
-            list.Add(new FloatMenuOption("XenotypeEditor".Translate() + "...",
+            list.Add(new("XenotypeEditor".Translate() + "...",
                 delegate { Find.WindowStack.Add(new Dialog_CreateXenotype(-1, delegate { CharacterCardUtility.cachedCustomXenotypes = null; })); }));
 
             Find.WindowStack.Add(new FloatMenu(list));
@@ -128,7 +129,7 @@ public partial class TabWorker_Bio_Humanlike
                .ToList()));
     }
 
-    private static void SetDevStage(Pawn pawn, DevelopmentalStage stage)
+    public static void SetDevStage(Pawn pawn, DevelopmentalStage stage)
     {
         var lifeStage = pawn.RaceProps.lifeStageAges.FirstOrDefault(lifeStage => lifeStage.def.developmentalStage == stage);
         if (lifeStage != null)
@@ -138,7 +139,7 @@ public partial class TabWorker_Bio_Humanlike
         }
     }
 
-    private static void SetGender(Pawn pawn, Gender gender)
+    public static void SetGender(Pawn pawn, Gender gender)
     {
         pawn.gender = gender;
         if (pawn.story.bodyType == BodyTypeDefOf.Female && gender == Gender.Male) pawn.story.bodyType = BodyTypeDefOf.Male;
@@ -146,7 +147,7 @@ public partial class TabWorker_Bio_Humanlike
         RecacheGraphics(pawn);
     }
 
-    private static void RecacheGraphics(Pawn pawn)
+    public static void RecacheGraphics(Pawn pawn)
     {
         LongEventHandler.ExecuteWhenFinished(delegate
         {
