@@ -234,7 +234,7 @@ public class Dialog_AppearanceEditor : Window
         if (colorCount > 0)
         {
             var rect = new Rect(inRect.xMax - 26, inRect.yMax - 26, 18, 18);
-            if (Widgets.ButtonImage(rect, TexPawnEditor.OpenColorPicker))
+            if (Widgets.ButtonImage(rect, Designator_Eyedropper.EyeDropperTex))
                 Find.WindowStack.Add(new Dialog_ColorPicker(color => setColor(color, selectedColorIndex), colorType, colors[selectedColorIndex]));
 
             for (var i = 0; i < colorCount; i++)
