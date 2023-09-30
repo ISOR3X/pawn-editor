@@ -167,4 +167,7 @@
     <PawnEditor.DistanceFromColony>Distance from colony</PawnEditor.DistanceFromColony>
     <PawnEditor.DistanceFromColony.Calculate>Calculate distance from colony</PawnEditor.DistanceFromColony.Calculate>
     <PawnEditor.Hediff>hediff</PawnEditor.Hediff>
+    <PawnEditor.TraitDisallowedByKind>Trait {0} is not allowed on {1}.</PawnEditor.TraitDisallowedByKind>
+    <PawnEditor.TraitConflicts>Trait {0} conflicts with trait {1}.</PawnEditor.TraitConflicts>
+    <PawnEditor.TraitWorkDisabled>{0} can't do {1}, which is required by {2}.</PawnEditor.TraitWorkDisabled>
 </LanguageData>

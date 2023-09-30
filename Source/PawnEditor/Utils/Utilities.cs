@@ -7,6 +7,7 @@ namespace PawnEditor;
 public static class Utilities
 {
     public static bool SubMenuOpen = false;
+
     public static void Set<T>(this List<T> list, int index, T item)
     {
         while (list.Count <= index) list.Add(default);
@@ -36,4 +37,6 @@ public static class Utilities
     public static Dictionary<TKey, TResult>
         SelectValues<TKey, TSource, TResult>(this Dictionary<TKey, TSource> source, Func<TKey, TSource, TResult> selector) =>
         source.Select(kv => new KeyValuePair<TKey, TResult>(kv.Key, selector(kv.Key, kv.Value))).ToDictionary(kv => kv.Key, kv => kv.Value);
+
+    public static bool NotNullAndAny<T>(this IEnumerable<T> source, Func<T, bool> predicate) => source != null && source.Any(predicate);
 }
