@@ -150,7 +150,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         Widgets.EndScrollView();
 
         // Free BodyPartGroups label
-        inRect.yMin += 8f;
+        inRect.yMin += 4f;
         var occupiedGroups = occupiableGroupsDefs.Where(bp => CurPawn.apparel.WornApparel.Any(a => a.def.apparel.bodyPartGroups.Contains(bp)));
         var allGroups = occupiableGroupsDefs;
         var freeGroups = allGroups.Except(occupiedGroups);
@@ -161,8 +161,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         using (new TextBlock(GameFont.Tiny))
             Widgets.Label(labelRect, label.Truncate(inRect.width, truncateCache).Colorize(ColoredText.SubtleGrayColor));
         TooltipHandler.TipRegion(labelRect, label);
-
-
+        
         inRect.TakeTopPart(16f);
     }
 

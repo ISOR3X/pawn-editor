@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -62,6 +63,12 @@ public class Dialog_AppearanceEditor : Window
         doCloseX = false;
         doCloseButton = false;
         closeOnCancel = false;
+
+        forcePause = true;
+        absorbInputAroundWindow = true;
+        closeOnAccept = false;
+        closeOnCancel = true;
+        forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
     }
 
     public override float Margin => 8;
@@ -119,6 +126,7 @@ public class Dialog_AppearanceEditor : Window
 
     public override void DoWindowContents(Rect inRect)
     {
+        Widgets.BeginGroup(inRect);
         using (new TextBlock(GameFont.Medium))
         {
             var rect = inRect.TakeTopPart(Text.LineHeight * 2.5f);
@@ -134,97 +142,104 @@ public class Dialog_AppearanceEditor : Window
             }
         }
 
-        DrawBottomButtons(inRect.TakeBottomPart(50));
-        DoLeftSection(inRect.TakeLeftPart(170).ContractedBy(6, 0));
-
-        mainTabs.Clear();
-        mainTabs.Add(new("PawnEditor.Shape".Translate(), () => mainTab = MainTab.Shape, mainTab == MainTab.Shape));
-        mainTabs.Add(new("Hair".Translate().CapitalizeFirst(), () => mainTab = MainTab.Hair, mainTab == MainTab.Hair));
-        mainTabs.Add(new("Tattoos".Translate(), () => mainTab = MainTab.Tattoos, mainTab == MainTab.Tattoos));
-        if (ModsConfig.BiotechActive)
-            mainTabs.Add(new("Xenotype".Translate(), () => mainTab = MainTab.Xenotype, mainTab == MainTab.Xenotype));
-
-        Widgets.DrawMenuSection(inRect);
-        TabDrawer.DrawTabs(inRect, mainTabs);
-        inRect.yMin += 40;
-
-        switch (mainTab)
+        using (new TextBlock(GameFont.Small))
         {
-            case MainTab.Shape:
-                shapeTabs.Clear();
-                shapeTabs.Add(new("PawnEditor.Body".Translate(), () => shapeTab = ShapeTab.Body, shapeTab == ShapeTab.Body));
-                shapeTabs.Add(new("PawnEditor.Head".Translate().CapitalizeFirst(), () => shapeTab = ShapeTab.Head, shapeTab == ShapeTab.Head));
-                Widgets.DrawMenuSection(inRect);
-                TabDrawer.DrawTabs(inRect, shapeTabs);
-                switch (shapeTab)
-                {
-                    case ShapeTab.Body:
-                        DoIconOptions(inRect.ContractedBy(5), DefDatabase<BodyTypeDef>.AllDefsListForReading, def =>
-                            {
-                                pawn.story.bodyType = def;
-                                TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                            }, def => TexPawnEditor.BodyTypeIcons[def], def => pawn.story.bodyType == def, 1, new[] { pawn.story.SkinColorBase },
-                            (color, i) => pawn.story.SkinColorBase = color, ColorType.Misc, DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
-                        break;
-                    case ShapeTab.Head:
-                        DoIconOptions(inRect.ContractedBy(5), DefDatabase<HeadTypeDef>.AllDefsListForReading, def =>
-                            {
-                                pawn.story.headType = def;
-                                TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                            }, def => def.GetGraphic(pawn.story.SkinColor, false, pawn.story.SkinColorOverriden).MatSouth.mainTexture,
-                            def => pawn.story.headType == def, 1, new[] { pawn.story.SkinColorBase },
-                            (color, i) => pawn.story.SkinColorBase = color, ColorType.Misc, DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+            DrawBottomButtons(inRect.TakeBottomPart(50));
+            DoLeftSection(inRect.TakeLeftPart(170).ContractedBy(6, 0));
 
-                break;
-            case MainTab.Hair:
-                DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefsListForReading, def =>
+            mainTabs.Clear();
+            mainTabs.Add(new("PawnEditor.Shape".Translate(), () => mainTab = MainTab.Shape, mainTab == MainTab.Shape));
+            mainTabs.Add(new("Hair".Translate().CapitalizeFirst(), () => mainTab = MainTab.Hair, mainTab == MainTab.Hair));
+            mainTabs.Add(new("Tattoos".Translate(), () => mainTab = MainTab.Tattoos, mainTab == MainTab.Tattoos));
+            if (ModsConfig.BiotechActive)
+                mainTabs.Add(new("Xenotype".Translate(), () => mainTab = MainTab.Xenotype, mainTab == MainTab.Xenotype));
+
+            Widgets.DrawMenuSection(inRect);
+            TabDrawer.DrawTabs(inRect, mainTabs, maxTabWidth: 400f);
+            inRect.yMin += 40;
+
+            switch (mainTab)
+            {
+                case MainTab.Shape:
+                    shapeTabs.Clear();
+                    shapeTabs.Add(new("PawnEditor.Body".Translate(), () => shapeTab = ShapeTab.Body, shapeTab == ShapeTab.Body));
+                    shapeTabs.Add(new("PawnEditor.Head".Translate().CapitalizeFirst(), () => shapeTab = ShapeTab.Head, shapeTab == ShapeTab.Head));
+                    Widgets.DrawMenuSection(inRect);
+                    TabDrawer.DrawTabs(inRect, shapeTabs);
+                    switch (shapeTab)
                     {
-                        pawn.story.hairDef = def;
-                        TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                    }, def => def.Icon,
-                    def => pawn.story.hairDef == def, 1, new[] { pawn.story.HairColor },
-                    (color, i) => pawn.story.HairColor = color, ColorType.Hair,
-                    DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
-                break;
-            case MainTab.Tattoos:
-                shapeTabs.Clear();
-                shapeTabs.Add(new("PawnEditor.Body".Translate(), () => shapeTab = ShapeTab.Body, shapeTab == ShapeTab.Body));
-                shapeTabs.Add(new("PawnEditor.Head".Translate().CapitalizeFirst(), () => shapeTab = ShapeTab.Head, shapeTab == ShapeTab.Head));
-                Widgets.DrawMenuSection(inRect);
-                TabDrawer.DrawTabs(inRect, shapeTabs);
-                switch (shapeTab)
-                {
-                    case ShapeTab.Body:
-                        DoIconOptions(inRect.ContractedBy(5), DefDatabase<TattooDef>.AllDefsListForReading, def =>
-                            {
-                                pawn.style.BodyTattoo = def;
-                                TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                            }, def => def.Icon,
-                            def => pawn.style.BodyTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
-                        break;
-                    case ShapeTab.Head:
-                        DoIconOptions(inRect.ContractedBy(5), DefDatabase<TattooDef>.AllDefsListForReading, def =>
-                            {
-                                pawn.style.FaceTattoo = def;
-                                TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                            }, def => def.Icon,
-                            def => pawn.style.FaceTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                        case ShapeTab.Body:
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<BodyTypeDef>.AllDefsListForReading, def =>
+                                {
+                                    pawn.story.bodyType = def;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, def => TexPawnEditor.BodyTypeIcons[def], def => pawn.story.bodyType == def, 1, new[] { pawn.story.SkinColorBase },
+                                (color, i) => pawn.story.SkinColorBase = color, ColorType.Misc, DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
+                            break;
+                        case ShapeTab.Head:
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<HeadTypeDef>.AllDefsListForReading, def =>
+                                {
+                                    pawn.story.headType = def;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, def => def.GetGraphic(pawn.story.SkinColor, false, pawn.story.SkinColorOverriden).MatSouth.mainTexture,
+                                def => pawn.story.headType == def, 1, new[] { pawn.story.SkinColorBase },
+                                (color, i) => pawn.story.SkinColorBase = color, ColorType.Misc, DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
-                break;
-            case MainTab.Xenotype:
-                DoXenotypeOptions(inRect.ContractedBy(5));
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+                    break;
+                case MainTab.Hair:
+                    inRect.yMin -= TabDrawer.TabHeight;
+                    DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefsListForReading, def =>
+                        {
+                            pawn.story.hairDef = def;
+                            TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                        }, def => def.Icon,
+                        def => pawn.story.hairDef == def, 1, new[] { pawn.story.HairColor },
+                        (color, i) => pawn.story.HairColor = color, ColorType.Hair,
+                        DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
+                    break;
+                case MainTab.Tattoos:
+                    shapeTabs.Clear();
+                    shapeTabs.Add(new("PawnEditor.Body".Translate(), () => shapeTab = ShapeTab.Body, shapeTab == ShapeTab.Body));
+                    shapeTabs.Add(new("PawnEditor.Head".Translate().CapitalizeFirst(), () => shapeTab = ShapeTab.Head, shapeTab == ShapeTab.Head));
+                    Widgets.DrawMenuSection(inRect);
+                    TabDrawer.DrawTabs(inRect, shapeTabs);
+                    switch (shapeTab)
+                    {
+                        case ShapeTab.Body:
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
+                                {
+                                    pawn.style.BodyTattoo = def;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, def => def.Icon,
+                                def => pawn.style.BodyTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
+                            break;
+                        case ShapeTab.Head:
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
+                                {
+                                    pawn.style.FaceTattoo = def;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, def => def.Icon,
+                                def => pawn.style.FaceTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    break;
+                case MainTab.Xenotype:
+                    inRect.yMin -= TabDrawer.TabHeight;
+                    DoXenotypeOptions(inRect.ContractedBy(5));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
+
+        Widgets.EndGroup();
     }
 
     private void DoIconOptions<T>(Rect inRect, List<T> options, Action<T> onSelected, Func<T, Texture> getIcon, Func<T, bool> isSelected, int colorCount,
@@ -271,12 +286,23 @@ public class Dialog_AppearanceEditor : Window
         for (var i = 0; i < options.Count; i++)
         {
             var option = options[i];
-            var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(2);
+            var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(6);
             Widgets.DrawHighlight(rect);
+
+            if (typeof(Def).IsAssignableFrom(option.GetType()))
+            {
+                var def = option as Def;
+                if (Mouse.IsOver(rect))
+                {
+                    Widgets.DrawLightHighlight(rect);
+                    if (def.LabelCap != null) TooltipHandler.TipRegion(rect, def.LabelCap);
+                }
+            }
+
             if (isSelected(option)) Widgets.DrawBox(rect);
             if (Widgets.ButtonInvisible(rect)) onSelected(option);
 
-            GUI.DrawTexture(rect.ContractedBy(4), getIcon(option));
+            GUI.DrawTexture(rect.ContractedBy(2), getIcon(option));
         }
 
         Widgets.EndScrollView();
@@ -335,6 +361,8 @@ public class Dialog_AppearanceEditor : Window
                     }
             }
 
+            // ToDo: Apply correct gene background texture according to gene category.
+            GUI.DrawTexture(rect.ContractedBy(4), GeneUIUtility.GeneBackground_Xenogene.Texture);
             GUI.color = option.IconColor;
             GUI.DrawTexture(rect.ContractedBy(4), option.Icon);
             GUI.color = Color.white;
@@ -342,82 +370,142 @@ public class Dialog_AppearanceEditor : Window
             TooltipHandler.TipRegion(rect, option.LabelCap);
         }
 
+        inRect.yMin += 8f;
         Widgets.EndGroup();
     }
 
     private void DoLeftSection(Rect inRect)
     {
+        inRect.yMin -= 30f;
         PawnEditor.DrawPawnPortrait(inRect.TakeTopPart(170));
-        var buttonsRect = inRect.TakeTopPart(140);
+        inRect.yMin += 8f;
+        var buttonsRect = inRect.TakeTopPart(110);
         Widgets.DrawHighlight(buttonsRect);
-        buttonsRect = buttonsRect.ContractedBy(6);
-        var devStageRect = buttonsRect.TopHalf().LeftHalf().ContractedBy(2);
-        var text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
-        if (Mouse.IsOver(devStageRect))
-        {
-            Widgets.DrawHighlight(devStageRect);
-            if (Find.WindowStack.FloatMenu == null)
-                TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
-        }
+        buttonsRect = buttonsRect.ContractedBy(4);
 
-        Widgets.Label(devStageRect.BottomHalf(), text);
-        if (Widgets.ButtonImageWithBG(devStageRect.TopHalf(), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+        using (new TextBlock(TextAnchor.MiddleCenter))
         {
-            var options = new List<FloatMenuOption>
+            var sexRect = buttonsRect.TopHalf().LeftHalf().ContractedBy(2);
+            Widgets.DrawHighlightIfMouseover(sexRect);
+
+            if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f))
+                && pawn.kindDef.fixedGender == null && pawn.RaceProps.hasGenders)
             {
-                new("Adult".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Adult),
-                    DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
-                new("Child".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Child),
-                    DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
-                new("Baby".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Baby),
-                    DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
-            };
-            Find.WindowStack.Add(new FloatMenu(options));
-        }
-
-        var sexRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
-        Widgets.DrawHighlightIfMouseover(sexRect);
-        Widgets.Label(sexRect.BottomHalf(), "PawnEditor.Sex".Translate());
-        if (Widgets.ButtonImageWithBG(sexRect.TopHalf(), pawn.gender.GetIcon(), new Vector2(22f, 22f)) && pawn.kindDef.fixedGender == null
-         && pawn.RaceProps.hasGenders)
-        {
-            var list = new List<FloatMenuOption>
-            {
-                new("Female".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetGender(pawn, Gender.Female), GenderUtility.FemaleIcon,
-                    Color.white),
-                new("Male".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetGender(pawn, Gender.Male), GenderUtility.MaleIcon, Color.white)
-            };
-
-            Find.WindowStack.Add(new FloatMenu(list));
-        }
-
-        var bodyRect = buttonsRect.BottomHalf().RightHalf().ContractedBy(2);
-        Widgets.DrawHighlightIfMouseover(bodyRect);
-        Widgets.Label(bodyRect.BottomHalf(), "PawnEditor.Shape".Translate());
-        if (Widgets.ButtonImageWithBG(bodyRect.TopHalf(), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType],
-                new Vector2(22f, 22f)))
-            Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
+                var list = new List<FloatMenuOption>
                 {
-                    pawn.story.bodyType = bodyType;
-                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                }, TexPawnEditor.BodyTypeIcons[bodyType], Color.white))
-               .ToList()));
+                    new("Female".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetGender(pawn, Gender.Female), GenderUtility.FemaleIcon,
+                        Color.white),
+                    new("Male".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetGender(pawn, Gender.Male), GenderUtility.MaleIcon, Color.white)
+                };
 
-        inRect.yMin += 2;
+                Find.WindowStack.Add(new FloatMenu(list));
+            }
+
+            Widgets.Label(sexRect, "PawnEditor.Sex".Translate());
+
+            var devStageRect = buttonsRect.TopHalf().RightHalf().ContractedBy(2);
+            var text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
+            if (Mouse.IsOver(devStageRect))
+            {
+                Widgets.DrawHighlight(devStageRect);
+                if (Find.WindowStack.FloatMenu == null)
+                    TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
+            }
+
+
+            if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+            {
+                var options = new List<FloatMenuOption>
+                {
+                    new("Adult".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Adult),
+                        DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
+                    new("Child".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Child),
+                        DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
+                    new("Baby".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Baby),
+                        DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
+                };
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            Widgets.Label(devStageRect, text);
+
+            var xenotypeRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
+            text = pawn.genes.XenotypeLabelCap;
+            if (Mouse.IsOver(xenotypeRect))
+            {
+                Widgets.DrawHighlight(xenotypeRect);
+                if (Find.WindowStack.FloatMenu == null)
+                    TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
+            }
+
+
+            if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
+            {
+                var list = new List<FloatMenuOption>();
+                foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
+                {
+                    var xenotype = item;
+                    list.Add(new(xenotype.LabelCap,
+                        () => pawn.genes.SetXenotype(xenotype), xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
+                        r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
+                        r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
+                }
+
+                foreach (var customXenotype in CharacterCardUtility.CustomXenotypes)
+                {
+                    var customInner = customXenotype;
+                    list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
+                        delegate
+                        {
+                            if (!pawn.IsBaseliner()) pawn.genes.SetXenotype(XenotypeDefOf.Baseliner);
+                            pawn.genes.xenotypeName = customXenotype.name;
+                            pawn.genes.iconDef = customXenotype.IconDef;
+                            foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
+                        }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
+                        {
+                            if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
+                            {
+                                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), delegate
+                                {
+                                    var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
+                                    if (File.Exists(path))
+                                    {
+                                        File.Delete(path);
+                                        CharacterCardUtility.cachedCustomXenotypes = null;
+                                    }
+                                }, true));
+                                return true;
+                            }
+
+                            return false;
+                        }, extraPartRightJustified: true));
+                }
+
+                list.Add(new("XenotypeEditor".Translate() + "...",
+                    delegate { Find.WindowStack.Add(new Dialog_CreateXenotype(-1, delegate { CharacterCardUtility.cachedCustomXenotypes = null; })); }));
+
+                Find.WindowStack.Add(new FloatMenu(list));
+            }
+
+            Widgets.Label(xenotypeRect, text);
+        }
+
+        inRect.yMin += 6;
 
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "DominantStyle".Translate().CapitalizeFirst());
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), "Default".Translate()))
             Messages.Message("PawnEditor.NoStyles".Translate(), MessageTypeDefOf.RejectInput, false);
 
+        inRect.yMin += 4;
 
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "Source".Translate().CapitalizeFirst());
 
-        if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate()))
+        if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate().CapitalizeFirst()))
             Find.WindowStack.Add(new FloatMenu(LoadedModManager.RunningMods.Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
-               .Prepend(new(
+                .Prepend(new(
                     "All".Translate(), () => sourceFilter = null))
-               .ToList()));
+                .ToList()));
 
         if (ModsConfig.BiotechActive)
             Widgets.CheckboxLabeled(inRect.TakeBottomPart(50), "PawnEditor.IgnoreXenotype".Translate(), ref ignoreXenotype);
@@ -434,7 +522,11 @@ public class Dialog_AppearanceEditor : Window
             PawnEditor.GotoTab(PawnEditorDefOf.Gear);
         }
 
-        if (Widgets.ButtonText(inRect.TakeRightPart(210).ContractedBy(5), "Accept".Translate())) OnAcceptKeyPressed();
+        if (Widgets.ButtonText(inRect.TakeRightPart(210).ContractedBy(5), "Accept".Translate()))
+        {
+            OnAcceptKeyPressed();
+            Close();
+        }
 
         if (Widgets.ButtonText(new Rect(0, 0, 200, 40).CenteredOnXIn(inRect).CenteredOnYIn(inRect), "Randomize".Translate()))
             Find.WindowStack.Add(new FloatMenu(new()
@@ -468,6 +560,7 @@ public class Dialog_AppearanceEditor : Window
 
     private enum ShapeTab
     {
-        Body, Head
+        Body,
+        Head
     }
 }
