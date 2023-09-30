@@ -15,9 +15,10 @@ public static partial class PawnEditor
     {
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.SelectedFaction".Translate());
 
-        if (selectedFaction == null || (pregame && !selectedFaction.IsPlayer))
+        if (selectedFaction == null || (pregame && selectedFaction != Faction.OfPlayer))
         {
             selectedFaction = Faction.OfPlayer;
+            selectedPawn = null;
             RecachePawnList();
             CheckChangeTabGroup();
         }
@@ -25,14 +26,16 @@ public static partial class PawnEditor
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
         {
             // Reversed so player faction is at the top of the float menu.
-            Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse().Select(faction =>
+            Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
+               .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
                         selectedFaction = faction;
+                        selectedPawn = null;
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
-                .ToList()));
+               .ToList()));
             inRect.yMin += 2;
         }
 
@@ -52,7 +55,7 @@ public static partial class PawnEditor
             CheckChangeTabGroup();
         }
 
-        Rect labelRect = inRect.TakeTopPart(Text.LineHeight);
+        var labelRect = inRect.TakeTopPart(Text.LineHeight);
         labelRect.xMax += 12f;
         using (new TextBlock(GameFont.Tiny))
             Widgets.Label(labelRect, "PawnEditor.ClickFactionOverview".Translate().Colorize(ColoredText.SubtleGrayColor));
@@ -63,15 +66,15 @@ public static partial class PawnEditor
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30f), selectedCategory.LabelCapPlural()))
             Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
-                .Cast<PawnCategory>()
-                .Select(category =>
+               .Cast<PawnCategory>()
+               .Select(category =>
                     new FloatMenuOption(category.LabelCapPlural(), delegate
                     {
                         selectedCategory = category;
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }))
-                .ToList()));
+               .ToList()));
 
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn(selectedCategory);
 
@@ -130,6 +133,7 @@ public static partial class PawnEditor
     {
         void AddPawnKind(PawnKindDef pawnKind)
         {
+            Log.Message($"Generating {pawnKind} in {selectedFaction}");
             AddPawn(PawnGenerator.GeneratePawn(new(pawnKind, selectedFaction,
                 Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
                 forceGenerateNewPawn: true)), category);
@@ -145,9 +149,12 @@ public static partial class PawnEditor
         };
 
         if (category == PawnCategory.Humans)
-            list.Insert(0, new("PawnEditor.Add.PawnKind".Translate(), delegate { Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, PawnCategory.Humans)); }));
+            list.Insert(0,
+                new("PawnEditor.Add.PawnKind".Translate(), delegate { Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, PawnCategory.Humans)); }));
         else if (selectedCategory is PawnCategory.Animals or PawnCategory.Mechs)
-            list.Insert(0, new FloatMenuOption($"{"Add".Translate().CapitalizeFirst()} {selectedCategory.Label()}", delegate { Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, selectedCategory)); }));
+            list.Insert(0,
+                new($"{"Add".Translate().CapitalizeFirst()} {selectedCategory.Label()}",
+                    delegate { Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, selectedCategory)); }));
 
         list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));
 
@@ -158,7 +165,10 @@ public static partial class PawnEditor
     {
         if (Pregame)
             if (category == PawnCategory.Humans)
+            {
                 Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
+                Find.GameInitData.startingPossessions.Add(addedPawn, new());
+            }
             else
                 StartingThingsManager.AddPawn(category, addedPawn);
         else
@@ -168,5 +178,7 @@ public static partial class PawnEditor
             addedPawn.teleporting = false;
             PawnList.UpdateCache(selectedFaction, category);
         }
+
+        Select(addedPawn);
     }
 }

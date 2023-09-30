@@ -29,6 +29,8 @@ public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
     {
         base.PreOpen();
         PawnEditor.Pregame = true;
+        TabWorker<Pawn>.Notify_OpenedDialog();
+        TabWorker<Faction>.Notify_OpenedDialog();
     }
 
     public override void DoWindowContents(Rect inRect)
@@ -46,6 +48,8 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
         PawnEditor.RecachePawnList();
         PawnEditor.CheckChangeTabGroup();
         ColonyInventory.RecacheItems();
+        TabWorker<Pawn>.Notify_OpenedDialog();
+        TabWorker<Faction>.Notify_OpenedDialog();
     }
 
     public override void PostClose()

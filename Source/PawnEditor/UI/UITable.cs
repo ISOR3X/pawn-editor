@@ -352,4 +352,10 @@ public abstract class TabWorker_Table<T> : TabWorker<T>
         base.Initialize();
         table ??= new(GetHeadings(), GetRows);
     }
+
+    protected override void Notify_Open()
+    {
+        base.Notify_Open();
+        table.ClearCache();
+    }
 }

@@ -48,6 +48,7 @@ public static class TabGroupDefOf
 
 public abstract class TabWorker<T>
 {
+    private static readonly List<TabWorker<T>> tabWorkers = new();
     public abstract void DrawTabContents(Rect rect, T pawn);
 
     public virtual IEnumerable<SaveLoadItem> GetSaveLoadItems(T pawn)
@@ -60,7 +61,17 @@ public abstract class TabWorker<T>
         yield break;
     }
 
-    public virtual void Initialize() { }
+    public virtual void Initialize()
+    {
+        tabWorkers.Add(this);
+    }
+
+    protected virtual void Notify_Open() { }
+
+    public static void Notify_OpenedDialog()
+    {
+        foreach (var tabWorker in tabWorkers) tabWorker.Notify_Open();
+    }
 }
 
 public class TabDef : Def

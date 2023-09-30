@@ -171,6 +171,27 @@ public static partial class PawnEditor
         if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
         PawnList.UpdateCache(selectedFaction, selectedCategory);
         TabWorker_FactionOverview.RecachePawns(selectedFaction);
+        if (Pregame)
+        {
+            if (selectedCategory == PawnCategory.Humans)
+            {
+                if (selectedPawn == null || !Find.GameInitData.startingAndOptionalPawns.Contains(selectedPawn))
+                    selectedPawn = Find.GameInitData.startingAndOptionalPawns.FirstOrDefault();
+            }
+            else
+            {
+                var pawns = StartingThingsManager.GetPawns(selectedCategory);
+                if (selectedPawn == null || !pawns.Contains(selectedPawn))
+                    selectedPawn = pawns.FirstOrDefault();
+            }
+        }
+        else
+        {
+            var (pawns, _, _) = PawnList.GetLists();
+            if (selectedPawn == null || !pawns.Contains(selectedPawn))
+                selectedPawn = pawns.FirstOrDefault();
+        }
+
         PortraitsCache.Clear();
         ResetPoints();
     }

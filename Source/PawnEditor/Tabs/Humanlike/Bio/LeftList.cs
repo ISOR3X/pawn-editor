@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,7 +8,6 @@ namespace PawnEditor;
 
 public partial class TabWorker_Bio_Humanlike
 {
-
     private void DoLeft(Rect inRect, Pawn pawn)
     {
         if (leftLastHeight == 0) leftLastHeight = inRect.height;
@@ -16,7 +16,7 @@ public partial class TabWorker_Bio_Humanlike
         var add = "Add".Translate().CapitalizeFirst();
         var headerRect = viewRect.TakeTopPart(Text.LineHeight);
         Widgets.Label(headerRect, "Traits".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { Find.WindowStack.Add(new Dialog_SelectPawnTrait(pawn)); }
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new Dialog_SelectPawnTrait(pawn));
 
         var traitRect = viewRect.TakeTopPart(traitsLastHeight + 14).ContractedBy(7);
         var traits = pawn.story.traits.allTraits;
@@ -38,7 +38,7 @@ public partial class TabWorker_Bio_Humanlike
                     if (trait.Suppressed) GUI.color = ColoredText.SubtleGrayColor;
                     else if (trait.sourceGene != null) GUI.color = ColoredText.GeneColor;
 
-                    Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), trait.LabelCap);
+                    Widgets.Label(new(r.x + 5f, r.y, r.width - 10f, r.height), trait.LabelCap);
                     if (Mouse.IsOver(r))
                     {
                         var trLocal = trait;
@@ -75,7 +75,7 @@ public partial class TabWorker_Bio_Humanlike
                     GUI.color = CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, tag);
                     if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
 
-                    Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), tag.LabelTranslated().CapitalizeFirst());
+                    Widgets.Label(new(r.x + 5f, r.y, r.width - 10f, r.height), tag.LabelTranslated().CapitalizeFirst());
                     if (Mouse.IsOver(r))
                     {
                         var tagLocal = tag;
@@ -92,7 +92,7 @@ public partial class TabWorker_Bio_Humanlike
 
         headerRect = viewRect.TakeTopPart(Text.LineHeight);
         Widgets.Label(headerRect, "Abilities".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { Find.WindowStack.Add(new Dialog_SelectPawnAbility(pawn)); }
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new Dialog_SelectPawnAbility(pawn));
 
         var abilities = (from a in pawn.abilities.abilities
             orderby a.def.level, a.def.EntropyGain
@@ -152,11 +152,11 @@ public partial class TabWorker_Bio_Humanlike
             {
                 var relationRect = relationsRect.TakeTopPart(Text.LineHeight + 4);
                 Widgets.DrawHighlightIfMouseover(relationRect);
-                if (index % 2 == 1) {Widgets.DrawLightHighlight(relationRect);}
-                string str =
+                if (index % 2 == 1) Widgets.DrawLightHighlight(relationRect);
+                var str =
                     (relation.def.GetGenderSpecificLabelCap(relation.otherPawn) + ": ").Colorize(ColoredText
-                        .SubtleGrayColor)
-                    + relation.otherPawn.Name.ToStringFull;
+                       .SubtleGrayColor)
+                  + relation.otherPawn.Name.ToStringFull;
                 using (new TextBlock(TextAnchor.MiddleLeft))
                     Widgets.Label(relationRect.ContractedBy(4f, 0f),
                         str.Truncate(160f, truncateCache));
@@ -173,6 +173,9 @@ public partial class TabWorker_Bio_Humanlike
 
                 if (Mouse.IsOver(relationRect) && Widgets.ButtonImage(relationRect.RightPartPixels(relationRect.height).ContractedBy(4), TexButton.DeleteX))
                     pawn.relations.RemoveDirectRelation(relation);
+
+                TooltipHandler.TipRegion(relationRect, () => GetPawnRowTooltip(relation, pawn),
+                    relation.otherPawn.thingIDNumber * 13 + pawn.thingIDNumber);
                 index++;
             }
         }
@@ -180,5 +183,66 @@ public partial class TabWorker_Bio_Humanlike
         leftLastHeight = Text.LineHeight * 4 + traitsLastHeight + incapableLastHeight + abilitiesLastHeight + relationsHeight + 56;
 
         Widgets.EndScrollView();
+    }
+
+    private static string GetPawnRowTooltip(DirectPawnRelation relation, Pawn selPawnForSocialInfo)
+    {
+        var stringBuilder = new StringBuilder();
+        if (relation.otherPawn.RaceProps.Humanlike && selPawnForSocialInfo.RaceProps.Humanlike)
+        {
+            stringBuilder.AppendLine(selPawnForSocialInfo.relations.OpinionExplanation(relation.otherPawn));
+            stringBuilder.AppendLine();
+            var text = SocialCardUtility.RomanceExplanation(selPawnForSocialInfo, relation.otherPawn);
+            if (!text.NullOrEmpty()) stringBuilder.AppendLine(text);
+
+            stringBuilder.Append(("SomeonesOpinionOfMe".Translate(relation.otherPawn.LabelShort) + ": ").Colorize(ColoredText.TipSectionTitleColor));
+            stringBuilder.Append(relation.otherPawn.relations.OpinionOf(selPawnForSocialInfo).ToStringWithSign());
+        }
+        else
+        {
+            stringBuilder.Append(relation.otherPawn.LabelCapNoCount);
+            var pawnSituationLabel = SocialCardUtility.GetPawnSituationLabel(relation.otherPawn, selPawnForSocialInfo);
+            if (!pawnSituationLabel.NullOrEmpty())
+                stringBuilder.AppendLine(" (" + pawnSituationLabel + ")");
+            else
+                stringBuilder.AppendLine();
+
+            stringBuilder.Append(" - " + GetRelationsString(relation, selPawnForSocialInfo));
+        }
+
+        if (Prefs.DevMode)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("(debug) Compatibility: " + selPawnForSocialInfo.relations.CompatibilityWith(relation.otherPawn).ToString("F2"));
+            stringBuilder.Append("(debug) RomanceChanceFactor: "
+                               + selPawnForSocialInfo.relations.SecondaryRomanceChanceFactor(relation.otherPawn).ToString("F2"));
+        }
+
+        return stringBuilder.ToString();
+    }
+
+    private static string GetRelationsString(DirectPawnRelation relation, Pawn selPawnForSocialInfo)
+    {
+        var text = "";
+        var relations = selPawnForSocialInfo.GetRelations(relation.otherPawn).ToList();
+        if (relations.Count != 0)
+        {
+            for (var i = 0; i < relations.Count; i++)
+            {
+                var pawnRelationDef = relations[i];
+                if (!text.NullOrEmpty())
+                    text = text + ", " + pawnRelationDef.GetGenderSpecificLabel(relation.otherPawn);
+                else
+                    text = pawnRelationDef.GetGenderSpecificLabelCap(relation.otherPawn);
+            }
+
+            return text;
+        }
+
+        if (selPawnForSocialInfo.relations.OpinionOf(relation.otherPawn) < -20) return "Rival".Translate();
+
+        if (selPawnForSocialInfo.relations.OpinionOf(relation.otherPawn) > 20) return "Friend".Translate();
+
+        return "Acquaintance".Translate();
     }
 }
