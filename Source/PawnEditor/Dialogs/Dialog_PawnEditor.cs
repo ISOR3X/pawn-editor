@@ -16,7 +16,19 @@ public abstract class Dialog_PawnEditor : Window
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
     }
 
+    protected abstract bool Pregame { get; }
+
     public override Vector2 InitialSize => Page.StandardSize;
+
+    public override void PreOpen()
+    {
+        base.PreOpen();
+        PawnEditor.Pregame = Pregame;
+        PawnEditor.RecachePawnList();
+        PawnEditor.CheckChangeTabGroup();
+        TabWorker<Pawn>.Notify_OpenedDialog();
+        TabWorker<Faction>.Notify_OpenedDialog();
+    }
 }
 
 public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
@@ -25,31 +37,22 @@ public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
 
     public Dialog_PawnEditor_Pregame(Action doNext) => this.doNext = doNext;
 
-    public override void PreOpen()
-    {
-        base.PreOpen();
-        PawnEditor.Pregame = true;
-        TabWorker<Pawn>.Notify_OpenedDialog();
-        TabWorker<Faction>.Notify_OpenedDialog();
-    }
+    protected override bool Pregame => false;
 
     public override void DoWindowContents(Rect inRect)
     {
-        PawnEditor.DoUI(inRect, () => Close(), doNext, true);
+        PawnEditor.DoUI(inRect, () => Close(), doNext);
     }
 }
 
 public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
 {
+    protected override bool Pregame => true;
+
     public override void PreOpen()
     {
         base.PreOpen();
-        PawnEditor.Pregame = false;
-        PawnEditor.RecachePawnList();
-        PawnEditor.CheckChangeTabGroup();
         ColonyInventory.RecacheItems();
-        TabWorker<Pawn>.Notify_OpenedDialog();
-        TabWorker<Faction>.Notify_OpenedDialog();
     }
 
     public override void PostClose()
@@ -60,6 +63,6 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
 
     public override void DoWindowContents(Rect inRect)
     {
-        PawnEditor.DoUI(inRect, () => Close(), null, false);
+        PawnEditor.DoUI(inRect, () => Close(), null);
     }
 }

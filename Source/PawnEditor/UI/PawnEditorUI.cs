@@ -30,14 +30,13 @@ public static partial class PawnEditor
 
     public static bool Pregame;
 
-    public static void DoUI(Rect inRect, Action onClose, Action onNext, bool pregame)
+    public static void DoUI(Rect inRect, Action onClose, Action onNext)
     {
-        Pregame = pregame;
         var headerRect = inRect.TakeTopPart(50f);
         headerRect.xMax -= 10f;
         headerRect.yMax -= 20f;
         using (new TextBlock(GameFont.Medium))
-            Widgets.Label(headerRect, $"{(pregame ? "Create" : "PawnEditor.Edit")}Characters".Translate());
+            Widgets.Label(headerRect, $"{(Pregame ? "Create" : "PawnEditor.Edit")}Characters".Translate());
 
         if (ModsConfig.IdeologyActive)
         {
@@ -62,7 +61,7 @@ public static partial class PawnEditor
         Widgets.Label(rect3.TakeLeftPart(num), text4);
         using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(ColoredText.CurrencyColor));
 
-        DoBottomButtons(inRect.TakeBottomPart(Page.BottomButHeight), onClose, pregame
+        DoBottomButtons(inRect.TakeBottomPart(Page.BottomButHeight), onClose, Pregame
             ? onNext
             : () =>
             {
@@ -71,10 +70,10 @@ public static partial class PawnEditor
                        .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnList.GetTeleportOption(caravan, selectedPawn)))
                        .Append(PawnList.GetTeleportOption(Find.World, selectedPawn))
                        .ToList()));
-            }, pregame);
+            });
 
         inRect.yMin -= 10f;
-        DoLeftPanel(inRect.TakeLeftPart(134), pregame);
+        DoLeftPanel(inRect.TakeLeftPart(134), Pregame);
         inRect.xMin += 12f;
         inRect = inRect.ContractedBy(6);
         inRect.TakeTopPart(40);
@@ -88,12 +87,12 @@ public static partial class PawnEditor
                 curTab.DrawTabContents(inRect, selectedPawn);
     }
 
-    public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton, bool pregame)
+    public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton)
     {
         Text.Font = GameFont.Small;
-        if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), pregame ? "Back".Translate() : "Close".Translate())) onLeftButton();
+        if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), Pregame ? "Back".Translate() : "Close".Translate())) onLeftButton();
 
-        if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())) onRightButton();
+        if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), Pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())) onRightButton();
 
         var randomRect = new Rect(Vector2.zero, Page.BottomButSize).CenteredOnXIn(inRect).CenteredOnYIn(inRect);
 
@@ -109,15 +108,15 @@ public static partial class PawnEditor
         buttonRect.x -= 5 + buttonRect.width;
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
-            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems(pregame).Select(item => item.MakeSaveOption()).ToList()));
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems().Select(item => item.MakeSaveOption()).ToList()));
 
         buttonRect.x += buttonRect.width * 2 + 10;
 
         if (Widgets.ButtonText(buttonRect, "Load".Translate()))
-            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems(pregame).Select(item => item.MakeLoadOption()).ToList()));
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems().Select(item => item.MakeLoadOption()).ToList()));
     }
 
-    private static IEnumerable<SaveLoadItem> GetSaveLoadItems(bool pregame)
+    private static IEnumerable<SaveLoadItem> GetSaveLoadItems()
     {
         if (showFactionInfo)
             yield return new SaveLoadItem<Faction>("PawnEditor.Selected".Translate(), selectedFaction, new()
@@ -130,7 +129,7 @@ public static partial class PawnEditor
                 LoadLabel = "PawnEditor.LoadPawn".Translate()
             });
 
-        if (pregame)
+        if (Pregame)
             yield return new SaveLoadItem<StartingThingsManager.StartingPreset>("PawnEditor.Selection".Translate(), new());
         else
             yield return new SaveLoadItem<Map>("PawnEditor.Colony".Translate(), Find.CurrentMap, new()
@@ -169,28 +168,18 @@ public static partial class PawnEditor
     {
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
         if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
-        PawnList.UpdateCache(selectedFaction, selectedCategory);
         TabWorker_FactionOverview.RecachePawns(selectedFaction);
+        List<Pawn> pawns;
         if (Pregame)
-        {
-            if (selectedCategory == PawnCategory.Humans)
-            {
-                if (selectedPawn == null || !Find.GameInitData.startingAndOptionalPawns.Contains(selectedPawn))
-                    selectedPawn = Find.GameInitData.startingAndOptionalPawns.FirstOrDefault();
-            }
-            else
-            {
-                var pawns = StartingThingsManager.GetPawns(selectedCategory);
-                if (selectedPawn == null || !pawns.Contains(selectedPawn))
-                    selectedPawn = pawns.FirstOrDefault();
-            }
-        }
+            pawns = selectedCategory == PawnCategory.Humans ? Find.GameInitData.startingAndOptionalPawns : StartingThingsManager.GetPawns(selectedCategory);
         else
         {
-            var (pawns, _, _) = PawnList.GetLists();
-            if (selectedPawn == null || !pawns.Contains(selectedPawn))
-                selectedPawn = pawns.FirstOrDefault();
+            PawnList.UpdateCache(selectedFaction, selectedCategory);
+            (pawns, _, _) = PawnList.GetLists();
         }
+
+        if (selectedPawn == null || !pawns.Contains(selectedPawn))
+            selectedPawn = pawns.FirstOrDefault();
 
         PortraitsCache.Clear();
         ResetPoints();
