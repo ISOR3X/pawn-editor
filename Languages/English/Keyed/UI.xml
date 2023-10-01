@@ -59,6 +59,7 @@
     <PawnEditor.BodyType>Body type</PawnEditor.BodyType>
     <PawnEditor.Voice>Voice</PawnEditor.Voice>
     <PawnEditor.Fur>Skin (fur)</PawnEditor.Fur>
+    <PawnEditor.XenotypeForbbiden>Not allowed due to Xenotype.</PawnEditor.XenotypeForbbiden>
 
     <!-- Ideology and Groups -->
     <PawnEditor.SelectIdeo>Select ideology</PawnEditor.SelectIdeo>

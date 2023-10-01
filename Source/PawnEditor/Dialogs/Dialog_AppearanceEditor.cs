@@ -155,7 +155,7 @@ public class Dialog_AppearanceEditor : Window
                 mainTabs.Add(new("Xenotype".Translate(), () => mainTab = MainTab.Xenotype, mainTab == MainTab.Xenotype));
 
             Widgets.DrawMenuSection(inRect);
-            TabDrawer.DrawTabs(inRect, mainTabs, maxTabWidth: 400f);
+            TabDrawer.DrawTabs(inRect, mainTabs, 400f);
             inRect.yMin += 40;
 
             switch (mainTab)
@@ -173,8 +173,9 @@ public class Dialog_AppearanceEditor : Window
                                 {
                                     pawn.story.bodyType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                                }, def => TexPawnEditor.BodyTypeIcons[def], def => pawn.story.bodyType == def, 1, new[] { pawn.story.SkinColorBase },
-                                (color, i) => pawn.story.SkinColorBase = color, ColorType.Misc, DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
+                                }, def => TexPawnEditor.BodyTypeIcons[def], def => pawn.story.bodyType == def, 1, new[] { pawn.story.SkinColor },
+                                (color, i) => pawn.story.skinColorOverride = color, ColorType.Misc,
+                                DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
                             break;
                         case ShapeTab.Head:
                             DoIconOptions(inRect.ContractedBy(5), DefDatabase<HeadTypeDef>.AllDefsListForReading, def =>
@@ -182,8 +183,9 @@ public class Dialog_AppearanceEditor : Window
                                     pawn.story.headType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, def => def.GetGraphic(pawn.story.SkinColor, false, pawn.story.SkinColorOverriden).MatSouth.mainTexture,
-                                def => pawn.story.headType == def, 1, new[] { pawn.story.SkinColorBase },
-                                (color, i) => pawn.story.SkinColorBase = color, ColorType.Misc, DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
+                                def => pawn.story.headType == def, 1, new[] { pawn.story.SkinColor },
+                                (color, i) => pawn.story.skinColorOverride = color, ColorType.Misc,
+                                DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -210,7 +212,8 @@ public class Dialog_AppearanceEditor : Window
                     switch (shapeTab)
                     {
                         case ShapeTab.Body:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
+                            DoIconOptions(inRect.ContractedBy(5),
+                                DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
                                 {
                                     pawn.style.BodyTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -218,7 +221,8 @@ public class Dialog_AppearanceEditor : Window
                                 def => pawn.style.BodyTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
                             break;
                         case ShapeTab.Head:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
+                            DoIconOptions(inRect.ContractedBy(5),
+                                DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
                                 {
                                     pawn.style.FaceTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -346,9 +350,11 @@ public class Dialog_AppearanceEditor : Window
         {
             var option = options[i];
             var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(2);
+            var enabled = ignoreXenotype || (pawn.genes.Xenotype?.AllGenes.Contains(option) ?? true)
+                                         || (pawn.genes.CustomXenotype?.genes.Contains(option) ?? false);
             Widgets.DrawHighlight(rect);
             if (pawn.genes.HasGene(option)) Widgets.DrawBox(rect);
-            if (Widgets.ButtonInvisible(rect))
+            if (enabled && Widgets.ButtonInvisible(rect))
             {
                 if (pawn.genes.HasGene(option))
                     pawn.genes.RemoveGene(pawn.genes.GetGene(option));
@@ -361,13 +367,14 @@ public class Dialog_AppearanceEditor : Window
                     }
             }
 
+            GUI.color = enabled ? Color.gray : Color.white;
             // ToDo: Apply correct gene background texture according to gene category.
-            GUI.DrawTexture(rect.ContractedBy(4), GeneUIUtility.GeneBackground_Xenogene.Texture);
-            GUI.color = option.IconColor;
+            GUI.DrawTexture(rect.ContractedBy(4), GeneUIUtility.GeneBackground_Endogene.Texture);
+            GUI.color *= option.IconColor;
             GUI.DrawTexture(rect.ContractedBy(4), option.Icon);
             GUI.color = Color.white;
 
-            TooltipHandler.TipRegion(rect, option.LabelCap);
+            TooltipHandler.TipRegion(rect, option.LabelCap + (enabled ? TaggedString.Empty : "\n\n" + "PawnEditor.XenotypeForbbiden".Translate()));
         }
 
         inRect.yMin += 8f;
@@ -389,7 +396,7 @@ public class Dialog_AppearanceEditor : Window
             Widgets.DrawHighlightIfMouseover(sexRect);
 
             if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f))
-                && pawn.kindDef.fixedGender == null && pawn.RaceProps.hasGenders)
+             && pawn.kindDef.fixedGender == null && pawn.RaceProps.hasGenders)
             {
                 var list = new List<FloatMenuOption>
                 {
@@ -409,11 +416,13 @@ public class Dialog_AppearanceEditor : Window
             {
                 Widgets.DrawHighlight(devStageRect);
                 if (Find.WindowStack.FloatMenu == null)
-                    TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
+                    TooltipHandler.TipRegion(devStageRect,
+                        text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
             }
 
 
-            if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+            if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture,
+                    new Vector2(22f, 22f)))
             {
                 var options = new List<FloatMenuOption>
                 {
@@ -465,15 +474,16 @@ public class Dialog_AppearanceEditor : Window
                         {
                             if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
                             {
-                                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), delegate
-                                {
-                                    var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
-                                    if (File.Exists(path))
+                                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()),
+                                    delegate
                                     {
-                                        File.Delete(path);
-                                        CharacterCardUtility.cachedCustomXenotypes = null;
-                                    }
-                                }, true));
+                                        var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
+                                        if (File.Exists(path))
+                                        {
+                                            File.Delete(path);
+                                            CharacterCardUtility.cachedCustomXenotypes = null;
+                                        }
+                                    }, true));
                                 return true;
                             }
 
@@ -503,9 +513,9 @@ public class Dialog_AppearanceEditor : Window
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate().CapitalizeFirst()))
             Find.WindowStack.Add(new FloatMenu(LoadedModManager.RunningMods.Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
-                .Prepend(new(
+               .Prepend(new(
                     "All".Translate(), () => sourceFilter = null))
-                .ToList()));
+               .ToList()));
 
         if (ModsConfig.BiotechActive)
             Widgets.CheckboxLabeled(inRect.TakeBottomPart(50), "PawnEditor.IgnoreXenotype".Translate(), ref ignoreXenotype);
@@ -560,7 +570,6 @@ public class Dialog_AppearanceEditor : Window
 
     private enum ShapeTab
     {
-        Body,
-        Head
+        Body, Head
     }
 }
