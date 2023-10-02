@@ -82,19 +82,14 @@ public class Dialog_AppearanceEditor : Window
         {
             case (EndogeneCategory)0xB:
                 return gene.exclusionTags.NotNullAndContains("Fur");
-                break;
             case (EndogeneCategory)0xC:
                 return gene.exclusionTags.NotNullAndContains("Tail");
-                break;
             case (EndogeneCategory)0xD:
                 return gene.exclusionTags.NotNullAndContains("HairStyle");
-                break;
             case (EndogeneCategory)0xE:
                 return gene.exclusionTags.NotNullAndContains("EyeColor");
-                break;
             case (EndogeneCategory)0xF:
                 return gene.exclusionTags.NotNullAndContains("BeardStyle");
-                break;
         }
 
         return false;
@@ -293,9 +288,8 @@ public class Dialog_AppearanceEditor : Window
             var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(6);
             Widgets.DrawHighlight(rect);
 
-            if (typeof(Def).IsAssignableFrom(option.GetType()))
+            if (option is Def def)
             {
-                var def = option as Def;
                 if (Mouse.IsOver(rect))
                 {
                     Widgets.DrawLightHighlight(rect);

@@ -37,7 +37,7 @@ public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
 
     public Dialog_PawnEditor_Pregame(Action doNext) => this.doNext = doNext;
 
-    protected override bool Pregame => false;
+    protected override bool Pregame => true;
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -47,7 +47,7 @@ public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
 
 public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
 {
-    protected override bool Pregame => true;
+    protected override bool Pregame => false;
 
     public override void PreOpen()
     {
