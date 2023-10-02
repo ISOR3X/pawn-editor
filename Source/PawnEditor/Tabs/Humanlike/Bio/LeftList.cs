@@ -18,7 +18,7 @@ public partial class TabWorker_Bio_Humanlike
         Widgets.Label(headerRect, "Traits".Translate().Colorize(ColoredText.TipSectionTitleColor));
         if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new Dialog_SelectPawnTrait(pawn));
 
-        var traitRect = viewRect.TakeTopPart(traitsLastHeight + 14).ContractedBy(7);
+        var traitRect = viewRect.TakeTopPart(traitsLastHeight + 14).ContractedBy(6);
         var traits = pawn.story.traits.allTraits;
         if (traits == null || traits.Count == 0)
         {
@@ -46,7 +46,7 @@ public partial class TabWorker_Bio_Humanlike
                         if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX)) pawn.story.traits.RemoveTrait(trait, true);
                     }
                 }, trait => Text.CalcSize(trait.LabelCap).x + 10f, 4f, 5f, false)
-               .height;
+                .height;
 
         traitsLastHeight = Mathf.Max(45, traitsLastHeight);
 
@@ -57,7 +57,7 @@ public partial class TabWorker_Bio_Humanlike
         Widgets.Label(headerRect, "IncapableOf".Translate().Colorize(ColoredText.TipSectionTitleColor));
         var disabledTags = pawn.CombinedDisabledWorkTags;
         var disabledTagsList = CharacterCardUtility.WorkTagsFrom(disabledTags).ToList();
-        var disabledRect = viewRect.TakeTopPart(incapableLastHeight + 14).ContractedBy(7);
+        var disabledRect = viewRect.TakeTopPart(incapableLastHeight + 14).ContractedBy(6);
         if (disabledTags == WorkTags.None)
         {
             GUI.color = Color.gray;
@@ -80,11 +80,11 @@ public partial class TabWorker_Bio_Humanlike
                     {
                         var tagLocal = tag;
                         TooltipHandler.TipRegion(r, () => CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, tagLocal) + "\n"
-                          + CharacterCardUtility.GetWorkTypesDisabledByWorkTag(
-                                tagLocal), r.GetHashCode());
+                                                                                                                           + CharacterCardUtility.GetWorkTypesDisabledByWorkTag(
+                                                                                                                               tagLocal), r.GetHashCode());
                     }
                 }, tag => Text.CalcSize(tag.LabelTranslated().CapitalizeFirst()).x + 10f, 5f)
-               .height;
+                .height;
 
         incapableLastHeight = Mathf.Max(45, incapableLastHeight);
 
@@ -97,7 +97,7 @@ public partial class TabWorker_Bio_Humanlike
         var abilities = (from a in pawn.abilities.abilities
             orderby a.def.level, a.def.EntropyGain
             select a).ToList();
-        var abilitiesRect = viewRect.TakeTopPart(abilitiesLastHeight + 14).ContractedBy(7);
+        var abilitiesRect = viewRect.TakeTopPart(abilitiesLastHeight + 14).ContractedBy(6);
         if (abilities.Count == 0)
         {
             GUI.color = Color.gray;
@@ -122,65 +122,33 @@ public partial class TabWorker_Bio_Humanlike
                             r.GetHashCode());
                     }
                 }, _ => 32f)
-               .height;
+                .height;
 
         abilitiesLastHeight = Mathf.Max(45, abilitiesLastHeight);
 
         GUI.color = Color.white;
 
+        // Extras group
         headerRect = viewRect.TakeTopPart(Text.LineHeight);
-        Widgets.Label(headerRect, "Relations".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) { }
+        Widgets.Label(headerRect, "PawnEditor.Extras".Translate().Colorize(ColoredText.TipSectionTitleColor));
 
-        var relations = pawn.relations.DirectRelations.OrderBy(r => r.startTicks).ToList();
-        float relationsHeight;
-        if (relations.Count == 0)
+        // Favourite color
+        var colorRect = viewRect.TakeTopPart(30);
+        colorRect.xMin += 6f;
+        string label = "PawnEditor.FavColor".Translate();
+        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(Text.CalcSize(label).x + 4), label);
+        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor ?? Color.white);
+        if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
         {
-            relationsHeight = Text.LineHeight;
-            var relationsRect = viewRect.TakeTopPart(relationsHeight + 14).ContractedBy(7);
-            GUI.color = Color.gray;
-            if (Mouse.IsOver(relationsRect)) Widgets.DrawHighlight(relationsRect);
-            Widgets.Label(relationsRect, "None".Translate());
-            TooltipHandler.TipRegionByKey(relationsRect, "None");
+            var currentColor = pawn.story.favoriteColor ?? Color.white;
+            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor = color, DefDatabase<ColorDef>.AllDefs
+                    .Select(cd => cd.color)
+                    .ToList(),
+                currentColor));
         }
-        else
-        {
-            relationsHeight = relations.Count * (Text.LineHeight + 4);
-            var relationsRect = viewRect.TakeTopPart(relationsHeight + 14).ContractedBy(7);
-            var index = 0;
-            foreach (var relation in relations)
-            {
-                var relationRect = relationsRect.TakeTopPart(Text.LineHeight + 4);
-                Widgets.DrawHighlightIfMouseover(relationRect);
-                if (index % 2 == 1) Widgets.DrawLightHighlight(relationRect);
-                var str =
-                    (relation.def.GetGenderSpecificLabelCap(relation.otherPawn) + ": ").Colorize(ColoredText
-                       .SubtleGrayColor)
-                  + relation.otherPawn.Name.ToStringFull;
-                using (new TextBlock(TextAnchor.MiddleLeft))
-                    Widgets.Label(relationRect.ContractedBy(4f, 0f),
-                        str.Truncate(160f, truncateCache));
+        var extrasHeight = 30f;
 
-                using (new TextBlock(TextAnchor.MiddleRight))
-                {
-                    var opinionOf = relation.otherPawn.relations.OpinionOf(pawn);
-                    var opinionFrom = pawn.relations.OpinionOf(relation.otherPawn);
-                    Widgets.Label(relationRect.ContractedBy(4f, 0f),
-                        opinionOf.ToStringWithSign().Colorize(opinionOf < 0 ? ColorLibrary.RedReadable : opinionOf > 0 ? ColorLibrary.Green : Color.white)
-                      + $" ({opinionFrom.ToStringWithSign()})".Colorize(opinionFrom < 0 ? ColorLibrary.Red.FadedColor(0.4f) :
-                            opinionFrom > 0 ? ColorLibrary.Green.FadedColor(0.4f) : Color.white.FadedColor(0.4f)));
-                }
-
-                if (Mouse.IsOver(relationRect) && Widgets.ButtonImage(relationRect.RightPartPixels(relationRect.height).ContractedBy(4), TexButton.DeleteX))
-                    pawn.relations.RemoveDirectRelation(relation);
-
-                TooltipHandler.TipRegion(relationRect, () => GetPawnRowTooltip(relation, pawn),
-                    relation.otherPawn.thingIDNumber * 13 + pawn.thingIDNumber);
-                index++;
-            }
-        }
-
-        leftLastHeight = Text.LineHeight * 4 + traitsLastHeight + incapableLastHeight + abilitiesLastHeight + relationsHeight + 56;
+        leftLastHeight = Text.LineHeight * 4 + traitsLastHeight + incapableLastHeight + abilitiesLastHeight + extrasHeight + 56;
 
         Widgets.EndScrollView();
     }
@@ -215,7 +183,7 @@ public partial class TabWorker_Bio_Humanlike
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("(debug) Compatibility: " + selPawnForSocialInfo.relations.CompatibilityWith(relation.otherPawn).ToString("F2"));
             stringBuilder.Append("(debug) RomanceChanceFactor: "
-                               + selPawnForSocialInfo.relations.SecondaryRomanceChanceFactor(relation.otherPawn).ToString("F2"));
+                                 + selPawnForSocialInfo.relations.SecondaryRomanceChanceFactor(relation.otherPawn).ToString("F2"));
         }
 
         return stringBuilder.ToString();

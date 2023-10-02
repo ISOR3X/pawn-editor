@@ -14,7 +14,7 @@ public partial class TabWorker_Bio_Humanlike
         using var block = new TextBlock(TextAnchor.MiddleCenter);
         Widgets.DrawHighlight(buttonsRect);
         buttonsRect = buttonsRect.ContractedBy(6);
-        if (Widgets.ButtonText(buttonsRect.TakeBottomPart(25), "PawnEditor.EditAppearance".Translate()))
+        if (Widgets.ButtonText(buttonsRect.TakeBottomPart(UIUtility.RegularButtonHeight), "PawnEditor.EditAppearance".Translate()))
             Find.WindowStack.Add(new Dialog_AppearanceEditor(pawn));
 
         var devStageRect = buttonsRect.TopHalf().LeftHalf().ContractedBy(2);
@@ -26,8 +26,8 @@ public partial class TabWorker_Bio_Humanlike
                 TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
         }
 
-        Widgets.Label(devStageRect.BottomHalf(), text);
-        if (Widgets.ButtonImageWithBG(devStageRect.TopHalf(), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+
+        if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
         {
             var options = new List<FloatMenuOption>
             {
@@ -41,6 +41,8 @@ public partial class TabWorker_Bio_Humanlike
             Find.WindowStack.Add(new FloatMenu(options));
         }
 
+        Widgets.Label(devStageRect, text);
+
         var xenotypeRect = buttonsRect.TopHalf().RightHalf().ContractedBy(2);
         text = pawn.genes.XenotypeLabelCap;
         if (Mouse.IsOver(xenotypeRect))
@@ -50,9 +52,8 @@ public partial class TabWorker_Bio_Humanlike
                 TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
         }
 
-        Widgets.Label(xenotypeRect.BottomHalf(), text);
 
-        if (Widgets.ButtonImageWithBG(xenotypeRect.TopHalf(), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
+        if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
         {
             var list = new List<FloatMenuOption>();
             foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
@@ -100,11 +101,13 @@ public partial class TabWorker_Bio_Humanlike
             Find.WindowStack.Add(new FloatMenu(list));
         }
 
+        Widgets.Label(xenotypeRect, text);
+
         var sexRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
         Widgets.DrawHighlightIfMouseover(sexRect);
-        Widgets.Label(sexRect.BottomHalf(), "PawnEditor.Sex".Translate());
-        if (Widgets.ButtonImageWithBG(sexRect.TopHalf(), pawn.gender.GetIcon(), new Vector2(22f, 22f)) && pawn.kindDef.fixedGender == null
-         && pawn.RaceProps.hasGenders)
+
+        if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f)) && pawn.kindDef.fixedGender == null
+                                                                                                                                        && pawn.RaceProps.hasGenders)
         {
             var list = new List<FloatMenuOption>
             {
@@ -116,17 +119,20 @@ public partial class TabWorker_Bio_Humanlike
             Find.WindowStack.Add(new FloatMenu(list));
         }
 
+        Widgets.Label(sexRect, "PawnEditor.Sex".Translate());
+
         var bodyRect = buttonsRect.BottomHalf().RightHalf().ContractedBy(2);
         Widgets.DrawHighlightIfMouseover(bodyRect);
-        Widgets.Label(bodyRect.BottomHalf(), "PawnEditor.Shape".Translate());
-        if (Widgets.ButtonImageWithBG(bodyRect.TopHalf(), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType],
+
+        if (Widgets.ButtonImageWithBG(bodyRect.TakeTopPart(UIUtility.RegularButtonHeight), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType],
                 new Vector2(22f, 22f)))
             Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
                 {
                     pawn.story.bodyType = bodyType;
                     RecacheGraphics(pawn);
                 }, TexPawnEditor.BodyTypeIcons[bodyType], Color.white))
-               .ToList()));
+                .ToList()));
+        Widgets.Label(bodyRect, "PawnEditor.Shape".Translate());
     }
 
     public static void SetDevStage(Pawn pawn, DevelopmentalStage stage)

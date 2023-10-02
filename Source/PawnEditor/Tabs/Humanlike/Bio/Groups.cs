@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -20,6 +21,7 @@ public partial class TabWorker_Bio_Humanlike
         var title = "PawnEditor.EmpireTitle".Translate();
         var honor = "PawnEditor.Honor".Translate();
         var favColor = "PawnEditor.FavColor".Translate();
+        var role = "Role".Translate().CapitalizeFirst();
         var leftWidth = UIUtility.ColumnWidth(3, faction, ideo, certainty, title, honor, favColor) + 4f;
         if (pawn.Faction != null)
         {
@@ -33,55 +35,31 @@ public partial class TabWorker_Bio_Humanlike
                             pawn.SetFaction(newFaction);
                             PawnEditor.RecachePawnList();
                         }, newFaction.def.FactionIcon, newFaction.Color))
-                   .ToList()));
+                    .ToList()));
             factionRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
             factionRect.TakeLeftPart(leftWidth);
             Widgets.DrawHighlight(factionRect);
             Widgets.DrawHighlightIfMouseover(factionRect);
+            if (Widgets.ButtonInvisible(factionRect))
+            {
+                Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
+            }
+
             GUI.color = pawn.Faction.Color;
             GUI.DrawTexture(factionRect.TakeLeftPart(30).ContractedBy(6), pawn.Faction.def.FactionIcon);
             GUI.color = Color.white;
             using (new TextBlock(TextAnchor.MiddleLeft))
                 Widgets.Label(factionRect, pawn.Faction.Name);
 
-            inRect.yMin += 4;
-        }
-
-        if (ModsConfig.IdeologyActive && pawn.Ideo != null)
-        {
-            var ideoRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
-            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(ideoRect.TakeLeftPart(leftWidth), ideo);
-            if (Widgets.ButtonText(ideoRect, "PawnEditor.SelectIdeo".Translate()))
-                Find.WindowStack.Add(new FloatMenu(Find.IdeoManager.IdeosInViewOrder.Select(newIdeo =>
-                        new FloatMenuOption(newIdeo.name, delegate { pawn.ideo.SetIdeo(newIdeo); }, newIdeo.Icon, newIdeo.Color))
-                   .ToList()));
-
-            ideoRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
-            ideoRect.TakeLeftPart(leftWidth);
-            Widgets.DrawHighlight(ideoRect);
-            Widgets.DrawHighlightIfMouseover(ideoRect);
-            GUI.color = pawn.Ideo.Color;
-            GUI.DrawTexture(ideoRect.TakeLeftPart(30).ContractedBy(6), pawn.Ideo.Icon);
-            GUI.color = Color.white;
-            using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(ideoRect, pawn.Ideo.name);
-
-            var certaintyRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
-            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(certaintyRect.TakeLeftPart(leftWidth), certainty);
-            certaintyRect.yMax -= Mathf.Round((certaintyRect.height - 10f) / 2f);
-            pawn.ideo.certaintyInt = Widgets.HorizontalSlider_NewTemp(certaintyRect, pawn.ideo.certaintyInt, 0, 1, true, pawn.ideo.Certainty.ToStringPercent(),
-                "0%", "100%");
+            inRect.yMin += 16;
         }
 
         var empire = Faction.OfEmpire;
         if (ModsConfig.RoyaltyActive && empire != null)
         {
             var titleRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
+            inRect.yMin += 10;
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(titleRect.TakeLeftPart(leftWidth), title);
             var curTitle = pawn.royalty.GetCurrentTitle(empire);
             if (Widgets.ButtonText(titleRect, curTitle?.GetLabelCapFor(pawn) ?? "None".Translate()))
@@ -105,25 +83,60 @@ public partial class TabWorker_Bio_Humanlike
                 Widgets.HorizontalSlider(honorRect, ref favor, new(0, curTitle.GetNextTitle(empire).favorCost - 1), favor.ToString());
                 pawn.royalty.SetFavor(empire, (int)favor, false);
             }
+
+            inRect.yMin += 16;
         }
 
-        inRect.yMin += 16f;
-        inRect.xMin -= 2;
-        Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.Extras".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        inRect.xMin += 2;
-        inRect.yMin += 4;
-
-        var colorRect = inRect.TakeTopPart(30);
-        inRect.yMin += 4;
-        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(leftWidth), favColor);
-        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor ?? Color.white);
-        if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
+        if (ModsConfig.IdeologyActive && pawn.Ideo != null)
         {
-            var currentColor = pawn.story.favoriteColor ?? Color.white;
-            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor = color, DefDatabase<ColorDef>.AllDefs
-                   .Select(cd => cd.color)
-                   .ToList(),
-                currentColor));
+            var ideoRect = inRect.TakeTopPart(30);
+            inRect.yMin += 4;
+            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(ideoRect.TakeLeftPart(leftWidth), ideo);
+            if (Widgets.ButtonText(ideoRect, "PawnEditor.SelectIdeo".Translate()))
+                Find.WindowStack.Add(new FloatMenu(Find.IdeoManager.IdeosInViewOrder.Select(newIdeo =>
+                        new FloatMenuOption(newIdeo.name, delegate { pawn.ideo.SetIdeo(newIdeo); }, newIdeo.Icon, newIdeo.Color))
+                    .ToList()));
+
+            ideoRect = inRect.TakeTopPart(30);
+            inRect.yMin += 10f;
+            ideoRect.TakeLeftPart(leftWidth);
+            Widgets.DrawHighlight(ideoRect);
+            Widgets.DrawHighlightIfMouseover(ideoRect);
+            if (Widgets.ButtonInvisible(ideoRect))
+            {
+                IdeoUIUtility.OpenIdeoInfo(pawn.Ideo);
+            }
+
+            GUI.color = pawn.Ideo.Color;
+            GUI.DrawTexture(ideoRect.TakeLeftPart(30).ContractedBy(6), pawn.Ideo.Icon);
+            GUI.color = Color.white;
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Widgets.Label(ideoRect, pawn.Ideo.name);
+
+            var certaintyRect = inRect.TakeTopPart(30);
+            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(certaintyRect.TakeLeftPart(leftWidth), certainty);
+            certaintyRect.yMax -= Mathf.Round((certaintyRect.height - 10f) / 2f);
+            pawn.ideo.certaintyInt = Widgets.HorizontalSlider_NewTemp(certaintyRect, pawn.ideo.certaintyInt, 0, 1, true, pawn.ideo.Certainty.ToStringPercent(),
+                "0%", "100%");
+
+
+            var roleRect = inRect.TakeTopPart(30);
+            inRect.yMin += 4;
+            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(roleRect.TakeLeftPart(leftWidth), role);
+            var curTitle = pawn.Ideo.GetRole(pawn);
+            if (Widgets.ButtonText(roleRect, curTitle?.LabelForPawn(pawn) ?? "None".Translate()))
+            {
+                var list = new List<FloatMenuOption>
+                {
+                    // ToDo: Removing roles has some odd behaviour where it sometimes changes the role to a different one instead of removing it.
+                    new("None".Translate(), () => { curTitle?.Unassign(pawn, false); })
+                };
+                list.AddRange(pawn.Ideo.cachedPossibleRoles.Select(ideoRole =>
+                    new FloatMenuOption(ideoRole.LabelForPawn(pawn), () => ideoRole.Assign(pawn, true))));
+                Find.WindowStack.Add(new FloatMenu(list));
+            }
+
+            inRect.yMin += 16;
         }
     }
 }

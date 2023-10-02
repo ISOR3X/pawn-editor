@@ -83,7 +83,15 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                     };
                 var level = skill.GetLevel();
                 var disabled = skill.TotallyDisabled;
-                if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / 20f), SkillUI.SkillBarFillTex, TexPawnEditor.SkillBarBGTex, false);
+                Texture2D texture2D = SkillUI.SkillBarFillTex;
+                if (ModsConfig.BiotechActive)
+                {
+                    if (skill.Aptitude > 0)
+                        texture2D = SkillUI.SkillBarAptitudePositiveTex;
+                    else if (skill.Aptitude < 0)
+                        texture2D = SkillUI.SkillBarAptitudeNegativeTex;
+                }
+                if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / 20f), texture2D, TexPawnEditor.SkillBarBGTex, false);
                 rect.xMin += 3;
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
                 if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus)) skill.Level++;
