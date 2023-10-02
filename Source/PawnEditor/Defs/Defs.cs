@@ -5,6 +5,7 @@ using MonoMod.Utils;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using static PawnEditor.TabDef;
 
 // ReSharper disable InconsistentNaming
 
@@ -116,21 +117,31 @@ public class TabDef : Def
         if (workerClass != null)
         {
             worker = Activator.CreateInstance(workerClass);
-            try { AccessTools.Method(workerClass, "Initialize")?.Invoke(worker, Array.Empty<object>()); }
-            catch { Log.Error("Failed to initialize tab worker."); }
+            var argType = type switch
+            {
+                TabType.Faction => typeof(Faction),
+                TabType.Pawn => typeof(Pawn),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            try { AccessTools.Method(workerClass, "Initialize", Type.EmptyTypes)?.Invoke(worker, Array.Empty<object>()); }
+            catch (Exception e) { Log.Error($"Failed to initialize tab worker: {e}"); }
 
-            try { drawer = AccessTools.Method(workerClass, "DrawTabContents").CreateDelegate<Action<Rect, object>>(worker); }
-            catch { Log.Error("Failed to instantiate tab drawer."); }
-
-            try { getSaveLoadItems = AccessTools.Method(workerClass, "GetSaveLoadItems")?.CreateDelegate<Func<object, IEnumerable<SaveLoadItem>>>(worker); }
-            catch { Log.Error("Failed to instantiate tab save/loading."); }
+            try { drawer = AccessTools.Method(workerClass, "DrawTabContents", new[] { typeof(Rect), argType }).CreateDelegate<Action<Rect, object>>(worker); }
+            catch (Exception e) { Log.Error($"Failed to instantiate tab drawer: {e}"); }
 
             try
             {
-                getRandomizationOptions = AccessTools.Method(workerClass, "GetRandomizationOptions")
+                getSaveLoadItems = AccessTools.Method(workerClass, "GetSaveLoadItems", new[] { argType })
+                  ?.CreateDelegate<Func<object, IEnumerable<SaveLoadItem>>>(worker);
+            }
+            catch (Exception e) { Log.Error($"Failed to instantiate tab save/loading: {e}"); }
+
+            try
+            {
+                getRandomizationOptions = AccessTools.Method(workerClass, "GetRandomizationOptions", new[] { argType })?
                    .CreateDelegate<Func<object, IEnumerable<FloatMenuOption>>>(worker);
             }
-            catch { Log.Error("Failed to instantiate tab randomization."); }
+            catch (Exception e) { Log.Error($"Failed to instantiate tab randomization: {e}"); }
         }
     }
 }
@@ -139,17 +150,90 @@ public class WidgetDef : Def
 {
     public float defaultHeight;
     public float defaultWidth;
+    public TabType type;
     public Type workerClass;
+    private Action<Rect, object> drawer;
 
-    private Action<Rect> drawer;
 
-    public WidgetDef() => description ??= label;
+    private Func<object, float> getHeight;
+    private Func<object, float> getWidth;
+    private Func<object, bool> showOn;
+    private object worker;
+
+    public WidgetDef()
+    {
+        label ??= defName;
+        description ??= label;
+    }
+
+    public float GetWidth(Pawn pawn) => getWidth?.Invoke(pawn) ?? defaultWidth;
+    public float GetWidth(Faction faction) => getWidth?.Invoke(faction) ?? defaultWidth;
+    public float GetHeight(Pawn pawn) => getHeight?.Invoke(pawn) ?? defaultWidth;
+    public float GetHeight(Faction faction) => getHeight?.Invoke(faction) ?? defaultWidth;
+    public bool ShowOn(Pawn pawn) => showOn?.Invoke(pawn) ?? true;
+    public bool ShowOn(Faction faction) => showOn?.Invoke(faction) ?? true;
+
+    public void Draw(Rect inRect, Pawn pawn)
+    {
+        drawer(inRect, pawn);
+    }
+
+    public void Draw(Rect inRect, Faction faction)
+    {
+        drawer(inRect, faction);
+    }
 
     public override void PostLoad()
     {
         base.PostLoad();
         if (workerClass != null)
-            try { drawer = AccessTools.Method(workerClass, "DrawTabContents", new[] { typeof(Rect) }).CreateDelegate<Action<Rect>>(); }
-            catch { Log.Error("Failed to instantiate tab drawer."); }
+        {
+            worker = AccessTools.CreateInstance(workerClass);
+            var argType = type switch
+            {
+                TabType.Faction => typeof(Faction),
+                TabType.Pawn => typeof(Pawn),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            try { AccessTools.Method(workerClass, "Initialize", new[] { typeof(WidgetDef) })?.Invoke(worker, new object[] { this }); }
+            catch (Exception e) { Log.Error($"Failed to initialize widget worker: {e}"); }
+
+            try { drawer = AccessTools.Method(workerClass, "Draw", new[] { typeof(Rect), argType }).CreateDelegate<Action<Rect, object>>(worker); }
+            catch (Exception e) { Log.Error($"Failed to instantiate widget drawer: {e}"); }
+
+            try { getHeight = AccessTools.Method(workerClass, "GetHeight", new[] { argType })?.CreateDelegate<Func<object, float>>(worker); }
+            catch (Exception e) { Log.Error($"Failed to instantiate height getter: {e}"); }
+
+            try { getWidth = AccessTools.Method(workerClass, "GetWidth", new[] { argType })?.CreateDelegate<Func<object, float>>(worker); }
+            catch (Exception e) { Log.Error($"Failed to instantiate width getter: {e}"); }
+
+            try { showOn = AccessTools.Method(workerClass, "ShowOn", new[] { argType })?.CreateDelegate<Func<object, bool>>(worker); }
+            catch (Exception e) { Log.Error($"Failed to instantiate predicate: {e}"); }
+        }
+    }
+}
+
+public abstract class WidgetWorker<T>
+{
+    protected WidgetDef def;
+
+    public virtual void Initialize(WidgetDef def)
+    {
+        this.def = def;
+    }
+
+    public abstract void Draw(Rect inRect, T pawn);
+
+    public virtual float GetWidth(T pawn) => def.defaultWidth;
+    public virtual float GetHeight(T pawn) => def.defaultHeight;
+
+    public virtual bool ShowOn(T pawn) => true;
+}
+
+public class WidgetWorker_Blank : WidgetWorker<Pawn>
+{
+    public override void Draw(Rect inRect, Pawn pawn)
+    {
+        Widgets.DrawBoxSolid(inRect, pawn.story?.favoriteColor ?? Color.cyan);
     }
 }

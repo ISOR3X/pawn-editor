@@ -24,11 +24,21 @@ public static partial class PawnEditor
     private static TabGroupDef tabGroup;
     private static List<TabRecord> tabs;
     private static TabDef curTab;
+    private static List<WidgetDef> widgets;
+
+    private static readonly TabDef widgetTab = new()
+    {
+        defName = "Widgets",
+        label = "MiscRecordsCategory".Translate()
+    };
+
     public static PawnLister PawnList = new();
 
     private static Rot4 curRot = Rot4.South;
 
     public static bool Pregame;
+
+    private static TabRecord cachedWidgetTab;
 
     public static void DoUI(Rect inRect, Action onClose, Action onNext)
     {
@@ -81,10 +91,14 @@ public static partial class PawnEditor
         if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs, 1);
         inRect = inRect.ContractedBy(6);
         if (curTab != null)
-            if (showFactionInfo)
+        {
+            if (curTab == widgetTab)
+                DoWidgets(inRect);
+            else if (showFactionInfo)
                 curTab.DrawTabContents(inRect, selectedFaction);
             else
                 curTab.DrawTabContents(inRect, selectedPawn);
+        }
     }
 
     public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton)
@@ -179,7 +193,10 @@ public static partial class PawnEditor
         }
 
         if (selectedPawn == null || !pawns.Contains(selectedPawn))
+        {
             selectedPawn = pawns.FirstOrDefault();
+            CheckChangeTabGroup();
+        }
 
         PortraitsCache.Clear();
         ResetPoints();
@@ -221,6 +238,27 @@ public static partial class PawnEditor
         else desiredTabGroup = null;
 
         if (desiredTabGroup != tabGroup) SetTabGroup(desiredTabGroup);
+        RecacheWidgets();
+    }
+
+    private static void RecacheWidgets()
+    {
+        if (cachedWidgetTab != null) tabs.Remove(cachedWidgetTab);
+
+        Func<WidgetDef, bool> predicate;
+        if (showFactionInfo && selectedFaction != null) predicate = def => def.type == TabDef.TabType.Faction && def.ShowOn(selectedFaction);
+        else if (selectedPawn != null) predicate = def => def.type == TabDef.TabType.Pawn && def.ShowOn(selectedPawn);
+        else predicate = _ => false;
+
+        widgets = DefDatabase<WidgetDef>.AllDefs.Where(predicate).ToList();
+
+        if (widgets.NullOrEmpty())
+            cachedWidgetTab = null;
+        else
+        {
+            cachedWidgetTab = new(widgetTab.LabelCap, static () => curTab = widgetTab, static () => curTab == widgetTab);
+            tabs.Add(cachedWidgetTab);
+        }
     }
 
     public static void Select(Pawn pawn)

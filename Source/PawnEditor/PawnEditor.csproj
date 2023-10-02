@@ -96,6 +96,7 @@
     <Compile Include="UI\PawnEditorUI.cs" />
     <Compile Include="UI\PawnList.cs" />
     <Compile Include="UI\UITable.cs" />
+    <Compile Include="UI\Widgets.cs" />
     <Compile Include="Utils\Listing_Thing.cs" />
     <Compile Include="Utils\Listing_TreeThing.cs" />
     <Compile Include="Utils\ColonyInventory.cs" />
