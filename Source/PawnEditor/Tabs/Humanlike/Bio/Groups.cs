@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -35,16 +34,13 @@ public partial class TabWorker_Bio_Humanlike
                             pawn.SetFaction(newFaction);
                             PawnEditor.RecachePawnList();
                         }, newFaction.def.FactionIcon, newFaction.Color))
-                    .ToList()));
+                   .ToList()));
             factionRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
             factionRect.TakeLeftPart(leftWidth);
             Widgets.DrawHighlight(factionRect);
             Widgets.DrawHighlightIfMouseover(factionRect);
-            if (Widgets.ButtonInvisible(factionRect))
-            {
-                Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
-            }
+            if (Widgets.ButtonInvisible(factionRect)) Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
 
             GUI.color = pawn.Faction.Color;
             GUI.DrawTexture(factionRect.TakeLeftPart(30).ContractedBy(6), pawn.Faction.def.FactionIcon);
@@ -95,23 +91,20 @@ public partial class TabWorker_Bio_Humanlike
             if (Widgets.ButtonText(ideoRect, "PawnEditor.SelectIdeo".Translate()))
                 Find.WindowStack.Add(new FloatMenu(Find.IdeoManager.IdeosInViewOrder.Select(newIdeo =>
                         new FloatMenuOption(newIdeo.name, delegate { pawn.ideo.SetIdeo(newIdeo); }, newIdeo.Icon, newIdeo.Color))
-                    .ToList()));
+                   .ToList()));
 
             ideoRect = inRect.TakeTopPart(30);
             inRect.yMin += 10f;
             ideoRect.TakeLeftPart(leftWidth);
             Widgets.DrawHighlight(ideoRect);
             Widgets.DrawHighlightIfMouseover(ideoRect);
-            if (Widgets.ButtonInvisible(ideoRect))
-            {
-                IdeoUIUtility.OpenIdeoInfo(pawn.Ideo);
-            }
+            if (Widgets.ButtonInvisible(ideoRect)) IdeoUIUtility.OpenIdeoInfo(pawn.Ideo);
 
             GUI.color = pawn.Ideo.Color;
             GUI.DrawTexture(ideoRect.TakeLeftPart(30).ContractedBy(6), pawn.Ideo.Icon);
             GUI.color = Color.white;
             using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(ideoRect, pawn.Ideo.name);
+                Widgets.Label(ideoRect, pawn.Ideo.name.Truncate(ideoRect.width, truncateCache));
 
             var certaintyRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(certaintyRect.TakeLeftPart(leftWidth), certainty);

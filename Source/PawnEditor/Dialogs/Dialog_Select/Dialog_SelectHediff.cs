@@ -32,18 +32,46 @@ public class Dialog_SelectHediff : Dialog_SelectThing<HediffDef>
     {
         OnSelected = def =>
         {
+            void AddCheck(BodyPartRecord part)
+            {
+                void ReallyAdd()
+                {
+                    CurPawn.health.AddHediff(def, part);
+                }
+
+                if (typeof(Hediff_AddedPart).IsAssignableFrom(def.hediffClass)
+                 && CurPawn.health.hediffSet.GetFirstHediffMatchingPart<Hediff_AddedPart>(part) is { } hediff)
+                {
+                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.HediffConflict".Translate(def.LabelCap, hediff.LabelCap), ReallyAdd));
+                    return;
+                }
+
+                if (!typeof(Hediff_Injury).IsAssignableFrom(def.hediffClass))
+                {
+                    var existing = new List<Hediff>();
+                    CurPawn.health.hediffSet.GetHediffs(ref existing, h => h.def == def && h.Part == part);
+                    if (existing.Count > 0)
+                    {
+                        Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.HediffDuplicate".Translate(def.LabelCap), ReallyAdd));
+                        return;
+                    }
+                }
+
+                ReallyAdd();
+            }
+
             if (defaultBodyParts.TryGetValue(def, out var result))
             {
                 if (result.Item1?.Select(part => curPawn.RaceProps.body.GetPartsWithDef(part)?.FirstOrDefault()).FirstOrDefault() is { } part1)
-                    curPawn.health.AddHediff(def, part1);
+                    AddCheck(part1);
                 else if (result.Item2?.Select(group => curPawn.RaceProps.body.AllParts.FirstOrDefault(part => part.IsInGroup(group))).FirstOrDefault() is
                          { } part2)
-                    curPawn.health.AddHediff(def, part2);
+                    AddCheck(part2);
                 else
-                    curPawn.health.AddHediff(def);
+                    AddCheck(null);
             }
             else
-                curPawn.health.AddHediff(def);
+                AddCheck(null);
         };
         selected = select ?? curPawn.health.hediffSet.GetFirstHediff<Hediff>();
     }

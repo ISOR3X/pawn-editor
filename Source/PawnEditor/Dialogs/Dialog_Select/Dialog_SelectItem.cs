@@ -24,12 +24,12 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
     private readonly IEnumerable<Thing> _activeItems;
     private readonly ItemType _itemType;
     private readonly string _thingCategoryLabel;
+
+    private readonly IEnumerable<BodyPartGroupDef> occupiableGroupsDefs;
     private string[] _countBuffer;
 
     private Vector2 _scrollPosition;
     private Thing _selected;
-
-    private readonly IEnumerable<BodyPartGroupDef> occupiableGroupsDefs;
 
     static Dialog_SelectItem()
     {
@@ -161,7 +161,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         using (new TextBlock(GameFont.Tiny))
             Widgets.Label(labelRect, label.Truncate(inRect.width, truncateCache).Colorize(ColoredText.SubtleGrayColor));
         TooltipHandler.TipRegion(labelRect, label);
-        
+
         inRect.TakeTopPart(16f);
     }
 
@@ -336,10 +336,18 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
             case ItemType.Apparel:
                 if (thingDef.IsApparel)
                 {
-                    // ApparelUtility.CanWearTogether()
-                    PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair);
-                    var apparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
-                    CurPawn.apparel.Wear(apparel, false);
+                    void Wear()
+                    {
+                        PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair);
+                        var apparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+                        CurPawn.apparel.Wear(apparel, false);
+                    }
+
+                    if (CurPawn.apparel.WornApparel.FirstOrDefault(ap => !ApparelUtility.CanWearTogether(thingDef, ap.def, CurPawn.RaceProps.body)) is
+                        { } conflictApparel)
+                        Find.WindowStack.Add(
+                            Dialog_MessageBox.CreateConfirmation("PawnEditor.WearingWouldRemove".Translate(thingDef.LabelCap, conflictApparel.LabelCap), Wear));
+                    else Wear();
                 }
 
                 break;

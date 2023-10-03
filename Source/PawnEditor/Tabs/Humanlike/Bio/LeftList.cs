@@ -46,7 +46,7 @@ public partial class TabWorker_Bio_Humanlike
                         if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX)) pawn.story.traits.RemoveTrait(trait, true);
                     }
                 }, trait => Text.CalcSize(trait.LabelCap).x + 10f, 4f, 5f, false)
-                .height;
+               .height;
 
         traitsLastHeight = Mathf.Max(45, traitsLastHeight);
 
@@ -80,11 +80,11 @@ public partial class TabWorker_Bio_Humanlike
                     {
                         var tagLocal = tag;
                         TooltipHandler.TipRegion(r, () => CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, tagLocal) + "\n"
-                                                                                                                           + CharacterCardUtility.GetWorkTypesDisabledByWorkTag(
-                                                                                                                               tagLocal), r.GetHashCode());
+                          + CharacterCardUtility.GetWorkTypesDisabledByWorkTag(
+                                tagLocal), r.GetHashCode());
                     }
                 }, tag => Text.CalcSize(tag.LabelTranslated().CapitalizeFirst()).x + 10f, 5f)
-                .height;
+               .height;
 
         incapableLastHeight = Mathf.Max(45, incapableLastHeight);
 
@@ -111,7 +111,12 @@ public partial class TabWorker_Bio_Humanlike
             abilitiesLastHeight = GenUI.DrawElementStack(abilitiesRect, 32f, abilities, delegate(Rect r, Ability abil)
                 {
                     // GUI.DrawTexture(r, Command.BGTexShrunk);
-                    if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
+                    if (Mouse.IsOver(r))
+                    {
+                        Widgets.DrawHighlight(r);
+                        if (Widgets.ButtonImage(r.TopPart(0.3f).RightPart(0.3f), TexButton.DeleteX)) pawn.abilities.RemoveAbility(abil.def);
+                    }
+
 
                     if (Widgets.ButtonImage(r, abil.def.uiIcon, false)) Find.WindowStack.Add(new Dialog_InfoCard(abil.def));
 
@@ -122,7 +127,7 @@ public partial class TabWorker_Bio_Humanlike
                             r.GetHashCode());
                     }
                 }, _ => 32f)
-                .height;
+               .height;
 
         abilitiesLastHeight = Mathf.Max(45, abilitiesLastHeight);
 
@@ -142,10 +147,11 @@ public partial class TabWorker_Bio_Humanlike
         {
             var currentColor = pawn.story.favoriteColor ?? Color.white;
             Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor = color, DefDatabase<ColorDef>.AllDefs
-                    .Select(cd => cd.color)
-                    .ToList(),
+                   .Select(cd => cd.color)
+                   .ToList(),
                 currentColor));
         }
+
         var extrasHeight = 30f;
 
         leftLastHeight = Text.LineHeight * 4 + traitsLastHeight + incapableLastHeight + abilitiesLastHeight + extrasHeight + 56;
@@ -183,7 +189,7 @@ public partial class TabWorker_Bio_Humanlike
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("(debug) Compatibility: " + selPawnForSocialInfo.relations.CompatibilityWith(relation.otherPawn).ToString("F2"));
             stringBuilder.Append("(debug) RomanceChanceFactor: "
-                                 + selPawnForSocialInfo.relations.SecondaryRomanceChanceFactor(relation.otherPawn).ToString("F2"));
+                               + selPawnForSocialInfo.relations.SecondaryRomanceChanceFactor(relation.otherPawn).ToString("F2"));
         }
 
         return stringBuilder.ToString();

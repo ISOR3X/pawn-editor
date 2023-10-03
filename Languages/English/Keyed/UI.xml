@@ -23,6 +23,7 @@
     <PawnEditor.Add.Saved>Add saved {0}</PawnEditor.Add.Saved>
     <PawnEditor.Add.Random>Add random {0} ({1} points)</PawnEditor.Add.Random>
     <PawnEditor.Add.OtherSave>Add pawn from other save</PawnEditor.Add.OtherSave>
+    <PawnEditor.Add.Backer>Add special pawn</PawnEditor.Add.Backer>
 
     <!-- Teleport and Editor -->
     <PawnEditor.Teleport>Teleport</PawnEditor.Teleport>
@@ -171,6 +172,12 @@
     <PawnEditor.TraitDisallowedByKind>Trait {0} is not allowed on {1}.</PawnEditor.TraitDisallowedByKind>
     <PawnEditor.TraitConflicts>Trait {0} conflicts with trait {1}.</PawnEditor.TraitConflicts>
     <PawnEditor.TraitWorkDisabled>{0} can't do {1}, which is required by {2}.</PawnEditor.TraitWorkDisabled>
+    <PawnEditor.AddPsylink>{0} is a psycast that needs a psylink. Would you like to add one?</PawnEditor.AddPsylink>
+    <PawnEditor.NoAdultOnChild>Can't add adult backstory {0} to a child.</PawnEditor.NoAdultOnChild>
+    <PawnEditor.WearingWouldRemove>Wearing {0} would remove {1}. Replace it?</PawnEditor.WearingWouldRemove>
+    <PawnEditor.HediffConflict>Prosthetic {0} conflicts with existing prosthetic {1}. Add anyway?</PawnEditor.HediffConflict>
+    <PawnEditor.HediffDuplicate>Are you sure you want to add duplicate hediff {0}?</PawnEditor.HediffDuplicate>
+    <PawnEditor.Teleport.Specific>Teleport to exact location</PawnEditor.Teleport.Specific>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

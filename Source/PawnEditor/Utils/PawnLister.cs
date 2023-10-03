@@ -135,7 +135,7 @@ public class PawnLister
         return new(LocationLabel(location), () => TeleportFromTo(pawn, GetLocation(pawn), location));
     }
 
-    private object GetLocation(Pawn pawn)
+    public object GetLocation(Pawn pawn)
     {
         if (pawns.Contains(pawn)) return locations[pawns.IndexOf(pawn)];
         if (pawn.SpawnedOrAnyParentSpawned) return pawn.MapHeld;

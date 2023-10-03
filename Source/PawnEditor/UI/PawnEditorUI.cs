@@ -79,6 +79,20 @@ public static partial class PawnEditor
                     Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnList.GetTeleportOption(map, selectedPawn))
                        .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnList.GetTeleportOption(caravan, selectedPawn)))
                        .Append(PawnList.GetTeleportOption(Find.World, selectedPawn))
+                       .Append(new("PawnEditor.Teleport.Specific".Translate(), delegate
+                        {
+                            onClose();
+                            DebugTools.curTool = new("PawnEditor.Teleport".Translate(), () =>
+                            {
+                                var cell = UI.MouseCell();
+                                var map = Find.CurrentMap;
+                                if (!cell.Standable(map) || cell.Fogged(map)) return;
+                                PawnList.TeleportFromTo(selectedPawn, PawnList.GetLocation(selectedPawn), map);
+                                selectedPawn.Position = cell;
+                                selectedPawn.Notify_Teleported();
+                                DebugTools.curTool = null;
+                            });
+                        }))
                        .ToList()));
             });
 

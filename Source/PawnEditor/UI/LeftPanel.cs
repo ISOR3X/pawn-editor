@@ -133,7 +133,6 @@ public static partial class PawnEditor
     {
         void AddPawnKind(PawnKindDef pawnKind)
         {
-            Log.Message($"Generating {pawnKind} in {selectedFaction}");
             AddPawn(PawnGenerator.GeneratePawn(new(pawnKind, selectedFaction,
                 Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
                 forceGenerateNewPawn: true)), category);
@@ -149,12 +148,34 @@ public static partial class PawnEditor
         };
 
         if (category == PawnCategory.Humans)
+        {
             list.Insert(0,
-                new("PawnEditor.Add.PawnKind".Translate(), delegate { Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, PawnCategory.Humans)); }));
+                new("PawnEditor.Add.PawnKind".Translate(), () => Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, PawnCategory.Humans))));
+            list.Add(new("PawnEditor.Add.Backer".Translate(), delegate
+            {
+                Find.WindowStack.Add(new FloatMenu(SolidBioDatabase.allBios.Select(bio => new FloatMenuOption(bio.name.ToStringFull, delegate
+                    {
+                        var pawn = PawnGenerator.GeneratePawn(new(selectedFaction.def.basicMemberKind, selectedFaction,
+                            Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
+                            forceGenerateNewPawn: true, fixedBirthName: bio.name.First, fixedLastName: bio.name.Last, fixedGender: bio.gender switch
+                            {
+                                GenderPossibility.Male => Gender.Male,
+                                GenderPossibility.Female => Gender.Female,
+                                GenderPossibility.Either => null,
+                                _ => throw new ArgumentOutOfRangeException()
+                            }));
+                        pawn.Name = bio.name;
+                        pawn.story.Childhood = bio.childhood;
+                        pawn.story.Adulthood = bio.adulthood;
+                        AddPawn(pawn, category);
+                    }))
+                   .ToList()));
+            }));
+        }
         else if (selectedCategory is PawnCategory.Animals or PawnCategory.Mechs)
             list.Insert(0,
                 new($"{"Add".Translate().CapitalizeFirst()} {selectedCategory.Label()}",
-                    delegate { Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, selectedCategory)); }));
+                    () => Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, selectedCategory))));
 
         list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));
 
