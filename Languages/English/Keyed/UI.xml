@@ -40,7 +40,6 @@
 
     <!-- Edit Appearance -->
     <PawnEditor.EditAppearance>Edit appearance</PawnEditor.EditAppearance>
-    <PawnEditor.Shape>Shape</PawnEditor.Shape>
     <PawnEditor.Sex>Sex</PawnEditor.Sex>
     <PawnEditor.Basic>Basic</PawnEditor.Basic>
     <PawnEditor.Age>Age</PawnEditor.Age>
