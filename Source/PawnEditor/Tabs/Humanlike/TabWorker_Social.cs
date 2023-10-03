@@ -17,13 +17,13 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
         var headerRect = rect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
         PawnEditor.DrawPawnPortrait(portraitRect);
-        DoBottomOptions(rect.TakeBottomPart(40), pawn);
+        DoBottomOptions(rect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
         DoRelations(rect, pawn);
     }
 
     private void DoBottomOptions(Rect inRect, Pawn pawn)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.QuickActions".Translate()))
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
             Find.WindowStack.Add(new FloatMenu(new()
             {
                 new("PawnEditor.ForceRomance".Translate(), () =>
@@ -38,19 +38,23 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                     var pawns = PawnEditor.Pregame
                         ? Find.GameInitData.startingAndOptionalPawns
                         : pawn.MapHeld?.mapPawns.AllPawns
-                       ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
-                             .AllCaravansAndTravelingTransportPods_Alive;
+                          ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
+                              .AllCaravansAndTravelingTransportPods_Alive;
 
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
-                       .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
-                       .ToList()));
+                        .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+                        .ToList()));
                 })
             }));
+        inRect.xMin += 4f;
+        
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddRelation".Translate()))
+        {
+        }
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddRelation".Translate())) { }
-
+        inRect.xMin += 4f;
         var oldShowAll = SocialCardUtility.showAllRelations;
-        Widgets.CheckboxLabeled(inRect.ContractedBy(4), "PawnEditor.ShowAll.Relations".Translate(), ref SocialCardUtility.showAllRelations,
+        Widgets.CheckboxLabeled(inRect, "PawnEditor.ShowAll.Relations".Translate(), ref SocialCardUtility.showAllRelations,
             placeCheckboxNearText: true);
         if (oldShowAll != SocialCardUtility.showAllRelations) table.ClearCache();
     }

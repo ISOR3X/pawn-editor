@@ -19,7 +19,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
         PawnEditor.DrawPawnPortrait(portraitRect);
         headerRect.xMin += 10;
         DoCapacities(headerRect, pawn);
-        DoBottomOptions(rect.TakeBottomPart(40), pawn);
+        DoBottomOptions(rect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
         DoHediffs(rect, pawn);
     }
 
@@ -40,7 +40,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
 
     private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.QuickActions".Translate()))
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
             Find.WindowStack.Add(new FloatMenu(new()
             {
                 new("PawnEditor.TendAll".Translate(), () =>
@@ -55,11 +55,13 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                         foreach (var hediff in bad) pawn.health.RemoveHediff(hediff);
                     })
             }));
-
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddHediff".Translate()))
+        inRect.xMin += 4f;
+        
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddHediff".Translate()))
             Find.WindowStack.Add(new Dialog_SelectHediff(DefDatabase<HediffDef>.AllDefsListForReading, pawn));
-
-        Widgets.CheckboxLabeled(inRect.ContractedBy(4), "PawnEditor.ShowHidden.Hediffs".Translate(), ref HealthCardUtility.showAllHediffs,
+        inRect.xMin += 4f;
+        
+        Widgets.CheckboxLabeled(inRect, "PawnEditor.ShowHidden.Hediffs".Translate(), ref HealthCardUtility.showAllHediffs,
             placeCheckboxNearText: true);
     }
 

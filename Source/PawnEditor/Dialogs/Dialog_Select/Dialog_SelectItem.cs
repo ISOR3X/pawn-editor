@@ -20,7 +20,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         All
     }
 
-    private static readonly HashSet<ThingStyle> thingStyles = new();
+    public static readonly HashSet<ThingStyle> thingStyles = new();
     private readonly IEnumerable<Thing> _activeItems;
     private readonly ItemType _itemType;
     private readonly string _thingCategoryLabel;
@@ -360,7 +360,7 @@ public class Dialog_SelectItem : Dialog_SelectThing<ThingDef>
         }
     }
 
-    private struct ThingStyle
+    public struct ThingStyle
     {
         public ThingDef ThingDef;
         public Dictionary<ThingStyleDef, StyleCategoryDef> StyleDefs;

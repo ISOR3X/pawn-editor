@@ -81,8 +81,8 @@ public static class UIUtility
 
     public static void ListSeparator(this Listing listing, string label)
     {
-        listing.NewColumnIfNeeded(25);
-        Widgets.ListSeparator(ref listing.curY, listing.ColumnWidth, label);
+        ListSeparator(new Rect(listing.curX, listing.curY, listing.ColumnWidth, 30f), label);
+        listing.Gap(30f);
     }
 
     public static void ListSeparator(Rect inRect, string label)
@@ -147,8 +147,22 @@ public static class UIUtility
         return flag;
     }
 
-    public static void IntField(Rect inRect, ref int value, int min, int max, ref string buffer)
+    public static void IntField(Rect inRect, ref int value, int min, int max, ref string buffer, bool minMaxButtons = false)
     {
+        if (minMaxButtons)
+        {
+            if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalfDouble))
+            {
+                if (value >= min + 1)
+                {
+                    value = min;
+                    buffer = null;
+                }
+                else
+                    Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+            }
+        }
+
         if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalf))
         {
             if (value >= min + 1)
@@ -158,6 +172,20 @@ public static class UIUtility
             }
             else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+        }
+
+        if (minMaxButtons)
+        {
+            if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalfDouble))
+            {
+                if (value <= max - 1)
+                {
+                    value = max;
+                    buffer = null;
+                }
+                else
+                    Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+            }
         }
 
         if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalf))
@@ -170,6 +198,7 @@ public static class UIUtility
             else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
         }
+
 
         Widgets.TextFieldNumeric(inRect.ContractedBy(0f, 4f), ref value, ref buffer, min, max);
     }
@@ -191,5 +220,15 @@ public static class UIUtility
         rect.xMin += labelIcon.width;
         Widgets.DrawTextureFitted(outerRect, labelIcon, labelIconScale);
         Widgets.Label(rect, label);
+    }
+
+    public static bool DefaultButtonText(ref Rect inRect, string label, float xMargin = 48f)
+    {
+        float width = Text.CalcSize(label).x;
+        var rect = inRect.TakeLeftPart(width + xMargin);
+        using (new TextBlock(GameFont.Small, TextAnchor.MiddleCenter, false))
+        {
+            return Widgets.ButtonText(rect, label);
+        }
     }
 }
