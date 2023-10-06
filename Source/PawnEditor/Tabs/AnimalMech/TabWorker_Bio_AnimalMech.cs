@@ -183,8 +183,8 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         {
             var possiblePawns = pawn.MapHeld == null
                 ? Find.WorldPawns.AllPawnsAlive.Where(p =>
-                    p.IsColonistPlayerControlled && (!pawn.RaceProps.IsMechanoid || MechanitorUtility.CanControlMech(p, pawn)))
-                : pawn.MapHeld.mapPawns.FreeColonists;
+                    p.IsColonistPlayerControlled && (!pawn.RaceProps.IsMechanoid || MechanitorUtility.IsMechanitor(p)))
+                : pawn.MapHeld.mapPawns.FreeColonists.Where(p => !pawn.RaceProps.IsMechanoid || MechanitorUtility.IsMechanitor(p));
             Find.WindowStack.Add(new FloatMenu(possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
                 {
                     if (bond != null)
