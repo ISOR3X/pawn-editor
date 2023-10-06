@@ -88,7 +88,8 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                        .ToList()));
                 }),
                 new("Edit".Translate() + "...", () => PawnEditor.Select(pawn)),
-                new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn); }),
+                new(TexButton.Save,
+                    () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Animals.ToString()); }),
                 new(TexButton.Copy, () => { }),
                 new(TexButton.Paste, () => { }),
                 new(TexButton.DeleteX, () =>
@@ -140,7 +141,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                        .ToList()));
                 }),
                 new("Edit".Translate() + "...", () => PawnEditor.Select(pawn)),
-                new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn); }),
+                new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Mechs.ToString()); }),
                 new(TexButton.Copy, () => { }),
                 new(TexButton.Paste, () => { }),
                 new(TexButton.DeleteX, () =>
@@ -177,25 +178,27 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         if (PawnEditor.Pregame)
         {
             yield return new SaveLoadItem<PawnList>("AnimalsSection".Translate(), new(
-                StartingThingsManager.GetPawns(PawnCategory.Animals)), new()
+                StartingThingsManager.GetPawns(PawnCategory.Animals), PawnCategory.Animals), new()
             {
                 OnLoad = pawnList =>
                 {
                     var list = StartingThingsManager.GetPawns(PawnCategory.Animals);
                     list.Clear();
                     list.AddRange(pawnList.Pawns);
-                }
+                },
+                TypePostfix = PawnCategory.Animals.ToString()
             });
 
             yield return new SaveLoadItem<PawnList>("MechsSection".Translate(), new(
-                StartingThingsManager.GetPawns(PawnCategory.Mechs)), new()
+                StartingThingsManager.GetPawns(PawnCategory.Mechs), PawnCategory.Mechs), new()
             {
                 OnLoad = pawnList =>
                 {
                     var list = StartingThingsManager.GetPawns(PawnCategory.Mechs);
                     list.Clear();
                     list.AddRange(pawnList.Pawns);
-                }
+                },
+                TypePostfix = PawnCategory.Mechs.ToString()
             });
         }
     }
@@ -213,15 +216,23 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         });
     }
 
-    private struct PawnList : IExposable
+    private struct PawnList : IExposable, ISaveable
     {
         public List<Pawn> Pawns;
+        private PawnCategory category;
 
-        public PawnList(IEnumerable<Pawn> pawns) => Pawns = pawns.ToList();
+        public PawnList(IEnumerable<Pawn> pawns, PawnCategory category)
+        {
+            Pawns = pawns.ToList();
+            this.category = category;
+        }
 
         public void ExposeData()
         {
             Scribe_Collections.Look(ref Pawns, "pawns", LookMode.Deep);
+            Scribe_Values.Look(ref category, nameof(category));
         }
+
+        public string DefaultFileName() => category.ToString();
     }
 }

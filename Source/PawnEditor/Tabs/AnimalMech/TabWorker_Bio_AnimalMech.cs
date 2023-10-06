@@ -114,7 +114,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         inRect.xMin += 5;
         var name = "Name".Translate();
         var age = "PawnEditor.Age".Translate();
-        var bonded = "PawnEditor.Bonded".Translate();
+        var bonded = pawn.RaceProps.IsMechanoid ? "Overseer".Translate() : "PawnEditor.Bonded".Translate();
         var leftWidth = UIUtility.ColumnWidth(3, name, age, bonded);
         var nameRect = inRect.TakeTopPart(30);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(nameRect.TakeLeftPart(leftWidth), name);
@@ -132,7 +132,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
             var nick = nameTriple.Nick;
             var last = nameTriple.Last;
             CharacterCardUtility.DoNameInputRect(firstRect, ref first, 12);
-            if (nameTriple.Nick == nameTriple.First || nameTriple.Nick == nameTriple.Last) GUI.color = new Color(1f, 1f, 1f, 0.5f);
+            if (nameTriple.Nick == nameTriple.First || nameTriple.Nick == nameTriple.Last) GUI.color = new(1f, 1f, 1f, 0.5f);
             CharacterCardUtility.DoNameInputRect(nickRect, ref nick, 16);
             GUI.color = Color.white;
             CharacterCardUtility.DoNameInputRect(lastRect, ref last, 12);
@@ -176,18 +176,20 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
 
         var bondRect = inRect.TakeTopPart(30);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(bondRect.TakeLeftPart(leftWidth), bonded);
-        var bondedTo = pawn.relations.GetFirstDirectRelationPawn(PawnRelationDefOf.Bond, _ => true);
-        var bond = bondedTo == null ? null : pawn.relations.GetDirectRelation(PawnRelationDefOf.Bond, bondedTo);
-        if (Widgets.ButtonText(bondRect, bondedTo?.Name?.ToStringShort ?? "None".Translate()))
+        var bondRelation = pawn.RaceProps.IsMechanoid ? PawnRelationDefOf.Overseer : PawnRelationDefOf.Bond;
+        var bondedTo = pawn.relations.GetFirstDirectRelationPawn(bondRelation, _ => true);
+        var bond = bondedTo == null ? null : pawn.relations.GetDirectRelation(bondRelation, bondedTo);
+        if (Widgets.ButtonText(bondRect, bondedTo?.Name?.ToStringShort ?? (pawn.RaceProps.IsMechanoid ? "OverseerNone" : "None").Translate()))
         {
             var possiblePawns = pawn.MapHeld == null
-                ? Find.WorldPawns.AllPawnsAlive.Where(p => p.IsColonistPlayerControlled)
+                ? Find.WorldPawns.AllPawnsAlive.Where(p =>
+                    p.IsColonistPlayerControlled && (!pawn.RaceProps.IsMechanoid || MechanitorUtility.CanControlMech(p, pawn)))
                 : pawn.MapHeld.mapPawns.FreeColonists;
             Find.WindowStack.Add(new FloatMenu(possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
                 {
                     if (bond != null)
                         pawn.relations.RemoveDirectRelation(bond);
-                    pawn.relations.AddDirectRelation(PawnRelationDefOf.Bond, p);
+                    pawn.relations.AddDirectRelation(bondRelation, p);
                 }))
                .ToList()));
         }

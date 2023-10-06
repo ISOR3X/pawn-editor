@@ -104,7 +104,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     {
         if (PawnEditor.Pregame)
         {
-            yield return new SaveLoadItem<ThingList>("Equipment".Translate(), new(StartingThingsManager.GetStartingThingsNear()),
+            yield return new SaveLoadItem<ThingList>("Equipment".Translate(), new(StartingThingsManager.GetStartingThingsNear(), "Equipment"),
                 new()
                 {
                     OnLoad = thingList =>
@@ -114,7 +114,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                         list.AddRange(thingList.Things);
                     }
                 });
-            yield return new SaveLoadItem<ThingList>("ScatteredLoot".Translate(), new(StartingThingsManager.GetStartingThingsFar()),
+            yield return new SaveLoadItem<ThingList>("ScatteredLoot".Translate(), new(StartingThingsManager.GetStartingThingsFar(), "Loot"),
                 new()
                 {
                     OnLoad = thingList =>
@@ -136,15 +136,23 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate())) { }
     }
 
-    private struct ThingList : IExposable
+    private struct ThingList : IExposable, ISaveable
     {
         public List<Thing> Things;
+        private string label;
 
-        public ThingList(IEnumerable<Thing> things) => Things = things.ToList();
+        public ThingList(IEnumerable<Thing> things, string label = "Things")
+        {
+            Things = things.ToList();
+            this.label = label;
+        }
 
         public void ExposeData()
         {
             Scribe_Collections.Look(ref Things, "things", LookMode.Deep);
+            Scribe_Values.Look(ref label, nameof(label));
         }
+
+        public string DefaultFileName() => label;
     }
 }

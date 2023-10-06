@@ -14,11 +14,13 @@ public class PawnEditorMod : Mod
 {
     public static Harmony Harm;
     public static PawnEditorSettings Settings;
+    public static PawnEditorMod Instance;
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
         Harm = new("legodude17.pawneditor");
         Settings = GetSettings<PawnEditorSettings>();
+        Instance = this;
 
         Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.PreOpen)),
             new(GetType(), nameof(Notify_ConfigurePawns)));

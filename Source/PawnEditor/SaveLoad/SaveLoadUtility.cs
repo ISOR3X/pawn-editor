@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using RimWorld;
 using Verse;
 
 namespace PawnEditor;
@@ -21,17 +22,30 @@ public static partial class SaveLoadUtility
 
     public static string BaseSaveFolder => GenFilePaths.FolderUnderSaveData("PawnEditor");
 
-    public static string SaveFolderForItemType(string type) => Path.Combine(BaseSaveFolder, type.CapitalizeFirst());
+    public static DirectoryInfo SaveFolderForItemType(string type)
+    {
+        var dir = new DirectoryInfo(Path.Combine(BaseSaveFolder, type.CapitalizeFirst()));
+        var parent = dir.Parent;
+        while (parent is { Exists: false })
+        {
+            parent.Create();
+            parent = parent.Parent;
+        }
 
-    public static string FilePathFor(string type, string name) => Path.Combine(SaveFolderForItemType(type), name + ".xml");
+        if (!dir.Exists) dir.Create();
+        return dir;
+    }
+
+    public static string FilePathFor(string type, string name) => Path.Combine(BaseSaveFolder, type.CapitalizeFirst(), name + ".xml");
 
     public static int CountWithName(string type, string name) =>
-        new DirectoryInfo(SaveFolderForItemType(type)).GetFiles().Count(f => f.Extension == ".xml" && f.Name.StartsWith(name));
+        SaveFolderForItemType(type).GetFiles().Count(f => f.Extension == ".xml" && f.Name.StartsWith(name));
 
-    public static void SaveItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null) where T : IExposable
+    public static void SaveItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null, string typePostfix = null)
+        where T : IExposable
     {
         var type = typeof(T).Name;
-        Find.WindowStack.Add(new Dialog_PawnEditorFiles_Save(type, path =>
+        Find.WindowStack.Add(new Dialog_PawnEditorFiles_Save(typePostfix.NullOrEmpty() ? type : Path.Combine(type, typePostfix!), path =>
         {
             currentlyWorking = true;
             currentItem = item as ILoadReferenceable;
@@ -41,12 +55,12 @@ public static partial class SaveLoadUtility
             ApplyPatches();
 
             var tempFile = Path.GetTempFileName();
-            Scribe.saver.InitSaving(tempFile, type);
+            Scribe.saver.InitSaving(tempFile, typePostfix.NullOrEmpty() ? type : type + "." + typePostfix);
             item.ExposeData();
             Scribe.saver.FinalizeSaving();
             File.Delete(tempFile);
 
-            Scribe.saver.InitSaving(path, type);
+            Scribe.saver.InitSaving(path, typePostfix.NullOrEmpty() ? type : type + "." + typePostfix);
             ScribeMetaHeaderUtility.WriteMetaHeader();
             item.ExposeData();
             Scribe.saver.FinalizeSaving();
@@ -56,20 +70,31 @@ public static partial class SaveLoadUtility
             currentlyWorking = false;
             currentPawn = null;
             UnApplyPatches();
+
+            if (item is Pawn pawn) PawnEditor.SavePawnTex(pawn, Path.ChangeExtension(path, ".png"));
+
             callback?.Invoke(item);
         }, item switch
         {
             Pawn pawn => pawn.LabelShort,
             Map => "Colony",
             StartingThingsManager.StartingPreset => "Colony",
+            Faction faction => faction.Name,
+            Pawn_AbilityTracker abilities => abilities.pawn.LabelShort,
+            Pawn_EquipmentTracker equipment => equipment.pawn.LabelShort,
+            Pawn_ApparelTracker apparel => apparel.pawn.LabelShort,
+            Pawn_InventoryTracker inventory => inventory.pawn.LabelShort,
+            HediffSet hediffs => hediffs.pawn.LabelShort,
+            ISaveable saveable => saveable.DefaultFileName(),
             _ => type
         }));
     }
 
-    public static void LoadItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null) where T : IExposable
+    public static void LoadItem<T>(T item, Action<T> callback = null, Pawn parentPawn = null, Action<T> prepare = null, string typePostfix = null)
+        where T : IExposable
     {
         var type = typeof(T).Name;
-        Find.WindowStack.Add(new Dialog_PawnEditorFiles_Load(type, path =>
+        Find.WindowStack.Add(new Dialog_PawnEditorFiles_Load(typePostfix.NullOrEmpty() ? type : Path.Combine(type, typePostfix!), path =>
         {
             currentlyWorking = true;
             currentItem = item as ILoadReferenceable;
@@ -112,19 +137,19 @@ public static partial class SaveLoadUtility
     {
         var myType = typeof(SaveLoadUtility);
         PawnEditorMod.Harm.Patch(ReferenceLook.MakeGenericMethod(typeof(ILoadReferenceable)),
-            new HarmonyMethod(myType, nameof(InterceptReferences)));
+            new(myType, nameof(InterceptReferences)));
         PawnEditorMod.Harm.Patch(AccessTools.Method(typeof(Thing), nameof(Thing.ExposeData)),
-            transpiler: new HarmonyMethod(myType, nameof(FixFactionWeirdness)));
+            transpiler: new(myType, nameof(FixFactionWeirdness)));
         PawnEditorMod.Harm.Patch(AccessTools.Method(typeof(DebugLoadIDsSavingErrorsChecker), nameof(DebugLoadIDsSavingErrorsChecker.RegisterDeepSaved)),
-            postfix: new HarmonyMethod(myType, nameof(Notify_DeepSaved)));
+            postfix: new(myType, nameof(Notify_DeepSaved)));
         PawnEditorMod.Harm.Patch(AccessTools.Method(typeof(PostLoadIniter), nameof(PostLoadIniter.RegisterForPostLoadInit)),
-            postfix: new HarmonyMethod(myType, nameof(Notify_DeepSaved)));
+            postfix: new(myType, nameof(Notify_DeepSaved)));
         PawnEditorMod.Harm.Patch(AccessTools.Method(typeof(Scribe_Values), nameof(Scribe_Values.Look), generics: new[] { typeof(int) }),
-            new HarmonyMethod(myType, nameof(ReassignLoadID)));
+            new(myType, nameof(ReassignLoadID)));
         PawnEditorMod.Harm.Patch(AccessTools.Method(typeof(Pawn), nameof(Pawn.ExposeData)),
-            new HarmonyMethod(myType, nameof(AssignCurrentPawn)), new HarmonyMethod(myType, nameof(ClearCurrentPawn)));
+            new(myType, nameof(AssignCurrentPawn)), new(myType, nameof(ClearCurrentPawn)));
         PawnEditorMod.Harm.Patch(AccessTools.Method(typeof(LoadIDsWantedBank), nameof(LoadIDsWantedBank.RegisterLoadIDListReadFromXml),
-            new[] { typeof(List<string>), typeof(string), typeof(IExposable) }), new HarmonyMethod(myType, nameof(InterceptIDList)));
+            new[] { typeof(List<string>), typeof(string), typeof(IExposable) }), new(myType, nameof(InterceptIDList)));
     }
 
     private static void UnApplyPatches()
@@ -142,4 +167,9 @@ public static partial class SaveLoadUtility
         PawnEditorMod.Harm.Unpatch(AccessTools.Method(typeof(LoadIDsWantedBank), nameof(LoadIDsWantedBank.RegisterLoadIDListReadFromXml),
             new[] { typeof(List<string>), typeof(string), typeof(IExposable) }), AccessTools.Method(myType, nameof(InterceptIDList)));
     }
+}
+
+public interface ISaveable
+{
+    string DefaultFileName();
 }

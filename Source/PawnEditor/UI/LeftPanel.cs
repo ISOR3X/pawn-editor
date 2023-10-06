@@ -143,7 +143,7 @@ public static partial class PawnEditor
             new("PawnEditor.Add.Saved".Translate(category.Label()), delegate
             {
                 var pawn = new Pawn();
-                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category));
+                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category), typePostfix: category.ToString());
             })
         };
 

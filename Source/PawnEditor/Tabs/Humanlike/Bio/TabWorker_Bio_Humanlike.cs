@@ -10,12 +10,12 @@ namespace PawnEditor;
 [HotSwappable]
 public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
 {
+    private readonly Dictionary<string, string> truncateCache = new();
     private float abilitiesLastHeight = 120;
     private float incapableLastHeight = 60;
     private float leftLastHeight;
     private Vector2 leftScrollPos;
     private float traitsLastHeight = 60;
-    private readonly Dictionary<string, string> truncateCache = new();
 
     public override void DrawTabContents(Rect rect, Pawn pawn)
     {
@@ -35,7 +35,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
     public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Pawn pawn)
     {
         yield return new SaveLoadItem<Pawn_AbilityTracker>("Abilities".Translate(), pawn.abilities);
-        yield return new SaveLoadItem<AppearanceInfo>("Appearance".Translate(), AppearanceInfo.CreateFrom(pawn), new SaveLoadParms<AppearanceInfo>
+        yield return new SaveLoadItem<AppearanceInfo>("Appearance".Translate(), AppearanceInfo.CreateFrom(pawn), new()
         {
             OnLoad = info => info.CopyTo(pawn)
         });
@@ -47,7 +47,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         Widgets.Label(headerRect, "Skills".Translate().Colorize(ColoredText.TipSectionTitleColor));
         GUI.color = Color.white;
         if (Widgets.ButtonText(headerRect.TakeRightPart(60), "PawnEditor.Preset".Translate()))
-            Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>
+            Find.WindowStack.Add(new FloatMenu(new()
             {
                 new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), 0), GetSetDelegate(pawn, false, 0)),
                 new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), "PawnEditor.Max".Translate()), GetSetDelegate(pawn, false, 20)),
@@ -83,7 +83,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                     };
                 var level = skill.GetLevel();
                 var disabled = skill.TotallyDisabled;
-                Texture2D texture2D = SkillUI.SkillBarFillTex;
+                var texture2D = SkillUI.SkillBarFillTex;
                 if (ModsConfig.BiotechActive)
                 {
                     if (skill.Aptitude > 0)
@@ -91,6 +91,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                     else if (skill.Aptitude < 0)
                         texture2D = SkillUI.SkillBarAptitudeNegativeTex;
                 }
+
                 if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / 20f), texture2D, TexPawnEditor.SkillBarBGTex, false);
                 rect.xMin += 3;
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
@@ -113,7 +114,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
     }
 
     [HotSwappable]
-    private class AppearanceInfo : IExposable
+    internal class AppearanceInfo : IExposable, ISaveable
     {
         public BeardDef beard;
         public TattooDef bodyTattoo;
@@ -139,6 +140,8 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
             Scribe_Values.Look(ref skinColorOverride, nameof(skinColorOverride));
             Scribe_Values.Look(ref hairColorOverride, nameof(hairColorOverride));
         }
+
+        public string DefaultFileName() => "Appearance";
 
         public static AppearanceInfo CreateFrom(Pawn pawn)
         {

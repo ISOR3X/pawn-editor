@@ -44,7 +44,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
                     Find.GameInitData.startingAndOptionalPawns = cachedPawns;
                     Find.GameInitData.startingPawnCount = cachedSections.IndexOf("StartingPawnsLeftBehind".Translate());
                     CreateLocationTables(cachedPawns, cachedSections);
-                }
+                },
+                TypePostfix = PawnCategory.Humans.ToString()
             });
     }
 
@@ -111,7 +112,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         yield return new(pawn.ageTracker.AgeNumberString, pawn.ageTracker.AgeBiologicalYears);
         yield return new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue);
         yield return new("Edit".Translate() + "...", () => PawnEditor.Select(pawn));
-        yield return new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn); });
+        yield return new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Humans.ToString()); });
         yield return new(TexButton.Copy, () => { });
         yield return new(TexButton.Paste, () => { });
         yield return new(TexButton.DeleteX, () =>
@@ -134,7 +135,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         });
     }
 
-    private struct ColonistList : IExposable
+    private struct ColonistList : IExposable, ISaveable
     {
         public List<Pawn> Colonists;
         public List<string> Sections;
@@ -150,5 +151,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             Scribe_Collections.Look(ref Colonists, "colonists", LookMode.Deep);
             Scribe_Collections.Look(ref Sections, "sections", LookMode.Value);
         }
+
+        public string DefaultFileName() => "Colonists";
     }
 }

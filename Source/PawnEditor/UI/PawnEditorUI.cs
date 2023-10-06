@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -154,7 +155,8 @@ public static partial class PawnEditor
         else
             yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn, new()
             {
-                LoadLabel = "PawnEditor.LoadPawn".Translate()
+                LoadLabel = "PawnEditor.LoadPawn".Translate(),
+                TypePostfix = selectedCategory.ToString()
             });
 
         if (Pregame)
@@ -230,10 +232,18 @@ public static partial class PawnEditor
             remainingPoints -= amount.Value;
         else if (cachedPawnList?.Count > 0)
         {
-            var pawnValue = cachedPawnList.Sum(p => p.GetStatValue(StatDefOf.MarketValue));
+            var pawnValue = cachedPawnList.Sum(GetPawnValue);
             remainingPoints -= pawnValue - cachedPawnValue;
             cachedPawnValue = pawnValue;
         }
+    }
+
+    private static float GetPawnValue(Pawn pawn)
+    {
+        var num = pawn.MarketValue;
+        num += pawn.apparel.WornApparel.Sum(t => t.MarketValue);
+        num += pawn.equipment.AllEquipmentListForReading.Sum(t => t.MarketValue);
+        return num;
     }
 
     private static void SetTabGroup(TabGroupDef def)
@@ -303,8 +313,20 @@ public static partial class PawnEditor
     }
 
     public static RenderTexture GetPawnTex(Pawn pawn, Vector2 portraitSize, Rot4 dir, Vector3 cameraOffset = default, float cameraZoom = 1f) =>
-        PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom, renderHeadgear: RenderHeadgear, renderClothes: RenderClothes,
+        PortraitsCache.Get(pawn, portraitSize / pawn.BodySize, dir, cameraOffset, cameraZoom, renderHeadgear: RenderHeadgear, renderClothes: RenderClothes,
             stylingStation: true);
+
+    public static void SavePawnTex(Pawn pawn, string path)
+    {
+        var tex = GetPawnTex(pawn, new(128, 128), Rot4.South);
+        RenderTexture.active = tex;
+        var tex2D = new Texture2D(tex.width, tex.width);
+        tex2D.ReadPixels(new(0, 0, tex.width, tex.height), 0, 0);
+        RenderTexture.active = null;
+        tex2D.Apply(true, false);
+        var bytes = tex2D.EncodeToPNG();
+        File.WriteAllBytes(path, bytes);
+    }
 
     public static void DrawPawnPortrait(Rect rect)
     {
