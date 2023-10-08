@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Defs>
-    <PawnEditor.WidgetDef>
+    <!-- <PawnEditor.WidgetDef>
         <defName>Test2</defName>
         <workerClass>PawnEditor.WidgetWorker_Blank</workerClass>
         <defaultWidth>300</defaultWidth>
@@ -20,5 +20,5 @@
         <defaultWidth>400</defaultWidth>
         <defaultHeight>300</defaultHeight>
         <type>Pawn</type>
-    </PawnEditor.WidgetDef>
+    </PawnEditor.WidgetDef> -->
 </Defs>

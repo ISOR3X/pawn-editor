@@ -16,9 +16,15 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
     {
         var headerRect = rect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
+        headerRect = headerRect.ContractedBy(8f, 0f);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(headerRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "TabLog".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        headerRect.xMin += 4f;
+        headerRect.yMin += 4f;
+        InteractionCardUtility.DrawInteractionsLog(headerRect, pawn, Find.PlayLog.AllEntries, 12);
         PawnEditor.DrawPawnPortrait(portraitRect);
         DoBottomOptions(rect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
-        DoRelations(rect, pawn);
+        DoRelations(rect.ContractedBy(4f), pawn);
     }
 
     private void DoBottomOptions(Rect inRect, Pawn pawn)
@@ -45,9 +51,10 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                         .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
                         .ToList()));
                 })
+                // ToDo: Create baby from parent?
             }));
         inRect.xMin += 4f;
-        
+
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddRelation".Translate()))
         {
         }
@@ -61,6 +68,9 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
     private void DoRelations(Rect inRect, Pawn pawn)
     {
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "Relations".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        inRect.xMin += 4f;
         var viewRect = new Rect(0, 0, inRect.width - 20, SocialCardUtility.cachedEntries.Count * 30 + Text.LineHeightOf(GameFont.Medium));
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
         table.OnGUI(viewRect, pawn);
@@ -70,11 +80,15 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
     protected override List<UITable<Pawn>.Heading> GetHeadings() =>
         new()
         {
-            new("Relations".Translate(), 242),
-            new("PawnEditor.Relation".Translate()),
-            new("PawnEditor.Opinion".Translate().CapitalizeFirst(), 140),
-            new(100),
-            new(30)
+            new(35), // Icon
+            new("PawnEditor.Relation".Translate(), 140, TextAnchor.LowerLeft),
+            new("PawnEditor.Pawn".Translate(), textAnchor: TextAnchor.LowerLeft),
+            new("Faction".Translate(), textAnchor: TextAnchor.LowerLeft),
+            new("RomanceChanceOpinionFactor".Translate(), 100),
+            new(20),
+            // new(100), // Edit
+            new(30), // Jump to pawn
+            new(30) // Delete
         };
 
     protected override List<UITable<Pawn>.Row> GetRows(Pawn pawn)
@@ -85,8 +99,18 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
         {
             var items = new List<UITable<Pawn>.Row.Item>(5);
             var entry = SocialCardUtility.cachedEntries[i];
-            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), Widgets.PlaceholderIconTex, i));
-            items.Add(new(SocialCardUtility.GetRelationsString(entry, pawn)));
+            items.Add(new(PawnEditor.GetPawnTex(entry.otherPawn, new(25, 25), Rot4.South, cameraZoom: 2f)));
+            items.Add(new(SocialCardUtility.GetRelationsString(entry, pawn).Colorize(ColoredText.SubtleGrayColor), textAnchor: TextAnchor.MiddleLeft));
+            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), i, textAnchor: TextAnchor.MiddleLeft));
+            if (entry.otherPawn.Faction != Faction.OfPlayer)
+            {
+                items.Add(new($"{entry.otherPawn.Faction.PlayerRelationKind.ToString()}, {entry.otherPawn.Faction.Name}".Colorize(ColoredText.SubtleGrayColor), textAnchor: TextAnchor.MiddleLeft));
+            }
+            else
+            {
+                items.Add(new());
+            }
+
             items.Add(new(opinionRect =>
             {
                 opinionRect.xMin += 15;
@@ -101,7 +125,9 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                         $"({opinionFrom.ToStringWithSign()})".Colorize((opinionFrom < 0 ? ColorLibrary.RedReadable :
                             opinionFrom > 0 ? ColorLibrary.Green : Color.white).FadedColor(0.8f)));
             }, entry.otherPawn.relations.OpinionOf(pawn)));
-            items.Add(new("Edit".Translate() + "...", () => { }));
+            items.Add(new());
+            // items.Add(new("Edit".Translate() + "...", () => { }));
+            items.Add(new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(entry.otherPawn); }));
             if (entry.relations.Any(relation => !relation.implied))
                 items.Add(new(TexButton.DeleteX, () =>
                 {
@@ -115,6 +141,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
             result.Add(new(items, SocialCardUtility.GetPawnRowTooltip(entry, pawn)));
         }
+
 
         return result;
     }

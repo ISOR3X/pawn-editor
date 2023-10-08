@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,20 +17,42 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
     public override void DrawTabContents(Rect rect, Pawn pawn)
     {
-        var headerRect = rect.TakeTopPart(170);
-        var portraitRect = headerRect.TakeLeftPart(170);
-        var bottomButRect = rect.TakeBottomPart(30 + 2 * 4);
-        PawnEditor.DrawPawnPortrait(portraitRect);
+        var oldDevMode = Prefs.DevMode;
+        var oldGodMode = DebugSettings.godMode;
+        Prefs.DevMode = false;
+        DebugSettings.godMode = false;
 
-        rect.yMin += 8;
-        DrawBottomButtons(bottomButRect, pawn);
-        DrawNeeds(rect.TakeLeftPart(225f), pawn);
+        DoBottomOptions(rect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
+
+        var needsRect = rect.TakeLeftPart(330f);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(needsRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "TabNeeds".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        needsRect.xMin += 4f;
+        needsRect.yMin += 4f;
+        DrawNeeds(needsRect, pawn);
+
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(rect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "Mood".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        rect.xMin += 4f;
+        rect.yMin += 4f;
+        
+        DrawNeedWidget(rect.TakeTopPart(30f).LeftPart(0.8f), pawn.needs.mood, drawLabel: false);
+        rect.yMin += 16f;
+        rect.xMin -= 4f;
+
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(rect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "PawnEditor.Thoughts".Translate().Colorize(ColoredText.TipSectionTitleColor));
         DrawThoughts(rect, pawn);
+
+
+        Prefs.DevMode = oldDevMode;
+        DebugSettings.godMode = oldGodMode;
     }
 
-    private static void DrawBottomButtons(Rect inRect, Pawn pawn)
+    private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.QuickActions".Translate()))
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
+        {
             Find.WindowStack.Add(new FloatMenu(new()
             {
                 new("PawnEditor.RefillNeeds".Translate(), () =>
@@ -39,32 +62,56 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                 new("PawnEditor.CancelBreakdown".Translate(),
                     () => pawn.mindState.mentalStateHandler.CurState?.RecoverFromState())
             }));
+        }
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(inRect.width / 4).ContractedBy(4), "PawnEditor.AddThought".Translate())) { }
+        inRect.xMin += 4f;
+
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate()))
+        {
+        }
+
+        inRect.xMin += 4f;
     }
 
     private void DrawNeeds(Rect inRect, Pawn pawn)
     {
         NeedsCardUtility.UpdateDisplayNeeds(pawn);
         var needs = NeedsCardUtility.displayNeeds;
-        needs.Insert(0, pawn.needs.mood);
         var viewRect = new Rect(0, 0, inRect.width - 20f,
-            needs.Sum(need => need.def.major ? 70f : 50f));
-        var oldDevMode = Prefs.DevMode;
-        var oldGodMode = DebugSettings.godMode;
-        Prefs.DevMode = true;
-        DebugSettings.godMode = true;
+            needs.Sum(_ => 70f));
         Widgets.BeginScrollView(inRect, ref needsScrollPos, viewRect);
         foreach (var n in needs)
         {
-            var height = n.def.major ? 70f : 50f;
-            var width = n.def.major ? 1 : 0.74f;
-            n.DrawOnGUI(viewRect.TakeTopPart(height).LeftPart(width), customMargin: 16f);
+            DrawNeedWidget(viewRect.TakeTopPart(30f), n);
+            viewRect.yMin += 8f;
         }
 
         Widgets.EndScrollView();
-        Prefs.DevMode = oldDevMode;
-        DebugSettings.godMode = oldGodMode;
+    }
+
+    private void DrawNeedWidget(Rect inRect, Need n, float margin = 16, bool drawLabel = true)
+    {
+        var width = n.def.major ? 1 : 0.8f;
+        if (drawLabel)
+            Widgets.Label(inRect.TakeLeftPart(100f), n.LabelCap);
+        var barRect = inRect.LeftPart(width);
+        n.DrawOnGUI(barRect, customMargin: margin, drawLabel: false);
+        var pct = n.CurInstantLevelPercentage;
+        Vector2 vector2 = new Vector2(barRect.x + (barRect.width - margin * 2f) * pct, barRect.y + barRect.height);
+        GUI.DrawTexture(new Rect(vector2.x - 12 / 2f + 16f, vector2.y - margin / 2f, 12, 12), Need.BarInstantMarkerTex);
+
+        Rect barRect1 = barRect;
+        barRect1.yMax -= margin / 2;
+        barRect.xMin -= margin;
+        barRect1.xMax -= margin;
+        if (Widgets.ButtonImage(barRect1.TakeRightPart(barRect1.height).ContractedBy(4f), TexButton.Plus))
+            n.CurLevelPercentage += 0.1f;
+        if (Mouse.IsOver(barRect1))
+            TooltipHandler.TipRegion(barRect1, (TipSignal)"+ 10%");
+        if (Widgets.ButtonImage(barRect1.TakeRightPart(barRect1.height).ContractedBy(4f), TexButton.Minus))
+            n.CurLevelPercentage -= 0.1f;
+        if (Mouse.IsOver(barRect1))
+            TooltipHandler.TipRegion(barRect1, (TipSignal)"- 10%");
     }
 
     private void DrawThoughts(Rect inRect, Pawn pawn)
@@ -150,7 +197,8 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
     protected override List<UITable<Pawn>.Heading> GetHeadings() =>
         new()
         {
-            new("PawnEditor.Thoughts".Translate()),
+            new(35f),
+            new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
             new("ExpiresIn".Translate(), 120),
             new("PawnEditor.Weight".Translate(), 60),
             new(30)
@@ -178,9 +226,27 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                 NeedsCardUtility.thoughtGroup.Insert(0, leadingThought);
             }
 
+            items.Add(new(iconRect =>
+            {
+                iconRect.xMin += 3f;
+                iconRect = iconRect.ContractedBy(2f);
+
+                if (ModsConfig.IdeologyActive)
+                {
+                    if (leadingThought.sourcePrecept != null)
+                    {
+                        if (!Find.IdeoManager.classicMode)
+                            IdeoUIUtility.DoIdeoIcon(iconRect.ContractedBy(4f), leadingThought.sourcePrecept.ideo, false, (() => IdeoUIUtility.OpenIdeoInfo(leadingThought.sourcePrecept.ideo)));
+                        return;
+                    }
+                }
+
+                GUI.DrawTexture(iconRect, Widgets.PlaceholderIconTex);
+            }));
+
             var label = leadingThought.LabelCap;
             if (NeedsCardUtility.thoughtGroup.Count > 1) label += $" x{NeedsCardUtility.thoughtGroup.Count}";
-            items.Add(new(label, Widgets.PlaceholderIconTex, i));
+            items.Add(new(label, i, TextAnchor.MiddleLeft));
 
             var durationTicks = thoughtGroup.DurationTicks;
             if (durationTicks > 5 && leadingThought is Thought_Memory thoughtMemory)
@@ -189,13 +255,13 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                     ? thoughtMemory.age
                     : NeedsCardUtility.thoughtGroup.Cast<Thought_Memory>().Aggregate(int.MaxValue, (current, memory) => Mathf.Min(current, memory.age));
 
-                items.Add(new((durationTicks - age).ToStringTicksToDays(), durationTicks));
+                items.Add(new((durationTicks - age).ToStringTicksToDays().Colorize(ColoredText.SubtleGrayColor), durationTicks));
             }
-            else items.Add(new("Never".Translate()));
+            else items.Add(new("Never".Translate().Colorize(ColoredText.SubtleGrayColor)));
 
             var moodOffset = pawn.needs.mood.thoughts.MoodOffsetOfGroup(thoughtGroup);
             items.Add(new(moodOffset.ToString("##0")
-               .Colorize(moodOffset switch
+                .Colorize(moodOffset switch
                 {
                     0f => NeedsCardUtility.NoEffectColor,
                     > 0f => NeedsCardUtility.MoodColor,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Verse;
 using Verse.Sound;
 
@@ -19,6 +20,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
     private int sortDirection;
     private int sortIndex = -1;
     private T target;
+    private static float rowHeight = 32f;
 
     public UITable(List<Heading> headings, Func<T, IEnumerable<Row>> getRows)
     {
@@ -83,16 +85,16 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         var headerRect = inRect.TakeTopPart(Heading.Height);
         for (var i = 0; i < headings.Count; i++)
         {
-            var rect = headings[i].Draw(ref headerRect, i == 0, firstHasIcon, cachedWidths[i]);
-            Widgets.DrawHighlightIfMouseover(rect);
+            var currentColRect = headings[i].Draw(ref headerRect, i == 0, firstHasIcon, out float labelWidth, cachedWidths[i]);
+            Widgets.DrawHighlightIfMouseover(currentColRect);
             if (!headings[i].Sortable) continue;
             if (sortIndex == i)
             {
                 var texture2D = sortDirection == -1 ? PawnColumnWorker.SortingDescendingIcon : PawnColumnWorker.SortingIcon;
-                GUI.DrawTexture(new(rect.xMax - texture2D.width - 1f, rect.yMax - texture2D.height - 1f, texture2D.width, texture2D.height), texture2D);
+                GUI.DrawTexture(new(currentColRect.xMin + labelWidth + texture2D.width - 6f, currentColRect.yMax - texture2D.height - 1f, texture2D.width, texture2D.height), texture2D);
             }
 
-            if (Widgets.ButtonInvisible(rect))
+            if (Widgets.ButtonInvisible(currentColRect))
             {
                 if (Event.current.button == 0)
                 {
@@ -146,7 +148,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
 
         for (var i = 0; i < rows.Count; i++)
         {
-            var rect = inRect.TakeTopPart(30);
+            var rect = inRect.TakeTopPart(rowHeight);
             rect.xMin += 4;
             var totalRect = new Rect(rect);
             if (i % 2 == 1) Widgets.DrawLightHighlight(rect);
@@ -179,13 +181,15 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             private readonly int sortIndex;
             private readonly Action<Rect> customDrawer;
             private readonly Action buttonClicked;
+            private readonly TextAnchor textAnchor;
 
             public int SortIndex => sortIndex;
 
-            public Item(string label, int sortIndex = -1)
+            public Item(string label, int sortIndex = -1, TextAnchor textAnchor = TextAnchor.MiddleCenter)
             {
                 this.label = label;
                 this.sortIndex = sortIndex;
+                this.textAnchor = textAnchor;
             }
 
             public Item(string label, Action buttonClicked)
@@ -247,9 +251,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     {
                         var scale = inRect.height / icon.height;
                         var rect = new Rect(0, 0, icon.width * scale, icon.height * scale)
-                           .CenteredOnXIn(inRect)
-                           .CenteredOnYIn(inRect)
-                           .ContractedBy(2.5f);
+                            .CenteredOnXIn(inRect)
+                            .CenteredOnYIn(inRect)
+                            .ContractedBy(2.5f);
                         GUI.color = Mouse.IsOver(inRect) ? GenUI.MouseoverColor : Color.white;
                         GUI.DrawTexture(rect, icon);
                         GUI.color = Color.white;
@@ -263,9 +267,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 {
                     var scale = inRect.height / icon.height;
                     GUI.DrawTexture(new Rect(0, 0, icon.width * scale, icon.height * scale)
-                       .CenteredOnXIn(inRect)
-                       .CenteredOnYIn(inRect)
-                       .ContractedBy(2.5f), icon);
+                        .CenteredOnXIn(inRect)
+                        .CenteredOnYIn(inRect)
+                        .ContractedBy(2.5f), icon);
                 }
                 else if (!label.NullOrEmpty())
                 {
@@ -275,7 +279,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(inRect, label);
                     }
                     else
-                        using (new TextBlock(TextAnchor.MiddleCenter))
+                        using (new TextBlock(textAnchor))
                             Widgets.Label(inRect, label);
                 }
             }
@@ -287,18 +291,20 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         private readonly string label;
         private readonly Texture2D icon;
         private readonly float scale;
+        private readonly TextAnchor textAnchor;
 
-        public static float Height => Text.LineHeightOf(GameFont.Medium);
+        public static float Height => Text.LineHeightOf(GameFont.Small);
 
         public Heading() => Expandable = true;
 
         public Heading(float width) => Width = width;
 
-        public Heading(string label, float? width = null)
+        public Heading(string label, float? width = null, TextAnchor textAnchor = TextAnchor.LowerCenter)
         {
             this.label = label;
             Expandable = width == null;
             Width = width ?? Text.CalcSize(label).x;
+            this.textAnchor = textAnchor;
         }
 
         public Heading(Texture2D icon, float? width = null)
@@ -314,15 +320,16 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         public readonly float Width;
         public readonly bool Expandable;
 
-        public Rect Draw(ref Rect outerRect, bool first, bool skipIcon, float? widthOverride = null)
+        public Rect Draw(ref Rect outerRect, bool first, bool skipIcon, out float labelWidth, float? widthOverride = null)
         {
             var rect = outerRect.TakeLeftPart(widthOverride ?? Width);
+            labelWidth = 0;
+            var headerRect = rect;
             if (first) rect.TakeLeftPart(skipIcon ? 34 : 4);
             if (icon != null)
             {
                 rect = new Rect(0, 0, icon.width * scale, icon.height * scale).CenteredOnXIn(rect).CenteredOnYIn(rect).ContractedBy(2.5f);
                 GUI.DrawTexture(rect, icon);
-                rect = rect.ExpandedBy(2);
             }
             else if (!label.NullOrEmpty())
                 using (new TextBlock(GameFont.Small))
@@ -331,12 +338,17 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     newRect = newRect.ExpandedBy(2);
                     if (!first) newRect = newRect.CenteredOnXIn(rect);
                     newRect.y += rect.height - newRect.height;
-                    using (new TextBlock(first ? TextAnchor.LowerLeft : TextAnchor.LowerCenter))
+                    labelWidth = Text.CalcSize(label).x;
+                    if (textAnchor == TextAnchor.LowerCenter)
+                    {
+                        labelWidth += (headerRect.width - labelWidth) / 2;
+                    }
+
+                    using (new TextBlock(first ? TextAnchor.LowerLeft : textAnchor))
                         Widgets.Label(rect, label);
-                    rect = newRect;
                 }
 
-            return rect;
+            return headerRect;
         }
     }
 }

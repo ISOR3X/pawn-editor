@@ -106,7 +106,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     private static IEnumerable<UITable<Faction>.Row.Item> GetItems(Pawn pawn)
     {
-        yield return new(pawn.Name.ToStringShort, PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South));
+        yield return new(pawn.Name.ToStringShort, PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South, cameraZoom: 2f));
         yield return new(pawn.genes.XenotypeIcon, pawn.genes.Xenotype?.index ?? pawn.genes.CustomXenotype.name.ToCharArray()[0]);
         yield return new(pawn.gender.GetIcon(), (int)pawn.gender);
         yield return new(pawn.ageTracker.AgeNumberString, pawn.ageTracker.AgeBiologicalYears);
