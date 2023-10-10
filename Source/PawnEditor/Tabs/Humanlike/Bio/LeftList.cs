@@ -16,7 +16,7 @@ public partial class TabWorker_Bio_Humanlike
         var add = "Add".Translate().CapitalizeFirst();
         var headerRect = viewRect.TakeTopPart(Text.LineHeight);
         Widgets.Label(headerRect, "Traits".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new Dialog_SelectPawnTrait(pawn));
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new ListingMenu_Trait(pawn));
 
         var traitRect = viewRect.TakeTopPart(traitsLastHeight + 14).ContractedBy(6);
         var traits = pawn.story.traits.allTraits;
@@ -92,7 +92,7 @@ public partial class TabWorker_Bio_Humanlike
 
         headerRect = viewRect.TakeTopPart(Text.LineHeight);
         Widgets.Label(headerRect, "Abilities".Translate().Colorize(ColoredText.TipSectionTitleColor));
-        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new Dialog_SelectPawnAbility(pawn));
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new ListingMenu_Abilities(pawn));
 
         var abilities = (from a in pawn.abilities.abilities
             orderby a.def.level, a.def.EntropyGain

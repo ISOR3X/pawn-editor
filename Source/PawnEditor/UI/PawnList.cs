@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -15,6 +16,7 @@ public static partial class PawnEditor
     private static void DoPawnList(Rect inRect, List<Pawn> pawns, List<string> sections, int sectionCount, Action<Pawn, int, int> onReorder,
         Action<Pawn> onDelete)
     {
+        sectionCount = sections.Count(s => s != null) + 1;
         var height = pawns.Count * 59f + sectionCount * 20f;
 
         if (pawns.Count > 0)

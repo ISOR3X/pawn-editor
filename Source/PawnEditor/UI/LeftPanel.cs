@@ -27,7 +27,7 @@ public static partial class PawnEditor
         {
             // Reversed so player faction is at the top of the float menu.
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
-               .Select(faction =>
+                .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
                         selectedFaction = faction;
@@ -35,7 +35,7 @@ public static partial class PawnEditor
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
-               .ToList()));
+                .ToList()));
             inRect.yMin += 2;
         }
 
@@ -66,15 +66,15 @@ public static partial class PawnEditor
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30f), selectedCategory.LabelCapPlural()))
             Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
-               .Cast<PawnCategory>()
-               .Select(category =>
+                .Cast<PawnCategory>()
+                .Select(category =>
                     new FloatMenuOption(category.LabelCapPlural(), delegate
                     {
                         selectedCategory = category;
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }))
-               .ToList()));
+                .ToList()));
 
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn(selectedCategory);
 
@@ -150,34 +150,32 @@ public static partial class PawnEditor
         if (category == PawnCategory.Humans)
         {
             list.Insert(0,
-                new("PawnEditor.Add.PawnKind".Translate(), () => Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, PawnCategory.Humans))));
+                new("PawnEditor.Add.PawnKind".Translate(), () => Find.WindowStack.Add(new ListingMenu_PawnKindDef(PawnCategory.Humans, AddPawnKind))));
             list.Add(new("PawnEditor.Add.Backer".Translate(), delegate
             {
-                Find.WindowStack.Add(new FloatMenu(SolidBioDatabase.allBios.Select(bio => new FloatMenuOption(bio.name.ToStringFull, delegate
-                    {
-                        var pawn = PawnGenerator.GeneratePawn(new(selectedFaction.def.basicMemberKind, selectedFaction,
-                            Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
-                            forceGenerateNewPawn: true, fixedBirthName: bio.name.First, fixedLastName: bio.name.Last, fixedGender: bio.gender switch
-                            {
-                                GenderPossibility.Male => Gender.Male,
-                                GenderPossibility.Female => Gender.Female,
-                                GenderPossibility.Either => null,
-                                _ => throw new ArgumentOutOfRangeException()
-                            }));
-                        pawn.Name = bio.name;
-                        pawn.story.Childhood = bio.childhood;
-                        pawn.story.Adulthood = bio.adulthood;
-                        AddPawn(pawn, category);
-                    }))
-                   .ToList()));
+                Find.WindowStack.Add(new ListingMenu<PawnBio>(SolidBioDatabase.allBios, bio => bio.name.ToStringFull, bio =>
+                {
+                    var pawn = PawnGenerator.GeneratePawn(new(selectedFaction.def.basicMemberKind, selectedFaction,
+                        Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
+                        forceGenerateNewPawn: true, fixedBirthName: bio.name.First, fixedLastName: bio.name.Last, fixedGender: bio.gender switch
+                        {
+                            GenderPossibility.Male => Gender.Male,
+                            GenderPossibility.Female => Gender.Female,
+                            GenderPossibility.Either => null,
+                            _ => throw new ArgumentOutOfRangeException()
+                        }));
+                    pawn.Name = bio.name;
+                    pawn.story.Childhood = bio.childhood;
+                    pawn.story.Adulthood = bio.adulthood;
+                    AddPawn(pawn, category);
+                }, "Add backer pawn"));
             }));
         }
         else if (selectedCategory is PawnCategory.Animals or PawnCategory.Mechs)
             list.Insert(0,
-                new($"{"Add".Translate().CapitalizeFirst()} {selectedCategory.Label()}",
-                    () => Find.WindowStack.Add(new Dialog_ChoosePawnKindDef(AddPawnKind, selectedCategory))));
-
-        list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));
+                new("PawnEditor.Add.PawnKind".Translate(),
+                    () => Find.WindowStack.Add(new ListingMenu_PawnKindDef(selectedCategory, AddPawnKind))));
+        // list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));
 
         Find.WindowStack.Add(new FloatMenu(list));
     }

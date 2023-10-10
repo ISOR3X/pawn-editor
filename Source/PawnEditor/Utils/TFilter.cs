@@ -25,7 +25,6 @@ public class TFilter<T>
 
     private readonly FilterType _filterType;
     private readonly List<FloatMenuOption> _floatMenuOptions;
-    private readonly Dictionary<string, string> _truncatedStringCache = new();
 
     public bool DoInvert;
 
@@ -98,11 +97,11 @@ public class TFilter<T>
 
     private void DrawWidget(Rect inRect)
     {
-        Rect widgetRect = inRect.ContractedBy(0f, 4f);
+        Rect widgetRect = inRect;
         switch (_filterType)
         {
             case FilterType.Dropdown:
-                if (Widgets.ButtonText(widgetRect, _buttonLabel.Truncate(inRect.width - 12f, _truncatedStringCache)))
+                if (Widgets.ButtonText(widgetRect, _buttonLabel.Truncate(widgetRect.width - 12f)))
                 {
                     Find.WindowStack.Add(new FloatMenu(_floatMenuOptions));
                 }
@@ -141,46 +140,52 @@ public class TFilter<T>
         }
     }
 
-    public void DrawFilter(Rect inRect, ref List<TFilter<T>> filtersToRemove)
+    public void DrawFilter(ref Rect inRect, ref List<TFilter<T>> filtersToRemove)
     {
+        float rowHeight = UIUtility.RegularButtonHeight * 2 + 8;
+        if (_filterType == FilterType.Toggle) 
+        {
+            rowHeight -= (UIUtility.RegularButtonHeight + 4);
+        }
+
+        var filterRect = inRect.TakeTopPart(rowHeight);
+        
         // Grey background
-        Rect s = inRect;
         GUI.color = CharacterCardUtility.StackElementBackground;
-        GUI.DrawTexture(inRect, BaseContent.WhiteTex);
+        GUI.DrawTexture(filterRect, BaseContent.WhiteTex);
         GUI.color = Color.white;
-
-        // Filter label
-        inRect.xMin += 8f;
-        // Label can use whole width if toggle since that has no interaction widget.
-        Rect labelRect = this._filterType == FilterType.Toggle ? inRect : inRect.LeftHalf();
-        using (new TextBlock(TextAnchor.MiddleLeft))
-        {
-            Color c = DoInvert ? Color.gray : Color.white;
-            Widgets.Label(labelRect, Label.Colorize(c));
-
-            labelRect.xMin += s.height;
-            if (Widgets.ButtonInvisible(labelRect))
-            {
-                Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption> { new("PawnEditor.InvertFilter".Translate(), () => { DoInvert = !DoInvert; }) }));
-            }
-        }
-
-        if (Mouse.IsOver(labelRect) && _description != "")
-        {
-            TooltipHandler.TipRegion(labelRect, $"{Label.Colorize(ColoredText.TipSectionTitleColor)}\n\n{_description}");
-        }
+        filterRect = filterRect.ContractedBy(6f);
 
         // Filter widget
-        inRect.xMax -= 4f;
-        DrawWidget(inRect.RightHalf());
+        DrawWidget(filterRect.TakeBottomPart(UIUtility.RegularButtonHeight));
+        filterRect.yMax -= 4f;
 
-        // Deletion icon
-        if (Mouse.IsOver(inRect))
+        // Filter info
+        Rect topRowRect = filterRect.TakeTopPart(Text.LineHeightOf(GameFont.Small));
+        using (new TextBlock(TextAnchor.MiddleLeft))
         {
-            if (Widgets.ButtonImage(inRect.LeftPartPixels(s.height).ContractedBy(4), TexButton.DeleteX))
+            Rect buttonRect = topRowRect.TakeRightPart(topRowRect.height);
+            if (Widgets.ButtonImage(buttonRect, TexButton.DeleteX))
             {
                 DoInvert = false;
                 filtersToRemove.Add(this);
+            }
+
+            buttonRect = topRowRect.TakeRightPart(topRowRect.height).ExpandedBy(4f);
+            buttonRect.x -= 4f;
+
+            TooltipHandler.TipRegion(buttonRect, "PawnEditor.InvertFilter".Translate());
+            
+            Texture2D filter = DoInvert ? TexPawnEditor.InvertFilterActive : TexPawnEditor.InvertFilter;
+            if (Widgets.ButtonImage(buttonRect, filter))
+            {
+                DoInvert = !DoInvert;
+            }
+
+            Widgets.Label(topRowRect, Label);
+            if (Mouse.IsOver(topRowRect) && _description != "")
+            {
+                TooltipHandler.TipRegion(topRowRect, $"{Label.Colorize(ColoredText.TipSectionTitleColor)}\n\n{_description}");
             }
         }
     }

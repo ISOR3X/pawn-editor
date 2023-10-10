@@ -110,11 +110,11 @@ public class Dialog_EditItem : Window
 
 
             // Style
-            if (Dialog_SelectItem.thingStyles.Select(ts => ts.ThingDef).Contains(SelectedThing.def))
+            if (ListingMenu_Items.ThingStyles.Select(ts => ts.ThingDef).Contains(SelectedThing.def))
             {
                 Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "Stat_Thing_StyleLabel".Translate());
                 List<FloatMenuOption> options2 = new();
-                var styleOptions = Dialog_SelectItem.thingStyles.FirstOrDefault(ts => ts.ThingDef == SelectedThing.def).StyleDefs;
+                var styleOptions = ListingMenu_Items.ThingStyles.FirstOrDefault(ts => ts.ThingDef == SelectedThing.def).StyleDefs;
                 foreach (var style in styleOptions)
                     options2.Add(new(style.Value.LabelCap, () =>
                     {

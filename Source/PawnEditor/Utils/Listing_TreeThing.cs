@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -8,9 +9,16 @@ namespace PawnEditor;
 
 public class Listing_TreeThing : Listing_Thing<ThingDef>
 {
-    public Listing_TreeThing(QuickSearchFilter searchFilter, List<ThingDef> things) : base(searchFilter, things)
+    public Listing_TreeThing(List<ThingDef> items, Func<ThingDef, string> labelGetter, Func<ThingDef, string> descGetter = null, List<TFilter<ThingDef>> filters = null)
+        : base(items, labelGetter, descGetter, filters)
     {
     }
+
+    public Listing_TreeThing(List<ThingDef> items, Func<ThingDef, string> labelGetter, Action<ThingDef, Rect> iconDrawer, Func<ThingDef, string> descGetter = null, List<TFilter<ThingDef>> filters = null)
+        : base(items, labelGetter, iconDrawer, descGetter, filters)
+    {
+    }
+
 
     public void ListCategoryChildren(
         TreeNode_ThingCategory node,
@@ -34,21 +42,22 @@ public class Listing_TreeThing : Listing_Thing<ThingDef>
                 DoCategory(childCategoryNode, indentLevel, openMask, subtreeMatchedSearch);
         }
 
+        int i = 0;
         foreach (ThingDef sortedChildThingDef in node.catDef.SortedChildThingDefs)
         {
             if (Visible(sortedChildThingDef) && !HideThingDueToSearch(sortedChildThingDef))
-                DoThing(sortedChildThingDef, indentLevel);
+            {
+                DoThing(sortedChildThingDef, indentLevel, i);
+                i++;
+            }
         }
 
 
-        bool HideCategoryDueToSearch(TreeNode_ThingCategory subCat) => !(!SearchFilter.Active | subtreeMatchedSearch) && !CategoryMatches(subCat) && !ThisOrDescendantsVisibleAndMatchesSearch(subCat);
+        bool HideCategoryDueToSearch(TreeNode_ThingCategory subCat) => !(!SearchFilter.filter.Active | subtreeMatchedSearch) && !CategoryMatches(subCat) && !ThisOrDescendantsVisibleAndMatchesSearch(subCat);
 
-        bool HideCategoryDueToDisallowed(TreeNode_ThingCategory subCat)
-        {
-            return subCat.catDef == ThingCategoryDefOf.Corpses || subCat.catDef.defName == "Unfinished";
-        }
+        bool HideCategoryDueToDisallowed(TreeNode_ThingCategory subCat) => subCat.catDef == ThingCategoryDefOf.Corpses || subCat.catDef.defName == "Unfinished";
 
-        bool HideThingDueToSearch(ThingDef tDef) => !(!SearchFilter.Active | subtreeMatchedSearch) && !SearchFilter.Matches(tDef);
+        bool HideThingDueToSearch(ThingDef tDef) => !(!SearchFilter.filter.Active | subtreeMatchedSearch) && !SearchFilter.filter.Matches(tDef);
     }
 
     private void DoCategory(
@@ -58,7 +67,7 @@ public class Listing_TreeThing : Listing_Thing<ThingDef>
         bool subtreeMatchedSearch)
     {
         Color? textColor = new Color?();
-        if (SearchFilter.Active)
+        if (SearchFilter.filter.Active)
         {
             if (CategoryMatches(node))
             {
@@ -73,15 +82,14 @@ public class Listing_TreeThing : Listing_Thing<ThingDef>
             OpenCloseWidget(node, indentLevel, openMask);
             LabelLeft(node.LabelCap, node.catDef.description, indentLevel, textColor: textColor);
         }
+
         EndLine();
         if (!IsOpen(node, openMask))
             return;
         DoCategoryChildren(node, indentLevel + 1, openMask, subtreeMatchedSearch);
     }
 
-    protected override bool Visible(ThingDef td) => td.PlayerAcquirable && base.Visible(td);
-
-    public override bool IsOpen(TreeNode node, int openMask) => base.IsOpen(node, openMask) || node is TreeNode_ThingCategory node1 && SearchFilter.Active && ThisOrDescendantsVisibleAndMatchesSearch(node1);
+    public override bool IsOpen(TreeNode node, int openMask) => base.IsOpen(node, openMask) || node is TreeNode_ThingCategory node1 && SearchFilter.filter.Active && ThisOrDescendantsVisibleAndMatchesSearch(node1);
 
     private bool ThisOrDescendantsVisibleAndMatchesSearch(TreeNode_ThingCategory node)
     {
@@ -101,10 +109,10 @@ public class Listing_TreeThing : Listing_Thing<ThingDef>
 
         return false;
 
-        bool ThingDefVisibleAndMatches(ThingDef td) => Visible(td) && SearchFilter.Matches(td);
+        bool ThingDefVisibleAndMatches(ThingDef td) => Visible(td) && SearchFilter.filter.Matches(td);
     }
 
-    private bool CategoryMatches(TreeNode_ThingCategory node) => SearchFilter.Matches(node.catDef.label);
+    private bool CategoryMatches(TreeNode_ThingCategory node) => SearchFilter.filter.Matches(node.catDef.label);
 
     private bool Visible(TreeNode_ThingCategory node) => node.catDef.DescendantThingDefs.Any(Visible);
 }

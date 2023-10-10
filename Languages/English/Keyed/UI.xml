@@ -153,6 +153,7 @@
     <PawnEditor.IsInjury>Is injury</PawnEditor.IsInjury>
     <PawnEditor.IsImplant>Is implant</PawnEditor.IsImplant>
     <PawnEditor.IsDisease>Is disease</PawnEditor.IsDisease>
+    <PawnEditor.OccupiesLayer>Occupies layer</PawnEditor.OccupiesLayer>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
@@ -185,4 +186,10 @@
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>
+
+    <!-- ItemType enum -->
+    <PawnEditor.ItemType.All>All</PawnEditor.ItemType.All>
+    <PawnEditor.ItemType.Apparel>Apparel</PawnEditor.ItemType.Apparel>
+    <PawnEditor.ItemType.Equipment>Equipment</PawnEditor.ItemType.Equipment>
+    <PawnEditor.ItemType.Possessions>Possessions</PawnEditor.ItemType.Possessions>
 </LanguageData>

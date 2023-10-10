@@ -58,7 +58,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
         inRect.xMin += 4f;
 
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddHediff".Translate()))
-            Find.WindowStack.Add(new Dialog_SelectHediff(DefDatabase<HediffDef>.AllDefsListForReading, pawn));
+            Find.WindowStack.Add(new ListingMenu_Hediffs(pawn));
         inRect.xMin += 4f;
 
         Widgets.CheckboxLabeled(inRect, "PawnEditor.ShowHidden.Hediffs".Translate(), ref HealthCardUtility.showAllHediffs,

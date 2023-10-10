@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -6,34 +7,43 @@ using Verse;
 
 namespace PawnEditor;
 
-// TODO: Listing_TreeThing as child of Listing_Thing.
+// If the listing turns out to slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
 public class Listing_Thing<T> : Listing_Tree
 {
-    public List<T> FilteredThings;
-    protected readonly QuickSearchFilter SearchFilter;
+    private readonly List<T> _items;
+    protected readonly QuickSearchWidget SearchFilter = new();
     protected Rect VisibleRect;
 
-    private readonly Pawn _pawn;
-    public T SelectedThing;
+    public List<TFilter<T>> Filters;
+    public readonly List<TFilter<T>> ActiveFilters = new();
 
-    public bool showIcon;
+    public readonly Func<T, string> LabelGetter;
+    private readonly Func<T, string> _descGetter;
+    public readonly Action<T, Rect> IconDrawer;
 
-    public Listing_Thing(
-        QuickSearchFilter searchFilter,
-        List<T> things, bool showIcon = true)
+    public T Selected;
+
+    protected Listing_Thing(List<T> items, Func<T, string> labelGetter, Func<T, string> descGetter = null, List<TFilter<T>> filters = null)
     {
-        FilteredThings = things;
+        _items = items;
+        LabelGetter = labelGetter;
+        _descGetter = descGetter;
+
+        if (filters != null)
+        {
+            Filters = filters;
+            ActiveFilters = filters.Where(f => f.EnabledByDefault).ToList();
+        }
+
         lineHeight = 32f;
-        SearchFilter = searchFilter;
-        this.showIcon = showIcon;
         nestIndentWidth /= 2;
+        verticalSpacing = 0f;
     }
 
-    public Listing_Thing(
-        QuickSearchFilter searchFilter,
-        List<T> things, Pawn pawn, bool showIcon = true) : this(searchFilter, things, showIcon)
+    public Listing_Thing(List<T> items, Func<T, string> labelGetter, Action<T, Rect> iconDrawer, Func<T, string> descGetter = null, List<TFilter<T>> filters = null) :
+        this(items, labelGetter, descGetter, filters)
     {
-        _pawn = pawn;
+        IconDrawer = iconDrawer;
     }
 
     public void ListChildren(
@@ -46,143 +56,79 @@ public class Listing_Thing<T> : Listing_Tree
 
     private void DoCategoryChildren()
     {
-        foreach (var thing in FilteredThings.Where(thing => Visible(thing) && !HideThingDueToSearch(thing)))
+        int i = 0;
+        foreach (var thing in _items.Where(thing => Visible(thing) && !HideThingDueToSearch(thing) && !HideThingDueToFilter(thing)))
         {
-            DoThing(thing, -3);
+            DoThing(thing, -3, i);
+            i++;
         }
 
         return;
 
-        bool HideThingDueToSearch(T thing) => SearchFilter.Active && !SearchFilter.Matches(GetThingLabel(thing));
+        bool HideThingDueToSearch(T thing) => SearchFilter.filter.Active && !SearchFilter.filter.Matches(LabelGetter(thing));
+
+        bool HideThingDueToFilter(T thing) => !ActiveFilters.All(lf => lf.FilterAction(thing));
     }
 
-    protected void DoThing(T thing, int nestLevel)
+    protected void DoThing(T thing, int nestLevel, int i)
     {
         Color? nullable = new Color?();
-        if (!SearchFilter.Matches(GetThingLabel(thing)))
+        if (!SearchFilter.filter.Matches(LabelGetter(thing)))
             nullable = Listing_TreeThingFilter.NoMatchColor;
 
-        if (showIcon)
+        if (IconDrawer != null)
         {
             nestLevel += 5;
-            DrawThingIcon(thing, nestLevel, nullable);
+            IconDrawer.Invoke(thing, new Rect(XAtIndentLevel(nestLevel) - 16f, curY, 32f, 32f));
         }
 
         if (CurrentRowVisibleOnScreen())
         {
-            string tipText = GetThingDesc(thing);
+            var rect = new Rect(0.0f, curY, ColumnWidth, lineHeight);
+            rect.xMin = XAtIndentLevel(nestLevel) + 18f;
 
-            LabelLeft(GetThingLabel(thing), tipText, nestLevel, XAtIndentLevel(nestLevel), nullable);
-
-            bool checkOn = SelectedThing != null && ReferenceEquals(SelectedThing, thing);
-
-            if (Widgets.ButtonInvisible(new Rect(XAtIndentLevel(nestLevel), curY, ColumnWidth, 32f)) || Widgets.RadioButton(new Vector2(LabelWidth, curY + (32f - Widgets.RadioButtonSize) / 2), checkOn))
+            string tipText = string.Empty;
+            if (Mouse.IsOver(rect))
             {
-                SelectedThing = thing;
+                tipText = _descGetter != null ? _descGetter(thing) : string.Empty;
+            }
+
+            LabelLeft(LabelGetter(thing), tipText, nestLevel, XAtIndentLevel(nestLevel), nullable);
+
+            bool checkOn = Selected != null && ReferenceEquals(Selected, thing);
+
+            if (Widgets.ButtonInvisible(rect))
+            {
+                Selected = thing;
+            }
+
+            if (checkOn)
+            {
+                Widgets.DrawHighlightSelected(rect);
+            }
+
+            if (i % 2 == 1)
+            {
+                Widgets.DrawLightHighlight(rect);
             }
         }
 
         EndLine();
     }
 
-    protected virtual bool Visible(T thing) => FilteredThings.Contains(thing);
+    protected virtual bool Visible(T td)
+    {
+        bool output = _items.Contains(td);
+        if (ActiveFilters.Any())
+            output = output && ActiveFilters.All(lf => lf.FilterAction(td));
+
+        return output;
+    }
 
     protected bool CurrentRowVisibleOnScreen() => VisibleRect.Overlaps(new Rect(0.0f, curY, ColumnWidth, lineHeight));
 
-    public static string GetThingLabel(T thing)
+    public void DrawSearchBar(Rect inRect)
     {
-        if (typeof(Dialog_SelectPawnTrait.TraitInfo).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as Dialog_SelectPawnTrait.TraitInfo;
-            return t?.TraitDegreeData.LabelCap;
-        }
-
-        if (typeof(BackstoryDef).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as BackstoryDef;
-            return t?.title.CapitalizeFirst();
-        }
-
-        if (typeof(Def).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as Def;
-            return t?.LabelCap;
-        }
-
-        return "PLACEHOLDER";
-    }
-
-    private string GetThingDesc(T thing)
-    {
-        if (typeof(Dialog_SelectPawnTrait.TraitInfo).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as Dialog_SelectPawnTrait.TraitInfo;
-            if (_pawn == null)
-            {
-                Log.ErrorOnce("No pawn found", 14798);
-            }
-
-            return t?.TraitDegreeData.description.Formatted(_pawn.Named("PAWN")).AdjustedFor(_pawn);
-        }
-
-        if (typeof(ThingDef).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as ThingDef;
-            return t?.DescriptionDetailed;
-        }
-        
-        if (typeof(AbilityDef).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as AbilityDef;
-            return t?.GetTooltip(_pawn);
-        }
-
-        if (typeof(BackstoryDef).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as BackstoryDef;
-            return t?.FullDescriptionFor(_pawn).Resolve();
-        }
-
-        if (typeof(Def).IsAssignableFrom(typeof(T)))
-        {
-            var t = thing as Def;
-            return t?.description;
-        }
-
-        return "PLACEHOLDER";
-    }
-
-    private void DrawThingIcon(T thing, int nestLevel, Color? nullable)
-    {
-        if (thing is Def def)
-        {
-            if (thing is AbilityDef abilityDef)
-            {
-                Widgets.DrawTextureFitted(new Rect(XAtIndentLevel(nestLevel) - 16f, curY, 32f, 32f), abilityDef.uiIcon, .8f);
-            }
-
-            Widgets.DefIcon(new Rect(XAtIndentLevel(nestLevel) - 16f, curY, 32f, 32f), def, drawPlaceholder: true, color: nullable, scale: 0.8f);
-        }
-        else
-        {
-            Widgets.DrawTextureFitted(new Rect(XAtIndentLevel(nestLevel) - 16f, curY, 32f, 32f), Widgets.PlaceholderIconTex, .8f);
-        }
-    }
-
-    public static void DrawThingIcon(Rect rect, T thing)
-    {
-        if (thing is Def def)
-        {
-            if (thing is AbilityDef abilityDef)
-            {
-                Widgets.DrawTextureFitted(rect, abilityDef.uiIcon, .8f);
-            }
-
-            Widgets.DefIcon(rect, def, drawPlaceholder: true, color: null, scale: 0.8f);
-        }
-        else
-        {
-            Widgets.DrawTextureFitted(rect, Widgets.PlaceholderIconTex, .8f);
-        }
+        SearchFilter.OnGUI(inRect);
     }
 }

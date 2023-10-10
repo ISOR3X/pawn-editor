@@ -45,13 +45,13 @@ public class TabWorker_Gear : TabWorker<Pawn>
 
         Widgets.BeginScrollView(outRect, ref scrollPos, viewRect);
         DoEquipmentList(viewRect.TakeTopPart(apparelHeight), apparel,
-            "Apparel".Translate(), thing => pawn.apparel.TryDrop(thing), Dialog_SelectItem.ItemType.Apparel, pawn);
+            "Apparel".Translate(), thing => pawn.apparel.TryDrop(thing), ListingMenu_Items.ItemType.Apparel, pawn);
         viewRect.yMin += tableCategorySpacing;
         DoEquipmentList(viewRect.TakeTopPart(equipmentHeight), equipment,
-            "Equipment".Translate(), pawn.equipment.Remove, Dialog_SelectItem.ItemType.Equipment, pawn);
+            "Equipment".Translate(), pawn.equipment.Remove, ListingMenu_Items.ItemType.Equipment, pawn);
         viewRect.yMin += tableCategorySpacing;
         DoEquipmentList(viewRect.TakeTopPart(possessionsHeight), possessions, "Possessions".Translate(),
-            thing => pawn.inventory.DropCount(thing.def, thing.stackCount), Dialog_SelectItem.ItemType.Inventory, pawn);
+            thing => pawn.inventory.DropCount(thing.def, thing.stackCount), ListingMenu_Items.ItemType.Possessions, pawn);
         Widgets.EndScrollView();
 
         // Close Dialog_EditItem on any interaction with the Dialog_PawnEditor menu.
@@ -133,7 +133,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         return (weightWidth, hpWidth, valueWidth, countWidth);
     }
 
-    private void DoEquipmentList<T>(Rect inRect, List<T> equipment, string label, Action<T> remove, Dialog_SelectItem.ItemType itemType, Pawn pawn,
+    private void DoEquipmentList<T>(Rect inRect, List<T> equipment, string label, Action<T> remove, ListingMenu_Items.ItemType itemType, Pawn pawn,
         bool doCount = false) where T : Thing
     {
         if (!countBuffers.TryGetValue(label, out var countBufferArr) || countBufferArr.Length != equipment.Count)
@@ -277,9 +277,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
         if (UIUtility.DefaultButtonText(ref inRect, "Add".Translate().CapitalizeFirst() + " " + "Apparel".Translate().ToLower()))
         {
             IEnumerable<Thing> curApparel = pawn.apparel.WornApparel;
-            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel).ToList(), pawn, ref curApparel,
-                ThingCategoryNodeDatabase.allThingCategoryNodes
-                    .FirstOrDefault(tc => tc.catDef == ThingCategoryDefOf.Apparel), "Apparel", Dialog_SelectItem.ItemType.Apparel));
+            Find.WindowStack.Add(new ListingMenu_Items(ListingMenu_Items.ItemType.Apparel, pawn,
+                ThingCategoryNodeDatabase.allThingCategoryNodes.FirstOrDefault(tc => tc.catDef == ThingCategoryDefOf.Apparel)));
         }
 
         inRect.xMin += 4f;
@@ -287,9 +286,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
         if (UIUtility.DefaultButtonText(ref inRect, "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate().ToLower()))
         {
             IEnumerable<Thing> curEquipment = pawn.equipment.AllEquipmentListForReading;
-            Find.WindowStack.Add(new Dialog_SelectItem(
-                DefDatabase<ThingDef>.AllDefs.Where(td => td.comps.Any(c => c.compClass == typeof(CompEquippable))).ToList(), pawn, ref curEquipment,
-                thingCategoryLabel: "Equipment", itemType: Dialog_SelectItem.ItemType.Equipment));
+            Find.WindowStack.Add(new ListingMenu_Items(ListingMenu_Items.ItemType.Equipment, pawn,
+                ThingCategoryNodeDatabase.RootNode));
         }
 
         inRect.xMin += 4f;
@@ -297,8 +295,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
         if (UIUtility.DefaultButtonText(ref inRect, "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.Possession".Translate()))
         {
             IEnumerable<Thing> curPossessions = pawn.inventory.innerContainer;
-            Find.WindowStack.Add(new Dialog_SelectItem(DefDatabase<ThingDef>.AllDefs.Where(td => td.category == ThingCategory.Item).ToList(), pawn,
-                ref curPossessions, thingCategoryLabel: "PawnEditor.Possession", itemType: Dialog_SelectItem.ItemType.Inventory));
+            Find.WindowStack.Add(new ListingMenu_Items(ListingMenu_Items.ItemType.Possessions, pawn,
+                ThingCategoryNodeDatabase.RootNode));
         }
 
         inRect.xMin += 4f;
