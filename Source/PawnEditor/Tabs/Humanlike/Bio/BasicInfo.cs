@@ -35,7 +35,7 @@ public partial class TabWorker_Bio_Humanlike
             var nick = nameTriple.Nick;
             var last = nameTriple.Last;
             CharacterCardUtility.DoNameInputRect(firstRect, ref first, 12);
-            if (nameTriple.Nick == nameTriple.First || nameTriple.Nick == nameTriple.Last) GUI.color = new Color(1f, 1f, 1f, 0.5f);
+            if (nameTriple.Nick == nameTriple.First || nameTriple.Nick == nameTriple.Last) GUI.color = new(1f, 1f, 1f, 0.5f);
             CharacterCardUtility.DoNameInputRect(nickRect, ref nick, 16);
             GUI.color = Color.white;
             CharacterCardUtility.DoNameInputRect(lastRect, ref last, 12);
@@ -78,7 +78,12 @@ public partial class TabWorker_Bio_Humanlike
         }
 
         Widgets.TextFieldNumeric(bio, ref ageBio, ref ageBiologicalBuffer);
-        if (ageBio != pawn.ageTracker.AgeBiologicalYears) pawn.ageTracker.AgeBiologicalTicks = ageBio * 3600000L;
+        if (ageBio != pawn.ageTracker.AgeBiologicalYears)
+        {
+            pawn.ageTracker.AgeBiologicalTicks = ageBio * 3600000L;
+            PawnEditor.Notify_PointsUsed();
+        }
+
         var chrono = ageRect.LeftPart(0.6f).RightHalf();
         using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter, null))
             Widgets.Label(chrono.TakeTopPart(Text.LineHeight), "PawnEditor.Chronological".Translate());
@@ -96,7 +101,11 @@ public partial class TabWorker_Bio_Humanlike
         }
 
         Widgets.TextFieldNumeric(chrono, ref ageChrono, ref ageChronologicalBuffer);
-        if (ageChrono != pawn.ageTracker.AgeChronologicalYears) pawn.ageTracker.AgeChronologicalTicks = ageChrono * 3600000L;
+        if (ageChrono != pawn.ageTracker.AgeChronologicalYears)
+        {
+            pawn.ageTracker.AgeChronologicalTicks = ageChrono * 3600000L;
+            PawnEditor.Notify_PointsUsed();
+        }
 
         if (pawn.story.Childhood != null)
         {
@@ -104,9 +113,7 @@ public partial class TabWorker_Bio_Humanlike
             var childRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(childRect.TakeLeftPart(leftWidth), childhood);
             if (Widgets.ButtonText(childRect.LeftPart(0.6f), pawn.story.Childhood.TitleCapFor(pawn.gender)))
-            {
                 Find.WindowStack.Add(new ListingMenu_Backstories(pawn));
-            }
 
             TooltipHandler.TipRegion(childRect.LeftPart(0.6f), (TipSignal)pawn.story.childhood.FullDescriptionFor(pawn).Resolve());
         }
@@ -117,9 +124,7 @@ public partial class TabWorker_Bio_Humanlike
             var adultRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(adultRect.TakeLeftPart(leftWidth), adulthood);
             if (Widgets.ButtonText(adultRect.LeftPart(0.6f), pawn.story.Adulthood.TitleCapFor(pawn.gender)))
-            {
                 Find.WindowStack.Add(new ListingMenu_Backstories(pawn));
-            }
 
             TooltipHandler.TipRegion(adultRect.LeftPart(0.6f), (TipSignal)pawn.story.adulthood.FullDescriptionFor(pawn).Resolve());
         }

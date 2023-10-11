@@ -18,24 +18,22 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
     static ListingMenu_Trait()
     {
         items = DefDatabase<TraitDef>.AllDefs
-            .SelectMany(traitDef =>
+           .SelectMany(traitDef =>
                 traitDef.degreeDatas.Select(degree => new TraitInfo(traitDef, degree)))
-            .ToList();
+           .ToList();
         filters = GetFilters();
     }
 
     public ListingMenu_Trait(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "Trait".Translate().ToLower(),
-        b => descGetter(b, pawn), null, filters, pawn)
-    {
-    }
+        b => descGetter(b, pawn), null, filters, pawn) { }
 
     private static void TryAdd(TraitInfo traitInfo, Pawn pawn)
     {
         if (pawn.kindDef.disallowedTraits.NotNullAndContains(traitInfo.Trait.def)
-            || pawn.kindDef.disallowedTraitsWithDegree.NotNullAndAny(t => t.def == traitInfo.Trait.def && t.degree == traitInfo.TraitDegreeData.degree)
-            || (pawn.kindDef.requiredWorkTags != WorkTags.None
-                && (traitInfo.Trait.def.disabledWorkTags & pawn.kindDef.requiredWorkTags) != WorkTags.None))
+         || pawn.kindDef.disallowedTraitsWithDegree.NotNullAndAny(t => t.def == traitInfo.Trait.def && t.degree == traitInfo.TraitDegreeData.degree)
+         || (pawn.kindDef.requiredWorkTags != WorkTags.None
+          && (traitInfo.Trait.def.disabledWorkTags & pawn.kindDef.requiredWorkTags) != WorkTags.None))
         {
             Messages.Message("PawnEditor.TraitDisallowedByKind".Translate(traitInfo.Trait.Label, pawn.kindDef.labelPlural), MessageTypeDefOf.RejectInput,
                 false);
@@ -64,17 +62,18 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
         }
 
         pawn.story.traits.GainTrait(new(traitInfo.Trait.def, traitInfo.TraitDegreeData.degree));
+        PawnEditor.Notify_PointsUsed();
     }
 
     private static List<TFilter<TraitInfo>> GetFilters()
     {
         var list = new List<TFilter<TraitInfo>>();
-        
+
         var modSourceDict = new Dictionary<FloatMenuOption, Func<TraitInfo, bool>>();
         LoadedModManager.runningMods
-            .Where(m => m.AllDefs.OfType<TraitDef>().Any())
-            .ToList()
-            .ForEach(m =>
+           .Where(m => m.AllDefs.OfType<TraitDef>().Any())
+           .ToList()
+           .ForEach(m =>
             {
                 var label = m.Name;
                 var option = new FloatMenuOption(label, () => { });

@@ -68,7 +68,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
     private void DoHediffs(Rect inRect, Pawn pawn)
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "PawnEditor.Hediffs".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+            Widgets.Label(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
+                "PawnEditor.Hediffs".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 4f;
         var viewRect = new Rect(0, 0, inRect.width - 20, hediffs.Count * 30 + Text.LineHeightOf(GameFont.Medium));
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
@@ -86,8 +87,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
         if (pawn.def.race.IsFlesh)
         {
             var rect = listing.GetRect(20);
-            Pair<string, Color> painLabel = HealthCardUtility.GetPainLabel(pawn);
-            string painTip = HealthCardUtility.GetPainTip(pawn);
+            var painLabel = HealthCardUtility.GetPainLabel(pawn);
+            var painTip = HealthCardUtility.GetPainTip(pawn);
             Widgets.Label(new(rect.x, rect.y, rect.width * 0.65f, 30f),
                 "PainLevel".Translate().CapitalizeFirst());
             Widgets.Label(new(rect.x + rect.width * 0.65f, rect.y, rect.width * 0.35f, 30f), painLabel.First.Colorize(painLabel.Second));
@@ -141,7 +142,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
             // new(32), // Info icon
             new(38), // Icon
             new("PawnEditor.BodyPart".Translate(), 140f, TextAnchor.LowerLeft),
-            new("PawnEditor.HediffType".Translate(), 240f, textAnchor: TextAnchor.LowerLeft),
+            new("PawnEditor.HediffType".Translate(), 240f, TextAnchor.LowerLeft),
             new("PawnEditor.AdditionalInfo".Translate(), textAnchor: TextAnchor.LowerLeft),
             // new(100),
             new(30)
@@ -167,9 +168,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 iconsRect.width = 32f;
                 iconsRect = iconsRect.ContractedBy(4f);
                 if (hediff.Bleeding)
-                {
-                    GUI.DrawTexture(iconsRect.ContractedBy(GenMath.LerpDouble(0.0f, 0.6f, 5f, 0.0f, Mathf.Min(hediff.BleedRate, 1f))), HealthCardUtility.BleedingIcon);
-                }
+                    GUI.DrawTexture(iconsRect.ContractedBy(GenMath.LerpDouble(0.0f, 0.6f, 5f, 0.0f, Mathf.Min(hediff.BleedRate, 1f))),
+                        HealthCardUtility.BleedingIcon);
                 else
                 {
                     GUI.color = hediff.StateIcon.color;
@@ -178,11 +178,12 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 }
             }));
             if (hediff.Part != null)
-                items.Add(new(hediff.Part.LabelCap.Colorize(HealthUtility.GetPartConditionLabel(pawn, hediff.Part).Second), hediff.Part.Index, textAnchor: TextAnchor.MiddleLeft));
+                items.Add(new(hediff.Part.LabelCap.Colorize(HealthUtility.GetPartConditionLabel(pawn, hediff.Part).Second), hediff.Part.Index,
+                    TextAnchor.MiddleLeft));
             else
                 items.Add(new("WholeBody".Translate().Colorize(HealthUtility.RedColor), textAnchor: TextAnchor.MiddleLeft));
             items.Add(new(hediff.LabelCap.Colorize(hediff.LabelColor),
-                Mathf.RoundToInt(HealthCardUtility.GetListPriority(hediff.Part)), textAnchor: TextAnchor.MiddleLeft));
+                Mathf.RoundToInt(HealthCardUtility.GetListPriority(hediff.Part)), TextAnchor.MiddleLeft));
             // items.Add(new("Edit".Translate() + "...",
             //     () => { Find.WindowStack.Add(new Dialog_SelectHediff(DefDatabase<HediffDef>.AllDefsListForReading, pawn, hediff)); }));
             items.Add(new(infoRect =>
@@ -191,14 +192,13 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 {
                     var immunizable = hediff.TryGetComp<HediffComp_Immunizable>();
                     if (immunizable != null)
-                    {
                         Widgets.Label(infoRect, $"{hediff.Severity:0.##}% (immunity {immunizable.Immunity:0.##}%)".Colorize(ColoredText.SubtleGrayColor));
-                    }
                 }
             }));
             items.Add(new(TexButton.DeleteX, () =>
             {
                 pawn.health.RemoveHediff(hediff);
+                PawnEditor.Notify_PointsUsed();
                 table.ClearCache();
             }));
 

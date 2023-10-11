@@ -183,6 +183,7 @@
     <PawnEditor.HediffDuplicate>Are you sure you want to add duplicate hediff {0}?</PawnEditor.HediffDuplicate>
     <PawnEditor.Teleport.Specific>Teleport to exact location</PawnEditor.Teleport.Specific>
     <PawnEditor.AdditionalInfo>Additional info</PawnEditor.AdditionalInfo>
+    <PawnEditor.NotEnoughPoints>Not enough points. Need {0}.</PawnEditor.NotEnoughPoints>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

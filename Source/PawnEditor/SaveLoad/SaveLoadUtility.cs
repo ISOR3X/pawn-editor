@@ -130,6 +130,8 @@ public static partial class SaveLoadUtility
             callback?.Invoke(item);
             if (playing)
                 Current.ProgramState = ProgramState.Playing;
+
+            PawnEditor.Notify_PointsUsed();
         }));
     }
 

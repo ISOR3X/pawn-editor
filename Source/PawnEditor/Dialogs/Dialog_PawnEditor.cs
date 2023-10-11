@@ -28,6 +28,7 @@ public abstract class Dialog_PawnEditor : Window
         PawnEditor.CheckChangeTabGroup();
         TabWorker<Pawn>.Notify_OpenedDialog();
         TabWorker<Faction>.Notify_OpenedDialog();
+        PawnEditor.ResetPoints();
     }
 }
 
@@ -51,14 +52,16 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
 
     public override void PreOpen()
     {
-        base.PreOpen();
         ColonyInventory.RecacheItems();
+        base.PreOpen();
     }
 
     public override void PostClose()
     {
         base.PostClose();
         PawnEditor.PawnList.ClearCache();
+        if (PawnEditorMod.Settings.UseSilver) PawnEditor.ApplyPoints();
+        ColonyInventory.ClearCache();
     }
 
     public override void DoWindowContents(Rect inRect)

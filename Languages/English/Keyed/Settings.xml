@@ -5,4 +5,7 @@
     <PawnEditor.OverrideVanilla.Desc>Override the vanilla character creation screen with the pawn editor screen. If false, there will be a Pawn Editor button on the bottom the screen to open the editor.</PawnEditor.OverrideVanilla.Desc>
     <PawnEditor.InGameDevButton>In-game dev button</PawnEditor.InGameDevButton>
     <PawnEditor.InGameDevButton.Desc>Enable the button in dev mode to open the pawn editor window.</PawnEditor.InGameDevButton.Desc>
+    <PawnEditor.PointLimit>Point limit</PawnEditor.PointLimit>
+    <PawnEditor.UseSilver>Use silver for points</PawnEditor.UseSilver>
+    <PawnEditor.UseSilver.Desc>Point limit will be amount of silver in the current colony, and usage of points will deduct silver.</PawnEditor.UseSilver.Desc>
 </LanguageData>

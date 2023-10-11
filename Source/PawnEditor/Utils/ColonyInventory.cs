@@ -15,4 +15,9 @@ public static class ColonyInventory
         foreach (var slotGroup in Find.CurrentMap.haulDestinationManager.AllGroupsListForReading) inventoryItems.AddRange(slotGroup.HeldThings);
         TabWorker_EquipmentLoot.ClearCaches();
     }
+
+    public static void ClearCache()
+    {
+        inventoryItems.Clear();
+    }
 }

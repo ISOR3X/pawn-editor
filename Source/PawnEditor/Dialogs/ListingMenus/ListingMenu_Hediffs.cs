@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -23,7 +22,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
     static ListingMenu_Hediffs()
     {
         defaultBodyParts = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null)
-            .ToDictionary(recipe => recipe.addsHediff, recipe =>
+           .ToDictionary(recipe => recipe.addsHediff, recipe =>
                 (recipe.appliedOnFixedBodyParts, recipe.appliedOnFixedBodyPartGroups));
 
         possibleTechLevels = new();
@@ -37,9 +36,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
 
     public ListingMenu_Hediffs(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Hediff".Translate().ToLower(),
-        b => descGetter(b), null, filters, pawn)
-    {
-    }
+        b => descGetter(b), null, filters, pawn) { }
 
     private static void TryAdd(HediffDef hediffDef, Pawn pawn)
     {
@@ -47,13 +44,18 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         {
             void ReallyAdd()
             {
+                var price = hediffDef.priceOffset;
+                if (price == 0 && hediffDef.priceImpact && hediffDef.spawnThingOnRemoved != null) price = hediffDef.spawnThingOnRemoved.BaseMarketValue;
+                if (price is >= 1 or <= 1 && hediffDef.priceImpact && !PawnEditor.CanUsePoints(price)) return;
                 pawn.health.AddHediff(hediffDef, part);
+                PawnEditor.Notify_PointsUsed();
             }
 
             if (typeof(Hediff_AddedPart).IsAssignableFrom(hediffDef.hediffClass)
-                && pawn.health.hediffSet.GetFirstHediffMatchingPart<Hediff_AddedPart>(part) is { } hediff)
+             && pawn.health.hediffSet.GetFirstHediffMatchingPart<Hediff_AddedPart>(part) is { } hediff)
             {
-                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.HediffConflict".Translate(hediffDef.LabelCap, hediff.LabelCap), ReallyAdd));
+                Find.WindowStack.Add(
+                    Dialog_MessageBox.CreateConfirmation("PawnEditor.HediffConflict".Translate(hediffDef.LabelCap, hediff.LabelCap), ReallyAdd));
                 return;
             }
 
@@ -75,8 +77,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         {
             if (result.Item1?.Select(part => pawn.RaceProps.body.GetPartsWithDef(part)?.FirstOrDefault()).FirstOrDefault() is { } part1)
                 AddCheck(part1);
-            else if (result.Item2?.Select(group => pawn.RaceProps.body.AllParts.FirstOrDefault(part => part.IsInGroup(group))).FirstOrDefault() is
-                     { } part2)
+            else if (result.Item2?.Select(group => pawn.RaceProps.body.AllParts.FirstOrDefault(part => part.IsInGroup(group))).FirstOrDefault() is { } part2)
                 AddCheck(part2);
             else
                 AddCheck(null);
@@ -91,7 +92,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
 
         list.Add(new("PawnEditor.Prosthetic".Translate(), false, def => typeof(Hediff_AddedPart).IsAssignableFrom(def.hediffClass)));
         list.Add(new("PawnEditor.IsImplant".Translate(), false, def => typeof(Hediff_Implant).IsAssignableFrom(def.hediffClass) && !typeof(Hediff_AddedPart)
-            .IsAssignableFrom(def.hediffClass)));
+           .IsAssignableFrom(def.hediffClass)));
         list.Add(new("PawnEditor.IsInjury".Translate(), false, def => typeof(Hediff_Injury).IsAssignableFrom(def.hediffClass)));
         list.Add(new("PawnEditor.IsDisease".Translate(), false, def => def.makesSickThought));
         var techLevel = possibleTechLevels.ToDictionary<TechLevel, FloatMenuOption, Func<HediffDef, bool>>(

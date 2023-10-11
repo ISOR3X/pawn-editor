@@ -41,6 +41,9 @@ public class PawnEditorMod : Mod
         listing.Begin(inRect);
         listing.CheckboxLabeled("PawnEdtior.OverrideVanilla".Translate(), ref Settings.OverrideVanilla, "PawnEditor.OverrideVanilla.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.InGameDevButton".Translate(), ref Settings.InGameDevButton, "PawnEditor.InGameDevButton.Desc".Translate());
+        listing.Label("PawnEditor.PointLimit".Translate() + ": " + Settings.PointLimit.ToStringMoney());
+        Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 1000000000);
+        listing.CheckboxLabeled("PawnEditor.UseSilver".Translate(), ref Settings.UseSilver, "PawnEditor.UseSilver.Desc".Translate());
         listing.End();
     }
 
@@ -149,12 +152,16 @@ public class PawnEditorSettings : ModSettings
 {
     public bool InGameDevButton = true;
     public bool OverrideVanilla = true;
+    public float PointLimit = 100000;
+    public bool UseSilver;
 
     public override void ExposeData()
     {
         base.ExposeData();
         Scribe_Values.Look(ref OverrideVanilla, nameof(OverrideVanilla), true);
         Scribe_Values.Look(ref InGameDevButton, nameof(InGameDevButton), true);
+        Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
+        Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
     }
 }
 

@@ -13,9 +13,9 @@ public class TabWorker_Gear : TabWorker<Pawn>
     private const float ItemHeight = 30;
     private const float tableCategorySpacing = 16f;
     private readonly Dictionary<string, string[]> countBuffers = new();
+    private Vector2 oldScrollPos = Vector2.zero;
 
     private Vector2 scrollPos;
-    private Vector2 oldScrollPos = Vector2.zero;
 
     public override void DrawTabContents(Rect rect, Pawn pawn)
     {
@@ -37,11 +37,9 @@ public class TabWorker_Gear : TabWorker<Pawn>
         var possessions = pawn.inventory.innerContainer.ToList();
         var possessionsHeight = categoryHeaderHeight + possessions.Count * ItemHeight;
 
-
         var height = possessionsHeight + equipmentHeight + apparelHeight + 3 * tableCategorySpacing;
         var outRect = rect.ContractedBy(0f, 4f);
         var viewRect = new Rect(0, 0, outRect.width - 20, height);
-
 
         Widgets.BeginScrollView(outRect, ref scrollPos, viewRect);
         DoEquipmentList(viewRect.TakeTopPart(apparelHeight), apparel,
@@ -56,12 +54,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
 
         // Close Dialog_EditItem on any interaction with the Dialog_PawnEditor menu.
         if (Find.WindowStack.IsOpen<Dialog_EditItem>())
-        {
             if (oldScrollPos != scrollPos || Find.WindowStack.focusedWindow is Dialog_PawnEditor)
-            {
                 Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
-            }
-        }
 
         oldScrollPos = scrollPos;
     }
@@ -70,14 +64,14 @@ public class TabWorker_Gear : TabWorker<Pawn>
     {
         var listing = new Listing_Standard();
         listing.Begin(inRect);
-        listing.ColumnWidth -= (listing.ColumnWidth / 2 + 16f);
+        listing.ColumnWidth -= listing.ColumnWidth / 2 + 16f;
 
         listing.ListSeparator("TabBasics".Translate());
         listing.Label("MassCarried".Translate(MassUtility.GearAndInventoryMass(pawn).ToString("0.##"),
             MassUtility.Capacity(pawn).ToString("0.##")));
         listing.Label("ComfyTemperatureRange".Translate() + ": " +
                       pawn.GetStatValue(StatDefOf.ComfyTemperatureMin).ToStringTemperature("F0") + " ~ "
-                      + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
+                    + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
         listing.Label("MarketValueTip".Translate() + ": $" + pawn.GetStatValue(StatDefOf.MarketValue));
         listing.NewColumn();
 
@@ -185,7 +179,11 @@ public class TabWorker_Gear : TabWorker<Pawn>
             var thing = equipment[i];
 
             if (Widgets.ButtonImage(rect.TakeRightPart(ItemHeight).ContractedBy(2.5f), TexButton.DeleteX))
+            {
                 remove(thing);
+                PawnEditor.Notify_PointsUsed();
+            }
+
             rect.xMax -= 4;
             if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "..."))
             {
@@ -195,13 +193,16 @@ public class TabWorker_Gear : TabWorker<Pawn>
                     Dialog_EditItem.SelectedThing = null;
                 }
                 else
-                    Find.WindowStack.Add(new Dialog_EditItem(GUIUtility.GUIToScreenPoint(new Vector2(rect.x, rect.y)), pawn, thing));
+                    Find.WindowStack.Add(new Dialog_EditItem(GUIUtility.GUIToScreenPoint(new(rect.x, rect.y)), pawn, thing));
             }
 
             if (doCount)
             {
                 var countRect = rect.TakeRightPart(countWidth);
+                var oldCount = thing.stackCount;
                 UIUtility.IntField(countRect, ref thing.stackCount, 1, thing.def.stackLimit, ref countBufferArr[i]);
+                if (oldCount != thing.stackCount)
+                    PawnEditor.Notify_PointsUsed();
             }
 
             if (Mouse.IsOver(rect))
@@ -234,10 +235,9 @@ public class TabWorker_Gear : TabWorker<Pawn>
     private void DoBottomOptions(Rect inRect, Pawn pawn)
     {
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
-        {
             Find.WindowStack.Add(new FloatMenu(new()
             {
-                new FloatMenuOption("PawnEditor.RepairAll".Translate(), () =>
+                new("PawnEditor.RepairAll".Translate(), () =>
                 {
                     pawn.apparel.WornApparel.ForEach(a =>
                         {
@@ -246,31 +246,24 @@ public class TabWorker_Gear : TabWorker<Pawn>
                         }
                     );
                     pawn.equipment.AllEquipmentListForReading.ForEach(e => e.HitPoints = e.MaxHitPoints);
-                    foreach (var thing in pawn.inventory.innerContainer)
-                    {
-                        thing.HitPoints = thing.MaxHitPoints;
-                    }
+                    foreach (var thing in pawn.inventory.innerContainer) thing.HitPoints = thing.MaxHitPoints;
+                    PawnEditor.Notify_PointsUsed();
                 }),
-                new FloatMenuOption("PawnEditor.SetAllTo".Translate("Apparel".Translate().ToLower(), "PawnEditor.FavColor".Translate().ToLower()), () =>
+                new("PawnEditor.SetAllTo".Translate("Apparel".Translate().ToLower(), "PawnEditor.FavColor".Translate().ToLower()), () =>
                 {
                     pawn.apparel.WornApparel.ForEach(a =>
                         {
                             if (a.TryGetComp<CompColorable>() != null)
                             {
                                 if (pawn.story.favoriteColor != null)
-                                {
                                     a.SetColor((Color)pawn.story.favoriteColor);
-                                }
                                 else
-                                {
                                     Messages.Message("No favourite color found for pawn", MessageTypeDefOf.RejectInput);
-                                }
                             }
                         }
                     );
                 })
             }));
-        }
 
         inRect.xMin += 4f;
 
@@ -324,7 +317,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             ThingStuffPair workingPair;
 
             while (Rand.Value >= PawnApparelGenerator.workingSet.Count / 10f
-                   && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
+                && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
                        out workingPair))
             {
                 PawnApparelGenerator.workingSet.Add(workingPair);
@@ -334,8 +327,10 @@ public class TabWorker_Gear : TabWorker<Pawn>
             }
         });
         yield return new("Apparel".Translate() + " " + "PawnEditor.FromKind".Translate(), () =>
+        {
             PawnApparelGenerator.GenerateStartingApparelFor(
-                pawn, new(pawn.kindDef, pawn.Faction)));
+                pawn, new(pawn.kindDef, pawn.Faction));
+        });
         yield return new("Equipment".Translate(), () =>
         {
             pawn.equipment.DestroyAllEquipment();

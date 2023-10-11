@@ -14,18 +14,18 @@ public static partial class PawnEditor
     public static bool RenderClothes = true;
     public static bool RenderHeadgear = true;
     private static bool usePointLimit;
-    private static float remainingPoints = 100000;
+    private static float remainingPoints;
     private static Faction selectedFaction;
     private static Pawn selectedPawn;
     private static bool showFactionInfo;
     private static PawnCategory selectedCategory;
-    private static float cachedPawnValue;
-    private static List<Pawn> cachedPawnList;
+    private static float cachedValue;
     private static FloatMenuOption lastRandomization;
     private static TabGroupDef tabGroup;
     private static List<TabRecord> tabs;
     private static TabDef curTab;
     private static List<WidgetDef> widgets;
+    private static int startingSilver;
 
     private static readonly TabDef widgetTab = new()
     {
@@ -34,6 +34,7 @@ public static partial class PawnEditor
     };
 
     public static PawnLister PawnList = new();
+    public static PawnListerBase AllPawns = new();
 
     private static Rot4 curRot = Rot4.South;
 
@@ -191,6 +192,7 @@ public static partial class PawnEditor
             {
                 lastRandomization = option;
                 option.action();
+                Notify_PointsUsed();
             }));
     }
 
@@ -215,34 +217,96 @@ public static partial class PawnEditor
         }
 
         PortraitsCache.Clear();
-        ResetPoints();
     }
 
     public static void ResetPoints()
     {
-        remainingPoints = 100000;
-        cachedPawnValue = 0;
-        cachedPawnList = null;
+        remainingPoints = PawnEditorMod.Settings.PointLimit;
+        cachedValue = 0;
+        if (!Pregame && PawnEditorMod.Settings.UseSilver)
+        {
+            startingSilver = ColonyInventory.AllItemsInInventory().Sum(static t => t.def == ThingDefOf.Silver ? t.stackCount : 0);
+            remainingPoints = startingSilver;
+        }
+
         Notify_PointsUsed();
     }
+
+    public static void ApplyPoints()
+    {
+        var amount = remainingPoints - startingSilver;
+        if (amount > 0)
+        {
+            var pos = ColonyInventory.AllItemsInInventory().FirstOrDefault(static t => t.def == ThingDefOf.Silver).Position;
+            var silver = ThingMaker.MakeThing(ThingDefOf.Silver);
+            silver.stackCount = Mathf.RoundToInt(amount);
+            GenPlace.TryPlaceThing(silver, pos, Find.CurrentMap, ThingPlaceMode.Near);
+        }
+        else if (amount < 0)
+        {
+            amount = -amount;
+            foreach (var thing in ColonyInventory.AllItemsInInventory().Where(static t => t.def == ThingDefOf.Silver))
+            {
+                var toRemove = Math.Min(thing.stackCount, Mathf.RoundToInt(amount));
+                thing.stackCount -= toRemove;
+                amount -= toRemove;
+
+                if (thing.stackCount <= 0) thing.Destroy();
+                if (amount < 1f) break;
+            }
+        }
+    }
+
+    public static bool CanUsePoints(float amount)
+    {
+        if (!usePointLimit) return true;
+        if (remainingPoints >= amount) return true;
+        Messages.Message("PawnEditor.NotEnoughPoints".Translate(amount), MessageTypeDefOf.RejectInput, false);
+        return false;
+    }
+
+    public static bool CanUsePoints(Thing thing) => CanUsePoints(GetThingValue(thing));
+    public static bool CanUsePoints(Pawn pawn) => CanUsePoints(GetPawnValue(pawn));
 
     public static void Notify_PointsUsed(float? amount = null)
     {
         if (amount.HasValue)
             remainingPoints -= amount.Value;
-        else if (cachedPawnList?.Count > 0)
+        else
         {
-            var pawnValue = cachedPawnList.Sum(GetPawnValue);
-            remainingPoints -= pawnValue - cachedPawnValue;
-            cachedPawnValue = pawnValue;
+            var value = 0f;
+            if (Pregame)
+            {
+                value += ValueOfPawns(Find.GameInitData.startingAndOptionalPawns);
+                value += ValueOfPawns(StartingThingsManager.GetPawns(PawnCategory.Animals));
+                value += ValueOfPawns(StartingThingsManager.GetPawns(PawnCategory.Mechs));
+                value += ValueOfThings(StartingThingsManager.GetStartingThingsNear());
+                value += ValueOfThings(StartingThingsManager.GetStartingThingsFar());
+            }
+            else
+            {
+                AllPawns.UpdateCache(null, PawnCategory.All);
+                value += ValueOfPawns(AllPawns.GetList());
+                value += ValueOfThings(ColonyInventory.AllItemsInInventory());
+            }
+
+
+            remainingPoints -= value - cachedValue;
+            cachedValue = value;
         }
     }
+
+    private static float ValueOfPawns(IEnumerable<Pawn> pawns) => pawns.Sum(GetPawnValue);
+    private static float ValueOfThings(IEnumerable<Thing> things) => things.Sum(GetThingValue);
+    private static float GetThingValue(Thing thing) => thing.MarketValue * thing.stackCount;
 
     private static float GetPawnValue(Pawn pawn)
     {
         var num = pawn.MarketValue;
-        num += pawn.apparel.WornApparel.Sum(t => t.MarketValue);
-        num += pawn.equipment.AllEquipmentListForReading.Sum(t => t.MarketValue);
+        if (pawn.apparel != null)
+            num += pawn.apparel.WornApparel.Sum(t => t.MarketValue);
+        if (pawn.equipment != null)
+            num += pawn.equipment.AllEquipmentListForReading.Sum(t => t.MarketValue);
         return num;
     }
 

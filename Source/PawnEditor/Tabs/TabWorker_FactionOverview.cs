@@ -131,6 +131,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
                         pawns.RemoveAt(i);
                         sections.RemoveAt(i);
                     }
+
+                    PawnEditor.Notify_PointsUsed();
                 }, true));
         });
     }

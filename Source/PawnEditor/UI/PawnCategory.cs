@@ -5,7 +5,10 @@ namespace PawnEditor;
 
 public enum PawnCategory
 {
-    Humans, Animals, Mechs
+    Humans,
+    Animals,
+    Mechs,
+    All
 }
 
 public static class PawnCategoryExtensions
@@ -22,6 +25,7 @@ public static class PawnCategoryExtensions
             PawnCategory.Humans => pawn.RaceProps.Humanlike,
             PawnCategory.Animals => pawn.RaceProps.Animal,
             PawnCategory.Mechs => pawn.RaceProps.IsMechanoid,
+            PawnCategory.All => true,
             _ => throw new ArgumentOutOfRangeException(nameof(category), category, null)
         };
     }

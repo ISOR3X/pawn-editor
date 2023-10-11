@@ -27,7 +27,7 @@ public static partial class PawnEditor
         {
             // Reversed so player faction is at the top of the float menu.
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
-                .Select(faction =>
+               .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
                         selectedFaction = faction;
@@ -35,7 +35,7 @@ public static partial class PawnEditor
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
-                .ToList()));
+               .ToList()));
             inRect.yMin += 2;
         }
 
@@ -66,15 +66,15 @@ public static partial class PawnEditor
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30f), selectedCategory.LabelCapPlural()))
             Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
-                .Cast<PawnCategory>()
-                .Select(category =>
+               .Cast<PawnCategory>()
+               .Select(category =>
                     new FloatMenuOption(category.LabelCapPlural(), delegate
                     {
                         selectedCategory = category;
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }))
-                .ToList()));
+               .ToList()));
 
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn(selectedCategory);
 
@@ -117,12 +117,6 @@ public static partial class PawnEditor
             (pawns, sections, sectionCount) = PawnList.GetLists();
             onReorder = PawnList.OnReorder;
             onDelete = PawnList.OnDelete;
-        }
-
-        if (cachedPawnList == null)
-        {
-            cachedPawnList = pawns;
-            Notify_PointsUsed();
         }
 
         inRect.yMin += 12f;
@@ -182,6 +176,12 @@ public static partial class PawnEditor
 
     private static void AddPawn(Pawn addedPawn, PawnCategory category)
     {
+        if (!CanUsePoints(addedPawn))
+        {
+            addedPawn.Discard(true);
+            return;
+        }
+
         if (Pregame)
             if (category == PawnCategory.Humans)
             {
@@ -198,6 +198,8 @@ public static partial class PawnEditor
             PawnList.UpdateCache(selectedFaction, category);
         }
 
+
+        Notify_PointsUsed();
         Select(addedPawn);
     }
 }

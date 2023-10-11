@@ -47,7 +47,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                 new(thing.MarketValue.ToStringMoney(), (int)thing.MarketValue),
                 new(countRect =>
                 {
-                    ref var count = ref thing.stackCount;
+                    var count = thing.stackCount;
                     countBuffer.TryGetValue(thing, out var buffer);
                     if (count > 1 && Widgets.ButtonImage(countRect.TakeLeftPart(25).ContractedBy(0, 5),
                             TexPawnEditor.ArrowLeftHalf))
@@ -63,6 +63,12 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                     }
 
                     Widgets.TextFieldNumeric(countRect, ref count, ref buffer);
+                    if (count != thing.stackCount)
+                    {
+                        thing.stackCount = count;
+                        PawnEditor.Notify_PointsUsed();
+                    }
+
                     countBuffer[thing] = buffer;
                 }),
                 new("Edit".Translate() + "...", () => { }),
@@ -70,6 +76,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                 {
                     thing.Destroy();
                     thing.Discard(true);
+                    PawnEditor.Notify_PointsUsed();
                     ClearCaches();
                 })
             };

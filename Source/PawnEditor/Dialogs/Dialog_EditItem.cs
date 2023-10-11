@@ -10,11 +10,10 @@ namespace PawnEditor;
 [HotSwappable]
 public class Dialog_EditItem : Window
 {
-    public override Vector2 InitialSize => new(790f, 160f);
-
-    private readonly Vector2 _position;
     public static Thing SelectedThing;
     private readonly Pawn _pawn;
+
+    private readonly Vector2 _position;
     private string _buffer = "";
 
     public Dialog_EditItem(Vector2 absPosition, Pawn pawn, Thing item)
@@ -26,6 +25,8 @@ public class Dialog_EditItem : Window
         SelectedThing = item;
     }
 
+    public override Vector2 InitialSize => new(790f, 160f);
+
     public override void PreOpen()
     {
         base.PreOpen();
@@ -33,7 +34,7 @@ public class Dialog_EditItem : Window
         windowRect.y = _position.y - InitialSize.y;
         _buffer = SelectedThing.stackCount.ToString();
     }
-    
+
     public override void PostClose()
     {
         base.PostClose();
@@ -58,6 +59,7 @@ public class Dialog_EditItem : Window
                     {
                         SelectedThing.SetStuffDirect(stuff);
                         SelectedThing.Notify_ColorChanged();
+                        PawnEditor.Notify_PointsUsed();
                     }, Widgets.GetIconFor(stuff), stuff.uiIconColor));
 
                 if (UIUtility.ButtonTextImage(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct), SelectedThing.Stuff))
@@ -79,6 +81,7 @@ public class Dialog_EditItem : Window
                     {
                         buttonLabel = quality.GetLabel().CapitalizeFirst();
                         compQuality.SetQuality(quality, ArtGenerationContext.Outsider);
+                        PawnEditor.Notify_PointsUsed();
                     }));
 
                 if (Widgets.ButtonText(UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct), buttonLabel))
@@ -139,7 +142,12 @@ public class Dialog_EditItem : Window
             float hitPoints = SelectedThing.HitPoints;
             var widgetRect2 = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
             Widgets.HorizontalSlider(widgetRect2, ref hitPoints, new(0, SelectedThing.MaxHitPoints), hitPoints.ToString());
-            SelectedThing.HitPoints = (int)hitPoints;
+            if (SelectedThing.HitPoints != (int)hitPoints)
+            {
+                SelectedThing.HitPoints = (int)hitPoints;
+                PawnEditor.Notify_PointsUsed();
+            }
+
             cellCount++;
 
             // Tainted
@@ -149,7 +157,12 @@ public class Dialog_EditItem : Window
                 var widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
                 var isTainted = apparel.WornByCorpse;
                 Widgets.Checkbox(new(widgetRect.x + (widgetRect.width - Widgets.CheckboxSize) / 2, widgetRect.y + 3f), ref isTainted);
-                apparel.wornByCorpseInt = isTainted;
+                if (apparel.WornByCorpse != isTainted)
+                {
+                    apparel.wornByCorpseInt = isTainted;
+                    PawnEditor.Notify_PointsUsed();
+                }
+
                 cellCount++;
             }
 
@@ -158,12 +171,14 @@ public class Dialog_EditItem : Window
             {
                 Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "PenFoodTab_Count".Translate());
                 var widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
+                var stackCount = SelectedThing.stackCount;
                 UIUtility.IntField(widgetRect, ref SelectedThing.stackCount, 1, SelectedThing.def.stackLimit, ref _buffer, true);
+                if (stackCount != SelectedThing.stackCount) PawnEditor.Notify_PointsUsed();
                 cellCount++;
             }
         }
 
-        float newHeight = (float)Math.Ceiling(cellCount / 2f) * 38f + 24f;
+        var newHeight = (float)Math.Ceiling(cellCount / 2f) * 38f + 24f;
         windowRect.y += windowRect.height - newHeight;
         windowRect.height = newHeight;
     }

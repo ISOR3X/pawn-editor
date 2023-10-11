@@ -52,7 +52,6 @@ public partial class TabWorker_Bio_Humanlike
                 TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
         }
 
-
         if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
         {
             var list = new List<FloatMenuOption>();
@@ -60,7 +59,11 @@ public partial class TabWorker_Bio_Humanlike
             {
                 var xenotype = item;
                 list.Add(new(xenotype.LabelCap,
-                    () => pawn.genes.SetXenotype(xenotype), xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
+                    () =>
+                    {
+                        pawn.genes.SetXenotype(xenotype);
+                        PawnEditor.Notify_PointsUsed();
+                    }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
                     r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
                     r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
             }
@@ -75,6 +78,7 @@ public partial class TabWorker_Bio_Humanlike
                         pawn.genes.xenotypeName = customXenotype.name;
                         pawn.genes.iconDef = customXenotype.IconDef;
                         foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
+                        PawnEditor.Notify_PointsUsed();
                     }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
                     {
                         if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
@@ -106,8 +110,9 @@ public partial class TabWorker_Bio_Humanlike
         var sexRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
         Widgets.DrawHighlightIfMouseover(sexRect);
 
-        if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f)) && pawn.kindDef.fixedGender == null
-                                                                                                                                        && pawn.RaceProps.hasGenders)
+        if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f))
+         && pawn.kindDef.fixedGender == null
+         && pawn.RaceProps.hasGenders)
         {
             var list = new List<FloatMenuOption>
             {
@@ -131,7 +136,7 @@ public partial class TabWorker_Bio_Humanlike
                     pawn.story.bodyType = bodyType;
                     RecacheGraphics(pawn);
                 }, TexPawnEditor.BodyTypeIcons[bodyType], Color.white))
-                .ToList()));
+               .ToList()));
         Widgets.Label(bodyRect, "PawnEditor.Shape".Translate());
     }
 

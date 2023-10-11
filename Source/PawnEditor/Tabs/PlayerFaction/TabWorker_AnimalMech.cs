@@ -10,8 +10,8 @@ namespace PawnEditor;
 public class TabWorker_AnimalMech : TabWorker<Faction>
 {
     private static readonly QuickSearchWidget searchWidget = new();
-    private readonly PawnLister animalList = new();
-    private readonly PawnLister mechList = new();
+    private readonly PawnListerBase animalList = new();
+    private readonly PawnListerBase mechList = new();
     private int animalCount;
 
     private Vector2 animalScrollPos;
@@ -57,7 +57,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         else
         {
             animalList.UpdateCache(faction, PawnCategory.Animals);
-            (pawns, _, _) = animalList.GetLists();
+            pawns = animalList.GetList();
         }
 
         animalCount = 0;
@@ -99,6 +99,8 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                         {
                             pawn.Discard(true);
                             pawns.Remove(pawn);
+                            PawnEditor.Notify_PointsUsed();
+                            animalTable.ClearCache();
                         }, true));
                 })
             };
@@ -113,7 +115,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         else
         {
             mechList.UpdateCache(faction, PawnCategory.Mechs);
-            (pawns, _, _) = mechList.GetLists();
+            pawns = mechList.GetList();
         }
 
         mechCount = 0;
@@ -151,6 +153,8 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                         {
                             pawn.Discard(true);
                             pawns.Remove(pawn);
+                            PawnEditor.Notify_PointsUsed();
+                            mechTable.ClearCache();
                         }, true));
                 })
             };

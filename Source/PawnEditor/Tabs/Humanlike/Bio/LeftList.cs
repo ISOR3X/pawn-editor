@@ -43,7 +43,11 @@ public partial class TabWorker_Bio_Humanlike
                     {
                         var trLocal = trait;
                         TooltipHandler.TipRegion(r, () => trLocal.TipString(pawn), r.GetHashCode());
-                        if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX)) pawn.story.traits.RemoveTrait(trait, true);
+                        if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX))
+                        {
+                            pawn.story.traits.RemoveTrait(trait, true);
+                            PawnEditor.Notify_PointsUsed();
+                        }
                     }
                 }, trait => Text.CalcSize(trait.LabelCap).x + 10f, 4f, 5f, false)
                .height;

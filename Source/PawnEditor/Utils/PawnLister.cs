@@ -1,21 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
 namespace PawnEditor;
 
-public class PawnLister
+public class PawnListerBase
 {
-    private static readonly List<PawnLister> allLists = new();
-    private readonly List<object> locations = new();
+    private static readonly List<PawnListerBase> allLists = new();
     private readonly List<Pawn> pawns = new();
-    private readonly List<string> sections = new();
     private PawnCategory category;
     private Faction faction;
-    private int sectionCount;
+    private bool inited;
 
-    public PawnLister()
+
+    public PawnListerBase()
     {
         allLists.Add(this);
     }
@@ -30,31 +30,83 @@ public class PawnLister
         foreach (var caravan in Find.WorldObjects.Caravans) AddLocation(caravan, caravan.PawnsListForReading);
 
         AddLocation(Find.World, Find.WorldPawns.AllPawnsAliveOrDead);
+        inited = true;
     }
 
-    public void ClearCache()
+    protected virtual bool AddLocation(object location, IEnumerable<Pawn> occupants)
+    {
+        var hasAny = false;
+        foreach (var pawn in occupants)
+        {
+            if ((faction != null && pawn.Faction != faction) || !category.Includes(pawn)) continue;
+            hasAny = true;
+            AddPawn(location, pawn);
+        }
+
+        return hasAny;
+    }
+
+    protected virtual void AddPawn(object location, Pawn pawn)
+    {
+        pawns.Add(pawn);
+    }
+
+    protected void CheckInited()
+    {
+        if (!inited) throw new InvalidOperationException("Cannot get lists from uninitialized PawnLister");
+    }
+
+    public List<Pawn> GetList()
+    {
+        CheckInited();
+        return pawns;
+    }
+
+    public virtual void ClearCache()
     {
         pawns.Clear();
+        faction = null;
+        category = PawnCategory.All;
+        inited = false;
+    }
+
+    protected void NotifyOthers()
+    {
+        foreach (var lister in allLists.Except(this))
+            if (lister.faction == faction && lister.category == category)
+                lister.UpdateCache(faction, category);
+    }
+}
+
+public class PawnLister : PawnListerBase
+{
+    private readonly List<object> locations = new();
+    private readonly List<string> sections = new();
+    private int sectionCount;
+
+    public override void ClearCache()
+    {
+        base.ClearCache();
         sections.Clear();
         locations.Clear();
         sectionCount = 0;
-        faction = null;
-        category = PawnCategory.Humans;
     }
 
-    private void AddLocation(object location, IEnumerable<Pawn> occupants)
+    protected override bool AddLocation(object location, IEnumerable<Pawn> occupants)
     {
         sections.Add(LocationLabel(location));
         sectionCount++;
-        foreach (var pawn in occupants)
-        {
-            if (pawn.Faction != faction || !category.Includes(pawn)) continue;
-            locations.Add(location);
-            sections.Add(null);
-            pawns.Add(pawn);
-        }
-
+        var hasAny = base.AddLocation(location, occupants);
         sections.RemoveLast();
+        if (!hasAny) sectionCount--;
+        return hasAny;
+    }
+
+    protected override void AddPawn(object location, Pawn pawn)
+    {
+        locations.Add(location);
+        sections.Add(null);
+        base.AddPawn(location, pawn);
     }
 
     public void OnReorder(Pawn pawn, int fromIndex, int toIndex)
@@ -65,30 +117,26 @@ public class PawnLister
         locations.RemoveAt(fromIndex < toIndex ? fromIndex : fromIndex + 1);
         if (sections[toIndex] != null) toIndex++;
         sections.Insert(toIndex, null);
-        sections.RemoveLast();
+        if (sections.Pop() != null) sectionCount--;
         DoTeleport(pawn, from, to);
         NotifyOthers();
     }
 
-    public (List<Pawn>, List<string>, int) GetLists() => (pawns, sections, sectionCount);
+    public (List<Pawn>, List<string>, int) GetLists() => (GetList(), sections, sectionCount);
 
     public void OnDelete(Pawn pawn)
     {
+        var pawns = GetList();
         FullyRemove(pawn);
         pawn.Discard(true);
         RemoveFromList(pawn);
+        if (sections[pawns.IndexOf(pawn)] != null) sectionCount--;
         NotifyOthers();
-    }
-
-    private void NotifyOthers()
-    {
-        foreach (var lister in allLists.Except(this))
-            if (lister.faction == faction && lister.category == category)
-                lister.UpdateCache(faction, category);
     }
 
     private void RemoveFromList(Pawn pawn)
     {
+        var pawns = GetList();
         var index = pawns.IndexOf(pawn);
         locations.RemoveAt(index);
         var nextIndex = index + 1;
@@ -99,6 +147,7 @@ public class PawnLister
     public void TeleportFromTo(Pawn pawn, object from, object to)
     {
         if (to == from) return;
+        var pawns = GetList();
         if (pawns.Contains(pawn))
         {
             var toIndex = locations.LastIndexOf(to);
@@ -110,10 +159,12 @@ public class PawnLister
             }
 
             RemoveFromList(pawn);
+            if (sections[fromIndex] != null) sectionCount--;
             sections.RemoveAt(fromIndex);
             pawns.Remove(pawn);
             pawns.Add(pawn);
             sections.Add(LocationLabel(to));
+            sectionCount++;
             locations.Add(to);
         }
 
@@ -137,6 +188,7 @@ public class PawnLister
 
     public object GetLocation(Pawn pawn)
     {
+        var pawns = GetList();
         if (pawns.Contains(pawn)) return locations[pawns.IndexOf(pawn)];
         if (pawn.SpawnedOrAnyParentSpawned) return pawn.MapHeld;
         if (pawn.GetCaravan() is { } caravan) return caravan;

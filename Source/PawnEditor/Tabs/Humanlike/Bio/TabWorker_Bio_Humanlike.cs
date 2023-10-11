@@ -95,8 +95,18 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                 if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / 20f), texture2D, TexPawnEditor.SkillBarBGTex, false);
                 rect.xMin += 3;
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
-                if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus)) skill.Level++;
-                if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus)) skill.Level--;
+                if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus))
+                {
+                    skill.Level++;
+                    PawnEditor.Notify_PointsUsed();
+                }
+
+                if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus))
+                {
+                    skill.Level--;
+                    PawnEditor.Notify_PointsUsed();
+                }
+
                 inRect.yMin += 4;
             }
     }
@@ -110,6 +120,8 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                     skillRecord.passion = (Passion)value;
                 else
                     skillRecord.Level = value;
+
+            PawnEditor.Notify_PointsUsed();
         };
     }
 
