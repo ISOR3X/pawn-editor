@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -38,6 +39,15 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         yield return new SaveLoadItem<AppearanceInfo>("Appearance".Translate(), AppearanceInfo.CreateFrom(pawn), new()
         {
             OnLoad = info => info.CopyTo(pawn)
+        });
+        yield return new SaveItem("PawnEditor.ExportImage".Translate(), () =>
+        {
+            var text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            if (text.NullOrEmpty()) text = GenFilePaths.SaveDataFolderPath;
+
+            text = Path.Combine(text, pawn.Name.ToStringShort + ".png");
+            PawnEditor.SavePawnTex(pawn, text);
+            Messages.Message("PawnEditor.ImageExported".Translate(pawn.Name.ToStringFull, text), MessageTypeDefOf.TaskCompletion, false);
         });
     }
 

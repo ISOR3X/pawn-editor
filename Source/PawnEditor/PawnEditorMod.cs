@@ -44,6 +44,7 @@ public class PawnEditorMod : Mod
         listing.Label("PawnEditor.PointLimit".Translate() + ": " + Settings.PointLimit.ToStringMoney());
         Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 1000000000);
         listing.CheckboxLabeled("PawnEditor.UseSilver".Translate(), ref Settings.UseSilver, "PawnEditor.UseSilver.Desc".Translate());
+        listing.CheckboxLabeled("PawnEditor.CountNPCs".Translate(), ref Settings.CountNPCs, "PawnEditor.CountNPCs.Desc".Translate());
         listing.End();
     }
 
@@ -150,6 +151,7 @@ public class PawnEditorMod : Mod
 
 public class PawnEditorSettings : ModSettings
 {
+    public bool CountNPCs;
     public bool InGameDevButton = true;
     public bool OverrideVanilla = true;
     public float PointLimit = 100000;
@@ -162,6 +164,7 @@ public class PawnEditorSettings : ModSettings
         Scribe_Values.Look(ref InGameDevButton, nameof(InGameDevButton), true);
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
         Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
+        Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));
     }
 }
 

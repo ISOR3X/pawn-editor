@@ -56,6 +56,12 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
         base.PreOpen();
     }
 
+    public override void OnCancelKeyPressed()
+    {
+        if (PawnEditor.CanExit())
+            base.OnCancelKeyPressed();
+    }
+
     public override void PostClose()
     {
         base.PostClose();

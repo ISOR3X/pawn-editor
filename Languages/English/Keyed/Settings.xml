@@ -8,4 +8,6 @@
     <PawnEditor.PointLimit>Point limit</PawnEditor.PointLimit>
     <PawnEditor.UseSilver>Use silver for points</PawnEditor.UseSilver>
     <PawnEditor.UseSilver.Desc>Point limit will be amount of silver in the current colony, and usage of points will deduct silver.</PawnEditor.UseSilver.Desc>
+    <PawnEditor.CountNPCs>Count NPC pawns in points</PawnEditor.CountNPCs>
+    <PawnEditor.CountNPCs.Desc>If enabled, then NPC pawns will also impact your point limit.</PawnEditor.CountNPCs.Desc>
 </LanguageData>

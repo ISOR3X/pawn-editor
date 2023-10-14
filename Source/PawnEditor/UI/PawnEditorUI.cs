@@ -120,30 +120,49 @@ public static partial class PawnEditor
     public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton)
     {
         Text.Font = GameFont.Small;
-        if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), Pregame ? "Back".Translate() : "Close".Translate())) onLeftButton();
+        if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), Pregame ? "Back".Translate() : "Close".Translate()) && CanExit()) onLeftButton();
 
-        if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), Pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())) onRightButton();
+        if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), Pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())
+         && CanExit()) onRightButton();
 
         var randomRect = new Rect(Vector2.zero, Page.BottomButSize).CenteredOnXIn(inRect).CenteredOnYIn(inRect);
 
         var buttonRect = new Rect(randomRect);
 
         if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
+        {
             lastRandomization.action();
-
-        randomRect.TakeRightPart(1);
+            randomRect.TakeRightPart(1);
+        }
 
         if (Widgets.ButtonText(randomRect, "Randomize".Translate())) Find.WindowStack.Add(new FloatMenu(GetRandomizationOptions().ToList()));
 
         buttonRect.x -= 5 + buttonRect.width;
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
-            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems().Select(item => item.MakeSaveOption()).ToList()));
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems()
+               .Select(static item => item.MakeSaveOption())
+               .Where(static option => option != null)
+               .ToList()));
 
         buttonRect.x += buttonRect.width * 2 + 10;
 
         if (Widgets.ButtonText(buttonRect, "Load".Translate()))
-            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems().Select(item => item.MakeLoadOption()).ToList()));
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems()
+               .Select(static item => item.MakeLoadOption())
+               .Where(static option => option != null)
+               .ToList()));
+    }
+
+    public static bool CanExit()
+    {
+        if (Pregame && usePointLimit && remainingPoints < 0)
+        {
+            Messages.Message("PawnEditor.NegativePoints".Translate(), MessageTypeDefOf.RejectInput, false);
+            return false;
+        }
+
+        return true;
     }
 
     private static IEnumerable<SaveLoadItem> GetSaveLoadItems()
@@ -217,97 +236,6 @@ public static partial class PawnEditor
         }
 
         PortraitsCache.Clear();
-    }
-
-    public static void ResetPoints()
-    {
-        remainingPoints = PawnEditorMod.Settings.PointLimit;
-        cachedValue = 0;
-        if (!Pregame && PawnEditorMod.Settings.UseSilver)
-        {
-            startingSilver = ColonyInventory.AllItemsInInventory().Sum(static t => t.def == ThingDefOf.Silver ? t.stackCount : 0);
-            remainingPoints = startingSilver;
-        }
-
-        Notify_PointsUsed();
-    }
-
-    public static void ApplyPoints()
-    {
-        var amount = remainingPoints - startingSilver;
-        if (amount > 0)
-        {
-            var pos = ColonyInventory.AllItemsInInventory().FirstOrDefault(static t => t.def == ThingDefOf.Silver).Position;
-            var silver = ThingMaker.MakeThing(ThingDefOf.Silver);
-            silver.stackCount = Mathf.RoundToInt(amount);
-            GenPlace.TryPlaceThing(silver, pos, Find.CurrentMap, ThingPlaceMode.Near);
-        }
-        else if (amount < 0)
-        {
-            amount = -amount;
-            foreach (var thing in ColonyInventory.AllItemsInInventory().Where(static t => t.def == ThingDefOf.Silver))
-            {
-                var toRemove = Math.Min(thing.stackCount, Mathf.RoundToInt(amount));
-                thing.stackCount -= toRemove;
-                amount -= toRemove;
-
-                if (thing.stackCount <= 0) thing.Destroy();
-                if (amount < 1f) break;
-            }
-        }
-    }
-
-    public static bool CanUsePoints(float amount)
-    {
-        if (!usePointLimit) return true;
-        if (remainingPoints >= amount) return true;
-        Messages.Message("PawnEditor.NotEnoughPoints".Translate(amount), MessageTypeDefOf.RejectInput, false);
-        return false;
-    }
-
-    public static bool CanUsePoints(Thing thing) => CanUsePoints(GetThingValue(thing));
-    public static bool CanUsePoints(Pawn pawn) => CanUsePoints(GetPawnValue(pawn));
-
-    public static void Notify_PointsUsed(float? amount = null)
-    {
-        if (amount.HasValue)
-            remainingPoints -= amount.Value;
-        else
-        {
-            var value = 0f;
-            if (Pregame)
-            {
-                value += ValueOfPawns(Find.GameInitData.startingAndOptionalPawns);
-                value += ValueOfPawns(StartingThingsManager.GetPawns(PawnCategory.Animals));
-                value += ValueOfPawns(StartingThingsManager.GetPawns(PawnCategory.Mechs));
-                value += ValueOfThings(StartingThingsManager.GetStartingThingsNear());
-                value += ValueOfThings(StartingThingsManager.GetStartingThingsFar());
-            }
-            else
-            {
-                AllPawns.UpdateCache(null, PawnCategory.All);
-                value += ValueOfPawns(AllPawns.GetList());
-                value += ValueOfThings(ColonyInventory.AllItemsInInventory());
-            }
-
-
-            remainingPoints -= value - cachedValue;
-            cachedValue = value;
-        }
-    }
-
-    private static float ValueOfPawns(IEnumerable<Pawn> pawns) => pawns.Sum(GetPawnValue);
-    private static float ValueOfThings(IEnumerable<Thing> things) => things.Sum(GetThingValue);
-    private static float GetThingValue(Thing thing) => thing.MarketValue * thing.stackCount;
-
-    private static float GetPawnValue(Pawn pawn)
-    {
-        var num = pawn.MarketValue;
-        if (pawn.apparel != null)
-            num += pawn.apparel.WornApparel.Sum(t => t.MarketValue);
-        if (pawn.equipment != null)
-            num += pawn.equipment.AllEquipmentListForReading.Sum(t => t.MarketValue);
-        return num;
     }
 
     private static void SetTabGroup(TabGroupDef def)

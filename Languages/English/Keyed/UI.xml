@@ -184,6 +184,9 @@
     <PawnEditor.Teleport.Specific>Teleport to exact location</PawnEditor.Teleport.Specific>
     <PawnEditor.AdditionalInfo>Additional info</PawnEditor.AdditionalInfo>
     <PawnEditor.NotEnoughPoints>Not enough points. Need {0}.</PawnEditor.NotEnoughPoints>
+    <PawnEditor.ExportImage>Export portrait</PawnEditor.ExportImage>
+    <PawnEditor.ImageExported>Exported portrait of {0} to {1}.</PawnEditor.ImageExported>
+    <PawnEditor.NegativePoints>Remaining points is negative.</PawnEditor.NegativePoints>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

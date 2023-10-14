@@ -37,6 +37,17 @@ public class SaveLoadItem<T> : SaveLoadItem where T : IExposable
     }
 }
 
+public class SaveItem : SaveLoadItem
+{
+    private readonly FloatMenuOption option;
+
+    public SaveItem(FloatMenuOption option) => this.option = option;
+    public SaveItem(string label, Action action) => option = new(label, action);
+
+    public override FloatMenuOption MakeSaveOption() => option;
+    public override FloatMenuOption MakeLoadOption() => null;
+}
+
 public struct SaveLoadParms<T> where T : IExposable
 {
     public Action<T> OnSave;
