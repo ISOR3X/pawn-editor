@@ -77,7 +77,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>
 
         if (rows.Count == 0)
         {
-            Widgets.Label(inRect, "None".Translate().Colorize(ColoredText.SubtleGrayColor));
+            var rect = inRect;
+            rect.xMin += 4f;
+            Widgets.Label(rect, "None".Translate().Colorize(ColoredText.SubtleGrayColor));
             TooltipHandler.TipRegionByKey(inRect, "None");
             return;
         }
@@ -253,7 +255,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                         var rect = new Rect(0, 0, icon.width * scale, icon.height * scale)
                             .CenteredOnXIn(inRect)
                             .CenteredOnYIn(inRect)
-                            .ContractedBy(2.5f);
+                            .ContractedBy(4f);
                         GUI.color = Mouse.IsOver(inRect) ? GenUI.MouseoverColor : Color.white;
                         GUI.DrawTexture(rect, icon);
                         GUI.color = Color.white;
@@ -269,7 +271,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     GUI.DrawTexture(new Rect(0, 0, icon.width * scale, icon.height * scale)
                         .CenteredOnXIn(inRect)
                         .CenteredOnYIn(inRect)
-                        .ContractedBy(2.5f), icon);
+                        .ContractedBy(4f), icon);
                 }
                 else if (!label.NullOrEmpty())
                 {
@@ -329,7 +331,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             if (icon != null)
             {
                 rect = new Rect(0, 0, icon.width * scale, icon.height * scale).CenteredOnXIn(rect).CenteredOnYIn(rect).ContractedBy(2.5f);
-                GUI.DrawTexture(rect, icon);
+                GUI.DrawTexture(rect.ExpandedBy(2f), icon);
             }
             else if (!label.NullOrEmpty())
                 using (new TextBlock(GameFont.Small))

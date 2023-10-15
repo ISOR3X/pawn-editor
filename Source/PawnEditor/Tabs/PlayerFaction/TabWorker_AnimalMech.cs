@@ -25,28 +25,34 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         base.Initialize();
         animalTable = new(new()
         {
-            new("AnimalsSection".Translate()),
-            new(TexPawnEditor.GendersTex),
-            new("PawnEditor.Age".Translate()),
-            new("StatsReport_LifeStage".Translate()),
-            new("MarketValueTip".Translate()),
-            new("AnimalBonded".Translate()),
-            new(100),
-            new(30),
-            new(30),
-            new(30),
-            new(30)
+            new(35), // Icon
+            new("PawnEditor.Name".Translate(), textAnchor: TextAnchor.LowerLeft),
+            new("Stat_Thing_Apparel_ValidLifestage".Translate(), 100),
+            new(TexPawnEditor.GendersTex, 100),
+            new("PawnEditor.Age".Translate(), 100),
+            new("MarketValueTip".Translate(), 100),
+            // new(16), // Spacing
+            // new("AnimalBonded".Translate(), 120),
+            // new(16), // Spacing
+            new(24), // Paste
+            new(24), // Copy
+            new(24), // Go to
+            new(24), // Save
+            new(24) // Delete
         }, GetAnimalRows);
         mechTable = new(new()
         {
+            new(35), // Icon
             new("MechsSection".Translate()),
-            new("MarketValueTip".Translate()),
-            new("Overseer".Translate()),
-            new(100),
-            new(30),
-            new(30),
-            new(30),
-            new(30)
+            new("MarketValueTip".Translate(), 100),
+            // new(16), // Spacing
+            // new("Overseer".Translate(), 120),
+            // new(16), // Spacing
+            new(24), // Paste
+            new(24), // Copy
+            new(24), // Go to
+            new(24), // Save
+            new(24) // Delete
         }, GetMechRows);
     }
 
@@ -69,29 +75,32 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
             animalCount++;
             var items = new List<UITable<Faction>.Row.Item>
             {
-                new(pawn.Name.ToStringShort, i),
+                new(Widgets.GetIconFor(pawn, Vector2.one, null, false, out _, out _, out _, out _)),
+                new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft),
+                new(pawn.ageTracker.CurLifeStageRace.GetIcon(pawn), pawn.ageTracker.CurLifeStageIndex),
                 new(pawn.gender.GetIcon(), (int)pawn.gender),
                 new(pawn.ageTracker.AgeNumberString, pawn.ageTracker.AgeBiologicalYears),
-                new(pawn.ageTracker.CurLifeStage.iconTex, pawn.ageTracker.CurLifeStageIndex),
                 new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue),
-                new(TrainableUtility.GetAllColonistBondsFor(pawn).FirstOrDefault()?.Name?.ToStringShort ?? "None".Translate(), () =>
-                {
-                    var possiblePawns = pawn.MapHeld == null
-                        ? Find.WorldPawns.AllPawnsAlive.Where(p => p.IsColonistPlayerControlled)
-                        : pawn.MapHeld.mapPawns.FreeColonists;
-                    Find.WindowStack.Add(new FloatMenu(possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
-                        {
-                            foreach (var bondmate in TrainableUtility.GetAllColonistBondsFor(pawn).ToList())
-                                pawn.relations.RemoveDirectRelation(PawnRelationDefOf.Bond, bondmate);
-                            pawn.relations.AddDirectRelation(PawnRelationDefOf.Bond, p);
-                        }))
-                       .ToList()));
-                }),
-                new("Edit".Translate() + "...", () => PawnEditor.Select(pawn)),
-                new(TexButton.Save,
-                    () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Animals.ToString()); }),
-                new(TexButton.Copy, () => { }),
+                // new(),
+                // new(TrainableUtility.GetAllColonistBondsFor(pawn).FirstOrDefault()?.Name?.ToStringShort ?? "None".Translate(), () =>
+                // {
+                //     var possiblePawns = pawn.MapHeld == null
+                //         ? Find.WorldPawns.AllPawnsAlive.Where(p => p.IsColonistPlayerControlled)
+                //         : pawn.MapHeld.mapPawns.FreeColonists;
+                //     Find.WindowStack.Add(new FloatMenu(possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
+                //         {
+                //             foreach (var bondmate in TrainableUtility.GetAllColonistBondsFor(pawn).ToList())
+                //                 pawn.relations.RemoveDirectRelation(PawnRelationDefOf.Bond, bondmate);
+                //             pawn.relations.AddDirectRelation(PawnRelationDefOf.Bond, p);
+                //         }))
+                //         .ToList()));
+                // }),
+                // new(),
                 new(TexButton.Paste, () => { }),
+                new(TexButton.Copy, () => { }),
+                new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); }),
+                new(TexPawnEditor.Save,
+                    () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Animals.ToString()); }),
                 new(TexButton.DeleteX, () =>
                 {
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
@@ -127,7 +136,8 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
             mechCount++;
             var items = new List<UITable<Faction>.Row.Item>
             {
-                new(pawn.Name.ToStringShort, i),
+                new(Widgets.GetIconFor(pawn, Vector2.one, null, false, out _, out _, out _, out _)),
+                new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft),
                 new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue),
                 new(pawn.GetOverseer()?.Name?.ToStringShort ?? "OverseerNone".Translate(), () =>
                 {
@@ -140,12 +150,13 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                             if (old != null) pawn.relations.RemoveDirectRelation(PawnRelationDefOf.Overseer, old);
                             pawn.relations.AddDirectRelation(PawnRelationDefOf.Overseer, p);
                         }))
-                       .ToList()));
+                        .ToList()));
                 }),
-                new("Edit".Translate() + "...", () => PawnEditor.Select(pawn)),
-                new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Mechs.ToString()); }),
-                new(TexButton.Copy, () => { }),
                 new(TexButton.Paste, () => { }),
+                new(TexButton.Copy, () => { }),
+                new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); }),
+                new(TexPawnEditor.Save,
+                    () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Mechs.ToString()); }),
                 new(TexButton.DeleteX, () =>
                 {
                     Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
@@ -164,16 +175,22 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
 
     public override void DrawTabContents(Rect inRect, Faction faction)
     {
-        DoBottomButtons(inRect.TakeBottomPart(40));
+        DoBottomButtons(inRect.TakeBottomPart(UIUtility.RegularButtonHeight));
 
-        var viewRect = new Rect(0, 0, inRect.width - 20, UITable<Faction>.Heading.Height + animalCount * 34);
-        Widgets.BeginScrollView(inRect.TopHalf(), ref animalScrollPos, viewRect);
-        animalTable.OnGUI(viewRect, faction);
-        Widgets.EndScrollView();
-
-        viewRect = new(0, 0, inRect.width - 20, UITable<Faction>.Heading.Height + mechCount * 34);
-        Widgets.BeginScrollView(inRect.BottomHalf(), ref mechScrollPos, viewRect);
-        mechTable.OnGUI(viewRect, faction);
+        var viewRect = new Rect(0, 0, inRect.width - 20, UITable<Faction>.Heading.Height + (animalCount + mechCount) * 34 + (Text.LineHeightOf(GameFont.Small) + 4) * 2 + 32f);
+        Widgets.BeginScrollView(inRect, ref animalScrollPos, viewRect);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "AnimalsSection".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        viewRect.xMin += 4f;
+        viewRect.yMin += 4f;
+        animalTable.OnGUI(viewRect.TakeTopPart(animalCount * 34), faction);
+        viewRect.xMin += -4f;
+        viewRect.yMin += 32f;
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "MechsSection".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        viewRect.xMin += 4f;
+        viewRect.yMin += 4f;
+        mechTable.OnGUI(viewRect.TakeTopPart(mechCount * 34), faction);
         Widgets.EndScrollView();
     }
 
@@ -209,11 +226,13 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
 
     private void DoBottomButtons(Rect inRect)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
+        if (UIUtility.DefaultButtonText(ref inRect,
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.PawnCategory.Animals".Translate())) PawnEditor.AddPawn(PawnCategory.Animals);
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
+        inRect.xMin += 4f;
+        if (UIUtility.DefaultButtonText(ref inRect,
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.PawnCategory.Mechs".Translate())) PawnEditor.AddPawn(PawnCategory.Mechs);
-        searchWidget.OnGUI(inRect.TakeRightPart(250).ContractedBy(5), () =>
+        inRect.xMin += 4f;
+        searchWidget.OnGUI(inRect.TakeRightPart(250), () =>
         {
             animalTable.ClearCache();
             mechTable.ClearCache();

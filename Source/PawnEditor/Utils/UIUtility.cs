@@ -43,7 +43,7 @@ public static class UIUtility
         rect.xMin += pixels;
         return ret;
     }
-
+    
     public static void CheckboxLabeledCentered(Rect rect, string label, ref bool checkOn, bool disabled = false, float size = 24, Texture2D texChecked = null,
         Texture2D texUnchecked = null)
     {
