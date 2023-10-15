@@ -17,7 +17,6 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
     private Vector2 animalScrollPos;
     private UITable<Faction> animalTable;
     private int mechCount;
-    private Vector2 mechScrollPos;
     private UITable<Faction> mechTable;
 
     public override void Initialize()

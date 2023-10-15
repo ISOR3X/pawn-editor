@@ -18,9 +18,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
 
     private static readonly HashSet<TechLevel> possibleTechLevels;
     private static readonly Dictionary<HediffDef, (List<BodyPartDef>, List<BodyPartGroupDef>)> defaultBodyParts;
-
-    private UITable<Pawn> table;
-
+    
     static ListingMenu_Hediffs()
     {
         defaultBodyParts = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null)
