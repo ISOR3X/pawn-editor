@@ -246,7 +246,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
 
                         Widgets.DrawAtlas(inRect, atlas);
                         GUI.DrawTexture(inRect.TakeLeftPart(30).ContractedBy(2.5f), icon);
-                        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(inRect, label);
+                        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(inRect, label.Truncate(inRect.width));
                         if (Widgets.ButtonInvisible(inRect)) buttonClicked();
                     }
                     else if (icon != null)
@@ -282,7 +282,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     }
                     else
                         using (new TextBlock(textAnchor))
-                            Widgets.Label(inRect, label);
+                            Widgets.Label(inRect, label.Truncate(inRect.width));
                 }
             }
         }

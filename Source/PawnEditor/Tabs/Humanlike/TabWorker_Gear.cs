@@ -46,13 +46,38 @@ public class TabWorker_Gear : TabWorker<Pawn>
             var thing = things[i];
             var items = new List<UITable<Pawn>.Row.Item>
             {
-                new(Widgets.GetIconFor(thing, new(25, 25), Rot4.South, false, out _, out _, out _, out _), i),
-                new(thing.LabelCap, textAnchor: TextAnchor.MiddleLeft),
+                new(iconRect =>
+                {
+                    Widgets.ThingIcon(iconRect.ContractedBy(4f), thing);
+                    iconRect.xMin += 4f;
+                    if (Mouse.IsOver(iconRect))
+                    {
+                        Widgets.DrawHighlight(iconRect);
+                        TooltipHandler.TipRegion(iconRect, "PawnEditor.ClickToOpen".Translate());
+                    }
+                    if (Widgets.ButtonInvisible(iconRect))
+                    {
+                        Find.WindowStack.Add(new Dialog_InfoCard(thing));
+                    }
+                }),
+                new(thing.LabelCap, thing.LabelCap.ToCharArray()[0], TextAnchor.MiddleLeft),
                 new(thing.GetStatValue(StatDefOf.Mass).ToStringMass().Colorize(ColoredText.SubtleGrayColor), (int)thing.GetStatValue(StatDefOf.Mass)),
                 new(((float)thing.HitPoints / thing.MaxHitPoints).ToStringPercent().Colorize(ColoredText.SubtleGrayColor), thing.HitPoints / thing.MaxHitPoints),
                 new(thing.MarketValue.ToStringMoney().Colorize(ColoredText.SubtleGrayColor), (int)thing.MarketValue),
                 new(),
-                new("Edit".Translate() + "...", () => { }),
+                new(editRect =>
+                {
+                    if (Widgets.ButtonText(editRect, "Edit".Translate() + "..."))
+                    {
+                        if (Dialog_EditItem.SelectedThing == thing)
+                        {
+                            Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
+                            Dialog_EditItem.SelectedThing = null;
+                        }
+                        else
+                            Find.WindowStack.Add(new Dialog_EditItem(GUIUtility.GUIToScreenPoint(new Vector2(editRect.x, editRect.y)), pawn, thing));
+                    }
+                }),
                 new(TexButton.DeleteX, () =>
                 {
                     thing.Destroy();
@@ -66,7 +91,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         }
     }
 
-    private static void ClearCaches()
+    public static void ClearCaches()
     {
         apparelTable.ClearCache();
         equipmentTable.ClearCache();
@@ -78,61 +103,61 @@ public class TabWorker_Gear : TabWorker<Pawn>
         var apparelHeight = apparelTable.Height;
         var equipmentHeight = equipmentTable.Height;
         var possessionsHeight = possessionsTable.Height;
-        var totalHeight = apparelHeight + equipmentHeight + possessionsHeight + 32f * 3f;
+        var totalHeight = apparelHeight + equipmentHeight + possessionsHeight + 
+                          16f * 2f + 3f * 4f + 3 * Text.LineHeightOf(GameFont.Small) - 30f; // Actual table height + table padding + table title separation + table title height;
 
-        var viewRect = new Rect(0, 0, inRect.width - 20f, totalHeight);
+        var viewRect = new Rect(inRect.x, inRect.y, inRect.width - 20f, totalHeight);
 
-        Widgets.BeginScrollView(viewRect, ref scrollPos, viewRect);
+        Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
         using (new TextBlock(TextAnchor.MiddleLeft))
             Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
                 "Apparel".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         viewRect.xMin += 4f;
         viewRect.yMin += 4f;
-        apparelTable.OnGUI(viewRect.TakeTopPart(apparelTable.Height), pawn);
+        apparelTable.OnGUI(viewRect.TakeTopPart(apparelHeight), pawn);
         viewRect.xMin += -4f;
-        viewRect.yMin += 32f;
+        viewRect.yMin += 16f;
 
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
                 "Equipment".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         viewRect.xMin += 4f;
         viewRect.yMin += 4f;
-        equipmentTable.OnGUI(viewRect.TakeTopPart(equipmentTable.Height), pawn);
+        equipmentTable.OnGUI(viewRect.TakeTopPart(equipmentHeight), pawn);
         viewRect.xMin += -4f;
-        viewRect.yMin += 32f;
+        viewRect.yMin += 16f;
 
         using (new TextBlock(TextAnchor.MiddleLeft))
             Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
                 "Possessions".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         viewRect.xMin += 4f;
         viewRect.yMin += 4f;
-        possessionsTable.OnGUI(viewRect.TakeTopPart(possessionsTable.Height), pawn);
-        viewRect.xMin += -4f;
-        viewRect.yMin += 32f;
+        possessionsTable.OnGUI(viewRect.TakeTopPart(possessionsHeight), pawn);
 
         Widgets.EndScrollView();
     }
 
 
-    public override void DrawTabContents(Rect rect, Pawn pawn)
+    public override void DrawTabContents(Rect inRect, Pawn pawn)
     {
-        var headerRect = rect.TakeTopPart(170);
+        var headerRect = inRect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
         PawnEditor.DrawPawnPortrait(portraitRect);
 
         headerRect.xMin += 7;
         DrawEquipmentInfo(headerRect, pawn);
-        DoBottomOptions(rect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
+        DoBottomOptions(inRect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
 
-        rect.xMin += 4;
-
-        DoTables(rect, pawn);
+        inRect = inRect.ContractedBy(4f);
+        DoTables(inRect, pawn);
 
         // Close Dialog_EditItem on any interaction with the Dialog_PawnEditor menu.
         if (Find.WindowStack.IsOpen<Dialog_EditItem>())
             if (oldScrollPos != scrollPos || Find.WindowStack.focusedWindow is Dialog_PawnEditor)
+            {
                 Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
-
+                // Dialog_EditItem.SelectedThing = null;
+            }
         oldScrollPos = scrollPos;
     }
 

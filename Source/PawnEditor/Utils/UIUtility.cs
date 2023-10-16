@@ -206,7 +206,7 @@ public static class UIUtility
     public static Rect CellRect(int cell, Rect inRect)
     {
         var cellWidth = inRect.width / 2f - 16f;
-        var cellHeight = 30f;
+        const float cellHeight = 30f;
         var x = cell % 2 == 0 ? 0f : cellWidth + 32f;
         var y = cell / 2 * (cellHeight + 8f);
         return new(inRect.x + x, inRect.y + y, cellWidth, cellHeight);
@@ -222,10 +222,10 @@ public static class UIUtility
         Widgets.Label(rect, label);
     }
 
-    public static bool DefaultButtonText(ref Rect inRect, string label, float xMargin = 48f)
+    public static bool DefaultButtonText(ref Rect inRect, string label, float xMargin = 48f, bool rightAlign = false)
     {
         float width = Text.CalcSize(label).x;
-        var rect = inRect.TakeLeftPart(width + xMargin);
+        var rect = rightAlign ? inRect.TakeRightPart(width + xMargin) : inRect.TakeLeftPart(width + xMargin);
         using (new TextBlock(GameFont.Small, TextAnchor.MiddleCenter, false))
         {
             return Widgets.ButtonText(rect, label);
