@@ -72,6 +72,8 @@
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Hediffs.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Items.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_PawnKindDef.cs" />
+    <Compile Include="Dialogs\ListingMenus\ListingMenu_Pawns.cs" />
+    <Compile Include="Dialogs\ListingMenus\ListingMenu_Relations.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Trait.cs" />
     <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />

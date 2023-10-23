@@ -57,6 +57,9 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddRelation".Translate()))
         {
+            var list = PawnEditor.AllPawns.GetList();
+            list.Remove(pawn);
+            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn));
         }
 
         inRect.xMin += 4f;

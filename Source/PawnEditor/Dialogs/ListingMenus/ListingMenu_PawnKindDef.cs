@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -17,18 +16,14 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
     private static List<PawnKindDef> mechs;
     private static List<PawnKindDef> humans;
     private static List<PawnKindDef> all;
-
-    private static readonly Func<PawnKindDef, string> labelGetter = p => p.LabelCap;
-    private static readonly Func<PawnKindDef, string> descGetter = p => p.race.description;
-    private static readonly Action<PawnKindDef, Rect> iconDrawer = DrawPawnIcon;
-
+    
     static ListingMenu_PawnKindDef()
     {
         MakePawnLists();
     }
 
-    public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Action<PawnKindDef> addAction) : base(output.Invoke(pawnCategory), labelGetter, addAction,
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), descGetter, iconDrawer)
+    public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Action<PawnKindDef> addAction) : base(output.Invoke(pawnCategory), p => p.LabelCap, addAction,
+        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), p => p.race.description, DrawPawnIcon)
     {
         type = pawnCategory;
     }

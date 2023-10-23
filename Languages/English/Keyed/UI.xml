@@ -154,6 +154,8 @@
     <PawnEditor.IsImplant>Is implant</PawnEditor.IsImplant>
     <PawnEditor.IsDisease>Is disease</PawnEditor.IsDisease>
     <PawnEditor.OccupiesLayer>Occupies layer</PawnEditor.OccupiesLayer>
+    <PawnEditor.IsHuman>Is human</PawnEditor.IsHuman>
+    <PawnEditor.IsColonist>Is colonist</PawnEditor.IsColonist>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
