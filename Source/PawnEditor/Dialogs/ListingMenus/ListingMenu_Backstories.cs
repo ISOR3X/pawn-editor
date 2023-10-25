@@ -10,20 +10,15 @@ namespace PawnEditor;
 public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
 {
     private static readonly List<BackstoryDef> items;
-    private static readonly Func<BackstoryDef, string> labelGetter = b => b.titleShort.CapitalizeFirst();
-    private static readonly Func<BackstoryDef, Pawn, string> descGetter = (b, p) => b.FullDescriptionFor(p).Resolve();
-    private static readonly Action<BackstoryDef, Pawn> action = TryAdd;
-    private static readonly List<TFilter<BackstoryDef>> filters;
 
     static ListingMenu_Backstories()
     {
         items = DefDatabase<BackstoryDef>.AllDefsListForReading;
-        filters = GetFilters();
     }
 
-    public ListingMenu_Backstories(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
+    public ListingMenu_Backstories(Pawn pawn) : base(items, b => b.titleShort.CapitalizeFirst(), b => TryAdd(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "Backstory".Translate().ToLower(),
-        b => descGetter(b, pawn), null, filters, pawn)
+        b => b.FullDescriptionFor(pawn).Resolve(), null, GetFilters(), pawn)
     {
     }
 

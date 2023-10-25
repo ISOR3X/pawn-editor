@@ -167,9 +167,13 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                 Log.WarningOnce("No ItemType!", 15703);
                 break;
         }
+        TabWorker_Gear.ClearCaches();
     }
 
-    private static void TryAdd(ThingDef thingDef) { }
+    private static void TryAdd(ThingDef thingDef)
+    {
+        
+    }
 
     private static void MakeItemLists()
     {

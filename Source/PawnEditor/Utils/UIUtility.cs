@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine;
@@ -206,7 +208,7 @@ public static class UIUtility
     public static Rect CellRect(int cell, Rect inRect)
     {
         var cellWidth = inRect.width / 2f - 16f;
-        var cellHeight = 30f;
+        const float cellHeight = 30f;
         var x = cell % 2 == 0 ? 0f : cellWidth + 32f;
         var y = cell / 2 * (cellHeight + 8f);
         return new(inRect.x + x, inRect.y + y, cellWidth, cellHeight);
@@ -222,13 +224,64 @@ public static class UIUtility
         Widgets.Label(rect, label);
     }
 
-    public static bool DefaultButtonText(ref Rect inRect, string label, float xMargin = 48f)
+    public static bool DefaultButtonText(ref Rect inRect, string label, float xMargin = 48f, bool rightAlign = false)
     {
         float width = Text.CalcSize(label).x;
-        var rect = inRect.TakeLeftPart(width + xMargin);
+        var rect = rightAlign ? inRect.TakeRightPart(width + xMargin) : inRect.TakeLeftPart(width + xMargin);
         using (new TextBlock(GameFont.Small, TextAnchor.MiddleCenter, false))
         {
             return Widgets.ButtonText(rect, label);
         }
+    }
+
+    public static void GeneResourceBarWidget(Rect inRect, Gene_Resource resource)
+    {
+        float value = resource.ValuePercent;
+        ResourceBarWidget(inRect, ref value, resource.LabelCap, resource.BarColor, new ColorInt(8, 9, 13).ToColor);
+        resource.ValuePercent = value;
+    }
+
+    public static void ResourceBarWidget(Rect inRect, ref float valuePct, string label, Color barColor, Color? bgBarColor = null, List<float> threshPercents = null, float stepSizePct = 0.1f)
+    {
+        Widgets.Label(inRect.TakeLeftPart(100f), label.CapitalizeFirst());
+
+        if (Mouse.IsOver(inRect))
+        {
+            Widgets.DrawHighlight(inRect);
+            string tooltip = $"{(object)label.Colorize(ColoredText.TipSectionTitleColor)}: {(object)(valuePct * 100)}%";
+            TooltipHandler.TipRegion(inRect, tooltip);
+        }
+
+        Rect barRect = inRect.ContractedBy(16f, 0f);
+        barRect.yMax -= 8f;
+
+        float value = Mathf.Clamp(valuePct, 0f, 1f);
+        Widgets.FillableBar(barRect, value, SolidColorMaterials.NewSolidColorTexture(barColor), SolidColorMaterials.NewSolidColorTexture(bgBarColor.Value), true);
+        if (threshPercents != null)
+        {
+            foreach (float threshPercent in threshPercents)
+            {
+                Rect position = new Rect()
+                {
+                    x = (float)(barRect.x + 3.0 + (barRect.width - 8.0) * threshPercent),
+                    y = (float)(barRect.y + (double)barRect.height - 9.0),
+                    width = 2f,
+                    height = 6f
+                };
+                GUI.DrawTexture(position, (double)value < threshPercent ? BaseContent.GreyTex : BaseContent.BlackTex);
+            }
+        }
+
+        Rect plusRect = barRect.TakeRightPart(barRect.height).ContractedBy(4f);
+        Rect minRect = barRect.TakeRightPart(barRect.height).ContractedBy(4f);
+
+        if (Widgets.ButtonImage(plusRect, TexButton.Plus))
+            valuePct = Utilities.StepValue(valuePct, stepSizePct);
+        if (Mouse.IsOver(plusRect))
+            TooltipHandler.TipRegion(plusRect, (TipSignal)$"+ {stepSizePct*100}%");
+        if (Widgets.ButtonImage(minRect, TexButton.Minus))
+            valuePct = Utilities.StepValue(valuePct, -stepSizePct);
+        if (Mouse.IsOver(minRect))
+            TooltipHandler.TipRegion(minRect, (TipSignal)$"- {stepSizePct*100}%");
     }
 }

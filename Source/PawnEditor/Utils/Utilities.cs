@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace PawnEditor;
 
@@ -39,4 +40,9 @@ public static class Utilities
         source.Select(kv => new KeyValuePair<TKey, TResult>(kv.Key, selector(kv.Key, kv.Value))).ToDictionary(kv => kv.Key, kv => kv.Value);
 
     public static bool NotNullAndAny<T>(this IEnumerable<T> source, Func<T, bool> predicate) => source != null && source.Any(predicate);
+
+    public static float StepValue(float oldValuePct, float stepPct, float min = 0, float max = 1)
+    {
+        return Mathf.Clamp((float)Math.Round(oldValuePct + stepPct, 2), min, max);
+    }
 }

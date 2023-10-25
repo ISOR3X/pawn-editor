@@ -154,6 +154,8 @@
     <PawnEditor.IsImplant>Is implant</PawnEditor.IsImplant>
     <PawnEditor.IsDisease>Is disease</PawnEditor.IsDisease>
     <PawnEditor.OccupiesLayer>Occupies layer</PawnEditor.OccupiesLayer>
+    <PawnEditor.IsHuman>Is human</PawnEditor.IsHuman>
+    <PawnEditor.IsColonist>Is colonist</PawnEditor.IsColonist>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
@@ -187,6 +189,7 @@
     <PawnEditor.ExportImage>Export portrait</PawnEditor.ExportImage>
     <PawnEditor.ImageExported>Exported portrait of {0} to {1}.</PawnEditor.ImageExported>
     <PawnEditor.NegativePoints>Remaining points is negative.</PawnEditor.NegativePoints>
+    <PawnEditor.ClickToOpen>Click to view infocard</PawnEditor.ClickToOpen>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

@@ -25,12 +25,12 @@ public class Dialog_EditItem : Window
         SelectedThing = item;
     }
 
-    public override Vector2 InitialSize => new(790f, 160f);
+    public override Vector2 InitialSize => new(790f - 12f, 160f); // -12f because of the insets on the table.
 
     public override void PreOpen()
     {
         base.PreOpen();
-        windowRect.x = _position.x - 4f;
+        windowRect.x = _position.x - InitialSize.x + 124f; // 124 is button width + delete button
         windowRect.y = _position.y - InitialSize.y;
         _buffer = SelectedThing.stackCount.ToString();
     }
@@ -99,8 +99,8 @@ public class Dialog_EditItem : Window
                 widgetRect.xMax -= 4f;
                 colorRect.height = 24f;
                 colorRect.y += 3f;
-                var curColor = apparel2.GetComp<CompColorable>().color;
-                curColor = curColor == Color.white ? apparel2.Stuff.stuffProps.color : curColor;
+                var colorComp = apparel2.GetComp<CompColorable>();
+                var curColor = colorComp != null && colorComp.Color != Color.white ? colorComp.Color : apparel2.Stuff.stuffProps.color;
 
                 if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
                     Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),
@@ -176,9 +176,71 @@ public class Dialog_EditItem : Window
                 if (stackCount != SelectedThing.stackCount) PawnEditor.Notify_PointsUsed();
                 cellCount++;
             }
+
+            // Persona traits
+            var bladelink = SelectedThing.TryGetComp<CompBladelinkWeapon>();
+            if (bladelink != null)
+            {
+                Rect bladeRect = UIUtility.CellRect(cellCount, inRect);
+                bladeRect.xMax = inRect.xMax;
+                Widgets.Label(bladeRect.LeftPart(labelWidthPct / 2), "Traits".Translate());
+                Rect traitsRect = bladeRect.RightPart(1 - labelWidthPct / 2);
+
+                var options4 = DefDatabase<WeaponTraitDef>.AllDefs.Select(weaponTraitDef => new FloatMenuOption(weaponTraitDef.LabelCap, () =>
+                    {
+                        if (bladelink.CanAddTrait(weaponTraitDef)) bladelink.traits.Add(weaponTraitDef);
+                        else Messages.Message("PawnEditor.TraitDisallowedByKind".Translate(weaponTraitDef.label, SelectedThing.Label), MessageTypeDefOf.RejectInput);
+                    }))
+                    .ToList();
+
+                if (UIUtility.DefaultButtonText(ref traitsRect, "Add".Translate().CapitalizeFirst() + " " + "Trait".Translate(), rightAlign: true))
+                {
+                    Find.WindowStack.Add(new FloatMenu(options4));
+                }
+
+                GenUI.DrawElementStack(traitsRect, 30, bladelink.traits, delegate(Rect r, WeaponTraitDef weaponTraitDef)
+                {
+                    r = r.ContractedBy(0f, 4f);
+                    GUI.color = CharacterCardUtility.StackElementBackground;
+                    GUI.DrawTexture(r, BaseContent.WhiteTex);
+                    GUI.color = Color.white;
+                    if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
+
+                    Widgets.Label(new(r.x + 5f, r.y, r.width - 10f, r.height), weaponTraitDef.LabelCap);
+                    if (Mouse.IsOver(r))
+                    {
+                        var weaponTraitDefLocal = weaponTraitDef;
+                        TooltipHandler.TipRegion(r, weaponTraitDefLocal.description);
+                        if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX))
+                        {
+                            bladelink.traits.Remove(weaponTraitDefLocal);
+                            PawnEditor.Notify_PointsUsed();
+                        }
+                    }
+                }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f, 5f);
+
+
+                cellCount += 2;
+            }
+            
+            // Name
+            var name = SelectedThing.TryGetComp<CompGeneratedNames>();
+            if (name != null)
+            {
+                Widgets.Label(UIUtility.CellRect(cellCount, inRect).LeftPart(labelWidthPct), "PawnEditor.Name".Translate());
+                var widgetRect = UIUtility.CellRect(cellCount, inRect).RightPart(1 - labelWidthPct);
+                if (Widgets.ButtonImage(widgetRect.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Randomize))
+                {
+                    name.Initialize(name.Props);
+                }
+                name.name = Widgets.TextField(widgetRect, name.name);
+                cellCount++;
+            }
+
+            TabWorker_Gear.ClearCaches();
         }
 
-        var newHeight = (float)Math.Ceiling(cellCount / 2f) * 38f + 24f;
+        var newHeight = (float)Math.Ceiling(cellCount / 2f) * 38f + 24f + 8f;
         windowRect.y += windowRect.height - newHeight;
         windowRect.height = newHeight;
     }

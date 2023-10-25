@@ -7,7 +7,7 @@ using Verse;
 
 namespace PawnEditor;
 
-// If the listing turns out to slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
+// If the listing turns out too slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
 public class Listing_Thing<T> : Listing_Tree
 {
     private readonly List<T> _items;

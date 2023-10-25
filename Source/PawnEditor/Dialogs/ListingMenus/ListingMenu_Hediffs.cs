@@ -13,12 +13,12 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
     private static readonly List<HediffDef> items;
     private static readonly Func<HediffDef, string> labelGetter = d => d.LabelCap;
     private static readonly Func<HediffDef, string> descGetter = d => d.Description;
-    private static readonly Action<HediffDef, Pawn> action = TryAdd;
+    private static readonly Action<HediffDef, Pawn, UITable<Pawn>> action = TryAdd;
     private static readonly List<TFilter<HediffDef>> filters;
 
     private static readonly HashSet<TechLevel> possibleTechLevels;
     private static readonly Dictionary<HediffDef, (List<BodyPartDef>, List<BodyPartGroupDef>)> defaultBodyParts;
-
+    
     static ListingMenu_Hediffs()
     {
         defaultBodyParts = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null)
@@ -34,11 +34,11 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         filters = GetFilters();
     }
 
-    public ListingMenu_Hediffs(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
+    public ListingMenu_Hediffs(Pawn pawn, UITable<Pawn> table) : base(items, labelGetter, b => action(b, pawn, table),
         "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Hediff".Translate().ToLower(),
         b => descGetter(b), null, filters, pawn) { }
 
-    private static void TryAdd(HediffDef hediffDef, Pawn pawn)
+    private static void TryAdd(HediffDef hediffDef, Pawn pawn, UITable<Pawn> uiTable)
     {
         void AddCheck(BodyPartRecord part)
         {
@@ -49,6 +49,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
                 if (price is >= 1 or <= 1 && hediffDef.priceImpact && !PawnEditor.CanUsePoints(price)) return;
                 pawn.health.AddHediff(hediffDef, part);
                 PawnEditor.Notify_PointsUsed();
+                uiTable.ClearCache();
             }
 
             if (typeof(Hediff_AddedPart).IsAssignableFrom(hediffDef.hediffClass)
@@ -69,8 +70,8 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
                     return;
                 }
             }
-
             ReallyAdd();
+
         }
 
         if (defaultBodyParts.TryGetValue(hediffDef, out var result))
@@ -101,4 +102,6 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         list.Add(new("PawnEditor.TechLevel".Translate(), false, techLevel));
         return list;
     }
+
+
 }

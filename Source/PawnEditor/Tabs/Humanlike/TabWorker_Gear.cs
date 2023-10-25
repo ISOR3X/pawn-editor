@@ -10,53 +10,154 @@ namespace PawnEditor;
 [HotSwappable]
 public class TabWorker_Gear : TabWorker<Pawn>
 {
-    private const float ItemHeight = 30;
-    private const float tableCategorySpacing = 16f;
-    private readonly Dictionary<string, string[]> countBuffers = new();
     private Vector2 oldScrollPos = Vector2.zero;
-
     private Vector2 scrollPos;
 
-    public override void DrawTabContents(Rect rect, Pawn pawn)
+    private static UITable<Pawn> apparelTable;
+    private static UITable<Pawn> equipmentTable;
+    private static UITable<Pawn> possessionsTable;
+
+    public override void Initialize()
     {
-        var headerRect = rect.TakeTopPart(170);
+        base.Initialize();
+        apparelTable = new(GetHeadings(), p => GetRows(p, pawn => pawn.apparel.WornApparel.Cast<Thing>().ToList()));
+        equipmentTable = new(GetHeadings(), p => GetRows(p, pawn => pawn.equipment.equipment.Cast<Thing>().ToList()));
+        possessionsTable = new(GetHeadings(), p => GetRows(p, pawn => pawn.inventory.innerContainer.ToList()));
+    }
+
+    private List<UITable<Pawn>.Heading> GetHeadings() =>
+        new()
+        {
+            new(32),
+            new("Name".Translate(), textAnchor: TextAnchor.MiddleLeft),
+            new("PawnEditor.Weight".Translate(), 120),
+            new("PawnEditor.Hitpoints".Translate(), 120),
+            new("MarketValueTip".Translate(), 120),
+            new(16),
+            new(100), // Edit
+            new(24) // Delete
+        };
+
+    private IEnumerable<UITable<Pawn>.Row> GetRows(Pawn pawn, Func<Pawn, List<Thing>> thingsGetter)
+    {
+        var things = thingsGetter(pawn);
+        for (var i = 0; i < things.Count; i++)
+        {
+            var thing = things[i];
+            var items = new List<UITable<Pawn>.Row.Item>
+            {
+                new(iconRect =>
+                {
+                    Widgets.ThingIcon(iconRect.ContractedBy(4f), thing);
+                    iconRect.xMin += 4f;
+                    if (Mouse.IsOver(iconRect))
+                    {
+                        Widgets.DrawHighlight(iconRect);
+                        TooltipHandler.TipRegion(iconRect, "PawnEditor.ClickToOpen".Translate());
+                    }
+                    if (Widgets.ButtonInvisible(iconRect))
+                    {
+                        Find.WindowStack.Add(new Dialog_InfoCard(thing));
+                    }
+                }),
+                new(thing.LabelCap, thing.LabelCap.ToCharArray()[0], TextAnchor.MiddleLeft),
+                new(thing.GetStatValue(StatDefOf.Mass).ToStringMass().Colorize(ColoredText.SubtleGrayColor), (int)thing.GetStatValue(StatDefOf.Mass)),
+                new(((float)thing.HitPoints / thing.MaxHitPoints).ToStringPercent().Colorize(ColoredText.SubtleGrayColor), thing.HitPoints / thing.MaxHitPoints),
+                new(thing.MarketValue.ToStringMoney().Colorize(ColoredText.SubtleGrayColor), (int)thing.MarketValue),
+                new(),
+                new(editRect =>
+                {
+                    if (Widgets.ButtonText(editRect, "Edit".Translate() + "..."))
+                    {
+                        if (Dialog_EditItem.SelectedThing == thing)
+                        {
+                            Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
+                            Dialog_EditItem.SelectedThing = null;
+                        }
+                        else
+                            Find.WindowStack.Add(new Dialog_EditItem(GUIUtility.GUIToScreenPoint(new Vector2(editRect.x, editRect.y)), pawn, thing));
+                    }
+                }),
+                new(TexButton.DeleteX, () =>
+                {
+                    thing.Destroy();
+                    thing.Discard(true);
+                    PawnEditor.Notify_PointsUsed();
+                    ClearCaches();
+                })
+            };
+
+            yield return new(items, thing.GetTooltip().text);
+        }
+    }
+
+    public static void ClearCaches()
+    {
+        apparelTable.ClearCache();
+        equipmentTable.ClearCache();
+        possessionsTable.ClearCache();
+    }
+
+    private void DoTables(Rect inRect, Pawn pawn)
+    {
+        var apparelHeight = apparelTable.Height;
+        var equipmentHeight = equipmentTable.Height;
+        var possessionsHeight = possessionsTable.Height;
+        var totalHeight = apparelHeight + equipmentHeight + possessionsHeight + 
+                          16f * 2f + 3f * 4f + 3 * Text.LineHeightOf(GameFont.Small) - 30f; // Actual table height + table padding + table title separation + table title height;
+
+        var viewRect = new Rect(inRect.x, inRect.y, inRect.width - 20f, totalHeight);
+
+        Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
+                "Apparel".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+        viewRect.xMin += 4f;
+        viewRect.yMin += 4f;
+        apparelTable.OnGUI(viewRect.TakeTopPart(apparelHeight), pawn);
+        viewRect.xMin += -4f;
+        viewRect.yMin += 16f;
+
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
+                "Equipment".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+        viewRect.xMin += 4f;
+        viewRect.yMin += 4f;
+        equipmentTable.OnGUI(viewRect.TakeTopPart(equipmentHeight), pawn);
+        viewRect.xMin += -4f;
+        viewRect.yMin += 16f;
+
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
+                "Possessions".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+        viewRect.xMin += 4f;
+        viewRect.yMin += 4f;
+        possessionsTable.OnGUI(viewRect.TakeTopPart(possessionsHeight), pawn);
+
+        Widgets.EndScrollView();
+    }
+
+
+    public override void DrawTabContents(Rect inRect, Pawn pawn)
+    {
+        var headerRect = inRect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
         PawnEditor.DrawPawnPortrait(portraitRect);
 
         headerRect.xMin += 7;
         DrawEquipmentInfo(headerRect, pawn);
-        DoBottomOptions(rect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
+        DoBottomOptions(inRect.TakeBottomPart(UIUtility.RegularButtonHeight), pawn);
 
-        rect.xMin += 4;
-
-        var categoryHeaderHeight = Text.LineHeightOf(GameFont.Small) * 2;
-        var apparel = pawn.apparel.WornApparel;
-        var apparelHeight = categoryHeaderHeight + apparel.Count * ItemHeight;
-        var equipment = pawn.equipment.AllEquipmentListForReading;
-        var equipmentHeight = categoryHeaderHeight + equipment.Count * ItemHeight;
-        var possessions = pawn.inventory.innerContainer.ToList();
-        var possessionsHeight = categoryHeaderHeight + possessions.Count * ItemHeight;
-
-        var height = possessionsHeight + equipmentHeight + apparelHeight + 3 * tableCategorySpacing;
-        var outRect = rect.ContractedBy(0f, 4f);
-        var viewRect = new Rect(0, 0, outRect.width - 20, height);
-
-        Widgets.BeginScrollView(outRect, ref scrollPos, viewRect);
-        DoEquipmentList(viewRect.TakeTopPart(apparelHeight), apparel,
-            "Apparel".Translate(), thing => pawn.apparel.TryDrop(thing), ListingMenu_Items.ItemType.Apparel, pawn);
-        viewRect.yMin += tableCategorySpacing;
-        DoEquipmentList(viewRect.TakeTopPart(equipmentHeight), equipment,
-            "Equipment".Translate(), pawn.equipment.Remove, ListingMenu_Items.ItemType.Equipment, pawn);
-        viewRect.yMin += tableCategorySpacing;
-        DoEquipmentList(viewRect.TakeTopPart(possessionsHeight), possessions, "Possessions".Translate(),
-            thing => pawn.inventory.DropCount(thing.def, thing.stackCount), ListingMenu_Items.ItemType.Possessions, pawn);
-        Widgets.EndScrollView();
+        inRect = inRect.ContractedBy(4f);
+        DoTables(inRect, pawn);
 
         // Close Dialog_EditItem on any interaction with the Dialog_PawnEditor menu.
         if (Find.WindowStack.IsOpen<Dialog_EditItem>())
             if (oldScrollPos != scrollPos || Find.WindowStack.focusedWindow is Dialog_PawnEditor)
+            {
                 Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
-
+                // Dialog_EditItem.SelectedThing = null;
+            }
         oldScrollPos = scrollPos;
     }
 
@@ -71,7 +172,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             MassUtility.Capacity(pawn).ToString("0.##")));
         listing.Label("ComfyTemperatureRange".Translate() + ": " +
                       pawn.GetStatValue(StatDefOf.ComfyTemperatureMin).ToStringTemperature("F0") + " ~ "
-                    + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
+                      + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
         listing.Label("MarketValueTip".Translate() + ": $" + pawn.GetStatValue(StatDefOf.MarketValue));
         listing.NewColumn();
 
@@ -104,132 +205,6 @@ public class TabWorker_Gear : TabWorker<Pawn>
 
         num = Mathf.Clamp(num * 2f, 0f, 2f);
         listing.LabelDouble(label.Truncate(120), num.ToStringPercent());
-    }
-
-    private static (float, float, float, float) GetColumnWidths(bool doCount)
-    {
-        float weightWidth, hpWidth, valueWidth, countWidth;
-        if (doCount)
-        {
-            weightWidth = 80;
-            hpWidth = 80;
-            valueWidth = 120;
-            countWidth = 100;
-        }
-        else
-        {
-            weightWidth = 80;
-            hpWidth = 150;
-            valueWidth = 150;
-            countWidth = 0;
-        }
-
-        return (weightWidth, hpWidth, valueWidth, countWidth);
-    }
-
-    private void DoEquipmentList<T>(Rect inRect, List<T> equipment, string label, Action<T> remove, ListingMenu_Items.ItemType itemType, Pawn pawn,
-        bool doCount = false) where T : Thing
-    {
-        if (!countBuffers.TryGetValue(label, out var countBufferArr) || countBufferArr.Length != equipment.Count)
-        {
-            countBufferArr = new string[equipment.Count];
-            countBufferArr.Initialize();
-            countBuffers[label] = countBufferArr;
-        }
-
-        var titleRect = inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small));
-        var headerRect = inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small));
-
-        const float buttonsWidth = ItemHeight + 100 + 4;
-        var (weightWidth, hpWidth, valueWidth, countWidth) = GetColumnWidths(doCount);
-
-        Widgets.Label(titleRect, label.Colorize(ColoredText.TipSectionTitleColor));
-
-        if (equipment.Count > 0)
-        {
-            using (new TextBlock(TextAnchor.LowerLeft))
-                Widgets.Label(headerRect.ContractedBy(ItemHeight + 4f, 0f), "PawnEditor.Name".Translate());
-
-            using (new TextBlock(TextAnchor.LowerCenter))
-            {
-                headerRect.xMax -= buttonsWidth;
-                if (doCount) Widgets.Label(headerRect.TakeRightPart(countWidth), "PenFoodTab_Count".Translate());
-                Widgets.Label(headerRect.TakeRightPart(valueWidth), "MarketValueTip".Translate());
-                Widgets.Label(headerRect.TakeRightPart(hpWidth), "PawnEditor.Hitpoints".Translate());
-                Widgets.Label(headerRect.TakeRightPart(weightWidth), "PawnEditor.Weight".Translate());
-                GUI.color = Widgets.SeparatorLineColor;
-                Widgets.DrawLineHorizontal(inRect.x, inRect.y, inRect.width);
-                GUI.color = Color.white;
-            }
-        }
-        else
-        {
-            if (Mouse.IsOver(headerRect)) Widgets.DrawHighlight(headerRect);
-            Widgets.Label(headerRect, "None".Translate().Colorize(ColoredText.SubtleGrayColor));
-            TooltipHandler.TipRegionByKey(headerRect, "None");
-        }
-
-        for (var i = 0; i < equipment.Count; i++)
-        {
-            var rect = inRect.TakeTopPart(ItemHeight);
-            rect.xMin += 4;
-            var totalRect = new Rect(rect);
-            if (i % 2 == 1) Widgets.DrawLightHighlight(rect);
-
-            var thing = equipment[i];
-
-            if (Widgets.ButtonImage(rect.TakeRightPart(ItemHeight).ContractedBy(2.5f), TexButton.DeleteX))
-            {
-                remove(thing);
-                PawnEditor.Notify_PointsUsed();
-            }
-
-            rect.xMax -= 4;
-            if (Widgets.ButtonText(rect.TakeRightPart(100), "Edit".Translate() + "..."))
-            {
-                if (Dialog_EditItem.SelectedThing == thing)
-                {
-                    Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
-                    Dialog_EditItem.SelectedThing = null;
-                }
-                else
-                    Find.WindowStack.Add(new Dialog_EditItem(GUIUtility.GUIToScreenPoint(new(rect.x, rect.y)), pawn, thing));
-            }
-
-            if (doCount)
-            {
-                var countRect = rect.TakeRightPart(countWidth);
-                var oldCount = thing.stackCount;
-                UIUtility.IntField(countRect, ref thing.stackCount, 1, thing.def.stackLimit, ref countBufferArr[i]);
-                if (oldCount != thing.stackCount)
-                    PawnEditor.Notify_PointsUsed();
-            }
-
-            if (Mouse.IsOver(rect))
-            {
-                Widgets.DrawHighlight(totalRect);
-                var tooltip =
-                    $"{thing.LabelNoParenthesisCap.AsTipTitle()}{GenLabel.LabelExtras(thing, 1, true, true)}\n\n{thing.DescriptionDetailed}";
-                if (thing.def.useHitPoints) tooltip = $"{tooltip}\n{thing.HitPoints} / {thing.MaxHitPoints}";
-                TooltipHandler.TipRegion(rect, tooltip);
-            }
-
-            using (new TextBlock(TextAnchor.MiddleCenter))
-            {
-                GUI.color = ColoredText.SubtleGrayColor;
-                Widgets.Label(rect.TakeRightPart(valueWidth), (thing.MarketValue * thing.stackCount).ToStringMoney());
-                Widgets.Label(rect.TakeRightPart(hpWidth),
-                    (thing.HitPoints / (float)thing.MaxHitPoints).ToStringPercent());
-                Widgets.Label(rect.TakeRightPart(weightWidth),
-                    (thing.GetStatValue(StatDefOf.Mass) * thing.stackCount).ToStringMass());
-                GUI.color = Color.white;
-            }
-
-            Widgets.ThingIcon(rect.TakeLeftPart(ItemHeight).ContractedBy(2.5f), thing);
-
-            using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(rect, thing.LabelCap);
-        }
     }
 
     private void DoBottomOptions(Rect inRect, Pawn pawn)
@@ -317,7 +292,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             ThingStuffPair workingPair;
 
             while (Rand.Value >= PawnApparelGenerator.workingSet.Count / 10f
-                && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
+                   && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
                        out workingPair))
             {
                 PawnApparelGenerator.workingSet.Add(workingPair);
