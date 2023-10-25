@@ -35,7 +35,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
             Widgets.Label(rect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "Mood".Translate().Colorize(ColoredText.TipSectionTitleColor));
         rect.xMin += 4f;
         rect.yMin += 4f;
-        
+
         DrawNeedWidget(rect.TakeTopPart(30f).LeftPart(0.8f), pawn.needs.mood, drawLabel: false);
         rect.yMin += 16f;
         rect.xMin -= 4f;
@@ -77,13 +77,33 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
     {
         NeedsCardUtility.UpdateDisplayNeeds(pawn);
         var needs = NeedsCardUtility.displayNeeds;
+        var resourceGenes = pawn.genes.cachedGenes.OfType<Gene_Resource>().ToList();
+
         var viewRect = new Rect(0, 0, inRect.width - 20f,
-            needs.Sum(_ => 70f));
+            needs.Sum(_ => 38f) + resourceGenes.Sum(_ => 38f));
         Widgets.BeginScrollView(inRect, ref needsScrollPos, viewRect);
         foreach (var n in needs)
         {
             DrawNeedWidget(viewRect.TakeTopPart(30f), n);
             viewRect.yMin += 8f;
+        }
+
+        viewRect.yMin += 16f;
+        
+        if (ModsConfig.IdeologyActive)
+        {
+            // ToDo: Gene_Resource SetMax()
+            foreach (Gene_Resource resourceGene in resourceGenes)
+            {
+                UIUtility.GeneResourceBarWidget(viewRect.TakeTopPart(30f), resourceGene);
+                viewRect.yMin += 8f;
+            }
+        }
+
+        if (ModsConfig.royaltyActive && pawn.psychicEntropy.NeedsPsyfocus)
+        {
+            UIUtility.ResourceBarWidget(viewRect.TakeTopPart(30f), ref pawn.psychicEntropy.currentPsyfocus, "Psyfocus".Translate(),
+                new Color(0.34f, 0.42f, 0.43f), new Color(0.03f, 0.035f, 0.05f), new List<float>{ 0.25f, 0.5f }, 0.05f);
         }
 
         Widgets.EndScrollView();
@@ -104,14 +124,16 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         barRect1.yMax -= margin / 2;
         barRect.xMin -= margin;
         barRect1.xMax -= margin;
-        if (Widgets.ButtonImage(barRect1.TakeRightPart(barRect1.height).ContractedBy(4f), TexButton.Plus))
+        Rect plusRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
+        Rect minRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
+        if (Widgets.ButtonImage(plusRect, TexButton.Plus))
             n.CurLevelPercentage += 0.1f;
-        if (Mouse.IsOver(barRect1))
-            TooltipHandler.TipRegion(barRect1, (TipSignal)"+ 10%");
-        if (Widgets.ButtonImage(barRect1.TakeRightPart(barRect1.height).ContractedBy(4f), TexButton.Minus))
+        if (Mouse.IsOver(plusRect))
+            TooltipHandler.TipRegion(plusRect, (TipSignal)"+ 10%");
+        if (Widgets.ButtonImage(minRect, TexButton.Minus))
             n.CurLevelPercentage -= 0.1f;
-        if (Mouse.IsOver(barRect1))
-            TooltipHandler.TipRegion(barRect1, (TipSignal)"- 10%");
+        if (Mouse.IsOver(minRect))
+            TooltipHandler.TipRegion(minRect, (TipSignal)"- 10%");
     }
 
     private void DrawThoughts(Rect inRect, Pawn pawn)

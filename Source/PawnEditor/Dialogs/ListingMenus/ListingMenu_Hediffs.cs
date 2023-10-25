@@ -49,6 +49,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
                 if (price is >= 1 or <= 1 && hediffDef.priceImpact && !PawnEditor.CanUsePoints(price)) return;
                 pawn.health.AddHediff(hediffDef, part);
                 PawnEditor.Notify_PointsUsed();
+                uiTable.ClearCache();
             }
 
             if (typeof(Hediff_AddedPart).IsAssignableFrom(hediffDef.hediffClass)
@@ -101,4 +102,6 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         list.Add(new("PawnEditor.TechLevel".Translate(), false, techLevel));
         return list;
     }
+
+
 }

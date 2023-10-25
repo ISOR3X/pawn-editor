@@ -361,7 +361,7 @@ public class Dialog_AppearanceEditor : Window
                     }
             }
 
-            GUI.color = enabled ? Color.gray : Color.white;
+            GUI.color = enabled ? Color.white : Color.gray;
             // ToDo: Apply correct gene background texture according to gene category.
             GUI.DrawTexture(rect.ContractedBy(4), GeneUIUtility.GeneBackground_Endogene.Texture);
             GUI.color *= option.IconColor;

@@ -23,7 +23,7 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
     }
 
     public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Action<PawnKindDef> addAction) : base(output.Invoke(pawnCategory), p => p.LabelCap, addAction,
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), p => p.race.description, DrawPawnIcon)
+        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), null, DrawPawnIcon)
     {
         type = pawnCategory;
     }
@@ -66,7 +66,7 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
 
     private static void MakePawnLists()
     {
-        all = DefDatabase<PawnKindDef>.AllDefs.Distinct().ToList();
+        all = DefDatabase<PawnKindDef>.AllDefs.GroupBy(p => p.LabelCap).Select(p => p.First()).ToList();
         animals = all.Where(pkd => pkd.race.race.Animal && !pkd.race.race.Dryad)
             .ToList();
         mechs = all.Where(pkd => // Right now mechanoids are found based on their maskPath but this seems a bit weird.
