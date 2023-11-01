@@ -1,69 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
 
 namespace PawnEditor;
 
-[StaticConstructorOnStartup]
+[HotSwappable]
 public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
 {
-    private static readonly List<PawnRelationDef> relationDefs;
-    
-    static ListingMenu_Relations()
-    {
-        relationDefs = DefDatabase<PawnRelationDef>.AllDefsListForReading;
-    }
-    
-    public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, Action<PawnRelationDef> action, List<TFilter<PawnRelationDef>> filters = null) 
-        : base(GetPossibleRelations(pawn, otherPawn), r => r.LabelCap, action, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Relation".Translate(), 
-            r => r.description, null, filters, pawn)
-    {
-    }
+    private readonly Pawn _otherPawn;
 
-    private static List<PawnRelationDef> GetPossibleRelations(Pawn pawn, Pawn otherPawn)
-    {
-        return relationDefs.Where(rd => AddDirectRelation(pawn, rd, otherPawn)).ToList();
-    }
-    
-    // Direct copy of AddDirectRelation from Pawn_RelationsTracker.cs
-    private static bool AddDirectRelation(Pawn pawn, PawnRelationDef def, Pawn otherPawn)
-    {
-        if (def.implied)
-            return false;
-        else if (otherPawn == pawn)
-            return false;
-        else if (pawn.relations.DirectRelationExists(def, otherPawn))
-        {
-            return false;
-        }
-        else
-        {
-            int startTicks = Current.ProgramState == ProgramState.Playing ? Find.TickManager.TicksGame : 0;
-            def.Worker.OnRelationCreated(pawn, otherPawn);
-            pawn.relations.directRelations.Add(new DirectPawnRelation(def, otherPawn, startTicks));
-            otherPawn.relations.pawnsWithDirectRelationsWithMe.Add(pawn);
-            if (def.reflexive)
+    public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, List<TFilter<PawnRelationDef>> filters = null)
+        : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), r => r.LabelCap, def =>
             {
-                otherPawn.relations.directRelations.Add(new DirectPawnRelation(def, pawn, startTicks));
-                pawn.relations.pawnsWithDirectRelationsWithMe.Add(otherPawn);
-            }
-            pawn.relations.GainedOrLostDirectRelation();
-            otherPawn.relations.GainedOrLostDirectRelation();
-            if (Current.ProgramState != ProgramState.Playing)
-                return true;
-            if (!pawn.Dead && pawn.health != null)
+                if (def.implied && def.CanAddImpliedRelation(pawn, otherPawn, out var required, out var create, out var predicate))
+                {
+                    if (required > 0)
+                    {
+                        PawnEditor.AllPawns.UpdateCache(null, PawnCategory.All);
+                        var list = PawnEditor.AllPawns.GetList();
+                        list.Remove(pawn);
+                        list.Remove(otherPawn);
+                        if (predicate != null) list.RemoveAll(p => !predicate(p));
+                        Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), create, required, "Back".Translate(),
+                            () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, filters))));
+                    }
+                    else
+                        create(new());
+                }
+                else def.AddDirectRelation(pawn, otherPawn);
+            }, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Relation".Translate(),
+            r => r.description, null, filters, pawn, null, "Back".Translate(), () =>
             {
-                for (int index = pawn.health.hediffSet.hediffs.Count - 1; index >= 0; --index)
-                    pawn.health.hediffSet.hediffs[index].Notify_RelationAdded(otherPawn, def);
-            }
-            if (otherPawn.Dead || otherPawn.health == null)
-                return true;
-            for (int index = otherPawn.health.hediffSet.hediffs.Count - 1; index >= 0; --index)
-                otherPawn.health.hediffSet.hediffs[index].Notify_RelationAdded(pawn, def);
-            
-            return true;
-        }
-    }
+                PawnEditor.AllPawns.UpdateCache(null, PawnCategory.All);
+                var list = PawnEditor.AllPawns.GetList();
+                list.Remove(pawn);
+                Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(),
+                    p => Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, filters))));
+            }) =>
+        _otherPawn = otherPawn;
+
+    protected override string NextLabel =>
+        Listing.Selected.implied && Listing.Selected.CanAddImpliedRelation(Pawn, _otherPawn, out var count, out _, out _) && count > 0
+            ? "Next".Translate()
+            : "Add".Translate().CapitalizeFirst();
 }

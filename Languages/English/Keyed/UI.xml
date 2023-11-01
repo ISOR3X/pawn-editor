@@ -190,6 +190,7 @@
     <PawnEditor.ImageExported>Exported portrait of {0} to {1}.</PawnEditor.ImageExported>
     <PawnEditor.NegativePoints>Remaining points is negative.</PawnEditor.NegativePoints>
     <PawnEditor.ClickToOpen>Click to view infocard</PawnEditor.ClickToOpen>
+    <PawnEditor.MustBeOneEachGender>Pawns must be one male and one female.</PawnEditor.MustBeOneEachGender>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

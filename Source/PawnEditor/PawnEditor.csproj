@@ -110,6 +110,7 @@
     <Compile Include="SaveLoad\SaveLoadPatches.cs" />
     <Compile Include="SaveLoad\SaveLoadUtility.cs" />
     <Compile Include="Utils\PointsSystem.cs" />
+    <Compile Include="Utils\RelationUtilities.cs" />
     <Compile Include="Utils\StartingThingsManager.cs" />
     <Compile Include="UI\TexPawnEditor.cs" />
     <Compile Include="Utils\TFilter.cs" />

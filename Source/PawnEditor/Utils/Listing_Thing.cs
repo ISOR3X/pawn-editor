@@ -10,24 +10,42 @@ namespace PawnEditor;
 // If the listing turns out too slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
 public class Listing_Thing<T> : Listing_Tree
 {
-    private readonly List<T> _items;
-    protected readonly QuickSearchWidget SearchFilter = new();
-    protected Rect VisibleRect;
-
-    public List<TFilter<T>> Filters;
     public readonly List<TFilter<T>> ActiveFilters = new();
-
-    public readonly Func<T, string> LabelGetter;
-    private readonly Func<T, string> _descGetter;
     public readonly Action<T, Rect> IconDrawer;
 
-    public T Selected;
+    public readonly Func<T, string> LabelGetter;
+    protected readonly QuickSearchWidget SearchFilter = new();
+    private readonly bool _allowMultiSelect;
+    private readonly HashSet<T> _auxHighlight;
+    private readonly Func<T, string> _descGetter;
+    private readonly List<T> _items;
+    private readonly int _maxCount;
 
-    protected Listing_Thing(List<T> items, Func<T, string> labelGetter, Func<T, string> descGetter = null, List<TFilter<T>> filters = null)
+    public List<TFilter<T>> Filters;
+    public List<T> MultiSelected;
+
+    public T Selected;
+    protected Rect VisibleRect;
+
+    public Listing_Thing(List<T> items, Func<T, string> labelGetter, Func<T, string> descGetter = null,
+        List<TFilter<T>> filters = null, IEnumerable<T> auxHighlight = null) : this(items, labelGetter, null, descGetter, filters, auxHighlight) { }
+
+    public Listing_Thing(List<T> items, int maxCount, Func<T, string> labelGetter, Action<T, Rect> iconDrawer = null, Func<T, string> descGetter = null,
+        List<TFilter<T>> filters = null, IEnumerable<T> auxHighlight = null) :
+        this(items, labelGetter, iconDrawer, descGetter, filters, auxHighlight)
+    {
+        _allowMultiSelect = true;
+        _maxCount = maxCount;
+        MultiSelected = new();
+    }
+
+    public Listing_Thing(List<T> items, Func<T, string> labelGetter, Action<T, Rect> iconDrawer = null, Func<T, string> descGetter = null,
+        List<TFilter<T>> filters = null, IEnumerable<T> auxHighlight = null)
     {
         _items = items;
         LabelGetter = labelGetter;
         _descGetter = descGetter;
+        IconDrawer = iconDrawer;
 
         if (filters != null)
         {
@@ -38,12 +56,8 @@ public class Listing_Thing<T> : Listing_Tree
         lineHeight = 32f;
         nestIndentWidth /= 2;
         verticalSpacing = 0f;
-    }
 
-    public Listing_Thing(List<T> items, Func<T, string> labelGetter, Action<T, Rect> iconDrawer, Func<T, string> descGetter = null, List<TFilter<T>> filters = null) :
-        this(items, labelGetter, descGetter, filters)
-    {
-        IconDrawer = iconDrawer;
+        _auxHighlight = auxHighlight?.ToHashSet() ?? new HashSet<T>();
     }
 
     public void ListChildren(
@@ -56,7 +70,7 @@ public class Listing_Thing<T> : Listing_Tree
 
     private void DoCategoryChildren()
     {
-        int i = 0;
+        var i = 0;
         foreach (var thing in _items.Where(thing => Visible(thing) && !HideThingDueToSearch(thing) && !HideThingDueToFilter(thing)))
         {
             DoThing(thing, -3, i);
@@ -72,14 +86,14 @@ public class Listing_Thing<T> : Listing_Tree
 
     protected void DoThing(T thing, int nestLevel, int i)
     {
-        Color? nullable = new Color?();
+        var nullable = new Color?();
         if (!SearchFilter.filter.Matches(LabelGetter(thing)))
             nullable = Listing_TreeThingFilter.NoMatchColor;
 
         if (IconDrawer != null)
         {
             nestLevel += 5;
-            IconDrawer.Invoke(thing, new Rect(XAtIndentLevel(nestLevel) - 16f, curY, 32f, 32f));
+            IconDrawer(thing, new(XAtIndentLevel(nestLevel) - 16f, curY, 32f, 32f));
         }
 
         if (CurrentRowVisibleOnScreen())
@@ -87,30 +101,30 @@ public class Listing_Thing<T> : Listing_Tree
             var rect = new Rect(0.0f, curY, ColumnWidth, lineHeight);
             rect.xMin = XAtIndentLevel(nestLevel) + 18f;
 
-            string tipText = string.Empty;
-            if (Mouse.IsOver(rect))
-            {
-                tipText = _descGetter != null ? _descGetter(thing) : string.Empty;
-            }
+            var tipText = string.Empty;
+            if (Mouse.IsOver(rect)) tipText = _descGetter != null ? _descGetter(thing) : string.Empty;
 
             LabelLeft(LabelGetter(thing), tipText, nestLevel, XAtIndentLevel(nestLevel), nullable);
 
-            bool checkOn = Selected != null && ReferenceEquals(Selected, thing);
+            var selected = _allowMultiSelect ? MultiSelected.Contains(thing) : Selected != null && ReferenceEquals(Selected, thing);
 
             if (Widgets.ButtonInvisible(rect))
             {
-                Selected = thing;
+                if (_allowMultiSelect)
+                {
+                    if (selected)
+                        MultiSelected.Remove(thing);
+                    else if (MultiSelected.Count < _maxCount)
+                        MultiSelected.Add(thing);
+                }
+                else Selected = thing;
             }
 
-            if (checkOn)
-            {
-                Widgets.DrawHighlightSelected(rect);
-            }
+            if (selected) Widgets.DrawHighlightSelected(rect);
 
-            if (i % 2 == 1)
-            {
-                Widgets.DrawLightHighlight(rect);
-            }
+            if (_auxHighlight.Contains(thing)) Widgets.DrawHighlight(rect);
+
+            if (i % 2 == 1) Widgets.DrawLightHighlight(rect);
         }
 
         EndLine();
@@ -118,14 +132,14 @@ public class Listing_Thing<T> : Listing_Tree
 
     protected virtual bool Visible(T td)
     {
-        bool output = _items.Contains(td);
+        var output = _items.Contains(td);
         if (ActiveFilters.Any())
             output = output && ActiveFilters.All(lf => lf.FilterAction(td));
 
         return output;
     }
 
-    protected bool CurrentRowVisibleOnScreen() => VisibleRect.Overlaps(new Rect(0.0f, curY, ColumnWidth, lineHeight));
+    protected bool CurrentRowVisibleOnScreen() => VisibleRect.Overlaps(new(0.0f, curY, ColumnWidth, lineHeight));
 
     public void DrawSearchBar(Rect inRect)
     {

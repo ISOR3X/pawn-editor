@@ -44,12 +44,12 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                     var pawns = PawnEditor.Pregame
                         ? Find.GameInitData.startingAndOptionalPawns
                         : pawn.MapHeld?.mapPawns.AllPawns
-                          ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
-                              .AllCaravansAndTravelingTransportPods_Alive;
+                       ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
+                             .AllCaravansAndTravelingTransportPods_Alive;
 
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
-                        .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
-                        .ToList()));
+                       .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+                       .ToList()));
                 })
                 // ToDo: Create baby from parent?
             }));
@@ -57,9 +57,10 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddRelation".Translate()))
         {
+            PawnEditor.AllPawns.UpdateCache(null, PawnCategory.All);
             var list = PawnEditor.AllPawns.GetList();
             list.Remove(pawn);
-            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn));
+            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(), p => Find.WindowStack.Add(new ListingMenu_Relations(pawn, p))));
         }
 
         inRect.xMin += 4f;
@@ -104,15 +105,12 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             var entry = SocialCardUtility.cachedEntries[i];
             items.Add(new(PawnEditor.GetPawnTex(entry.otherPawn, new(25, 25), Rot4.South, cameraZoom: 2f)));
             items.Add(new(SocialCardUtility.GetRelationsString(entry, pawn).Colorize(ColoredText.SubtleGrayColor), textAnchor: TextAnchor.MiddleLeft));
-            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), i, textAnchor: TextAnchor.MiddleLeft));
+            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), i, TextAnchor.MiddleLeft));
             if (entry.otherPawn.Faction != Faction.OfPlayer)
-            {
-                items.Add(new($"{entry.otherPawn.Faction.PlayerRelationKind.ToString()}, {entry.otherPawn.Faction.Name}".Colorize(ColoredText.SubtleGrayColor), textAnchor: TextAnchor.MiddleLeft));
-            }
+                items.Add(new($"{entry.otherPawn.Faction.PlayerRelationKind.ToString()}, {entry.otherPawn.Faction.Name}".Colorize(ColoredText.SubtleGrayColor),
+                    textAnchor: TextAnchor.MiddleLeft));
             else
-            {
                 items.Add(new());
-            }
 
             items.Add(new(opinionRect =>
             {
