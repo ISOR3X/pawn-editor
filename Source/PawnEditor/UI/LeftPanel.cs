@@ -15,13 +15,7 @@ public static partial class PawnEditor
     {
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.SelectedFaction".Translate());
 
-        if (selectedFaction == null || (pregame && selectedFaction != Faction.OfPlayer))
-        {
-            selectedFaction = Faction.OfPlayer;
-            selectedPawn = null;
-            RecachePawnList();
-            CheckChangeTabGroup();
-        }
+        if (selectedFaction == null || (pregame && selectedFaction != Faction.OfPlayer)) RecachePawnList();
 
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
         {

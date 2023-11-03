@@ -26,6 +26,12 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
         if (highlightGender) Listing.DoThingExtras = DoThingExtras;
     }
 
+    public override void PostOpen()
+    {
+        base.PostOpen();
+        TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
+    }
+
     private static void DoThingExtras(Rect inRect, Pawn pawn, bool selected)
     {
         if (selected) GUI.DrawTexture(inRect.RightPartPixels(inRect.height).ContractedBy(3), pawn.gender.GetIcon());

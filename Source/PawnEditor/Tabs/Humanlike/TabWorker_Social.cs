@@ -97,7 +97,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
     protected override List<UITable<Pawn>.Row> GetRows(Pawn pawn)
     {
-        SocialCardUtility.CheckRecache(pawn);
+        SocialCardUtility.Recache(pawn);
         var result = new List<UITable<Pawn>.Row>(SocialCardUtility.cachedEntries.Count);
         for (var i = 0; i < SocialCardUtility.cachedEntries.Count; i++)
         {

@@ -217,8 +217,24 @@ public static partial class PawnEditor
 
     public static void RecachePawnList()
     {
-        if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
-        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
+        if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction))
+        {
+            selectedFaction = Faction.OfPlayer;
+            CheckChangeTabGroup();
+        }
+
+        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction)
+        {
+            selectedFaction = pawnFaction;
+            CheckChangeTabGroup();
+        }
+
+        if (Pregame && selectedFaction != Faction.OfPlayer)
+        {
+            selectedFaction = Faction.OfPlayer;
+            CheckChangeTabGroup();
+        }
+
         TabWorker_FactionOverview.RecachePawns(selectedFaction);
         List<Pawn> pawns;
         if (Pregame)

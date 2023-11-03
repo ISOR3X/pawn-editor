@@ -40,6 +40,7 @@ public static class RelationUtilities
                 {
                     pawn.SetMother(list[0]);
                     otherPawn.SetMother(list[0]);
+                    TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                     return true;
                 };
             }
@@ -51,6 +52,7 @@ public static class RelationUtilities
                 {
                     pawn.SetFather(list[0]);
                     otherPawn.SetFather(list[0]);
+                    TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                     return true;
                 };
             }
@@ -69,6 +71,7 @@ public static class RelationUtilities
                     otherPawn.SetParent(list[0]);
                     pawn.SetParent(list[1]);
                     otherPawn.SetParent(list[1]);
+                    TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
 
                     return true;
                 };
