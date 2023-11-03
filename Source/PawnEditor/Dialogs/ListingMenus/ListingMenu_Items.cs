@@ -68,7 +68,8 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         Listing = new Listing_TreeThing(output.Invoke(itemType, null), labelGetter, iconDrawer, descGetter);
     }
 
-    public ListingMenu_Items(ItemType itemType, Pawn pawn, TreeNode_ThingCategory treeNodeThingCategory = null) : base(t => pawnAction(t, pawn),
+    public ListingMenu_Items(ItemType itemType, Pawn pawn, TreeNode_ThingCategory treeNodeThingCategory = null, IEnumerable<Thing> auxHighlight = null) : base(
+        t => pawnAction(t, pawn),
         GetMenuTitle(itemType), pawn)
     {
         TreeNodeThingCategory = treeNodeThingCategory ?? ThingCategoryNodeDatabase.RootNode;
@@ -113,6 +114,8 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
 
     private static void TryAdd(ThingDef thingDef, Pawn pawn)
     {
+        if (MassUtility.FreeSpace(pawn) < thingDef.GetStatValueAbstract(StatDefOf.Mass))
+            Messages.Message("PawnEditor.WouldMakeOverCapacity".Translate(thingDef.LabelCap, pawn.NameShortColored), MessageTypeDefOf.CautionInput, false);
         switch (type)
         {
             case ItemType.Apparel:
@@ -167,13 +170,11 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                 Log.WarningOnce("No ItemType!", 15703);
                 break;
         }
+
         TabWorker_Gear.ClearCaches();
     }
 
-    private static void TryAdd(ThingDef thingDef)
-    {
-        
-    }
+    private static void TryAdd(ThingDef thingDef) { }
 
     private static void MakeItemLists()
     {

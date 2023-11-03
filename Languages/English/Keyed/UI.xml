@@ -191,6 +191,7 @@
     <PawnEditor.NegativePoints>Remaining points is negative.</PawnEditor.NegativePoints>
     <PawnEditor.ClickToOpen>Click to view infocard</PawnEditor.ClickToOpen>
     <PawnEditor.MustBeOneEachGender>Pawns must be one male and one female.</PawnEditor.MustBeOneEachGender>
+    <PawnEditor.WouldMakeOverCapacity>Adding {0} would {1} over their carrying capacity.</PawnEditor.WouldMakeOverCapacity>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

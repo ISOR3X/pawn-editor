@@ -84,13 +84,11 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
             DevelopmentalStage.Adult => pawn.RaceProps.lifeStageAges.MaxBy(lifeStage => lifeStage.minAge),
             _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
         };
-        Log.Message($"Found age {lifeStage} from {stage} and {pawn}");
         if (lifeStage != null) SetAge(pawn, lifeStage.minAge);
     }
 
     private void SetAge(Pawn pawn, float age)
     {
-        Log.Message($"Setting age to {age}");
         pawn.ageTracker.growth = Mathf.InverseLerp(0f, pawn.RaceProps.lifeStageAges[pawn.RaceProps.lifeStageAges.Count - 1].minAge, age);
         pawn.ageTracker.AgeBiologicalTicks = (long)(age * 3600000L);
         ageBiologicalBuffer = null;

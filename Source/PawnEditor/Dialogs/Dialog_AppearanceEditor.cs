@@ -164,7 +164,15 @@ public class Dialog_AppearanceEditor : Window
                     switch (shapeTab)
                     {
                         case ShapeTab.Body:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<BodyTypeDef>.AllDefsListForReading, def =>
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<BodyTypeDef>.AllDefs.Where(bodyType =>
+                                        pawn.DevelopmentalStage switch
+                                        {
+                                            DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                                            DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                                            DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                                            _ => true
+                                        })
+                                   .ToList(), def =>
                                 {
                                     pawn.story.bodyType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -208,7 +216,7 @@ public class Dialog_AppearanceEditor : Window
                     {
                         case ShapeTab.Body:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
+                                DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
                                 {
                                     pawn.style.BodyTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -217,7 +225,7 @@ public class Dialog_AppearanceEditor : Window
                             break;
                         case ShapeTab.Head:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
+                                DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
                                 {
                                     pawn.style.FaceTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -289,13 +297,11 @@ public class Dialog_AppearanceEditor : Window
             Widgets.DrawHighlight(rect);
 
             if (option is Def def)
-            {
                 if (Mouse.IsOver(rect))
                 {
                     Widgets.DrawLightHighlight(rect);
                     if (def.LabelCap != null) TooltipHandler.TipRegion(rect, def.LabelCap);
                 }
-            }
 
             if (isSelected(option)) Widgets.DrawBox(rect);
             if (Widgets.ButtonInvisible(rect)) onSelected(option);

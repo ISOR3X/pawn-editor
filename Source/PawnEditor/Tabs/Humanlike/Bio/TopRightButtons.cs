@@ -131,7 +131,14 @@ public partial class TabWorker_Bio_Humanlike
 
         if (Widgets.ButtonImageWithBG(bodyRect.TakeTopPart(UIUtility.RegularButtonHeight), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType],
                 new Vector2(22f, 22f)))
-            Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
+            Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Where(bodyType => pawn.DevelopmentalStage switch
+                {
+                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                    _ => true
+                })
+               .Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
                 {
                     pawn.story.bodyType = bodyType;
                     RecacheGraphics(pawn);
@@ -147,6 +154,16 @@ public partial class TabWorker_Bio_Humanlike
         {
             var num = lifeStage.minAge;
             pawn.ageTracker.AgeBiologicalTicks = (long)(num * 3600000L);
+        }
+
+        if ((pawn.story.bodyType == BodyTypeDefOf.Child && stage != DevelopmentalStage.Child)
+         || (pawn.story.bodyType == BodyTypeDefOf.Baby && stage is not DevelopmentalStage.Baby and not DevelopmentalStage.Newborn)
+         || (stage == DevelopmentalStage.Adult && (pawn.story.bodyType == BodyTypeDefOf.Baby || pawn.story.bodyType == BodyTypeDefOf.Child)))
+        {
+            pawn.apparel?.DropAllOrMoveAllToInventory(apparel => !apparel.def.apparel.developmentalStageFilter.Has(stage));
+            var bodyTypeFor = PawnGenerator.GetBodyTypeFor(pawn);
+            pawn.story.bodyType = bodyTypeFor;
+            RecacheGraphics(pawn);
         }
     }
 
