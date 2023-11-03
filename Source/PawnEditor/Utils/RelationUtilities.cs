@@ -11,24 +11,26 @@ public static class RelationUtilities
     public static bool CanAddRelation(this PawnRelationDef def, Pawn pawn, Pawn otherPawn)
     {
         if (pawn == otherPawn) return false;
-        if (def.implied) return CanAddImpliedRelation(def, pawn, otherPawn, out _, out _, out _);
+        if (def.implied) return CanAddImpliedRelation(def, pawn, otherPawn, out _, out _, out _, out _);
         if (pawn.relations.DirectRelationExists(def, otherPawn))
             return false;
         return true;
     }
 
     public static bool CanAddImpliedRelation(this PawnRelationDef def, Pawn pawn, Pawn otherPawn, out int requiredCount,
-        out Func<List<Pawn>, bool> createAction, out Func<Pawn, bool> predicate)
+        out Func<List<Pawn>, bool> createAction, out Func<Pawn, bool> predicate, out bool highlightGender)
     {
         requiredCount = 0;
         createAction = null;
         predicate = null;
+        highlightGender = false;
         if (def == PawnRelationDefOf.Sibling)
         {
             var father = pawn.GetFather();
             var mother = pawn.GetMother();
             var otherFather = otherPawn.GetFather();
             var otherMother = otherPawn.GetMother();
+            highlightGender = true;
             if (father != null && otherFather != null && father == otherFather)
             {
                 if (mother != null && otherMother != null && mother == otherMother) return false;

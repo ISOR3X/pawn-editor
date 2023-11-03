@@ -8,16 +8,28 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public class ListingMenu_Pawns : ListingMenu<Pawn>
 {
-    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Action<Pawn> nextAction, string closeLabel = null, Action closeAction = null) :
+    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Action<Pawn> nextAction, string closeLabel = null, Action closeAction = null,
+        bool highlightGender = false) :
         base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Pawn".Translate(),
             p => p.DescriptionDetailed,
-            DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction) { }
+            DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
+    {
+        if (highlightGender) Listing.DoThingExtras = DoThingExtras;
+    }
 
     public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<List<Pawn>, bool> nextAction, int count, string closeLabel = null,
-        Action closeAction = null) :
+        Action closeAction = null, bool highlightGender = false) :
         base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "ChooseStuffForRelic".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
                 "PawnEditor.Pawn".Translate(), count), new(count, count),
-            p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction) { }
+            p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
+    {
+        if (highlightGender) Listing.DoThingExtras = DoThingExtras;
+    }
+
+    private static void DoThingExtras(Rect inRect, Pawn pawn, bool selected)
+    {
+        if (selected) GUI.DrawTexture(inRect.RightPartPixels(inRect.height).ContractedBy(3), pawn.gender.GetIcon());
+    }
 
     private static void DrawPawnIcon(Pawn pawn, Rect rect)
     {

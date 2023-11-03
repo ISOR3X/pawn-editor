@@ -21,6 +21,8 @@ public class Listing_Thing<T> : Listing_Tree
     private readonly List<T> _items;
     private readonly int _maxCount;
 
+    public Action<Rect, T, bool> DoThingExtras;
+
     public List<TFilter<T>> Filters;
     public List<T> MultiSelected;
 
@@ -87,7 +89,8 @@ public class Listing_Thing<T> : Listing_Tree
     protected void DoThing(T thing, int nestLevel, int i)
     {
         var nullable = new Color?();
-        if (!SearchFilter.filter.Matches(LabelGetter(thing)))
+        var label = LabelGetter(thing);
+        if (!SearchFilter.filter.Matches(label))
             nullable = Listing_TreeThingFilter.NoMatchColor;
 
         if (IconDrawer != null)
@@ -104,7 +107,7 @@ public class Listing_Thing<T> : Listing_Tree
             var tipText = string.Empty;
             if (Mouse.IsOver(rect)) tipText = _descGetter != null ? _descGetter(thing) : string.Empty;
 
-            LabelLeft(LabelGetter(thing), tipText, nestLevel, XAtIndentLevel(nestLevel), nullable);
+            LabelLeft(label, tipText, nestLevel, XAtIndentLevel(nestLevel), nullable);
 
             var selected = _allowMultiSelect ? MultiSelected.Contains(thing) : Selected != null && ReferenceEquals(Selected, thing);
 
@@ -120,11 +123,17 @@ public class Listing_Thing<T> : Listing_Tree
                 else Selected = thing;
             }
 
+
             if (selected) Widgets.DrawHighlightSelected(rect);
 
             if (_auxHighlight.Contains(thing)) Widgets.DrawHighlight(rect);
 
             if (i % 2 == 1) Widgets.DrawLightHighlight(rect);
+
+            rect.xMin += XAtIndentLevel(nestLevel);
+            rect.xMin += LabelWidth;
+
+            DoThingExtras?.Invoke(rect, thing, selected);
         }
 
         EndLine();
