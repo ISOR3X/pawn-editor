@@ -14,11 +14,11 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
     private static readonly Func<HediffDef, string> labelGetter = d => d.LabelCap;
     private static readonly Func<HediffDef, string> descGetter = d => d.Description;
     private static readonly Action<HediffDef, Pawn, UITable<Pawn>> action = TryAdd;
-    private static readonly List<TFilter<HediffDef>> filters;
+    private static readonly List<Filter<HediffDef>> filters;
 
     private static readonly HashSet<TechLevel> possibleTechLevels;
     private static readonly Dictionary<HediffDef, (List<BodyPartDef>, List<BodyPartGroupDef>)> defaultBodyParts;
-    
+
     static ListingMenu_Hediffs()
     {
         defaultBodyParts = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null)
@@ -70,8 +70,8 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
                     return;
                 }
             }
-            ReallyAdd();
 
+            ReallyAdd();
         }
 
         if (defaultBodyParts.TryGetValue(hediffDef, out var result))
@@ -87,21 +87,21 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
             AddCheck(null);
     }
 
-    private static List<TFilter<HediffDef>> GetFilters()
+    private static List<Filter<HediffDef>> GetFilters()
     {
-        var list = new List<TFilter<HediffDef>>();
+        var list = new List<Filter<HediffDef>>
+        {
+            new Filter_Toggle<HediffDef>("PawnEditor.Prosthetic".Translate(), def => typeof(Hediff_AddedPart).IsAssignableFrom(def.hediffClass)),
+            new Filter_Toggle<HediffDef>("PawnEditor.IsImplant".Translate(),
+                def => typeof(Hediff_Implant).IsAssignableFrom(def.hediffClass) && !typeof(Hediff_AddedPart).IsAssignableFrom(def.hediffClass)),
+            new Filter_Toggle<HediffDef>("PawnEditor.IsInjury".Translate(), def => typeof(Hediff_Injury).IsAssignableFrom(def.hediffClass)),
+            new Filter_Toggle<HediffDef>("PawnEditor.IsDisease".Translate(), def => def.makesSickThought)
+        };
 
-        list.Add(new("PawnEditor.Prosthetic".Translate(), false, def => typeof(Hediff_AddedPart).IsAssignableFrom(def.hediffClass)));
-        list.Add(new("PawnEditor.IsImplant".Translate(), false, def => typeof(Hediff_Implant).IsAssignableFrom(def.hediffClass) && !typeof(Hediff_AddedPart)
-           .IsAssignableFrom(def.hediffClass)));
-        list.Add(new("PawnEditor.IsInjury".Translate(), false, def => typeof(Hediff_Injury).IsAssignableFrom(def.hediffClass)));
-        list.Add(new("PawnEditor.IsDisease".Translate(), false, def => def.makesSickThought));
-        var techLevel = possibleTechLevels.ToDictionary<TechLevel, FloatMenuOption, Func<HediffDef, bool>>(
-            level => new(level.ToStringHuman().CapitalizeFirst(), () => { }),
+        var techLevel = possibleTechLevels.ToDictionary<TechLevel, string, Func<HediffDef, bool>>(
+            level => level.ToStringHuman().CapitalizeFirst(),
             level => hediff => hediff.spawnThingOnRemoved?.techLevel == level);
-        list.Add(new("PawnEditor.TechLevel".Translate(), false, techLevel));
+        list.Add(new Filter_Dropdown<HediffDef>("PawnEditor.TechLevel".Translate(), techLevel));
         return list;
     }
-
-
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -11,25 +12,44 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
 {
     private readonly Pawn _otherPawn;
 
-    public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, List<TFilter<PawnRelationDef>> filters = null)
+    public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, List<Filter<PawnRelationDef>> filters = null)
         : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), r => r.LabelCap, def =>
             {
-                if (def.implied && def.CanAddImpliedRelation(pawn, otherPawn, out var required, out var create, out var predicate, out var highlightGender))
+                Func<List<Pawn>, bool> createInt = _ =>
                 {
-                    if (required > 0)
+                    def.AddDirectRelation(pawn, otherPawn);
+                    return true;
+                };
+                var required = 0;
+                Func<Pawn, bool> predicate = null;
+                var highlightGender = false;
+
+                if (def.implied && !def.CanAddImpliedRelation(pawn, otherPawn, out required, out createInt, out predicate, out highlightGender)) return;
+
+                bool Create(List<Pawn> list)
+                {
+                    if (!def.implied && pawn.relations.GetDirectRelationsCount(def) > 0)
                     {
-                        PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
-                        var list = PawnEditor.AllPawns.GetList();
-                        list.Remove(pawn);
-                        list.Remove(otherPawn);
-                        if (predicate != null) list.RemoveAll(p => !predicate(p));
-                        Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), create, required, "Back".Translate(),
-                            () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, filters)), highlightGender));
+                        Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.RelationExists".Translate(pawn.NameShortColored, def.LabelCap),
+                            () => createInt(list), true));
+                        return false;
                     }
-                    else
-                        create(new());
+
+                    createInt(list);
+                    return true;
                 }
-                else def.AddDirectRelation(pawn, otherPawn);
+
+                if (required > 0)
+                {
+                    PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
+                    var list = PawnEditor.AllPawns.GetList();
+                    list.Remove(pawn);
+                    list.Remove(otherPawn);
+                    if (predicate != null) list.RemoveAll(p => !predicate(p));
+                    Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), Create, required, "Back".Translate(),
+                        () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, filters)), highlightGender));
+                }
+                else Create(new());
             }, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Relation".Translate(),
             r => r.description, null, filters, pawn, null, "Back".Translate(), () =>
             {

@@ -10,7 +10,7 @@ namespace PawnEditor;
 // If the listing turns out too slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
 public class Listing_Thing<T> : Listing_Tree
 {
-    public readonly List<TFilter<T>> ActiveFilters = new();
+    public readonly List<Filter<T>> ActiveFilters = new();
     public readonly Action<T, Rect> IconDrawer;
 
     public readonly Func<T, string> LabelGetter;
@@ -23,17 +23,17 @@ public class Listing_Thing<T> : Listing_Tree
 
     public Action<Rect, T, bool> DoThingExtras;
 
-    public List<TFilter<T>> Filters;
+    public List<Filter<T>> Filters;
     public List<T> MultiSelected;
 
     public T Selected;
     protected Rect VisibleRect;
 
     public Listing_Thing(List<T> items, Func<T, string> labelGetter, Func<T, string> descGetter = null,
-        List<TFilter<T>> filters = null, IEnumerable<T> auxHighlight = null) : this(items, labelGetter, null, descGetter, filters, auxHighlight) { }
+        List<Filter<T>> filters = null, IEnumerable<T> auxHighlight = null) : this(items, labelGetter, null, descGetter, filters, auxHighlight) { }
 
     public Listing_Thing(List<T> items, int maxCount, Func<T, string> labelGetter, Action<T, Rect> iconDrawer = null, Func<T, string> descGetter = null,
-        List<TFilter<T>> filters = null, IEnumerable<T> auxHighlight = null) :
+        List<Filter<T>> filters = null, IEnumerable<T> auxHighlight = null) :
         this(items, labelGetter, iconDrawer, descGetter, filters, auxHighlight)
     {
         _allowMultiSelect = true;
@@ -42,7 +42,7 @@ public class Listing_Thing<T> : Listing_Tree
     }
 
     public Listing_Thing(List<T> items, Func<T, string> labelGetter, Action<T, Rect> iconDrawer = null, Func<T, string> descGetter = null,
-        List<TFilter<T>> filters = null, IEnumerable<T> auxHighlight = null)
+        List<Filter<T>> filters = null, IEnumerable<T> auxHighlight = null)
     {
         _items = items;
         LabelGetter = labelGetter;
@@ -83,7 +83,7 @@ public class Listing_Thing<T> : Listing_Tree
 
         bool HideThingDueToSearch(T thing) => SearchFilter.filter.Active && !SearchFilter.filter.Matches(LabelGetter(thing));
 
-        bool HideThingDueToFilter(T thing) => !ActiveFilters.All(lf => lf.FilterAction(thing));
+        bool HideThingDueToFilter(T thing) => !ActiveFilters.All(lf => lf.Matches(thing));
     }
 
     protected void DoThing(T thing, int nestLevel, int i)
@@ -143,7 +143,7 @@ public class Listing_Thing<T> : Listing_Tree
     {
         var output = _items.Contains(td);
         if (ActiveFilters.Any())
-            output = output && ActiveFilters.All(lf => lf.FilterAction(td));
+            output = output && ActiveFilters.All(lf => lf.Matches(td));
 
         return output;
     }

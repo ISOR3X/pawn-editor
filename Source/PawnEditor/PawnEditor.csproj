@@ -66,6 +66,10 @@
     <Compile Include="Dialogs\Dialog_EditItem.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_Dropdown.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_IntRange.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_Toggle.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Abilities.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Backstories.cs" />
@@ -113,9 +117,9 @@
     <Compile Include="Utils\RelationUtilities.cs" />
     <Compile Include="Utils\StartingThingsManager.cs" />
     <Compile Include="UI\TexPawnEditor.cs" />
-    <Compile Include="Utils\TFilter.cs" />
     <Compile Include="Utils\UIUtility.cs" />
     <Compile Include="Utils\Utilities.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

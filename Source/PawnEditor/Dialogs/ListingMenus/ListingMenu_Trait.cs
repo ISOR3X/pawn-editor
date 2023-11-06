@@ -13,7 +13,7 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
     private static readonly Func<TraitInfo, string> labelGetter = t => t?.TraitDegreeData.LabelCap;
     private static readonly Func<TraitInfo, Pawn, string> descGetter = (t, p) => t?.TraitDegreeData.description.Formatted(p.Named("PAWN")).AdjustedFor(p);
     private static readonly Action<TraitInfo, Pawn> action = TryAdd;
-    private static readonly List<TFilter<TraitInfo>> filters;
+    private static readonly List<Filter<TraitInfo>> filters;
 
     static ListingMenu_Trait()
     {
@@ -65,21 +65,16 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
         PawnEditor.Notify_PointsUsed();
     }
 
-    private static List<TFilter<TraitInfo>> GetFilters()
+    private static List<Filter<TraitInfo>> GetFilters()
     {
-        var list = new List<TFilter<TraitInfo>>();
+        var list = new List<Filter<TraitInfo>>();
 
-        var modSourceDict = new Dictionary<FloatMenuOption, Func<TraitInfo, bool>>();
-        LoadedModManager.runningMods
-           .Where(m => m.AllDefs.OfType<TraitDef>().Any())
-           .ToList()
-           .ForEach(m =>
-            {
-                var label = m.Name;
-                var option = new FloatMenuOption(label, () => { });
-                modSourceDict.Add(option, traitInfo => traitInfo.Trait.def.modContentPack.Name == m.Name);
-            });
-        list.Add(new("Source".Translate(), true, modSourceDict, "PawnEditor.SourceDesc".Translate()));
+        var modSourceDict =
+            LoadedModManager.runningMods
+               .Where(m => m.AllDefs.OfType<TraitDef>().Any())
+               .ToDictionary<ModContentPack, string, Func<TraitInfo, bool>>(m => m.Name, m => traitInfo =>
+                    traitInfo.Trait.def.modContentPack.Name == m.Name);
+        list.Add(new Filter_Dropdown<TraitInfo>("Source".Translate(), modSourceDict, true, "PawnEditor.SourceDesc".Translate()));
 
         return list;
     }

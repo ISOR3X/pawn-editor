@@ -15,7 +15,7 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
     private static readonly Func<AbilityDef, Pawn, string> descGetter = (d, p) => d.GetTooltip(p);
     private static readonly Action<AbilityDef, Rect> iconDrawer = DrawIcon;
     private static readonly Action<AbilityDef, Pawn> action = TryAdd;
-    private static readonly List<TFilter<AbilityDef>> filters;
+    private static readonly List<Filter<AbilityDef>> filters;
 
     static ListingMenu_Abilities()
     {
@@ -25,17 +25,12 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
 
     public ListingMenu_Abilities(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Ability".Translate().ToLower(),
-        b => descGetter(b, pawn), iconDrawer, filters, pawn)
-    {
-    }
+        b => descGetter(b, pawn), iconDrawer, filters, pawn) { }
 
     private static void DrawIcon(AbilityDef abilityDef, Rect rect)
     {
         var texture = Widgets.PlaceholderIconTex;
-        if (abilityDef != null)
-        {
-            texture = abilityDef.uiIcon;
-        }
+        if (abilityDef != null) texture = abilityDef.uiIcon;
 
         Widgets.DrawTextureFitted(rect, texture, .8f);
     }
@@ -52,14 +47,14 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
         pawn.abilities.GainAbility(abilityDef);
     }
 
-    private static List<TFilter<AbilityDef>> GetFilters()
+    private static List<Filter<AbilityDef>> GetFilters()
     {
-        var list = new List<TFilter<AbilityDef>>();
+        var list = new List<Filter<AbilityDef>>();
 
         var abilityDefLevels = DefDatabase<AbilityDef>.AllDefs.Select(ad => ad.level).Distinct().ToList();
 
-        list.Add(new("PawnEditor.MinAbilityLevel".Translate(), false, item => item.level, abilityDefLevels.Min(), abilityDefLevels.Max(),
-            "PawnEditor.MinAbilityLevelDesc".Translate()));
+        list.Add(new Filter_IntRange<AbilityDef>("PawnEditor.MinAbilityLevel".Translate(), new(abilityDefLevels.Min(), abilityDefLevels.Max()),
+            item => item.level, false, "PawnEditor.MinAbilityLevelDesc".Translate()));
 
         return list;
     }

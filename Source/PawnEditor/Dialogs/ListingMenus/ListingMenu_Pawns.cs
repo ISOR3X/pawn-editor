@@ -45,12 +45,12 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
         Widgets.DrawTextureFitted(rect, texture, .8f);
     }
 
-    private static List<TFilter<Pawn>> GetFilters()
+    private static List<Filter<Pawn>> GetFilters()
     {
-        var list = new List<TFilter<Pawn>>();
+        var list = new List<Filter<Pawn>>();
 
-        list.Add(new("PawnEditor.IsColonist".Translate(), false, p => p.IsColonist));
-        list.Add(new("PawnEditor.IsHuman".Translate(), false, p => p.RaceProps.Humanlike));
+        list.Add(new Filter_Toggle<Pawn>("PawnEditor.IsColonist".Translate(), p => p.IsColonist));
+        list.Add(new Filter_Toggle<Pawn>("PawnEditor.IsHuman".Translate(), p => p.RaceProps.Humanlike));
 
         return list;
     }

@@ -20,6 +20,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         DoButtons(headerRect.TakeRightPart(212).TopPartPixels(80), pawn);
         headerRect.xMin += 3;
         DoBasics(headerRect.TakeLeftPart(headerRect.width * 0.67f).ContractedBy(5, 0), pawn);
+        if (pawn.training != null) DoSkills(rect, pawn);
     }
 
     private void DoButtons(Rect buttonsRect, Pawn pawn)
@@ -191,5 +192,67 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
                 }))
                .ToList()));
         }
+    }
+
+    private static void DoSkills(Rect inRect, Pawn pawn)
+    {
+        var headerRect = inRect.TakeTopPart(Text.LineHeight);
+        Widgets.Label(headerRect, "Skills".Translate().Colorize(ColoredText.TipSectionTitleColor));
+        GUI.color = Color.white;
+        if (Widgets.ButtonText(headerRect.TakeRightPart(60), "PawnEditor.Preset".Translate()))
+            Find.WindowStack.Add(new FloatMenu(new()
+            {
+                new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), 0), GetSetDelegate(pawn, false)),
+                new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), "PawnEditor.Max".Translate()), GetSetDelegate(pawn, true))
+            }));
+
+        inRect.xMin += 4;
+        inRect.yMin += 4f;
+        var leftWidth = DefDatabase<TrainableDef>.AllDefs.Select(def => Text.CalcSize(def.LabelCap.Resolve()).x).Max() + 16f;
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            foreach (var def in DefDatabase<TrainableDef>.AllDefsListForReading)
+            {
+                var rect = inRect.TakeTopPart(26f);
+                Widgets.DrawHighlightIfMouseover(rect);
+                TooltipHandler.TipRegion(rect, () => def.description, def.GetHashCode() * 397945);
+                Widgets.Label(rect.TakeLeftPart(leftWidth), def.LabelCap);
+                var level = pawn.training.GetSteps(def);
+                var disabled = !pawn.training.CanAssignToTrain(def);
+                var texture2D = SkillUI.SkillBarFillTex;
+
+                if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / 20f), texture2D, TexPawnEditor.SkillBarBGTex, false);
+                rect.xMin += 3;
+                Widgets.Label(rect, disabled ? "-" : level.ToString());
+                if (!disabled && level < def.steps && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus))
+                {
+                    pawn.training.steps[def] = ++level;
+                    if (level >= def.steps) pawn.training.learned[def] = true;
+                    PawnEditor.Notify_PointsUsed();
+                }
+
+                if (!disabled && level > 0 && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus))
+                {
+                    pawn.training.steps[def] = --level;
+                    if (level < def.steps) pawn.training.learned[def] = false;
+                    PawnEditor.Notify_PointsUsed();
+                }
+
+                inRect.yMin += 4;
+            }
+    }
+
+
+    private static Action GetSetDelegate(Pawn pawn, bool max)
+    {
+        return () =>
+        {
+            foreach (var def in DefDatabase<TrainableDef>.AllDefsListForReading)
+            {
+                pawn.training.steps[def] = max ? def.steps : 0;
+                pawn.training.learned[def] = max;
+            }
+
+            PawnEditor.Notify_PointsUsed();
+        };
     }
 }

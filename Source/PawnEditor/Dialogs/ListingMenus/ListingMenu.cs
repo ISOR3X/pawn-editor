@@ -27,7 +27,7 @@ public class ListingMenu<T> : Window
     private float _viewHeight = 100f;
 
     public ListingMenu(List<T> items, Func<T, string> labelGetter, Action<T> action, string menuTitle,
-        Func<T, string> descGetter = null, Action<T, Rect> iconDrawer = null, List<TFilter<T>> filters = null, Pawn pawn = null, string nextLabel = null,
+        Func<T, string> descGetter = null, Action<T, Rect> iconDrawer = null, List<Filter<T>> filters = null, Pawn pawn = null, string nextLabel = null,
         string closeLabel = null, Action closeAction = null,
         IEnumerable<T> auxHighlight = null) :
         this(menuTitle, pawn, nextLabel, closeLabel, closeAction)
@@ -38,7 +38,7 @@ public class ListingMenu<T> : Window
     }
 
     public ListingMenu(List<T> items, Func<T, string> labelGetter, Func<List<T>, bool> action, string menuTitle, IntRange wantedCount,
-        Func<T, string> descGetter = null, Action<T, Rect> iconDrawer = null, List<TFilter<T>> filters = null, Pawn pawn = null, string nextLabel = null,
+        Func<T, string> descGetter = null, Action<T, Rect> iconDrawer = null, List<Filter<T>> filters = null, Pawn pawn = null, string nextLabel = null,
         string closeLabel = null, Action closeAction = null,
         IEnumerable<T> auxHighlight = null) :
         this(menuTitle, pawn, nextLabel, closeLabel, closeAction)
@@ -273,16 +273,17 @@ public class ListingMenu<T> : Window
         buttonRect.xMin += 4f;
         if (Widgets.ButtonText(buttonRect, label2))
         {
-            activeFilters.ForEach(f => f.DoInvert = false);
+            activeFilters.ForEach(f => f.Inverted = false);
             activeFilters.Clear();
         }
 
         inRect.yMin += 4f;
 
-        var filtersToRemove = new List<TFilter<T>>();
+        var filtersToRemove = new List<Filter<T>>();
         foreach (var activeFilter in activeFilters)
         {
-            activeFilter.DrawFilter(ref inRect, ref filtersToRemove);
+            if (activeFilter.DrawFilter(ref inRect))
+                filtersToRemove.Add(activeFilter);
             inRect.yMin += 4f;
         }
 

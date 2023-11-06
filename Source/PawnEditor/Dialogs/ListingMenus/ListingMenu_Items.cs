@@ -203,24 +203,24 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         }
     }
 
-    private List<TFilter<ThingDef>> GetFilters()
+    private List<Filter<ThingDef>> GetFilters()
     {
-        var list = new List<TFilter<ThingDef>>();
+        var list = new List<Filter<ThingDef>>();
 
-        list.Add(new("PawnEditor.HasStyle".Translate(), false, def => ThingStyles.Select(ts => ts.ThingDef).Contains(def)));
-        list.Add(new("PawnEditor.HasStuff".Translate(), false, def => def.MadeFromStuff));
+        list.Add(new Filter_Toggle<ThingDef>("PawnEditor.HasStyle".Translate(), def => ThingStyles.Select(ts => ts.ThingDef).Contains(def)));
+        list.Add(new Filter_Toggle<ThingDef>("PawnEditor.HasStuff".Translate(), def => def.MadeFromStuff));
 
         if (type == ItemType.Apparel && Pawn != null)
         {
-            var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, FloatMenuOption, Func<ThingDef, bool>>(
-                def => new(def.LabelCap, () => { }),
+            var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, string, Func<ThingDef, bool>>(
+                def => def.LabelCap,
                 def => td => td.apparel.bodyPartGroups.Contains(def));
-            list.Add(new("PawnEditor.WornOnBodyPart".Translate(), false, bodyPartDict));
+            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.WornOnBodyPart".Translate(), bodyPartDict));
 
-            var apparelLayerDict = DefDatabase<ApparelLayerDef>.AllDefs.ToDictionary<ApparelLayerDef, FloatMenuOption, Func<ThingDef, bool>>(
-                def => new(def.LabelCap, () => { }),
+            var apparelLayerDict = DefDatabase<ApparelLayerDef>.AllDefs.ToDictionary<ApparelLayerDef, string, Func<ThingDef, bool>>(
+                def => def.LabelCap,
                 def => td => td.apparel.layers.Contains(def));
-            list.Add(new("PawnEditor.OccupiesLayer".Translate(), false, apparelLayerDict));
+            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.OccupiesLayer".Translate(), apparelLayerDict));
         }
 
         return list;

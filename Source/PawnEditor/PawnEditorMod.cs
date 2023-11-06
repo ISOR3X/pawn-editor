@@ -45,6 +45,7 @@ public class PawnEditorMod : Mod
         Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 1000000000);
         listing.CheckboxLabeled("PawnEditor.UseSilver".Translate(), ref Settings.UseSilver, "PawnEditor.UseSilver.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.CountNPCs".Translate(), ref Settings.CountNPCs, "PawnEditor.CountNPCs.Desc".Translate());
+        listing.CheckboxLabeled("PawnEditor.ShowEditButton".Translate(), ref Settings.ShowOpenButton, "PawnEditor.ShowEditButton.Desc".Translate());
         listing.End();
     }
 
@@ -52,13 +53,20 @@ public class PawnEditorMod : Mod
     {
         Harm.Unpatch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)), HarmonyPatchType.Prefix,
             Harm.Id);
+        Harm.Unpatch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DrawXenotypeEditorButton)),
+            HarmonyPatchType.Prefix,
+            Harm.Id);
         Harm.Unpatch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)), HarmonyPatchType.Transpiler, Harm.Id);
+        Harm.Unpatch(AccessTools.Method(typeof(Pawn), nameof(Pawn.GetGizmos)), HarmonyPatchType.Postfix, Harm.Id);
         if (Settings.OverrideVanilla)
             Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)),
                 new(GetType(), nameof(OverrideVanilla)));
         else
             Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DrawXenotypeEditorButton)),
                 new(GetType(), nameof(AddEditorButton)));
+
+        if (Settings.ShowOpenButton)
+            Harm.Patch(AccessTools.Method(typeof(Pawn), nameof(Pawn.GetGizmos)), postfix: new(GetType(), nameof(AddEditButton)));
 
         if (Settings.InGameDevButton)
             Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)),
@@ -141,6 +149,20 @@ public class PawnEditorMod : Mod
         return codes;
     }
 
+    public static IEnumerable<Gizmo> AddEditButton(IEnumerable<Gizmo> gizmos, Pawn __instance) =>
+        DebugSettings.ShowDevGizmos
+            ? gizmos.Append(new Command_Action
+            {
+                defaultLabel = "PawnEditor.Edit".Translate(),
+                defaultDesc = "PawnEditor.Edit.Desc".Translate(),
+                action = () =>
+                {
+                    Find.WindowStack.Add(new Dialog_PawnEditor_InGame());
+                    PawnEditor.Select(__instance);
+                }
+            })
+            : gizmos;
+
     public static void Notify_ConfigurePawns()
     {
         StartingThingsManager.ProcessScenario();
@@ -155,6 +177,7 @@ public class PawnEditorSettings : ModSettings
     public bool InGameDevButton = true;
     public bool OverrideVanilla = true;
     public float PointLimit = 100000;
+    public bool ShowOpenButton = true;
     public bool UseSilver;
 
     public override void ExposeData()
@@ -162,6 +185,7 @@ public class PawnEditorSettings : ModSettings
         base.ExposeData();
         Scribe_Values.Look(ref OverrideVanilla, nameof(OverrideVanilla), true);
         Scribe_Values.Look(ref InGameDevButton, nameof(InGameDevButton), true);
+        Scribe_Values.Look(ref ShowOpenButton, nameof(ShowOpenButton), true);
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
         Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
         Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));

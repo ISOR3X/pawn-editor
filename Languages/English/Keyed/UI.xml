@@ -192,6 +192,9 @@
     <PawnEditor.ClickToOpen>Click to view infocard</PawnEditor.ClickToOpen>
     <PawnEditor.MustBeOneEachGender>Pawns must be one male and one female.</PawnEditor.MustBeOneEachGender>
     <PawnEditor.WouldMakeOverCapacity>Adding {0} would {1} over their carrying capacity.</PawnEditor.WouldMakeOverCapacity>
+    <PawnEditor.Edit>Edit</PawnEditor.Edit>
+    <PawnEditor.Edit.Desc>Open the pawn editor to this pawn.</PawnEditor.Edit.Desc>
+    <PawnEditor.RelationExists>{0} already has an existing relation of type {1}. Do you still want to add this relation?</PawnEditor.RelationExists>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>
