@@ -44,9 +44,15 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         {
             var text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             if (text.NullOrEmpty()) text = GenFilePaths.SaveDataFolderPath;
+            text = Path.Combine(text, "PawnEditor", pawn.Name.ToStringShort + "-" + DateTime.Now.ToShortDateString() + "-" + DateTime.Now.ToLongTimeString());
+            if (!Directory.Exists(text)) Directory.CreateDirectory(text);
 
-            text = Path.Combine(text, pawn.Name.ToStringShort + ".png");
-            PawnEditor.SavePawnTex(pawn, text);
+            for (var i = 0; i < 4; i++)
+            {
+                var rot = new Rot4(i);
+                PawnEditor.SavePawnTex(pawn, Path.Combine(text, rot.ToStringHuman() + ".png"), rot);
+            }
+
             Messages.Message("PawnEditor.ImageExported".Translate(pawn.Name.ToStringFull, text), MessageTypeDefOf.TaskCompletion, false);
         });
     }

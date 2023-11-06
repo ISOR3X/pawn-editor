@@ -324,9 +324,9 @@ public static partial class PawnEditor
         PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom / pawn.BodySize,
             renderHeadgear: RenderHeadgear, renderClothes: RenderClothes, stylingStation: true);
 
-    public static void SavePawnTex(Pawn pawn, string path)
+    public static void SavePawnTex(Pawn pawn, string path, Rot4 dir)
     {
-        var tex = GetPawnTex(pawn, new(128, 128), Rot4.South);
+        var tex = GetPawnTex(pawn, new(128, 128), dir);
         RenderTexture.active = tex;
         var tex2D = new Texture2D(tex.width, tex.width);
         tex2D.ReadPixels(new(0, 0, tex.width, tex.height), 0, 0);
