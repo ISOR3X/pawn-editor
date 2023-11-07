@@ -44,7 +44,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         {
             var text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             if (text.NullOrEmpty()) text = GenFilePaths.SaveDataFolderPath;
-            text = Path.Combine(text, "PawnEditor", pawn.Name.ToStringShort + "-" + DateTime.Now.ToShortDateString() + "-" + DateTime.Now.ToLongTimeString());
+            text = Path.Combine(text, "PawnEditor", pawn.Name.ToStringShort + "-" + DateTime.Now.ToFileTimeUtc());
             if (!Directory.Exists(text)) Directory.CreateDirectory(text);
 
             for (var i = 0; i < 4; i++)

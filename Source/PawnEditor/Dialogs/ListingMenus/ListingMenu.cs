@@ -52,8 +52,8 @@ public class ListingMenu<T> : Window
     protected ListingMenu(string menuTitle, Pawn pawn = null, string nextLabel = null, string closeLabel = null, Action closeAction = null) : this(menuTitle,
         pawn)
     {
-        NextLabel = nextLabel ?? "Add".Translate().CapitalizeFirst();
-        _closeLabel = closeLabel ?? "Close".Translate();
+        NextLabel = nextLabel.NullOrEmpty() ? "Add".Translate().CapitalizeFirst() : nextLabel;
+        _closeLabel = closeLabel.NullOrEmpty() ? "Close".Translate() : closeLabel;
         _closeAction = closeAction;
     }
 
@@ -61,6 +61,8 @@ public class ListingMenu<T> : Window
     {
         _action = action;
         _allowMultiSelect = false;
+        NextLabel = "Add".Translate().CapitalizeFirst();
+        _closeLabel = "Close".Translate();
     }
 
     protected ListingMenu(string menuTitle, Pawn pawn = null)
@@ -314,13 +316,11 @@ public class ListingMenu<T> : Window
         {
             windowRect.width = WideSize.x;
             windowRect.height = WideSize.y;
-            Log.Message("wide");
         }
         else if (!_showFilters && windowRect.width != InitialSize.x)
         {
             windowRect.width = InitialSize.x;
             windowRect.height = InitialSize.y;
-            Log.Message("small");
         }
     }
 

@@ -20,7 +20,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         DoButtons(headerRect.TakeRightPart(212).TopPartPixels(80), pawn);
         headerRect.xMin += 3;
         DoBasics(headerRect.TakeLeftPart(headerRect.width * 0.67f).ContractedBy(5, 0), pawn);
-        if (pawn.training != null) DoSkills(rect, pawn);
+        if (pawn.training != null) DoSkills(rect.LeftPart(0.34f), pawn);
     }
 
     private void DoButtons(Rect buttonsRect, Pawn pawn)
@@ -220,7 +220,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
                 var disabled = !pawn.training.CanAssignToTrain(def);
                 var texture2D = SkillUI.SkillBarFillTex;
 
-                if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / 20f), texture2D, TexPawnEditor.SkillBarBGTex, false);
+                if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / (float)def.steps), texture2D, TexPawnEditor.SkillBarBGTex, false);
                 rect.xMin += 3;
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
                 if (!disabled && level < def.steps && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus))
