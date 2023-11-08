@@ -11,13 +11,13 @@ namespace PawnEditor;
 public class ListingMenu<T> : Window
 {
     protected readonly Pawn Pawn;
-    private readonly Action<T> _action;
+    private readonly Func<T, AddResult> _action;
     private readonly bool _allowMultiSelect;
     private readonly Action _closeAction;
     private readonly string _closeLabel;
     private readonly string _menuTitle;
     private readonly int _minCount;
-    private readonly Func<List<T>, bool> _multiAction;
+    private readonly Func<List<T>, AddResult> _multiAction;
 
     protected Listing_Thing<T> Listing;
     protected TreeNode_ThingCategory TreeNodeThingCategory;
@@ -26,7 +26,7 @@ public class ListingMenu<T> : Window
     private bool _showFilters;
     private float _viewHeight = 100f;
 
-    public ListingMenu(List<T> items, Func<T, string> labelGetter, Action<T> action, string menuTitle,
+    public ListingMenu(List<T> items, Func<T, string> labelGetter, Func<T, AddResult> action, string menuTitle,
         Func<T, string> descGetter = null, Action<T, Rect> iconDrawer = null, List<Filter<T>> filters = null, Pawn pawn = null, string nextLabel = null,
         string closeLabel = null, Action closeAction = null,
         IEnumerable<T> auxHighlight = null) :
@@ -37,7 +37,7 @@ public class ListingMenu<T> : Window
         _allowMultiSelect = false;
     }
 
-    public ListingMenu(List<T> items, Func<T, string> labelGetter, Func<List<T>, bool> action, string menuTitle, IntRange wantedCount,
+    public ListingMenu(List<T> items, Func<T, string> labelGetter, Func<List<T>, AddResult> action, string menuTitle, IntRange wantedCount,
         Func<T, string> descGetter = null, Action<T, Rect> iconDrawer = null, List<Filter<T>> filters = null, Pawn pawn = null, string nextLabel = null,
         string closeLabel = null, Action closeAction = null,
         IEnumerable<T> auxHighlight = null) :
@@ -57,7 +57,7 @@ public class ListingMenu<T> : Window
         _closeAction = closeAction;
     }
 
-    protected ListingMenu(Action<T> action, string menuTitle, Pawn pawn = null) : this(menuTitle, pawn)
+    protected ListingMenu(Func<T, AddResult> action, string menuTitle, Pawn pawn = null) : this(menuTitle, pawn)
     {
         _action = action;
         _allowMultiSelect = false;
@@ -218,14 +218,7 @@ public class ListingMenu<T> : Window
         {
             if (Widgets.ButtonText(new(inRect.xMax - UIUtility.BottomButtonSize.x, inRect.y, UIUtility.BottomButtonSize.x, UIUtility.BottomButtonSize.y),
                     NextLabel))
-            {
-                if (_allowMultiSelect && _multiAction(Listing.MultiSelected)) Close();
-                else if (!_allowMultiSelect)
-                {
-                    _action(Listing.Selected);
-                    Close();
-                }
-            }
+                (_allowMultiSelect ? _multiAction(Listing.MultiSelected) : _action(Listing.Selected)).HandleResult(() => Close());
 
             if (Widgets.ButtonText(new(inRect.x, inRect.y, UIUtility.BottomButtonSize.x, UIUtility.BottomButtonSize.y), _closeLabel))
             {

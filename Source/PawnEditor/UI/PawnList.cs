@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -56,9 +55,9 @@ public static partial class PawnEditor
             Widgets.BeginGroup(outerRect);
             var rect = outerRect.AtZero();
             rect = rect.ContractedBy(5);
-            GUI.color = new Color(1f, 1f, 1f, 0.2f);
+            GUI.color = new(1f, 1f, 1f, 0.2f);
             var portraitSize = Page_ConfigureStartingPawns.PawnSelectorPortraitSize;
-            GUI.DrawTexture(new Rect(105f - portraitSize.x / 2f, 40f - portraitSize.y / 2f, portraitSize.x, portraitSize.y),
+            GUI.DrawTexture(new(105f - portraitSize.x / 2f, 40f - portraitSize.y / 2f, portraitSize.x, portraitSize.y),
                 GetPawnTex(pawn, portraitSize, selectedCategory == PawnCategory.Humans ? Rot4.South : Rot4.East,
                     selectedCategory == PawnCategory.Humans ? default : new Vector3(-0.01f, 0, 0),
                     1 / Mathf.Clamp(pawn.BodySize, 1, 5)));
@@ -80,7 +79,7 @@ public static partial class PawnEditor
                 if (Widgets.ButtonImage(deleteRect, TexButton.CloseXSmall, Color.red))
                 {
                     var index = i;
-                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
+                    Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeletePawn",
                         () =>
                         {
                             onDelete(pawn);

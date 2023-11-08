@@ -185,7 +185,7 @@
     <PawnEditor.HediffDuplicate>Are you sure you want to add duplicate hediff {0}?</PawnEditor.HediffDuplicate>
     <PawnEditor.Teleport.Specific>Teleport to exact location</PawnEditor.Teleport.Specific>
     <PawnEditor.AdditionalInfo>Additional info</PawnEditor.AdditionalInfo>
-    <PawnEditor.NotEnoughPoints>Not enough points. Need {0}.</PawnEditor.NotEnoughPoints>
+    <PawnEditor.NotEnoughPoints>Not enough points. Need {0}, have {1}.</PawnEditor.NotEnoughPoints>
     <PawnEditor.ExportImage>Export portrait</PawnEditor.ExportImage>
     <PawnEditor.ImageExported>Exported portrait of {0} to {1}.</PawnEditor.ImageExported>
     <PawnEditor.NegativePoints>Remaining points is negative.</PawnEditor.NegativePoints>
@@ -195,6 +195,7 @@
     <PawnEditor.Edit>Edit</PawnEditor.Edit>
     <PawnEditor.Edit.Desc>Open the pawn editor to this pawn.</PawnEditor.Edit.Desc>
     <PawnEditor.RelationExists>{0} already has an existing relation of type {1}. Do you still want to add this relation?</PawnEditor.RelationExists>
+    <PawnEditor.DontShowAgain>Don't show again</PawnEditor.DontShowAgain>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

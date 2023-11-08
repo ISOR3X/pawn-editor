@@ -102,7 +102,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                     () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Animals.ToString()); }),
                 new(TexButton.DeleteX, () =>
                 {
-                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
+                    Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteAnimal",
                         () =>
                         {
                             pawn.Discard(true);
@@ -149,7 +149,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                             if (old != null) pawn.relations.RemoveDirectRelation(PawnRelationDefOf.Overseer, old);
                             pawn.relations.AddDirectRelation(PawnRelationDefOf.Overseer, p);
                         }))
-                        .ToList()));
+                       .ToList()));
                 }),
                 new(TexButton.Paste, () => { }),
                 new(TexButton.Copy, () => { }),
@@ -158,7 +158,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                     () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Mechs.ToString()); }),
                 new(TexButton.DeleteX, () =>
                 {
-                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
+                    Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteMech",
                         () =>
                         {
                             pawn.Discard(true);
@@ -176,7 +176,8 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
     {
         DoBottomButtons(inRect.TakeBottomPart(UIUtility.RegularButtonHeight));
 
-        var viewRect = new Rect(0, 0, inRect.width - 20, UITable<Faction>.Heading.Height + (animalCount + mechCount) * 34 + (Text.LineHeightOf(GameFont.Small) + 4) * 2 + 32f);
+        var viewRect = new Rect(0, 0, inRect.width - 20,
+            UITable<Faction>.Heading.Height + (animalCount + mechCount) * 34 + (Text.LineHeightOf(GameFont.Small) + 4) * 2 + 32f);
         Widgets.BeginScrollView(inRect, ref animalScrollPos, viewRect);
         using (new TextBlock(TextAnchor.MiddleLeft))
             Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "AnimalsSection".Translate().Colorize(ColoredText.TipSectionTitleColor));

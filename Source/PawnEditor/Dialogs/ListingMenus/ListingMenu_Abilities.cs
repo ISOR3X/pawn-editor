@@ -13,8 +13,6 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
     private static readonly List<AbilityDef> items;
     private static readonly Func<AbilityDef, string> labelGetter = d => d.LabelCap;
     private static readonly Func<AbilityDef, Pawn, string> descGetter = (d, p) => d.GetTooltip(p);
-    private static readonly Action<AbilityDef, Rect> iconDrawer = DrawIcon;
-    private static readonly Action<AbilityDef, Pawn> action = TryAdd;
     private static readonly List<Filter<AbilityDef>> filters;
 
     static ListingMenu_Abilities()
@@ -23,9 +21,9 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
         filters = GetFilters();
     }
 
-    public ListingMenu_Abilities(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
+    public ListingMenu_Abilities(Pawn pawn) : base(items, labelGetter, b => TryAdd(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Ability".Translate().ToLower(),
-        b => descGetter(b, pawn), iconDrawer, filters, pawn) { }
+        b => descGetter(b, pawn), DrawIcon, filters, pawn) { }
 
     private static void DrawIcon(AbilityDef abilityDef, Rect rect)
     {
@@ -35,7 +33,7 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
         Widgets.DrawTextureFitted(rect, texture, .8f);
     }
 
-    private static void TryAdd(AbilityDef abilityDef, Pawn pawn)
+    private static AddResult TryAdd(AbilityDef abilityDef, Pawn pawn)
     {
         if (abilityDef.IsPsycast && !pawn.HasPsylink)
         {
@@ -45,6 +43,7 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
         }
 
         pawn.abilities.GainAbility(abilityDef);
+        return true;
     }
 
     private static List<Filter<AbilityDef>> GetFilters()

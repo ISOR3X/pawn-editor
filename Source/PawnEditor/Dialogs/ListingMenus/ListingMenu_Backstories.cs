@@ -17,14 +17,16 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
         "ChooseStuffForRelic".Translate() + " " + "Backstory".Translate().ToLower(),
         b => b.FullDescriptionFor(pawn).Resolve(), null, GetFilters(), pawn) { }
 
-    private static void TryAdd(BackstoryDef backstoryDef, Pawn pawn)
+    private static AddResult TryAdd(BackstoryDef backstoryDef, Pawn pawn)
     {
         if (backstoryDef.slot == BackstorySlot.Childhood)
             pawn.story.Childhood = backstoryDef;
         else if (!pawn.ageTracker.Adult)
-            Messages.Message("PawnEditor.NoAdultOnChild".Translate(backstoryDef.LabelCap), MessageTypeDefOf.RejectInput, false);
+            return "PawnEditor.NoAdultOnChild".Translate(backstoryDef.LabelCap);
         else
             pawn.story.Adulthood = backstoryDef;
+
+        return true;
     }
 
     private static List<Filter<BackstoryDef>> GetFilters()

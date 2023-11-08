@@ -12,7 +12,6 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
     private static readonly List<TraitInfo> items;
     private static readonly Func<TraitInfo, string> labelGetter = t => t?.TraitDegreeData.LabelCap;
     private static readonly Func<TraitInfo, Pawn, string> descGetter = (t, p) => t?.TraitDegreeData.description.Formatted(p.Named("PAWN")).AdjustedFor(p);
-    private static readonly Action<TraitInfo, Pawn> action = TryAdd;
     private static readonly List<Filter<TraitInfo>> filters;
 
     static ListingMenu_Trait()
@@ -24,45 +23,31 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
         filters = GetFilters();
     }
 
-    public ListingMenu_Trait(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
+    public ListingMenu_Trait(Pawn pawn) : base(items, labelGetter, b => TryAdd(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "Trait".Translate().ToLower(),
         b => descGetter(b, pawn), null, filters, pawn) { }
 
-    private static void TryAdd(TraitInfo traitInfo, Pawn pawn)
+    private static AddResult TryAdd(TraitInfo traitInfo, Pawn pawn)
     {
         if (pawn.kindDef.disallowedTraits.NotNullAndContains(traitInfo.Trait.def)
          || pawn.kindDef.disallowedTraitsWithDegree.NotNullAndAny(t => t.def == traitInfo.Trait.def && t.degree == traitInfo.TraitDegreeData.degree)
          || (pawn.kindDef.requiredWorkTags != WorkTags.None
           && (traitInfo.Trait.def.disabledWorkTags & pawn.kindDef.requiredWorkTags) != WorkTags.None))
-        {
-            Messages.Message("PawnEditor.TraitDisallowedByKind".Translate(traitInfo.Trait.Label, pawn.kindDef.labelPlural), MessageTypeDefOf.RejectInput,
-                false);
-            return;
-        }
+            return "PawnEditor.TraitDisallowedByKind".Translate(traitInfo.Trait.Label, pawn.kindDef.labelPlural);
 
         if (pawn.story.traits.allTraits.FirstOrDefault(tr => traitInfo.Trait.def.ConflictsWith(tr)) is { } trait)
-        {
-            Messages.Message("PawnEditor.TraitConflicts".Translate(traitInfo.Trait.Label, trait.Label), MessageTypeDefOf.RejectInput, false);
-            return;
-        }
+            return "PawnEditor.TraitConflicts".Translate(traitInfo.Trait.Label, trait.Label);
 
         if (pawn.WorkTagIsDisabled(traitInfo.Trait.def.requiredWorkTags))
-        {
-            Messages.Message(
-                "PawnEditor.TraitWorkDisabled".Translate(pawn.Name.ToStringShort, traitInfo.Trait.def.requiredWorkTags.LabelTranslated(),
-                    traitInfo.Trait.Label), MessageTypeDefOf.RejectInput, false);
-            return;
-        }
+            return "PawnEditor.TraitWorkDisabled".Translate(pawn.Name.ToStringShort, traitInfo.Trait.def.requiredWorkTags.LabelTranslated(),
+                traitInfo.Trait.Label);
 
         if (traitInfo.Trait.def.requiredWorkTypes?.FirstOrDefault(pawn.WorkTypeIsDisabled) is { } workType)
-        {
-            Messages.Message("PawnEditor.TraitWorkDisabled".Translate(pawn.Name.ToStringShort, workType.label, traitInfo.Trait.Label),
-                MessageTypeDefOf.RejectInput, false);
-            return;
-        }
+            return "PawnEditor.TraitWorkDisabled".Translate(pawn.Name.ToStringShort, workType.label, traitInfo.Trait.Label);
 
         pawn.story.traits.GainTrait(new(traitInfo.Trait.def, traitInfo.TraitDegreeData.degree));
         PawnEditor.Notify_PointsUsed();
+        return true;
     }
 
     private static List<Filter<TraitInfo>> GetFilters()

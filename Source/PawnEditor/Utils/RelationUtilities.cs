@@ -18,7 +18,7 @@ public static class RelationUtilities
     }
 
     public static bool CanAddImpliedRelation(this PawnRelationDef def, Pawn pawn, Pawn otherPawn, out int requiredCount,
-        out Func<List<Pawn>, bool> createAction, out Func<Pawn, bool> predicate, out bool highlightGender)
+        out Func<List<Pawn>, AddResult> createAction, out Func<Pawn, bool> predicate, out bool highlightGender)
     {
         requiredCount = 0;
         createAction = null;
@@ -36,45 +36,37 @@ public static class RelationUtilities
                 if (mother != null && otherMother != null && mother == otherMother) return false;
                 requiredCount = 1;
                 predicate = p => p.gender == Gender.Female;
-                createAction = list =>
+                createAction = list => new SuccessInfo(() =>
                 {
                     pawn.SetMother(list[0]);
                     otherPawn.SetMother(list[0]);
                     TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
-                    return true;
-                };
+                });
             }
             else if (mother != null && otherMother != null && mother == otherMother)
             {
                 requiredCount = 1;
                 predicate = p => p.gender == Gender.Male;
-                createAction = list =>
+                createAction = list => new SuccessInfo(() =>
                 {
                     pawn.SetFather(list[0]);
                     otherPawn.SetFather(list[0]);
                     TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
-                    return true;
-                };
+                });
             }
             else
             {
                 requiredCount = 2;
-                createAction = list =>
-                {
-                    if (list[0].gender == list[1].gender)
+                createAction = list => list[0].gender == list[1].gender
+                    ? "PawnEditor.MustBeOneEachGender".Translate()
+                    : new SuccessInfo(() =>
                     {
-                        Messages.Message("PawnEditor.MustBeOneEachGender".Translate(), MessageTypeDefOf.RejectInput);
-                        return false;
-                    }
-
-                    pawn.SetParent(list[0]);
-                    otherPawn.SetParent(list[0]);
-                    pawn.SetParent(list[1]);
-                    otherPawn.SetParent(list[1]);
-                    TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
-
-                    return true;
-                };
+                        pawn.SetParent(list[0]);
+                        otherPawn.SetParent(list[0]);
+                        pawn.SetParent(list[1]);
+                        otherPawn.SetParent(list[1]);
+                        TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
+                    });
             }
 
             return true;

@@ -60,7 +60,11 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
             var list = PawnEditor.AllPawns.GetList();
             list.Remove(pawn);
-            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(), p => Find.WindowStack.Add(new ListingMenu_Relations(pawn, p))));
+            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(), p =>
+            {
+                Find.WindowStack.Add(new ListingMenu_Relations(pawn, p));
+                return true;
+            }));
         }
 
         inRect.xMin += 4f;

@@ -124,7 +124,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         yield return new(TexPawnEditor.Save, () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Humans.ToString()); });
         yield return new(TexButton.DeleteX, () =>
         {
-            Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
+            Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteHuman",
                 () =>
                 {
                     pawn.Discard(true);

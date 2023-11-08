@@ -83,15 +83,16 @@ public partial class TabWorker_Bio_Humanlike
                     {
                         if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
                         {
-                            Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), delegate
-                            {
-                                var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
-                                if (File.Exists(path))
+                            Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
+                                delegate
                                 {
-                                    File.Delete(path);
-                                    CharacterCardUtility.cachedCustomXenotypes = null;
-                                }
-                            }, true));
+                                    var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
+                                    if (File.Exists(path))
+                                    {
+                                        File.Delete(path);
+                                        CharacterCardUtility.cachedCustomXenotypes = null;
+                                    }
+                                }, true));
                             return true;
                         }
 

@@ -8,7 +8,8 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public class ListingMenu_Pawns : ListingMenu<Pawn>
 {
-    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Action<Pawn> nextAction, string closeLabel = null, Action closeAction = null,
+    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<Pawn, AddResult> nextAction, string closeLabel = null,
+        Action closeAction = null,
         bool highlightGender = false) :
         base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Pawn".Translate(),
             p => p.DescriptionDetailed,
@@ -17,7 +18,7 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
         if (highlightGender) Listing.DoThingExtras = DoThingExtras;
     }
 
-    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<List<Pawn>, bool> nextAction, int count, string closeLabel = null,
+    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<List<Pawn>, AddResult> nextAction, int count, string closeLabel = null,
         Action closeAction = null, bool highlightGender = false) :
         base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "ChooseStuffForRelic".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
                 "PawnEditor.Pawn".Translate(), count), new(count, count),

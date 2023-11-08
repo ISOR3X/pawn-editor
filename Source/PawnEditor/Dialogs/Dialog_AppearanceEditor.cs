@@ -474,7 +474,7 @@ public class Dialog_AppearanceEditor : Window
                         {
                             if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
                             {
-                                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()),
+                                Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
                                     delegate
                                     {
                                         var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);

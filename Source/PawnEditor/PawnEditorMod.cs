@@ -46,6 +46,7 @@ public class PawnEditorMod : Mod
         listing.CheckboxLabeled("PawnEditor.UseSilver".Translate(), ref Settings.UseSilver, "PawnEditor.UseSilver.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.CountNPCs".Translate(), ref Settings.CountNPCs, "PawnEditor.CountNPCs.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.ShowEditButton".Translate(), ref Settings.ShowOpenButton, "PawnEditor.ShowEditButton.Desc".Translate());
+        if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
         listing.End();
     }
 
@@ -174,6 +175,7 @@ public class PawnEditorMod : Mod
 public class PawnEditorSettings : ModSettings
 {
     public bool CountNPCs;
+    public HashSet<string> DontShowAgain = new();
     public bool InGameDevButton = true;
     public bool OverrideVanilla = true;
     public float PointLimit = 100000;
@@ -183,12 +185,15 @@ public class PawnEditorSettings : ModSettings
     public override void ExposeData()
     {
         base.ExposeData();
+        Scribe_Collections.Look(ref DontShowAgain, nameof(DontShowAgain));
         Scribe_Values.Look(ref OverrideVanilla, nameof(OverrideVanilla), true);
         Scribe_Values.Look(ref InGameDevButton, nameof(InGameDevButton), true);
         Scribe_Values.Look(ref ShowOpenButton, nameof(ShowOpenButton), true);
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
         Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
         Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));
+
+        DontShowAgain ??= new();
     }
 }
 

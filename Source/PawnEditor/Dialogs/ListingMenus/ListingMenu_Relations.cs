@@ -15,29 +15,17 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
     public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, List<Filter<PawnRelationDef>> filters = null)
         : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), r => r.LabelCap, def =>
             {
-                Func<List<Pawn>, bool> createInt = _ =>
-                {
-                    def.AddDirectRelation(pawn, otherPawn);
-                    return true;
-                };
+                Func<List<Pawn>, AddResult> createInt = _ => new SuccessInfo(() => def.AddDirectRelation(pawn, otherPawn));
                 var required = 0;
                 Func<Pawn, bool> predicate = null;
                 var highlightGender = false;
 
-                if (def.implied && !def.CanAddImpliedRelation(pawn, otherPawn, out required, out createInt, out predicate, out highlightGender)) return;
+                if (def.implied && !def.CanAddImpliedRelation(pawn, otherPawn, out required, out createInt, out predicate, out highlightGender)) return false;
 
-                bool Create(List<Pawn> list)
-                {
-                    if (!def.implied && pawn.relations.GetDirectRelationsCount(def) > 0)
-                    {
-                        Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.RelationExists".Translate(pawn.NameShortColored, def.LabelCap),
-                            () => createInt(list), true));
-                        return false;
-                    }
-
-                    createInt(list);
-                    return true;
-                }
+                AddResult Create(List<Pawn> list) =>
+                    new ConfirmInfo("PawnEditor.RelationExists".Translate(pawn.NameShortColored, def.LabelCap), "RelationExists",
+                        createInt(list),
+                        !def.implied && pawn.relations.GetDirectRelationsCount(def) > 0);
 
                 if (required > 0)
                 {
@@ -48,8 +36,10 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                     if (predicate != null) list.RemoveAll(p => !predicate(p));
                     Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), Create, required, "Back".Translate(),
                         () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, filters)), highlightGender));
+                    return true;
                 }
-                else Create(new());
+
+                return Create(new());
             }, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Relation".Translate(),
             r => r.description, null, filters, pawn, null, "Back".Translate(), () =>
             {
@@ -57,7 +47,11 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                 var list = PawnEditor.AllPawns.GetList();
                 list.Remove(pawn);
                 Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(),
-                    p => Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, filters))));
+                    p =>
+                    {
+                        Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, filters));
+                        return true;
+                    }));
             }) =>
         _otherPawn = otherPawn;
 

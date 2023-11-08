@@ -34,7 +34,7 @@ public class TabWorker_FactionSettlements : TabWorker<Faction>
                 }),
                 new(TexButton.DeleteX, () =>
                 {
-                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(s.Name),
+                    Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(s.Name), "ConfirmDeleteSettlement",
                         () =>
                         {
                             s.Destroy();
