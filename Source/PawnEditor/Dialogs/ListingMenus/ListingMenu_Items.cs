@@ -202,6 +202,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
     {
         var list = new List<Filter<ThingDef>>();
 
+        list.Add(new Filter_ModSource<ThingDef>());
         list.Add(new Filter_Toggle<ThingDef>("PawnEditor.HasStyle".Translate(), def => ThingStyles.Select(ts => ts.ThingDef).Contains(def)));
         list.Add(new Filter_Toggle<ThingDef>("PawnEditor.HasStuff".Translate(), def => def.MadeFromStuff));
 

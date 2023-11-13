@@ -70,6 +70,7 @@
     <Compile Include="Dialogs\ListingMenus\Filters\Filter.cs" />
     <Compile Include="Dialogs\ListingMenus\Filters\Filter_Dropdown.cs" />
     <Compile Include="Dialogs\ListingMenus\Filters\Filter_IntRange.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_ModSource.cs" />
     <Compile Include="Dialogs\ListingMenus\Filters\Filter_Toggle.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Abilities.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Dialogs\ListingMenus\ListingMenu_PawnKindDef.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Pawns.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Relations.cs" />
+    <Compile Include="Dialogs\ListingMenus\ListingMenu_Thought.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Trait.cs" />
     <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />

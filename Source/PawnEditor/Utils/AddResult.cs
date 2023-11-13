@@ -16,11 +16,7 @@ public abstract class AddResult
 
     public virtual void HandleResult(Action successAction = null)
     {
-        if (IsSuccess())
-        {
-            Log.Message($"Success! Doing {successAction}");
-            successAction?.Invoke();
-        }
+        if (IsSuccess()) successAction?.Invoke();
     }
 }
 
@@ -52,7 +48,6 @@ public class ConfirmInfo : AddResult
     public override bool IsSuccess() => !NeedsConfirmation || PawnEditorMod.Settings.DontShowAgain.Contains(Key);
 }
 
-[HotSwappable]
 public class FailureInfo : AddResult
 {
     public readonly string Reason;
@@ -63,12 +58,10 @@ public class FailureInfo : AddResult
 
     public override void HandleResult(Action successAction = null)
     {
-        Log.Message($"Failure, because {Reason}");
         if (!Reason.NullOrEmpty()) Messages.Message(Reason, MessageTypeDefOf.RejectInput, false);
     }
 }
 
-[HotSwappable]
 public class SuccessInfo : AddResult
 {
     public readonly Action OnSuccess;
@@ -77,7 +70,6 @@ public class SuccessInfo : AddResult
 
     public override void HandleResult(Action successAction = null)
     {
-        Log.Message($"Success, duh. Doing {OnSuccess}, then {successAction}");
         base.HandleResult(OnSuccess + successAction);
     }
 

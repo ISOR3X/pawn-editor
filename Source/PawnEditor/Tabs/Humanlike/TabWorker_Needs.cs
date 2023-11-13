@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -52,7 +51,6 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
     private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
-        {
             Find.WindowStack.Add(new FloatMenu(new()
             {
                 new("PawnEditor.RefillNeeds".Translate(), () =>
@@ -62,13 +60,10 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                 new("PawnEditor.CancelBreakdown".Translate(),
                     () => pawn.mindState.mentalStateHandler.CurState?.RecoverFromState())
             }));
-        }
 
         inRect.xMin += 4f;
 
-        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate()))
-        {
-        }
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate())) Find.WindowStack.Add(new ListingMenu_Thoughts(pawn));
 
         inRect.xMin += 4f;
     }
@@ -89,22 +84,18 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         }
 
         viewRect.yMin += 16f;
-        
+
         if (ModsConfig.IdeologyActive)
-        {
             // ToDo: Gene_Resource SetMax()
-            foreach (Gene_Resource resourceGene in resourceGenes)
+            foreach (var resourceGene in resourceGenes)
             {
                 UIUtility.GeneResourceBarWidget(viewRect.TakeTopPart(30f), resourceGene);
                 viewRect.yMin += 8f;
             }
-        }
 
         if (ModsConfig.royaltyActive && pawn.psychicEntropy.NeedsPsyfocus)
-        {
             UIUtility.ResourceBarWidget(viewRect.TakeTopPart(30f), ref pawn.psychicEntropy.currentPsyfocus, "Psyfocus".Translate(),
-                new Color(0.34f, 0.42f, 0.43f), new Color(0.03f, 0.035f, 0.05f), new List<float>{ 0.25f, 0.5f }, 0.05f);
-        }
+                new(0.34f, 0.42f, 0.43f), new Color(0.03f, 0.035f, 0.05f), new() { 0.25f, 0.5f }, 0.05f);
 
         Widgets.EndScrollView();
     }
@@ -117,15 +108,15 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         var barRect = inRect.LeftPart(width);
         n.DrawOnGUI(barRect, customMargin: margin, drawLabel: false);
         var pct = n.CurInstantLevelPercentage;
-        Vector2 vector2 = new Vector2(barRect.x + (barRect.width - margin * 2f) * pct, barRect.y + barRect.height);
-        GUI.DrawTexture(new Rect(vector2.x - 12 / 2f + 16f, vector2.y - margin / 2f, 12, 12), Need.BarInstantMarkerTex);
+        var vector2 = new Vector2(barRect.x + (barRect.width - margin * 2f) * pct, barRect.y + barRect.height);
+        GUI.DrawTexture(new(vector2.x - 12 / 2f + 16f, vector2.y - margin / 2f, 12, 12), Need.BarInstantMarkerTex);
 
-        Rect barRect1 = barRect;
+        var barRect1 = barRect;
         barRect1.yMax -= margin / 2;
         barRect.xMin -= margin;
         barRect1.xMax -= margin;
-        Rect plusRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
-        Rect minRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
+        var plusRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
+        var minRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
         if (Widgets.ButtonImage(plusRect, TexButton.Plus))
             n.CurLevelPercentage += 0.1f;
         if (Mouse.IsOver(plusRect))
@@ -254,14 +245,13 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                 iconRect = iconRect.ContractedBy(2f);
 
                 if (ModsConfig.IdeologyActive)
-                {
                     if (leadingThought.sourcePrecept != null)
                     {
                         if (!Find.IdeoManager.classicMode)
-                            IdeoUIUtility.DoIdeoIcon(iconRect.ContractedBy(4f), leadingThought.sourcePrecept.ideo, false, (() => IdeoUIUtility.OpenIdeoInfo(leadingThought.sourcePrecept.ideo)));
+                            IdeoUIUtility.DoIdeoIcon(iconRect.ContractedBy(4f), leadingThought.sourcePrecept.ideo, false,
+                                () => IdeoUIUtility.OpenIdeoInfo(leadingThought.sourcePrecept.ideo));
                         return;
                     }
-                }
 
                 GUI.DrawTexture(iconRect, Widgets.PlaceholderIconTex);
             }));
@@ -283,7 +273,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
             var moodOffset = pawn.needs.mood.thoughts.MoodOffsetOfGroup(thoughtGroup);
             items.Add(new(moodOffset.ToString("##0")
-                .Colorize(moodOffset switch
+               .Colorize(moodOffset switch
                 {
                     0f => NeedsCardUtility.NoEffectColor,
                     > 0f => NeedsCardUtility.MoodColor,
