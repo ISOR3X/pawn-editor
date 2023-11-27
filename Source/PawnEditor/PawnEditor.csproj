@@ -64,9 +64,11 @@
     <Compile Include="Dialogs\Dialog_AppearanceEditor.cs" />
     <Compile Include="Dialogs\Dialog_ColorPicker.cs" />
     <Compile Include="Dialogs\Dialog_Confirm.cs" />
-    <Compile Include="Dialogs\Dialog_EditItem.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditHediff.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditItem.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditThing.cs" />
     <Compile Include="Dialogs\ListingMenus\Filters\Filter.cs" />
     <Compile Include="Dialogs\ListingMenus\Filters\Filter_Dropdown.cs" />
     <Compile Include="Dialogs\ListingMenus\Filters\Filter_IntRange.cs" />
@@ -108,6 +110,7 @@
     <Compile Include="UI\UITable.cs" />
     <Compile Include="UI\Widgets.cs" />
     <Compile Include="Utils\AddResult.cs" />
+    <Compile Include="Utils\EditUtility.cs" />
     <Compile Include="Utils\Listing_Thing.cs" />
     <Compile Include="Utils\Listing_TreeThing.cs" />
     <Compile Include="Utils\ColonyInventory.cs" />

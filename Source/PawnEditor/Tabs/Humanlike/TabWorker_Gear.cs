@@ -10,19 +10,18 @@ namespace PawnEditor;
 [HotSwappable]
 public class TabWorker_Gear : TabWorker<Pawn>
 {
-    private Vector2 oldScrollPos = Vector2.zero;
-    private Vector2 scrollPos;
-
     private static UITable<Pawn> apparelTable;
     private static UITable<Pawn> equipmentTable;
     private static UITable<Pawn> possessionsTable;
+    private Vector2 oldScrollPos = Vector2.zero;
+    private Vector2 scrollPos;
 
     public override void Initialize()
     {
         base.Initialize();
-        apparelTable = new(GetHeadings(), p => GetRows(p, pawn => pawn.apparel.WornApparel.Cast<Thing>().ToList()));
-        equipmentTable = new(GetHeadings(), p => GetRows(p, pawn => pawn.equipment.equipment.Cast<Thing>().ToList()));
-        possessionsTable = new(GetHeadings(), p => GetRows(p, pawn => pawn.inventory.innerContainer.ToList()));
+        apparelTable = new(GetHeadings(), p => GetRows(p, apparelTable, pawn => pawn.apparel.WornApparel.Cast<Thing>().ToList()));
+        equipmentTable = new(GetHeadings(), p => GetRows(p, equipmentTable, pawn => pawn.equipment.equipment.Cast<Thing>().ToList()));
+        possessionsTable = new(GetHeadings(), p => GetRows(p, possessionsTable, pawn => pawn.inventory.innerContainer.ToList()));
     }
 
     private List<UITable<Pawn>.Heading> GetHeadings() =>
@@ -38,7 +37,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             new(24) // Delete
         };
 
-    private IEnumerable<UITable<Pawn>.Row> GetRows(Pawn pawn, Func<Pawn, List<Thing>> thingsGetter)
+    private IEnumerable<UITable<Pawn>.Row> GetRows(Pawn pawn, UITable<Pawn> table, Func<Pawn, List<Thing>> thingsGetter)
     {
         var things = thingsGetter(pawn);
         for (var i = 0; i < things.Count; i++)
@@ -55,28 +54,18 @@ public class TabWorker_Gear : TabWorker<Pawn>
                         Widgets.DrawHighlight(iconRect);
                         TooltipHandler.TipRegion(iconRect, "PawnEditor.ClickToOpen".Translate());
                     }
-                    if (Widgets.ButtonInvisible(iconRect))
-                    {
-                        Find.WindowStack.Add(new Dialog_InfoCard(thing));
-                    }
+
+                    if (Widgets.ButtonInvisible(iconRect)) Find.WindowStack.Add(new Dialog_InfoCard(thing));
                 }),
                 new(thing.LabelCap, thing.LabelCap.ToCharArray()[0], TextAnchor.MiddleLeft),
                 new(thing.GetStatValue(StatDefOf.Mass).ToStringMass().Colorize(ColoredText.SubtleGrayColor), (int)thing.GetStatValue(StatDefOf.Mass)),
-                new(((float)thing.HitPoints / thing.MaxHitPoints).ToStringPercent().Colorize(ColoredText.SubtleGrayColor), thing.HitPoints / thing.MaxHitPoints),
+                new(((float)thing.HitPoints / thing.MaxHitPoints).ToStringPercent().Colorize(ColoredText.SubtleGrayColor),
+                    thing.HitPoints / thing.MaxHitPoints),
                 new(thing.MarketValue.ToStringMoney().Colorize(ColoredText.SubtleGrayColor), (int)thing.MarketValue),
                 new(),
                 new(editRect =>
                 {
-                    if (Widgets.ButtonText(editRect, "Edit".Translate() + "..."))
-                    {
-                        if (Dialog_EditItem.SelectedThing == thing)
-                        {
-                            Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
-                            Dialog_EditItem.SelectedThing = null;
-                        }
-                        else
-                            Find.WindowStack.Add(new Dialog_EditItem(GUIUtility.GUIToScreenPoint(new Vector2(editRect.x, editRect.y)), pawn, thing));
-                    }
+                    if (Widgets.ButtonText(editRect, "Edit".Translate() + "...")) EditUtility.Edit(thing, pawn, table);
                 }),
                 new(TexButton.DeleteX, () =>
                 {
@@ -103,8 +92,9 @@ public class TabWorker_Gear : TabWorker<Pawn>
         var apparelHeight = apparelTable.Height;
         var equipmentHeight = equipmentTable.Height;
         var possessionsHeight = possessionsTable.Height;
-        var totalHeight = apparelHeight + equipmentHeight + possessionsHeight + 
-                          16f * 2f + 3f * 4f + 3 * Text.LineHeightOf(GameFont.Small) - 30f; // Actual table height + table padding + table title separation + table title height;
+        var totalHeight = apparelHeight + equipmentHeight + possessionsHeight +
+                          16f * 2f + 3f * 4f + 3 * Text.LineHeightOf(GameFont.Small)
+                        - 30f; // Actual table height + table padding + table title separation + table title height;
 
         var viewRect = new Rect(inRect.x, inRect.y, inRect.width - 20f, totalHeight);
 
@@ -154,10 +144,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
         // Close Dialog_EditItem on any interaction with the Dialog_PawnEditor menu.
         if (Find.WindowStack.IsOpen<Dialog_EditItem>())
             if (oldScrollPos != scrollPos || Find.WindowStack.focusedWindow is Dialog_PawnEditor)
-            {
                 Find.WindowStack.TryRemove(typeof(Dialog_EditItem));
-                // Dialog_EditItem.SelectedThing = null;
-            }
+        // Dialog_EditItem.SelectedThing = null;
         oldScrollPos = scrollPos;
     }
 
@@ -172,7 +160,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             MassUtility.Capacity(pawn).ToString("0.##")));
         listing.Label("ComfyTemperatureRange".Translate() + ": " +
                       pawn.GetStatValue(StatDefOf.ComfyTemperatureMin).ToStringTemperature("F0") + " ~ "
-                      + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
+                    + pawn.GetStatValue(StatDefOf.ComfyTemperatureMax).ToStringTemperature("F0"));
         listing.Label("MarketValueTip".Translate() + ": $" + pawn.GetStatValue(StatDefOf.MarketValue));
         listing.NewColumn();
 
@@ -292,7 +280,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
             ThingStuffPair workingPair;
 
             while (Rand.Value >= PawnApparelGenerator.workingSet.Count / 10f
-                   && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
+                && PawnApparelGenerator.usableApparel.TryRandomElementByWeight(pa => pa.Commonality,
                        out workingPair))
             {
                 PawnApparelGenerator.workingSet.Add(workingPair);

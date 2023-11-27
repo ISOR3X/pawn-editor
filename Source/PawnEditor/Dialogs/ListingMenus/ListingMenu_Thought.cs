@@ -14,7 +14,6 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
     private static readonly List<ThoughtDef> moodMemoryDefs;
     private static readonly List<ThoughtDef> opinionMemoryDefs;
     private static IntRange maxMoodOffset = IntRange.one;
-    private static readonly Thing placeholderThing = new Placeholder();
 
     private static readonly HashSet<ThoughtDef> extraNeedsOtherPawn = new()
     {

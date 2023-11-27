@@ -146,7 +146,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
             new("PawnEditor.BodyPart".Translate(), 140f, TextAnchor.LowerLeft),
             new("PawnEditor.HediffType".Translate(), 240f, TextAnchor.LowerLeft),
             new("PawnEditor.AdditionalInfo".Translate(), textAnchor: TextAnchor.LowerLeft),
-            // new(100),
+            new(100),
             new(30)
         };
 
@@ -186,8 +186,6 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 items.Add(new("WholeBody".Translate().Colorize(HealthUtility.RedColor), textAnchor: TextAnchor.MiddleLeft));
             items.Add(new(hediff.LabelCap.Colorize(hediff.LabelColor),
                 Mathf.RoundToInt(HealthCardUtility.GetListPriority(hediff.Part)), TextAnchor.MiddleLeft));
-            // items.Add(new("Edit".Translate() + "...",
-            //     () => { Find.WindowStack.Add(new Dialog_SelectHediff(DefDatabase<HediffDef>.AllDefsListForReading, pawn, hediff)); }));
             items.Add(new(infoRect =>
             {
                 using (new TextBlock(TextAnchor.MiddleLeft))
@@ -197,6 +195,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                         Widgets.Label(infoRect, $"{hediff.Severity:0.##}% (immunity {immunizable.Immunity:0.##}%)".Colorize(ColoredText.SubtleGrayColor));
                 }
             }));
+            items.Add(new("Edit".Translate() + "...", () => { EditUtility.Edit(hediff, pawn, table); }));
             items.Add(new(TexButton.DeleteX, () =>
             {
                 pawn.health.RemoveHediff(hediff);

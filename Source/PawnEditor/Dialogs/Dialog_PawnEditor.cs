@@ -30,6 +30,19 @@ public abstract class Dialog_PawnEditor : Window
         TabWorker<Faction>.Notify_OpenedDialog();
         PawnEditor.ResetPoints();
     }
+
+    public override void PostClose()
+    {
+        base.PostClose();
+        EditUtility.CurrentWindow?.Close();
+    }
+
+    public override void OnCancelKeyPressed()
+    {
+        if (EditUtility.CurrentWindow != null)
+            EditUtility.CurrentWindow.OnCancelKeyPressed();
+        else base.OnCancelKeyPressed();
+    }
 }
 
 public class Dialog_PawnEditor_Pregame : Dialog_PawnEditor
