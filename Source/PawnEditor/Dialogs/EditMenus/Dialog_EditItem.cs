@@ -18,13 +18,34 @@ public abstract class Dialog_EditItem : Window
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
     }
 
+    protected virtual float MinWidth => 400;
+
     public override Vector2 InitialSize => new(790f - 12f, 160f); // -12f because of the insets on the table.
 
     public override void SetInitialSizeAndPosition()
     {
         if (Find.WindowStack.WindowOfType<Dialog_PawnEditor>() is { } window)
-            windowRect = new(window.windowRect.xMax + 12, window.windowRect.yMin, UI.screenWidth - window.windowRect.xMax - 24, window.windowRect.height);
+        {
+            var width = UI.screenWidth - window.windowRect.xMax - 24;
+            if (width >= MinWidth)
+            {
+                windowRect = new(window.windowRect.xMax + 12, window.windowRect.yMin, width, window.windowRect.height);
+                window.windowRect.x = UI.screenWidth / 2f - window.windowRect.width / 2;
+            }
+            else
+            {
+                window.windowRect.x -= MinWidth - width;
+                windowRect = new(window.windowRect.xMax + 12, window.windowRect.yMin, MinWidth, window.windowRect.height);
+            }
+        }
         else base.SetInitialSizeAndPosition();
+    }
+
+    public override void PreClose()
+    {
+        base.PreClose();
+        if (Find.WindowStack.WindowOfType<Dialog_PawnEditor>() is { } window)
+            window.windowRect.x = UI.screenWidth / 2f - window.windowRect.width / 2;
     }
 
     protected abstract void DoContents(Listing_Standard listing);
@@ -62,6 +83,7 @@ public abstract class Dialog_EditItem<T> : Dialog_EditItem
     public virtual void Select(T item)
     {
         Selected = item;
+        SetInitialSizeAndPosition();
     }
 
     public virtual bool IsSelected(T item) => ReferenceEquals(Selected, item);

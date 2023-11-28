@@ -94,7 +94,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             new("Faction".Translate(), textAnchor: TextAnchor.LowerLeft),
             new("RomanceChanceOpinionFactor".Translate(), 100),
             new(20),
-            // new(100), // Edit
+            new(100), // Edit
             new(30), // Jump to pawn
             new(30) // Delete
         };
@@ -131,7 +131,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                             opinionFrom > 0 ? ColorLibrary.Green : Color.white).FadedColor(0.8f)));
             }, entry.otherPawn.relations.OpinionOf(pawn)));
             items.Add(new());
-            // items.Add(new("Edit".Translate() + "...", () => { }));
+            items.Add(new("Edit".Translate() + "...", () => { EditUtility.Edit(entry, pawn, table); }));
             items.Add(new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(entry.otherPawn); }));
             if (entry.relations.Any(relation => !relation.implied))
                 items.Add(new(TexButton.DeleteX, () =>
