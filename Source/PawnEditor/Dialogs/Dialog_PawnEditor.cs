@@ -39,7 +39,7 @@ public abstract class Dialog_PawnEditor : Window
 
     public override void OnCancelKeyPressed()
     {
-        if (EditUtility.CurrentWindow != null)
+        if (EditUtility.CurrentWindow != null && Find.WindowStack.IsOpen(EditUtility.CurrentWindow))
             EditUtility.CurrentWindow.OnCancelKeyPressed();
         else base.OnCancelKeyPressed();
     }
