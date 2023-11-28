@@ -135,7 +135,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         Widgets.EndScrollView();
     }
 
-    private static string GetThoughtTip(Pawn pawn, Thought leadingThought, Thought group)
+    public static string GetThoughtTip(Pawn pawn, Thought leadingThought, Thought group)
     {
         var stringBuilder = new StringBuilder();
         if (pawn.DevelopmentalStage.Baby())
@@ -214,6 +214,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
             new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
             new("ExpiresIn".Translate(), 120),
             new("PawnEditor.Weight".Translate(), 60),
+            new(100),
             new(30)
         };
 
@@ -223,7 +224,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         var result = new List<UITable<Pawn>.Row>(NeedsCardUtility.thoughtGroupsPresent.Count);
         for (var i = 0; i < NeedsCardUtility.thoughtGroupsPresent.Count; i++)
         {
-            var items = new List<UITable<Pawn>.Row.Item>(4);
+            var items = new List<UITable<Pawn>.Row.Item>(5);
             var thoughtGroup = NeedsCardUtility.thoughtGroupsPresent[i];
             pawn.needs.mood.thoughts.GetMoodThoughts(thoughtGroup, NeedsCardUtility.thoughtGroup);
             var leadingThought = PawnNeedsUIUtility.GetLeadingThoughtInGroup(NeedsCardUtility.thoughtGroup);
@@ -279,6 +280,8 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                     > 0f => NeedsCardUtility.MoodColor,
                     _ => NeedsCardUtility.MoodColorNegative
                 }), Mathf.RoundToInt(moodOffset)));
+
+            items.Add(new("Edit".Translate() + "...", () => EditUtility.Edit(NeedsCardUtility.thoughtGroup.ListFullCopy(), pawn, table)));
 
             if (NeedsCardUtility.thoughtGroup.OfType<Thought_Memory>().Any())
                 items.Add(new(TexButton.DeleteX, () =>

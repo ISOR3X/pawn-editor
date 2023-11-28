@@ -42,7 +42,7 @@ public class PawnEditorMod : Mod
         listing.CheckboxLabeled("PawnEdtior.OverrideVanilla".Translate(), ref Settings.OverrideVanilla, "PawnEditor.OverrideVanilla.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.InGameDevButton".Translate(), ref Settings.InGameDevButton, "PawnEditor.InGameDevButton.Desc".Translate());
         listing.Label("PawnEditor.PointLimit".Translate() + ": " + Settings.PointLimit.ToStringMoney());
-        Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 1000000000);
+        Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 10000000);
         listing.CheckboxLabeled("PawnEditor.UseSilver".Translate(), ref Settings.UseSilver, "PawnEditor.UseSilver.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.CountNPCs".Translate(), ref Settings.CountNPCs, "PawnEditor.CountNPCs.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.ShowEditButton".Translate(), ref Settings.ShowOpenButton, "PawnEditor.ShowEditButton.Desc".Translate());
