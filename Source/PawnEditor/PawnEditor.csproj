@@ -112,6 +112,7 @@
     <Compile Include="UI\UITable.cs" />
     <Compile Include="UI\Widgets.cs" />
     <Compile Include="Utils\AddResult.cs" />
+    <Compile Include="Utils\CopyPaste.cs" />
     <Compile Include="Utils\EditUtility.cs" />
     <Compile Include="Utils\Listing_Thing.cs" />
     <Compile Include="Utils\Listing_TreeThing.cs" />

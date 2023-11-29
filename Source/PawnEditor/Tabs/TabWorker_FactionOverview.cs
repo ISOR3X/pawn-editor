@@ -118,10 +118,20 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         yield return new(pawn.gender.GetIcon(), (int)pawn.gender);
         yield return new(pawn.ageTracker.AgeNumberString, pawn.ageTracker.AgeBiologicalYears);
         yield return new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue);
-        yield return new(TexButton.Paste, () => { });
-        yield return new(TexButton.Copy, () => { });
-        yield return new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); });
-        yield return new(TexPawnEditor.Save, () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Humans.ToString()); });
+        yield return new(TexButton.Paste, () =>
+        {
+            PawnEditor.Paste(pawn);
+            string section = PawnEditor.Pregame
+                ? Find.GameInitData.startingAndOptionalPawns.IndexOf(pawn) >= Find.GameInitData.startingPawnCount
+                    ? "StartingPawnsLeftBehind"
+                       .Translate()
+                    : "StartingPawnsSelected".Translate()
+                : PawnLister.LocationLabel(colonistList.GetLocation(pawn));
+            pawnLocationTables[section].ClearCache();
+        }, () => PawnEditor.CanPaste);
+        yield return new(TexButton.Copy, () => PawnEditor.Copy(pawn));
+        yield return new(TexPawnEditor.GoToPawn, () => PawnEditor.Select(pawn));
+        yield return new(TexPawnEditor.Save, () => SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Humans.ToString()));
         yield return new(TexButton.DeleteX, () =>
         {
             Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteHuman",

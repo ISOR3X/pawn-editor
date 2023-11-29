@@ -204,7 +204,7 @@ public class PawnLister : PawnListerBase
         if (pawn.IsWorldPawn()) Find.WorldPawns.RemovePawn(pawn);
     }
 
-    private static string LocationLabel(object location)
+    public static string LocationLabel(object location)
     {
         return location switch
         {

@@ -185,6 +185,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             private readonly Action<Rect> customDrawer;
             private readonly Action buttonClicked;
             private readonly TextAnchor textAnchor;
+            private readonly Func<bool> shouldDraw;
 
             public int SortIndex => sortIndex;
 
@@ -221,10 +222,11 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 this.sortIndex = sortIndex;
             }
 
-            public Item(Texture icon, Action buttonClicked)
+            public Item(Texture icon, Action buttonClicked, Func<bool> shouldDraw = null)
             {
                 this.icon = icon;
                 this.buttonClicked = buttonClicked;
+                this.shouldDraw = shouldDraw;
                 sortIndex = -1;
             }
 
@@ -233,6 +235,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             public void Draw(Rect inRect)
             {
                 inRect.x -= 4;
+                if (shouldDraw != null && !shouldDraw()) return;
                 if (customDrawer != null) customDrawer(inRect);
                 else if (buttonClicked != null)
                 {

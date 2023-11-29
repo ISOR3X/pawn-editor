@@ -95,8 +95,12 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                 //         .ToList()));
                 // }),
                 // new(),
-                new(TexButton.Paste, () => { }),
-                new(TexButton.Copy, () => { }),
+                new(TexButton.Paste, () =>
+                {
+                    PawnEditor.Paste(pawn);
+                    mechTable.ClearCache();
+                }, () => PawnEditor.CanPaste),
+                new(TexButton.Copy, () => PawnEditor.Copy(pawn)),
                 new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); }),
                 new(TexPawnEditor.Save,
                     () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Animals.ToString()); }),
@@ -151,8 +155,12 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                         }))
                        .ToList()));
                 }),
-                new(TexButton.Paste, () => { }),
-                new(TexButton.Copy, () => { }),
+                new(TexButton.Paste, () =>
+                {
+                    PawnEditor.Paste(pawn);
+                    mechTable.ClearCache();
+                }, () => PawnEditor.CanPaste),
+                new(TexButton.Copy, () => PawnEditor.Copy(pawn)),
                 new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); }),
                 new(TexPawnEditor.Save,
                     () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Mechs.ToString()); }),
