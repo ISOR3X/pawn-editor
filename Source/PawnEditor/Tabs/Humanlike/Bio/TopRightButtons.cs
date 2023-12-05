@@ -173,6 +173,12 @@ public partial class TabWorker_Bio_Humanlike
         pawn.gender = gender;
         if (pawn.story.bodyType == BodyTypeDefOf.Female && gender == Gender.Male) pawn.story.bodyType = BodyTypeDefOf.Male;
         if (pawn.story.bodyType == BodyTypeDefOf.Male && gender == Gender.Female) pawn.story.bodyType = BodyTypeDefOf.Female;
+
+        // HAR doesn't like head types not matching genders, so make sure to fix that
+        if (HARCompat.Active && pawn.story.headType.gender != gender
+                             && !pawn.story.TryGetRandomHeadFromSet(HARCompat.FilterHeadTypes(DefDatabase<HeadTypeDef>.AllDefs, pawn)))
+            Log.Warning("Failed to find head type for " + pawn);
+
         RecacheGraphics(pawn);
     }
 

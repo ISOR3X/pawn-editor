@@ -29,6 +29,28 @@ public class PawnEditorMod : Mod
         Harm.Patch(AccessTools.Method(typeof(Game), nameof(Game.InitNewGame)),
             postfix: new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
 
+        LongEventHandler.ExecuteWhenFinished(delegate
+        {
+            foreach (var assembly in content.assemblies.loadedAssemblies)
+            foreach (var type in assembly.GetTypes())
+                if (type.TryGetAttribute<ModCompatAttribute>(out var modCompat) && modCompat.ShouldActivate())
+                {
+                    var method = AccessTools.Method(type, "Activate", Type.EmptyTypes);
+                    method?.Invoke(null, Array.Empty<object>());
+                    method = AccessTools.Method(type, "Activate", new[] { typeof(Harmony) });
+                    method?.Invoke(null, new object[] { Harm });
+                    var field = AccessTools.Field(type, "Active");
+                    field?.SetValue(null, true);
+                    method = AccessTools.Method(type, "GetName");
+                    var name = (string)method?.Invoke(null, Array.Empty<object>());
+                    method = AccessTools.Method(type, "get_Name");
+                    name ??= (string)method?.Invoke(null, Array.Empty<object>());
+                    field = AccessTools.Field(type, "Name");
+                    name ??= (string)field?.GetValue(null);
+                    if (name != null) Log.Message($"[Pawn Editor] {name} compatibility active.");
+                }
+        });
+
         LongEventHandler.ExecuteWhenFinished(ApplySettings);
     }
 
@@ -199,3 +221,13 @@ public class PawnEditorSettings : ModSettings
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class HotSwappableAttribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.Class)]
+public class ModCompatAttribute : Attribute
+{
+    private readonly List<string> mods;
+
+    public ModCompatAttribute(params string[] mods) => this.mods = mods.ToList();
+
+    public bool ShouldActivate() => ModLister.AnyFromListActive(mods);
+}
