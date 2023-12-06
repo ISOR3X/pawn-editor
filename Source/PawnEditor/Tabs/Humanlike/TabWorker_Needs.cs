@@ -281,8 +281,12 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                     _ => NeedsCardUtility.MoodColorNegative
                 }), Mathf.RoundToInt(moodOffset)));
 
-            var list = NeedsCardUtility.thoughtGroup.ListFullCopy();
-            items.Add(new("Edit".Translate() + "...", () => EditUtility.Edit(list, pawn, table)));
+            if (leadingThought is Thought_Memory)
+            {
+                var list = NeedsCardUtility.thoughtGroup.ListFullCopy();
+                items.Add(new(editRect => EditUtility.EditButton(editRect, list, pawn, table)));
+            }
+            else items.Add(new());
 
             if (NeedsCardUtility.thoughtGroup.OfType<Thought_Memory>().Any())
                 items.Add(new(TexButton.DeleteX, () =>

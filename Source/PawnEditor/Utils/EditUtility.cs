@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -20,8 +21,9 @@ public static class EditUtility
     private static Type WindowForType(Type type) =>
         editTypes.FirstOrDefault(editType => typeof(Dialog_EditItem<>).MakeGenericType(type).IsAssignableFrom(editType));
 
-    public static void Edit<T>(T item, Pawn pawn = null, UITable<Pawn> table = null)
+    public static void EditButton<T>(Rect rect, T item, Pawn pawn = null, UITable<Pawn> table = null)
     {
+        if (!Widgets.ButtonText(rect, "Edit".Translate() + "...")) return;
         var type = WindowForType(typeof(T));
         if (CurrentWindow != null && type.IsInstanceOfType(CurrentWindow))
         {
@@ -33,6 +35,7 @@ public static class EditUtility
             }
             else
             {
+                window.TableRect = rect;
                 window.Select(item);
                 if (!Find.WindowStack.IsOpen(window)) Find.WindowStack.Add(window);
             }
@@ -41,6 +44,7 @@ public static class EditUtility
         {
             CurrentWindow?.Close(false);
             CurrentWindow = (Dialog_EditItem)Activator.CreateInstance(type, item, pawn, table);
+            CurrentWindow.TableRect = rect;
             Find.WindowStack.Add(CurrentWindow);
         }
     }

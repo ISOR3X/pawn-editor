@@ -6,8 +6,12 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class Dialog_EditItem : Window
 {
+    protected const float LABEL_WIDTH_PCT = 0.3f;
+    protected const float CELL_HEIGHT = 30f;
     protected readonly Pawn Pawn;
     private readonly UITable<Pawn> table;
+    public Rect TableRect;
+    private bool setPosition;
 
     protected Dialog_EditItem(Pawn pawn = null, UITable<Pawn> table = null)
     {
@@ -16,48 +20,53 @@ public abstract class Dialog_EditItem : Window
         onlyOneOfTypeAllowed = true;
         absorbInputAroundWindow = false;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
+        layer = WindowLayer.Super;
     }
 
     protected virtual float MinWidth => 400;
 
-    public override Vector2 InitialSize => new(790f - 12f, 160f); // -12f because of the insets on the table.
+    public override Vector2 InitialSize => new(790f - 12f, 500);
 
     public override void SetInitialSizeAndPosition()
     {
-        if (Find.WindowStack.WindowOfType<Dialog_PawnEditor>() is { } window)
-        {
-            var width = UI.screenWidth - window.windowRect.xMax - 24;
-            if (width >= MinWidth)
-            {
-                windowRect = new(window.windowRect.xMax + 12, window.windowRect.yMin, width, window.windowRect.height);
-                window.windowRect.x = UI.screenWidth / 2f - window.windowRect.width / 2;
-            }
-            else
-            {
-                window.windowRect.x -= MinWidth - width;
-                windowRect = new(window.windowRect.xMax + 12, window.windowRect.yMin, MinWidth, window.windowRect.height);
-            }
-        }
-        else base.SetInitialSizeAndPosition();
-    }
-
-    public override void PreClose()
-    {
-        base.PreClose();
-        if (Find.WindowStack.WindowOfType<Dialog_PawnEditor>() is { } window)
-            window.windowRect.x = UI.screenWidth / 2f - window.windowRect.width / 2;
+        base.SetInitialSizeAndPosition();
+        var rect = UI.GUIToScreenRect(TableRect);
+        windowRect.width = Mathf.Max(MinWidth, table?.Width ?? InitialSize.x);
+        windowRect.x = rect.x - windowRect.width + 124;
+        windowRect.y = rect.y - InitialSize.y;
+        setPosition = false;
     }
 
     protected abstract void DoContents(Listing_Standard listing);
+    protected virtual int GetColumnCount(Rect inRect) => Mathf.FloorToInt(inRect.width / 372);
 
     public override void DoWindowContents(Rect inRect)
     {
         var listing = new Listing_Standard();
         listing.Begin(inRect);
+        var columnCount = GetColumnCount(inRect);
+        if (columnCount == 1)
+            listing.maxOneColumn = true;
+        else
+        {
+            listing.ColumnWidth /= columnCount;
+            listing.ColumnWidth -= 17;
+        }
+
         using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft, null)) DoContents(listing);
         listing.End();
 
         if (Event.current.type is not EventType.Layout and not EventType.Ignore and not EventType.Repaint) ClearCaches();
+
+        if (Event.current.type == EventType.Layout && !setPosition)
+        {
+            var cellCount = Mathf.Ceil((listing.CurHeight - 4) / CELL_HEIGHT);
+            var cellsPerColumn = Mathf.Ceil(cellCount / columnCount);
+            var newHeight = cellsPerColumn * (CELL_HEIGHT + 1) + Margin * 2;
+            windowRect.y += windowRect.height - newHeight;
+            windowRect.height = newHeight;
+            setPosition = true;
+        }
     }
 
     protected virtual void ClearCaches()
@@ -68,8 +77,6 @@ public abstract class Dialog_EditItem : Window
 
 public abstract class Dialog_EditItem<T> : Dialog_EditItem
 {
-    protected const float LABEL_WIDTH_PCT = 0.3f;
-    protected const float CELL_HEIGHT = 30f;
     protected T Selected;
 
     protected Dialog_EditItem(T item, Pawn pawn = null, UITable<Pawn> table = null) : base(pawn, table) => Selected = item;

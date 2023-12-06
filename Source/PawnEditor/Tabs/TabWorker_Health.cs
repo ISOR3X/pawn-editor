@@ -195,7 +195,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                         Widgets.Label(infoRect, $"{hediff.Severity:0.##}% (immunity {immunizable.Immunity:0.##}%)".Colorize(ColoredText.SubtleGrayColor));
                 }
             }));
-            items.Add(new("Edit".Translate() + "...", () => { EditUtility.Edit(hediff, pawn, table); }));
+            items.Add(new(editRect => EditUtility.EditButton(editRect, hediff, pawn, table)));
             items.Add(new(TexButton.DeleteX, () =>
             {
                 pawn.health.RemoveHediff(hediff);

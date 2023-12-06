@@ -26,10 +26,11 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
         );
 
     protected override float MinWidth => 720;
+    protected override int GetColumnCount(Rect inRect) => 1;
 
     protected override void DoContents(Listing_Standard listing)
     {
-        thoughtTable.OnGUI(listing.GetRect(thoughts.Count * 30f + 30f), Selected);
+        thoughtTable.OnGUI(listing.GetRect(thoughtTable.Height), Selected);
     }
 
     private List<UITable<SocialCardUtility.CachedSocialTabEntry>.Row> GetRows(SocialCardUtility.CachedSocialTabEntry entry)
@@ -48,11 +49,11 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
             if (durationTicks > 5 && thought is Thought_Memory thoughtMemory)
                 items.Add(new(rect =>
                 {
-                    var progress = Mathf.InverseLerp(0, durationTicks, thoughtMemory.age);
+                    var progress = Mathf.InverseLerp(durationTicks, 0, thoughtMemory.age);
                     progress = Widgets.HorizontalSlider_NewTemp(rect, progress,
-                        0, 1, true, durationTicks.ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
-                        (durationTicks - thoughtMemory.age).ToStringTicksToPeriodVerbose());
-                    thoughtMemory.age = (int)Mathf.Lerp(0, durationTicks, progress);
+                        0, 1, true, (durationTicks - thoughtMemory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
+                        durationTicks.ToStringTicksToPeriodVerbose());
+                    thoughtMemory.age = (int)Mathf.Lerp(durationTicks, 0, progress);
                 }));
             else items.Add(new("Never".Translate().Colorize(ColoredText.SubtleGrayColor)));
 

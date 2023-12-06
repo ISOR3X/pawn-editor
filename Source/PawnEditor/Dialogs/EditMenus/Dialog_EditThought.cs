@@ -28,6 +28,8 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
 
     protected override float MinWidth => Selected.Count < 2 ? base.MinWidth : 720;
 
+    protected override int GetColumnCount(Rect inRect) => 1;
+
     protected override void DoContents(Listing_Standard listing)
     {
         if (Selected.Count == 1)
@@ -79,11 +81,11 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
             if (durationTicks > 5 && thought is Thought_Memory thoughtMemory)
                 items.Add(new(rect =>
                 {
-                    var progress = Mathf.InverseLerp(0, durationTicks, thoughtMemory.age);
+                    var progress = Mathf.InverseLerp(durationTicks, 0, thoughtMemory.age);
                     progress = Widgets.HorizontalSlider_NewTemp(rect, progress,
-                        0, 1, true, durationTicks.ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
-                        (durationTicks - thoughtMemory.age).ToStringTicksToPeriodVerbose());
-                    thoughtMemory.age = (int)Mathf.Lerp(0, durationTicks, progress);
+                        0, 1, true, (durationTicks - thoughtMemory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
+                        durationTicks.ToStringTicksToPeriodVerbose());
+                    thoughtMemory.age = (int)Mathf.Lerp(durationTicks, 0, progress);
                 }));
             else items.Add(new("Never".Translate().Colorize(ColoredText.SubtleGrayColor)));
 

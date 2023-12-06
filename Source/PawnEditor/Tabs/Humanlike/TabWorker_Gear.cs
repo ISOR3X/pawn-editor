@@ -63,10 +63,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
                     thing.HitPoints / thing.MaxHitPoints),
                 new(thing.MarketValue.ToStringMoney().Colorize(ColoredText.SubtleGrayColor), (int)thing.MarketValue),
                 new(),
-                new(editRect =>
-                {
-                    if (Widgets.ButtonText(editRect, "Edit".Translate() + "...")) EditUtility.Edit(thing, pawn, table);
-                }),
+                new(editRect => EditUtility.EditButton(editRect, thing, pawn, table)),
                 new(TexButton.DeleteX, () =>
                 {
                     thing.Destroy();
