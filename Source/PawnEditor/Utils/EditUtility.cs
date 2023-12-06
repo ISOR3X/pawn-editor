@@ -30,12 +30,18 @@ public static class EditUtility
             var window = (Dialog_EditItem<T>)CurrentWindow;
             if (window.IsSelected(item))
             {
-                window.Close();
-                CurrentWindow = null;
+                if (Find.WindowStack.IsOpen(window))
+                {
+                    window.Close();
+                    CurrentWindow = null;
+                }
+                else
+                    Find.WindowStack.Add(window);
             }
             else
             {
                 window.TableRect = rect;
+                if (table != null) window.TableRect.x = table.Position.x;
                 window.Select(item);
                 if (!Find.WindowStack.IsOpen(window)) Find.WindowStack.Add(window);
             }
@@ -45,6 +51,7 @@ public static class EditUtility
             CurrentWindow?.Close(false);
             CurrentWindow = (Dialog_EditItem)Activator.CreateInstance(type, item, pawn, table);
             CurrentWindow.TableRect = rect;
+            if (table != null) CurrentWindow.TableRect.x = table.Position.x;
             Find.WindowStack.Add(CurrentWindow);
         }
     }

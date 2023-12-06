@@ -39,7 +39,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
         if (Selected.TryGetComp<CompQuality>() is { } compQuality)
         {
             var buttonLabel = compQuality.Quality.GetLabel().CapitalizeFirst();
-            if (listing.ButtonTextLabeledPct("Quality".Translate(), buttonLabel, LABEL_WIDTH_PCT, TextAnchor.MiddleLeft))
+            if (Widgets.ButtonText(listing.GetRectLabeled("Quality".Translate(), CELL_HEIGHT), buttonLabel))
                 Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories.Select(quality =>
                         new FloatMenuOption(quality.GetLabel().CapitalizeFirst(), () =>
                         {

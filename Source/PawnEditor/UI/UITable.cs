@@ -27,6 +27,8 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         this.getRows = getRows;
     }
 
+    public bool Initialized => cachedRect != default && target != null;
+    public Vector2 Position => cachedRect.position;
     public float Width => cachedRect.width;
     public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2 + rows.Count * 34;
 
@@ -61,7 +63,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         target = default;
     }
 
-    public void OnGUI(Rect inRect, T target)
+    public void CheckRecache(Rect inRect, T target)
     {
         if (this.target?.GetHashCode() != target.GetHashCode())
         {
@@ -74,7 +76,11 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             cachedRect = inRect;
             RecacheWidths();
         }
+    }
 
+    public void OnGUI(Rect inRect, T target)
+    {
+        CheckRecache(inRect, target);
         if (rows.Count == 0)
         {
             var rect = inRect;

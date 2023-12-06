@@ -20,6 +20,7 @@ public abstract class Dialog_EditItem : Window
         onlyOneOfTypeAllowed = true;
         absorbInputAroundWindow = false;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
+        closeOnClickedOutside = true;
         layer = WindowLayer.Super;
     }
 
@@ -32,7 +33,7 @@ public abstract class Dialog_EditItem : Window
         base.SetInitialSizeAndPosition();
         var rect = UI.GUIToScreenRect(TableRect);
         windowRect.width = Mathf.Max(MinWidth, table?.Width ?? InitialSize.x);
-        windowRect.x = rect.x - windowRect.width + 124;
+        windowRect.x = rect.x + 3;
         windowRect.y = rect.y - InitialSize.y;
         setPosition = false;
     }

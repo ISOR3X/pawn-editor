@@ -30,6 +30,7 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
 
     protected override void DoContents(Listing_Standard listing)
     {
+        thoughtTable.CheckRecache(listing.listingRect, Selected); // Need to make sure the rows are up-to-date for the Height to be correct
         thoughtTable.OnGUI(listing.GetRect(thoughtTable.Height), Selected);
     }
 

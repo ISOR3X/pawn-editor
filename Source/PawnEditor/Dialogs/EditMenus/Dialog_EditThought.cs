@@ -46,7 +46,10 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
             }
         }
         else
-            thoughtTable.OnGUI(listing.GetRect(Selected.Count * 30f + 30f), Selected);
+        {
+            thoughtTable.CheckRecache(listing.listingRect, Selected); // Need to make sure the rows are up-to-date for the Height to be correct
+            thoughtTable.OnGUI(listing.GetRect(thoughtTable.Height), Selected);
+        }
     }
 
     private List<UITable<List<Thought>>.Row> GetRows(List<Thought> thoughts)

@@ -61,6 +61,7 @@ public static partial class PawnEditor
         if (Widgets.ButtonText(inRect.TakeTopPart(30f), selectedCategory.LabelCapPlural()))
             Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
                .Cast<PawnCategory>()
+               .Except(new() { PawnCategory.All })
                .Select(category =>
                     new FloatMenuOption(category.LabelCapPlural(), delegate
                     {
