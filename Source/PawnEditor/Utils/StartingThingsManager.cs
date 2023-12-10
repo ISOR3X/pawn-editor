@@ -227,7 +227,6 @@ public static class StartingThingsManager
 
         public void Apply()
         {
-            Log.Message("Applying starting preset!");
             Find.GameInitData.startingAndOptionalPawns.Clear();
             Find.GameInitData.startingAndOptionalPawns.AddRange(humans);
             Find.GameInitData.startingPawnCount = takingCount;

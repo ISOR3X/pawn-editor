@@ -49,7 +49,7 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
                 if (Widgets.ButtonImage(rect2, TexButton.DeleteX, Color.white, GenUI.SubtleMouseoverColor))
                 {
                     var localFile = saveFileInfo.FileInfo;
-                    Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(localFile.Name), delegate
+                    Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(localFile.Name), "ConfirmDelete" + type, delegate
                     {
                         localFile.Delete();
                         ReloadFiles();

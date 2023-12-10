@@ -143,8 +143,8 @@
     <PawnEditor.WorkDisablesDesc>Hide backstories that have disabled work types.</PawnEditor.WorkDisablesDesc>
     <PawnEditor.SkillLose>Hide backstories with negative skill gains</PawnEditor.SkillLose>
     <PawnEditor.SkillLoseDesc>Hide backstories that have disabled work types.</PawnEditor.SkillLoseDesc>
-    <PawnEditor.MinAbilityLevel>Min. level</PawnEditor.MinAbilityLevel>
-    <PawnEditor.MinAbilityLevelDesc>Set the minimum level the psycast should be.</PawnEditor.MinAbilityLevelDesc>
+    <PawnEditor.MinAbilityLevel>Level</PawnEditor.MinAbilityLevel>
+    <PawnEditor.MinAbilityLevelDesc>The level range of psycasts to show.</PawnEditor.MinAbilityLevelDesc>
     <PawnEditor.HasStyle>Has style</PawnEditor.HasStyle>
     <PawnEditor.HasStuff>Has stuff</PawnEditor.HasStuff>
     <PawnEditor.WornOnBodyPart>Worn on body part</PawnEditor.WornOnBodyPart>
@@ -154,6 +154,8 @@
     <PawnEditor.IsImplant>Is implant</PawnEditor.IsImplant>
     <PawnEditor.IsDisease>Is disease</PawnEditor.IsDisease>
     <PawnEditor.OccupiesLayer>Occupies layer</PawnEditor.OccupiesLayer>
+    <PawnEditor.IsHuman>Is human</PawnEditor.IsHuman>
+    <PawnEditor.IsColonist>Is colonist</PawnEditor.IsColonist>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
@@ -163,7 +165,6 @@
     <PawnEditor.IsPermanent>Is permanent</PawnEditor.IsPermanent>
     <PawnEditor.BodyPart>Body part</PawnEditor.BodyPart>
 
-
     <!-- Unsorted -->
     <PawnEditor.ScatteredLoot>scattered loot</PawnEditor.ScatteredLoot>
     <PawnEditor.EquipmentLootDesc>Equipment is spawned in the vicinity of colonists, scattered loot (or structures), are randomly spread around the map.</PawnEditor.EquipmentLootDesc>
@@ -171,8 +172,6 @@
     <PawnEditor.Settlements>Settlements</PawnEditor.Settlements>
     <PawnEditor.DistanceFromColony>Distance from colony</PawnEditor.DistanceFromColony>
     <PawnEditor.DistanceFromColony.Calculate>Calculate distance from colony</PawnEditor.DistanceFromColony.Calculate>
-    <!-- <PawnEditor.Hediff>hediff</PawnEditor.Hediff> -->
-    <PawnEditor.Hediffs>hediffs</PawnEditor.Hediffs>
     <PawnEditor.TraitDisallowedByKind>Trait {0} is not allowed on {1}.</PawnEditor.TraitDisallowedByKind>
     <PawnEditor.TraitConflicts>Trait {0} conflicts with trait {1}.</PawnEditor.TraitConflicts>
     <PawnEditor.TraitWorkDisabled>{0} can't do {1}, which is required by {2}.</PawnEditor.TraitWorkDisabled>
@@ -183,10 +182,21 @@
     <PawnEditor.HediffDuplicate>Are you sure you want to add duplicate hediff {0}?</PawnEditor.HediffDuplicate>
     <PawnEditor.Teleport.Specific>Teleport to exact location</PawnEditor.Teleport.Specific>
     <PawnEditor.AdditionalInfo>Additional info</PawnEditor.AdditionalInfo>
-    <PawnEditor.NotEnoughPoints>Not enough points. Need {0}.</PawnEditor.NotEnoughPoints>
+    <PawnEditor.NotEnoughPoints>Not enough points. Need {0}, have {1}.</PawnEditor.NotEnoughPoints>
     <PawnEditor.ExportImage>Export portrait</PawnEditor.ExportImage>
     <PawnEditor.ImageExported>Exported portrait of {0} to {1}.</PawnEditor.ImageExported>
     <PawnEditor.NegativePoints>Remaining points is negative.</PawnEditor.NegativePoints>
+    <PawnEditor.ClickToOpen>Click to view infocard</PawnEditor.ClickToOpen>
+    <PawnEditor.MustBeOneEachGender>Pawns must be one male and one female.</PawnEditor.MustBeOneEachGender>
+    <PawnEditor.WouldMakeOverCapacity>Adding {0} would {1} over their carrying capacity.</PawnEditor.WouldMakeOverCapacity>
+    <PawnEditor.Edit>Edit</PawnEditor.Edit>
+    <PawnEditor.Edit.Desc>Open the pawn editor to this pawn.</PawnEditor.Edit.Desc>
+    <PawnEditor.RelationExists>{0} already has an existing relation of type {1}. Do you still want to add this relation?</PawnEditor.RelationExists>
+    <PawnEditor.DontShowAgain>Don't show again</PawnEditor.DontShowAgain>
+    <PawnEditor.ThoughtDuplicate>Thought of same type already exists. Do you still want to add this?</PawnEditor.ThoughtDuplicate>
+    <PawnEditor.CannotGetThought>{0} can't get the thought {1}.</PawnEditor.CannotGetThought>
+    <PawnEditor.AddThoughNullified>Add {0} anyway?</PawnEditor.AddThoughNullified>
+    <PawnEditor.MoodOffset>Mood offset</PawnEditor.MoodOffset>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

@@ -38,6 +38,7 @@ public class PawnListerBase
         var hasAny = false;
         foreach (var pawn in occupants)
         {
+            if (pawn == null) continue;
             if ((faction != null && pawn.Faction != faction) || !category.Includes(pawn)) continue;
             hasAny = true;
             AddPawn(location, pawn);
@@ -203,7 +204,7 @@ public class PawnLister : PawnListerBase
         if (pawn.IsWorldPawn()) Find.WorldPawns.RemovePawn(pawn);
     }
 
-    private static string LocationLabel(object location)
+    public static string LocationLabel(object location)
     {
         return location switch
         {

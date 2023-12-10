@@ -29,6 +29,28 @@ public class PawnEditorMod : Mod
         Harm.Patch(AccessTools.Method(typeof(Game), nameof(Game.InitNewGame)),
             postfix: new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
 
+        LongEventHandler.ExecuteWhenFinished(delegate
+        {
+            foreach (var assembly in content.assemblies.loadedAssemblies)
+            foreach (var type in assembly.GetTypes())
+                if (type.TryGetAttribute<ModCompatAttribute>(out var modCompat) && modCompat.ShouldActivate())
+                {
+                    var method = AccessTools.Method(type, "Activate", Type.EmptyTypes);
+                    method?.Invoke(null, Array.Empty<object>());
+                    method = AccessTools.Method(type, "Activate", new[] { typeof(Harmony) });
+                    method?.Invoke(null, new object[] { Harm });
+                    var field = AccessTools.Field(type, "Active");
+                    field?.SetValue(null, true);
+                    method = AccessTools.Method(type, "GetName");
+                    var name = (string)method?.Invoke(null, Array.Empty<object>());
+                    method = AccessTools.Method(type, "get_Name");
+                    name ??= (string)method?.Invoke(null, Array.Empty<object>());
+                    field = AccessTools.Field(type, "Name");
+                    name ??= (string)field?.GetValue(null);
+                    if (name != null) Log.Message($"[Pawn Editor] {name} compatibility active.");
+                }
+        });
+
         LongEventHandler.ExecuteWhenFinished(ApplySettings);
     }
 
@@ -42,9 +64,11 @@ public class PawnEditorMod : Mod
         listing.CheckboxLabeled("PawnEdtior.OverrideVanilla".Translate(), ref Settings.OverrideVanilla, "PawnEditor.OverrideVanilla.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.InGameDevButton".Translate(), ref Settings.InGameDevButton, "PawnEditor.InGameDevButton.Desc".Translate());
         listing.Label("PawnEditor.PointLimit".Translate() + ": " + Settings.PointLimit.ToStringMoney());
-        Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 1000000000);
+        Settings.PointLimit = listing.Slider(Settings.PointLimit, 100, 10000000);
         listing.CheckboxLabeled("PawnEditor.UseSilver".Translate(), ref Settings.UseSilver, "PawnEditor.UseSilver.Desc".Translate());
         listing.CheckboxLabeled("PawnEditor.CountNPCs".Translate(), ref Settings.CountNPCs, "PawnEditor.CountNPCs.Desc".Translate());
+        listing.CheckboxLabeled("PawnEditor.ShowEditButton".Translate(), ref Settings.ShowOpenButton, "PawnEditor.ShowEditButton.Desc".Translate());
+        if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
         listing.End();
     }
 
@@ -52,13 +76,20 @@ public class PawnEditorMod : Mod
     {
         Harm.Unpatch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)), HarmonyPatchType.Prefix,
             Harm.Id);
+        Harm.Unpatch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DrawXenotypeEditorButton)),
+            HarmonyPatchType.Prefix,
+            Harm.Id);
         Harm.Unpatch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)), HarmonyPatchType.Transpiler, Harm.Id);
+        Harm.Unpatch(AccessTools.Method(typeof(Pawn), nameof(Pawn.GetGizmos)), HarmonyPatchType.Postfix, Harm.Id);
         if (Settings.OverrideVanilla)
             Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DoWindowContents)),
                 new(GetType(), nameof(OverrideVanilla)));
         else
             Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.DrawXenotypeEditorButton)),
                 new(GetType(), nameof(AddEditorButton)));
+
+        if (Settings.ShowOpenButton)
+            Harm.Patch(AccessTools.Method(typeof(Pawn), nameof(Pawn.GetGizmos)), postfix: new(GetType(), nameof(AddEditButton)));
 
         if (Settings.InGameDevButton)
             Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DrawButtons)),
@@ -141,6 +172,20 @@ public class PawnEditorMod : Mod
         return codes;
     }
 
+    public static IEnumerable<Gizmo> AddEditButton(IEnumerable<Gizmo> gizmos, Pawn __instance) =>
+        DebugSettings.ShowDevGizmos
+            ? gizmos.Append(new Command_Action
+            {
+                defaultLabel = "PawnEditor.Edit".Translate(),
+                defaultDesc = "PawnEditor.Edit.Desc".Translate(),
+                action = () =>
+                {
+                    Find.WindowStack.Add(new Dialog_PawnEditor_InGame());
+                    PawnEditor.Select(__instance);
+                }
+            })
+            : gizmos;
+
     public static void Notify_ConfigurePawns()
     {
         StartingThingsManager.ProcessScenario();
@@ -152,21 +197,37 @@ public class PawnEditorMod : Mod
 public class PawnEditorSettings : ModSettings
 {
     public bool CountNPCs;
+    public HashSet<string> DontShowAgain = new();
     public bool InGameDevButton = true;
     public bool OverrideVanilla = true;
     public float PointLimit = 100000;
+    public bool ShowOpenButton = true;
     public bool UseSilver;
 
     public override void ExposeData()
     {
         base.ExposeData();
+        Scribe_Collections.Look(ref DontShowAgain, nameof(DontShowAgain));
         Scribe_Values.Look(ref OverrideVanilla, nameof(OverrideVanilla), true);
         Scribe_Values.Look(ref InGameDevButton, nameof(InGameDevButton), true);
+        Scribe_Values.Look(ref ShowOpenButton, nameof(ShowOpenButton), true);
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
         Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
         Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));
+
+        DontShowAgain ??= new();
     }
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public class HotSwappableAttribute : Attribute { }
+
+[AttributeUsage(AttributeTargets.Class)]
+public class ModCompatAttribute : Attribute
+{
+    private readonly List<string> mods;
+
+    public ModCompatAttribute(params string[] mods) => this.mods = mods.ToList();
+
+    public bool ShouldActivate() => ModLister.AnyFromListActive(mods);
+}

@@ -83,15 +83,16 @@ public partial class TabWorker_Bio_Humanlike
                     {
                         if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
                         {
-                            Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), delegate
-                            {
-                                var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
-                                if (File.Exists(path))
+                            Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
+                                delegate
                                 {
-                                    File.Delete(path);
-                                    CharacterCardUtility.cachedCustomXenotypes = null;
-                                }
-                            }, true));
+                                    var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
+                                    if (File.Exists(path))
+                                    {
+                                        File.Delete(path);
+                                        CharacterCardUtility.cachedCustomXenotypes = null;
+                                    }
+                                }, true));
                             return true;
                         }
 
@@ -131,7 +132,14 @@ public partial class TabWorker_Bio_Humanlike
 
         if (Widgets.ButtonImageWithBG(bodyRect.TakeTopPart(UIUtility.RegularButtonHeight), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType],
                 new Vector2(22f, 22f)))
-            Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
+            Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Where(bodyType => pawn.DevelopmentalStage switch
+                {
+                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                    _ => true
+                })
+               .Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
                 {
                     pawn.story.bodyType = bodyType;
                     RecacheGraphics(pawn);
@@ -148,6 +156,16 @@ public partial class TabWorker_Bio_Humanlike
             var num = lifeStage.minAge;
             pawn.ageTracker.AgeBiologicalTicks = (long)(num * 3600000L);
         }
+
+        if ((pawn.story.bodyType == BodyTypeDefOf.Child && stage != DevelopmentalStage.Child)
+         || (pawn.story.bodyType == BodyTypeDefOf.Baby && stage is not DevelopmentalStage.Baby and not DevelopmentalStage.Newborn)
+         || (stage == DevelopmentalStage.Adult && (pawn.story.bodyType == BodyTypeDefOf.Baby || pawn.story.bodyType == BodyTypeDefOf.Child)))
+        {
+            pawn.apparel?.DropAllOrMoveAllToInventory(apparel => !apparel.def.apparel.developmentalStageFilter.Has(stage));
+            var bodyTypeFor = PawnGenerator.GetBodyTypeFor(pawn);
+            pawn.story.bodyType = bodyTypeFor;
+            RecacheGraphics(pawn);
+        }
     }
 
     public static void SetGender(Pawn pawn, Gender gender)
@@ -155,6 +173,12 @@ public partial class TabWorker_Bio_Humanlike
         pawn.gender = gender;
         if (pawn.story.bodyType == BodyTypeDefOf.Female && gender == Gender.Male) pawn.story.bodyType = BodyTypeDefOf.Male;
         if (pawn.story.bodyType == BodyTypeDefOf.Male && gender == Gender.Female) pawn.story.bodyType = BodyTypeDefOf.Female;
+
+        // HAR doesn't like head types not matching genders, so make sure to fix that
+        if (HARCompat.Active && pawn.story.headType.gender != gender
+                             && !pawn.story.TryGetRandomHeadFromSet(HARCompat.FilterHeadTypes(DefDatabase<HeadTypeDef>.AllDefs, pawn)))
+            Log.Warning("Failed to find head type for " + pawn);
+
         RecacheGraphics(pawn);
     }
 

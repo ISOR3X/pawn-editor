@@ -27,14 +27,19 @@ public class TabWorker_PlayerFactionOverview : TabWorker_FactionOverview
     public override void DrawTabContents(Rect inRect, Faction faction)
     {
         DoHeading(inRect.TakeTopPart(35), faction);
-        DoTeamSkills(inRect.TakeBottomPart(120).ContractedBy(5), faction);
-        DoBottomButtons(inRect.TakeBottomPart(40));
+        DoTeamSkills(inRect.TakeBottomPart(120), faction);
+        inRect.yMax -= 8f;
+        DoBottomButtons(inRect.TakeBottomPart(UIUtility.RegularButtonHeight));
         DrawPawnTables(inRect, faction);
     }
 
     private static void DoBottomButtons(Rect inRect)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "PawnEditor.AddColonist".Translate())) PawnEditor.AddPawn(PawnCategory.Humans);
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddColonist".Translate()))
+        {
+            PawnEditor.AddPawn(PawnCategory.Humans);
+        }
+
         DoSearch(ref inRect);
     }
 

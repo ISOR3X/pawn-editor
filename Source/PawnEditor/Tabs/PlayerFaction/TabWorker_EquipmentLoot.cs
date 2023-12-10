@@ -18,7 +18,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     {
         base.Initialize();
         equipmentTable = new(GetHeadings("Equipment".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsNear()));
-        lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsFar()));
+        lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate().CapitalizeFirst()), _ => GetRows(StartingThingsManager.GetStartingThingsFar()));
         itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(ColonyInventory.AllItemsInInventory()));
     }
 

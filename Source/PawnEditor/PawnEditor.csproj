@@ -63,16 +63,30 @@
     <Compile Include="Defs\Defs.cs" />
     <Compile Include="Dialogs\Dialog_AppearanceEditor.cs" />
     <Compile Include="Dialogs\Dialog_ColorPicker.cs" />
-    <Compile Include="Dialogs\Dialog_EditItem.cs" />
+    <Compile Include="Dialogs\Dialog_Confirm.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditHediff.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditItem.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditor.cs" />
     <Compile Include="Dialogs\Dialog_PawnEditorFiles.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditRelation.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditThing.cs" />
+    <Compile Include="Dialogs\EditMenus\Dialog_EditThought.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_Dropdown.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_IntRange.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_ModSource.cs" />
+    <Compile Include="Dialogs\ListingMenus\Filters\Filter_Toggle.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Abilities.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Backstories.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Hediffs.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Items.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_PawnKindDef.cs" />
+    <Compile Include="Dialogs\ListingMenus\ListingMenu_Pawns.cs" />
+    <Compile Include="Dialogs\ListingMenus\ListingMenu_Relations.cs" />
+    <Compile Include="Dialogs\ListingMenus\ListingMenu_Thought.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Trait.cs" />
+    <Compile Include="ModCompat\HARCompat.cs" />
     <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Gear.cs" />
@@ -98,6 +112,9 @@
     <Compile Include="UI\PawnList.cs" />
     <Compile Include="UI\UITable.cs" />
     <Compile Include="UI\Widgets.cs" />
+    <Compile Include="Utils\AddResult.cs" />
+    <Compile Include="Utils\CopyPaste.cs" />
+    <Compile Include="Utils\EditUtility.cs" />
     <Compile Include="Utils\Listing_Thing.cs" />
     <Compile Include="Utils\Listing_TreeThing.cs" />
     <Compile Include="Utils\ColonyInventory.cs" />
@@ -108,11 +125,12 @@
     <Compile Include="SaveLoad\SaveLoadPatches.cs" />
     <Compile Include="SaveLoad\SaveLoadUtility.cs" />
     <Compile Include="Utils\PointsSystem.cs" />
+    <Compile Include="Utils\RelationUtilities.cs" />
     <Compile Include="Utils\StartingThingsManager.cs" />
     <Compile Include="UI\TexPawnEditor.cs" />
-    <Compile Include="Utils\TFilter.cs" />
     <Compile Include="Utils\UIUtility.cs" />
     <Compile Include="Utils\Utilities.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -71,7 +71,7 @@ public static partial class SaveLoadUtility
             currentPawn = null;
             UnApplyPatches();
 
-            if (item is Pawn pawn) PawnEditor.SavePawnTex(pawn, Path.ChangeExtension(path, ".png"));
+            if (item is Pawn pawn) PawnEditor.SavePawnTex(pawn, Path.ChangeExtension(path, ".png"), Rot4.South);
 
             callback?.Invoke(item);
         }, item switch

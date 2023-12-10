@@ -19,6 +19,11 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     protected void DrawPawnTables(Rect inRect, Faction faction)
     {
+        inRect.yMin += 8f;
+        inRect.xMin += 4f;
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "CaravanColonists".Translate().Colorize(ColoredText.TipSectionTitleColor));
+
         var height = cachedPawns.Count * 34 + cachedSectionCount * Text.LineHeightOf(GameFont.Medium);
         var viewRect = new Rect(0, 0, inRect.width - 20, height);
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
@@ -28,7 +33,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     protected static void DoSearch(ref Rect inRect)
     {
-        searchWidget.OnGUI(inRect.TakeRightPart(250).ContractedBy(5), static () => { CreateLocationTables(cachedPawns, cachedSections); });
+        searchWidget.OnGUI(inRect.TakeRightPart(250), static () => { CreateLocationTables(cachedPawns, cachedSections); });
     }
 
     public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)
@@ -92,32 +97,44 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     private static List<UITable<Faction>.Heading> GetHeadings(string heading) =>
         new()
         {
-            new(heading),
-            new(XenotypeDefOf.Baseliner.Icon),
-            new(TexPawnEditor.GendersTex),
-            new("PawnEditor.Age".Translate()),
-            new("MarketValueTip".Translate()),
-            new(100),
-            new(30),
-            new(30),
-            new(30),
-            new(30)
+            new(35), // Icon
+            new("PawnEditor.Name".Translate(), textAnchor: TextAnchor.LowerLeft),
+            new(XenotypeDefOf.Baseliner.Icon, 100),
+            new(TexPawnEditor.GendersTex, 100),
+            new("PawnEditor.Age".Translate(), 100),
+            new("MarketValueTip".Translate(), 100),
+            new(24), // Paste
+            new(24), // Copy
+            new(24), // Go to
+            new(24), // Save
+            new(24) // Delete
         };
 
     private static IEnumerable<UITable<Faction>.Row.Item> GetItems(Pawn pawn)
     {
-        yield return new(pawn.Name.ToStringShort, PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South, cameraZoom: 2f));
+        yield return new(PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South, cameraZoom: 2f));
+        yield return new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft);
         yield return new(pawn.genes.XenotypeIcon, pawn.genes.Xenotype?.index ?? pawn.genes.CustomXenotype.name.ToCharArray()[0]);
         yield return new(pawn.gender.GetIcon(), (int)pawn.gender);
         yield return new(pawn.ageTracker.AgeNumberString, pawn.ageTracker.AgeBiologicalYears);
         yield return new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue);
-        yield return new("Edit".Translate() + "...", () => PawnEditor.Select(pawn));
-        yield return new(TexButton.Save, () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Humans.ToString()); });
-        yield return new(TexButton.Copy, () => { });
-        yield return new(TexButton.Paste, () => { });
+        yield return new(TexButton.Paste, () =>
+        {
+            PawnEditor.Paste(pawn);
+            string section = PawnEditor.Pregame
+                ? Find.GameInitData.startingAndOptionalPawns.IndexOf(pawn) >= Find.GameInitData.startingPawnCount
+                    ? "StartingPawnsLeftBehind"
+                       .Translate()
+                    : "StartingPawnsSelected".Translate()
+                : PawnLister.LocationLabel(colonistList.GetLocation(pawn));
+            pawnLocationTables[section].ClearCache();
+        }, () => PawnEditor.CanPaste);
+        yield return new(TexButton.Copy, () => PawnEditor.Copy(pawn));
+        yield return new(TexPawnEditor.GoToPawn, () => PawnEditor.Select(pawn));
+        yield return new(TexPawnEditor.Save, () => SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Humans.ToString()));
         yield return new(TexButton.DeleteX, () =>
         {
-            Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored),
+            Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteHuman",
                 () =>
                 {
                     pawn.Discard(true);

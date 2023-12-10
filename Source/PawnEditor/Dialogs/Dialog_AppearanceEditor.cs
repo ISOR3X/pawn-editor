@@ -69,6 +69,9 @@ public class Dialog_AppearanceEditor : Window
         closeOnAccept = false;
         closeOnCancel = true;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
+
+        if (HARCompat.Active)
+            HARCompat.Notify_AppearanceEditorOpen(pawn);
     }
 
     public override float Margin => 8;
@@ -148,6 +151,8 @@ public class Dialog_AppearanceEditor : Window
             mainTabs.Add(new("Tattoos".Translate(), () => mainTab = MainTab.Tattoos, mainTab == MainTab.Tattoos));
             if (ModsConfig.BiotechActive)
                 mainTabs.Add(new("Xenotype".Translate(), () => mainTab = MainTab.Xenotype, mainTab == MainTab.Xenotype));
+            if (HARCompat.Active)
+                mainTabs.Add(new("HAR.RaceFeatures".Translate(), () => mainTab = MainTab.HAR, mainTab == MainTab.HAR));
 
             Widgets.DrawMenuSection(inRect);
             TabDrawer.DrawTabs(inRect, mainTabs, 400f);
@@ -164,7 +169,23 @@ public class Dialog_AppearanceEditor : Window
                     switch (shapeTab)
                     {
                         case ShapeTab.Body:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<BodyTypeDef>.AllDefsListForReading, def =>
+                            var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs.Where(bodyType =>
+                                pawn.DevelopmentalStage switch
+                                {
+                                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                                    _ => true
+                                });
+
+                            if (HARCompat.Active)
+                            {
+                                var allowedBodyTypes = HARCompat.AllowedBodyTypes(pawn);
+                                if (!allowedBodyTypes.NullOrEmpty()) bodyTypes = bodyTypes.Intersect(allowedBodyTypes);
+                            }
+
+                            DoIconOptions(inRect.ContractedBy(5), bodyTypes
+                                   .ToList(), def =>
                                 {
                                     pawn.story.bodyType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -173,7 +194,15 @@ public class Dialog_AppearanceEditor : Window
                                 DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
                             break;
                         case ShapeTab.Head:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<HeadTypeDef>.AllDefsListForReading, def =>
+                            var headTypes = DefDatabase<HeadTypeDef>.AllDefs;
+                            if (HARCompat.Active)
+                            {
+                                headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
+                                // HAR doesn't like head types not matching genders
+                                headTypes = headTypes.Where(type => type.gender == Gender.None || type.gender == pawn.gender);
+                            }
+
+                            DoIconOptions(inRect.ContractedBy(5), headTypes.ToList(), def =>
                                 {
                                     pawn.story.headType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -208,7 +237,7 @@ public class Dialog_AppearanceEditor : Window
                     {
                         case ShapeTab.Body:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
+                                DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
                                 {
                                     pawn.style.BodyTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -217,7 +246,7 @@ public class Dialog_AppearanceEditor : Window
                             break;
                         case ShapeTab.Head:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefsListForReading.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
+                                DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
                                 {
                                     pawn.style.FaceTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -232,6 +261,11 @@ public class Dialog_AppearanceEditor : Window
                 case MainTab.Xenotype:
                     inRect.yMin -= TabDrawer.TabHeight;
                     DoXenotypeOptions(inRect.ContractedBy(5));
+                    break;
+                case MainTab.HAR:
+                    HARCompat.DoRaceTabs(inRect.ContractedBy(5));
+                    if (Event.current.type is EventType.MouseDown or EventType.Used)
+                        TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -289,13 +323,11 @@ public class Dialog_AppearanceEditor : Window
             Widgets.DrawHighlight(rect);
 
             if (option is Def def)
-            {
                 if (Mouse.IsOver(rect))
                 {
                     Widgets.DrawLightHighlight(rect);
                     if (def.LabelCap != null) TooltipHandler.TipRegion(rect, def.LabelCap);
                 }
-            }
 
             if (isSelected(option)) Widgets.DrawBox(rect);
             if (Widgets.ButtonInvisible(rect)) onSelected(option);
@@ -361,7 +393,7 @@ public class Dialog_AppearanceEditor : Window
                     }
             }
 
-            GUI.color = enabled ? Color.gray : Color.white;
+            GUI.color = enabled ? Color.white : Color.gray;
             // ToDo: Apply correct gene background texture according to gene category.
             GUI.DrawTexture(rect.ContractedBy(4), GeneUIUtility.GeneBackground_Endogene.Texture);
             GUI.color *= option.IconColor;
@@ -468,7 +500,7 @@ public class Dialog_AppearanceEditor : Window
                         {
                             if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
                             {
-                                Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()),
+                                Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
                                     delegate
                                     {
                                         var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
@@ -559,7 +591,8 @@ public class Dialog_AppearanceEditor : Window
         Shape,
         Hair,
         Tattoos,
-        Xenotype
+        Xenotype,
+        HAR
     }
 
     private enum ShapeTab

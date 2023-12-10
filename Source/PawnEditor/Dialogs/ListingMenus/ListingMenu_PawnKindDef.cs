@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -18,25 +17,20 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
     private static List<PawnKindDef> humans;
     private static List<PawnKindDef> all;
 
-    private static readonly Func<PawnKindDef, string> labelGetter = p => p.LabelCap;
-    private static readonly Func<PawnKindDef, string> descGetter = p => p.race.description;
-    private static readonly Action<PawnKindDef, Rect> iconDrawer = DrawPawnIcon;
-
     static ListingMenu_PawnKindDef()
     {
         MakePawnLists();
     }
 
-    public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Action<PawnKindDef> addAction) : base(output.Invoke(pawnCategory), labelGetter, addAction,
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), descGetter, iconDrawer)
-    {
+    public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Func<PawnKindDef, AddResult> addAction) : base(output.Invoke(pawnCategory), p => p.LabelCap,
+        addAction,
+        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), null, DrawPawnIcon) =>
         type = pawnCategory;
-    }
 
     private static void DrawPawnIcon(PawnKindDef pawnKindDef, Rect rect)
     {
         var texture = Widgets.PlaceholderIconTex;
-        Color color = Color.white;
+        var color = Color.white;
         if (pawnKindDef != null && type != PawnCategory.Humans)
         {
             var bodyGraphicData = pawnKindDef.lifeStages.LastOrDefault()!.bodyGraphicData;
@@ -54,31 +48,22 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
     {
         switch (pawnCategory)
         {
-            case PawnCategory.Animals:
-            {
-                return animals;
-            }
-            case PawnCategory.Mechs:
-            {
-                return mechs;
-            }
-            default:
-            {
-                return humans;
-            }
+            case PawnCategory.Animals: { return animals; }
+            case PawnCategory.Mechs: { return mechs; }
+            default: { return humans; }
         }
     }
 
     private static void MakePawnLists()
     {
-        all = DefDatabase<PawnKindDef>.AllDefs.Distinct().ToList();
+        all = DefDatabase<PawnKindDef>.AllDefs.GroupBy(p => p.LabelCap).Select(p => p.First()).ToList();
         animals = all.Where(pkd => pkd.race.race.Animal && !pkd.race.race.Dryad)
-            .ToList();
+           .ToList();
         mechs = all.Where(pkd => // Right now mechanoids are found based on their maskPath but this seems a bit weird.
                 pkd.race.race.IsMechanoid &&
                 pkd.lifeStages.LastOrDefault()!.bodyGraphicData.maskPath != null)
-            .ToList();
+           .ToList();
         humans = all.Where(pk => pk.RaceProps.Humanlike)
-            .ToList();
+           .ToList();
     }
 }

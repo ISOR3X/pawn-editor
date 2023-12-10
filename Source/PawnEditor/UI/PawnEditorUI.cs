@@ -73,7 +73,28 @@ public static partial class PawnEditor
         Widgets.Label(rect3.TakeLeftPart(num), text4);
         using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(ColoredText.CurrencyColor));
 
-        DoBottomButtons(inRect.TakeBottomPart(Page.BottomButHeight), onClose, Pregame
+        var bottomButtonsRect = inRect.TakeBottomPart(Page.BottomButHeight);
+
+        inRect.yMin -= 10f;
+        DoLeftPanel(inRect.TakeLeftPart(134), Pregame);
+        inRect.xMin += 12f;
+        inRect = inRect.ContractedBy(6);
+        inRect.TakeTopPart(40);
+        Widgets.DrawMenuSection(inRect);
+        if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs, 1);
+        inRect = inRect.ContractedBy(6);
+        if (curTab != null)
+        {
+            if (curTab == widgetTab)
+                DoWidgets(inRect);
+            else if (showFactionInfo)
+                curTab.DrawTabContents(inRect, selectedFaction);
+            else
+                curTab.DrawTabContents(inRect, selectedPawn);
+        }
+
+        // Since the Close button clears caches, it must be after all the stuff that uses the caches
+        DoBottomButtons(bottomButtonsRect, onClose, Pregame
             ? onNext
             : () =>
             {
@@ -97,24 +118,6 @@ public static partial class PawnEditor
                         }))
                        .ToList()));
             });
-
-        inRect.yMin -= 10f;
-        DoLeftPanel(inRect.TakeLeftPart(134), Pregame);
-        inRect.xMin += 12f;
-        inRect = inRect.ContractedBy(6);
-        inRect.TakeTopPart(40);
-        Widgets.DrawMenuSection(inRect);
-        if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs, 1);
-        inRect = inRect.ContractedBy(6);
-        if (curTab != null)
-        {
-            if (curTab == widgetTab)
-                DoWidgets(inRect);
-            else if (showFactionInfo)
-                curTab.DrawTabContents(inRect, selectedFaction);
-            else
-                curTab.DrawTabContents(inRect, selectedPawn);
-        }
     }
 
     public static void DoBottomButtons(Rect inRect, Action onLeftButton, Action onRightButton)
@@ -217,8 +220,24 @@ public static partial class PawnEditor
 
     public static void RecachePawnList()
     {
-        if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction)) selectedFaction = Faction.OfPlayer;
-        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction) selectedFaction = pawnFaction;
+        if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction))
+        {
+            selectedFaction = Faction.OfPlayer;
+            CheckChangeTabGroup();
+        }
+
+        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction)
+        {
+            selectedFaction = pawnFaction;
+            CheckChangeTabGroup();
+        }
+
+        if (Pregame && selectedFaction != Faction.OfPlayer)
+        {
+            selectedFaction = Faction.OfPlayer;
+            CheckChangeTabGroup();
+        }
+
         TabWorker_FactionOverview.RecachePawns(selectedFaction);
         List<Pawn> pawns;
         if (Pregame)
@@ -308,9 +327,9 @@ public static partial class PawnEditor
         PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom / pawn.BodySize,
             renderHeadgear: RenderHeadgear, renderClothes: RenderClothes, stylingStation: true);
 
-    public static void SavePawnTex(Pawn pawn, string path)
+    public static void SavePawnTex(Pawn pawn, string path, Rot4 dir)
     {
-        var tex = GetPawnTex(pawn, new(128, 128), Rot4.South);
+        var tex = GetPawnTex(pawn, new(128, 128), dir);
         RenderTexture.active = tex;
         var tex2D = new Texture2D(tex.width, tex.width);
         tex2D.ReadPixels(new(0, 0, tex.width, tex.height), 0, 0);

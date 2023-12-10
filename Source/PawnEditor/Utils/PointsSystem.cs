@@ -47,16 +47,15 @@ public partial class PawnEditor
         }
     }
 
-    public static bool CanUsePoints(float amount)
+    public static AddResult CanUsePoints(float amount)
     {
         if (!usePointLimit) return true;
         if (remainingPoints >= amount) return true;
-        Messages.Message("PawnEditor.NotEnoughPoints".Translate(amount), MessageTypeDefOf.RejectInput, false);
-        return false;
+        return "PawnEditor.NotEnoughPoints".Translate(amount.ToStringMoney(), remainingPoints.ToStringMoney());
     }
 
-    public static bool CanUsePoints(Thing thing) => CanUsePoints(GetThingValue(thing));
-    public static bool CanUsePoints(Pawn pawn) => CanUsePoints(GetPawnValue(pawn));
+    public static AddResult CanUsePoints(Thing thing) => CanUsePoints(GetThingValue(thing));
+    public static AddResult CanUsePoints(Pawn pawn) => CanUsePoints(GetPawnValue(pawn));
 
     public static void Notify_PointsUsed(float? amount = null)
     {

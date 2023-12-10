@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,7 +34,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
             Widgets.Label(rect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "Mood".Translate().Colorize(ColoredText.TipSectionTitleColor));
         rect.xMin += 4f;
         rect.yMin += 4f;
-        
+
         DrawNeedWidget(rect.TakeTopPart(30f).LeftPart(0.8f), pawn.needs.mood, drawLabel: false);
         rect.yMin += 16f;
         rect.xMin -= 4f;
@@ -52,7 +51,6 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
     private static void DoBottomOptions(Rect inRect, Pawn pawn)
     {
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
-        {
             Find.WindowStack.Add(new FloatMenu(new()
             {
                 new("PawnEditor.RefillNeeds".Translate(), () =>
@@ -62,13 +60,10 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                 new("PawnEditor.CancelBreakdown".Translate(),
                     () => pawn.mindState.mentalStateHandler.CurState?.RecoverFromState())
             }));
-        }
 
         inRect.xMin += 4f;
 
-        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate()))
-        {
-        }
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate())) Find.WindowStack.Add(new ListingMenu_Thoughts(pawn));
 
         inRect.xMin += 4f;
     }
@@ -77,14 +72,30 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
     {
         NeedsCardUtility.UpdateDisplayNeeds(pawn);
         var needs = NeedsCardUtility.displayNeeds;
+        var resourceGenes = pawn.genes.cachedGenes.OfType<Gene_Resource>().ToList();
+
         var viewRect = new Rect(0, 0, inRect.width - 20f,
-            needs.Sum(_ => 70f));
+            needs.Sum(_ => 38f) + resourceGenes.Sum(_ => 38f));
         Widgets.BeginScrollView(inRect, ref needsScrollPos, viewRect);
         foreach (var n in needs)
         {
             DrawNeedWidget(viewRect.TakeTopPart(30f), n);
             viewRect.yMin += 8f;
         }
+
+        viewRect.yMin += 16f;
+
+        if (ModsConfig.IdeologyActive)
+            // ToDo: Gene_Resource SetMax()
+            foreach (var resourceGene in resourceGenes)
+            {
+                UIUtility.GeneResourceBarWidget(viewRect.TakeTopPart(30f), resourceGene);
+                viewRect.yMin += 8f;
+            }
+
+        if (ModsConfig.royaltyActive && pawn.psychicEntropy.NeedsPsyfocus)
+            UIUtility.ResourceBarWidget(viewRect.TakeTopPart(30f), ref pawn.psychicEntropy.currentPsyfocus, "Psyfocus".Translate(),
+                new(0.34f, 0.42f, 0.43f), new Color(0.03f, 0.035f, 0.05f), new() { 0.25f, 0.5f }, 0.05f);
 
         Widgets.EndScrollView();
     }
@@ -97,21 +108,23 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         var barRect = inRect.LeftPart(width);
         n.DrawOnGUI(barRect, customMargin: margin, drawLabel: false);
         var pct = n.CurInstantLevelPercentage;
-        Vector2 vector2 = new Vector2(barRect.x + (barRect.width - margin * 2f) * pct, barRect.y + barRect.height);
-        GUI.DrawTexture(new Rect(vector2.x - 12 / 2f + 16f, vector2.y - margin / 2f, 12, 12), Need.BarInstantMarkerTex);
+        var vector2 = new Vector2(barRect.x + (barRect.width - margin * 2f) * pct, barRect.y + barRect.height);
+        GUI.DrawTexture(new(vector2.x - 12 / 2f + 16f, vector2.y - margin / 2f, 12, 12), Need.BarInstantMarkerTex);
 
-        Rect barRect1 = barRect;
+        var barRect1 = barRect;
         barRect1.yMax -= margin / 2;
         barRect.xMin -= margin;
         barRect1.xMax -= margin;
-        if (Widgets.ButtonImage(barRect1.TakeRightPart(barRect1.height).ContractedBy(4f), TexButton.Plus))
+        var plusRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
+        var minRect = barRect1.TakeRightPart(barRect1.height).ContractedBy(4f);
+        if (Widgets.ButtonImage(plusRect, TexButton.Plus))
             n.CurLevelPercentage += 0.1f;
-        if (Mouse.IsOver(barRect1))
-            TooltipHandler.TipRegion(barRect1, (TipSignal)"+ 10%");
-        if (Widgets.ButtonImage(barRect1.TakeRightPart(barRect1.height).ContractedBy(4f), TexButton.Minus))
+        if (Mouse.IsOver(plusRect))
+            TooltipHandler.TipRegion(plusRect, (TipSignal)"+ 10%");
+        if (Widgets.ButtonImage(minRect, TexButton.Minus))
             n.CurLevelPercentage -= 0.1f;
-        if (Mouse.IsOver(barRect1))
-            TooltipHandler.TipRegion(barRect1, (TipSignal)"- 10%");
+        if (Mouse.IsOver(minRect))
+            TooltipHandler.TipRegion(minRect, (TipSignal)"- 10%");
     }
 
     private void DrawThoughts(Rect inRect, Pawn pawn)
@@ -122,7 +135,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         Widgets.EndScrollView();
     }
 
-    private static string GetThoughtTip(Pawn pawn, Thought leadingThought, Thought group)
+    public static string GetThoughtTip(Pawn pawn, Thought leadingThought, Thought group)
     {
         var stringBuilder = new StringBuilder();
         if (pawn.DevelopmentalStage.Baby())
@@ -201,6 +214,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
             new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
             new("ExpiresIn".Translate(), 120),
             new("PawnEditor.Weight".Translate(), 60),
+            new(100),
             new(30)
         };
 
@@ -210,7 +224,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         var result = new List<UITable<Pawn>.Row>(NeedsCardUtility.thoughtGroupsPresent.Count);
         for (var i = 0; i < NeedsCardUtility.thoughtGroupsPresent.Count; i++)
         {
-            var items = new List<UITable<Pawn>.Row.Item>(4);
+            var items = new List<UITable<Pawn>.Row.Item>(5);
             var thoughtGroup = NeedsCardUtility.thoughtGroupsPresent[i];
             pawn.needs.mood.thoughts.GetMoodThoughts(thoughtGroup, NeedsCardUtility.thoughtGroup);
             var leadingThought = PawnNeedsUIUtility.GetLeadingThoughtInGroup(NeedsCardUtility.thoughtGroup);
@@ -232,14 +246,13 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
                 iconRect = iconRect.ContractedBy(2f);
 
                 if (ModsConfig.IdeologyActive)
-                {
                     if (leadingThought.sourcePrecept != null)
                     {
                         if (!Find.IdeoManager.classicMode)
-                            IdeoUIUtility.DoIdeoIcon(iconRect.ContractedBy(4f), leadingThought.sourcePrecept.ideo, false, (() => IdeoUIUtility.OpenIdeoInfo(leadingThought.sourcePrecept.ideo)));
+                            IdeoUIUtility.DoIdeoIcon(iconRect.ContractedBy(4f), leadingThought.sourcePrecept.ideo, false,
+                                () => IdeoUIUtility.OpenIdeoInfo(leadingThought.sourcePrecept.ideo));
                         return;
                     }
-                }
 
                 GUI.DrawTexture(iconRect, Widgets.PlaceholderIconTex);
             }));
@@ -261,12 +274,19 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
             var moodOffset = pawn.needs.mood.thoughts.MoodOffsetOfGroup(thoughtGroup);
             items.Add(new(moodOffset.ToString("##0")
-                .Colorize(moodOffset switch
+               .Colorize(moodOffset switch
                 {
                     0f => NeedsCardUtility.NoEffectColor,
                     > 0f => NeedsCardUtility.MoodColor,
                     _ => NeedsCardUtility.MoodColorNegative
                 }), Mathf.RoundToInt(moodOffset)));
+
+            if (leadingThought is Thought_Memory)
+            {
+                var list = NeedsCardUtility.thoughtGroup.ListFullCopy();
+                items.Add(new(editRect => EditUtility.EditButton(editRect, list, pawn, table)));
+            }
+            else items.Add(new());
 
             if (NeedsCardUtility.thoughtGroup.OfType<Thought_Memory>().Any())
                 items.Add(new(TexButton.DeleteX, () =>

@@ -44,12 +44,13 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                     var pawns = PawnEditor.Pregame
                         ? Find.GameInitData.startingAndOptionalPawns
                         : pawn.MapHeld?.mapPawns.AllPawns
-                          ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
-                              .AllCaravansAndTravelingTransportPods_Alive;
+                       ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
+                             .AllCaravansAndTravelingTransportPods_Alive;
 
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
-                        .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
-                        .ToList()));
+                       .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+                       .ToList()));
+                    // ToDo: Add success message
                 })
                 // ToDo: Create baby from parent?
             }));
@@ -57,6 +58,14 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
 
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddRelation".Translate()))
         {
+            PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
+            var list = PawnEditor.AllPawns.GetList();
+            list.Remove(pawn);
+            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(), p =>
+            {
+                Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, table));
+                return true;
+            }));
         }
 
         inRect.xMin += 4f;
@@ -86,14 +95,14 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             new("Faction".Translate(), textAnchor: TextAnchor.LowerLeft),
             new("RomanceChanceOpinionFactor".Translate(), 100),
             new(20),
-            // new(100), // Edit
+            new(100), // Edit
             new(30), // Jump to pawn
             new(30) // Delete
         };
 
     protected override List<UITable<Pawn>.Row> GetRows(Pawn pawn)
     {
-        SocialCardUtility.CheckRecache(pawn);
+        SocialCardUtility.Recache(pawn);
         var result = new List<UITable<Pawn>.Row>(SocialCardUtility.cachedEntries.Count);
         for (var i = 0; i < SocialCardUtility.cachedEntries.Count; i++)
         {
@@ -101,15 +110,12 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             var entry = SocialCardUtility.cachedEntries[i];
             items.Add(new(PawnEditor.GetPawnTex(entry.otherPawn, new(25, 25), Rot4.South, cameraZoom: 2f)));
             items.Add(new(SocialCardUtility.GetRelationsString(entry, pawn).Colorize(ColoredText.SubtleGrayColor), textAnchor: TextAnchor.MiddleLeft));
-            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), i, textAnchor: TextAnchor.MiddleLeft));
+            items.Add(new(SocialCardUtility.GetPawnLabel(entry.otherPawn), i, TextAnchor.MiddleLeft));
             if (entry.otherPawn.Faction != Faction.OfPlayer)
-            {
-                items.Add(new($"{entry.otherPawn.Faction.PlayerRelationKind.ToString()}, {entry.otherPawn.Faction.Name}".Colorize(ColoredText.SubtleGrayColor), textAnchor: TextAnchor.MiddleLeft));
-            }
+                items.Add(new($"{entry.otherPawn.Faction.PlayerRelationKind.ToString()}, {entry.otherPawn.Faction.Name}".Colorize(ColoredText.SubtleGrayColor),
+                    textAnchor: TextAnchor.MiddleLeft));
             else
-            {
                 items.Add(new());
-            }
 
             items.Add(new(opinionRect =>
             {
@@ -126,8 +132,12 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                             opinionFrom > 0 ? ColorLibrary.Green : Color.white).FadedColor(0.8f)));
             }, entry.otherPawn.relations.OpinionOf(pawn)));
             items.Add(new());
-            // items.Add(new("Edit".Translate() + "...", () => { }));
-            items.Add(new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(entry.otherPawn); }));
+            items.Add(new(editRect => EditUtility.EditButton(editRect, entry, pawn, table)));
+            items.Add(new(TexPawnEditor.GoToPawn, () =>
+            {
+                PawnEditor.Select(entry.otherPawn);
+                PawnEditor.Select(entry.otherPawn.Faction);
+            }));
             if (entry.relations.Any(relation => !relation.implied))
                 items.Add(new(TexButton.DeleteX, () =>
                 {

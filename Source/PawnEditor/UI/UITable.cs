@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Verse;
 using Verse.Sound;
 
@@ -11,6 +10,7 @@ namespace PawnEditor;
 
 public class UITable<T> : IComparer<UITable<T>.Row>
 {
+    private static readonly float rowHeight = 32f;
     private readonly Func<T, IEnumerable<Row>> getRows;
     private readonly List<Heading> headings;
     private Rect cachedRect;
@@ -20,7 +20,6 @@ public class UITable<T> : IComparer<UITable<T>.Row>
     private int sortDirection;
     private int sortIndex = -1;
     private T target;
-    private static float rowHeight = 32f;
 
     public UITable(List<Heading> headings, Func<T, IEnumerable<Row>> getRows)
     {
@@ -28,6 +27,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         this.getRows = getRows;
     }
 
+    public bool Initialized => cachedRect != default && target != null;
+    public Vector2 Position => cachedRect.position;
+    public float Width => cachedRect.width;
     public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2 + rows.Count * 34;
 
     public int Compare(Row x, Row y) => sortIndex == -1 ? 0 : x.Items[sortIndex].SortIndex.CompareTo(y.Items[sortIndex].SortIndex) * sortDirection;
@@ -61,7 +63,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         target = default;
     }
 
-    public void OnGUI(Rect inRect, T target)
+    public void CheckRecache(Rect inRect, T target)
     {
         if (this.target?.GetHashCode() != target.GetHashCode())
         {
@@ -74,10 +76,16 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             cachedRect = inRect;
             RecacheWidths();
         }
+    }
 
+    public void OnGUI(Rect inRect, T target)
+    {
+        CheckRecache(inRect, target);
         if (rows.Count == 0)
         {
-            Widgets.Label(inRect, "None".Translate().Colorize(ColoredText.SubtleGrayColor));
+            var rect = inRect;
+            rect.xMin += 4f;
+            Widgets.Label(rect, "None".Translate().Colorize(ColoredText.SubtleGrayColor));
             TooltipHandler.TipRegionByKey(inRect, "None");
             return;
         }
@@ -85,13 +93,15 @@ public class UITable<T> : IComparer<UITable<T>.Row>
         var headerRect = inRect.TakeTopPart(Heading.Height);
         for (var i = 0; i < headings.Count; i++)
         {
-            var currentColRect = headings[i].Draw(ref headerRect, i == 0, firstHasIcon, out float labelWidth, cachedWidths[i]);
+            var currentColRect = headings[i].Draw(ref headerRect, i == 0, firstHasIcon, out var labelWidth, cachedWidths[i]);
             Widgets.DrawHighlightIfMouseover(currentColRect);
             if (!headings[i].Sortable) continue;
             if (sortIndex == i)
             {
                 var texture2D = sortDirection == -1 ? PawnColumnWorker.SortingDescendingIcon : PawnColumnWorker.SortingIcon;
-                GUI.DrawTexture(new(currentColRect.xMin + labelWidth + texture2D.width - 6f, currentColRect.yMax - texture2D.height - 1f, texture2D.width, texture2D.height), texture2D);
+                GUI.DrawTexture(
+                    new(currentColRect.xMin + labelWidth + texture2D.width - 6f, currentColRect.yMax - texture2D.height - 1f, texture2D.width,
+                        texture2D.height), texture2D);
             }
 
             if (Widgets.ButtonInvisible(currentColRect))
@@ -182,6 +192,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             private readonly Action<Rect> customDrawer;
             private readonly Action buttonClicked;
             private readonly TextAnchor textAnchor;
+            private readonly Func<bool> shouldDraw;
 
             public int SortIndex => sortIndex;
 
@@ -218,10 +229,11 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 this.sortIndex = sortIndex;
             }
 
-            public Item(Texture icon, Action buttonClicked)
+            public Item(Texture icon, Action buttonClicked, Func<bool> shouldDraw = null)
             {
                 this.icon = icon;
                 this.buttonClicked = buttonClicked;
+                this.shouldDraw = shouldDraw;
                 sortIndex = -1;
             }
 
@@ -230,6 +242,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             public void Draw(Rect inRect)
             {
                 inRect.x -= 4;
+                if (shouldDraw != null && !shouldDraw()) return;
                 if (customDrawer != null) customDrawer(inRect);
                 else if (buttonClicked != null)
                 {
@@ -244,16 +257,16 @@ public class UITable<T> : IComparer<UITable<T>.Row>
 
                         Widgets.DrawAtlas(inRect, atlas);
                         GUI.DrawTexture(inRect.TakeLeftPart(30).ContractedBy(2.5f), icon);
-                        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(inRect, label);
+                        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(inRect, label.Truncate(inRect.width));
                         if (Widgets.ButtonInvisible(inRect)) buttonClicked();
                     }
                     else if (icon != null)
                     {
                         var scale = inRect.height / icon.height;
                         var rect = new Rect(0, 0, icon.width * scale, icon.height * scale)
-                            .CenteredOnXIn(inRect)
-                            .CenteredOnYIn(inRect)
-                            .ContractedBy(2.5f);
+                           .CenteredOnXIn(inRect)
+                           .CenteredOnYIn(inRect)
+                           .ContractedBy(4f);
                         GUI.color = Mouse.IsOver(inRect) ? GenUI.MouseoverColor : Color.white;
                         GUI.DrawTexture(rect, icon);
                         GUI.color = Color.white;
@@ -267,9 +280,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 {
                     var scale = inRect.height / icon.height;
                     GUI.DrawTexture(new Rect(0, 0, icon.width * scale, icon.height * scale)
-                        .CenteredOnXIn(inRect)
-                        .CenteredOnYIn(inRect)
-                        .ContractedBy(2.5f), icon);
+                       .CenteredOnXIn(inRect)
+                       .CenteredOnYIn(inRect)
+                       .ContractedBy(4f), icon);
                 }
                 else if (!label.NullOrEmpty())
                 {
@@ -280,7 +293,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     }
                     else
                         using (new TextBlock(textAnchor))
-                            Widgets.Label(inRect, label);
+                            Widgets.Label(inRect, label.Truncate(inRect.width));
                 }
             }
         }
@@ -329,7 +342,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             if (icon != null)
             {
                 rect = new Rect(0, 0, icon.width * scale, icon.height * scale).CenteredOnXIn(rect).CenteredOnYIn(rect).ContractedBy(2.5f);
-                GUI.DrawTexture(rect, icon);
+                GUI.DrawTexture(rect.ExpandedBy(2f), icon);
             }
             else if (!label.NullOrEmpty())
                 using (new TextBlock(GameFont.Small))
@@ -339,10 +352,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     if (!first) newRect = newRect.CenteredOnXIn(rect);
                     newRect.y += rect.height - newRect.height;
                     labelWidth = Text.CalcSize(label).x;
-                    if (textAnchor == TextAnchor.LowerCenter)
-                    {
-                        labelWidth += (headerRect.width - labelWidth) / 2;
-                    }
+                    if (textAnchor == TextAnchor.LowerCenter) labelWidth += (headerRect.width - labelWidth) / 2;
 
                     using (new TextBlock(first ? TextAnchor.LowerLeft : textAnchor))
                         Widgets.Label(rect, label);
@@ -355,7 +365,19 @@ public class UITable<T> : IComparer<UITable<T>.Row>
 
 public abstract class TabWorker_Table<T> : TabWorker<T>
 {
+    private static readonly Dictionary<Type, UITable<T>> allTables = new();
     protected UITable<T> table;
+
+    public static void ClearCacheFor<T2>()
+    {
+        ClearCacheFor(typeof(T2));
+    }
+
+    public static void ClearCacheFor(Type type)
+    {
+        allTables[type].ClearCache();
+    }
+
     protected abstract List<UITable<T>.Heading> GetHeadings();
     protected abstract List<UITable<T>.Row> GetRows(T target);
 
@@ -363,6 +385,7 @@ public abstract class TabWorker_Table<T> : TabWorker<T>
     {
         base.Initialize();
         table ??= new(GetHeadings(), GetRows);
+        allTables.SetOrAdd(GetType(), table);
     }
 
     protected override void Notify_Open()

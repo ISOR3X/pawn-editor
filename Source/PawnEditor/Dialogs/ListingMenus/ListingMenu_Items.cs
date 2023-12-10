@@ -31,8 +31,6 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
     private static readonly Func<ThingDef, string> labelGetter = t => t.LabelCap;
     private static readonly Func<ThingDef, string> descGetter = t => t.DescriptionDetailed;
     private static readonly Action<ThingDef, Rect> iconDrawer = DrawThingIcon;
-    private static readonly Action<ThingDef> action = TryAdd;
-    private static readonly Action<ThingDef, Pawn> pawnAction = TryAdd;
 
     public static readonly HashSet<ThingStyle> ThingStyles = new();
     private static IEnumerable<BodyPartGroupDef> occupiableGroupsDefs;
@@ -61,14 +59,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         MakeItemLists();
     }
 
-    public ListingMenu_Items(ItemType itemType, TreeNode_ThingCategory treeNodeThingCategory = null) : base(action, GetMenuTitle(itemType))
-    {
-        TreeNodeThingCategory = treeNodeThingCategory ?? ThingCategoryNodeDatabase.RootNode;
-        type = itemType;
-        Listing = new Listing_TreeThing(output.Invoke(itemType, null), labelGetter, iconDrawer, descGetter);
-    }
-
-    public ListingMenu_Items(ItemType itemType, Pawn pawn, TreeNode_ThingCategory treeNodeThingCategory = null) : base(t => pawnAction(t, pawn),
+    public ListingMenu_Items(ItemType itemType, Pawn pawn, TreeNode_ThingCategory treeNodeThingCategory = null) : base(t => TryAdd(t, pawn),
         GetMenuTitle(itemType), pawn)
     {
         TreeNodeThingCategory = treeNodeThingCategory ?? ThingCategoryNodeDatabase.RootNode;
@@ -111,65 +102,74 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         return "ChooseStuffForRelic".Translate() + " " + typeLabel.Translate().ToLower();
     }
 
-    private static void TryAdd(ThingDef thingDef, Pawn pawn)
+    private static void CheckCapacity(Pawn pawn, Thing newItem)
+    {
+        if (MassUtility.FreeSpace(pawn) < newItem.GetStatValue(StatDefOf.Mass))
+            Messages.Message("PawnEditor.WouldMakeOverCapacity".Translate(newItem.LabelCap, pawn.NameShortColored), MessageTypeDefOf.CautionInput, false);
+    }
+
+    private static AddResult TryAdd(ThingDef thingDef, Pawn pawn)
     {
         switch (type)
         {
             case ItemType.Apparel:
-                if (thingDef.IsApparel)
+            {
+                if (thingDef.IsApparel && PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair))
                 {
-                    void Wear()
+                    var newApparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+
+                    AddResult result = new ConditionalInfo(PawnEditor.CanUsePoints(newApparel), new SuccessInfo(() =>
                     {
-                        PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair);
-                        var newApparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
-                        if (PawnEditor.CanUsePoints(newApparel))
-                        {
-                            pawn.apparel.Wear(newApparel, false);
-                            PawnEditor.Notify_PointsUsed();
-                        }
-                        else newApparel.Discard(true);
-                    }
+                        CheckCapacity(pawn, newApparel);
+                        pawn.apparel.Wear(newApparel, false);
+                        PawnEditor.Notify_PointsUsed();
+                        TabWorker_Gear.ClearCaches();
+                    }));
+
 
                     if (pawn.apparel.WornApparel.FirstOrDefault(ap => !ApparelUtility.CanWearTogether(thingDef, ap.def, pawn.RaceProps.body)) is
                         { } conflictApparel)
-                        Find.WindowStack.Add(
-                            Dialog_MessageBox.CreateConfirmation("PawnEditor.WearingWouldRemove".Translate(thingDef.LabelCap, conflictApparel.LabelCap), Wear));
-                    else Wear();
+                        result = new ConfirmInfo("PawnEditor.WearingWouldRemove".Translate(thingDef.LabelCap, conflictApparel.LabelCap), "ApparelConflict",
+                            result);
+
+                    return result;
                 }
 
                 break;
+            }
             case ItemType.Equipment:
-                if (thingDef.equipmentType != EquipmentType.None)
+            {
+                if (thingDef.equipmentType != EquipmentType.None && PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef)
+                       .TryRandomElement(out var thingStuffPair))
                 {
-                    PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair);
                     var newEquipment = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
-                    if (PawnEditor.CanUsePoints(newEquipment))
+                    return new ConditionalInfo(PawnEditor.CanUsePoints(newEquipment), new SuccessInfo(() =>
                     {
                         pawn.equipment.MakeRoomFor(newEquipment);
                         pawn.equipment.AddEquipment(newEquipment);
                         PawnEditor.Notify_PointsUsed();
-                    }
-                    else newEquipment.Discard(true);
+                        TabWorker_Gear.ClearCaches();
+                    }));
                 }
 
                 break;
+            }
+            case ItemType.All:
             case ItemType.Possessions:
                 var newPossession = ThingMaker.MakeThing(thingDef, thingDef.defaultStuff);
-                if (PawnEditor.CanUsePoints(newPossession))
+                return new ConditionalInfo(PawnEditor.CanUsePoints(newPossession), new SuccessInfo(() =>
                 {
                     pawn.inventory.innerContainer.TryAdd(newPossession, 1);
                     PawnEditor.Notify_PointsUsed();
-                }
-                else newPossession.Discard(true);
-
-                break;
+                    TabWorker_Gear.ClearCaches();
+                }));
             default:
                 Log.WarningOnce("No ItemType!", 15703);
                 break;
         }
-    }
 
-    private static void TryAdd(ThingDef thingDef) { }
+        return false;
+    }
 
     private static void MakeItemLists()
     {
@@ -198,24 +198,25 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         }
     }
 
-    private List<TFilter<ThingDef>> GetFilters()
+    private List<Filter<ThingDef>> GetFilters()
     {
-        var list = new List<TFilter<ThingDef>>();
+        var list = new List<Filter<ThingDef>>();
 
-        list.Add(new("PawnEditor.HasStyle".Translate(), false, def => ThingStyles.Select(ts => ts.ThingDef).Contains(def)));
-        list.Add(new("PawnEditor.HasStuff".Translate(), false, def => def.MadeFromStuff));
+        list.Add(new Filter_ModSource<ThingDef>());
+        list.Add(new Filter_Toggle<ThingDef>("PawnEditor.HasStyle".Translate(), def => ThingStyles.Select(ts => ts.ThingDef).Contains(def)));
+        list.Add(new Filter_Toggle<ThingDef>("PawnEditor.HasStuff".Translate(), def => def.MadeFromStuff));
 
         if (type == ItemType.Apparel && Pawn != null)
         {
-            var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, FloatMenuOption, Func<ThingDef, bool>>(
-                def => new(def.LabelCap, () => { }),
+            var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, string, Func<ThingDef, bool>>(
+                def => def.LabelCap,
                 def => td => td.apparel.bodyPartGroups.Contains(def));
-            list.Add(new("PawnEditor.WornOnBodyPart".Translate(), false, bodyPartDict));
+            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.WornOnBodyPart".Translate(), bodyPartDict));
 
-            var apparelLayerDict = DefDatabase<ApparelLayerDef>.AllDefs.ToDictionary<ApparelLayerDef, FloatMenuOption, Func<ThingDef, bool>>(
-                def => new(def.LabelCap, () => { }),
+            var apparelLayerDict = DefDatabase<ApparelLayerDef>.AllDefs.ToDictionary<ApparelLayerDef, string, Func<ThingDef, bool>>(
+                def => def.LabelCap,
                 def => td => td.apparel.layers.Contains(def));
-            list.Add(new("PawnEditor.OccupiesLayer".Translate(), false, apparelLayerDict));
+            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.OccupiesLayer".Translate(), apparelLayerDict));
         }
 
         return list;

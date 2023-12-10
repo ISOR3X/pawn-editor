@@ -10,70 +10,53 @@ namespace PawnEditor;
 public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
 {
     private static readonly List<BackstoryDef> items;
-    private static readonly Func<BackstoryDef, string> labelGetter = b => b.titleShort.CapitalizeFirst();
-    private static readonly Func<BackstoryDef, Pawn, string> descGetter = (b, p) => b.FullDescriptionFor(p).Resolve();
-    private static readonly Action<BackstoryDef, Pawn> action = TryAdd;
-    private static readonly List<TFilter<BackstoryDef>> filters;
 
-    static ListingMenu_Backstories()
-    {
-        items = DefDatabase<BackstoryDef>.AllDefsListForReading;
-        filters = GetFilters();
-    }
+    static ListingMenu_Backstories() => items = DefDatabase<BackstoryDef>.AllDefsListForReading;
 
-    public ListingMenu_Backstories(Pawn pawn) : base(items, labelGetter, b => action(b, pawn),
+    public ListingMenu_Backstories(Pawn pawn) : base(items, b => b.titleShort.CapitalizeFirst(), b => TryAdd(b, pawn),
         "ChooseStuffForRelic".Translate() + " " + "Backstory".Translate().ToLower(),
-        b => descGetter(b, pawn), null, filters, pawn)
-    {
-    }
+        b => b.FullDescriptionFor(pawn).Resolve(), null, GetFilters(), pawn) { }
 
-    private static void TryAdd(BackstoryDef backstoryDef, Pawn pawn)
+    private static AddResult TryAdd(BackstoryDef backstoryDef, Pawn pawn)
     {
         if (backstoryDef.slot == BackstorySlot.Childhood)
             pawn.story.Childhood = backstoryDef;
         else if (!pawn.ageTracker.Adult)
-            Messages.Message("PawnEditor.NoAdultOnChild".Translate(backstoryDef.LabelCap), MessageTypeDefOf.RejectInput, false);
+            return "PawnEditor.NoAdultOnChild".Translate(backstoryDef.LabelCap);
         else
             pawn.story.Adulthood = backstoryDef;
+
+        return true;
     }
 
-    private static List<TFilter<BackstoryDef>> GetFilters()
+    private static List<Filter<BackstoryDef>> GetFilters()
     {
-        var list = new List<TFilter<BackstoryDef>>();
+        var list = new List<Filter<BackstoryDef>>();
 
-        list.Add(new("PawnEditor.ShuffableOnly".Translate(), true, item => item.shuffleable, "PawnEditor.ShuffableOnlyDesc".Translate()));
+        list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.ShuffableOnly".Translate(), item => item.shuffleable, true,
+            "PawnEditor.ShuffableOnlyDesc".Translate()));
 
-        var backstorySlotDict = new Dictionary<FloatMenuOption, Func<BackstoryDef, bool>>();
-        Enum.GetValues(typeof(BackstorySlot))
-            .Cast<BackstorySlot>()
-            .ToList()
-            .ForEach(bs =>
-            {
-                var label = bs.ToString();
-                var option = new FloatMenuOption(label, () => { });
-                backstorySlotDict.Add(option, bd => bd.slot == bs);
-            });
-        list.Add(new("PawnEditor.BackstorySlot".Translate(), false, backstorySlotDict, "PawnEditor.BackstorySlotDesc".Translate()));
+        var backstorySlotDict = Enum.GetValues(typeof(BackstorySlot))
+           .Cast<BackstorySlot>()
+           .ToDictionary<BackstorySlot, string, Func<BackstoryDef, bool>>(bs => bs.ToString(), bs => bd => bd.slot == bs);
+        list.Add(
+            new Filter_Dropdown<BackstoryDef>("PawnEditor.BackstorySlot".Translate(), backstorySlotDict, false, "PawnEditor.BackstorySlotDesc".Translate()));
 
 
         for (var i = 0; i < 5; i++)
         {
-            var skillGainDict = new Dictionary<FloatMenuOption, Func<BackstoryDef, bool>>();
-            DefDatabase<SkillDef>.AllDefs.Where(sd => items.Any(bd => bd.skillGains.ContainsKey(sd)))
-                .ToList()
-                .ForEach(sd =>
-                {
-                    var label = sd.skillLabel.CapitalizeFirst();
-                    var option = new FloatMenuOption(label, () => { });
-                    skillGainDict.Add(option, bd => bd.skillGains.ContainsKey(sd) && bd.skillGains[sd] > 0);
-                });
-            list.Add(new("PawnEditor.SkillGain".Translate(), false, skillGainDict, "PawnEditor.SkillGainDesc".Translate()));
+            var skillGainDict = DefDatabase<SkillDef>.AllDefs.Where(sd => items.Any(bd => bd.skillGains.ContainsKey(sd)))
+               .ToDictionary<SkillDef, string, Func<BackstoryDef, bool>>(sd => sd.skillLabel.CapitalizeFirst(),
+                    sd => bd => bd.skillGains.ContainsKey(sd) && bd.skillGains[sd] > 0);
+            list.Add(new Filter_Dropdown<BackstoryDef>("PawnEditor.SkillGain".Translate(), skillGainDict, false, "PawnEditor.SkillGainDesc".Translate()));
         }
 
 
-        list.Add(new("PawnEditor.WorkDisables".Translate(), false, item => item.workDisables == WorkTags.None, "PawnEditor.WorkDisablesDesc".Translate()));
+        list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.WorkDisables".Translate(), item => item.workDisables == WorkTags.None, false,
+            "PawnEditor.WorkDisablesDesc".Translate()));
 
-        list.Add(new("PawnEditor.SkillLose".Translate(), false, item => item.skillGains.Values.All(i => i > 0), "PawnEditor.SkillLoseDesc".Translate()));
+        list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.SkillLose".Translate(), item => item.skillGains.Values.All(i => i > 0), false,
+            "PawnEditor.SkillLoseDesc".Translate()));
 
         return list;
     }

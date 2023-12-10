@@ -16,9 +16,12 @@ public static class TexPawnEditor
     public static readonly Texture2D ArrowRightHalfDouble = ContentFinder<Texture2D>.Get("UI/Buttons/ArrowRightDouble");
     public static readonly Texture2D PassionEmptyTex = ContentFinder<Texture2D>.Get("UI/Buttons/Icons/PassionEmpty");
     public static readonly Texture2D GoToPawn = ContentFinder<Texture2D>.Get("UI/Buttons/GoToPawn");
+    public static readonly Texture2D Randomize = ContentFinder<Texture2D>.Get("UI/Buttons/Randomize");
+    public static readonly Texture2D Save = ContentFinder<Texture2D>.Get("UI/Buttons/Save");
     public static readonly Texture2D GendersTex = ContentFinder<Texture2D>.Get("UI/Icons/Gender/Genders");
     public static readonly Texture2D InvertFilter = ContentFinder<Texture2D>.Get("UI/Buttons/InvertFilter_a");
     public static readonly Texture2D InvertFilterActive = ContentFinder<Texture2D>.Get("UI/Buttons/InvertFilter_b");
+    public static readonly Texture2D LogarithmicSliderRailAtlas = ContentFinder<Texture2D>.Get("UI/Buttons/LogarithmicSliderRail");
     public static readonly Dictionary<BodyTypeDef, Texture2D> BodyTypeIcons;
     public static readonly Texture2D SkillBarBGTex = SolidColorMaterials.NewSolidColorTexture(0.137255f, 0.145098f, 0.156863f, 1);
 
