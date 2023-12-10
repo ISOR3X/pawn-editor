@@ -50,6 +50,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
                        .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
                        .ToList()));
+                    // ToDo: Add success message
                 })
                 // ToDo: Create baby from parent?
             }));
@@ -62,7 +63,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             list.Remove(pawn);
             Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(), p =>
             {
-                Find.WindowStack.Add(new ListingMenu_Relations(pawn, p));
+                Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, table));
                 return true;
             }));
         }
@@ -132,7 +133,11 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             }, entry.otherPawn.relations.OpinionOf(pawn)));
             items.Add(new());
             items.Add(new(editRect => EditUtility.EditButton(editRect, entry, pawn, table)));
-            items.Add(new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(entry.otherPawn); }));
+            items.Add(new(TexPawnEditor.GoToPawn, () =>
+            {
+                PawnEditor.Select(entry.otherPawn);
+                PawnEditor.Select(entry.otherPawn.Faction);
+            }));
             if (entry.relations.Any(relation => !relation.implied))
                 items.Add(new(TexButton.DeleteX, () =>
                 {

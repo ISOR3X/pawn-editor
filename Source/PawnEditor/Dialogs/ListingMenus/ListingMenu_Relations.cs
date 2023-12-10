@@ -12,7 +12,7 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
 {
     private readonly Pawn _otherPawn;
 
-    public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, List<Filter<PawnRelationDef>> filters = null)
+    public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, UITable<Pawn> table, List<Filter<PawnRelationDef>> filters = null)
         : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), r => r.LabelCap, def =>
             {
                 Func<List<Pawn>, AddResult> createInt = _ => new SuccessInfo(() => def.AddDirectRelation(pawn, otherPawn));
@@ -35,10 +35,10 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                     list.Remove(otherPawn);
                     if (predicate != null) list.RemoveAll(p => !predicate(p));
                     Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), Create, required, "Back".Translate(),
-                        () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, filters)), highlightGender));
+                        () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, table, filters)), highlightGender));
                     return true;
                 }
-
+                table.ClearCache();
                 return Create(new());
             }, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Relation".Translate(),
             r => r.description, null, filters, pawn, null, "Back".Translate(), () =>
@@ -49,9 +49,10 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                 Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(),
                     p =>
                     {
-                        Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, filters));
+                        Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, table, filters));
                         return true;
                     }));
+                
             }) =>
         _otherPawn = otherPawn;
 

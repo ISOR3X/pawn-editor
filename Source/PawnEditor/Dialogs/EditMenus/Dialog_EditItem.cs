@@ -21,7 +21,6 @@ public abstract class Dialog_EditItem : Window
         absorbInputAroundWindow = false;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
         closeOnClickedOutside = true;
-        layer = WindowLayer.Super;
     }
 
     protected virtual float MinWidth => 400;
