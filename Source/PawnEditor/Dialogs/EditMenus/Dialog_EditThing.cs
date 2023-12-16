@@ -59,7 +59,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
             widgetRect.xMax -= 4f;
             colorRect.height = 24f;
             colorRect.y += 3f;
-            var curColor = colorComp.Color != Color.white ? colorComp.Color : apparel2.Stuff.stuffProps.color;
+            var curColor = apparel2.DrawColor;
 
             if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
                 Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),

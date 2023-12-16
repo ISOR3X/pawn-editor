@@ -67,9 +67,9 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
             {
                 new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), 0), GetSetDelegate(pawn, false, 0)),
                 new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), "PawnEditor.Max".Translate()), GetSetDelegate(pawn, false, 20)),
-                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.None.GetLabel()), GetSetDelegate(pawn, false, 0)),
-                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Minor.GetLabel()), GetSetDelegate(pawn, false, 1)),
-                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Major.GetLabel()), GetSetDelegate(pawn, false, 2))
+                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.None.GetLabel()), GetSetDelegate(pawn, true, 0)),
+                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Minor.GetLabel()), GetSetDelegate(pawn, true, 1)),
+                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Major.GetLabel()), GetSetDelegate(pawn, true, 2))
             }));
 
         inRect.xMin += 4;

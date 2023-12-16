@@ -94,7 +94,6 @@ public static partial class PawnEditor
                     if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
                         TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
                 };
-                onDelete = pawn => pawn.Discard(true);
             }
             else
             {
@@ -104,14 +103,24 @@ public static partial class PawnEditor
                     sections[0] = "StartingPawnsSelected".Translate();
                 sectionCount = 1;
                 onReorder = (_, _, _) => { };
-                onDelete = pawn => pawn.Discard(true);
             }
+
+            onDelete = pawn =>
+            {
+                pawn.Discard(true);
+                TabWorker_FactionOverview.RecachePawns(selectedFaction);
+                if (selectedPawn == pawn) selectedPawn = pawns.Get(pawns.IndexOf(pawn) + 1);
+            };
         }
         else
         {
             (pawns, sections, sectionCount) = PawnList.GetLists();
             onReorder = PawnList.OnReorder;
-            onDelete = PawnList.OnDelete;
+            onDelete = pawn =>
+            {
+                if (selectedPawn == pawn) selectedPawn = pawns.Get(pawns.IndexOf(pawn) + 1);
+                PawnList.OnDelete(pawn);
+            };
         }
 
         inRect.yMin += 12f;
@@ -127,6 +136,7 @@ public static partial class PawnEditor
 
         var list = new List<FloatMenuOption>
         {
+            new("PawnEditor.Add.PawnKind".Translate(), () => Find.WindowStack.Add(new ListingMenu_PawnKindDef(category, AddPawnKind))),
             new("PawnEditor.Add.Saved".Translate(category.Label()), delegate
             {
                 var pawn = new Pawn();
@@ -135,9 +145,6 @@ public static partial class PawnEditor
         };
 
         if (category == PawnCategory.Humans)
-        {
-            list.Insert(0,
-                new("PawnEditor.Add.PawnKind".Translate(), () => Find.WindowStack.Add(new ListingMenu_PawnKindDef(PawnCategory.Humans, AddPawnKind))));
             list.Add(new("PawnEditor.Add.Backer".Translate(), delegate
             {
                 Find.WindowStack.Add(new ListingMenu<PawnBio>(SolidBioDatabase.allBios, bio => bio.name.ToStringFull, bio =>
@@ -157,11 +164,7 @@ public static partial class PawnEditor
                     return AddPawn(pawn, category);
                 }, "Add backer pawn"));
             }));
-        }
-        else if (selectedCategory is PawnCategory.Animals or PawnCategory.Mechs)
-            list.Insert(0,
-                new("PawnEditor.Add.PawnKind".Translate(),
-                    () => Find.WindowStack.Add(new ListingMenu_PawnKindDef(selectedCategory, AddPawnKind))));
+
         // list.Add(new("PawnEditor.Add.OtherSave".Translate(), delegate { }));
 
         Find.WindowStack.Add(new FloatMenu(list));

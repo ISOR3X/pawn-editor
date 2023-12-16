@@ -15,6 +15,14 @@ public static class Utilities
         list[index] = item;
     }
 
+    public static T Get<T>(this List<T> list, int index)
+    {
+        while (index >= list.Count) index -= list.Count;
+        while (index < 0) index += list.Count;
+
+        return list[index];
+    }
+
     public static void Deconstruct<T>(this T[] items, out T t0)
     {
         t0 = items.Length > 0 ? items[0] : default;
@@ -41,8 +49,6 @@ public static class Utilities
 
     public static bool NotNullAndAny<T>(this IEnumerable<T> source, Func<T, bool> predicate) => source != null && source.Any(predicate);
 
-    public static float StepValue(float oldValuePct, float stepPct, float min = 0, float max = 1)
-    {
-        return Mathf.Clamp((float)Math.Round(oldValuePct + stepPct, 2), min, max);
-    }
+    public static float StepValue(float oldValuePct, float stepPct, float min = 0, float max = 1) =>
+        Mathf.Clamp((float)Math.Round(oldValuePct + stepPct, 2), min, max);
 }

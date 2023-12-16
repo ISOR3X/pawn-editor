@@ -64,6 +64,9 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
          && pawn.health.hediffSet.GetFirstHediffMatchingPart<Hediff_AddedPart>(part) is { } hediff)
             result = new ConfirmInfo("PawnEditor.HediffConflict".Translate(hediffDef.LabelCap, hediff.LabelCap), "HediffConflict", result);
 
+        if (typeof(Hediff_AddedPart).IsAssignableFrom(hediffDef.hediffClass) && part == null)
+            result = new ConfirmInfo("PawnEditor.MissingPart".Translate(hediffDef.LabelCap), "MissingPart", result);
+
 
         if (!typeof(Hediff_Injury).IsAssignableFrom(hediffDef.hediffClass))
         {

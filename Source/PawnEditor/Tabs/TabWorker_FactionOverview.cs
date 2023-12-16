@@ -15,6 +15,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     private static PawnLister colonistList;
     private static Dictionary<string, UITable<Faction>> pawnLocationTables;
     private static readonly QuickSearchWidget searchWidget = new();
+    private static Faction cachedFaction;
     private Vector2 scrollPos;
 
     protected void DrawPawnTables(Rect inRect, Faction faction)
@@ -58,8 +59,14 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         Gen.YieldSingle(new FloatMenuOption("PawnEditor.FactionName".Translate(),
             () => { faction.Name = NameGenerator.GenerateName(faction.def.factionNameMaker, NamePlayerFactionDialogUtility.IsValidName); }));
 
+    public static void CheckRecache(Faction faction)
+    {
+        if (cachedFaction == faction) RecachePawns(faction);
+    }
+
     public static void RecachePawns(Faction faction)
     {
+        cachedFaction = faction;
         if (PawnEditor.Pregame)
         {
             cachedPawns = Find.GameInitData.startingAndOptionalPawns;

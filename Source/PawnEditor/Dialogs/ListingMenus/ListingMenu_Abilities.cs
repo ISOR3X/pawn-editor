@@ -52,8 +52,9 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
 
         var abilityDefLevels = DefDatabase<AbilityDef>.AllDefs.Select(ad => ad.level).Distinct().ToList();
 
-        list.Add(new Filter_IntRange<AbilityDef>("PawnEditor.MinAbilityLevel".Translate(), new(abilityDefLevels.Min(), abilityDefLevels.Max()),
-            item => item.level, false, "PawnEditor.MinAbilityLevelDesc".Translate()));
+        if (abilityDefLevels.Any())
+            list.Add(new Filter_IntRange<AbilityDef>("PawnEditor.MinAbilityLevel".Translate(), new(abilityDefLevels.Min(), abilityDefLevels.Max()),
+                item => item.level, false, "PawnEditor.MinAbilityLevelDesc".Translate()));
 
         return list;
     }

@@ -104,6 +104,7 @@ public class PawnEditorMod : Mod
 
     public static bool OverrideVanilla(Rect rect, Page_ConfigureStartingPawns __instance)
     {
+        PawnEditor.Pregame = true;
         PawnEditor.DoUI(rect, __instance.DoBack, __instance.DoNext);
         return false;
     }

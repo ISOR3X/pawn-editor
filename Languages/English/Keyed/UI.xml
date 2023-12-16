@@ -197,6 +197,7 @@
     <PawnEditor.CannotGetThought>{0} can't get the thought {1}.</PawnEditor.CannotGetThought>
     <PawnEditor.AddThoughNullified>Add {0} anyway?</PawnEditor.AddThoughNullified>
     <PawnEditor.MoodOffset>Mood offset</PawnEditor.MoodOffset>
+    <PawnEditor.MissingPart>Can't find valid part to mount {0}. Add anyway?</PawnEditor.MissingPart>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

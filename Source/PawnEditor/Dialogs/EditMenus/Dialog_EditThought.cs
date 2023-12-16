@@ -109,7 +109,7 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
                 }));
             else items.Add(new());
 
-            result.Add(new(items, TabWorker_Needs.GetThoughtTip(Pawn, thought, thought)));
+            result.Add(new(items));
         }
 
         return result;

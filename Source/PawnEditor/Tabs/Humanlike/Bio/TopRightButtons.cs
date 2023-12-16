@@ -61,7 +61,7 @@ public partial class TabWorker_Bio_Humanlike
                 list.Add(new(xenotype.LabelCap,
                     () =>
                     {
-                        pawn.genes.SetXenotype(xenotype);
+                        SetXenotype(pawn, xenotype);
                         PawnEditor.Notify_PointsUsed();
                     }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
                     r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
@@ -74,10 +74,7 @@ public partial class TabWorker_Bio_Humanlike
                 list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
                     delegate
                     {
-                        if (!pawn.IsBaseliner()) pawn.genes.SetXenotype(XenotypeDefOf.Baseliner);
-                        pawn.genes.xenotypeName = customXenotype.name;
-                        pawn.genes.iconDef = customXenotype.IconDef;
-                        foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
+                        SetXenotype(pawn, customInner);
                         PawnEditor.Notify_PointsUsed();
                     }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
                     {
@@ -189,5 +186,39 @@ public partial class TabWorker_Bio_Humanlike
             pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
             if (pawn.IsColonist) PortraitsCache.SetDirty(pawn);
         });
+    }
+
+    private static void ClearXenotype(Pawn pawn)
+    {
+        if (pawn.genes.xenotype != null)
+            foreach (var xenotypeGene in pawn.genes.xenotype.genes)
+            {
+                var gene = (pawn.genes.xenotype.inheritable ? pawn.genes.Endogenes : pawn.genes.Xenogenes).FirstOrDefault(g => g.def == xenotypeGene);
+                pawn.genes.RemoveGene(gene);
+            }
+
+        if (pawn.genes.CustomXenotype is { } customXenotype)
+            foreach (var xenotypeGene in customXenotype.genes)
+            {
+                var gene = (customXenotype.inheritable ? pawn.genes.Endogenes : pawn.genes.Xenogenes).FirstOrDefault(g => g.def == xenotypeGene);
+                pawn.genes.RemoveGene(gene);
+            }
+    }
+
+    public static void SetXenotype(Pawn pawn, XenotypeDef xenotype)
+    {
+        ClearXenotype(pawn);
+        foreach (var gene in xenotype.genes)
+            pawn.genes.AddGene(gene, !xenotype.inheritable);
+
+        pawn.genes.SetXenotypeDirect(xenotype);
+    }
+
+    public static void SetXenotype(Pawn pawn, CustomXenotype xenotype)
+    {
+        ClearXenotype(pawn);
+        pawn.genes.xenotypeName = xenotype.name;
+        pawn.genes.iconDef = xenotype.IconDef;
+        foreach (var geneDef in xenotype.genes) pawn.genes.AddGene(geneDef, !xenotype.inheritable);
     }
 }

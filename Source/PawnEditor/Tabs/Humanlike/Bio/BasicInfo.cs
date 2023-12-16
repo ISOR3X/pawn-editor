@@ -8,6 +8,7 @@ public partial class TabWorker_Bio_Humanlike
 {
     private string ageBiologicalBuffer;
     private string ageChronologicalBuffer;
+    private Pawn bufferForPawn;
 
     private void DoBasics(Rect inRect, Pawn pawn)
     {
@@ -65,6 +66,13 @@ public partial class TabWorker_Bio_Humanlike
         using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter, null))
             Widgets.Label(bio.TakeTopPart(Text.LineHeight), "PawnEditor.Biological".Translate());
         var ageBio = pawn.ageTracker.AgeBiologicalYears;
+        if (bufferForPawn == null || bufferForPawn != pawn)
+        {
+            ageBiologicalBuffer = null;
+            ageChronologicalBuffer = null;
+            bufferForPawn = pawn;
+        }
+
         if (Widgets.ButtonImage(bio.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalf))
         {
             ageBio--;

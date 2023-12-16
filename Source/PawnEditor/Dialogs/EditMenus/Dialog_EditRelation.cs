@@ -17,6 +17,7 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
         thoughtTable = new(
             new()
             {
+                new(35f),
                 new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
                 new("ExpiresIn".Translate(), 360),
                 new("PawnEditor.Weight".Translate(), 60),
@@ -42,6 +43,23 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
         {
             var items = new List<UITable<SocialCardUtility.CachedSocialTabEntry>.Row.Item>(5);
             var thought = (Thought)thoughts[i];
+
+            items.Add(new(iconRect =>
+            {
+                iconRect.xMin += 3f;
+                iconRect = iconRect.ContractedBy(2f);
+
+                if (ModsConfig.IdeologyActive)
+                    if (thought.sourcePrecept != null)
+                    {
+                        if (!Find.IdeoManager.classicMode)
+                            IdeoUIUtility.DoIdeoIcon(iconRect.ContractedBy(4f), thought.sourcePrecept.ideo, false,
+                                () => IdeoUIUtility.OpenIdeoInfo(thought.sourcePrecept.ideo));
+                        return;
+                    }
+
+                GUI.DrawTexture(iconRect, Widgets.PlaceholderIconTex);
+            }));
 
             var label = thought.LabelCap;
             items.Add(new(label, i, TextAnchor.MiddleLeft));
@@ -75,7 +93,7 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
                 }));
             else items.Add(new());
 
-            result.Add(new(items, TabWorker_Needs.GetThoughtTip(Pawn, thought, thought)));
+            result.Add(new(items));
         }
 
         return result;

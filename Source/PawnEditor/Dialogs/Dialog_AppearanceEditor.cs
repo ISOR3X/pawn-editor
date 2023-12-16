@@ -169,14 +169,15 @@ public class Dialog_AppearanceEditor : Window
                     switch (shapeTab)
                     {
                         case ShapeTab.Body:
-                            var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs.Where(bodyType =>
-                                pawn.DevelopmentalStage switch
-                                {
-                                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
-                                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
-                                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
-                                    _ => true
-                                });
+                            var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs.Where(MatchesSource)
+                               .Where(bodyType =>
+                                    pawn.DevelopmentalStage switch
+                                    {
+                                        DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                                        DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                                        DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                                        _ => true
+                                    });
 
                             if (HARCompat.Active)
                             {
@@ -190,11 +191,15 @@ public class Dialog_AppearanceEditor : Window
                                     pawn.story.bodyType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, def => TexPawnEditor.BodyTypeIcons[def], def => pawn.story.bodyType == def, 1, new[] { pawn.story.SkinColor },
-                                (color, i) => pawn.story.skinColorOverride = color, ColorType.Misc,
+                                (color, i) =>
+                                {
+                                    pawn.story.skinColorOverride = color;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, ColorType.Misc,
                                 DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
                             break;
                         case ShapeTab.Head:
-                            var headTypes = DefDatabase<HeadTypeDef>.AllDefs;
+                            var headTypes = DefDatabase<HeadTypeDef>.AllDefs.Where(MatchesSource);
                             if (HARCompat.Active)
                             {
                                 headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
@@ -208,7 +213,11 @@ public class Dialog_AppearanceEditor : Window
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, def => def.GetGraphic(pawn.story.SkinColor, false, pawn.story.SkinColorOverriden).MatSouth.mainTexture,
                                 def => pawn.story.headType == def, 1, new[] { pawn.story.SkinColor },
-                                (color, i) => pawn.story.skinColorOverride = color, ColorType.Misc,
+                                (color, i) =>
+                                {
+                                    pawn.story.skinColorOverride = color;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, ColorType.Misc,
                                 DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
                             break;
                         default:
@@ -218,13 +227,17 @@ public class Dialog_AppearanceEditor : Window
                     break;
                 case MainTab.Hair:
                     inRect.yMin -= TabDrawer.TabHeight;
-                    DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefsListForReading, def =>
+                    DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefs.Where(MatchesSource).ToList(), def =>
                         {
                             pawn.story.hairDef = def;
                             TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                         }, def => def.Icon,
                         def => pawn.story.hairDef == def, 1, new[] { pawn.story.HairColor },
-                        (color, i) => pawn.story.HairColor = color, ColorType.Hair,
+                        (color, i) =>
+                        {
+                            pawn.story.HairColor = color;
+                            TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                        }, ColorType.Hair,
                         DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
                     break;
                 case MainTab.Tattoos:
@@ -237,7 +250,7 @@ public class Dialog_AppearanceEditor : Window
                     {
                         case ShapeTab.Body:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Body).ToList(), def =>
+                                DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).Where(td => td.tattooType == TattooType.Body).ToList(), def =>
                                 {
                                     pawn.style.BodyTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -246,7 +259,7 @@ public class Dialog_AppearanceEditor : Window
                             break;
                         case ShapeTab.Head:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Face).ToList(), def =>
+                                DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).Where(td => td.tattooType == TattooType.Face).ToList(), def =>
                                 {
                                     pawn.style.FaceTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -523,7 +536,7 @@ public class Dialog_AppearanceEditor : Window
                 Find.WindowStack.Add(new FloatMenu(list));
             }
 
-            Widgets.Label(xenotypeRect, text);
+            Widgets.Label(xenotypeRect, text.Truncate(xenotypeRect.width));
         }
 
         inRect.yMin += 6;
@@ -537,11 +550,16 @@ public class Dialog_AppearanceEditor : Window
 
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "Source".Translate().CapitalizeFirst());
 
-        if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate().CapitalizeFirst()))
-            Find.WindowStack.Add(new FloatMenu(LoadedModManager.RunningMods.Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
+        if (mainTab != MainTab.HAR && Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate().CapitalizeFirst()))
+        {
+            var allDefs = GetAllDefsForCurrentTab();
+            var options = LoadedModManager.RunningMods.Intersect(allDefs.Select(def => def.modContentPack).Distinct())
+               .Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
                .Prepend(new(
                     "All".Translate(), () => sourceFilter = null))
-               .ToList()));
+               .ToList();
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
 
         if (ModsConfig.BiotechActive)
             Widgets.CheckboxLabeled(inRect.TakeBottomPart(50), "PawnEditor.IgnoreXenotype".Translate(), ref ignoreXenotype);
@@ -567,7 +585,12 @@ public class Dialog_AppearanceEditor : Window
         if (Widgets.ButtonText(new Rect(0, 0, 200, 40).CenteredOnXIn(inRect).CenteredOnYIn(inRect), "Randomize".Translate()))
             Find.WindowStack.Add(new FloatMenu(new()
             {
-                new("Randomize".Translate() + " " + "PawnEditor.Shape".Translate(), () => TabWorker_Bio_Humanlike.RandomizeShape(pawn)),
+                new("Randomize".Translate() + " " + "PawnEditor.Shape".Translate(), () =>
+                {
+                    pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
+                    pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
+                    PortraitsCache.SetDirty(pawn);
+                }),
                 new("Randomize".Translate() + " " + "PawnEditor.Head".Translate().CapitalizeFirst(), () =>
                 {
                     pawn.story.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
@@ -584,6 +607,62 @@ public class Dialog_AppearanceEditor : Window
                     PortraitsCache.SetDirty(pawn);
                 })
             }));
+    }
+
+    private bool MatchesSource(Def def) => sourceFilter == null || def.modContentPack == sourceFilter;
+
+    private List<Def> GetAllDefsForCurrentTab()
+    {
+        switch (mainTab)
+        {
+            case MainTab.Shape:
+                switch (shapeTab)
+                {
+                    case ShapeTab.Body:
+                        var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs
+                           .Where(bodyType =>
+                                pawn.DevelopmentalStage switch
+                                {
+                                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                                    _ => true
+                                });
+
+                        if (HARCompat.Active)
+                        {
+                            var allowedBodyTypes = HARCompat.AllowedBodyTypes(pawn);
+                            if (!allowedBodyTypes.NullOrEmpty()) bodyTypes = bodyTypes.Intersect(allowedBodyTypes);
+                        }
+
+                        return bodyTypes.Cast<Def>().ToList();
+                    case ShapeTab.Head:
+                        var headTypes = DefDatabase<HeadTypeDef>.AllDefs;
+                        if (HARCompat.Active)
+                        {
+                            headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
+                            // HAR doesn't like head types not matching genders
+                            headTypes = headTypes.Where(type => type.gender == Gender.None || type.gender == pawn.gender);
+                        }
+
+                        return headTypes.Cast<Def>().ToList();
+                    default:
+                        return new();
+                }
+            case MainTab.Hair:
+                return DefDatabase<HairDef>.AllDefsListForReading.ConvertAll(def => (Def)def);
+            case MainTab.Tattoos:
+                return shapeTab switch
+                {
+                    ShapeTab.Body => DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Body).Cast<Def>().ToList(),
+                    ShapeTab.Head => DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Face).Cast<Def>().ToList(),
+                    _ => new()
+                };
+            case MainTab.Xenotype:
+                return genesByCategory.SelectMany(defs => defs.Cast<Def>()).ToList();
+            default:
+                return new();
+        }
     }
 
     private enum MainTab

@@ -15,18 +15,18 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
     private static readonly List<ThoughtDef> opinionMemoryDefs;
     private static IntRange maxMoodOffset = IntRange.one;
 
-    private static readonly HashSet<ThoughtDef> extraNeedsOtherPawn = new()
+    private static readonly HashSet<string> extraNeedsOtherPawn = new()
     {
-        ThoughtDefOf.GotMarried,
-        ThoughtDefOf.DefeatedHostileFactionLeader,
-        ThoughtDefOf.BondedAnimalBanished,
-        ThoughtDefOf.FailedToRescueRelative,
-        ThoughtDefOf.RescuedRelative,
-        ThoughtDefOf.FailedRomanceAttemptOnMeLowOpinionMood,
-        ThoughtDefOf.Counselled,
-        ThoughtDefOf.Counselled_MoodBoost,
-        ThoughtDef.Named("FailedConvertAbilityInitiator"),
-        ThoughtDef.Named("FailedConvertAbilityRecipient")
+        "GotMarried",
+        "DefeatedHostileFactionLeader",
+        "BondedAnimalBanished",
+        "FailedToRescueRelative",
+        "RescuedRelative",
+        "FailedRomanceAttemptOnMeLowOpinionMood",
+        "Counselled",
+        "Counselled_MoodBoost",
+        "FailedConvertAbilityInitiator",
+        "FailedConvertAbilityRecipient"
     };
 
     private static readonly Regex tagRe = new("{[a-zA-Z_]+}", RegexOptions.Compiled | RegexOptions.ECMAScript);
@@ -53,7 +53,7 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
                 }
             }
 
-            if (thoughtDef.thoughtToMake != null) extraNeedsOtherPawn.Add(thoughtDef.thoughtToMake);
+            if (thoughtDef.thoughtToMake != null) extraNeedsOtherPawn.Add(thoughtDef.thoughtToMake.defName);
         }
     }
 
@@ -65,7 +65,7 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
 
     protected override string NextLabel => RequiresOtherPawn(Listing.Selected) ? "Next".Translate() : base.NextLabel;
 
-    private static bool RequiresOtherPawn(ThoughtDef def) => def.stackLimitForSameOtherPawn >= 0 || extraNeedsOtherPawn.Contains(def);
+    private static bool RequiresOtherPawn(ThoughtDef def) => def.stackLimitForSameOtherPawn >= 0 || extraNeedsOtherPawn.Contains(def.defName);
 
     private static AddResult TryAdd(Pawn pawn, ThoughtDef def, Pawn otherPawn = null)
     {

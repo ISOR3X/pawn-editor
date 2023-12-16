@@ -223,14 +223,14 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
                 if (!disabled) Widgets.FillableBar(rect, Mathf.Max(0.01f, level / (float)def.steps), texture2D, TexPawnEditor.SkillBarBGTex, false);
                 rect.xMin += 3;
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
-                if (!disabled && level < def.steps && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus))
+                if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus) && level < def.steps)
                 {
                     pawn.training.steps[def] = ++level;
                     if (level >= def.steps) pawn.training.learned[def] = true;
                     PawnEditor.Notify_PointsUsed();
                 }
 
-                if (!disabled && level > 0 && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus))
+                if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus) && level > 0)
                 {
                     pawn.training.steps[def] = --level;
                     if (level < def.steps) pawn.training.learned[def] = false;

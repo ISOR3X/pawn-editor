@@ -76,6 +76,8 @@ public class PawnListerBase
         foreach (var lister in allLists.Except(this))
             if (lister.faction == faction && lister.category == category)
                 lister.UpdateCache(faction, category);
+
+        TabWorker_FactionOverview.CheckRecache(faction);
     }
 }
 

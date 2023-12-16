@@ -285,11 +285,15 @@ public class TabWorker_Gear : TabWorker<Pawn>
                     if (PawnApparelGenerator.workingSet.PairOverlapsAnything(PawnApparelGenerator.usableApparel[k]))
                         PawnApparelGenerator.usableApparel.RemoveAt(k);
             }
+
+            apparelTable.ClearCache();
         });
         yield return new("Apparel".Translate() + " " + "PawnEditor.FromKind".Translate(), () =>
         {
             PawnApparelGenerator.GenerateStartingApparelFor(
                 pawn, new(pawn.kindDef, pawn.Faction));
+
+            apparelTable.ClearCache();
         });
         yield return new("Equipment".Translate(), () =>
         {
@@ -305,17 +309,20 @@ public class TabWorker_Gear : TabWorker<Pawn>
             }
 
             pawn.equipment.AddEquipment(thingWithComps);
+            equipmentTable.ClearCache();
         });
         yield return new("Equipment".Translate() + " " + "PawnEditor.FromKind".Translate(),
             () =>
             {
                 pawn.equipment.DestroyAllEquipment();
                 PawnWeaponGenerator.TryGenerateWeaponFor(pawn, new(pawn.kindDef, pawn.Faction));
+                equipmentTable.ClearCache();
             });
         yield return new("Possessions".Translate(), () =>
         {
             pawn.inventory.DestroyAll();
             PawnInventoryGenerator.GenerateInventoryFor(pawn, new(pawn.kindDef, pawn.Faction));
+            possessionsTable.ClearCache();
         });
     }
 }
