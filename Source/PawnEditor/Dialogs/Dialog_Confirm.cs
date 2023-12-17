@@ -17,15 +17,19 @@ public class Dialog_Confirm : Dialog_MessageBox
 
     public override void PreOpen()
     {
+        base.PreOpen();
+        buttonAAction += CheckAddHide;
+        acceptAction += CheckAddHide;
+    }
+
+    public override void PostOpen()
+    {
+        base.PostOpen();
         if (PawnEditorMod.Settings.DontShowAgain.Contains(confirmationKey))
         {
             acceptAction();
             Close(false);
         }
-
-        base.PreOpen();
-        buttonAAction += CheckAddHide;
-        acceptAction += CheckAddHide;
     }
 
     private void CheckAddHide()

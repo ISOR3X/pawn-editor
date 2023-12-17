@@ -11,6 +11,7 @@ public abstract class Dialog_EditItem : Window
     protected readonly Pawn Pawn;
     private readonly UITable<Pawn> table;
     public Rect TableRect;
+    private bool floatMenuLast;
     private bool setPosition;
 
     protected Dialog_EditItem(Pawn pawn = null, UITable<Pawn> table = null)
@@ -57,6 +58,13 @@ public abstract class Dialog_EditItem : Window
         listing.End();
 
         if (Event.current.type is not EventType.Layout and not EventType.Ignore and not EventType.Repaint) ClearCaches();
+
+        if (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.IsOpen)
+        {
+            if (floatMenuLast) ClearCaches();
+            floatMenuLast = false;
+        }
+        else floatMenuLast = true;
 
         if (Event.current.type == EventType.Layout && !setPosition)
         {

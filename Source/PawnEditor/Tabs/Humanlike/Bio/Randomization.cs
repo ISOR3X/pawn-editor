@@ -53,10 +53,32 @@ public partial class TabWorker_Bio_Humanlike
 
     public static void RandomizeShape(Pawn pawn)
     {
-        pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
-        pawn.story.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
-            where x.randomChosen
-            select x);
+        var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs
+           .Where(bodyType =>
+                pawn.DevelopmentalStage switch
+                {
+                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
+                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
+                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
+                    _ => true
+                });
+
+        if (HARCompat.Active)
+        {
+            var allowedBodyTypes = HARCompat.AllowedBodyTypes(pawn);
+            if (!allowedBodyTypes.NullOrEmpty()) bodyTypes = bodyTypes.Intersect(allowedBodyTypes);
+        }
+
+        var headTypes = DefDatabase<HeadTypeDef>.AllDefs;
+        if (HARCompat.Active)
+        {
+            headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
+            // HAR doesn't like head types not matching genders
+            headTypes = headTypes.Where(type => type.gender == Gender.None || type.gender == pawn.gender);
+        }
+
+        pawn.story.bodyType = bodyTypes.RandomElement();
+        pawn.story.headType = headTypes.RandomElement();
 
         pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
         PortraitsCache.SetDirty(pawn);

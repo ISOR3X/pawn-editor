@@ -267,10 +267,9 @@ public class TabWorker_Gear : TabWorker<Pawn>
         yield return new("Apparel".Translate(), () =>
         {
             pawn.apparel.DestroyAll();
-            var apparelCandidates = PawnApparelGenerator.allApparelPairs.ListFullCopy();
             PawnApparelGenerator.workingSet.Reset(pawn);
             PawnApparelGenerator.usableApparel.Clear();
-            PawnApparelGenerator.usableApparel.AddRange(apparelCandidates.Where(apparel =>
+            PawnApparelGenerator.usableApparel.AddRange(PawnApparelGenerator.allApparelPairs.Where(apparel =>
                 apparel.thing.apparel.PawnCanWear(pawn) &&
                 !PawnApparelGenerator.workingSet.PairOverlapsAnything(apparel)));
 
@@ -285,6 +284,9 @@ public class TabWorker_Gear : TabWorker<Pawn>
                     if (PawnApparelGenerator.workingSet.PairOverlapsAnything(PawnApparelGenerator.usableApparel[k]))
                         PawnApparelGenerator.usableApparel.RemoveAt(k);
             }
+
+            PawnApparelGenerator.workingSet.GiveToPawn(pawn);
+            PawnApparelGenerator.workingSet.Reset(null, null);
 
             apparelTable.ClearCache();
         });

@@ -552,7 +552,7 @@ public class Dialog_AppearanceEditor : Window
 
         if (mainTab != MainTab.HAR && Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate().CapitalizeFirst()))
         {
-            var allDefs = GetAllDefsForCurrentTab();
+            var allDefs = GetAllDefsForTab(mainTab, shapeTab);
             var options = LoadedModManager.RunningMods.Intersect(allDefs.Select(def => def.modContentPack).Distinct())
                .Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
                .Prepend(new(
@@ -587,15 +587,13 @@ public class Dialog_AppearanceEditor : Window
             {
                 new("Randomize".Translate() + " " + "PawnEditor.Shape".Translate(), () =>
                 {
-                    pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
+                    pawn.story.bodyType = (BodyTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Body).RandomElement();
                     pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
                 new("Randomize".Translate() + " " + "PawnEditor.Head".Translate().CapitalizeFirst(), () =>
                 {
-                    pawn.story.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
-                        where x.randomChosen
-                        select x);
+                    pawn.story.headType = (HeadTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Head).RandomElement();
                     pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
@@ -611,12 +609,12 @@ public class Dialog_AppearanceEditor : Window
 
     private bool MatchesSource(Def def) => sourceFilter == null || def.modContentPack == sourceFilter;
 
-    private List<Def> GetAllDefsForCurrentTab()
+    private List<Def> GetAllDefsForTab(MainTab tab, ShapeTab shape)
     {
-        switch (mainTab)
+        switch (tab)
         {
             case MainTab.Shape:
-                switch (shapeTab)
+                switch (shape)
                 {
                     case ShapeTab.Body:
                         var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs
@@ -652,7 +650,7 @@ public class Dialog_AppearanceEditor : Window
             case MainTab.Hair:
                 return DefDatabase<HairDef>.AllDefsListForReading.ConvertAll(def => (Def)def);
             case MainTab.Tattoos:
-                return shapeTab switch
+                return shape switch
                 {
                     ShapeTab.Body => DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Body).Cast<Def>().ToList(),
                     ShapeTab.Head => DefDatabase<TattooDef>.AllDefs.Where(td => td.tattooType == TattooType.Face).Cast<Def>().ToList(),
