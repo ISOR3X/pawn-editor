@@ -75,6 +75,12 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
             result = new ConfirmInfo("PawnEditor.HediffDuplicate".Translate(hediffDef.LabelCap), "HediffDuplicate", result, existing.Count > 0);
         }
 
+        result = new ConfirmInfo("PawnEditor.WouldDie".Translate(hediffDef.LabelCap, pawn.NameShortColored), "HediffDeath", result,
+            pawn.health.WouldDieAfterAddingHediff(hediffDef, part, hediffDef.initialSeverity));
+        result = new ConfirmInfo("PawnEditor.WouldBeDowned".Translate(hediffDef.LabelCap, pawn.NameShortColored), "HediffDowned", result,
+            pawn.health.WouldBeDownedAfterAddingHediff(hediffDef, part, hediffDef.initialSeverity));
+
+
         return result;
     }
 

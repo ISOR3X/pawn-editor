@@ -39,13 +39,15 @@ public class ConfirmInfo : AddResult
         Destructive = destructive;
     }
 
+    protected virtual bool Confirmed => !NeedsConfirmation || PawnEditorMod.Settings.DontShowAgain.Contains(Key);
+
     public override void HandleResult(Action successAction = null)
     {
-        if (IsSuccess()) Inner.HandleResult(successAction);
+        if (Confirmed) Inner.HandleResult(successAction);
         else Find.WindowStack.Add(new Dialog_Confirm(Text, Key, () => Inner.HandleResult(successAction), Destructive, Title));
     }
 
-    public override bool IsSuccess() => !NeedsConfirmation || PawnEditorMod.Settings.DontShowAgain.Contains(Key);
+    public override bool IsSuccess() => Confirmed && Inner.IsSuccess();
 }
 
 public class FailureInfo : AddResult
