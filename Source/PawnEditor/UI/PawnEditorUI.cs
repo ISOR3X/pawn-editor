@@ -324,7 +324,7 @@ public static partial class PawnEditor
     }
 
     public static RenderTexture GetPawnTex(Pawn pawn, Vector2 portraitSize, Rot4 dir, Vector3 cameraOffset = default, float cameraZoom = 1f) =>
-        PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom / pawn.BodySize,
+        PortraitsCache.Get(pawn, portraitSize, dir, cameraOffset, cameraZoom,
             renderHeadgear: RenderHeadgear, renderClothes: RenderClothes, stylingStation: true);
 
     public static void SavePawnTex(Pawn pawn, string path, Rot4 dir)

@@ -193,6 +193,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             private readonly Action buttonClicked;
             private readonly TextAnchor textAnchor;
             private readonly Func<bool> shouldDraw;
+            private readonly Color color = Color.white;
 
             public int SortIndex => sortIndex;
 
@@ -201,6 +202,14 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 this.label = label;
                 this.sortIndex = sortIndex;
                 this.textAnchor = textAnchor;
+            }
+            
+            public Item(string label, Color color, int sortIndex = -1, TextAnchor textAnchor = TextAnchor.MiddleCenter)
+            {
+                this.label = label;
+                this.sortIndex = sortIndex;
+                this.textAnchor = textAnchor;
+                this.color = color;
             }
 
             public Item(string label, Action buttonClicked)
@@ -293,7 +302,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                     }
                     else
                         using (new TextBlock(textAnchor))
-                            Widgets.Label(inRect, label.Truncate(inRect.width));
+                            Widgets.Label(inRect, label.Truncate(inRect.width).Colorize(color));
                 }
             }
         }

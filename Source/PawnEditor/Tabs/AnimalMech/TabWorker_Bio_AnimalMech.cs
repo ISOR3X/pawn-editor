@@ -114,7 +114,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         var name = "Name".Translate();
         var age = "PawnEditor.Age".Translate();
         var bonded = pawn.RaceProps.IsMechanoid ? "Overseer".Translate() : "PawnEditor.Bonded".Translate();
-        var leftWidth = UIUtility.ColumnWidth(3, name, age, bonded);
+        var leftWidth = UIUtility.ColumnWidth(3, name, age, bonded) + 18f;
         var nameRect = inRect.TakeTopPart(30);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(nameRect.TakeLeftPart(leftWidth), name);
         if (pawn.Name is NameTriple nameTriple)
@@ -172,7 +172,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
 
         Widgets.TextFieldNumeric(ageRect, ref ageBio, ref ageBiologicalBuffer);
         if (ageBio != pawn.ageTracker.AgeBiologicalYears) SetAge(pawn, ageBio);
-
+        inRect.yMin += 3;
         var bondRect = inRect.TakeTopPart(30);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(bondRect.TakeLeftPart(leftWidth), bonded);
         var bondRelation = pawn.RaceProps.IsMechanoid ? PawnRelationDefOf.Overseer : PawnRelationDefOf.Bond;

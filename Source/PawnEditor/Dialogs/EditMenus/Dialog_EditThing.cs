@@ -29,6 +29,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
                    .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
                     {
                         Selected.SetStuffDirect(stuff);
+                        Selected.SetColor(stuff.stuffProps.color);
                         Selected.Notify_ColorChanged();
                         PawnEditor.Notify_PointsUsed();
                     }, Widgets.GetIconFor(stuff), stuff.uiIconColor))
