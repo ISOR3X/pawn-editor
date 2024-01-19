@@ -119,6 +119,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                         var list = StartingThingsManager.GetStartingThingsNear();
                         list.Clear();
                         list.AddRange(thingList.Things);
+                        equipmentTable.ClearCache();
                     }
                 });
             yield return new SaveLoadItem<ThingList>("ScatteredLoot".Translate(), new(StartingThingsManager.GetStartingThingsFar(), "Loot"),
@@ -129,6 +130,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                         var list = StartingThingsManager.GetStartingThingsFar();
                         list.Clear();
                         list.AddRange(thingList.Things);
+                        lootTable.ClearCache();
                     }
                 });
         }
@@ -136,11 +138,28 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
 
     private static void DoBottomButtons(Rect inRect)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
-                "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate())) { }
+        if (PawnEditor.Pregame)
+        {
+            if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
+                    "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate()))
+                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsNear(), () => equipmentTable.ClearCache(),
+                    "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate()));
 
-        if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
-                "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate())) { }
+            if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
+                    "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate()))
+                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsFar(), () => lootTable.ClearCache(),
+                    "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate()));
+        }
+        else if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "Add".Translate().CapitalizeFirst() + " " + "ItemsTab".Translate()))
+            Find.WindowStack.Add(new ListingMenu_Items(item => new SuccessInfo(() =>
+                {
+                    if (GenPlace.TryPlaceThing(item, DropCellFinder.TradeDropSpot(Find.CurrentMap), Find.CurrentMap, ThingPlaceMode.Near))
+                    {
+                        ColonyInventory.RecacheItems();
+                        itemsTable.ClearCache();
+                    }
+                }),
+                "Add".Translate().CapitalizeFirst() + " " + "ItemsTab".Translate()));
     }
 
     private struct ThingList : IExposable, ISaveable

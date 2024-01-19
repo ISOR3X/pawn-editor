@@ -65,7 +65,7 @@ public static partial class PawnEditor
             var label = pawn.Name is NameTriple nameTriple ? nameTriple.Nick.NullOrEmpty() ? nameTriple.First : nameTriple.Nick : pawn.LabelShort;
             using (new TextBlock(TextAnchor.MiddleLeft))
             {
-                Widgets.Label(rect.TopPart(0.5f).Rounded(), label);
+                Widgets.Label(rect.TopPart(0.5f).Rounded(), label.Truncate(rect.width));
                 if (pawn.story != null)
                     Widgets.Label(rect.BottomPart(0.5f).Rounded(),
                         Text.CalcSize(pawn.story.TitleCap).x > rect.width ? pawn.story.TitleShortCap : pawn.story.TitleCap);

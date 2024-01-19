@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -49,7 +48,7 @@ public partial class TabWorker_Bio_Humanlike
                             PawnEditor.Notify_PointsUsed();
                         }
                     }
-                }, trait => Text.CalcSize(trait.LabelCap).x + 10f, 4f, 5f, false)
+                }, WidthGetter, 4f, 5f, false)
                .height;
 
         traitsLastHeight = Mathf.Max(45, traitsLastHeight);
@@ -163,64 +162,5 @@ public partial class TabWorker_Bio_Humanlike
         Widgets.EndScrollView();
     }
 
-    private static string GetPawnRowTooltip(DirectPawnRelation relation, Pawn selPawnForSocialInfo)
-    {
-        var stringBuilder = new StringBuilder();
-        if (relation.otherPawn.RaceProps.Humanlike && selPawnForSocialInfo.RaceProps.Humanlike)
-        {
-            stringBuilder.AppendLine(selPawnForSocialInfo.relations.OpinionExplanation(relation.otherPawn));
-            stringBuilder.AppendLine();
-            var text = SocialCardUtility.RomanceExplanation(selPawnForSocialInfo, relation.otherPawn);
-            if (!text.NullOrEmpty()) stringBuilder.AppendLine(text);
-
-            stringBuilder.Append(("SomeonesOpinionOfMe".Translate(relation.otherPawn.LabelShort) + ": ").Colorize(ColoredText.TipSectionTitleColor));
-            stringBuilder.Append(relation.otherPawn.relations.OpinionOf(selPawnForSocialInfo).ToStringWithSign());
-        }
-        else
-        {
-            stringBuilder.Append(relation.otherPawn.LabelCapNoCount);
-            var pawnSituationLabel = SocialCardUtility.GetPawnSituationLabel(relation.otherPawn, selPawnForSocialInfo);
-            if (!pawnSituationLabel.NullOrEmpty())
-                stringBuilder.AppendLine(" (" + pawnSituationLabel + ")");
-            else
-                stringBuilder.AppendLine();
-
-            stringBuilder.Append(" - " + GetRelationsString(relation, selPawnForSocialInfo));
-        }
-
-        if (Prefs.DevMode)
-        {
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("(debug) Compatibility: " + selPawnForSocialInfo.relations.CompatibilityWith(relation.otherPawn).ToString("F2"));
-            stringBuilder.Append("(debug) RomanceChanceFactor: "
-                               + selPawnForSocialInfo.relations.SecondaryRomanceChanceFactor(relation.otherPawn).ToString("F2"));
-        }
-
-        return stringBuilder.ToString();
-    }
-
-    private static string GetRelationsString(DirectPawnRelation relation, Pawn selPawnForSocialInfo)
-    {
-        var text = "";
-        var relations = selPawnForSocialInfo.GetRelations(relation.otherPawn).ToList();
-        if (relations.Count != 0)
-        {
-            for (var i = 0; i < relations.Count; i++)
-            {
-                var pawnRelationDef = relations[i];
-                if (!text.NullOrEmpty())
-                    text = text + ", " + pawnRelationDef.GetGenderSpecificLabel(relation.otherPawn);
-                else
-                    text = pawnRelationDef.GetGenderSpecificLabelCap(relation.otherPawn);
-            }
-
-            return text;
-        }
-
-        if (selPawnForSocialInfo.relations.OpinionOf(relation.otherPawn) < -20) return "Rival".Translate();
-
-        if (selPawnForSocialInfo.relations.OpinionOf(relation.otherPawn) > 20) return "Friend".Translate();
-
-        return "Acquaintance".Translate();
-    }
+    private static float WidthGetter(Trait trait) => Text.CalcSize(trait.LabelCap).x + 10f;
 }

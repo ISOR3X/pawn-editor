@@ -72,6 +72,18 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                .Any(bpg => bpg.Contains(bp)));
     }
 
+    public ListingMenu_Items(List<Thing> things, Action callback = null, string menuTitle = null) : base(t => TryAdd(t, things, callback), menuTitle)
+    {
+        TreeNodeThingCategory = ThingCategoryNodeDatabase.RootNode;
+        Listing = new Listing_TreeThing(all, labelGetter, iconDrawer, descGetter);
+    }
+
+    public ListingMenu_Items(Func<Thing, AddResult> adder, string menuTitle = null) : base(t => TryAdd(t, adder), menuTitle)
+    {
+        TreeNodeThingCategory = ThingCategoryNodeDatabase.RootNode;
+        Listing = new Listing_TreeThing(all, labelGetter, iconDrawer, descGetter);
+    }
+
     public override void PreOpen()
     {
         base.PreOpen();
@@ -169,6 +181,22 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         }
 
         return false;
+    }
+
+    private static AddResult TryAdd(ThingDef thingDef, List<Thing> things, Action callback = null)
+    {
+        var thing = ThingMaker.MakeThing(thingDef);
+        return new ConditionalInfo(PawnEditor.CanUsePoints(thing), new SuccessInfo(() =>
+        {
+            things.Add(thing);
+            callback?.Invoke();
+        }));
+    }
+
+    private static AddResult TryAdd(ThingDef thingDef, Func<Thing, AddResult> adder)
+    {
+        var thing = ThingMaker.MakeThing(thingDef);
+        return new ConditionalInfo(PawnEditor.CanUsePoints(thing), adder(thing));
     }
 
     private static void MakeItemLists()
