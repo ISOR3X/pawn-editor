@@ -32,7 +32,7 @@ public class ListingMenu<T> : Window
         IEnumerable<T> auxHighlight = null) :
         this(menuTitle, pawn, nextLabel, closeLabel, closeAction)
     {
-        Listing = new(items, labelGetter, iconDrawer, descGetter, filters, auxHighlight);
+        Listing = new(items.OrderBy(labelGetter).ToList(), labelGetter, iconDrawer, descGetter, filters, auxHighlight);
         _action = action;
         _allowMultiSelect = false;
     }
@@ -43,7 +43,7 @@ public class ListingMenu<T> : Window
         IEnumerable<T> auxHighlight = null) :
         this(menuTitle, pawn, nextLabel, closeLabel, closeAction)
     {
-        Listing = new(items, wantedCount.TrueMax, labelGetter, iconDrawer, descGetter, filters, auxHighlight);
+        Listing = new(items.OrderBy(labelGetter).ToList(), wantedCount.TrueMax, labelGetter, iconDrawer, descGetter, filters, auxHighlight);
         _multiAction = action;
         _allowMultiSelect = true;
         _minCount = wantedCount.TrueMin;
