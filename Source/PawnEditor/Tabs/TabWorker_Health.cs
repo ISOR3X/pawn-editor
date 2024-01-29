@@ -41,7 +41,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
     private void DoBottomOptions(Rect inRect, Pawn pawn)
     {
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
-            Find.WindowStack.Add(new FloatMenu(new()
+        {
+            var list = new List<FloatMenuOption>
             {
                 new("PawnEditor.TendAll".Translate(), () =>
                 {
@@ -56,7 +57,12 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                         foreach (var hediff in bad) pawn.health.RemoveHediff(hediff);
                         table.ClearCache();
                     })
-            }));
+            };
+            if (pawn.Dead)
+                list.Add(new("Resurrect".Translate(), () => { ResurrectionUtility.Resurrect(pawn); }));
+            Find.WindowStack.Add(new FloatMenu(list));
+        }
+
         inRect.xMin += 4f;
 
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddHediff".Translate()))

@@ -138,7 +138,7 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
             if (!stage.labelSocial.NullOrEmpty()) label = stage.labelSocial;
         }
 
-        Log.Message($"{tagRe} matches {label}: {tagRe.IsMatch(label)}");
+//        Log.Message($"{tagRe} matches {label}: {tagRe.IsMatch(label)}");
 
         if (tagRe.IsMatch(label))
             label = tagRe.Replace(label, match => match.Value.Colorize(ColoredText.SubtleGrayColor));

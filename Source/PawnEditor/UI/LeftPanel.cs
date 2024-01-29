@@ -190,7 +190,7 @@ public static partial class PawnEditor
                 PawnList.UpdateCache(selectedFaction, category);
             }
 
-
+            TabWorker_AnimalMech.Notify_PawnAdded(category);
             Notify_PointsUsed();
             Select(addedPawn);
         }));

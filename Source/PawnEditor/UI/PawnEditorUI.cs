@@ -239,6 +239,8 @@ public static partial class PawnEditor
         }
 
         TabWorker_FactionOverview.RecachePawns(selectedFaction);
+        TabWorker_AnimalMech.Notify_PawnAdded(selectedCategory);
+
         List<Pawn> pawns;
         if (Pregame)
             pawns = selectedCategory == PawnCategory.Humans ? Find.GameInitData.startingAndOptionalPawns : StartingThingsManager.GetPawns(selectedCategory);

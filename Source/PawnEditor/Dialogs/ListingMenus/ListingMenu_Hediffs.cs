@@ -48,6 +48,10 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
                 part = part2;
         }
 
+        if (part == null && (typeof(Hediff_Injury).IsAssignableFrom(hediffDef.hediffClass) || typeof(
+                Hediff_MissingPart).IsAssignableFrom(hediffDef.hediffClass)))
+            part = pawn.RaceProps.body.corePart;
+
         AddResult result = new SuccessInfo(() =>
         {
             pawn.health.AddHediff(hediffDef, part);

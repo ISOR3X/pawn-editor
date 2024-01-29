@@ -10,6 +10,7 @@ namespace PawnEditor;
 public class TabWorker_AnimalMech : TabWorker<Faction>
 {
     private static readonly QuickSearchWidget searchWidget = new();
+    private static TabWorker_AnimalMech instance;
     private readonly PawnListerBase animalList = new();
     private readonly PawnListerBase mechList = new();
     private int animalCount;
@@ -18,6 +19,8 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
     private UITable<Faction> animalTable;
     private int mechCount;
     private UITable<Faction> mechTable;
+
+    public TabWorker_AnimalMech() => instance = this;
 
     public override void Initialize()
     {
@@ -214,6 +217,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                     var list = StartingThingsManager.GetPawns(PawnCategory.Animals);
                     list.Clear();
                     list.AddRange(pawnList.Pawns);
+                    animalTable.ClearCache();
                 },
                 TypePostfix = PawnCategory.Animals.ToString()
             });
@@ -226,16 +230,24 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                     var list = StartingThingsManager.GetPawns(PawnCategory.Mechs);
                     list.Clear();
                     list.AddRange(pawnList.Pawns);
+                    mechTable.ClearCache();
                 },
                 TypePostfix = PawnCategory.Mechs.ToString()
             });
         }
     }
 
+    public static void Notify_PawnAdded(PawnCategory category)
+    {
+        if (category == PawnCategory.Animals) instance.animalTable.ClearCache();
+        if (category == PawnCategory.Mechs) instance.mechTable.ClearCache();
+    }
+
     private void DoBottomButtons(Rect inRect)
     {
         if (UIUtility.DefaultButtonText(ref inRect,
-                "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.PawnCategory.Animals".Translate())) PawnEditor.AddPawn(PawnCategory.Animals);
+                "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.PawnCategory.Animals".Translate()))
+            PawnEditor.AddPawn(PawnCategory.Animals);
         inRect.xMin += 4f;
         if (UIUtility.DefaultButtonText(ref inRect,
                 "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.PawnCategory.Mechs".Translate())) PawnEditor.AddPawn(PawnCategory.Mechs);
