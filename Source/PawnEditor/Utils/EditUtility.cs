@@ -21,7 +21,7 @@ public static class EditUtility
     private static Type WindowForType(Type type) =>
         editTypes.FirstOrDefault(editType => typeof(Dialog_EditItem<>).MakeGenericType(type).IsAssignableFrom(editType));
 
-    public static void EditButton<T>(Rect rect, T item, Pawn pawn = null, UITable<Pawn> table = null)
+    public static void EditButton<T>(Rect rect, T item, Pawn pawn = null, UIElement element = null)
     {
         if (!Widgets.ButtonText(rect, "Edit".Translate() + "...")) return;
         var type = WindowForType(typeof(T));
@@ -41,7 +41,7 @@ public static class EditUtility
             else
             {
                 window.TableRect = rect;
-                if (table != null) window.TableRect.x = table.Position.x;
+                if (element != null) window.TableRect.x = element.Position.x;
                 window.Select(item);
                 if (!Find.WindowStack.IsOpen(window)) Find.WindowStack.Add(window);
             }
@@ -49,9 +49,9 @@ public static class EditUtility
         else
         {
             CurrentWindow?.Close(false);
-            CurrentWindow = (Dialog_EditItem)Activator.CreateInstance(type, item, pawn, table);
+            CurrentWindow = (Dialog_EditItem)Activator.CreateInstance(type, item, pawn, element);
             CurrentWindow.TableRect = rect;
-            if (table != null) CurrentWindow.TableRect.x = table.Position.x;
+            if (element != null) CurrentWindow.TableRect.x = element.Position.x;
             Find.WindowStack.Add(CurrentWindow);
         }
     }

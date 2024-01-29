@@ -175,7 +175,7 @@ public static class StartingThingsManager
                     allowRoofed = true
                 }.Generate(map, default);
 
-            foreach (var ((thingDef, stuff), count) in thingsNear)
+            foreach (var ((thingDef, stuff), count) in thingsFar)
                 new GenStep_ScatterThings
                 {
                     nearPlayerStart = false,

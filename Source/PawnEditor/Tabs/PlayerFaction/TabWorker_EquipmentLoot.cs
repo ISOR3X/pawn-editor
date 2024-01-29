@@ -17,9 +17,10 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     public override void Initialize()
     {
         base.Initialize();
-        equipmentTable = new(GetHeadings("Equipment".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsNear()));
-        lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate().CapitalizeFirst()), _ => GetRows(StartingThingsManager.GetStartingThingsFar()));
-        itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(ColonyInventory.AllItemsInInventory()));
+        equipmentTable = new(GetHeadings("Equipment".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsNear(), equipmentTable));
+        lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate().CapitalizeFirst()),
+            _ => GetRows(StartingThingsManager.GetStartingThingsFar(), lootTable));
+        itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(ColonyInventory.AllItemsInInventory(), itemsTable));
     }
 
     private List<UITable<Faction>.Heading> GetHeadings(string heading) =>
@@ -34,7 +35,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
             new(30)
         };
 
-    private IEnumerable<UITable<Faction>.Row> GetRows(List<Thing> things)
+    private IEnumerable<UITable<Faction>.Row> GetRows(List<Thing> things, UITable<Faction> table)
     {
         for (var i = 0; i < things.Count; i++)
         {
@@ -71,7 +72,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
 
                     countBuffer[thing] = buffer;
                 }),
-                new("Edit".Translate() + "...", () => { }),
+                new(rect => { EditUtility.EditButton(rect, thing, null, table); }),
                 new(TexButton.DeleteX, () =>
                 {
                     thing.Destroy();
@@ -142,12 +143,14 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
         {
             if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                     "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate()))
-                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsNear(), () => equipmentTable.ClearCache(),
+                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsNear(), ListingMenu_Items.ItemType.Starting,
+                    () => equipmentTable.ClearCache(),
                     "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate()));
 
             if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                     "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate()))
-                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsFar(), () => lootTable.ClearCache(),
+                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsFar(), ListingMenu_Items.ItemType.Starting,
+                    () => lootTable.ClearCache(),
                     "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate()));
         }
         else if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5), "Add".Translate().CapitalizeFirst() + " " + "ItemsTab".Translate()))
@@ -158,7 +161,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                         ColonyInventory.RecacheItems();
                         itemsTable.ClearCache();
                     }
-                }),
+                }), ListingMenu_Items.ItemType.Starting,
                 "Add".Translate().CapitalizeFirst() + " " + "ItemsTab".Translate()));
     }
 

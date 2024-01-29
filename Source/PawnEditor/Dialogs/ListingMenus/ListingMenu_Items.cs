@@ -16,16 +16,16 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         All = 0,
         Apparel,
         Equipment,
-        Possessions
+        Possessions,
+        Starting
     }
-
-    private static readonly Func<ItemType, Pawn, List<ThingDef>> output = GetItemList;
 
     private static ItemType type;
     private static List<ThingDef> apparel;
     private static List<ThingDef> kidApparel;
     private static List<ThingDef> equipment;
     private static List<ThingDef> items;
+    private static List<ThingDef> starting;
     private static List<ThingDef> all;
 
     private static readonly Func<ThingDef, string> labelGetter = t => t.LabelCap;
@@ -64,7 +64,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
     {
         TreeNodeThingCategory = treeNodeThingCategory ?? ThingCategoryNodeDatabase.RootNode;
         type = itemType;
-        Listing = new Listing_TreeThing(output.Invoke(itemType, pawn), labelGetter, iconDrawer, descGetter);
+        Listing = new Listing_TreeThing(GetItemList(itemType, pawn), labelGetter, iconDrawer, descGetter);
 
         occupiableGroupsDefs = pawn.def.race.body.cachedAllParts.SelectMany(p => p.groups)
            .Distinct()
@@ -72,16 +72,19 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                .Any(bpg => bpg.Contains(bp)));
     }
 
-    public ListingMenu_Items(List<Thing> things, Action callback = null, string menuTitle = null) : base(t => TryAdd(t, things, callback), menuTitle)
+    public ListingMenu_Items(List<Thing> things, ItemType itemType, Action callback = null, string menuTitle = null) : base(t => TryAdd(t, things, callback),
+        menuTitle)
     {
         TreeNodeThingCategory = ThingCategoryNodeDatabase.RootNode;
-        Listing = new Listing_TreeThing(all, labelGetter, iconDrawer, descGetter);
+        type = itemType;
+        Listing = new Listing_TreeThing(GetItemList(itemType), labelGetter, iconDrawer, descGetter);
     }
 
-    public ListingMenu_Items(Func<Thing, AddResult> adder, string menuTitle = null) : base(t => TryAdd(t, adder), menuTitle)
+    public ListingMenu_Items(Func<Thing, AddResult> adder, ItemType itemType, string menuTitle = null) : base(t => TryAdd(t, adder), menuTitle)
     {
         TreeNodeThingCategory = ThingCategoryNodeDatabase.RootNode;
-        Listing = new Listing_TreeThing(all, labelGetter, iconDrawer, descGetter);
+        type = itemType;
+        Listing = new Listing_TreeThing(GetItemList(itemType), labelGetter, iconDrawer, descGetter);
     }
 
     public override void PreOpen()
@@ -205,10 +208,15 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         kidApparel = DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel && td.apparel.developmentalStageFilter != DevelopmentalStage.Adult).ToList();
         equipment = DefDatabase<ThingDef>.AllDefs.Where(td => td.equipmentType == EquipmentType.Primary).ToList();
         items = DefDatabase<ThingDef>.AllDefs.Where(td => td.category == ThingCategory.Item).ToList();
+        starting = DefDatabase<ThingDef>.AllDefs.Where(td =>
+                (td.category == ThingCategory.Item && td.scatterableOnMapGen && !td.destroyOnDrop) || (td.category == ThingCategory.Building && td.Minifiable)
+                                                                                                   || (td.category == ThingCategory.Building
+                                                                                                    && td.scatterableOnMapGen))
+           .ToList();
         all = DefDatabase<ThingDef>.AllDefs.ToList();
     }
 
-    private static List<ThingDef> GetItemList(ItemType itemType2, Pawn pawn)
+    private static List<ThingDef> GetItemList(ItemType itemType2, Pawn pawn = null)
     {
         switch (itemType2)
         {
@@ -220,6 +228,8 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                 return equipment;
             case ItemType.Possessions:
                 return items;
+            case ItemType.Starting:
+                return starting;
             default:
                 Log.WarningOnce("No ItemType!", 15703);
                 return all;

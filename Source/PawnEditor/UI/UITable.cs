@@ -8,7 +8,7 @@ using Verse.Sound;
 
 namespace PawnEditor;
 
-public class UITable<T> : IComparer<UITable<T>.Row>
+public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
 {
     private static readonly float rowHeight = 32f;
     private readonly Func<T, IEnumerable<Row>> getRows;
@@ -28,11 +28,11 @@ public class UITable<T> : IComparer<UITable<T>.Row>
     }
 
     public bool Initialized => cachedRect != default && target != null;
+
+    public int Compare(Row x, Row y) => sortIndex == -1 ? 0 : x.Items[sortIndex].SortIndex.CompareTo(y.Items[sortIndex].SortIndex) * sortDirection;
     public Vector2 Position => cachedRect.position;
     public float Width => cachedRect.width;
     public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2 + rows.Count * 34;
-
-    public int Compare(Row x, Row y) => sortIndex == -1 ? 0 : x.Items[sortIndex].SortIndex.CompareTo(y.Items[sortIndex].SortIndex) * sortDirection;
 
     private void RecacheRows()
     {
@@ -203,7 +203,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>
                 this.sortIndex = sortIndex;
                 this.textAnchor = textAnchor;
             }
-            
+
             public Item(string label, Color color, int sortIndex = -1, TextAnchor textAnchor = TextAnchor.MiddleCenter)
             {
                 this.label = label;
@@ -370,6 +370,13 @@ public class UITable<T> : IComparer<UITable<T>.Row>
             return headerRect;
         }
     }
+}
+
+public interface UIElement
+{
+    Vector2 Position { get; }
+    float Width { get; }
+    float Height { get; }
 }
 
 public abstract class TabWorker_Table<T> : TabWorker<T>
