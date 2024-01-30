@@ -156,15 +156,15 @@ public partial class TabWorker_Bio_Humanlike
     public static void SetDevStage(Pawn pawn, DevelopmentalStage stage)
     {
         var lifeStage = pawn.RaceProps.lifeStageAges.FirstOrDefault(lifeStage => lifeStage.def.developmentalStage == stage);
+        var oldStage = pawn.DevelopmentalStage; // ageTracker changes this so we store the old stage before it is changed.
+        
         if (lifeStage != null)
         {
             var num = lifeStage.minAge;
             pawn.ageTracker.AgeBiologicalTicks = (long)(num * 3600000L);
         }
 
-        if ((pawn.story.bodyType == BodyTypeDefOf.Child && stage != DevelopmentalStage.Child)
-         || (pawn.story.bodyType == BodyTypeDefOf.Baby && stage is not DevelopmentalStage.Baby and not DevelopmentalStage.Newborn)
-         || (stage == DevelopmentalStage.Adult && (pawn.story.bodyType == BodyTypeDefOf.Baby || pawn.story.bodyType == BodyTypeDefOf.Child)))
+        if (oldStage != stage)
         {
             pawn.apparel?.DropAllOrMoveAllToInventory(apparel => !apparel.def.apparel.developmentalStageFilter.Has(stage));
             var bodyTypeFor = PawnGenerator.GetBodyTypeFor(pawn);

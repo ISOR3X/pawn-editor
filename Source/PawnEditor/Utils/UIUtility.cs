@@ -198,6 +198,7 @@ public static class UIUtility
 
 
         Widgets.TextFieldNumeric(inRect.ContractedBy(0f, 4f), ref value, ref buffer, min, max);
+        buffer = null;
     }
 
     public static Rect CellRect(int cell, Rect inRect)

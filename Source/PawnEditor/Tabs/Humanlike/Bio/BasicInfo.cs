@@ -98,6 +98,8 @@ public partial class TabWorker_Bio_Humanlike
             pawn.ageTracker.AgeChronologicalTicks = ageChrono * 3600000L;
             PawnEditor.Notify_PointsUsed();
         }
+        
+        
 
         if (pawn.story.Childhood != null)
         {
