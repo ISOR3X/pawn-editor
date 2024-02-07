@@ -201,6 +201,7 @@
     <PawnEditor.WouldDie>Adding {0} will kill {1}. Add anyway?</PawnEditor.WouldDie>
     <PawnEditor.WouldBeDowned>Adding {0} will cause {1} to be downed. Add anyway?</PawnEditor.WouldBeDowned>
     <PawnEditor.Beard>Beard</PawnEditor.Beard>
+    <PawnEditor.NoRandomOptions>No randomization options available for this tab</PawnEditor.NoRandomOptions>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

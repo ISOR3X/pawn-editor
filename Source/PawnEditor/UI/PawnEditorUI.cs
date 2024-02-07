@@ -138,7 +138,14 @@ public static partial class PawnEditor
             randomRect.TakeRightPart(1);
         }
 
-        if (Widgets.ButtonText(randomRect, "Randomize".Translate())) Find.WindowStack.Add(new FloatMenu(GetRandomizationOptions().ToList()));
+        if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
+        {
+            var options = GetRandomizationOptions().ToList();
+            if (options.Count > 0)
+                Find.WindowStack.Add(new FloatMenu(options));
+            else
+                Messages.Message("PawnEditor.NoRandomOptions".Translate(), MessageTypeDefOf.RejectInput, false);
+        }
 
         buttonRect.x -= 5 + buttonRect.width;
 
