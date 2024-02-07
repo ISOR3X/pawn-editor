@@ -200,6 +200,7 @@
     <PawnEditor.MissingPart>Can't find valid part to mount {0}. Add anyway?</PawnEditor.MissingPart>
     <PawnEditor.WouldDie>Adding {0} will kill {1}. Add anyway?</PawnEditor.WouldDie>
     <PawnEditor.WouldBeDowned>Adding {0} will cause {1} to be downed. Add anyway?</PawnEditor.WouldBeDowned>
+    <PawnEditor.Beard>Beard</PawnEditor.Beard>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

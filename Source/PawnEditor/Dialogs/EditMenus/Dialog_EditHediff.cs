@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
@@ -25,10 +26,21 @@ public class Dialog_EditHediff : Dialog_EditItem<Hediff>
 
         if (listing.ButtonTextLabeledPct("PawnEditor.BodyPart".Translate(), Selected.Part?.LabelCap ?? "WholeBody".Translate(), LABEL_WIDTH_PCT,
                 TextAnchor.MiddleLeft))
-            Find.WindowStack.Add(new FloatMenu(Pawn.RaceProps.body.AllParts.Select(part =>
-                    new FloatMenuOption(part.LabelCap, () => Selected.Part = part))
-               .Prepend(new("WholeBody".Translate(), () => Selected.Part = null))
-               .ToList()));
+        {
+            IEnumerable<BodyPartRecord> parts = Pawn.RaceProps.body.AllParts;
+            var options = new List<FloatMenuOption>();
+
+            if (PawnEditorMod.Settings.HediffLocationLimit == PawnEditorSettings.HediffLocation.All
+             || !ListingMenu_Hediffs.defaultBodyParts.ContainsKey(Selected.def)) options.Add(new("WholeBody".Translate(), () => Selected.Part = null));
+
+            if (PawnEditorMod.Settings.HediffLocationLimit == PawnEditorSettings.HediffLocation.RecipeDef
+             && ListingMenu_Hediffs.defaultBodyParts.TryGetValue(Selected.def, out var result))
+                parts = parts.Where(part => result.Item1.Contains(part.def) || result.Item2.Any(group => part.groups.Contains(group)));
+
+            options.AddRange(parts.Select(part => new FloatMenuOption(part.LabelCap, () => Selected.Part = part)));
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
 
         if (Selected is HediffWithComps hediff)
             foreach (var comp in hediff.comps)

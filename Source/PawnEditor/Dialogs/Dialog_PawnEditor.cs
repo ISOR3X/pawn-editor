@@ -67,6 +67,8 @@ public class Dialog_PawnEditor_InGame : Dialog_PawnEditor
     {
         ColonyInventory.RecacheItems();
         base.PreOpen();
+        if (Find.Selector.SingleSelectedThing is Pawn pawn)
+            PawnEditor.Select(pawn);
     }
 
     public override void OnCancelKeyPressed()

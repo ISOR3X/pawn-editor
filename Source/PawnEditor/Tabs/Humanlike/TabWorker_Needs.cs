@@ -48,7 +48,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         DebugSettings.godMode = oldGodMode;
     }
 
-    private static void DoBottomOptions(Rect inRect, Pawn pawn)
+    private void DoBottomOptions(Rect inRect, Pawn pawn)
     {
         if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.QuickActions".Translate(), 80f))
             Find.WindowStack.Add(new FloatMenu(new()
@@ -63,7 +63,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
         inRect.xMin += 4f;
 
-        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate())) Find.WindowStack.Add(new ListingMenu_Thoughts(pawn));
+        if (UIUtility.DefaultButtonText(ref inRect, "PawnEditor.AddThought".Translate())) Find.WindowStack.Add(new ListingMenu_Thoughts(pawn, table));
 
         inRect.xMin += 4f;
     }

@@ -38,6 +38,8 @@ public class Dialog_AppearanceEditor : Window
 
     private float lastColorHeight;
 
+    private FloatMenuOption lastRandomization;
+
     private float lastXenotypeHeight;
     private MainTab mainTab;
 
@@ -226,19 +228,43 @@ public class Dialog_AppearanceEditor : Window
 
                     break;
                 case MainTab.Hair:
-                    inRect.yMin -= TabDrawer.TabHeight;
-                    DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefs.Where(MatchesSource).ToList(), def =>
-                        {
-                            pawn.story.hairDef = def;
-                            TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                        }, def => def.Icon,
-                        def => pawn.story.hairDef == def, 1, new[] { pawn.story.HairColor },
-                        (color, i) =>
-                        {
-                            pawn.story.HairColor = color;
-                            TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                        }, ColorType.Hair,
-                        DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
+                    shapeTabs.Clear();
+                    shapeTabs.Add(new("PawnEditor.Head".Translate().CapitalizeFirst(), () => shapeTab = ShapeTab.Head, shapeTab == ShapeTab.Head));
+                    shapeTabs.Add(new("PawnEditor.Beard".Translate(), () => shapeTab = ShapeTab.Body, shapeTab == ShapeTab.Body));
+                    Widgets.DrawMenuSection(inRect);
+                    TabDrawer.DrawTabs(inRect, shapeTabs);
+                    switch (shapeTab)
+                    {
+                        case ShapeTab.Head:
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefs.Where(MatchesSource).ToList(), def =>
+                                {
+                                    pawn.story.hairDef = def;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, def => def.Icon,
+                                def => pawn.story.hairDef == def, 1, new[] { pawn.story.HairColor },
+                                (color, i) =>
+                                {
+                                    pawn.story.HairColor = color;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, ColorType.Hair,
+                                DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
+                            break;
+                        case ShapeTab.Body:
+                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<BeardDef>.AllDefs.Where(MatchesSource).ToList(), def =>
+                                {
+                                    pawn.style.beardDef = def;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, def => def.Icon,
+                                def => pawn.style.beardDef == def, 1, new[] { pawn.story.HairColor },
+                                (color, i) =>
+                                {
+                                    pawn.story.HairColor = color;
+                                    TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
+                                }, ColorType.Hair,
+                                DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
+                            break;
+                    }
+
                     break;
                 case MainTab.Tattoos:
                     shapeTabs.Clear();
@@ -582,34 +608,53 @@ public class Dialog_AppearanceEditor : Window
             Close();
         }
 
-        if (Widgets.ButtonText(new Rect(0, 0, 200, 40).CenteredOnXIn(inRect).CenteredOnYIn(inRect), "Randomize".Translate()))
-            Find.WindowStack.Add(new FloatMenu(new()
+        var randomRect = new Rect(0, 0, 200, 40).CenteredOnXIn(inRect).CenteredOnYIn(inRect);
+
+        if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
+        {
+            lastRandomization.action();
+            randomRect.TakeRightPart(1);
+        }
+
+        if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
+        {
+            var initialOptions = new List<FloatMenuOption>
             {
-                new("Randomize".Translate() + " " + "PawnEditor.Shape".Translate(), () =>
+                new("PawnEditor.Shape".Translate(), () =>
                 {
-                    pawn.story.bodyType = (BodyTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Body).RandomElement();
+                    pawn.story.bodyType = (BodyTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Body).Where(MatchesSource).RandomElement();
                     pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
-                new("Randomize".Translate() + " " + "PawnEditor.Head".Translate().CapitalizeFirst(), () =>
+                new("PawnEditor.Head".Translate().CapitalizeFirst(), () =>
                 {
-                    pawn.story.headType = (HeadTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Head).RandomElement();
+                    pawn.story.headType = (HeadTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Head).Where(MatchesSource).RandomElement();
                     pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
-                new("Randomize".Translate() + " " + "Tattoos".Translate(), () =>
+                new("Tattoos".Translate(), () =>
                 {
-                    pawn.style.FaceTattoo = DefDatabase<TattooDef>.AllDefsListForReading.RandomElement();
-                    pawn.style.BodyTattoo = DefDatabase<TattooDef>.AllDefsListForReading.RandomElement();
+                    pawn.style.FaceTattoo = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).RandomElement();
+                    pawn.style.BodyTattoo = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).RandomElement();
                     pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 })
-            }));
+            };
+
+            var options = initialOptions.Select(opt => new FloatMenuOption("Randomize".Translate() + " " + opt.Label, () =>
+                {
+                    lastRandomization = opt;
+                    opt.action();
+                }))
+               .ToList();
+
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
     }
 
     private bool MatchesSource(Def def) => sourceFilter == null || def.modContentPack == sourceFilter;
 
-    private List<Def> GetAllDefsForTab(MainTab tab, ShapeTab shape)
+    private IEnumerable<Def> GetAllDefsForTab(MainTab tab, ShapeTab shape)
     {
         switch (tab)
         {
@@ -633,7 +678,7 @@ public class Dialog_AppearanceEditor : Window
                             if (!allowedBodyTypes.NullOrEmpty()) bodyTypes = bodyTypes.Intersect(allowedBodyTypes);
                         }
 
-                        return bodyTypes.Cast<Def>().ToList();
+                        return bodyTypes;
                     case ShapeTab.Head:
                         var headTypes = DefDatabase<HeadTypeDef>.AllDefs;
                         if (HARCompat.Active)
@@ -643,12 +688,12 @@ public class Dialog_AppearanceEditor : Window
                             headTypes = headTypes.Where(type => type.gender == Gender.None || type.gender == pawn.gender);
                         }
 
-                        return headTypes.Cast<Def>().ToList();
-                    default:
-                        return new();
+                        return headTypes;
                 }
+
+                break;
             case MainTab.Hair:
-                return DefDatabase<HairDef>.AllDefsListForReading.ConvertAll(def => (Def)def);
+                return DefDatabase<HairDef>.AllDefsListForReading;
             case MainTab.Tattoos:
                 return shape switch
                 {
@@ -657,10 +702,10 @@ public class Dialog_AppearanceEditor : Window
                     _ => new()
                 };
             case MainTab.Xenotype:
-                return genesByCategory.SelectMany(defs => defs.Cast<Def>()).ToList();
-            default:
-                return new();
+                return genesByCategory.SelectMany(defs => defs.Cast<Def>());
         }
+
+        return Enumerable.Empty<Def>();
     }
 
     private enum MainTab

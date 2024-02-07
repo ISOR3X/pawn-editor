@@ -226,7 +226,7 @@ public static partial class PawnEditor
             CheckChangeTabGroup();
         }
 
-        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction)
+        if (selectedPawn is { Faction: { } pawnFaction } && pawnFaction != selectedFaction && Find.FactionManager.allFactions.Contains(pawnFaction))
         {
             selectedFaction = pawnFaction;
             CheckChangeTabGroup();
@@ -301,15 +301,25 @@ public static partial class PawnEditor
     public static void Select(Pawn pawn)
     {
         selectedPawn = pawn;
-        selectedFaction = pawn.Faction;
+        var recache = false;
+        if (pawn.Faction != selectedFaction)
+        {
+            selectedFaction = pawn.Faction;
+            recache = true;
+        }
+
         showFactionInfo = false;
         if (!selectedCategory.Includes(pawn))
         {
             selectedCategory = pawn.RaceProps.Humanlike ? PawnCategory.Humans : pawn.RaceProps.IsMechanoid ? PawnCategory.Mechs : PawnCategory.Animals;
-            RecachePawnList();
+            recache = true;
         }
 
-        CheckChangeTabGroup();
+        if (recache)
+        {
+            CheckChangeTabGroup();
+            RecachePawnList();
+        }
     }
 
     public static void Select(Faction faction)

@@ -16,7 +16,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
     private static readonly List<Filter<HediffDef>> filters;
 
     private static readonly HashSet<TechLevel> possibleTechLevels;
-    private static readonly Dictionary<HediffDef, (List<BodyPartDef>, List<BodyPartGroupDef>)> defaultBodyParts;
+    public static readonly Dictionary<HediffDef, (List<BodyPartDef>, List<BodyPartGroupDef>)> defaultBodyParts;
 
     static ListingMenu_Hediffs()
     {

@@ -57,17 +57,18 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
         }
     }
 
-    public ListingMenu_Thoughts(Pawn pawn) : base(moodMemoryDefs, def => GetLabel(def, pawn), def => TryAdd(pawn, def),
+    public ListingMenu_Thoughts(Pawn pawn, UITable<Pawn> table) : base(moodMemoryDefs, def => GetLabel(def, pawn), def => TryAdd(pawn, def, table),
         "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Thought".Translate(), def => def.description, null, GetFilters(), pawn) { }
 
-    public ListingMenu_Thoughts(Pawn pawn, Pawn otherPawn) : base(opinionMemoryDefs, def => GetLabel(def, pawn, otherPawn), def => TryAdd(pawn, def, otherPawn),
+    public ListingMenu_Thoughts(Pawn pawn, Pawn otherPawn, UITable<Pawn> table) : base(opinionMemoryDefs, def => GetLabel(def, pawn, otherPawn),
+        def => TryAdd(pawn, def, table, otherPawn),
         "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Thought".Translate(), def => def.description, null, GetFilters(), pawn) { }
 
     protected override string NextLabel => RequiresOtherPawn(Listing.Selected) ? "Next".Translate() : base.NextLabel;
 
     private static bool RequiresOtherPawn(ThoughtDef def) => def.stackLimitForSameOtherPawn >= 0 || extraNeedsOtherPawn.Contains(def.defName);
 
-    private static AddResult TryAdd(Pawn pawn, ThoughtDef def, Pawn otherPawn = null)
+    private static AddResult TryAdd(Pawn pawn, ThoughtDef def, UITable<Pawn> table, Pawn otherPawn = null)
     {
         if (!ThoughtUtility.CanGetThought(pawn, def))
             return "PawnEditor.CannotGetThought".Translate(pawn.NameShortColored, def.LabelCap);
@@ -77,13 +78,13 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
             PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
             var list = PawnEditor.AllPawns.GetList();
             list.Remove(pawn);
-            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), newOtherPawn => TryAdd(pawn, def, newOtherPawn),
+            Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), newOtherPawn => TryAdd(pawn, def, table, newOtherPawn),
                 "Back".Translate(),
-                () => Find.WindowStack.Add(new ListingMenu_Thoughts(pawn))));
+                () => Find.WindowStack.Add(new ListingMenu_Thoughts(pawn, table))));
             return true;
         }
 
-        AddResult result = new SuccessInfo(() => Add(pawn, def, otherPawn));
+        AddResult result = new SuccessInfo(() => Add(pawn, def, table, otherPawn));
         result = new ConfirmInfo("PawnEditor.ThoughtDuplicate".Translate(), "ThoughtDuplicate", result,
             pawn.needs.mood.thoughts.memories.GetFirstMemoryOfDef(def) != null, null, true);
         result = new ConfirmInfo(ThoughtUtility.ThoughtNullifiedMessage(pawn, def) + ". " + "PawnEditor.AddThoughNullified".Translate(def.LabelCap),
@@ -91,7 +92,7 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
         return result;
     }
 
-    private static void Add(Pawn pawn, ThoughtDef def, Pawn otherPawn = null)
+    private static void Add(Pawn pawn, ThoughtDef def, UITable<Pawn> table, Pawn otherPawn = null)
     {
         if (!def.IsMemory || (RequiresOtherPawn(def) && otherPawn == null)) return;
         var thought = (Thought_Memory)ThoughtMaker.MakeThought(def);
@@ -124,6 +125,8 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
         else if (thought is Thought_WeaponTrait weaponTrait) weaponTrait.weapon = pawn.equipment.Primary;
 
         pawn.needs.mood.thoughts.memories.TryGainMemory(thought, otherPawn);
+
+        table.ClearCache();
     }
 
     private static string GetLabel(ThoughtDef def, Pawn pawn, Pawn otherPawn = null)
@@ -168,9 +171,4 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
                 return range;
             })
         };
-
-    private class Placeholder : Thing
-    {
-        public override string LabelNoCount => "";
-    }
 }
