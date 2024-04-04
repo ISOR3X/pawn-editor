@@ -42,7 +42,7 @@ public partial class TabWorker_Bio_Humanlike
                     {
                         var trLocal = trait;
                         TooltipHandler.TipRegion(r, () => trLocal.TipString(pawn), r.GetHashCode());
-                        if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX))
+                        if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.Delete))
                         {
                             pawn.story.traits.RemoveTrait(trait, true);
                             PawnEditor.Notify_PointsUsed();
@@ -117,7 +117,7 @@ public partial class TabWorker_Bio_Humanlike
                     if (Mouse.IsOver(r))
                     {
                         Widgets.DrawHighlight(r);
-                        if (Widgets.ButtonImage(r.TopPart(0.3f).RightPart(0.3f), TexButton.DeleteX)) pawn.abilities.RemoveAbility(abil.def);
+                        if (Widgets.ButtonImage(r.TopPart(0.3f).RightPart(0.3f), TexButton.Delete)) pawn.abilities.RemoveAbility(abil.def);
                     }
 
 

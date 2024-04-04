@@ -78,7 +78,7 @@ public partial class TabWorker_Bio_Humanlike
                         PawnEditor.Notify_PointsUsed();
                     }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
                     {
-                        if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
+                        if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
                         {
                             Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
                                 delegate
@@ -191,7 +191,7 @@ public partial class TabWorker_Bio_Humanlike
     {
         LongEventHandler.ExecuteWhenFinished(delegate
         {
-            pawn.Drawer.renderer.graphics.SetAllGraphicsDirty();
+            pawn.drawer.renderer.SetAllGraphicsDirty();
             if (pawn.IsColonist) PortraitsCache.SetDirty(pawn);
         });
     }

@@ -54,7 +54,7 @@ public abstract class Dialog_EditItem : Window
             listing.ColumnWidth -= 17;
         }
 
-        using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft, null)) DoContents(listing);
+        using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft)) DoContents(listing);
         listing.End();
 
         if (Event.current.type is not EventType.Layout and not EventType.Ignore and not EventType.Repaint) ClearCaches();

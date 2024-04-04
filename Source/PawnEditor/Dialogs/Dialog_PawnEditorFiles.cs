@@ -46,7 +46,7 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
                 if (num3 % 2 == 0) Widgets.DrawAltRect(rect);
                 Widgets.BeginGroup(rect);
                 var rect2 = new Rect(rect.width - 36f, (rect.height - 36f) / 2f, 36f, 36f);
-                if (Widgets.ButtonImage(rect2, TexButton.DeleteX, Color.white, GenUI.SubtleMouseoverColor))
+                if (Widgets.ButtonImage(rect2, TexButton.Delete, Color.white, GenUI.SubtleMouseoverColor))
                 {
                     var localFile = saveFileInfo.FileInfo;
                     Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(localFile.Name), "ConfirmDelete" + type, delegate

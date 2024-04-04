@@ -211,7 +211,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                 pawn.style.beardDef = beard;
             }
 
-            pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
+            pawn.drawer.renderer.SetAllGraphicsDirty();
             PortraitsCache.SetDirty(pawn);
         }
     }

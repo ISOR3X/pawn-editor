@@ -60,11 +60,11 @@ public static partial class SaveLoadUtility
         {
             switch (refee)
             {
-                case Outfit outfit:
+                case ApparelPolicy outfit:
                     return outfit.label;
                 case DrugPolicy policy:
                     return policy.label;
-                case FoodRestriction restriction:
+                case FoodPolicy restriction:
                     return restriction.label;
                 case Ideo ideo when currentPawn is { Faction.ideos: not null } ideoPawn && ideoPawn.Faction.ideos.PrimaryIdeo == ideo:
                     return "__FACTIONIDEO";
@@ -118,9 +118,9 @@ public static partial class SaveLoadUtility
             if (data == "__CURRENT") return currentItem;
             if (data == "__CURRENTPAWN") return currentPawn;
             if (data == "__CURRENTMAPPARENT") return Find.CurrentMap.Parent;
-            if (type == typeof(Outfit)) return Current.Game?.outfitDatabase?.AllOutfits.FirstOrDefault(x => x.label == data);
+            if (type == typeof(ApparelPolicy)) return Current.Game?.outfitDatabase?.AllOutfits.FirstOrDefault(x => x.label == data);
             if (type == typeof(DrugPolicy)) return Current.Game?.drugPolicyDatabase?.AllPolicies.FirstOrDefault(x => x.label == data);
-            if (type == typeof(FoodRestriction)) return Current.Game?.foodRestrictionDatabase?.AllFoodRestrictions.FirstOrDefault(x => x.label == data);
+            if (type == typeof(FoodPolicy)) return Current.Game?.foodRestrictionDatabase?.AllFoodRestrictions.FirstOrDefault(x => x.label == data);
             if (type == typeof(Ideo))
             {
                 if (data == "__FACTIONIDEO") return currentPawn?.Faction?.ideos?.PrimaryIdeo;
@@ -241,8 +241,8 @@ public static partial class SaveLoadUtility
     private static LocalTargetInfo LocalTargetInfoFromString(string str)
     {
         if (str.NullOrEmpty()) return LocalTargetInfo.Invalid;
-        if (str.Length != 0 && str[0] == '(') return new LocalTargetInfo(IntVec3.FromString(str));
-        if (LoadReferenceData(str, typeof(Thing)) is Thing thing) return new LocalTargetInfo(thing);
+        if (str.Length != 0 && str[0] == '(') return new(IntVec3.FromString(str));
+        if (LoadReferenceData(str, typeof(Thing)) is Thing thing) return new(thing);
         return LocalTargetInfo.Invalid;
     }
 

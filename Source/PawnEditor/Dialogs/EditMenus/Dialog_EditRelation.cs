@@ -69,7 +69,7 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
                 items.Add(new(rect =>
                 {
                     var progress = Mathf.InverseLerp(durationTicks, 0, thoughtMemory.age);
-                    progress = Widgets.HorizontalSlider_NewTemp(rect, progress,
+                    progress = Widgets.HorizontalSlider(rect, progress,
                         0, 1, true, (durationTicks - thoughtMemory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
                         durationTicks.ToStringTicksToPeriodVerbose());
                     thoughtMemory.age = (int)Mathf.Lerp(durationTicks, 0, progress);
@@ -86,7 +86,7 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
                 }), Mathf.RoundToInt(moodOffset)));
 
             if (thought is Thought_Memory memory)
-                items.Add(new(TexButton.DeleteX, () =>
+                items.Add(new(TexButton.Delete, () =>
                 {
                     Pawn.needs.mood.thoughts.memories.RemoveMemory(memory);
                     thoughtTable.ClearCache();

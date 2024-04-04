@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using LudeonTK;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -81,7 +82,7 @@ public static partial class PawnEditor
         inRect = inRect.ContractedBy(6);
         inRect.TakeTopPart(40);
         Widgets.DrawMenuSection(inRect);
-        if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs, 1);
+        if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs);
         inRect = inRect.ContractedBy(6);
         if (curTab != null)
         {

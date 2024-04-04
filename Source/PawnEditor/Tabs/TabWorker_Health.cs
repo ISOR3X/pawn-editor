@@ -59,7 +59,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                     })
             };
             if (pawn.Dead)
-                list.Add(new("Resurrect".Translate(), () => { ResurrectionUtility.Resurrect(pawn); }));
+                list.Add(new("Resurrect".Translate(), () => { ResurrectionUtility.TryResurrect(pawn); }));
             Find.WindowStack.Add(new FloatMenu(list));
         }
 
@@ -133,8 +133,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 GUI.color = Color.white;
             }
 
-            Widgets.Label(new(rect.x, rect.y, rect.width * 0.65f, 30f),
-                pawnCapacityDef.GetLabelFor(pawn.RaceProps.IsFlesh, pawn.RaceProps.Humanlike).CapitalizeFirst());
+            Widgets.Label(new(rect.x, rect.y, rect.width * 0.65f, 30f), pawnCapacityDef.GetLabelFor(pawn).CapitalizeFirst());
             Widgets.Label(new(rect.x + rect.width * 0.65f, rect.y, rect.width * 0.35f, 30f), efficiencyLabel.First.Colorize(efficiencyLabel.Second));
             if (Mouse.IsOver(rect))
                 TooltipHandler.TipRegion(rect, () => pawn.Dead ? "" : HealthCardUtility.GetPawnCapacityTip(pawn, capacity),
@@ -202,7 +201,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                 }
             }));
             items.Add(new(editRect => EditUtility.EditButton(editRect, hediff, pawn, table)));
-            items.Add(new(TexButton.DeleteX, () =>
+            items.Add(new(TexButton.Delete, () =>
             {
                 pawn.health.RemoveHediff(hediff);
                 PawnEditor.Notify_PointsUsed();

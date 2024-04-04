@@ -108,8 +108,8 @@ public class Dialog_AppearanceEditor : Window
             EndogeneCategory.Melanin => PawnSkinColors.SkinColorGenesInOrder[0].LabelCap,
             EndogeneCategory.HairColor => "HairColor".Translate().CapitalizeFirst(),
             EndogeneCategory.Ears => "PawnEditor.Ears".Translate(),
-            EndogeneCategory.Nose => BodyPartDefOf.Nose.LabelCap,
-            EndogeneCategory.Jaw => BodyPartDefOf.Jaw.LabelCap,
+            EndogeneCategory.Nose => PawnEditorDefOf.Nose.LabelCap,
+            EndogeneCategory.Jaw => PawnEditorDefOf.Jaw.LabelCap,
             EndogeneCategory.Hands => PawnEditorDefOf.Hands.LabelCap,
             EndogeneCategory.Headbone => "PawnEditor.Headbone".Translate(),
             EndogeneCategory.Head => BodyPartDefOf.Head.LabelCap,
@@ -213,7 +213,7 @@ public class Dialog_AppearanceEditor : Window
                                 {
                                     pawn.story.headType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                                }, def => def.GetGraphic(pawn.story.SkinColor, false, pawn.story.SkinColorOverriden).MatSouth.mainTexture,
+                                }, def => def.GetGraphic(pawn, pawn.story.HairColor).MatSouth.mainTexture,
                                 def => pawn.story.headType == def, 1, new[] { pawn.story.SkinColor },
                                 (color, i) =>
                                 {
@@ -537,7 +537,7 @@ public class Dialog_AppearanceEditor : Window
                             foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
                         }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
                         {
-                            if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.DeleteX, GUI.color))
+                            if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
                             {
                                 Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
                                     delegate
@@ -623,20 +623,20 @@ public class Dialog_AppearanceEditor : Window
                 new("PawnEditor.Shape".Translate(), () =>
                 {
                     pawn.story.bodyType = (BodyTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Body).Where(MatchesSource).RandomElement();
-                    pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
+                    pawn.drawer.renderer.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
                 new("PawnEditor.Head".Translate().CapitalizeFirst(), () =>
                 {
                     pawn.story.headType = (HeadTypeDef)GetAllDefsForTab(MainTab.Shape, ShapeTab.Head).Where(MatchesSource).RandomElement();
-                    pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
+                    pawn.drawer.renderer.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
                 new("Tattoos".Translate(), () =>
                 {
                     pawn.style.FaceTattoo = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).RandomElement();
                     pawn.style.BodyTattoo = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).RandomElement();
-                    pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
+                    pawn.drawer.renderer.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 })
             };

@@ -107,7 +107,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                 new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); }),
                 new(TexPawnEditor.Save,
                     () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Animals.ToString()); }),
-                new(TexButton.DeleteX, () =>
+                new(TexButton.Delete, () =>
                 {
                     Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteAnimal",
                         () =>
@@ -167,7 +167,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                 new(TexPawnEditor.GoToPawn, () => { PawnEditor.Select(pawn); }),
                 new(TexPawnEditor.Save,
                     () => { SaveLoadUtility.SaveItem(pawn, typePostfix: PawnCategory.Mechs.ToString()); }),
-                new(TexButton.DeleteX, () =>
+                new(TexButton.Delete, () =>
                 {
                     Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(pawn.NameShortColored), "ConfirmDeleteMech",
                         () =>

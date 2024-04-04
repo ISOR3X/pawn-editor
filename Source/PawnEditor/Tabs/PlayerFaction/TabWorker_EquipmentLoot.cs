@@ -73,7 +73,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                     countBuffer[thing] = buffer;
                 }),
                 new(rect => { EditUtility.EditButton(rect, thing, null, table); }),
-                new(TexButton.DeleteX, () =>
+                new(TexButton.Delete, () =>
                 {
                     thing.Destroy();
                     thing.Discard(true);

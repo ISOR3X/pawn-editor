@@ -80,7 +80,7 @@ public partial class TabWorker_Bio_Humanlike
         pawn.story.bodyType = bodyTypes.RandomElement();
         pawn.story.headType = headTypes.RandomElement();
 
-        pawn.drawer.renderer.graphics.SetAllGraphicsDirty();
+        pawn.drawer.renderer.SetAllGraphicsDirty();
         PortraitsCache.SetDirty(pawn);
     }
 

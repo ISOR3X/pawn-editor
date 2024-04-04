@@ -289,7 +289,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
             else items.Add(new());
 
             if (NeedsCardUtility.thoughtGroup.OfType<Thought_Memory>().Any())
-                items.Add(new(TexButton.DeleteX, () =>
+                items.Add(new(TexButton.Delete, () =>
                 {
                     for (var j = NeedsCardUtility.thoughtGroup.Count; j-- > 0;)
                         if (NeedsCardUtility.thoughtGroup[j] is Thought_Memory memory)

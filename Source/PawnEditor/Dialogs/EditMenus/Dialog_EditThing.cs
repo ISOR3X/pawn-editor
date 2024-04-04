@@ -153,7 +153,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
                 {
                     var weaponTraitDefLocal = weaponTraitDef;
                     TooltipHandler.TipRegion(r, weaponTraitDefLocal.description);
-                    if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.DeleteX))
+                    if (Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4), TexButton.Delete))
                     {
                         bladelink.traits.Remove(weaponTraitDefLocal);
                         PawnEditor.Notify_PointsUsed();

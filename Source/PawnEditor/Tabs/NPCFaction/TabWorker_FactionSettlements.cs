@@ -32,7 +32,7 @@ public class TabWorker_FactionSettlements : TabWorker<Faction>
                     Find.WindowStack.RemoveWindowsOfType(typeof(Dialog_PawnEditor_InGame));
                     CameraJumper.TryJumpAndSelect(s, CameraJumper.MovementMode.Cut);
                 }),
-                new(TexButton.DeleteX, () =>
+                new(TexButton.Delete, () =>
                 {
                     Find.WindowStack.Add(new Dialog_Confirm("PawnEditor.ReallyDelete".Translate(s.Name), "ConfirmDeleteSettlement",
                         () =>

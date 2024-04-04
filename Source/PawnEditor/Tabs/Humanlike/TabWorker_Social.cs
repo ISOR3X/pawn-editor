@@ -44,12 +44,12 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                     var pawns = PawnEditor.Pregame
                         ? Find.GameInitData.startingAndOptionalPawns
                         : pawn.MapHeld?.mapPawns.AllPawns
-                          ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
-                              .AllCaravansAndTravelingTransportPods_Alive;
+                       ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
+                             .AllCaravansAndTravelingTransportPods_Alive;
 
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
-                        .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
-                        .ToList()));
+                       .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+                       .ToList()));
                     // ToDo: Add success message
                 })
                 // ToDo: Create baby from parent?
@@ -139,7 +139,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                 PawnEditor.Select(entry.otherPawn.Faction);
             }));
             if (entry.relations.Any(relation => !relation.implied))
-                items.Add(new(TexButton.DeleteX, () =>
+                items.Add(new(TexButton.Delete, () =>
                 {
                     foreach (var relation in entry.relations.Where(static relation => !relation.implied))
                         pawn.relations.TryRemoveDirectRelation(relation, entry.otherPawn);

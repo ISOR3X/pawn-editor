@@ -103,7 +103,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
 
     private static void RecacheGraphics(Pawn pawn)
     {
-        LongEventHandler.ExecuteWhenFinished(pawn.Drawer.renderer.graphics.SetAllGraphicsDirty);
+        LongEventHandler.ExecuteWhenFinished(pawn.Drawer.renderer.SetAllGraphicsDirty);
     }
 
     private void DoBasics(Rect inRect, Pawn pawn)

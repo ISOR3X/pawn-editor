@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace PawnEditor;
@@ -51,4 +52,8 @@ public static class Utilities
 
     public static float StepValue(float oldValuePct, float stepPct, float min = 0, float max = 1) =>
         Mathf.Clamp((float)Math.Round(oldValuePct + stepPct, 2), min, max);
+
+    public static T CreateDelegate<T>(this MethodInfo info) where T : Delegate => (T)info.CreateDelegate(typeof(T));
+
+    public static T CreateDelegate<T>(this MethodInfo info, object target) where T : Delegate => (T)info.CreateDelegate(typeof(T), target);
 }

@@ -109,7 +109,7 @@ public partial class TabWorker_Bio_Humanlike
             var certaintyRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(certaintyRect.TakeLeftPart(leftWidth), certainty);
             certaintyRect.yMax -= Mathf.Round((certaintyRect.height - 10f) / 2f);
-            pawn.ideo.certaintyInt = Widgets.HorizontalSlider_NewTemp(certaintyRect, pawn.ideo.certaintyInt, 0, 1, true, pawn.ideo.Certainty.ToStringPercent(),
+            pawn.ideo.certaintyInt = Widgets.HorizontalSlider(certaintyRect, pawn.ideo.certaintyInt, 0, 1, true, pawn.ideo.Certainty.ToStringPercent(),
                 "0%", "100%");
 
 

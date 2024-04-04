@@ -27,7 +27,8 @@ public static class TexPawnEditor
     static TexPawnEditor()
     {
         BodyTypeIcons = DefDatabase<BodyTypeDef>.AllDefs.ToDictionary(def => def,
-            def => (Texture2D)GraphicDatabase.Get<Graphic_Multi>(def.bodyNakedGraphicPath, ShaderUtility.GetSkinShader(false), Vector2.one, Color.white)
+            def => (Texture2D)GraphicDatabase
+               .Get<Graphic_Multi>(def.bodyNakedGraphicPath, ShaderUtility.GetSkinShaderAbstract(true, false), Vector2.one, Color.white)
                .MatSouth.mainTexture);
     }
 }

@@ -13,6 +13,8 @@ public static class PawnEditorDefOf
     public static TabDef Gear;
     public static BodyPartGroupDef Hands;
     public static BodyPartDef Tail;
+    public static BodyPartDef Nose;
+    public static BodyPartDef Jaw;
 
     static PawnEditorDefOf()
     {

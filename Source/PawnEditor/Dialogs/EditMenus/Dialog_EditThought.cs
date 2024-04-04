@@ -39,7 +39,7 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
             if (thought is Thought_Memory memory && duration > 5)
             {
                 var progress = Mathf.InverseLerp(duration, 0, memory.age);
-                progress = Widgets.HorizontalSlider_NewTemp(listing.GetRectLabeled("ExpiresIn".Translate().CapitalizeFirst(), CELL_HEIGHT), progress,
+                progress = Widgets.HorizontalSlider(listing.GetRectLabeled("ExpiresIn".Translate().CapitalizeFirst(), CELL_HEIGHT), progress,
                     0, 1, true, (duration - memory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
                     duration.ToStringTicksToPeriodVerbose());
                 memory.age = (int)Mathf.Lerp(duration, 0, progress);
@@ -85,7 +85,7 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
                 items.Add(new(rect =>
                 {
                     var progress = Mathf.InverseLerp(durationTicks, 0, thoughtMemory.age);
-                    progress = Widgets.HorizontalSlider_NewTemp(rect, progress,
+                    progress = Widgets.HorizontalSlider(rect, progress,
                         0, 1, true, (durationTicks - thoughtMemory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
                         durationTicks.ToStringTicksToPeriodVerbose());
                     thoughtMemory.age = (int)Mathf.Lerp(durationTicks, 0, progress);
@@ -102,7 +102,7 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
                 }), Mathf.RoundToInt(moodOffset)));
 
             if (thought is Thought_Memory memory)
-                items.Add(new(TexButton.DeleteX, () =>
+                items.Add(new(TexButton.Delete, () =>
                 {
                     Pawn.needs.mood.thoughts.memories.RemoveMemory(memory);
                     thoughtTable.ClearCache();

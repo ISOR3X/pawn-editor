@@ -64,7 +64,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
                 new(thing.MarketValue.ToStringMoney().Colorize(ColoredText.SubtleGrayColor), (int)thing.MarketValue),
                 new(),
                 new(editRect => EditUtility.EditButton(editRect, thing, pawn, table)),
-                new(TexButton.DeleteX, () =>
+                new(TexButton.Delete, () =>
                 {
                     thing.Destroy();
                     thing.Discard(true);

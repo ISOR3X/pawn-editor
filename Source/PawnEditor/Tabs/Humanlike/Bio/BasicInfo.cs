@@ -1,5 +1,4 @@
-﻿using System;
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -64,7 +63,7 @@ public partial class TabWorker_Bio_Humanlike
         var ageRect = inRect.TakeTopPart(50);
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(ageRect.TakeLeftPart(leftWidth), age);
         var bio = ageRect.LeftPart(0.6f).LeftHalf();
-        using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter, null))
+        using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter))
             Widgets.Label(bio.TakeTopPart(Text.LineHeight), "PawnEditor.Biological".Translate());
         var ageBio = pawn.ageTracker.AgeBiologicalYears;
         if (bufferForPawn == null || bufferForPawn != pawn)
@@ -78,8 +77,8 @@ public partial class TabWorker_Bio_Humanlike
         var minAge = 0;
         if (pawn.ageTracker.Adult)
             minAge = (int)pawn.ageTracker.CurLifeStageRace.minAge;
-        UIUtility.IntField(bio, ref ageBio, minAge, Int32.MaxValue, ref ageBiologicalBuffer);
-        
+        UIUtility.IntField(bio, ref ageBio, minAge, int.MaxValue, ref ageBiologicalBuffer);
+
         if (ageBio != pawn.ageTracker.AgeBiologicalYears)
         {
             pawn.ageTracker.AgeBiologicalTicks = ageBio * 3600000L;
@@ -87,19 +86,18 @@ public partial class TabWorker_Bio_Humanlike
         }
 
         var chrono = ageRect.LeftPart(0.6f).RightHalf();
-        using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter, null))
+        using (new TextBlock(GameFont.Tiny, TextAnchor.MiddleCenter))
             Widgets.Label(chrono.TakeTopPart(Text.LineHeight), "PawnEditor.Chronological".Translate());
         var ageChrono = pawn.ageTracker.AgeChronologicalYears;
-        
-        UIUtility.IntField(chrono, ref ageChrono, 0, Int32.MaxValue, ref ageChronologicalBuffer);
-        
+
+        UIUtility.IntField(chrono, ref ageChrono, 0, int.MaxValue, ref ageChronologicalBuffer);
+
         if (ageChrono != pawn.ageTracker.AgeChronologicalYears)
         {
             pawn.ageTracker.AgeChronologicalTicks = ageChrono * 3600000L;
             PawnEditor.Notify_PointsUsed();
         }
-        
-        
+
 
         if (pawn.story.Childhood != null)
         {

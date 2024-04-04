@@ -42,7 +42,7 @@ public abstract class Filter<T>
         using (new TextBlock(TextAnchor.MiddleLeft))
         {
             var buttonRect = topRowRect.TakeRightPart(topRowRect.height);
-            if (Widgets.ButtonImage(buttonRect, TexButton.DeleteX))
+            if (Widgets.ButtonImage(buttonRect, TexButton.Delete))
             {
                 Inverted = false;
                 return true;

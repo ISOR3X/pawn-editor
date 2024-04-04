@@ -54,7 +54,7 @@ public class Dialog_EditHediff : Dialog_EditItem<Hediff>
                         break;
                     case HediffComp_Disappears disappears:
                         var progress = 1 - disappears.Progress;
-                        progress = Widgets.HorizontalSlider_NewTemp(listing.GetRectLabeled("TimeLeft".Translate().CapitalizeFirst(), CELL_HEIGHT), progress,
+                        progress = Widgets.HorizontalSlider(listing.GetRectLabeled("TimeLeft".Translate().CapitalizeFirst(), CELL_HEIGHT), progress,
                             0, 1, true, disappears.ticksToDisappear.ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
                             disappears.disappearsAfterTicks.ToStringTicksToPeriodVerbose());
                         disappears.ticksToDisappear = Mathf.RoundToInt(progress * Math.Max(1, disappears.disappearsAfterTicks));

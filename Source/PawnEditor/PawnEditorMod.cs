@@ -123,10 +123,10 @@ public class PawnEditorMod : Mod
             x = rect.x + rect.width / 2 + 2;
             y = rect.y + rect.height - 38f;
             if (Widgets.ButtonText(new(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "XenotypeEditor".Translate()))
-                Find.WindowStack.Add(new Dialog_CreateXenotype(StartingPawnUtility.PawnIndex(__instance.curPawn), delegate
+                Find.WindowStack.Add(new Dialog_CreateXenotype(__instance.curPawnIndex, delegate
                 {
                     CharacterCardUtility.cachedCustomXenotypes = null;
-                    __instance.RandomizeCurPawn();
+                    StartingPawnUtility.RandomizePawn(__instance.curPawnIndex);
                 }));
             x = rect.x + rect.width / 2 - 2 - Page.BottomButSize.x;
             y = rect.y + rect.height - 38f;
@@ -146,13 +146,14 @@ public class PawnEditorMod : Mod
     public static IEnumerable<CodeInstruction> AddDevButton(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
     {
         var codes = instructions.ToList();
-        var info = AccessTools.PropertySetter(typeof(Prefs), nameof(Prefs.PauseOnError));
+        var info = AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.ToggleGodMode));
         var idx = codes.FindIndex(ins => ins.Calls(info));
         var label = generator.DefineLabel();
+        var labels = codes[idx + 1].ExtractLabels();
         codes[idx + 1].labels.Add(label);
         codes.InsertRange(idx + 1, new[]
         {
-            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Ldarg_0).WithLabels(labels),
             CodeInstruction.LoadField(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.widgetRow)),
             CodeInstruction.LoadField(typeof(TexPawnEditor), nameof(TexPawnEditor.OpenPawnEditor)),
             new CodeInstruction(OpCodes.Ldstr, "PawnEditor.CharacterEditor"),

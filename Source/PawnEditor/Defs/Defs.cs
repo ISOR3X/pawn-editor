@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using HarmonyLib;
-using MonoMod.Utils;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -86,25 +85,28 @@ public class TabDef : Def
 
     public TabType type;
     public Type workerClass;
+    private Action<Rect, Faction> drawerFaction;
 
 
-    private Action<Rect, object> drawer;
-    private Func<object, IEnumerable<FloatMenuOption>> getRandomizationOptions;
-    private Func<object, IEnumerable<SaveLoadItem>> getSaveLoadItems;
+    private Action<Rect, Pawn> drawerPawn;
+    private Func<Faction, IEnumerable<FloatMenuOption>> getRandomizationOptionsFaction;
+    private Func<Pawn, IEnumerable<FloatMenuOption>> getRandomizationOptionsPawn;
+    private Func<Faction, IEnumerable<SaveLoadItem>> getSaveLoadItemsFaction;
+    private Func<Pawn, IEnumerable<SaveLoadItem>> getSaveLoadItemsPawn;
     private object worker;
 
     public TabDef() => description ??= label;
 
-    public void DrawTabContents(Rect rect, Pawn pawn) => drawer?.Invoke(rect, pawn);
+    public void DrawTabContents(Rect rect, Pawn pawn) => drawerPawn?.Invoke(rect, pawn);
 
-    public IEnumerable<SaveLoadItem> GetSaveLoadItems(Pawn pawn) => getSaveLoadItems?.Invoke(pawn);
+    public IEnumerable<SaveLoadItem> GetSaveLoadItems(Pawn pawn) => getSaveLoadItemsPawn?.Invoke(pawn);
 
-    public IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn) => getRandomizationOptions?.Invoke(pawn);
-    public void DrawTabContents(Rect rect, Faction faction) => drawer?.Invoke(rect, faction);
+    public IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn) => getRandomizationOptionsPawn?.Invoke(pawn);
+    public void DrawTabContents(Rect rect, Faction faction) => drawerFaction?.Invoke(rect, faction);
 
-    public IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction) => getSaveLoadItems?.Invoke(faction);
+    public IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction) => getSaveLoadItemsFaction?.Invoke(faction);
 
-    public IEnumerable<FloatMenuOption> GetRandomizationOptions(Faction faction) => getRandomizationOptions?.Invoke(faction);
+    public IEnumerable<FloatMenuOption> GetRandomizationOptions(Faction faction) => getRandomizationOptionsFaction?.Invoke(faction);
 
     public override void PostLoad()
     {
@@ -126,20 +128,36 @@ public class TabDef : Def
             try { AccessTools.Method(workerClass, "Initialize", Type.EmptyTypes)?.Invoke(worker, Array.Empty<object>()); }
             catch (Exception e) { Log.Error($"Failed to initialize tab worker: {e}"); }
 
-            try { drawer = AccessTools.Method(workerClass, "DrawTabContents", new[] { typeof(Rect), argType }).CreateDelegate<Action<Rect, object>>(worker); }
+            try
+            {
+                if (type == TabType.Faction)
+                    drawerFaction = AccessTools.Method(workerClass, "DrawTabContents", new[] { typeof(Rect), argType })
+                       .CreateDelegate<Action<Rect, Faction>>(worker);
+                else if (type == TabType.Pawn)
+                    drawerPawn = AccessTools.Method(workerClass, "DrawTabContents", new[] { typeof(Rect), argType })
+                       .CreateDelegate<Action<Rect, Pawn>>(worker);
+            }
             catch (Exception e) { Log.Error($"Failed to instantiate tab drawer: {e}"); }
 
             try
             {
-                getSaveLoadItems = AccessTools.Method(workerClass, "GetSaveLoadItems", new[] { argType })
-                  ?.CreateDelegate<Func<object, IEnumerable<SaveLoadItem>>>(worker);
+                if (type == TabType.Faction)
+                    getSaveLoadItemsFaction = AccessTools.Method(workerClass, "GetSaveLoadItems", new[] { argType })
+                      ?.CreateDelegate<Func<Faction, IEnumerable<SaveLoadItem>>>(worker);
+                else if (type == TabType.Pawn)
+                    getSaveLoadItemsPawn = AccessTools.Method(workerClass, "GetSaveLoadItems", new[] { argType })
+                      ?.CreateDelegate<Func<Pawn, IEnumerable<SaveLoadItem>>>(worker);
             }
             catch (Exception e) { Log.Error($"Failed to instantiate tab save/loading: {e}"); }
 
             try
             {
-                getRandomizationOptions = AccessTools.Method(workerClass, "GetRandomizationOptions", new[] { argType })?
-                   .CreateDelegate<Func<object, IEnumerable<FloatMenuOption>>>(worker);
+                if (type == TabType.Faction)
+                    getRandomizationOptionsFaction = AccessTools.Method(workerClass, "GetRandomizationOptions", new[] { argType })
+                      ?.CreateDelegate<Func<Faction, IEnumerable<FloatMenuOption>>>(worker);
+                else if (type == TabType.Pawn)
+                    getRandomizationOptionsPawn = AccessTools.Method(workerClass, "GetRandomizationOptions", new[] { argType })
+                      ?.CreateDelegate<Func<Pawn, IEnumerable<FloatMenuOption>>>(worker);
             }
             catch (Exception e) { Log.Error($"Failed to instantiate tab randomization: {e}"); }
         }
