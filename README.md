@@ -1,5 +1,5 @@
-![Preview](https://github.com/ISOR3X/pawn-editor/assets/75855460/892e838c-6544-4787-bcdc-c7afe2f7fcc7)
+Steer the story in the direction you want it to go. Heal injuries, teleport missing pawns back, change backstories thatdo not fit the narrative.
 
-Description goes here.
+Pawn Editor is a new editor for your pawns inspired by great mods like Character Editor and Prepare Carefully.
 
-Link to doc: https://docs.google.com/document/d/1w9uSY4zs73SiWhwAJmiDmy2OSa6ZMssuRTLdo4xtqTI/edit
+Your last colonist exerts her final breath as she dies. Not even her ultratech armor orarchotech implants could save your colony from... a rabbit? Tend to your pawns and shape them in a way that fits the story you had in mind.

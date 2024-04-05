@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
   <name>Pawn Editor</name>
-  <author>Helixien, legodude17, ISOREX</author>
+  <author>legodude17, ISOREX</author>
   <supportedVersions>
     <li>1.5</li>
   </supportedVersions>
   <packageId>ISOREX.PawnEditor</packageId>
+  <modVersion>0.9.0</modVersion>
   <modDependencies>
     <li>
       <packageId>brrainz.harmony</packageId>
@@ -21,7 +22,10 @@
     <li>Ludeon.RimWorld.Biotech</li>
     <li>brrainz.harmony</li>
   </loadAfter>
-  <description>
-to-do.
-  </description>
+  <description>Steer the story in the direction you want it to go. Heal injuries, teleport missing pawns back, change backstories thatdo not fit the narrative.
+
+Pawn Editor is a new editor for your pawns inspired by great mods like Character Editor and Prepare Carefully.
+
+Your last colonist exerts her final breath as she dies. Not even her ultratech armor orarchotech implants could save your colony from... a rabbit? Tend to your pawns and shape them in a way that fits the story you had in mind.</description>
+  <modIconPath IgnoreIfNoMatchingField="True">ModIcon</modIconPath>
 </ModMetaData>
