@@ -41,7 +41,8 @@ public static partial class SaveLoadUtility
                 refee = LoadReferenceData(data, type);
             }
         }
-        else if (loadInfo.TryGetValue((Scribe.loader.curParent, Scribe.loader.curPathRelToParent + '/' + label), out var info) && refee == null)
+        else if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs
+              && loadInfo.TryGetValue((Scribe.loader.curParent, Scribe.loader.curPathRelToParent + '/' + label), out var info))
         {
             var (data, type) = info;
             if (type == null) return true;
@@ -121,6 +122,7 @@ public static partial class SaveLoadUtility
             if (type == typeof(ApparelPolicy)) return Current.Game?.outfitDatabase?.AllOutfits.FirstOrDefault(x => x.label == data);
             if (type == typeof(DrugPolicy)) return Current.Game?.drugPolicyDatabase?.AllPolicies.FirstOrDefault(x => x.label == data);
             if (type == typeof(FoodPolicy)) return Current.Game?.foodRestrictionDatabase?.AllFoodRestrictions.FirstOrDefault(x => x.label == data);
+            if (type == typeof(ReadingPolicy)) return Current.Game?.readingPolicyDatabase?.AllReadingPolicies.FirstOrDefault(x => x.label == data);
             if (type == typeof(Ideo))
             {
                 if (data == "__FACTIONIDEO") return currentPawn?.Faction?.ideos?.PrimaryIdeo;
@@ -264,7 +266,7 @@ public static partial class SaveLoadUtility
                         var item = LoadReferenceData(id, type);
                         if (item == null)
                         {
-                            Log.Error($"Failed to find item! data={id}, type={type}");
+                            Log.Error($"[PawnEditor] Failed to find item! data={id}, type={type}");
                             continue;
                         }
 

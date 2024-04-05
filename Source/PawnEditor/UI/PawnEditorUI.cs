@@ -184,11 +184,50 @@ public static partial class PawnEditor
                 LoadLabel = "PawnEditor.LoadFaction".Translate()
             });
         else
+        {
+            IntVec3 pos = default;
+            Map map = null;
+            Rot4 rot = default;
+            ThingOwner parent = null;
             yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn, new()
             {
                 LoadLabel = "PawnEditor.LoadPawn".Translate(),
-                TypePostfix = selectedCategory.ToString()
+                TypePostfix = selectedCategory.ToString(),
+                PrepareLoad = pawn =>
+                {
+                    if (pawn.Spawned)
+                    {
+                        pos = pawn.Position;
+                        rot = pawn.Rotation;
+                        map = pawn.Map;
+                        pawn.DeSpawn();
+                    }
+                    else if (pawn.SpawnedOrAnyParentSpawned)
+                    {
+                        parent = pawn.holdingOwner;
+                        pawn.holdingOwner.Remove(pawn);
+                    }
+                },
+                OnLoad = pawn =>
+                {
+                    if (map != null)
+                        GenSpawn.Spawn(pawn, pos, map, rot, WipeMode.VanishOrMoveAside, true);
+                    else if (parent != null && !parent.TryAdd(pawn, false))
+                    {
+                        Log.Warning($"[Pawn Editor] Failed to add {pawn} to old parent {parent}.");
+                        var thing = parent.owner switch
+                        {
+                            Thing { SpawnedOrAnyParentSpawned: true } thing1 => thing1,
+                            ThingComp { parent: Thing { SpawnedOrAnyParentSpawned: true } thing2 } => thing2,
+                            _ => null
+                        };
+
+                        if (thing != null && GenPlace.TryFindPlaceSpotNear(thing.Position, Rot4.South, thing.MapHeld, pawn, false, out var spot))
+                            GenSpawn.Spawn(pawn, spot, thing.MapHeld, Rot4.South, WipeMode.VanishOrMoveAside, true);
+                    }
+                }
             });
+        }
 
         if (Pregame)
             yield return new SaveLoadItem<StartingThingsManager.StartingPreset>("PawnEditor.Selection".Translate(), new());
