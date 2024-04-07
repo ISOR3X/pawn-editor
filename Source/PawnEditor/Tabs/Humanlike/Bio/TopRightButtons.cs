@@ -57,6 +57,8 @@ public partial class TabWorker_Bio_Humanlike
             var list = new List<FloatMenuOption>();
             foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
             {
+                if (HARCompat.Active && HARCompat.EnforceRestrictions && !HARCompat.CanUseXenotype(item, pawn))
+                    continue;
                 var xenotype = item;
                 list.Add(new(xenotype.LabelCap,
                     () =>
@@ -157,7 +159,7 @@ public partial class TabWorker_Bio_Humanlike
     {
         var lifeStage = pawn.RaceProps.lifeStageAges.FirstOrDefault(lifeStage => lifeStage.def.developmentalStage == stage);
         var oldStage = pawn.DevelopmentalStage; // ageTracker changes this so we store the old stage before it is changed.
-        
+
         if (lifeStage != null)
         {
             var num = lifeStage.minAge;

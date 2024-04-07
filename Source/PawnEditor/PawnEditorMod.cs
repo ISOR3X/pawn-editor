@@ -19,7 +19,6 @@ public class PawnEditorMod : Mod
     public PawnEditorMod(ModContentPack content) : base(content)
     {
         Harm = new("legodude17.pawneditor");
-        Settings = GetSettings<PawnEditorSettings>();
         Instance = this;
 
         Harm.Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), nameof(Page_ConfigureStartingPawns.PreOpen)),
@@ -49,9 +48,10 @@ public class PawnEditorMod : Mod
                     name ??= (string)field?.GetValue(null);
                     if (name != null) Log.Message($"[Pawn Editor] {name} compatibility active.");
                 }
-        });
 
-        LongEventHandler.ExecuteWhenFinished(ApplySettings);
+            Settings = GetSettings<PawnEditorSettings>();
+            ApplySettings();
+        });
     }
 
     public override string SettingsCategory() => "PawnEditor".Translate();
@@ -74,6 +74,8 @@ public class PawnEditorMod : Mod
                .Select(loc => new FloatMenuOption($"PawnEditor.HediffLocation.{loc}".Translate(), () => Settings.HediffLocationLimit = loc))
                .ToList()));
         if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
+        listing.CheckboxLabeled("PawnEditor.EnforceHARRestrictions".Translate(), ref HARCompat.EnforceRestrictions,
+            "PawnEditor.EnforceHARRestrictions.Desc".Translate());
         listing.End();
     }
 
@@ -229,6 +231,8 @@ public class PawnEditorSettings : ModSettings
         Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));
         Scribe_Values.Look(ref HediffLocationLimit, nameof(HediffLocationLimit));
 
+        if (HARCompat.Active) Scribe_Values.Look(ref HARCompat.EnforceRestrictions, "EnforceHARRestrictions", true);
+
         DontShowAgain ??= new();
     }
 }
@@ -243,5 +247,5 @@ public class ModCompatAttribute : Attribute
 
     public ModCompatAttribute(params string[] mods) => this.mods = mods.ToList();
 
-    public bool ShouldActivate() => ModLister.AnyFromListActive(mods);
+    public bool ShouldActivate() => mods.Any(mod => ModLister.GetActiveModWithIdentifier(mod, true) != null);
 }

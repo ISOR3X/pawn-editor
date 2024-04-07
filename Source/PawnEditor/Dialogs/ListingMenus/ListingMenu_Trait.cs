@@ -45,6 +45,10 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
         if (traitInfo.Trait.def.requiredWorkTypes?.FirstOrDefault(pawn.WorkTypeIsDisabled) is { } workType)
             return "PawnEditor.TraitWorkDisabled".Translate(pawn.Name.ToStringShort, workType.label, traitInfo.Trait.Label);
 
+        if (HARCompat.Active && HARCompat.EnforceRestrictions && !HARCompat.CanGetTrait(traitInfo, pawn))
+            return "PawnEditor.HARRestrictionViolated".Translate(pawn.Named("PAWN"), pawn.def.label.Named("RACE"), "PawnEditor.Wear".Named("VERB"),
+                traitInfo.Trait.Label.Named("ITEM"));
+
         pawn.story.traits.GainTrait(new(traitInfo.Trait.def, traitInfo.TraitDegreeData.degree));
         PawnEditor.Notify_PointsUsed();
         return true;

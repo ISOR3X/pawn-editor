@@ -129,6 +129,10 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         {
             case ItemType.Apparel:
             {
+                if (HARCompat.Active && HARCompat.EnforceRestrictions && !HARCompat.CanWear(thingDef, pawn))
+                    return "PawnEditor.HARRestrictionViolated".Translate(pawn.Named("PAWN"), pawn.def.label.Named("RACE"), "PawnEditor.Wear".Named("VERB"),
+                        thingDef.label.Named("ITEM"));
+
                 if (thingDef.IsApparel && PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair))
                 {
                     var newApparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
@@ -154,6 +158,10 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
             }
             case ItemType.Equipment:
             {
+                if (HARCompat.Active && HARCompat.EnforceRestrictions && !HARCompat.CanEquip(thingDef, pawn))
+                    return "PawnEditor.HARRestrictionViolated".Translate(pawn.Named("PAWN"), pawn.def.label.Named("RACE"), "PawnEditor.Equip".Named("VERB"),
+                        thingDef.label.Named("ITEM"));
+
                 if (thingDef.equipmentType != EquipmentType.None && PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef)
                        .TryRandomElement(out var thingStuffPair))
                 {

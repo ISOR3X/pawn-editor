@@ -16,4 +16,6 @@
     <PawnEditor.HediffLocation>Limit possible hediff parts to...</PawnEditor.HediffLocation>
     <PawnEditor.HediffLocation.All>all</PawnEditor.HediffLocation.All>
     <PawnEditor.HediffLocation.RecipeDef>install locations</PawnEditor.HediffLocation.RecipeDef>
+    <PawnEditor.EnforceHARRestrictions>Enforce HAR restrictions</PawnEditor.EnforceHARRestrictions>
+    <PawnEditor.EnforceHARRestrictions.Desc>When true, HAR's restrictions for things like apparel and thoughts will be enforced in the editor.</PawnEditor.EnforceHARRestrictions.Desc>
 </LanguageData>

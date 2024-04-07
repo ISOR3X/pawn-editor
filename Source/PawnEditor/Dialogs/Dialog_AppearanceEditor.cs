@@ -198,7 +198,7 @@ public class Dialog_AppearanceEditor : Window
                                     pawn.story.skinColorOverride = color;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, ColorType.Misc,
-                                DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
+                                DefDatabase<ColorDef>.AllDefs.Select(static def => def.color).ToList());
                             break;
                         case ShapeTab.Head:
                             var headTypes = DefDatabase<HeadTypeDef>.AllDefs.Where(MatchesSource);
@@ -220,7 +220,7 @@ public class Dialog_AppearanceEditor : Window
                                     pawn.story.skinColorOverride = color;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, ColorType.Misc,
-                                DefDatabase<ColorDef>.AllDefs.Select(def => def.color).ToList());
+                                DefDatabase<ColorDef>.AllDefs.Select(static def => def.color).ToList());
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -236,7 +236,9 @@ public class Dialog_AppearanceEditor : Window
                     switch (shapeTab)
                     {
                         case ShapeTab.Head:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<HairDef>.AllDefs.Where(MatchesSource).ToList(), def =>
+                            var hairTypes = DefDatabase<HairDef>.AllDefs.Where(MatchesSource);
+                            if (HARCompat.Active && HARCompat.EnforceRestrictions) hairTypes = hairTypes.Where(hair => HARCompat.AllowStyleItem(hair, pawn));
+                            DoIconOptions(inRect.ContractedBy(5), hairTypes.ToList(), def =>
                                 {
                                     pawn.story.hairDef = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -247,10 +249,12 @@ public class Dialog_AppearanceEditor : Window
                                     pawn.story.HairColor = color;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, ColorType.Hair,
-                                DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
+                                DefDatabase<ColorDef>.AllDefs.Where(static def => def.colorType == ColorType.Hair).Select(static def => def.color).ToList());
                             break;
                         case ShapeTab.Body:
-                            DoIconOptions(inRect.ContractedBy(5), DefDatabase<BeardDef>.AllDefs.Where(MatchesSource).ToList(), def =>
+                            var beardTypes = DefDatabase<BeardDef>.AllDefs.Where(MatchesSource);
+                            if (HARCompat.Active && HARCompat.EnforceRestrictions) beardTypes = beardTypes.Where(hair => HARCompat.AllowStyleItem(hair, pawn));
+                            DoIconOptions(inRect.ContractedBy(5), beardTypes.ToList(), def =>
                                 {
                                     pawn.style.beardDef = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -261,7 +265,7 @@ public class Dialog_AppearanceEditor : Window
                                     pawn.story.HairColor = color;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
                                 }, ColorType.Hair,
-                                DefDatabase<ColorDef>.AllDefs.Where(def => def.colorType == ColorType.Hair).Select(def => def.color).ToList());
+                                DefDatabase<ColorDef>.AllDefs.Where(static def => def.colorType == ColorType.Hair).Select(static def => def.color).ToList());
                             break;
                     }
 
@@ -272,24 +276,25 @@ public class Dialog_AppearanceEditor : Window
                     shapeTabs.Add(new("PawnEditor.Head".Translate().CapitalizeFirst(), () => shapeTab = ShapeTab.Head, shapeTab == ShapeTab.Head));
                     Widgets.DrawMenuSection(inRect);
                     TabDrawer.DrawTabs(inRect, shapeTabs);
+                    var tattoos = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource);
+                    if (HARCompat.Active && HARCompat.EnforceRestrictions) tattoos = tattoos.Where(td => HARCompat.AllowStyleItem(td, pawn));
                     switch (shapeTab)
                     {
                         case ShapeTab.Body:
-                            DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).Where(td => td.tattooType == TattooType.Body).ToList(), def =>
+                            DoIconOptions(inRect.ContractedBy(5), tattoos.Where(static td => td.tattooType == TattooType.Body).ToList(), def =>
                                 {
                                     pawn.style.BodyTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                                }, def => def.Icon,
+                                }, static def => def.Icon,
                                 def => pawn.style.BodyTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
                             break;
                         case ShapeTab.Head:
                             DoIconOptions(inRect.ContractedBy(5),
-                                DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).Where(td => td.tattooType == TattooType.Face).ToList(), def =>
+                                tattoos.Where(static td => td.tattooType == TattooType.Face).ToList(), def =>
                                 {
                                     pawn.style.FaceTattoo = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
-                                }, def => def.Icon,
+                                }, static def => def.Icon,
                                 def => pawn.style.FaceTattoo == def, 0, Array.Empty<Color>(), null, ColorType.Misc, null);
                             break;
                         default:
@@ -415,8 +420,9 @@ public class Dialog_AppearanceEditor : Window
         {
             var option = options[i];
             var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(2);
-            var enabled = ignoreXenotype || (pawn.genes.Xenotype?.AllGenes.Contains(option) ?? true)
-                                         || (pawn.genes.CustomXenotype?.genes.Contains(option) ?? false);
+            var enabled = (ignoreXenotype || (pawn.genes.Xenotype?.AllGenes.Contains(option) ?? true)
+                                          || (pawn.genes.CustomXenotype?.genes.Contains(option) ?? false))
+                       && (!HARCompat.Active || !HARCompat.EnforceRestrictions || HARCompat.CanHaveGene(option, pawn));
             Widgets.DrawHighlight(rect);
             if (pawn.genes.HasGene(option)) Widgets.DrawBox(rect);
             if (enabled && Widgets.ButtonInvisible(rect))

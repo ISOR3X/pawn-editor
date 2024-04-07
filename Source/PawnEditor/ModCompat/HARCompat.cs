@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using JetBrains.Annotations;
-using MonoMod.Utils;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -14,6 +13,7 @@ namespace PawnEditor;
 public static class HARCompat
 {
     public static bool Active;
+    public static bool EnforceRestrictions = true;
     private static Action<Rect> doRaceTabs;
     private static Action<Pawn> constructorPostfix;
     private static Func<IEnumerable<HeadTypeDef>, Pawn, IEnumerable<HeadTypeDef>> headTypeFilter;
@@ -23,32 +23,50 @@ public static class HARCompat
     private static AccessTools.FieldRef<object, object> generalSettings;
 
     private static AccessTools.FieldRef<object, List<BodyTypeDef>> bodyTypes;
-//    private static AccessTools.FieldRef<object, object> styleSettings;
-//    private static Func<object, StyleItemDef, Pawn, bool, bool> isValidStyle;
+    private static AccessTools.FieldRef<object, object> styleSettings;
+    private static Func<object, StyleItemDef, Pawn, bool, bool> isValidStyle;
+
+    private static Func<ThingDef, ThingDef, bool> canWear;
+    private static Func<ThingDef, ThingDef, bool> canEquip;
+    private static Func<TraitDef, Pawn, int, bool> canGetTrait;
+    private static Func<GeneDef, ThingDef, bool> canHaveGene;
+    private static Func<XenotypeDef, ThingDef, bool> canUseXenotype;
 
     public static string Name = "Humanoid Alien Races";
 
     [UsedImplicitly]
     public static void Activate()
     {
-        var type = AccessTools.TypeByName("AlienRace.StylingStation");
-        doRaceTabs = AccessTools.Method(type, "DoRaceTabs", new[] { typeof(Rect) }).CreateDelegate<Action<Rect>>();
-        constructorPostfix = AccessTools.Method(type, "ConstructorPostfix", new[] { typeof(Pawn) }).CreateDelegate<Action<Pawn>>();
-        type = AccessTools.TypeByName("AlienRace.HarmonyPatches");
-        headTypeFilter = AccessTools.Method(type, "HeadTypeFilter").CreateDelegate<Func<IEnumerable<HeadTypeDef>, Pawn, IEnumerable<HeadTypeDef>>>();
-//        type = AccessTools.TypeByName("AlienRace.RaceRestrictionSettings");
+        var stylingStation = AccessTools.TypeByName("AlienRace.StylingStation");
+        doRaceTabs = AccessTools.Method(stylingStation, "DoRaceTabs", new[] { typeof(Rect) }).CreateDelegate<Action<Rect>>();
+        constructorPostfix = AccessTools.Method(stylingStation, "ConstructorPostfix", new[] { typeof(Pawn) }).CreateDelegate<Action<Pawn>>();
+        Log.Message("Styling station done!");
 
-        type = AccessTools.TypeByName("AlienRace.ThingDef_AlienRace");
-        thingDef_AlienRace = type;
-        alienRace = AccessTools.FieldRefAccess<object>(type, "alienRace");
-        type = AccessTools.Inner(type, "AlienSettings");
-        generalSettings = AccessTools.FieldRefAccess<object>(type, "generalSettings");
-        type = AccessTools.TypeByName("AlienRace.GeneralSettings");
-        alienPartGenerator = AccessTools.FieldRefAccess<object>(type, "alienPartGenerator");
-//        styleSettings = AccessTools.FieldRefAccess<object>(type, "styleSettings");
-        type = AccessTools.TypeByName("AlienRace.AlienPartGenerator");
-        bodyTypes = AccessTools.FieldRefAccess<List<BodyTypeDef>>(type, "bodyTypes");
-//        type = AccessTools.TypeByName("AlienRace.StyleSettings");
+        var patches = AccessTools.TypeByName("AlienRace.HarmonyPatches");
+        headTypeFilter = AccessTools.Method(patches, "HeadTypeFilter").CreateDelegate<Func<IEnumerable<HeadTypeDef>, Pawn, IEnumerable<HeadTypeDef>>>();
+        Log.Message("Head types done!");
+
+        thingDef_AlienRace = AccessTools.TypeByName("AlienRace.ThingDef_AlienRace");
+        alienRace = AccessTools.FieldRefAccess<object>(thingDef_AlienRace, "alienRace");
+        var alienSettings = AccessTools.Inner(thingDef_AlienRace, "AlienSettings");
+        generalSettings = AccessTools.FieldRefAccess<object>(alienSettings, "generalSettings");
+        alienPartGenerator = AccessTools.FieldRefAccess<object>(AccessTools.TypeByName("AlienRace.GeneralSettings"), "alienPartGenerator");
+        bodyTypes = AccessTools.FieldRefAccess<List<BodyTypeDef>>(AccessTools.TypeByName("AlienRace.AlienPartGenerator"), "bodyTypes");
+        Log.Message("Body types done!");
+
+        styleSettings = AccessTools.FieldRefAccess<object>(alienSettings, "styleSettings");
+        isValidStyle = AccessTools.Method(AccessTools.TypeByName("AlienRace.StyleSettings"), "IsValidStyle")
+           .CreateDelegate<Func<object, StyleItemDef, Pawn, bool, bool>>();
+        Log.Message("Style settings done!");
+
+        var raceRestrictionSettings = AccessTools.TypeByName("AlienRace.RaceRestrictionSettings");
+        canWear = AccessTools.Method(raceRestrictionSettings, "CanWear").CreateDelegate<Func<ThingDef, ThingDef, bool>>();
+        canEquip = AccessTools.Method(raceRestrictionSettings, "CanEquip").CreateDelegate<Func<ThingDef, ThingDef, bool>>();
+        canGetTrait = AccessTools.Method(raceRestrictionSettings, "RaceRestrictionSettings", new[] { typeof(TraitDef), typeof(Pawn), typeof(int) })
+           .CreateDelegate<Func<TraitDef, Pawn, int, bool>>();
+        canHaveGene = AccessTools.Method(raceRestrictionSettings, "CanHaveGene").CreateDelegate<Func<GeneDef, ThingDef, bool>>();
+        canUseXenotype = AccessTools.Method(raceRestrictionSettings, "CanUseXenotype").CreateDelegate<Func<XenotypeDef, ThingDef, bool>>();
+        Log.Message("Race restrictions done!");
     }
 
     public static void Notify_AppearanceEditorOpen(Pawn pawn)
@@ -79,8 +97,23 @@ public static class HARCompat
         return null;
     }
 
-//    public static bool AllowStyleItem(StyleItemDef item, Pawn pawn)
-//    {
-//
-//    }
+    public static bool AllowStyleItem(StyleItemDef item, Pawn pawn)
+    {
+        if (thingDef_AlienRace.IsInstanceOfType(pawn.def))
+        {
+            var obj = alienRace(pawn.def);
+            if (obj == null) return true;
+            var settings = styleSettings(obj);
+            if (settings is not Dictionary<Type, object> dict || !dict.TryGetValue(item.GetType(), out var typeSettings)) return true;
+            return isValidStyle(typeSettings, item, pawn, false);
+        }
+
+        return true;
+    }
+
+    public static bool CanWear(ThingDef apparel, Pawn pawn) => canWear(apparel, pawn.def);
+    public static bool CanEquip(ThingDef weapon, Pawn pawn) => canEquip(weapon, pawn.def);
+    public static bool CanGetTrait(ListingMenu_Trait.TraitInfo trait, Pawn pawn) => canGetTrait(trait.Trait.def, pawn, trait.Trait.degree);
+    public static bool CanHaveGene(GeneDef gene, Pawn pawn) => canHaveGene(gene, pawn.def);
+    public static bool CanUseXenotype(XenotypeDef xenotype, Pawn pawn) => canUseXenotype(xenotype, pawn.def);
 }

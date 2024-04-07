@@ -202,6 +202,10 @@
     <PawnEditor.WouldBeDowned>Adding {0} will cause {1} to be downed. Add anyway?</PawnEditor.WouldBeDowned>
     <PawnEditor.Beard>Beard</PawnEditor.Beard>
     <PawnEditor.NoRandomOptions>No randomization options available for this tab</PawnEditor.NoRandomOptions>
+    <PawnEditor.HARRestrictionViolated>{PAWN_possesive} race, {RACE}, cannot {VERB} {ITEM}.</PawnEditor.HARRestrictionViolated>
+    <PawnEditor.Wear>wear</PawnEditor.Wear>
+    <PawnEditor.Equip>equip</PawnEditor.Equip>
+    <PawnEditor.Use>use</PawnEditor.Use>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>
