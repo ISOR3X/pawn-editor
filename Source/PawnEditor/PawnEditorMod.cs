@@ -150,12 +150,14 @@ public class PawnEditorMod : Mod
         var codes = instructions.ToList();
         var info = AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.ToggleGodMode));
         var idx = codes.FindIndex(ins => ins.Calls(info));
-        var label = generator.DefineLabel();
-        var labels = codes[idx + 1].ExtractLabels();
-        codes[idx + 1].labels.Add(label);
+        var idx2 = codes.FindLastIndex(idx, ins => ins.opcode == OpCodes.Brfalse_S);
+        var label2 = (Label)codes[idx2].operand;
+        var label1 = generator.DefineLabel();
+        codes[idx + 1].labels.Remove(label2);
+        codes[idx + 1].labels.Add(label1);
         codes.InsertRange(idx + 1, new[]
         {
-            new CodeInstruction(OpCodes.Ldarg_0).WithLabels(labels),
+            new CodeInstruction(OpCodes.Ldarg_0).WithLabels(label2),
             CodeInstruction.LoadField(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.widgetRow)),
             CodeInstruction.LoadField(typeof(TexPawnEditor), nameof(TexPawnEditor.OpenPawnEditor)),
             new CodeInstruction(OpCodes.Ldstr, "PawnEditor.CharacterEditor"),
@@ -173,7 +175,7 @@ public class PawnEditorMod : Mod
             new CodeInstruction(OpCodes.Ldc_I4_1),
             new CodeInstruction(OpCodes.Ldc_R4, -1f),
             new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(WidgetRow), nameof(WidgetRow.ButtonIcon))),
-            new CodeInstruction(OpCodes.Brfalse, label),
+            new CodeInstruction(OpCodes.Brfalse, label1),
             new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(Find), nameof(Find.WindowStack))),
             new CodeInstruction(OpCodes.Newobj, AccessTools.Constructor(typeof(Dialog_PawnEditor_InGame))),
             CodeInstruction.Call(typeof(WindowStack), nameof(WindowStack.Add))
