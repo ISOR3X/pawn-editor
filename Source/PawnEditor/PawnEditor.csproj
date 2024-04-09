@@ -88,6 +88,7 @@
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Relations.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Thought.cs" />
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Trait.cs" />
+    <Compile Include="ModCompat\FacialAnimCompat.cs" />
     <Compile Include="ModCompat\HARCompat.cs" />
     <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />

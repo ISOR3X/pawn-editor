@@ -79,7 +79,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
             Widgets.Label(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)),
                 "PawnEditor.Hediffs".Translate().CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 4f;
-        var viewRect = new Rect(0, 0, inRect.width - 20, hediffs.Count * 30 + Text.LineHeightOf(GameFont.Medium));
+        var viewRect = new Rect(0, 0, inRect.width - 20, table.Height + Text.LineHeightOf(GameFont.Medium));
         Widgets.BeginScrollView(inRect, ref scrollPos, viewRect);
         table.OnGUI(viewRect, pawn);
         Widgets.EndScrollView();

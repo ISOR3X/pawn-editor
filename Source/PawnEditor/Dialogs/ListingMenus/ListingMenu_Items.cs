@@ -212,8 +212,8 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
 
     private static void MakeItemLists()
     {
-        apparel = DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel && td.apparel.developmentalStageFilter == DevelopmentalStage.Adult).ToList();
-        kidApparel = DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel && td.apparel.developmentalStageFilter != DevelopmentalStage.Adult).ToList();
+        apparel = DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult)).ToList();
+        kidApparel = DefDatabase<ThingDef>.AllDefs.Where(td => td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Child)).ToList();
         equipment = DefDatabase<ThingDef>.AllDefs.Where(td => td.equipmentType == EquipmentType.Primary).ToList();
         items = DefDatabase<ThingDef>.AllDefs.Where(td => td.category == ThingCategory.Item).ToList();
         starting = DefDatabase<ThingDef>.AllDefs.Where(td =>

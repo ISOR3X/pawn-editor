@@ -212,7 +212,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
         {
             new(35f),
             new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
-            new("ExpiresIn".Translate(), 120),
+            new("ExpiresIn".Translate().CapitalizeFirst(), 120),
             new("PawnEditor.Weight".Translate(), 60),
             new(100),
             new(30)
@@ -274,7 +274,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
             var moodOffset = pawn.needs.mood.thoughts.MoodOffsetOfGroup(thoughtGroup);
             items.Add(new(moodOffset.ToString("##0")
-               .Colorize(moodOffset switch
+                .Colorize(moodOffset switch
                 {
                     0f => NeedsCardUtility.NoEffectColor,
                     > 0f => NeedsCardUtility.MoodColor,
@@ -289,6 +289,8 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
             else items.Add(new());
 
             if (NeedsCardUtility.thoughtGroup.OfType<Thought_Memory>().Any())
+            {
+                var j = i;
                 items.Add(new(TexButton.Delete, () =>
                 {
                     for (var j = NeedsCardUtility.thoughtGroup.Count; j-- > 0;)
@@ -300,6 +302,7 @@ public class TabWorker_Needs : TabWorker_Table<Pawn>
 
                     table.ClearCache();
                 }));
+            }
             else items.Add(new());
 
             result.Add(new(items, GetThoughtTip(pawn, leadingThought, thoughtGroup)));

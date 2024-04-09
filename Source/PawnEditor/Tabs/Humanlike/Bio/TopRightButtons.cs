@@ -102,7 +102,7 @@ public partial class TabWorker_Bio_Humanlike
             list.Add(new("XenotypeEditor".Translate() + "...",
                 delegate
                 {
-                    var index = PawnEditor.Pregame ? StartingPawnUtility.PawnIndex(pawn) : StartingPawnUtility.StartingAndOptionalPawns.Count;
+                    var index = PawnEditor.Pregame ? StartingPawnUtility.PawnIndex(pawn) : CharacterCardUtility.CustomXenotypes.Count;
                     Find.WindowStack.Add(new Dialog_CreateXenotype(index, delegate
                     {
                         CharacterCardUtility.cachedCustomXenotypes = null;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 
 namespace PawnEditor;
@@ -56,4 +57,27 @@ public static class Utilities
     public static T CreateDelegate<T>(this MethodInfo info) where T : Delegate => (T)info.CreateDelegate(typeof(T));
 
     public static T CreateDelegate<T>(this MethodInfo info, object target) where T : Delegate => (T)info.CreateDelegate(typeof(T), target);
+
+    /// <summary>
+    /// Converts CamelCase to a more readable format. Example: "CamelCase" -> "Camel case"
+    /// </summary>
+    /// <param name="input">The string to format.</param>
+    /// <returns></returns>
+    public static string ConvertCamelCase(this string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        var result = new StringBuilder(input.Length * 2);
+        result.Append(char.ToUpper(input[0]));
+
+        for (int i = 1; i < input.Length; i++)
+        {
+            if (char.IsUpper(input[i]))
+                result.Append(' ');
+
+            result.Append(char.ToLower(input[i]));
+        }
+
+        return result.ToString();
+    }
 }

@@ -26,14 +26,14 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
         if (Selected.def.stuffCategories is { Count: > 1 })
             if (UIUtility.ButtonTextImage(listing.GetRectLabeled("StatsReport_Material".Translate(), CELL_HEIGHT), Selected.Stuff))
                 Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(Selected.def)
-                   .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
+                    .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
                     {
                         Selected.SetStuffDirect(stuff);
                         Selected.SetColor(stuff.stuffProps.color);
                         Selected.Notify_ColorChanged();
                         PawnEditor.Notify_PointsUsed();
                     }, Widgets.GetIconFor(stuff), stuff.uiIconColor))
-                   .ToList()));
+                    .ToList()));
 
 
         // Quality
@@ -48,7 +48,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
                             compQuality.SetQuality(quality, ArtGenerationContext.Outsider);
                             PawnEditor.Notify_PointsUsed();
                         }))
-                   .ToList()));
+                    .ToList()));
         }
 
 
@@ -61,10 +61,10 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
             colorRect.height = 24f;
             colorRect.y += 3f;
             var curColor = apparel2.DrawColor;
-
+            var defaultColor = apparel2.Stuff != null ? apparel2.Stuff.stuffProps.color : apparel2.def.colorGenerator?.NewRandomizedColor() ?? Color.white;
             if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
                 Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),
-                    DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, apparel2.Stuff.stuffProps.color,
+                    DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, defaultColor,
                     Pawn.story.favoriteColor));
 
             Widgets.DrawRectFast(colorRect, curColor);
@@ -82,12 +82,12 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
                         Selected.SetStyleDef(style.Key);
                         Selected.Notify_ColorChanged();
                     }, style.Value.Icon, Color.white))
-                   .Append(new("None", () =>
+                    .Append(new("None", () =>
                     {
                         Selected.SetStyleDef(null);
                         Selected.Notify_ColorChanged();
                     }))
-                   .ToList()));
+                    .ToList()));
         }
 
 
@@ -135,7 +135,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
                     if (bladelink.CanAddTrait(weaponTraitDef)) bladelink.traits.Add(weaponTraitDef);
                     else Messages.Message("PawnEditor.TraitDisallowedByKind".Translate(weaponTraitDef.label, Selected.Label), MessageTypeDefOf.RejectInput);
                 }))
-               .ToList();
+                .ToList();
 
             if (UIUtility.DefaultButtonText(ref traitsRect, "Add".Translate().CapitalizeFirst() + " " + "Trait".Translate(), rightAlign: true))
                 Find.WindowStack.Add(new FloatMenu(options4));

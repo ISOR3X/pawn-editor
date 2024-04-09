@@ -137,6 +137,8 @@
     <PawnEditor.ShuffableOnlyDesc>Show only shuffable backstories, which are backstories used for generating random pawns. This excludes player-added backstories (from purchasing Name In Game DLC). </PawnEditor.ShuffableOnlyDesc>
     <PawnEditor.BackstorySlot>Backstory slot</PawnEditor.BackstorySlot>
     <PawnEditor.BackstorySlotDesc>Select which type of backstories should be shown (adulthood/childhood).</PawnEditor.BackstorySlotDesc>
+    <PawnEditor.BackstoryType>Backstory category</PawnEditor.BackstoryType>
+    <PawnEditor.Categories>categories</PawnEditor.Categories>
     <PawnEditor.SkillGain>Skill bonus</PawnEditor.SkillGain>
     <PawnEditor.SkillGainDesc>Select a skill for which the pawn should have a postive bonus for.</PawnEditor.SkillGainDesc>
     <PawnEditor.WorkDisables>Hide backstories with disabled work types</PawnEditor.WorkDisables>
