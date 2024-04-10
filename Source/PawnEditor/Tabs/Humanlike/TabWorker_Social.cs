@@ -133,11 +133,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             }, entry.otherPawn.relations.OpinionOf(pawn)));
             items.Add(new());
             items.Add(new(editRect => EditUtility.EditButton(editRect, entry, pawn, table)));
-            items.Add(new(TexPawnEditor.GoToPawn, () =>
-            {
-                PawnEditor.Select(entry.otherPawn);
-                PawnEditor.Select(entry.otherPawn.Faction);
-            }));
+            items.Add(new(TexPawnEditor.GoToPawn, () => PawnEditor.Select(entry.otherPawn)));
             if (entry.relations.Any(relation => !relation.implied))
                 items.Add(new(TexButton.Delete, () =>
                 {

@@ -37,7 +37,11 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
     {
         if (abilityDef.IsPsycast && !pawn.HasPsylink)
         {
-            var addPsylink = () => { pawn.health.AddHediff(HediffDefOf.PsychicAmplifier, pawn.health.hediffSet.GetBrain()); };
+            var addPsylink = () =>
+            {
+                pawn.health.AddHediff(HediffDefOf.PsychicAmplifier, pawn.health.hediffSet.GetBrain());
+                TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Health>();
+            };
             Find.WindowStack.Add(new Dialog_MessageBox("PawnEditor.AddPsylink".Translate(abilityDef.LabelCap), "Yes".Translate(), addPsylink,
                 "No".Translate(), acceptAction: addPsylink));
         }

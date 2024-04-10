@@ -208,6 +208,7 @@
     <PawnEditor.Wear>wear</PawnEditor.Wear>
     <PawnEditor.Equip>equip</PawnEditor.Equip>
     <PawnEditor.Use>use</PawnEditor.Use>
+    <PawnEditor.NoAddMechWarning>Can't add mechs to non-player factions</PawnEditor.NoAddMechWarning>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

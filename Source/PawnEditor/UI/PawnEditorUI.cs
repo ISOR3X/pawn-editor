@@ -362,7 +362,7 @@ public static partial class PawnEditor
             recache = true;
         }
 
-        if (recache)
+        if (recache || (tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction))
         {
             CheckChangeTabGroup();
             RecachePawnList();

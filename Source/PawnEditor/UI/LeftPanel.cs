@@ -71,7 +71,17 @@ public static partial class PawnEditor
                     }))
                .ToList()));
 
-        if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst())) AddPawn(selectedCategory);
+        if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst()))
+        {
+            if (selectedFaction != Faction.OfPlayer && selectedCategory == PawnCategory.Mechs)
+            {
+                Messages.Message("PawnEditor.NoAddMechWarning".Translate(), MessageTypeDefOf.RejectInput);
+            }
+            else
+            {
+                AddPawn(selectedCategory);
+            }
+        };
 
         List<Pawn> pawns;
         List<string> sections;
