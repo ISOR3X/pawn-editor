@@ -90,8 +90,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
         var equipmentHeight = equipmentTable.Height;
         var possessionsHeight = possessionsTable.Height;
         var totalHeight = apparelHeight + equipmentHeight + possessionsHeight +
-                          16f * 2f + 3f * 4f + 3 * Text.LineHeightOf(GameFont.Small)
-                        - 30f; // Actual table height + table padding + table title separation + table title height;
+                          16f * 2f + 3f * 4f + 3 * Text.LineHeightOf(GameFont.Small);
+                         // Actual table height + table padding + table title separation + table title height;
 
         var viewRect = new Rect(inRect.x, inRect.y, inRect.width - 20f, totalHeight);
 

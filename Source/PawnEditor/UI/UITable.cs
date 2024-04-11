@@ -32,7 +32,7 @@ public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
     public int Compare(Row x, Row y) => sortIndex == -1 ? 0 : x.Items[sortIndex].SortIndex.CompareTo(y.Items[sortIndex].SortIndex) * sortDirection;
     public Vector2 Position => cachedRect.position;
     public float Width => cachedRect.width;
-    public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2 + rows.Count * 34;
+    public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2f + rows.Count * (rowHeight + 2f);
 
     private void RecacheRows()
     {
@@ -273,9 +273,9 @@ public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
                     {
                         var scale = inRect.height / icon.height;
                         var rect = new Rect(0, 0, icon.width * scale, icon.height * scale)
-                           .CenteredOnXIn(inRect)
-                           .CenteredOnYIn(inRect)
-                           .ContractedBy(4f);
+                            .CenteredOnXIn(inRect)
+                            .CenteredOnYIn(inRect)
+                            .ContractedBy(4f);
                         GUI.color = Mouse.IsOver(inRect) ? GenUI.MouseoverColor : Color.white;
                         GUI.DrawTexture(rect, icon);
                         GUI.color = Color.white;

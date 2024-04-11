@@ -13,6 +13,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     private static UITable<Faction> itemsTable;
     private static UITable<Faction> lootTable;
     private readonly Dictionary<Thing, string> countBuffer = new();
+    private Vector2 scrollPosition;
 
     public override void Initialize()
     {
@@ -101,11 +102,17 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
         {
             using (new TextBlock(GameFont.Tiny))
                 Widgets.Label(inRect.TakeBottomPart(Text.LineHeight), "PawnEditor.EquipmentLootDesc".Translate().Colorize(ColoredText.SubtleGrayColor));
-            equipmentTable.OnGUI(inRect.TopHalf(), faction);
-            lootTable.OnGUI(inRect.BottomHalf(), faction);
+            Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height = equipmentTable.Height + lootTable.Height, width = inRect.width - 16f});
+            equipmentTable.OnGUI(inRect.TopHalf() with { width = inRect.width - 16f }, faction);
+            lootTable.OnGUI(inRect.BottomHalf() with { width = inRect.width - 16f }, faction);
+            Widgets.EndScrollView();
         }
         else
-            itemsTable.OnGUI(inRect, faction);
+        {
+            Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height = itemsTable.Height, width = inRect.width - 16f });
+            itemsTable.OnGUI(inRect with { width = inRect.width - 16f }, faction);
+            Widgets.EndScrollView();
+        }
     }
 
     public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)

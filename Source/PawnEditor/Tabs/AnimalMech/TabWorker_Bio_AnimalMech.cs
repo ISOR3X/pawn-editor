@@ -186,13 +186,19 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
                 : pawn.MapHeld.mapPawns.FreeColonists.Where(p => !pawn.RaceProps.IsMechanoid || MechanitorUtility.IsMechanitor(p)).ToList();
             if (possiblePawns.Any())
             {
-                Find.WindowStack.Add(new FloatMenu(possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
+                var options = possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
                     {
                         if (bond != null)
                             pawn.relations.RemoveDirectRelation(bond);
                         pawn.relations.AddDirectRelation(bondRelation, p);
                     }))
-                    .ToList()));
+                    .ToList();
+                options.Add(new FloatMenuOption("None".Translate(), () =>
+                {
+                    if (bond != null)
+                        pawn.relations.RemoveDirectRelation(bond);
+                }));
+                Find.WindowStack.Add(new FloatMenu(options));
             }
             else
             {

@@ -189,7 +189,7 @@ public static partial class PawnEditor
             Map map = null;
             Rot4 rot = default;
             ThingOwner parent = null;
-            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate(), selectedPawn, new()
+            yield return new SaveLoadItem<Pawn>("PawnEditor.Selected".Translate() + " " + "PawnEditor.Pawn".Translate().ToLower(), selectedPawn, new()
             {
                 LoadLabel = "PawnEditor.LoadPawn".Translate(),
                 TypePostfix = selectedCategory.ToString(),
