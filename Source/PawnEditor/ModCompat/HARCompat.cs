@@ -40,11 +40,9 @@ public static class HARCompat
         var stylingStation = AccessTools.TypeByName("AlienRace.StylingStation");
         doRaceTabs = AccessTools.Method(stylingStation, "DoRaceTabs", new[] { typeof(Rect) }).CreateDelegate<Action<Rect>>();
         constructorPostfix = AccessTools.Method(stylingStation, "ConstructorPostfix", new[] { typeof(Pawn) }).CreateDelegate<Action<Pawn>>();
-        Log.Message("Styling station done!");
 
         var patches = AccessTools.TypeByName("AlienRace.HarmonyPatches");
         headTypeFilter = AccessTools.Method(patches, "HeadTypeFilter").CreateDelegate<Func<IEnumerable<HeadTypeDef>, Pawn, IEnumerable<HeadTypeDef>>>();
-        Log.Message("Head types done!");
 
         thingDef_AlienRace = AccessTools.TypeByName("AlienRace.ThingDef_AlienRace");
         alienRace = AccessTools.FieldRefAccess<object>(thingDef_AlienRace, "alienRace");
@@ -52,21 +50,18 @@ public static class HARCompat
         generalSettings = AccessTools.FieldRefAccess<object>(alienSettings, "generalSettings");
         alienPartGenerator = AccessTools.FieldRefAccess<object>(AccessTools.TypeByName("AlienRace.GeneralSettings"), "alienPartGenerator");
         bodyTypes = AccessTools.FieldRefAccess<List<BodyTypeDef>>(AccessTools.TypeByName("AlienRace.AlienPartGenerator"), "bodyTypes");
-        Log.Message("Body types done!");
 
         styleSettings = AccessTools.FieldRefAccess<object>(alienSettings, "styleSettings");
         isValidStyle = AccessTools.Method(AccessTools.TypeByName("AlienRace.StyleSettings"), "IsValidStyle")
-           .CreateDelegate<Func<object, StyleItemDef, Pawn, bool, bool>>();
-        Log.Message("Style settings done!");
+           .CreateDelegateCasting<Func<object, StyleItemDef, Pawn, bool, bool>>();
 
         var raceRestrictionSettings = AccessTools.TypeByName("AlienRace.RaceRestrictionSettings");
         canWear = AccessTools.Method(raceRestrictionSettings, "CanWear").CreateDelegate<Func<ThingDef, ThingDef, bool>>();
         canEquip = AccessTools.Method(raceRestrictionSettings, "CanEquip").CreateDelegate<Func<ThingDef, ThingDef, bool>>();
-        canGetTrait = AccessTools.Method(raceRestrictionSettings, "RaceRestrictionSettings", new[] { typeof(TraitDef), typeof(Pawn), typeof(int) })
+        canGetTrait = AccessTools.Method(raceRestrictionSettings, "CanGetTrait", new[] { typeof(TraitDef), typeof(Pawn), typeof(int) })
            .CreateDelegate<Func<TraitDef, Pawn, int, bool>>();
         canHaveGene = AccessTools.Method(raceRestrictionSettings, "CanHaveGene").CreateDelegate<Func<GeneDef, ThingDef, bool>>();
         canUseXenotype = AccessTools.Method(raceRestrictionSettings, "CanUseXenotype").CreateDelegate<Func<XenotypeDef, ThingDef, bool>>();
-        Log.Message("Race restrictions done!");
     }
 
     public static void Notify_AppearanceEditorOpen(Pawn pawn)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using UnityEngine;
 
@@ -9,8 +10,6 @@ namespace PawnEditor;
 
 public static class Utilities
 {
-    public static bool SubMenuOpen = false;
-
     public static void Set<T>(this List<T> list, int index, T item)
     {
         while (list.Count <= index) list.Add(default);
@@ -59,7 +58,7 @@ public static class Utilities
     public static T CreateDelegate<T>(this MethodInfo info, object target) where T : Delegate => (T)info.CreateDelegate(typeof(T), target);
 
     /// <summary>
-    /// Converts CamelCase to a more readable format. Example: "CamelCase" -> "Camel case"
+    ///     Converts CamelCase to a more readable format. Example: "CamelCase" -> "Camel case"
     /// </summary>
     /// <param name="input">The string to format.</param>
     /// <returns></returns>
@@ -70,7 +69,7 @@ public static class Utilities
         var result = new StringBuilder(input.Length * 2);
         result.Append(char.ToUpper(input[0]));
 
-        for (int i = 1; i < input.Length; i++)
+        for (var i = 1; i < input.Length; i++)
         {
             if (char.IsUpper(input[i]))
                 result.Append(' ');
@@ -79,5 +78,22 @@ public static class Utilities
         }
 
         return result.ToString();
+    }
+
+    public static T CreateDelegateCasting<T>(this MethodInfo info) where T : Delegate
+    {
+        var parms = info.GetParameters();
+        var parmTypes = new Type[parms.Length + 1];
+        parmTypes[0] = typeof(object);
+        for (var i = 0; i < parms.Length; i++) parmTypes[i + 1] = parms[i].ParameterType;
+
+        var dm = new DynamicMethod("<DelegateFor>__" + info.Name, info.ReturnType, parmTypes);
+        var gen = dm.GetILGenerator();
+        gen.Emit(OpCodes.Ldarg_0);
+        gen.Emit(OpCodes.Castclass, info.ReflectedType);
+        for (var i = 1; i < parmTypes.Length; i++) gen.Emit(OpCodes.Ldarg, i);
+        gen.Emit(OpCodes.Callvirt, info);
+        gen.Emit(OpCodes.Ret);
+        return dm.CreateDelegate<T>();
     }
 }
