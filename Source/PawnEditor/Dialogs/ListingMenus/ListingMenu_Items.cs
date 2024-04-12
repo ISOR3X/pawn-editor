@@ -40,17 +40,17 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
         foreach (var thingDefStyle in styleCategoryDef.thingDefStyles) // A list of thing defs and their style def to apply.
         {
-            if (ThingStyles.Select(ts => ts.ThingDef).Contains(thingDefStyle.thingDef))
+            if (ThingStyles.Select(ts => ts.ThingDef).Contains(thingDefStyle.ThingDef))
             {
                 // If the def already exists in the list, add the style to the existing list.
-                ThingStyles.FirstOrDefault(ts => ts.ThingDef == thingDefStyle.thingDef).StyleDefs.Add(thingDefStyle.styleDef, styleCategoryDef);
+                ThingStyles.FirstOrDefault(ts => ts.ThingDef == thingDefStyle.thingDef).StyleDefs.TryAdd(thingDefStyle.StyleDef, styleCategoryDef);
                 continue;
             }
 
             
             ThingStyles.Add(new()
             {
-                ThingDef = thingDefStyle.thingDef,
+                ThingDef = thingDefStyle.ThingDef,
                 StyleDefs = new()
                 {
                     { thingDefStyle.styleDef, styleCategoryDef }
