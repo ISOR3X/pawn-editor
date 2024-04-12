@@ -72,7 +72,8 @@ public static partial class PawnEditor
         UIUtility.CheckboxLabeledCentered(rect3.TopHalf(), text3, ref usePointLimit);
         rect3 = rect3.BottomHalf();
         Widgets.Label(rect3.TakeLeftPart(num), text4);
-        using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(ColoredText.CurrencyColor));
+        Color pointColor = usePointLimit ? ColoredText.CurrencyColor : ColoredText.SubtleGrayColor;
+        using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(pointColor));
 
         var bottomButtonsRect = inRect.TakeBottomPart(Page.BottomButHeight);
 

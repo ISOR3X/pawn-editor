@@ -14,7 +14,7 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
     static ListingMenu_Backstories() => items = DefDatabase<BackstoryDef>.AllDefsListForReading;
 
     public ListingMenu_Backstories(Pawn pawn) : base(items, b => b.titleShort.CapitalizeFirst(), b => TryAdd(b, pawn),
-        "ChooseStuffForRelic".Translate() + " " + "Backstory".Translate().ToLower(),
+        "PawnEditor.Choose".Translate() + " " + "Backstory".Translate().ToLower(),
         b => DoToolTipFor(b, pawn), null, GetFilters(), pawn)
     {
     }

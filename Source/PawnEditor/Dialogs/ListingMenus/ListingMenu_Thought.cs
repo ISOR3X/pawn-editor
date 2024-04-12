@@ -58,11 +58,11 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
     }
 
     public ListingMenu_Thoughts(Pawn pawn, UITable<Pawn> table) : base(moodMemoryDefs, def => GetLabel(def, pawn), def => TryAdd(pawn, def, table),
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Thought".Translate(), def => def.description, null, GetFilters(), pawn) { }
+        "PawnEditor.Choose".Translate() + " " + "PawnEditor.Thought".Translate(), def => def.description, null, GetFilters(), pawn) { }
 
     public ListingMenu_Thoughts(Pawn pawn, Pawn otherPawn, UITable<Pawn> table) : base(opinionMemoryDefs, def => GetLabel(def, pawn, otherPawn),
         def => TryAdd(pawn, def, table, otherPawn),
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Thought".Translate(), def => def.description, null, GetFilters(), pawn) { }
+        "PawnEditor.Choose".Translate() + " " + "PawnEditor.Thought".Translate(), def => def.description, null, GetFilters(), pawn) { }
 
     protected override string NextLabel => RequiresOtherPawn(Listing.Selected) ? "Next".Translate() : base.NextLabel;
 

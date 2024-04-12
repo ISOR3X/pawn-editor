@@ -24,7 +24,7 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
     }
 
     public ListingMenu_Trait(Pawn pawn) : base(items, labelGetter, b => TryAdd(b, pawn),
-        "ChooseStuffForRelic".Translate() + " " + "Trait".Translate().ToLower(),
+        "PawnEditor.Choose".Translate() + " " + "Trait".Translate().ToLower(),
         b => descGetter(b, pawn), null, filters, pawn) { }
 
     private static AddResult TryAdd(TraitInfo traitInfo, Pawn pawn)

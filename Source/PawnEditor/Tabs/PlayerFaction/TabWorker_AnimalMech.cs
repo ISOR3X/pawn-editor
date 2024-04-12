@@ -45,7 +45,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         mechTable = new(new()
         {
             new(35), // Icon
-            new("MechsSection".Translate()),
+            new("PawnEditor.Mechs".Translate().CapitalizeFirst()),
             new("MarketValueTip".Translate(), 100),
             // new(16), // Spacing
             // new("Overseer".Translate(), 120),
@@ -222,7 +222,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
                 TypePostfix = PawnCategory.Animals.ToString()
             });
 
-            yield return new SaveLoadItem<PawnList>("MechsSection".Translate(), new(
+            yield return new SaveLoadItem<PawnList>("PawnEditor.Mechs".Translate(), new(
                 StartingThingsManager.GetPawns(PawnCategory.Mechs), PawnCategory.Mechs), new()
             {
                 OnLoad = pawnList =>

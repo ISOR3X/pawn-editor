@@ -28,7 +28,7 @@ public class TabWorker_Gear : TabWorker<Pawn>
         new()
         {
             new(32),
-            new("Name".Translate(), textAnchor: TextAnchor.MiddleLeft),
+            new("PawnEditor.Name".Translate(), textAnchor: TextAnchor.MiddleLeft),
             new("PawnEditor.Weight".Translate(), 120),
             new("PawnEditor.Hitpoints".Translate(), 120),
             new("MarketValueTip".Translate(), 120),

@@ -101,12 +101,12 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             new(GetHeadings(heading), _ => pawns.Select(p => new UITable<Faction>.Row(GetItems(p), p.GetTooltip().text))));
     }
 
-    private static List<UITable<Faction>.Heading> GetHeadings(string heading) =>
-        new()
+    private static List<UITable<Faction>.Heading> GetHeadings(string heading)
+    {
+        var headings = new List<UITable<Faction>.Heading>
         {
             new(35), // Icon
             new("PawnEditor.Name".Translate(), textAnchor: TextAnchor.LowerLeft),
-            new(XenotypeDefOf.Baseliner.Icon, 100),
             new(TexPawnEditor.GendersTex, 100),
             new("PawnEditor.Age".Translate(), 100),
             new("MarketValueTip".Translate(), 100),
@@ -116,12 +116,20 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             new(24), // Save
             new(24) // Delete
         };
+        
+        if (ModsConfig.BiotechActive)
+        {
+            headings.Insert(2, new(XenotypeDefOf.Baseliner.Icon, 100));
+        }
+
+        return headings;
+    }
 
     private static IEnumerable<UITable<Faction>.Row.Item> GetItems(Pawn pawn)
     {
         yield return new(PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South, cameraZoom: 2f));
         yield return new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft);
-        yield return new(pawn.genes.XenotypeIcon, pawn.genes.Xenotype?.index ?? pawn.genes.CustomXenotype.name.ToCharArray()[0]);
+        if (ModsConfig.BiotechActive) yield return new(pawn.genes.XenotypeIcon, pawn.genes.Xenotype?.index ?? pawn.genes.CustomXenotype.name.ToCharArray()[0]);
         yield return new(pawn.gender.GetIcon(), (int)pawn.gender);
         yield return new(pawn.ageTracker.AgeNumberString, pawn.ageTracker.AgeBiologicalYears);
         yield return new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue);
@@ -131,7 +139,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             string section = PawnEditor.Pregame
                 ? Find.GameInitData.startingAndOptionalPawns.IndexOf(pawn) >= Find.GameInitData.startingPawnCount
                     ? "StartingPawnsLeftBehind"
-                       .Translate()
+                        .Translate()
                     : "StartingPawnsSelected".Translate()
                 : PawnLister.LocationLabel(colonistList.GetLocation(pawn));
             pawnLocationTables[section].ClearCache();

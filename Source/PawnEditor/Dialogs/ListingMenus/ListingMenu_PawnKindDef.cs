@@ -24,7 +24,7 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
 
     public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Func<PawnKindDef, AddResult> addAction) : base(output.Invoke(pawnCategory), p => p.LabelCap,
         addAction,
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.PawnKindDef".Translate(), null, DrawPawnIcon) =>
+        "PawnEditor.Choose".Translate() + " " + "PawnEditor.PawnKindDef".Translate().CapitalizeFirst(), null, DrawPawnIcon) =>
         type = pawnCategory;
 
     private static void DrawPawnIcon(PawnKindDef pawnKindDef, Rect rect)

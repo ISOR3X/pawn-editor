@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using RimWorld;
@@ -17,110 +18,117 @@ public partial class TabWorker_Bio_Humanlike
         if (Widgets.ButtonText(buttonsRect.TakeBottomPart(UIUtility.RegularButtonHeight), "PawnEditor.EditAppearance".Translate()))
             Find.WindowStack.Add(new Dialog_AppearanceEditor(pawn));
 
+        string text;
         var devStageRect = buttonsRect.TopHalf().LeftHalf().ContractedBy(2);
-        var text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
-        if (Mouse.IsOver(devStageRect))
+        if (ModsConfig.BiotechActive)
         {
-            Widgets.DrawHighlight(devStageRect);
-            if (Find.WindowStack.FloatMenu == null)
-                TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
-        }
-
-
-        if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
-        {
-            var options = new List<FloatMenuOption>
+            text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
+            if (Mouse.IsOver(devStageRect))
             {
-                new("Adult".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Adult),
-                    DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
-                new("Child".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Child),
-                    DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
-                new("Baby".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Baby),
-                    DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
-            };
-            Find.WindowStack.Add(new FloatMenu(options));
-        }
+                Widgets.DrawHighlight(devStageRect);
+                if (Find.WindowStack.FloatMenu == null)
+                    TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
+            }
 
-        Widgets.Label(devStageRect, text);
+
+            if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+            {
+                var options = new List<FloatMenuOption>
+                {
+                    new("Adult".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Adult),
+                        DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
+                    new("Child".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Child),
+                        DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
+                    new("Baby".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Baby),
+                        DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
+                };
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            Widgets.Label(devStageRect, text);
+        }
 
         var xenotypeRect = buttonsRect.TopHalf().RightHalf().ContractedBy(2);
-        text = pawn.genes.XenotypeLabelCap;
-        if (Mouse.IsOver(xenotypeRect))
+        if (ModsConfig.BiotechActive)
         {
-            Widgets.DrawHighlight(xenotypeRect);
-            if (Find.WindowStack.FloatMenu == null)
-                TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
-        }
-
-        if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
-        {
-            var list = new List<FloatMenuOption>();
-            foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
+            text = pawn.genes.XenotypeLabelCap;
+            if (Mouse.IsOver(xenotypeRect))
             {
-                if (HARCompat.Active && HARCompat.EnforceRestrictions && !HARCompat.CanUseXenotype(item, pawn))
-                    continue;
-                var xenotype = item;
-                list.Add(new(xenotype.LabelCap,
-                    () =>
-                    {
-                        SetXenotype(pawn, xenotype);
-                        PawnEditor.Notify_PointsUsed();
-                    }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
-                    r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
-                    r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
+                Widgets.DrawHighlight(xenotypeRect);
+                if (Find.WindowStack.FloatMenu == null)
+                    TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
             }
 
-            foreach (var customXenotype in CharacterCardUtility.CustomXenotypes)
+            if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
             {
-                var customInner = customXenotype;
-                list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
+                var list = new List<FloatMenuOption>();
+                foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
+                {
+                    if (HARCompat.Active && HARCompat.EnforceRestrictions && !HARCompat.CanUseXenotype(item, pawn))
+                        continue;
+                    var xenotype = item;
+                    list.Add(new(xenotype.LabelCap,
+                        () =>
+                        {
+                            SetXenotype(pawn, xenotype);
+                            PawnEditor.Notify_PointsUsed();
+                        }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
+                        r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
+                        r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
+                }
+
+                foreach (var customXenotype in CharacterCardUtility.CustomXenotypes)
+                {
+                    var customInner = customXenotype;
+                    list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
+                        delegate
+                        {
+                            SetXenotype(pawn, customInner);
+                            PawnEditor.Notify_PointsUsed();
+                        }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
+                        {
+                            if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
+                            {
+                                Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
+                                    delegate
+                                    {
+                                        var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
+                                        if (File.Exists(path))
+                                        {
+                                            File.Delete(path);
+                                            CharacterCardUtility.cachedCustomXenotypes = null;
+                                        }
+                                    }, true));
+                                return true;
+                            }
+
+                            return false;
+                        }, extraPartRightJustified: true));
+                }
+
+                list.Add(new("XenotypeEditor".Translate() + "...",
                     delegate
                     {
-                        SetXenotype(pawn, customInner);
-                        PawnEditor.Notify_PointsUsed();
-                    }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
-                    {
-                        if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
+                        var index = PawnEditor.Pregame ? StartingPawnUtility.PawnIndex(pawn) : CharacterCardUtility.CustomXenotypes.Count;
+                        Find.WindowStack.Add(new Dialog_CreateXenotype(index, delegate
                         {
-                            Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
-                                delegate
-                                {
-                                    var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
-                                    if (File.Exists(path))
-                                    {
-                                        File.Delete(path);
-                                        CharacterCardUtility.cachedCustomXenotypes = null;
-                                    }
-                                }, true));
-                            return true;
-                        }
+                            CharacterCardUtility.cachedCustomXenotypes = null;
+                            SetXenotype(pawn, StartingPawnUtility.GetGenerationRequest(index).ForcedCustomXenotype);
+                        }));
+                    }));
 
-                        return false;
-                    }, extraPartRightJustified: true));
+                Find.WindowStack.Add(new FloatMenu(list));
             }
 
-            list.Add(new("XenotypeEditor".Translate() + "...",
-                delegate
-                {
-                    var index = PawnEditor.Pregame ? StartingPawnUtility.PawnIndex(pawn) : CharacterCardUtility.CustomXenotypes.Count;
-                    Find.WindowStack.Add(new Dialog_CreateXenotype(index, delegate
-                    {
-                        CharacterCardUtility.cachedCustomXenotypes = null;
-                        SetXenotype(pawn, StartingPawnUtility.GetGenerationRequest(index).ForcedCustomXenotype);
-                    }));
-                }));
-
-            Find.WindowStack.Add(new FloatMenu(list));
+            Widgets.Label(xenotypeRect, text);
         }
-
-        Widgets.Label(xenotypeRect, text);
 
         var sexRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
         Widgets.DrawHighlightIfMouseover(sexRect);
 
         if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f))
-         && pawn.kindDef.fixedGender == null
-         && pawn.RaceProps.hasGenders)
+            && pawn.kindDef.fixedGender == null
+            && pawn.RaceProps.hasGenders)
         {
             var list = new List<FloatMenuOption>
             {
@@ -146,12 +154,12 @@ public partial class TabWorker_Bio_Humanlike
                     DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
                     _ => true
                 })
-               .Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
+                .Select(bodyType => new FloatMenuOption(bodyType.defName.CapitalizeFirst(), () =>
                 {
                     pawn.story.bodyType = bodyType;
                     RecacheGraphics(pawn);
                 }, TexPawnEditor.BodyTypeIcons[bodyType], Color.white))
-               .ToList()));
+                .ToList()));
         Widgets.Label(bodyRect, "PawnEditor.Shape".Translate());
     }
 

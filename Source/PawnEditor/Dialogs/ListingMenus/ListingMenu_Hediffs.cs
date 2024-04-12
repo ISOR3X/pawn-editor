@@ -34,7 +34,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
     }
 
     public ListingMenu_Hediffs(Pawn pawn, UITable<Pawn> table) : base(items, labelGetter, b => TryAdd(b, pawn, table),
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Hediff".Translate().ToLower(),
+        "PawnEditor.Choose".Translate() + " " + "PawnEditor.Hediff".Translate().ToLower(),
         b => descGetter(b), null, filters, pawn) { }
 
     private static AddResult TryAdd(HediffDef hediffDef, Pawn pawn, UITable<Pawn> uiTable)
