@@ -11,7 +11,7 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
     public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<Pawn, AddResult> nextAction, string closeLabel = null,
         Action closeAction = null,
         bool highlightGender = false) :
-        base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Pawn".Translate(),
+        base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "PawnEditor.Choose".Translate() + " " + "PawnEditor.Pawn".Translate(),
             p => p.DescriptionDetailed,
             DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
     {
@@ -20,7 +20,7 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
 
     public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<List<Pawn>, AddResult> nextAction, int count, string closeLabel = null,
         Action closeAction = null, bool highlightGender = false) :
-        base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "ChooseStuffForRelic".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
+        base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "PawnEditor.Choose".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
                 "PawnEditor.Pawn".Translate(), count), new(count, count),
             p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
     {

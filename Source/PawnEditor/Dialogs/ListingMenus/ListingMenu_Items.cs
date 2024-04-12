@@ -38,14 +38,16 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
     static ListingMenu_Items()
     {
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
-        foreach (var thingDefStyle in styleCategoryDef.thingDefStyles)
+        foreach (var thingDefStyle in styleCategoryDef.thingDefStyles) // A list of thing defs and their style def to apply.
         {
             if (ThingStyles.Select(ts => ts.ThingDef).Contains(thingDefStyle.thingDef))
             {
+                // If the def already exists in the list, add the style to the existing list.
                 ThingStyles.FirstOrDefault(ts => ts.ThingDef == thingDefStyle.thingDef).StyleDefs.Add(thingDefStyle.styleDef, styleCategoryDef);
                 continue;
             }
 
+            
             ThingStyles.Add(new()
             {
                 ThingDef = thingDefStyle.thingDef,
@@ -67,9 +69,9 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         Listing = new Listing_TreeThing(GetItemList(itemType, pawn), labelGetter, iconDrawer, descGetter);
 
         occupiableGroupsDefs = pawn.def.race.body.cachedAllParts.SelectMany(p => p.groups)
-           .Distinct()
-           .Where(bp => apparel.Select(td => td.apparel.bodyPartGroups)
-               .Any(bpg => bpg.Contains(bp)));
+            .Distinct()
+            .Where(bp => apparel.Select(td => td.apparel.bodyPartGroups)
+                .Any(bpg => bpg.Contains(bp)));
     }
 
     public ListingMenu_Items(List<Thing> things, ItemType itemType, Action callback = null, string menuTitle = null) : base(t => TryAdd(t, things, callback),
@@ -114,7 +116,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
     private static string GetMenuTitle(ItemType itemType)
     {
         var typeLabel = "PawnEditor.ItemType." + itemType;
-        return "ChooseStuffForRelic".Translate() + " " + typeLabel.Translate().ToLower();
+        return "PawnEditor.Choose".Translate() + " " + typeLabel.Translate().ToLower();
     }
 
     private static void CheckCapacity(Pawn pawn, Thing newItem)
@@ -163,7 +165,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                         thingDef.label.Named("ITEM"));
 
                 if (thingDef.equipmentType != EquipmentType.None && PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef)
-                       .TryRandomElement(out var thingStuffPair))
+                        .TryRandomElement(out var thingStuffPair))
                 {
                     var newEquipment = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
                     return new ConditionalInfo(PawnEditor.CanUsePoints(newEquipment), new SuccessInfo(() =>
@@ -219,8 +221,8 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         starting = DefDatabase<ThingDef>.AllDefs.Where(td =>
                 (td.category == ThingCategory.Item && td.scatterableOnMapGen && !td.destroyOnDrop) || (td.category == ThingCategory.Building && td.Minifiable)
                                                                                                    || (td.category == ThingCategory.Building
-                                                                                                    && td.scatterableOnMapGen))
-           .ToList();
+                                                                                                       && td.scatterableOnMapGen))
+            .ToList();
         all = DefDatabase<ThingDef>.AllDefs.ToList();
     }
 
@@ -270,7 +272,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
 
     public struct ThingStyle
     {
-        public ThingDef ThingDef;
-        public Dictionary<ThingStyleDef, StyleCategoryDef> StyleDefs;
+        public ThingDef ThingDef; // The thing def that has styles
+        public Dictionary<ThingStyleDef, StyleCategoryDef> StyleDefs; // The graphic is the key, the style group is the value
     }
 }

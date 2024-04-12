@@ -209,6 +209,12 @@
     <PawnEditor.Equip>equip</PawnEditor.Equip>
     <PawnEditor.Use>use</PawnEditor.Use>
     <PawnEditor.NoAddMechWarning>Can't add mechs to non-player factions</PawnEditor.NoAddMechWarning>
+    <PawnEditor.NoOptions>No available options found.</PawnEditor.NoOptions>
+    <PawnEditor.Name>name</PawnEditor.Name>
+    <PawnEditor.Edit>edit</PawnEditor.Edit>
+    <PawnEditor.Opinion>opinion</PawnEditor.Opinion>
+    <PawnEditor.Mechs>mechanoids</PawnEditor.Mechs>
+    <PawnEditor.Choose>choose</PawnEditor.Choose>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

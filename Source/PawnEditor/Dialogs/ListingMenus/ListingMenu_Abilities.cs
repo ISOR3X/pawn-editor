@@ -22,7 +22,7 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
     }
 
     public ListingMenu_Abilities(Pawn pawn) : base(items, labelGetter, b => TryAdd(b, pawn),
-        "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Ability".Translate().ToLower(),
+        "PawnEditor.Choose".Translate() + " " + "PawnEditor.Ability".Translate().ToLower(),
         b => descGetter(b, pawn), DrawIcon, filters, pawn) { }
 
     private static void DrawIcon(AbilityDef abilityDef, Rect rect)

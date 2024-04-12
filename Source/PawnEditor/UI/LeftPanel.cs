@@ -21,7 +21,7 @@ public static partial class PawnEditor
         {
             // Reversed so player faction is at the top of the float menu.
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
-               .Select(faction =>
+                .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
                         selectedFaction = faction;
@@ -29,7 +29,7 @@ public static partial class PawnEditor
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
-               .ToList()));
+                .ToList()));
             inRect.yMin += 2;
         }
 
@@ -81,7 +81,9 @@ public static partial class PawnEditor
             {
                 AddPawn(selectedCategory);
             }
-        };
+        }
+
+        ;
 
         List<Pawn> pawns;
         List<string> sections;

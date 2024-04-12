@@ -40,7 +40,7 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                 }
                 table.ClearCache();
                 return Create(new());
-            }, "ChooseStuffForRelic".Translate() + " " + "PawnEditor.Relation".Translate(),
+            }, "PawnEditor.Choose".Translate() + " " + "PawnEditor.Relation".Translate(),
             r => r.description, null, filters, pawn, null, "Back".Translate(), () =>
             {
                 PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);

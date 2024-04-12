@@ -93,7 +93,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
             new("PawnEditor.Relation".Translate(), 140, TextAnchor.LowerLeft),
             new("PawnEditor.Pawn".Translate(), textAnchor: TextAnchor.LowerLeft),
             new("Faction".Translate(), textAnchor: TextAnchor.LowerLeft),
-            new("RomanceChanceOpinionFactor".Translate(), 100),
+            new("PawnEditor.Opinion".Translate().CapitalizeFirst(), 100),
             new(20),
             new(100), // Edit
             new(30), // Jump to pawn

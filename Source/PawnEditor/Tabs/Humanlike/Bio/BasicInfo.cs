@@ -15,7 +15,7 @@ public partial class TabWorker_Bio_Humanlike
         inRect.xMax -= 10;
         Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.Basic".Translate().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 5;
-        var name = "Name".Translate();
+        var name = "PawnEditor.Name".Translate();
         var age = "PawnEditor.Age".Translate();
         var childhood = "Childhood".Translate();
         var adulthood = "Adulthood".Translate();

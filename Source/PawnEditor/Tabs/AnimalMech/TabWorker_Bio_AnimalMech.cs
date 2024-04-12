@@ -30,40 +30,43 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         buttonsRect = buttonsRect.ContractedBy(6);
 
         var devStageRect = buttonsRect.LeftHalf().ContractedBy(2);
-        var devStage = (pawn.ageTracker.CurLifeStageIndex / (float)pawn.RaceProps.lifeStageAges.Count) switch
+        if (ModsConfig.BiotechActive)
         {
-            <= 0.33f => DevelopmentalStage.Baby,
-            <= 0.66f => DevelopmentalStage.Child,
-            _ => DevelopmentalStage.Adult
-        };
-        var text = devStage.ToString().Translate().CapitalizeFirst();
-        if (Mouse.IsOver(devStageRect))
-        {
-            Widgets.DrawHighlight(devStageRect);
-            if (Find.WindowStack.FloatMenu == null)
-                TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
-        }
-
-        Widgets.Label(devStageRect.BottomHalf(), text);
-        if (Widgets.ButtonImageWithBG(devStageRect.TopHalf(), devStage.Icon().Texture, new Vector2(22f, 22f)))
-        {
-            var options = new List<FloatMenuOption>
+            var devStage = (pawn.ageTracker.CurLifeStageIndex / (float)pawn.RaceProps.lifeStageAges.Count) switch
             {
-                new("Adult".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Adult),
-                    DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
-                new("Child".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Child),
-                    DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
-                new("Baby".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Baby),
-                    DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
+                <= 0.33f => DevelopmentalStage.Baby,
+                <= 0.66f => DevelopmentalStage.Child,
+                _ => DevelopmentalStage.Adult
             };
-            Find.WindowStack.Add(new FloatMenu(options));
+            var text = devStage.ToString().Translate().CapitalizeFirst();
+            if (Mouse.IsOver(devStageRect))
+            {
+                Widgets.DrawHighlight(devStageRect);
+                if (Find.WindowStack.FloatMenu == null)
+                    TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
+            }
+
+            Widgets.Label(devStageRect.BottomHalf(), text);
+            if (Widgets.ButtonImageWithBG(devStageRect.TopHalf(), devStage.Icon().Texture, new Vector2(22f, 22f)))
+            {
+                var options = new List<FloatMenuOption>
+                {
+                    new("Adult".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Adult),
+                        DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
+                    new("Child".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Child),
+                        DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
+                    new("Baby".Translate().CapitalizeFirst(), () => SetDevStage(pawn, DevelopmentalStage.Baby),
+                        DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
+                };
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
         }
 
         var sexRect = buttonsRect.RightHalf().ContractedBy(2);
         Widgets.DrawHighlightIfMouseover(sexRect);
         Widgets.Label(sexRect.BottomHalf(), "PawnEditor.Sex".Translate());
         if (Widgets.ButtonImageWithBG(sexRect.TopHalf(), pawn.gender.GetIcon(), new Vector2(22f, 22f)) && pawn.kindDef.fixedGender == null
-         && pawn.RaceProps.hasGenders)
+                                                                                                       && pawn.RaceProps.hasGenders)
         {
             var list = new List<FloatMenuOption>
             {
@@ -111,7 +114,7 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
         inRect.xMax -= 10;
         Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.Basic".Translate().Colorize(ColoredText.TipSectionTitleColor));
         inRect.xMin += 5;
-        var name = "Name".Translate();
+        var name = "PawnEditor.Name".Translate();
         var age = "PawnEditor.Age".Translate();
         var bonded = pawn.RaceProps.IsMechanoid ? "Overseer".Translate() : "PawnEditor.Bonded".Translate();
         var leftWidth = UIUtility.ColumnWidth(3, name, age, bonded) + 18f;

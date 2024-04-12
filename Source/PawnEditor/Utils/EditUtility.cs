@@ -23,7 +23,7 @@ public static class EditUtility
 
     public static void EditButton<T>(Rect rect, T item, Pawn pawn = null, UIElement element = null)
     {
-        if (!Widgets.ButtonText(rect, "Edit".Translate() + "...")) return;
+        if (!Widgets.ButtonText(rect, "PawnEditor.Edit".Translate() + "...")) return;
         var type = WindowForType(typeof(T));
         if (CurrentWindow != null && type.IsInstanceOfType(CurrentWindow))
         {
