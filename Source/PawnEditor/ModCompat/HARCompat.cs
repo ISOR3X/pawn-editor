@@ -29,7 +29,7 @@ public static class HARCompat
     private static Func<ThingDef, ThingDef, bool> canWear;
     private static Func<ThingDef, ThingDef, bool> canEquip;
     private static Func<TraitDef, Pawn, int, bool> canGetTrait;
-    private static Func<GeneDef, ThingDef, bool> canHaveGene;
+    private static Func<GeneDef, ThingDef, bool, bool> canHaveGene;
     private static Func<XenotypeDef, ThingDef, bool> canUseXenotype;
 
     public static string Name = "Humanoid Alien Races";
@@ -53,14 +53,14 @@ public static class HARCompat
 
         styleSettings = AccessTools.FieldRefAccess<object>(alienSettings, "styleSettings");
         isValidStyle = AccessTools.Method(AccessTools.TypeByName("AlienRace.StyleSettings"), "IsValidStyle")
-           .CreateDelegateCasting<Func<object, StyleItemDef, Pawn, bool, bool>>();
+            .CreateDelegateCasting<Func<object, StyleItemDef, Pawn, bool, bool>>();
 
         var raceRestrictionSettings = AccessTools.TypeByName("AlienRace.RaceRestrictionSettings");
         canWear = AccessTools.Method(raceRestrictionSettings, "CanWear").CreateDelegate<Func<ThingDef, ThingDef, bool>>();
         canEquip = AccessTools.Method(raceRestrictionSettings, "CanEquip").CreateDelegate<Func<ThingDef, ThingDef, bool>>();
         canGetTrait = AccessTools.Method(raceRestrictionSettings, "CanGetTrait", new[] { typeof(TraitDef), typeof(Pawn), typeof(int) })
-           .CreateDelegate<Func<TraitDef, Pawn, int, bool>>();
-        canHaveGene = AccessTools.Method(raceRestrictionSettings, "CanHaveGene").CreateDelegate<Func<GeneDef, ThingDef, bool>>();
+            .CreateDelegate<Func<TraitDef, Pawn, int, bool>>();
+        canHaveGene = AccessTools.Method(raceRestrictionSettings, "CanHaveGene").CreateDelegate<Func<GeneDef, ThingDef, bool, bool>>();
         canUseXenotype = AccessTools.Method(raceRestrictionSettings, "CanUseXenotype").CreateDelegate<Func<XenotypeDef, ThingDef, bool>>();
     }
 
@@ -109,6 +109,6 @@ public static class HARCompat
     public static bool CanWear(ThingDef apparel, Pawn pawn) => canWear(apparel, pawn.def);
     public static bool CanEquip(ThingDef weapon, Pawn pawn) => canEquip(weapon, pawn.def);
     public static bool CanGetTrait(ListingMenu_Trait.TraitInfo trait, Pawn pawn) => canGetTrait(trait.Trait.def, pawn, trait.Trait.degree);
-    public static bool CanHaveGene(GeneDef gene, Pawn pawn) => canHaveGene(gene, pawn.def);
+    public static bool CanHaveGene(GeneDef gene, Pawn pawn) => canHaveGene(gene, pawn.def, false);
     public static bool CanUseXenotype(XenotypeDef xenotype, Pawn pawn) => canUseXenotype(xenotype, pawn.def);
 }
