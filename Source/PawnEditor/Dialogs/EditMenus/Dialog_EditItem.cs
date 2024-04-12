@@ -9,15 +9,15 @@ public abstract class Dialog_EditItem : Window
     protected const float LABEL_WIDTH_PCT = 0.3f;
     protected const float CELL_HEIGHT = 30f;
     protected readonly Pawn Pawn;
-    private readonly UITable<Pawn> table;
+    private readonly UIElement element;
     public Rect TableRect;
     private bool floatMenuLast;
     private bool setPosition;
 
-    protected Dialog_EditItem(Pawn pawn = null, UITable<Pawn> table = null)
+    protected Dialog_EditItem(Pawn pawn = null, UIElement element = null)
     {
         Pawn = pawn;
-        this.table = table;
+        this.element = element;
         onlyOneOfTypeAllowed = true;
         absorbInputAroundWindow = false;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
@@ -32,7 +32,7 @@ public abstract class Dialog_EditItem : Window
     {
         base.SetInitialSizeAndPosition();
         var rect = UI.GUIToScreenRect(TableRect);
-        windowRect.width = Mathf.Max(MinWidth, table?.Width ?? InitialSize.x);
+        windowRect.width = Mathf.Max(MinWidth, element?.Width ?? InitialSize.x);
         windowRect.x = rect.x + 3;
         windowRect.y = rect.y - InitialSize.y;
         setPosition = false;
@@ -79,7 +79,7 @@ public abstract class Dialog_EditItem : Window
 
     protected virtual void ClearCaches()
     {
-        table?.ClearCache();
+        if (element is UITable<Pawn> table) table?.ClearCache();
     }
 }
 
@@ -87,7 +87,7 @@ public abstract class Dialog_EditItem<T> : Dialog_EditItem
 {
     protected T Selected;
 
-    protected Dialog_EditItem(T item, Pawn pawn = null, UITable<Pawn> table = null) : base(pawn, table) => Selected = item;
+    protected Dialog_EditItem(T item, Pawn pawn = null, UIElement element = null) : base(pawn, element) => Selected = item;
 
     public override void DoWindowContents(Rect inRect)
     {

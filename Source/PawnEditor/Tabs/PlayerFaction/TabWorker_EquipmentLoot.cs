@@ -102,7 +102,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
         {
             using (new TextBlock(GameFont.Tiny))
                 Widgets.Label(inRect.TakeBottomPart(Text.LineHeight), "PawnEditor.EquipmentLootDesc".Translate().Colorize(ColoredText.SubtleGrayColor));
-            Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height = equipmentTable.Height + lootTable.Height, width = inRect.width - 16f});
+            Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height = equipmentTable.Height + lootTable.Height, width = inRect.width - 16f });
             equipmentTable.OnGUI(inRect.TopHalf() with { width = inRect.width - 16f }, faction);
             lootTable.OnGUI(inRect.BottomHalf() with { width = inRect.width - 16f }, faction);
             Widgets.EndScrollView();
