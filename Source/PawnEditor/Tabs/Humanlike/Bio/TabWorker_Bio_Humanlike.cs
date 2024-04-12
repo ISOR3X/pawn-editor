@@ -88,7 +88,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                         Passion.None => TexPawnEditor.PassionEmptyTex,
                         Passion.Minor => SkillUI.PassionMinorIcon,
                         Passion.Major => SkillUI.PassionMajorIcon,
-                        _ => throw new ArgumentOutOfRangeException()
+                        _ => SkillUI.PassionMajorIcon
                     }))
                     skill.passion = skill.passion switch
                     {

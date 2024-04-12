@@ -226,6 +226,7 @@ public static partial class PawnEditor
                         if (thing != null && GenPlace.TryFindPlaceSpotNear(thing.Position, Rot4.South, thing.MapHeld, pawn, false, out var spot))
                             GenSpawn.Spawn(pawn, spot, thing.MapHeld, Rot4.South, WipeMode.VanishOrMoveAside, true);
                     }
+                    // TabWorker<Pawn>.Notify_OpenedDialog(); should recache tables?
                 }
             });
         }
