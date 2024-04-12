@@ -113,17 +113,13 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                 Widgets.Label(rect, disabled ? "-" : level.ToString());
                 if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Plus))
                 {
-                    var value = 1;
-                    value -= skill.aptitudeCached ?? 0;
-                    skill.Level += value;
+                    skill.Level = skill.GetLevel(false) + 1;
                     PawnEditor.Notify_PointsUsed();
                 }
 
                 if (!disabled && Widgets.ButtonImage(rect.TakeRightPart(30).ContractedBy(5), TexButton.Minus))
                 {
-                    var value = 1;
-                    value += skill.aptitudeCached ?? 0;
-                    skill.Level -= value;
+                    skill.Level = skill.GetLevel(false) - 1;
                     PawnEditor.Notify_PointsUsed();
                 }
 
