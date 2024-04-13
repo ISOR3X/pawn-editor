@@ -481,33 +481,36 @@ public class Dialog_AppearanceEditor : Window
 
             Widgets.Label(sexRect, "PawnEditor.Sex".Translate());
 
-            var devStageRect = buttonsRect.TopHalf().RightHalf().ContractedBy(2);
-            var text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
-            if (Mouse.IsOver(devStageRect))
+            TaggedString text;
+            if (ModsConfig.BiotechActive)
             {
-                Widgets.DrawHighlight(devStageRect);
-                if (Find.WindowStack.FloatMenu == null)
-                    TooltipHandler.TipRegion(devStageRect,
-                        text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
-            }
-
-
-            if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture,
-                    new Vector2(22f, 22f)))
-            {
-                var options = new List<FloatMenuOption>
+                var devStageRect = buttonsRect.TopHalf().RightHalf().ContractedBy(2);
+                text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
+                if (Mouse.IsOver(devStageRect))
                 {
-                    new("Adult".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Adult),
-                        DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
-                    new("Child".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Child),
-                        DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
-                    new("Baby".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Baby),
-                        DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
-                };
-                Find.WindowStack.Add(new FloatMenu(options));
-            }
+                    Widgets.DrawHighlight(devStageRect);
+                    if (Find.WindowStack.FloatMenu == null)
+                        TooltipHandler.TipRegion(devStageRect,
+                            text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
+                }
 
-            Widgets.Label(devStageRect, text);
+                if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture,
+                        new Vector2(22f, 22f)))
+                {
+                    var options = new List<FloatMenuOption>
+                    {
+                        new("Adult".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Adult),
+                            DevelopmentalStageExtensions.AdultTex.Texture, Color.white),
+                        new("Child".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Child),
+                            DevelopmentalStageExtensions.ChildTex.Texture, Color.white),
+                        new("Baby".Translate().CapitalizeFirst(), () => TabWorker_Bio_Humanlike.SetDevStage(pawn, DevelopmentalStage.Baby),
+                            DevelopmentalStageExtensions.BabyTex.Texture, Color.white)
+                    };
+                    Find.WindowStack.Add(new FloatMenu(options));
+                }
+
+                Widgets.Label(devStageRect, text);
+            }
 
             var xenotypeRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
             text = pawn.genes.XenotypeLabelCap;
