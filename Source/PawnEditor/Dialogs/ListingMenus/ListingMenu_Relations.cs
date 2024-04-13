@@ -31,6 +31,8 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                 {
                     PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
                     var list = PawnEditor.AllPawns.GetList();
+                    if (PawnEditor.Pregame)
+                        list.AddRange(Find.GameInitData.startingAndOptionalPawns);
                     list.Remove(pawn);
                     list.Remove(otherPawn);
                     if (predicate != null) list.RemoveAll(p => !predicate(p));
@@ -38,6 +40,7 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                         () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, table, filters)), highlightGender));
                     return true;
                 }
+
                 table.ClearCache();
                 return Create(new());
             }, "PawnEditor.Choose".Translate() + " " + "PawnEditor.Relation".Translate(),
@@ -45,6 +48,8 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
             {
                 PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
                 var list = PawnEditor.AllPawns.GetList();
+                if (PawnEditor.Pregame)
+                    list.AddRange(Find.GameInitData.startingAndOptionalPawns);
                 list.Remove(pawn);
                 Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(),
                     p =>
@@ -52,7 +57,6 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                         Find.WindowStack.Add(new ListingMenu_Relations(pawn, p, table, filters));
                         return true;
                     }));
-                
             }) =>
         _otherPawn = otherPawn;
 

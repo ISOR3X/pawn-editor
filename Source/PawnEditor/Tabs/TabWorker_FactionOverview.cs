@@ -72,7 +72,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             cachedPawns = Find.GameInitData.startingAndOptionalPawns;
             cachedSections = Enumerable.Repeat<string>(null, cachedPawns.Count).ToList();
             cachedSections[0] = "StartingPawnsSelected".Translate();
-            cachedSections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
+            if (Find.GameInitData.startingPawnCount < cachedSections.Count)
+                cachedSections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
             cachedSectionCount = 2;
         }
         else
@@ -116,11 +117,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             new(24), // Save
             new(24) // Delete
         };
-        
-        if (ModsConfig.BiotechActive)
-        {
-            headings.Insert(2, new(XenotypeDefOf.Baseliner.Icon, 100));
-        }
+
+        if (ModsConfig.BiotechActive) headings.Insert(2, new(XenotypeDefOf.Baseliner.Icon, 100));
 
         return headings;
     }
@@ -139,7 +137,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
             string section = PawnEditor.Pregame
                 ? Find.GameInitData.startingAndOptionalPawns.IndexOf(pawn) >= Find.GameInitData.startingPawnCount
                     ? "StartingPawnsLeftBehind"
-                        .Translate()
+                       .Translate()
                     : "StartingPawnsSelected".Translate()
                 : PawnLister.LocationLabel(colonistList.GetLocation(pawn));
             pawnLocationTables[section].ClearCache();

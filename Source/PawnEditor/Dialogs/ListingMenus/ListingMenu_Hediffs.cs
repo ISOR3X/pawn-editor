@@ -20,9 +20,23 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
 
     static ListingMenu_Hediffs()
     {
-        defaultBodyParts = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null)
-           .ToDictionary(recipe => recipe.addsHediff, recipe =>
-                (recipe.appliedOnFixedBodyParts, recipe.appliedOnFixedBodyPartGroups));
+        defaultBodyParts = new();
+
+        foreach (var recipe in DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null))
+            if (!defaultBodyParts.TryGetValue(recipe.addsHediff, out var item))
+                defaultBodyParts.Add(recipe.addsHediff, (recipe.appliedOnFixedBodyParts ?? new(), recipe.appliedOnFixedBodyPartGroups ?? new()));
+            else
+            {
+                List<BodyPartDef> item1 = new();
+                List<BodyPartGroupDef> item2 = new();
+                item1.AddRange(item.Item1);
+                item2.AddRange(item.Item2);
+                if (recipe.appliedOnFixedBodyParts != null)
+                    item1.AddRange(recipe.appliedOnFixedBodyParts);
+                if (recipe.appliedOnFixedBodyPartGroups != null)
+                    item2.AddRange(recipe.appliedOnFixedBodyPartGroups);
+                defaultBodyParts[recipe.addsHediff] = (item1, item2);
+            }
 
         possibleTechLevels = new();
         foreach (var hediff in DefDatabase<HediffDef>.AllDefsListForReading)

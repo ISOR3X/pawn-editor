@@ -21,7 +21,7 @@ public static partial class PawnEditor
         {
             // Reversed so player faction is at the top of the float menu.
             Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
-                .Select(faction =>
+               .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
                         selectedFaction = faction;
@@ -29,7 +29,7 @@ public static partial class PawnEditor
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
-                .ToList()));
+               .ToList()));
             inRect.yMin += 2;
         }
 
@@ -74,16 +74,10 @@ public static partial class PawnEditor
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst()))
         {
             if (selectedFaction != Faction.OfPlayer && selectedCategory == PawnCategory.Mechs)
-            {
                 Messages.Message("PawnEditor.NoAddMechWarning".Translate(), MessageTypeDefOf.RejectInput);
-            }
             else
-            {
                 AddPawn(selectedCategory);
-            }
         }
-
-        ;
 
         List<Pawn> pawns;
         List<string> sections;
@@ -97,7 +91,8 @@ public static partial class PawnEditor
                 pawns = Find.GameInitData.startingAndOptionalPawns;
                 sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
                 sections[0] = "StartingPawnsSelected".Translate();
-                sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
+                if (Find.GameInitData.startingPawnCount < sections.Count)
+                    sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
                 sectionCount = 2;
                 onReorder = delegate(Pawn _, int from, int to)
                 {

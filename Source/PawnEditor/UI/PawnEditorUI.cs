@@ -72,7 +72,7 @@ public static partial class PawnEditor
         UIUtility.CheckboxLabeledCentered(rect3.TopHalf(), text3, ref usePointLimit);
         rect3 = rect3.BottomHalf();
         Widgets.Label(rect3.TakeLeftPart(num), text4);
-        Color pointColor = usePointLimit ? ColoredText.CurrencyColor : ColoredText.SubtleGrayColor;
+        var pointColor = usePointLimit ? ColoredText.CurrencyColor : ColoredText.SubtleGrayColor;
         using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(rect3, text5.Colorize(pointColor));
 
         var bottomButtonsRect = inRect.TakeBottomPart(Page.BottomButHeight);
@@ -208,6 +208,8 @@ public static partial class PawnEditor
                         parent = pawn.holdingOwner;
                         pawn.holdingOwner.Remove(pawn);
                     }
+
+                    if (Pregame) Find.GameInitData.startingPossessions.Remove(pawn);
                 },
                 OnLoad = pawn =>
                 {
@@ -226,6 +228,9 @@ public static partial class PawnEditor
                         if (thing != null && GenPlace.TryFindPlaceSpotNear(thing.Position, Rot4.South, thing.MapHeld, pawn, false, out var spot))
                             GenSpawn.Spawn(pawn, spot, thing.MapHeld, Rot4.South, WipeMode.VanishOrMoveAside, true);
                     }
+
+
+                    if (Pregame) Find.GameInitData.startingPossessions.Add(pawn, new());
                     // TabWorker<Pawn>.Notify_OpenedDialog(); should recache tables?
                 }
             });
@@ -364,7 +369,7 @@ public static partial class PawnEditor
             recache = true;
         }
 
-        if (recache || (tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction))
+        if (recache || tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction)
         {
             CheckChangeTabGroup();
             RecachePawnList();

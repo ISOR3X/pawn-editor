@@ -126,6 +126,7 @@ public partial class TabWorker_Bio_Humanlike
 
     private static void RandomizeSkills(Pawn pawn)
     {
+        foreach (var skillRecord in pawn.skills.skills) skillRecord.passion = Passion.None;
         PawnGenerator.GenerateSkills(pawn, new(pawn.kindDef, pawn.Faction));
     }
 }

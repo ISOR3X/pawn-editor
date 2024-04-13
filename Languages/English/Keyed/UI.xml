@@ -53,7 +53,6 @@
     <PawnEditor.Body>Body</PawnEditor.Body>
     <PawnEditor.Head>Head</PawnEditor.Head>
     <PawnEditor.IgnoreXenotype>Ignore xenotype restrictions</PawnEditor.IgnoreXenotype>
-    <PawnEditor.NoOptions>No options available</PawnEditor.NoOptions>
     <PawnEditor.Ears>Ears</PawnEditor.Ears>
     <PawnEditor.Headbone>Forehead (horns)</PawnEditor.Headbone>
     <PawnEditor.BodyType>Body type</PawnEditor.BodyType>
@@ -210,8 +209,6 @@
     <PawnEditor.Use>use</PawnEditor.Use>
     <PawnEditor.NoAddMechWarning>Can't add mechs to non-player factions</PawnEditor.NoAddMechWarning>
     <PawnEditor.NoOptions>No available options found.</PawnEditor.NoOptions>
-    <PawnEditor.Name>name</PawnEditor.Name>
-    <PawnEditor.Edit>edit</PawnEditor.Edit>
     <PawnEditor.Opinion>opinion</PawnEditor.Opinion>
     <PawnEditor.Mechs>mechanoids</PawnEditor.Mechs>
     <PawnEditor.Choose>Choose</PawnEditor.Choose>
