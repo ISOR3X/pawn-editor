@@ -59,7 +59,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                     })
             };
             if (pawn.Dead)
-                list.Add(new("Resurrect".Translate(), () => { ResurrectionUtility.TryResurrect(pawn); }));
+                list.Add(new("PawnEditor.Resurrect".Translate(), () => { ResurrectionUtility.TryResurrect(pawn); }));
             Find.WindowStack.Add(new FloatMenu(list));
         }
 
@@ -189,7 +189,7 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
                     TextAnchor.MiddleLeft));
             else
                 items.Add(new("WholeBody".Translate().Colorize(HealthUtility.RedColor), textAnchor: TextAnchor.MiddleLeft));
-            items.Add(new(hediff.LabelCap.Colorize(hediff.LabelColor),
+            items.Add(new(hediff.LabelCap, hediff.LabelColor,
                 Mathf.RoundToInt(HealthCardUtility.GetListPriority(hediff.Part)), TextAnchor.MiddleLeft));
             items.Add(new(infoRect =>
             {
