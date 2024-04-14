@@ -105,7 +105,7 @@ public partial class TabWorker_Bio_Humanlike
             var childRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(childRect.TakeLeftPart(leftWidth), childhood);
             if (Widgets.ButtonText(childRect.LeftPart(0.6f), pawn.story.Childhood.TitleCapFor(pawn.gender)))
-                Find.WindowStack.Add(new ListingMenu_Backstories(pawn));
+                Find.WindowStack.Add(new ListingMenu_Backstories(pawn, BackstorySlot.Childhood));
 
             TooltipHandler.TipRegion(childRect.LeftPart(0.6f), (TipSignal)pawn.story.childhood.FullDescriptionFor(pawn).Resolve());
         }
@@ -116,7 +116,7 @@ public partial class TabWorker_Bio_Humanlike
             var adultRect = inRect.TakeTopPart(30);
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(adultRect.TakeLeftPart(leftWidth), adulthood);
             if (Widgets.ButtonText(adultRect.LeftPart(0.6f), pawn.story.Adulthood.TitleCapFor(pawn.gender)))
-                Find.WindowStack.Add(new ListingMenu_Backstories(pawn));
+                Find.WindowStack.Add(new ListingMenu_Backstories(pawn, BackstorySlot.Adulthood));
 
             TooltipHandler.TipRegion(adultRect.LeftPart(0.6f), (TipSignal)pawn.story.adulthood.FullDescriptionFor(pawn).Resolve());
         }

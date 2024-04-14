@@ -9,11 +9,16 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
 {
-    private static readonly List<BackstoryDef> items;
+    private static readonly Dictionary<BackstorySlot, List<BackstoryDef>> backstoriesBySlot = new();
 
-    static ListingMenu_Backstories() => items = DefDatabase<BackstoryDef>.AllDefsListForReading;
+    static ListingMenu_Backstories()
+    {
+        var items = DefDatabase<BackstoryDef>.AllDefsListForReading;
+        backstoriesBySlot.Add(BackstorySlot.Adulthood, items.Where(b => b.slot == BackstorySlot.Adulthood).ToList());
+        backstoriesBySlot.Add(BackstorySlot.Childhood, items.Where(b => b.slot == BackstorySlot.Childhood).ToList());
+    }
 
-    public ListingMenu_Backstories(Pawn pawn) : base(items, b => b.titleShort.CapitalizeFirst(), b => TryAdd(b, pawn),
+    public ListingMenu_Backstories(Pawn pawn, BackstorySlot backstorySlot) : base(backstoriesBySlot[backstorySlot], b => b.TitleFor(pawn.gender).CapitalizeFirst(), b => TryAdd(b, pawn),
         "PawnEditor.Choose".Translate() + " " + "Backstory".Translate().ToLower(),
         b => DoToolTipFor(b, pawn), null, GetFilters(), pawn)
     {
@@ -38,11 +43,11 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
         list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.ShuffableOnly".Translate(), item => item.shuffleable, true,
             "PawnEditor.ShuffableOnlyDesc".Translate()));
 
-        var backstorySlotDict = Enum.GetValues(typeof(BackstorySlot))
-            .Cast<BackstorySlot>()
-            .ToDictionary<BackstorySlot, string, Func<BackstoryDef, bool>>(bs => bs.ToString(), bs => bd => bd.slot == bs);
-        list.Add(
-            new Filter_Dropdown<BackstoryDef>("PawnEditor.BackstorySlot".Translate(), backstorySlotDict, false, "PawnEditor.BackstorySlotDesc".Translate()));
+        // var backstorySlotDict = Enum.GetValues(typeof(BackstorySlot))
+        //     .Cast<BackstorySlot>()
+        //     .ToDictionary<BackstorySlot, string, Func<BackstoryDef, bool>>(bs => bs.ToString(), bs => bd => bd.slot == bs);
+        // list.Add(
+        //     new Filter_Dropdown<BackstoryDef>("PawnEditor.BackstorySlot".Translate(), backstorySlotDict, false, "PawnEditor.BackstorySlotDesc".Translate()));
 
         for (var i = 0; i < 5; i++)
         {
@@ -54,7 +59,8 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
 
         for (var i = 0; i < 5; i++)
         {
-            var skillGainDict = DefDatabase<SkillDef>.AllDefs.Where(sd => items.Any(bd => bd.skillGains.Any(sg => sg.skill == sd)))
+            var skillGainDict = DefDatabase<SkillDef>.AllDefs.Where(sd => backstoriesBySlot
+                    .SelectMany(p => p.Value).Any(bd => bd.skillGains.Any(sg => sg.skill == sd)))
                 .ToDictionary<SkillDef, string, Func<BackstoryDef, bool>>(sd => sd.skillLabel.CapitalizeFirst(),
                     sd => bd => bd.skillGains.Any(sg => sg.skill == sd && sg.amount > 0));
             list.Add(new Filter_Dropdown<BackstoryDef>("PawnEditor.SkillGain".Translate(), skillGainDict, false, "PawnEditor.SkillGainDesc".Translate()));
@@ -74,7 +80,7 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
     {
         string output = backstoryDef.FullDescriptionFor(pawn).Resolve();
         string cats = string.Join(", ", backstoryDef.spawnCategories.Select(sc => sc.ConvertCamelCase()));
-        output += "\n\n"+ "PawnEditor.Categories".Translate().CapitalizeFirst()+ ": \n" + cats;
+        output += "\n\n" + "PawnEditor.Categories".Translate().CapitalizeFirst() + ": \n" + cats;
         return output;
     }
 }
