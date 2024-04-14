@@ -150,6 +150,9 @@ public static class UIUtility
 
     public static void IntField(Rect inRect, ref int value, int min, int max, ref string buffer, bool minMaxButtons = false)
     {
+        int intBuff = -1;
+        if (buffer == null) intBuff = value;
+        
         if (minMaxButtons)
             if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalfDouble))
             {
@@ -160,6 +163,7 @@ public static class UIUtility
                 }
                 else
                     Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+                return;
             }
 
         if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalf))
@@ -171,6 +175,7 @@ public static class UIUtility
             }
             else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+            return;
         }
 
         if (minMaxButtons)
@@ -183,6 +188,7 @@ public static class UIUtility
                 }
                 else
                     Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+                return;
             }
 
         if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalf))
@@ -194,11 +200,17 @@ public static class UIUtility
             }
             else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+            return;
         }
+        
+        Rect fieldRect = inRect.ContractedBy(0f, 4f);
+        Widgets.TextFieldNumeric(fieldRect, ref intBuff, ref buffer);
 
-
-        Widgets.TextFieldNumeric(inRect.ContractedBy(0f, 4f), ref value, ref buffer, min, max);
-        buffer = null;
+        if (GUI.GetNameOfFocusedControl() != "TextField" + fieldRect.y.ToString("F0") + fieldRect.x.ToString("F0"))
+        {
+            value = Mathf.Clamp(intBuff, min, max);
+            buffer = null;
+        }
     }
 
     public static Rect CellRect(int cell, Rect inRect)
