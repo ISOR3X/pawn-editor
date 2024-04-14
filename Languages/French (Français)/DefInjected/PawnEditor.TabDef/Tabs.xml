@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+	<Bio_Humanlike.label>biographie</Bio_Humanlike.label>
+	<Gear.label>matériel</Gear.label>
+	<Needs.label>besoins</Needs.label>
+	<Health.label>santé</Health.label>
+	<Social.label>social</Social.label>
+	<Bio_AnimalMech.label>biographie</Bio_AnimalMech.label>
+	<FactionOverviewPlayer.label>apercu</FactionOverviewPlayer.label>
+	<AnimalsMechs.label>animaux &amp; méchas</AnimalsMechs.label>
+	<EquipmentLoot.label>équipement &amp; butin</EquipmentLoot.label>
+	<FactionOverviewNPC.label>apercu</FactionOverviewNPC.label>
+	<Settlements.label>colonies</Settlements.label>
+</LanguageData>
