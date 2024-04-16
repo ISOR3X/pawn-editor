@@ -33,6 +33,7 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
         else
             pawn.story.Adulthood = backstoryDef;
 
+        pawn.Notify_DisabledWorkTypesChanged();
         return true;
     }
 
