@@ -79,44 +79,50 @@ public static partial class PawnEditor
                 AddPawn(selectedCategory);
         }
 
-        List<Pawn> pawns;
-        List<string> sections;
-        int sectionCount;
-        Action<Pawn, int, int> onReorder;
+        List<Pawn> pawns = null;
+        List<string> sections = null;
+        int sectionCount = 0;
+        Action<Pawn, int, int> onReorder = null;
         Action<Pawn> onDelete;
         if (pregame)
         {
             if (selectedCategory == PawnCategory.Humans)
             {
                 pawns = Find.GameInitData.startingAndOptionalPawns;
-                sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
-                sections[0] = "StartingPawnsSelected".Translate();
-                if (Find.GameInitData.startingPawnCount < sections.Count)
-                    sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
-                sectionCount = 2;
-                onReorder = delegate(Pawn _, int from, int to)
+                if (pawns.Any())
                 {
-                    StartingPawnUtility.ReorderRequests(from, to);
-                    TutorSystem.Notify_Event("ReorderPawn");
-                    if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
-                        TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
-                };
+                    sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
+                    sections[0] = "StartingPawnsSelected".Translate();
+                    if (Find.GameInitData.startingPawnCount < sections.Count)
+                        sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
+                    sectionCount = 2;
+                    onReorder = delegate (Pawn _, int from, int to)
+                    {
+                        StartingPawnUtility.ReorderRequests(from, to);
+                        TutorSystem.Notify_Event("ReorderPawn");
+                        if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
+                            TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
+                    };
+                }
+
             }
             else
             {
                 pawns = StartingThingsManager.GetPawns(selectedCategory);
-                sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
-                if (sections.Count > 0)
-                    sections[0] = "StartingPawnsSelected".Translate();
-                sectionCount = 1;
-                onReorder = (_, _, _) => { };
+                if (pawns.Any())
+                {
+                    sections = Enumerable.Repeat<string>(null, pawns.Count).ToList();
+                    if (sections.Count > 0)
+                        sections[0] = "StartingPawnsSelected".Translate();
+                    sectionCount = 1;
+                    onReorder = (_, _, _) => { };
+                }
             }
 
             onDelete = pawn =>
             {
-                pawn.Discard(true);
+                DeletePawn(pawn, pawns);
                 TabWorker_FactionOverview.RecachePawns(selectedFaction);
-                if (selectedPawn == pawn) selectedPawn = pawns.Get(pawns.IndexOf(pawn) + 1);
             };
         }
         else
@@ -131,7 +137,21 @@ public static partial class PawnEditor
         }
 
         inRect.yMin += 12f;
-        DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
+        if (pawns.Any())
+        {
+            DoPawnList(inRect.TakeTopPart(415f), pawns, sections, sectionCount, onReorder, onDelete);
+        }
+    }
+
+    private static void DeletePawn(Pawn pawn, List<Pawn> pawns)
+    {
+        if (selectedPawn == pawn) selectedPawn = pawns.Get(pawns.IndexOf(pawn) + 1);
+        pawns.Remove(pawn);
+        if (pawns.Empty()) selectedPawn = null;
+        if (pawn.Discarded is false)
+        {
+            pawn.Discard(true);
+        }
     }
 
     public static void AddPawn(PawnCategory category)
