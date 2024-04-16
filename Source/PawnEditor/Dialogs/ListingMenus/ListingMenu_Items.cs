@@ -164,20 +164,18 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                     return "PawnEditor.HARRestrictionViolated".Translate(pawn.Named("PAWN"), pawn.def.label.Named("RACE"), "PawnEditor.Equip".Named("VERB"),
                         thingDef.label.Named("ITEM"));
 
-                if (thingDef.equipmentType != EquipmentType.None && PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef)
-                        .TryRandomElement(out var thingStuffPair))
-                {
-                    var newEquipment = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
-                    return new ConditionalInfo(PawnEditor.CanUsePoints(newEquipment), new SuccessInfo(() =>
+                if (thingDef.equipmentType != EquipmentType.None)
                     {
-                        pawn.equipment.MakeRoomFor(newEquipment);
-                        pawn.equipment.AddEquipment(newEquipment);
-                        PawnEditor.Notify_PointsUsed();
-                        TabWorker_Gear.ClearCaches();
-                    }));
-                }
-
-                break;
+                        ThingWithComps newEquipment = MakeEquipment(thingDef);
+                        return new ConditionalInfo(PawnEditor.CanUsePoints(newEquipment), new SuccessInfo(() =>
+                        {
+                            pawn.equipment.MakeRoomFor(newEquipment);
+                            pawn.equipment.AddEquipment(newEquipment);
+                            PawnEditor.Notify_PointsUsed();
+                            TabWorker_Gear.ClearCaches();
+                        }));
+                    }
+                    break;
             }
             case ItemType.All:
             case ItemType.Possessions:
@@ -194,6 +192,29 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         }
 
         return false;
+    }
+
+    private static ThingWithComps MakeEquipment(ThingDef thingDef)
+    {
+        if (thingDef.MadeFromStuff)
+        {
+            if (PawnWeaponGenerator.allWeaponPairs.Where(pair => pair.thing == thingDef)
+                    .TryRandomElement(out var thingStuffPair))
+            {
+                var newEquipment = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+                return newEquipment;
+            }
+            else
+            {
+                var newEquipment = (ThingWithComps)ThingMaker.MakeThing(thingDef, GenStuff.DefaultStuffFor(thingDef));
+                return newEquipment;
+            }
+        }
+        else
+        {
+            var newEquipment = (ThingWithComps)ThingMaker.MakeThing(thingDef);
+            return newEquipment;
+        }
     }
 
     private static AddResult TryAdd(ThingDef thingDef, List<Thing> things, Action callback = null)
