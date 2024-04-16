@@ -420,9 +420,7 @@ public class Dialog_AppearanceEditor : Window
         {
             var option = options[i];
             var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(2);
-            var enabled = (ignoreXenotype || (pawn.genes.Xenotype?.AllGenes.Contains(option) ?? true)
-                                          || (pawn.genes.CustomXenotype?.genes.Contains(option) ?? false))
-                       && (!HARCompat.Active || !HARCompat.EnforceRestrictions || HARCompat.CanHaveGene(option, pawn));
+            bool enabled = GeneIsAllowed(option);
             Widgets.DrawHighlight(rect);
             if (pawn.genes.HasGene(option)) Widgets.DrawBox(rect);
             if (enabled && Widgets.ButtonInvisible(rect))
@@ -450,6 +448,28 @@ public class Dialog_AppearanceEditor : Window
 
         inRect.yMin += 8f;
         Widgets.EndGroup();
+    }
+
+    private bool GeneIsAllowed(GeneDef option)
+    {
+        if (ignoreXenotype) return true;
+        if (HARCompat.Active && HARCompat.EnforceRestrictions && HARCompat.CanHaveGene(option, pawn) is false)
+        {
+            return false;
+        }
+        else if (pawn.IsBaseliner())
+        {
+            return option.endogeneCategory == EndogeneCategory.Melanin || option.endogeneCategory == EndogeneCategory.HairColor;
+        }
+        else if (pawn.genes.Xenotype != null)
+        {
+            return pawn.genes.Xenotype.AllGenes.Contains(option);
+        }
+        else if (pawn.genes.CustomXenotype != null)
+        {
+            return pawn.genes.CustomXenotype.genes.Contains(option);
+        }
+        return false;
     }
 
     private void DoLeftSection(Rect inRect)
@@ -525,16 +545,19 @@ public class Dialog_AppearanceEditor : Window
             if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
             {
                 var list = new List<FloatMenuOption>();
-                foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
+                foreach (var item in DefDatabase<XenotypeDef>.AllDefs.Where(x => x != pawn.genes.xenotype).OrderBy(x => 0f - x.displayPriority))
                 {
                     var xenotype = item;
                     list.Add(new(xenotype.LabelCap,
-                        () => pawn.genes.SetXenotype(xenotype), xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
+                        () =>
+                        {
+                            SetXenotype(xenotype);
+                        }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
                         r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
                         r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
                 }
 
-                foreach (var customXenotype in CharacterCardUtility.CustomXenotypes)
+                foreach (var customXenotype in CharacterCardUtility.CustomXenotypes.Where(x => x != pawn.genes.CustomXenotype))
                 {
                     var customInner = customXenotype;
                     list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
@@ -593,6 +616,16 @@ public class Dialog_AppearanceEditor : Window
             Widgets.CheckboxLabeled(inRect.TakeBottomPart(50), "PawnEditor.IgnoreXenotype".Translate(), ref ignoreXenotype);
         Widgets.CheckboxLabeled(inRect.TakeBottomPart(30), "ShowApparel".Translate(), ref PawnEditor.RenderClothes);
         Widgets.CheckboxLabeled(inRect.TakeBottomPart(30), "ShowHeadgear".Translate(), ref PawnEditor.RenderHeadgear);
+    }
+
+    private void SetXenotype(XenotypeDef xenotype)
+    {
+        for (int num = pawn.genes.endogenes.Count - 1; num >= 0; num--)
+        {
+            pawn.genes.RemoveGene(pawn.genes.endogenes[num]);
+        }
+        pawn.genes.ClearXenogenes();
+        PawnGenerator.GenerateGenes(pawn, xenotype, default);
     }
 
     private void DrawBottomButtons(Rect inRect)
