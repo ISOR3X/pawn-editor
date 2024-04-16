@@ -135,28 +135,27 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
                     return "PawnEditor.HARRestrictionViolated".Translate(pawn.Named("PAWN"), pawn.def.label.Named("RACE"), "PawnEditor.Wear".Named("VERB"),
                         thingDef.label.Named("ITEM"));
 
-                if (thingDef.IsApparel && PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef).TryRandomElement(out var thingStuffPair))
-                {
-                    var newApparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
-
-                    AddResult result = new ConditionalInfo(PawnEditor.CanUsePoints(newApparel), new SuccessInfo(() =>
+                if (thingDef.IsApparel)
                     {
-                        CheckCapacity(pawn, newApparel);
-                        pawn.apparel.Wear(newApparel, false);
-                        PawnEditor.Notify_PointsUsed();
-                        TabWorker_Gear.ClearCaches();
-                    }));
+                        Apparel newApparel = MakeApparel(thingDef);
+                        AddResult result = new ConditionalInfo(PawnEditor.CanUsePoints(newApparel), new SuccessInfo(() =>
+                        {
+                            CheckCapacity(pawn, newApparel);
+                            pawn.apparel.Wear(newApparel, false);
+                            PawnEditor.Notify_PointsUsed();
+                            TabWorker_Gear.ClearCaches();
+                        }));
 
 
-                    if (pawn.apparel.WornApparel.FirstOrDefault(ap => !ApparelUtility.CanWearTogether(thingDef, ap.def, pawn.RaceProps.body)) is
-                        { } conflictApparel)
-                        result = new ConfirmInfo("PawnEditor.WearingWouldRemove".Translate(thingDef.LabelCap, conflictApparel.LabelCap), "ApparelConflict",
-                            result);
+                        if (pawn.apparel.WornApparel.FirstOrDefault(ap => !ApparelUtility.CanWearTogether(thingDef, ap.def, pawn.RaceProps.body)) is
+                            { } conflictApparel)
+                            result = new ConfirmInfo("PawnEditor.WearingWouldRemove".Translate(thingDef.LabelCap, conflictApparel.LabelCap), "ApparelConflict",
+                                result);
 
-                    return result;
-                }
+                        return result;
+                    }
 
-                break;
+                    break;
             }
             case ItemType.Equipment:
             {
@@ -192,6 +191,29 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
         }
 
         return false;
+    }
+
+    private static Apparel MakeApparel(ThingDef thingDef)
+    {
+        if (thingDef.MadeFromStuff)
+        {
+            if (PawnApparelGenerator.allApparelPairs.Where(pair => pair.thing == thingDef)
+                .TryRandomElement(out var thingStuffPair))
+            {
+                var newApparel = (Apparel)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+                return newApparel;
+            }
+            else
+            {
+                var newApparel = (Apparel)ThingMaker.MakeThing(thingDef, GenStuff.DefaultStuffFor(thingDef));
+                return newApparel;
+            }
+        }
+        else
+        {
+            var newApparel = (Apparel)ThingMaker.MakeThing(thingDef);
+            return newApparel;
+        }
     }
 
     private static ThingWithComps MakeEquipment(ThingDef thingDef)
