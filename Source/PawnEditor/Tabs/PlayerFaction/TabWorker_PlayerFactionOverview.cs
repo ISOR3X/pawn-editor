@@ -95,7 +95,11 @@ public class TabWorker_PlayerFactionOverview : TabWorker_FactionOverview
             var factionNameRect = inRect.LeftHalf();
             factionNameRect.width *= 0.75f;
             Widgets.Label(factionNameRect.TakeLeftPart(leftLeftWidth), factionName);
-            faction.Name = Widgets.TextField(factionNameRect, faction.Name);
+            var tmpName = Widgets.TextField(factionNameRect, faction.Name);
+            if (tmpName != faction.def.LabelCap)
+            {
+                faction.Name = tmpName;
+            }
 
             if (!PawnEditor.Pregame)
             {
