@@ -582,6 +582,7 @@ public class Dialog_AppearanceEditor : Window
         {
             var allDefs = GetAllDefsForTab(mainTab, shapeTab);
             var options = LoadedModManager.RunningMods.Intersect(allDefs.Select(def => def.modContentPack).Distinct())
+               .Where(x => x != null)
                .Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
                .Prepend(new(
                     "All".Translate().CapitalizeFirst(), () => sourceFilter = null))

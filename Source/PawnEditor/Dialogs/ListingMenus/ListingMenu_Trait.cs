@@ -62,7 +62,7 @@ public class ListingMenu_Trait : ListingMenu<ListingMenu_Trait.TraitInfo>
             LoadedModManager.runningMods
                .Where(m => m.AllDefs.OfType<TraitDef>().Any())
                .ToDictionary<ModContentPack, string, Func<TraitInfo, bool>>(m => m.Name, m => traitInfo =>
-                    traitInfo.Trait.def.modContentPack.Name == m.Name);
+                    traitInfo.Trait.def.modContentPack?.Name == m.Name);
         list.Add(new Filter_Dropdown<TraitInfo>("Source".Translate(), modSourceDict, false, "PawnEditor.SourceDesc".Translate()));
 
         return list;

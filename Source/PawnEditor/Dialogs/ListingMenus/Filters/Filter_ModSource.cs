@@ -11,5 +11,5 @@ public class Filter_ModSource<T> : Filter_Dropdown<T> where T : Def
         LoadedModManager.runningMods
            .Where(m => m.AllDefs.OfType<T>().Any())
            .ToDictionary<ModContentPack, string, Func<T, bool>>(m => m.Name, m => d =>
-                d.modContentPack.Name == m.Name), enabledByDefault, "PawnEditor.SourceDesc".Translate()) { }
+                d.modContentPack?.Name == m.Name), enabledByDefault, "PawnEditor.SourceDesc".Translate()) { }
 }
