@@ -149,8 +149,9 @@ public class Dialog_AppearanceEditor : Window
 
             mainTabs.Clear();
             mainTabs.Add(new("PawnEditor.Shape".Translate(), () => mainTab = MainTab.Shape, mainTab == MainTab.Shape));
-            mainTabs.Add(new("Hair".Translate().CapitalizeFirst(), () => mainTab = MainTab.Hair, mainTab == MainTab.Hair));
-            mainTabs.Add(new("Tattoos".Translate(), () => mainTab = MainTab.Tattoos, mainTab == MainTab.Tattoos));
+            mainTabs.Add(new("PawnEditor.Hair".Translate().CapitalizeFirst(), () => mainTab = MainTab.Hair, mainTab == MainTab.Hair));
+            if (ModsConfig.IdeologyActive)
+                mainTabs.Add(new("Tattoos".Translate(), () => mainTab = MainTab.Tattoos, mainTab == MainTab.Tattoos));
             if (ModsConfig.BiotechActive)
                 mainTabs.Add(new("Xenotype".Translate(), () => mainTab = MainTab.Xenotype, mainTab == MainTab.Xenotype));
             if (HARCompat.Active)
@@ -530,78 +531,87 @@ public class Dialog_AppearanceEditor : Window
                 }
 
                 Widgets.Label(devStageRect, text);
-            }
 
-            var xenotypeRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
-            text = pawn.genes.XenotypeLabelCap;
-            if (Mouse.IsOver(xenotypeRect))
-            {
-                Widgets.DrawHighlight(xenotypeRect);
-                if (Find.WindowStack.FloatMenu == null)
-                    TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
-            }
-
-
-            if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
-            {
-                var list = new List<FloatMenuOption>();
-                foreach (var item in DefDatabase<XenotypeDef>.AllDefs.Where(x => x != pawn.genes.xenotype).OrderBy(x => 0f - x.displayPriority))
+                var xenotypeRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
+                text = pawn.genes.XenotypeLabelCap;
+                if (Mouse.IsOver(xenotypeRect))
                 {
-                    var xenotype = item;
-                    list.Add(new(xenotype.LabelCap,
-                        () =>
-                        {
-                            SetXenotype(xenotype);
-                        }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
-                        r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
-                        r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
+                    Widgets.DrawHighlight(xenotypeRect);
+                    if (Find.WindowStack.FloatMenu == null)
+                        TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
                 }
 
-                foreach (var customXenotype in CharacterCardUtility.CustomXenotypes.Where(x => x != pawn.genes.CustomXenotype))
+
+                if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
                 {
-                    var customInner = customXenotype;
-                    list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
-                        delegate
-                        {
-                            if (!pawn.IsBaseliner()) pawn.genes.SetXenotype(XenotypeDefOf.Baseliner);
-                            pawn.genes.xenotypeName = customXenotype.name;
-                            pawn.genes.iconDef = customXenotype.IconDef;
-                            foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
-                        }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
-                        {
-                            if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
+                    var list = new List<FloatMenuOption>();
+                    foreach (var item in DefDatabase<XenotypeDef>.AllDefs.Where(x => x != pawn.genes.xenotype).OrderBy(x => 0f - x.displayPriority))
+                    {
+                        var xenotype = item;
+                        list.Add(new(xenotype.LabelCap,
+                            () =>
                             {
-                                Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
-                                    delegate
-                                    {
-                                        var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
-                                        if (File.Exists(path))
-                                        {
-                                            File.Delete(path);
-                                            CharacterCardUtility.cachedCustomXenotypes = null;
-                                        }
-                                    }, true));
-                                return true;
-                            }
+                                SetXenotype(xenotype);
+                            }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
+                            r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
+                            r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
+                    }
 
-                            return false;
-                        }, extraPartRightJustified: true));
+                    foreach (var customXenotype in CharacterCardUtility.CustomXenotypes.Where(x => x != pawn.genes.CustomXenotype))
+                    {
+                        var customInner = customXenotype;
+                        list.Add(new(customInner.name.CapitalizeFirst() + " (" + "Custom".Translate() + ")",
+                            delegate
+                            {
+                                if (!pawn.IsBaseliner()) pawn.genes.SetXenotype(XenotypeDefOf.Baseliner);
+                                pawn.genes.xenotypeName = customXenotype.name;
+                                pawn.genes.iconDef = customXenotype.IconDef;
+                                foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
+                            }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate (Rect r)
+                            {
+                                if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
+                                {
+                                    Find.WindowStack.Add(new Dialog_Confirm("ConfirmDelete".Translate(customInner.name.CapitalizeFirst()), "ConfirmDeleteXenotype",
+                                        delegate
+                                        {
+                                            var path = GenFilePaths.AbsFilePathForXenotype(customInner.name);
+                                            if (File.Exists(path))
+                                            {
+                                                File.Delete(path);
+                                                CharacterCardUtility.cachedCustomXenotypes = null;
+                                            }
+                                        }, true));
+                                    return true;
+                                }
+
+                                return false;
+                            }, extraPartRightJustified: true));
+                    }
+
+                    list.Add(new("XenotypeEditor".Translate() + "...",
+                        delegate { Find.WindowStack.Add(new Dialog_CreateXenotype(-1, delegate { CharacterCardUtility.cachedCustomXenotypes = null; })); }));
+
+                    Find.WindowStack.Add(new FloatMenu(list));
                 }
 
-                list.Add(new("XenotypeEditor".Translate() + "...",
-                    delegate { Find.WindowStack.Add(new Dialog_CreateXenotype(-1, delegate { CharacterCardUtility.cachedCustomXenotypes = null; })); }));
-
-                Find.WindowStack.Add(new FloatMenu(list));
+                Widgets.Label(xenotypeRect, text.Truncate(xenotypeRect.width));
             }
-
-            Widgets.Label(xenotypeRect, text.Truncate(xenotypeRect.width));
         }
-        
+
+        inRect.yMin += 6;
+
+        /* Doesn't seem to be doing anything at the moment, disabled for now to avoid new bug reports
+        using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "DominantStyle".Translate().CapitalizeFirst());
+
+        if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), "Default".Translate()))
+            Messages.Message("PawnEditor.NoStyles".Translate(), MessageTypeDefOf.RejectInput, false);
+
         inRect.yMin += 4;
 
+        */
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "Source".Translate().CapitalizeFirst());
 
-        if (mainTab != MainTab.HAR && Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "All".Translate().CapitalizeFirst()))
+        if (mainTab != MainTab.HAR && Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), sourceFilter?.Name ?? "PawnEditor.All".Translate().CapitalizeFirst()))
         {
             var allDefs = GetAllDefsForTab(mainTab, shapeTab);
             var options = LoadedModManager.RunningMods.Intersect(allDefs.Select(def => def.modContentPack).Distinct())
@@ -614,8 +624,8 @@ public class Dialog_AppearanceEditor : Window
 
         if (ModsConfig.BiotechActive)
             Widgets.CheckboxLabeled(inRect.TakeBottomPart(50), "PawnEditor.IgnoreXenotype".Translate(), ref ignoreXenotype);
-        Widgets.CheckboxLabeled(inRect.TakeBottomPart(30), "ShowApparel".Translate(), ref PawnEditor.RenderClothes);
-        Widgets.CheckboxLabeled(inRect.TakeBottomPart(30), "ShowHeadgear".Translate(), ref PawnEditor.RenderHeadgear);
+        Widgets.CheckboxLabeled(inRect.TakeBottomPart(30), "PawnEditor.ShowApparel".Translate(), ref PawnEditor.RenderClothes);
+        Widgets.CheckboxLabeled(inRect.TakeBottomPart(30), "PawnEditor.ShowHeadgear".Translate(), ref PawnEditor.RenderHeadgear);
     }
 
     private void SetXenotype(XenotypeDef xenotype)
@@ -667,15 +677,18 @@ public class Dialog_AppearanceEditor : Window
                     pawn.drawer.renderer.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
                 }),
-                new("Tattoos".Translate(), () =>
+            };
+
+            if (ModsConfig.IdeologyActive)
+            {
+                initialOptions.Add(new("Tattoos".Translate(), () =>
                 {
                     pawn.style.FaceTattoo = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).RandomElement();
                     pawn.style.BodyTattoo = DefDatabase<TattooDef>.AllDefs.Where(MatchesSource).RandomElement();
                     pawn.drawer.renderer.SetAllGraphicsDirty();
                     PortraitsCache.SetDirty(pawn);
-                })
-            };
-
+                }));
+            }
             var options = initialOptions.Select(opt => new FloatMenuOption("Randomize".Translate() + " " + opt.Label, () =>
                 {
                     lastRandomization = opt;
