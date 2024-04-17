@@ -10,7 +10,7 @@ public partial class TabWorker_Bio_Humanlike
 {
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
     {
-        yield return new("All".Translate(), () => RandomizeAll(pawn));
+        yield return new("PawnEditor.All".Translate(), () => RandomizeAll(pawn));
         yield return new("Appearance".Translate(), () => RandomizeAppearance(pawn));
         yield return new("PawnEditor.Shape".Translate(), () => RandomizeShape(pawn));
         yield return new("Relations".Translate(), () => RandomizeRelations(pawn));

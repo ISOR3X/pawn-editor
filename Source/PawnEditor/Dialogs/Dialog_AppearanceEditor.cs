@@ -617,7 +617,7 @@ public class Dialog_AppearanceEditor : Window
             var options = LoadedModManager.RunningMods.Intersect(allDefs.Select(def => def.modContentPack).Distinct())
                .Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
                .Prepend(new(
-                    "All".Translate().CapitalizeFirst(), () => sourceFilter = null))
+                    "PawnEditor.All".Translate().CapitalizeFirst(), () => sourceFilter = null))
                .ToList();
             Find.WindowStack.Add(new FloatMenu(options));
         }
