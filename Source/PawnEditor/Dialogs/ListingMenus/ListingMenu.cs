@@ -245,7 +245,7 @@ public class ListingMenu<T> : Window
 
         UIUtility.ListSeparator(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small) + 8f), $"{"PawnEditor.Filters".Translate().CapitalizeFirst()}");
         string label1 = "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.Filter".Translate().ToLower() + "...";
-        string label2 = "RemoveOrgan".Translate().CapitalizeFirst() + " " + "All".Translate().ToLower();
+        string label2 = "RemoveOrgan".Translate().CapitalizeFirst() + " " + "PawnEditor.All".Translate().ToLower();
         var buttonRect = inRect.TakeTopPart(UIUtility.RegularButtonHeight);
 
         var list = new List<FloatMenuOption>();

@@ -84,8 +84,10 @@ public static partial class PawnEditor
         int sectionCount = 0;
         Action<Pawn, int, int> onReorder = null;
         Action<Pawn> onDelete;
+
         if (pregame)
         {
+            TryRefreshSelectedPawn();
             if (selectedCategory == PawnCategory.Humans)
             {
                 pawns = Find.GameInitData.startingAndOptionalPawns;
@@ -151,6 +153,26 @@ public static partial class PawnEditor
         if (pawn.Discarded is false)
         {
             pawn.Discard(true);
+        }
+    }
+
+    private static void TryRefreshSelectedPawn()
+    {
+        // If selectedPawn isn't even present in the pawn list on the left, we have to force refresh it
+        if (selectedCategory == PawnCategory.Humans)
+        {
+            if (Find.GameInitData.startingAndOptionalPawns.Contains(selectedPawn) is false)
+            {
+                selectedPawn = Find.GameInitData.startingAndOptionalPawns.FirstOrDefault();
+            }
+        }
+        else
+        {
+            var pawns = StartingThingsManager.GetPawns(selectedCategory);
+            if (pawns.Contains(selectedPawn) is false)
+            {
+                selectedPawn = pawns.FirstOrDefault();
+            }
         }
     }
 

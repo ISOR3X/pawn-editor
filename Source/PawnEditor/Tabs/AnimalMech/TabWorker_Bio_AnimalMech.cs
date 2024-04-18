@@ -191,8 +191,10 @@ public class TabWorker_Bio_AnimalMech : TabWorker<Pawn>
             {
                 var options = possiblePawns.Select(p => new FloatMenuOption(p.Name.ToStringShort, () =>
                     {
-                        if (bond != null)
+                        if (bond != null && bond.def != PawnRelationDefOf.Overseer)
+                        {
                             pawn.relations.RemoveDirectRelation(bond);
+                        }
                         pawn.relations.AddDirectRelation(bondRelation, p);
                     }))
                     .ToList();

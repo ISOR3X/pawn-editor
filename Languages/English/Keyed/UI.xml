@@ -77,7 +77,12 @@
     <!-- Shape and Weight -->
     <PawnEditor.Shape>Shape</PawnEditor.Shape>
     <PawnEditor.Weight>Weight</PawnEditor.Weight>
+    <PawnEditor.Hair>Hair</PawnEditor.Hair>
+    <PawnEditor.All>All</PawnEditor.All>
+    <PawnEditor.ShowHeadgear>Show headgear</PawnEditor.ShowHeadgear>
+    <PawnEditor.ShowApparel>Show apparel</PawnEditor.ShowApparel>
 
+	
     <!-- Name and Hitpoints -->
     <PawnEditor.Name>Name</PawnEditor.Name>
     <PawnEditor.Hitpoints>Hitpoints</PawnEditor.Hitpoints>
