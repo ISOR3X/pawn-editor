@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class Dialog_ColorPicker : Window
     private readonly Color _oldColor;
     private readonly Action<Color> _onSelect;
 
-    private readonly string[] _textfieldBuffers = new string[3];
+    private string[] _textfieldBuffers = new string[6];
     private bool _hsvColorWheelDragging;
     private string _previousFocusedControlName;
     private Vector2 _scrollPosition;
@@ -25,6 +26,7 @@ public class Dialog_ColorPicker : Window
     private Color _selectedColor;
 
     private Color _textfieldColorBuffer;
+    private string _hexfieldStringBuffer;
 
     public Dialog_ColorPicker(Action<Color> onSelect, ColorType colorType, Color oldColor)
     {
@@ -185,43 +187,67 @@ public class Dialog_ColorPicker : Window
 
     private void ColorTextFields(ref RectDivider layout)
     {
+        layout.currentRect.y -= 250;
         var rectDivider1 = layout.NewCol(layout.Rect.width / 2);
-
-        var label1 = "Hue".Translate().CapitalizeFirst();
-        var label2 = "Saturation".Translate().CapitalizeFirst();
-        var label3 = "PawnEditor.Hex".Translate().CapitalizeFirst();
+        var rect = rectDivider1.Rect;
+        RectAggregator aggregator = new RectAggregator(rect, layout.GetHashCode());
         const string controlName = "ColorTextfields";
-        var focusedPrev = _previousFocusedControlName != null && _previousFocusedControlName.StartsWith(controlName);
-        var focusedNow = GUI.GetNameOfFocusedControl().StartsWith(controlName);
-
-        var width = Mathf.Max(40, label1.GetWidthCached(), label2.GetWidthCached(), label3.GetWidthCached());
-
-        Color.RGBToHSV(_selectedColor, out var hue, out var sat, out var val);
-        var rectDivider2 = rectDivider1.NewRow(Text.LineHeight);
-        Widgets.Label(rectDivider2.NewCol(width), label1);
-        var hueText = Widgets.ToIntegerRange(hue, 0, 360).ToString();
-        var newHueText = Widgets.DelayedTextField(rectDivider2, hueText, ref _textfieldBuffers[0], _previousFocusedControlName, controlName + "_hue");
-        if (hueText != newHueText && int.TryParse(newHueText, out var newHue)) _textfieldColorBuffer = Color.HSVToRGB(newHue / 360f, sat, val);
-
-        var rectDivider3 = rectDivider1.NewRow(Text.LineHeight);
-        Widgets.Label(rectDivider3.NewCol(width), label2);
-        var satText = Widgets.ToIntegerRange(sat, 0, 100).ToString();
-        var newSatText = Widgets.DelayedTextField(rectDivider3, satText, ref _textfieldBuffers[1], _previousFocusedControlName, controlName + "_sat");
-        if (satText != newSatText && int.TryParse(newHueText, out var newSat)) _textfieldColorBuffer = Color.HSVToRGB(hue, newSat / 100f, val);
-
-        var rectDivider4 = rectDivider1.NewRow(Text.LineHeight);
-        Widgets.Label(rectDivider4.NewCol(width), label3);
-        var hex = ColorUtility.ToHtmlStringRGB(_selectedColor);
-        var newHex = Widgets.DelayedTextField(rectDivider4, hex, ref _textfieldBuffers[2], _previousFocusedControlName, controlName + "_hex");
-        if (hex != newHex) ColorUtility.TryParseHtmlString(newHex, out _textfieldColorBuffer);
-        if (focusedPrev)
+        bool hue = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_hue", Widgets.ColorComponents.Hue, Widgets.ColorComponents.Hue);
+        if (hue)
         {
-            if (!focusedNow) _selectedColor = _textfieldColorBuffer;
+            Color.RGBToHSV(_selectedColor, out var H, out var S, out var _);
+            _selectedColor = Color.HSVToRGB(H, S, 1f);
         }
-        else _textfieldColorBuffer = _selectedColor;
+        bool sat = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_sat", Widgets.ColorComponents.Sat, Widgets.ColorComponents.Sat);
+        if (sat)
+        {
+            Color.RGBToHSV(_selectedColor, out var H, out var S, out var _);
+            _selectedColor = Color.HSVToRGB(H, S, 1f);
+        }
+        var label = "PawnEditor.Hex".Translate().CapitalizeFirst();
+        var hexRect = new Rect(aggregator.Rect.x, aggregator.Rect.yMax + 4, label.GetWidthCached(), 30f);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+        {
+            Widgets.Label(hexRect, label);
+            var hexFieldRect = new Rect(hexRect.x + 50, hexRect.y, 74, 30f);
+            if (_hexfieldStringBuffer.NullOrEmpty())
+            {
+                _hexfieldStringBuffer = ColorUtility.ToHtmlStringRGB(_selectedColor);
+            }
+            var newHex = Widgets.TextField(hexFieldRect, _hexfieldStringBuffer);
+            if (_hexfieldStringBuffer != newHex && TryGetColorFromHex(newHex, out var tempColor))
+            {
+                _selectedColor = tempColor;
+            }
+            _hexfieldStringBuffer = newHex;
+        }
+        var randomRect = new Rect(hexRect.x, hexRect.yMax + 4, rectDivider1.currentRect.width, UIUtility.RegularButtonHeight);
+        if (Widgets.ButtonText(randomRect, "Random".Translate())) 
+            _selectedColor = Random.ColorHSV();
+        layout.currentRect.y += 250;
+    }
 
-        var rectDivider5 = rectDivider1.NewRow(UIUtility.RegularButtonHeight);
-        if (Widgets.ButtonText(rectDivider5, "Random".Translate())) _selectedColor = Random.ColorHSV();
+    public static bool TryGetColorFromHex(string hex, out Color color)
+    {
+        color = Color.white;
+        if (hex.StartsWith("#"))
+        {
+            hex = hex.Substring(1);
+        }
+        if (hex.Length != 6 && hex.Length != 8)
+        {
+            return false;
+        }
+        int r = int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
+        int g = int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
+        int b = int.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
+        int a = 255;
+        if (hex.Length == 8)
+        {
+            a = int.Parse(hex.Substring(6, 2), NumberStyles.HexNumber);
+        }
+        color = GenColor.FromBytes(r, g, b, a);
+        return true;
     }
 
     private void Accept()
