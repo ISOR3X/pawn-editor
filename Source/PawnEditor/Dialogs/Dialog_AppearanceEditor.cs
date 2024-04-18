@@ -573,14 +573,7 @@ public class Dialog_AppearanceEditor : Window
 
             Widgets.Label(xenotypeRect, text.Truncate(xenotypeRect.width));
         }
-
-        inRect.yMin += 6;
-
-        using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "DominantStyle".Translate().CapitalizeFirst());
-
-        if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), "Default".Translate()))
-            Messages.Message("PawnEditor.NoStyles".Translate(), MessageTypeDefOf.RejectInput, false);
-
+        
         inRect.yMin += 4;
 
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "Source".Translate().CapitalizeFirst());
