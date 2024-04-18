@@ -122,9 +122,49 @@ public class Listing_Horizontal
         return r;
     }
 
+    public Rect RectLabeledVStack(string label, int width = -1, float height = DefaultRowHeight + Text.SmallFontHeight, string tooltip = null, bool grow = true)
+    {
+        Rect r = GetRect(width, height, grow) with { height = height };
+
+        if (!tooltip.NullOrEmpty())
+        {
+            TooltipHandler.TipRegion(r, (TipSignal)tooltip);
+        }
+
+        if (Event.current.type == EventType.Layout)
+        {
+            _maxLabelWidth = Mathf.Max(_maxLabelWidth, Text.CalcSize(label).x);
+        }
+
+        Rect labelRect = r.TakeBottomPart(Text.SmallFontHeight);
+        using (new TextBlock(TextAnchor.MiddleCenter)) Widgets.Label(labelRect.TopPartPixels(DefaultRowHeight), label);
+        return r;
+    }
+
     public bool ButtonTextLabeled(string label, string buttonLabel, int width = -1, string tooltip = null, bool grow = true)
     {
         Rect r = RectLabeled(label, width, tooltip: tooltip, grow: grow);
+        var flag = Widgets.ButtonText(r, buttonLabel.Truncate(r.width - 20f));
+        return flag;
+    }
+
+    public bool ButtonTextLabeledVStack(string label, string buttonLabel, int width = -1, string tooltip = null, bool grow = true)
+    {
+        Rect r = RectLabeledVStack(label, width, tooltip: tooltip, grow: grow);
+        var flag = Widgets.ButtonText(r, buttonLabel.Truncate(r.width - 20f));
+        return flag;
+    }
+
+    public bool ButtonImageLabeledVStack(string label, Texture2D buttonText, int width = -1, string tooltip = null, bool grow = true)
+    {
+        Rect r = RectLabeledVStack(label, width, tooltip: tooltip, grow: grow);
+        var flag = Widgets.ButtonImageWithBG(r, buttonText, new Vector2(22, 22));
+        return flag;
+    }
+
+    public bool ButtonText(string buttonLabel, int width = -1, string tooltip = null, bool grow = true)
+    {
+        Rect r = GetRect(width, grow: grow);
         var flag = Widgets.ButtonText(r, buttonLabel.Truncate(r.width - 20f));
         return flag;
     }

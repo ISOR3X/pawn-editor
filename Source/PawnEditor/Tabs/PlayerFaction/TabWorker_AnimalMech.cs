@@ -198,7 +198,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
         viewRect.xMin += -4f;
         viewRect.yMin += 32f;
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "MechsSection".Translate().Colorize(ColoredText.TipSectionTitleColor));
+            Widgets.Label(viewRect.TakeTopPart(Text.LineHeightOf(GameFont.Small)), "PawnEditor.MechsSection".Translate().Colorize(ColoredText.TipSectionTitleColor));
         viewRect.xMin += 4f;
         viewRect.yMin += 4f;
         mechTable.OnGUI(viewRect.TakeTopPart(mechCount * 34), faction);
