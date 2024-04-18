@@ -204,6 +204,8 @@ public class TabWorker_Health : TabWorker_Table<Pawn>
             items.Add(new(TexButton.Delete, () =>
             {
                 pawn.health.RemoveHediff(hediff);
+                pawn.needs?.mood?.thoughts?.situational?.Notify_SituationalThoughtsDirty();
+                ClearCacheFor<TabWorker_Needs>();
                 PawnEditor.Notify_PointsUsed();
                 table.ClearCache();
             }));

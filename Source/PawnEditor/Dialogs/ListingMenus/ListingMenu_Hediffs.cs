@@ -69,6 +69,8 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         AddResult result = new SuccessInfo(() =>
         {
             pawn.health.AddHediff(hediffDef, part);
+            pawn.needs?.mood?.thoughts?.situational?.Notify_SituationalThoughtsDirty();
+            TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Needs>();
             PawnEditor.Notify_PointsUsed();
             uiTable.ClearCache();
         });
