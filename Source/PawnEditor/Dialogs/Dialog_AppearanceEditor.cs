@@ -605,7 +605,7 @@ public class Dialog_AppearanceEditor : Window
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), "Default".Translate()))
             Messages.Message("PawnEditor.NoStyles".Translate(), MessageTypeDefOf.RejectInput, false);
-
+        
         inRect.yMin += 4;
 
         */
