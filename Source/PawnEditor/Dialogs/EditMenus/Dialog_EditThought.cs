@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using RimUI;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -19,7 +20,7 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
             {
                 new(35f),
                 new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
-                new("ExpiresIn".Translate(), 360),
+                new("ExpiresIn".Translate().CapitalizeFirst(), 360),
                 new("PawnEditor.Weight".Translate(), 60),
                 new(30)
             },
@@ -27,10 +28,8 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
         );
 
     protected override float MinWidth => Selected.Count < 2 ? base.MinWidth : 720;
-
-    protected override int GetColumnCount(Rect inRect) => 1;
-
-    protected override void DoContents(Listing_Standard listing)
+    
+    protected override void DoContents(Listing_Horizontal listing)
     {
         if (Selected.Count == 1)
         {
@@ -39,16 +38,16 @@ public class Dialog_EditThought : Dialog_EditItem<List<Thought>>
             if (thought is Thought_Memory memory && duration > 5)
             {
                 var progress = Mathf.InverseLerp(duration, 0, memory.age);
-                progress = Widgets.HorizontalSlider(listing.GetRectLabeled("ExpiresIn".Translate().CapitalizeFirst(), CELL_HEIGHT), progress,
-                    0, 1, true, (duration - memory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
+                progress = listing.SliderLabeled("ExpiresIn".Translate().CapitalizeFirst(), progress,
+                    0, 1, (duration - memory.age).ToStringTicksToPeriodVerbose(), "0 " + "SecondsLower".Translate(),
                     duration.ToStringTicksToPeriodVerbose());
                 memory.age = (int)Mathf.Lerp(duration, 0, progress);
             }
         }
         else
         {
-            thoughtTable.CheckRecache(listing.listingRect, Selected); // Need to make sure the rows are up-to-date for the Height to be correct
-            thoughtTable.OnGUI(listing.GetRect(thoughtTable.Height), Selected);
+            thoughtTable.CheckRecache(listing.ListingRect, Selected); // Need to make sure the rows are up-to-date for the Height to be correct
+            thoughtTable.OnGUI(listing.GetRect(height: thoughtTable.Height), Selected);
         }
     }
 

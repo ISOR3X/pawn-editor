@@ -70,9 +70,9 @@ public class PawnEditorMod : Mod
         listing.CheckboxLabeled("PawnEditor.ShowEditButton".Translate(), ref Settings.ShowOpenButton, "PawnEditor.ShowEditButton.Desc".Translate());
         if (listing.ButtonTextLabeled("PawnEditor.HediffLocation".Translate(), $"PawnEditor.HediffLocation.{Settings.HediffLocationLimit}".Translate()))
             Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnEditorSettings.HediffLocation))
-               .Cast<PawnEditorSettings.HediffLocation>()
-               .Select(loc => new FloatMenuOption($"PawnEditor.HediffLocation.{loc}".Translate(), () => Settings.HediffLocationLimit = loc))
-               .ToList()));
+                .Cast<PawnEditorSettings.HediffLocation>()
+                .Select(loc => new FloatMenuOption($"PawnEditor.HediffLocation.{loc}".Translate(), () => Settings.HediffLocationLimit = loc))
+                .ToList()));
         if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
         listing.CheckboxLabeled("PawnEditor.EnforceHARRestrictions".Translate(), ref HARCompat.EnforceRestrictions,
             "PawnEditor.EnforceHARRestrictions.Desc".Translate());
@@ -209,7 +209,8 @@ public class PawnEditorSettings : ModSettings
 {
     public enum HediffLocation
     {
-        All, RecipeDef
+        All,
+        RecipeDef
     }
 
     public bool CountNPCs;
@@ -231,7 +232,7 @@ public class PawnEditorSettings : ModSettings
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
         Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
         Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));
-        Scribe_Values.Look(ref HediffLocationLimit, nameof(HediffLocationLimit));
+        Scribe_Values.Look(ref HediffLocationLimit, nameof(HediffLocationLimit), HediffLocation.RecipeDef);
 
         if (HARCompat.Active) Scribe_Values.Look(ref HARCompat.EnforceRestrictions, "EnforceHARRestrictions", true);
 
@@ -240,7 +241,9 @@ public class PawnEditorSettings : ModSettings
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public class HotSwappableAttribute : Attribute { }
+public class HotSwappableAttribute : Attribute
+{
+}
 
 [AttributeUsage(AttributeTargets.Class)]
 public class ModCompatAttribute : Attribute
