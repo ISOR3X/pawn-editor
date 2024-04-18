@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+    <PawnEditor>Éditeur de personnage</PawnEditor>
+    <PawnEdtior.OverrideVanilla>Remplacer la fenêtre d'origine</PawnEdtior.OverrideVanilla>
+    <PawnEditor.OverrideVanilla.Desc>Remplace l'écran de création de personnage d'origine par celui du mod. Si la valeur est fausse, un bouton sera présent en bas de l'écran pour ouvrir l'éditeur de personnage.</PawnEditor.OverrideVanilla.Desc>
+    <PawnEditor.InGameDevButton>Bouton de développement en jeu</PawnEditor.InGameDevButton>
+    <PawnEditor.InGameDevButton.Desc>Ajoute un bouton en mode développement pour ouvrir l'écran d'éditeur de personnage.</PawnEditor.InGameDevButton.Desc>
+    <PawnEditor.PointLimit>Limite de points</PawnEditor.PointLimit>
+    <PawnEditor.UseSilver>Utiliser de l'argent pour les points</PawnEditor.UseSilver>
+    <PawnEditor.UseSilver.Desc>La limite de points sera basée sur la quantité d'argent dans la colonie actuelle, et l'utilisation des points déduira de l'argent.</PawnEditor.UseSilver.Desc>
+    <PawnEditor.CountNPCs>Compter les PNJ dans les points</PawnEditor.CountNPCs>
+    <PawnEditor.CountNPCs.Desc>Si activé, les PNJ auront également un impact sur votre limite de points.</PawnEditor.CountNPCs.Desc>
+    <PawnEditor.ShowEditButton>Afficher le gadget d'édition</PawnEditor.ShowEditButton>
+    <PawnEditor.ShowEditButton.Desc>Affiche un bouton dans la barre de boutons en bas pour ouvrir l'éditeur pour un personnage sélectionné.</PawnEditor.ShowEditButton.Desc>
+    <PawnEditor.ResetConfirmation>Réinitialiser tous les messages de confirmation</PawnEditor.ResetConfirmation>
+    <PawnEditor.HediffLocation>Limit possible hediff parts to...</PawnEditor.HediffLocation>
+    <PawnEditor.HediffLocation.All>tout</PawnEditor.HediffLocation.All>
+    <PawnEditor.HediffLocation.RecipeDef>emplacements d'installation</PawnEditor.HediffLocation.RecipeDef>
+    <PawnEditor.EnforceHARRestrictions>Appliquer les restrictions HAR</PawnEditor.EnforceHARRestrictions>
+    <PawnEditor.EnforceHARRestrictions.Desc>Si activé, les restrictions HAR concernant des éléments tels que les vêtements et les pensées seront appliquées dans l'éditeur.</PawnEditor.EnforceHARRestrictions.Desc>
+</LanguageData>
