@@ -33,6 +33,8 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
         else
             pawn.story.Adulthood = backstoryDef;
 
+        pawn.skills = new Pawn_SkillTracker(pawn);
+        PawnGenerator.GenerateSkills(pawn, default);
         pawn.Notify_DisabledWorkTypesChanged();
         return true;
     }
