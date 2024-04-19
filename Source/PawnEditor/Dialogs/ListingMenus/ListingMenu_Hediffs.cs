@@ -23,28 +23,38 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         defaultBodyParts = new();
 
         foreach (var recipe in DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null))
-            if (!defaultBodyParts.TryGetValue(recipe.addsHediff, out var item))
-                defaultBodyParts.Add(recipe.addsHediff, (recipe.appliedOnFixedBodyParts ?? new(), recipe.appliedOnFixedBodyPartGroups ?? new()));
-            else
-            {
-                List<BodyPartDef> item1 = new();
-                List<BodyPartGroupDef> item2 = new();
-                item1.AddRange(item.Item1);
-                item2.AddRange(item.Item2);
-                if (recipe.appliedOnFixedBodyParts != null)
-                    item1.AddRange(recipe.appliedOnFixedBodyParts);
-                if (recipe.appliedOnFixedBodyPartGroups != null)
-                    item2.AddRange(recipe.appliedOnFixedBodyPartGroups);
-                defaultBodyParts[recipe.addsHediff] = (item1, item2);
-            }
+            AddDefaultBodyParts(recipe.addsHediff, recipe.appliedOnFixedBodyParts, recipe.appliedOnFixedBodyPartGroups);
 
         possibleTechLevels = new();
         foreach (var hediff in DefDatabase<HediffDef>.AllDefsListForReading)
+        {
             if (hediff.spawnThingOnRemoved is { techLevel: var level })
                 possibleTechLevels.Add(level);
+            if (hediff.defaultInstallPart != null)
+                AddDefaultBodyParts(hediff, new List<BodyPartDef> { hediff.defaultInstallPart }, null);
+        }
+
 
         items = DefDatabase<HediffDef>.AllDefsListForReading;
         filters = GetFilters();
+    }
+
+    private static void AddDefaultBodyParts(HediffDef hediff, List<BodyPartDef> appliedOnFixedBodyParts, List<BodyPartGroupDef> appliedOnFixedBodyPartGroups)
+    {
+        if (!defaultBodyParts.TryGetValue(hediff, out var item))
+            defaultBodyParts.Add(hediff, (appliedOnFixedBodyParts ?? new(), appliedOnFixedBodyPartGroups ?? new()));
+        else
+        {
+            List<BodyPartDef> item1 = new();
+            List<BodyPartGroupDef> item2 = new();
+            item1.AddRange(item.Item1);
+            item2.AddRange(item.Item2);
+            if (appliedOnFixedBodyParts != null)
+                item1.AddRange(appliedOnFixedBodyParts);
+            if (appliedOnFixedBodyPartGroups != null)
+                item2.AddRange(appliedOnFixedBodyPartGroups);
+            defaultBodyParts[hediff] = (item1, item2);
+        }
     }
 
     public ListingMenu_Hediffs(Pawn pawn, UITable<Pawn> table) : base(items, labelGetter, b => TryAdd(b, pawn, table),
