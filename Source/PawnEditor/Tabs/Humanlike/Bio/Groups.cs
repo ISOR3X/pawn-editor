@@ -125,7 +125,16 @@ public partial class TabWorker_Bio_Humanlike
                     new("None".Translate(), () => { curTitle?.Unassign(pawn, false); })
                 };
                 list.AddRange(pawn.Ideo.cachedPossibleRoles.Select(ideoRole =>
-                    new FloatMenuOption(ideoRole.LabelForPawn(pawn), () => ideoRole.Assign(pawn, true))));
+                    new FloatMenuOption(ideoRole.LabelForPawn(pawn), 
+                    delegate
+                    {
+                        if (curTitle != ideoRole)
+                        {
+                            curTitle?.Unassign(pawn, false);
+                            ideoRole.Assign(pawn, true);
+                        }
+                    }
+                    )));
                 Find.WindowStack.Add(new FloatMenu(list));
             }
 
