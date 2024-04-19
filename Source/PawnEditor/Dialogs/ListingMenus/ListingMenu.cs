@@ -89,9 +89,9 @@ public class ListingMenu<T> : Window
         var leftRect = inRect.TakeLeftPart(InitialSize.x - StandardMargin * 2);
         var bottomButRect = leftRect.TakeBottomPart(UIUtility.BottomButtonSize.y);
         DrawBottomButtons(bottomButRect);
-
+        DrawFooter(ref leftRect);
         DrawFootnote(leftRect.TakeBottomPart(Text.LineHeightOf(GameFont.Small) + 8f));
-
+        
 
         DrawListing(leftRect);
 
@@ -103,6 +103,11 @@ public class ListingMenu<T> : Window
 
         UpdateWindowRect();
         CloseIfNotSelected();
+    }
+
+    protected virtual void DrawFooter(ref Rect inRect)
+    {
+        
     }
 
     private void DrawHeader(Rect inRect)

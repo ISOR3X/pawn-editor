@@ -219,6 +219,7 @@
     <PawnEditor.Choose>Choose</PawnEditor.Choose>
     <PawnEditor.Resurrect>Resurrect</PawnEditor.Resurrect>
     <PawnEditor.MechsSection>Mechs</PawnEditor.MechsSection>
+    <PawnEditor.SelectedLocation>Selected location</PawnEditor.SelectedLocation>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
@@ -118,16 +119,29 @@ public class PawnLister : PawnListerBase
 
     public void OnReorder(Pawn pawn, int fromIndex, int toIndex)
     {
-        var from = locations[fromIndex];
-        var to = locations[toIndex];
-        locations.Insert(toIndex, to);
-        locations.RemoveAt(fromIndex < toIndex ? fromIndex : fromIndex + 1);
-        if (sections[toIndex] != null) toIndex++;
-        sections.Insert(toIndex, null);
-        if (sections.Pop() != null) sectionCount--;
-        DoTeleport(pawn, from, to);
-        NotifyOthers();
+        if (PawnEditor.Pregame)
+        {
+            var startingPawnCount = Find.GameInitData.startingPawnCount;
+            if (fromIndex < startingPawnCount && toIndex > startingPawnCount) Find.GameInitData.startingPawnCount--;
+            if (fromIndex >= startingPawnCount && toIndex < startingPawnCount) Find.GameInitData.startingPawnCount++;
+            StartingPawnUtility.ReorderRequests(fromIndex, toIndex);
+            NotifyOthers();
+        }
+        else
+        {
+            var from = locations[fromIndex];
+            var to = locations[toIndex];
+            locations.Insert(toIndex, to);
+            locations.RemoveAt(fromIndex < toIndex ? fromIndex : fromIndex + 1);
+            if (sections[toIndex] != null) toIndex++;
+            sections.Insert(toIndex, null);
+            if (sections.Pop() != null) sectionCount--;
+            DoTeleport(pawn, from, to);
+            NotifyOthers();
+            PawnEditor.RecachePawnList();
+        }
     }
+
 
     public (List<Pawn>, List<string>, int) GetLists() => (GetList(), sections, sectionCount);
 

@@ -98,13 +98,15 @@ public static partial class PawnEditor
                     if (Find.GameInitData.startingPawnCount < sections.Count)
                         sections[Find.GameInitData.startingPawnCount] = "StartingPawnsLeftBehind".Translate();
                     sectionCount = 2;
-                    onReorder = delegate (Pawn _, int from, int to)
-                    {
-                        StartingPawnUtility.ReorderRequests(from, to);
-                        TutorSystem.Notify_Event("ReorderPawn");
-                        if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
-                            TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
-                    };
+                    // onReorder = delegate (Pawn _, int from, int to)
+                    // {
+                    //     StartingPawnUtility.ReorderRequests(from, to);
+                    //     var a = Find.GameInitData.startingPawnsRequired;
+                    //     TutorSystem.Notify_Event("ReorderPawn");
+                    //     if (to < Find.GameInitData.startingPawnCount && from >= Find.GameInitData.startingPawnCount)
+                    //         TutorSystem.Notify_Event("ReorderPawnOptionalToStarting");
+                    // };
+                    onReorder = PawnList.OnReorder;
                 }
 
             }

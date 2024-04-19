@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -59,7 +60,9 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
 
     public ListingMenu_Hediffs(Pawn pawn, UITable<Pawn> table) : base(items, labelGetter, b => TryAdd(b, pawn, table),
         "PawnEditor.Choose".Translate() + " " + "PawnEditor.Hediff".Translate().ToLower(),
-        b => descGetter(b), null, filters, pawn) { }
+        b => descGetter(b), null, filters, pawn)
+    {
+    }
 
     private static AddResult TryAdd(HediffDef hediffDef, Pawn pawn, UITable<Pawn> uiTable)
     {
@@ -91,7 +94,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
             result = new ConditionalInfo(PawnEditor.CanUsePoints(price), result);
 
         if (typeof(Hediff_AddedPart).IsAssignableFrom(hediffDef.hediffClass)
-         && pawn.health.hediffSet.GetFirstHediffMatchingPart<Hediff_AddedPart>(part) is { } hediff)
+            && pawn.health.hediffSet.GetFirstHediffMatchingPart<Hediff_AddedPart>(part) is { } hediff)
             result = new ConfirmInfo("PawnEditor.HediffConflict".Translate(hediffDef.LabelCap, hediff.LabelCap), "HediffConflict", result);
 
         if (typeof(Hediff_AddedPart).IsAssignableFrom(hediffDef.hediffClass) && part == null)
@@ -112,6 +115,21 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
 
 
         return result;
+    }
+
+    protected override void DrawFooter(ref Rect inRect)
+    {
+        const float padding = 4f;
+        var rowRect = inRect.TakeBottomPart(30f + padding * 2f);
+        rowRect = rowRect.ContractedBy(0f, padding);
+        Widgets.Label(rowRect.LeftHalf(), "PawnEditor.SelectedLocation".Translate());
+        if (Widgets.ButtonText(rowRect.TakeRightPart(UIUtility.BottomButtonSize.x), "Test"))
+        {
+            Find.WindowStack.Add(new FloatMenu(new()
+            {
+                // ToDo: Add all body part options
+            }));
+        }
     }
 
     private static List<Filter<HediffDef>> GetFilters()
