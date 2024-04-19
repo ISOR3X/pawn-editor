@@ -23,7 +23,8 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         var headerRect = rect.TakeTopPart(170);
         var portraitRect = headerRect.TakeLeftPart(170);
         PawnEditor.DrawPawnPortrait(portraitRect);
-        DoButtons(headerRect.TakeRightPart(212).TopPartPixels(150), pawn);
+        var buttonRect = headerRect.TakeRightPart(212);
+        DoButtons(ref buttonRect, pawn);
         headerRect.xMin += 3;
         DoBasics(headerRect.ContractedBy(5, 0), pawn);
         rect.yMin += 20;

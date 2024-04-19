@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using RimUI;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -10,28 +11,29 @@ namespace PawnEditor;
 
 public partial class TabWorker_Bio_Humanlike
 {
-    private void DoButtons(Rect buttonsRect, Pawn pawn)
+    private Listing_Horizontal listing = new();
+    private float height = 999f;
+    private const float margin = 6f;
+
+    public TabWorker_Bio_Humanlike()
+    {
+        listing.InlineSpacing = 4f;
+        listing.BlockSpacing = 8f;
+    }
+
+    private void DoButtons(ref Rect buttonsRect, Pawn pawn)
     {
         using var block = new TextBlock(TextAnchor.MiddleCenter);
-        Widgets.DrawHighlight(buttonsRect);
-        buttonsRect = buttonsRect.ContractedBy(6);
-        if (Widgets.ButtonText(buttonsRect.TakeBottomPart(UIUtility.RegularButtonHeight), "PawnEditor.EditAppearance".Translate()))
-            Find.WindowStack.Add(new Dialog_AppearanceEditor(pawn));
-
+        var outerRect = buttonsRect.TakeTopPart(height + margin);
+        Widgets.DrawHighlight(outerRect);
+        buttonsRect = outerRect.ContractedBy(margin);
+        listing.Begin(buttonsRect);
         string text;
-        var devStageRect = buttonsRect.TopHalf().LeftHalf().ContractedBy(2);
         if (ModsConfig.BiotechActive)
         {
             text = pawn.DevelopmentalStage.ToString().Translate().CapitalizeFirst();
-            if (Mouse.IsOver(devStageRect))
-            {
-                Widgets.DrawHighlight(devStageRect);
-                if (Find.WindowStack.FloatMenu == null)
-                    TooltipHandler.TipRegion(devStageRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate());
-            }
-
-
-            if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+            // if (Widgets.ButtonImageWithBG(devStageRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.DevelopmentalStage.Icon().Texture, new Vector2(22f, 22f)))
+            if (listing.ButtonImageLabeledVStack(text, pawn.DevelopmentalStage.Icon().Texture, 6, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "DevelopmentalAgeSelectionDesc".Translate()))
             {
                 var options = new List<FloatMenuOption>
                 {
@@ -44,22 +46,12 @@ public partial class TabWorker_Bio_Humanlike
                 };
                 Find.WindowStack.Add(new FloatMenu(options));
             }
-
-            Widgets.Label(devStageRect, text);
         }
 
-        var xenotypeRect = buttonsRect.TopHalf().RightHalf().ContractedBy(2);
         if (ModsConfig.BiotechActive)
         {
             text = pawn.genes.XenotypeLabelCap;
-            if (Mouse.IsOver(xenotypeRect))
-            {
-                Widgets.DrawHighlight(xenotypeRect);
-                if (Find.WindowStack.FloatMenu == null)
-                    TooltipHandler.TipRegion(xenotypeRect, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate());
-            }
-
-            if (Widgets.ButtonImageWithBG(xenotypeRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.genes.XenotypeIcon, new Vector2(22f, 22f)))
+            if (listing.ButtonImageLabeledVStack(text, pawn.genes.XenotypeIcon, 6, text.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + "XenotypeSelectionDesc".Translate()))
             {
                 var list = new List<FloatMenuOption>();
                 foreach (var item in DefDatabase<XenotypeDef>.AllDefs.OrderBy(x => 0f - x.displayPriority))
@@ -119,14 +111,9 @@ public partial class TabWorker_Bio_Humanlike
 
                 Find.WindowStack.Add(new FloatMenu(list));
             }
-
-            Widgets.Label(xenotypeRect, text);
         }
 
-        var sexRect = buttonsRect.BottomHalf().LeftHalf().ContractedBy(2);
-        Widgets.DrawHighlightIfMouseover(sexRect);
-
-        if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f))
+        if (listing.ButtonImageLabeledVStack("PawnEditor.Sex".Translate(), pawn.gender.GetIcon(), 6)
             && pawn.kindDef.fixedGender == null
             && pawn.RaceProps.hasGenders)
         {
@@ -140,13 +127,7 @@ public partial class TabWorker_Bio_Humanlike
             Find.WindowStack.Add(new FloatMenu(list));
         }
 
-        Widgets.Label(sexRect, "PawnEditor.Sex".Translate());
-
-        var bodyRect = buttonsRect.BottomHalf().RightHalf().ContractedBy(2);
-        Widgets.DrawHighlightIfMouseover(bodyRect);
-
-        if (Widgets.ButtonImageWithBG(bodyRect.TakeTopPart(UIUtility.RegularButtonHeight), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType],
-                new Vector2(22f, 22f)))
+        if (listing.ButtonImageLabeledVStack("PawnEditor.Shape".Translate(), TexPawnEditor.BodyTypeIcons[pawn.story.bodyType], 6))
             Find.WindowStack.Add(new FloatMenu(DefDatabase<BodyTypeDef>.AllDefs.Where(bodyType => pawn.DevelopmentalStage switch
                 {
                     DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
@@ -160,7 +141,12 @@ public partial class TabWorker_Bio_Humanlike
                     RecacheGraphics(pawn);
                 }, TexPawnEditor.BodyTypeIcons[bodyType], Color.white))
                 .ToList()));
-        Widgets.Label(bodyRect, "PawnEditor.Shape".Translate());
+
+        if (listing.ButtonText("PawnEditor.EditAppearance".Translate(), 6))
+            Find.WindowStack.Add(new Dialog_AppearanceEditor(pawn));
+
+        listing.End();
+        height = listing.curHeight;
     }
 
     public static void SetDevStage(Pawn pawn, DevelopmentalStage stage)

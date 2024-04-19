@@ -43,10 +43,11 @@ public static class EditUtility
                 window.TableRect = rect;
                 if (element != null) window.TableRect.x = element.Position.x;
                 window.Select(item);
-                if (!Find.WindowStack.IsOpen(window)) Find.WindowStack.Add(window);
+                Find.WindowStack.RemoveWindowsOfType(type);
+                Find.WindowStack.Add(window);
             }
         }
-        else
+        else // Used when switching tabs/ using different dialogs.
         {
             CurrentWindow?.Close(false);
             CurrentWindow = (Dialog_EditItem)Activator.CreateInstance(type, item, pawn, element);

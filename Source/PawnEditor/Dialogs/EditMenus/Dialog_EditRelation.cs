@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
+using RimUI;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -19,7 +20,7 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
             {
                 new(35f),
                 new("PawnEditor.Thought".Translate(), textAnchor: TextAnchor.LowerLeft),
-                new("ExpiresIn".Translate(), 360),
+                new("ExpiresIn".Translate().CapitalizeFirst(), 360),
                 new("PawnEditor.Weight".Translate(), 60),
                 new(30)
             },
@@ -27,12 +28,11 @@ public class Dialog_EditRelation : Dialog_EditItem<SocialCardUtility.CachedSocia
         );
 
     protected override float MinWidth => 720;
-    protected override int GetColumnCount(Rect inRect) => 1;
 
-    protected override void DoContents(Listing_Standard listing)
+    protected override void DoContents(Listing_Horizontal listing)
     {
-        thoughtTable.CheckRecache(listing.listingRect, Selected); // Need to make sure the rows are up-to-date for the Height to be correct
-        thoughtTable.OnGUI(listing.GetRect(thoughtTable.Height), Selected);
+        thoughtTable.CheckRecache(listing.ListingRect, Selected); // Need to make sure the rows are up-to-date for the Height to be correct
+        thoughtTable.OnGUI(listing.GetRect(height: thoughtTable.Height), Selected);
     }
 
     private List<UITable<SocialCardUtility.CachedSocialTabEntry>.Row> GetRows(SocialCardUtility.CachedSocialTabEntry entry)

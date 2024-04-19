@@ -217,6 +217,8 @@
     <PawnEditor.Opinion>opinion</PawnEditor.Opinion>
     <PawnEditor.Mechs>mechanoids</PawnEditor.Mechs>
     <PawnEditor.Choose>Choose</PawnEditor.Choose>
+    <PawnEditor.Resurrect>Resurrect</PawnEditor.Resurrect>
+    <PawnEditor.MechsSection>Mechs</PawnEditor.MechsSection>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

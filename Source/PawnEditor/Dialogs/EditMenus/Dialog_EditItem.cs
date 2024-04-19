@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using RimUI;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -6,13 +7,13 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class Dialog_EditItem : Window
 {
-    protected const float LABEL_WIDTH_PCT = 0.3f;
-    protected const float CELL_HEIGHT = 30f;
     protected readonly Pawn Pawn;
     private readonly UIElement element;
+    private Listing_Horizontal listing = new();
     public Rect TableRect;
     private bool floatMenuLast;
     private bool setPosition;
+    
 
     protected Dialog_EditItem(Pawn pawn = null, UIElement element = null)
     {
@@ -39,25 +40,14 @@ public abstract class Dialog_EditItem : Window
         setPosition = false;
     }
 
-    protected abstract void DoContents(Listing_Standard listing);
-    protected virtual int GetColumnCount(Rect inRect) => Mathf.FloorToInt(inRect.width / 372);
+    protected abstract void DoContents(Listing_Horizontal listing);
 
     public override void DoWindowContents(Rect inRect)
     {
-        var listing = new Listing_Standard();
         listing.Begin(inRect);
-        var columnCount = GetColumnCount(inRect);
-        if (columnCount == 1)
-            listing.maxOneColumn = true;
-        else
-        {
-            listing.ColumnWidth /= columnCount;
-            listing.ColumnWidth -= 17;
-        }
-
         using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft)) DoContents(listing);
         listing.End();
-
+        
         if (Event.current.type is not EventType.Layout and not EventType.Ignore and not EventType.Repaint) ClearCaches();
 
         if (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.IsOpen)
@@ -69,9 +59,7 @@ public abstract class Dialog_EditItem : Window
 
         if (Event.current.type == EventType.Layout && !setPosition)
         {
-            var cellCount = Mathf.Ceil((listing.CurHeight - 4) / CELL_HEIGHT);
-            var cellsPerColumn = Mathf.Ceil(cellCount / columnCount);
-            var newHeight = cellsPerColumn * (CELL_HEIGHT + 1) + Margin * 2;
+            float newHeight = listing.curHeight + Margin * 2;
             windowRect.y += windowRect.height - newHeight;
             windowRect.height = newHeight;
             setPosition = true;
