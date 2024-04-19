@@ -30,6 +30,7 @@ public class PawnListerBase
         foreach (var caravan in Find.WorldObjects.Caravans) AddLocation(caravan, caravan.PawnsListForReading);
 
         AddLocation(Find.World, Find.WorldPawns.AllPawnsAliveOrDead);
+
         inited = true;
     }
 
@@ -49,7 +50,10 @@ public class PawnListerBase
 
     protected virtual void AddPawn(object location, Pawn pawn)
     {
-        pawns.Add(pawn);
+        if (pawns.Contains(pawn) is false)
+        {
+            pawns.Add(pawn);
+        }
     }
 
     protected void CheckInited()
