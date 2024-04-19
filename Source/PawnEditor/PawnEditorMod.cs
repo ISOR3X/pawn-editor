@@ -209,13 +209,13 @@ public class PawnEditorSettings : ModSettings
 {
     public enum HediffLocation
     {
-        All,
-        RecipeDef
+        RecipeDef,
+        All
     }
 
     public bool CountNPCs;
     public HashSet<string> DontShowAgain = new();
-    public HediffLocation HediffLocationLimit;
+    public HediffLocation HediffLocationLimit = HediffLocation.RecipeDef;
     public bool InGameDevButton = true;
     public bool OverrideVanilla = true;
     public float PointLimit = 100000;
