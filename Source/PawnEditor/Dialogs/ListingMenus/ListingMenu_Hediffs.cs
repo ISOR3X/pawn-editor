@@ -19,10 +19,12 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
     private static readonly HashSet<TechLevel> possibleTechLevels;
     public static readonly Dictionary<HediffDef, (List<BodyPartDef>, List<BodyPartGroupDef>)> defaultBodyParts;
 
+    public static BodyPartRecord currentBodyPart;
+
     static ListingMenu_Hediffs()
     {
         defaultBodyParts = new();
-
+        currentBodyPart = null;
         foreach (var recipe in DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.addsHediff != null))
             AddDefaultBodyParts(recipe.addsHediff, recipe.appliedOnFixedBodyParts, recipe.appliedOnFixedBodyPartGroups);
 
@@ -62,19 +64,19 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         "PawnEditor.Choose".Translate() + " " + "PawnEditor.Hediff".Translate().ToLower(),
         b => descGetter(b), null, filters, pawn)
     {
+
     }
 
     private static AddResult TryAdd(HediffDef hediffDef, Pawn pawn, UITable<Pawn> uiTable)
     {
-        BodyPartRecord part = null;
-        if (defaultBodyParts.TryGetValue(hediffDef, out var defaultPart))
+        BodyPartRecord part = currentBodyPart;
+        if (part is null && defaultBodyParts.TryGetValue(hediffDef, out var defaultPart))
         {
             if (defaultPart.Item1?.Select(part => pawn.RaceProps.body.GetPartsWithDef(part)?.FirstOrDefault()).FirstOrDefault() is { } part1)
                 part = part1;
             if (defaultPart.Item2?.Select(group => pawn.RaceProps.body.AllParts.FirstOrDefault(part => part.IsInGroup(group))).FirstOrDefault() is { } part2)
                 part = part2;
         }
-
         if (part == null && (typeof(Hediff_Injury).IsAssignableFrom(hediffDef.hediffClass) || typeof(
                 Hediff_MissingPart).IsAssignableFrom(hediffDef.hediffClass)))
             part = pawn.RaceProps.body.corePart;
@@ -113,22 +115,60 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
         result = new ConfirmInfo("PawnEditor.WouldBeDowned".Translate(hediffDef.LabelCap, pawn.NameShortColored), "HediffDowned", result,
             pawn.health.WouldBeDownedAfterAddingHediff(hediffDef, part, hediffDef.initialSeverity));
 
-
         return result;
+    }
+
+    private List<BodyPartRecord> AllowedBodyParts()
+    {
+        var hediffDef = Listing.Selected;
+        var pawn = Pawn;
+        var records = new List<BodyPartRecord>();
+        if (defaultBodyParts.TryGetValue(hediffDef, out var defaultPart))
+        {
+            var allBodyParts = defaultPart.Item1;
+            foreach (var bodyPart in allBodyParts)
+            {
+                var parts = pawn.RaceProps.body.GetPartsWithDef(bodyPart);
+                records.AddRange(parts);
+            }
+        }
+        return records;
+    }
+
+    private static void RecheckCurrentBodyPart(List<BodyPartRecord> records)
+    {
+        if (currentBodyPart != null && records.Contains(currentBodyPart) is false || currentBodyPart is null)
+        {
+            currentBodyPart = records.Any() ? records[0] : null;
+        }
     }
 
     protected override void DrawFooter(ref Rect inRect)
     {
-        const float padding = 4f;
-        var rowRect = inRect.TakeBottomPart(30f + padding * 2f);
-        rowRect = rowRect.ContractedBy(0f, padding);
-        Widgets.Label(rowRect.LeftHalf(), "PawnEditor.SelectedLocation".Translate());
-        if (Widgets.ButtonText(rowRect.TakeRightPart(UIUtility.BottomButtonSize.x), "Test"))
+        if (Listing.Selected != null)
         {
-            Find.WindowStack.Add(new FloatMenu(new()
+            var allBodyParts = AllowedBodyParts();
+            RecheckCurrentBodyPart(allBodyParts);
+            if (allBodyParts.Count > 1)
             {
-                // ToDo: Add all body part options
-            }));
+                const float padding = 4f;
+                var rowRect = inRect.TakeBottomPart(30f + padding * 2f);
+                rowRect = rowRect.ContractedBy(0f, padding);
+                Widgets.Label(rowRect.LeftHalf(), "PawnEditor.SelectedLocation".Translate());
+                if (Widgets.ButtonText(rowRect.TakeRightPart(UIUtility.BottomButtonSize.x),
+                    currentBodyPart is null ? "None".Translate() : currentBodyPart.LabelCap))
+                {
+                    var options = new List<FloatMenuOption>();
+                    foreach (var part in allBodyParts)
+                    {
+                        options.Add(new FloatMenuOption(part.LabelCap, delegate
+                        {
+                            currentBodyPart = part;
+                        }));
+                    }
+                    Find.WindowStack.Add(new FloatMenu(options));
+                }
+            }
         }
     }
 
