@@ -48,9 +48,18 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
     {
         switch (pawnCategory)
         {
-            case PawnCategory.Animals: { return animals; }
-            case PawnCategory.Mechs: { return mechs; }
-            default: { return humans; }
+            case PawnCategory.Animals:
+            {
+                return animals;
+            }
+            case PawnCategory.Mechs:
+            {
+                return mechs;
+            }
+            default:
+            {
+                return humans;
+            }
         }
     }
 
@@ -58,12 +67,12 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
     {
         all = DefDatabase<PawnKindDef>.AllDefs.GroupBy(p => p.LabelCap).Select(p => p.First()).ToList();
         animals = all.Where(pkd => pkd.race.race.Animal && !pkd.race.race.Dryad)
-           .ToList();
+            .ToList();
         mechs = all.Where(pkd => // Right now mechanoids are found based on their maskPath but this seems a bit weird.
                 pkd.race.race.IsMechanoid &&
                 pkd.lifeStages.LastOrDefault()!.bodyGraphicData.maskPath != null)
-           .ToList();
-        humans = all.Where(pk => pk.RaceProps.Humanlike)
-           .ToList();
+            .ToList();
+        humans = all.Where(pk => pk.RaceProps.Humanlike && pk.GetType() == typeof(PawnKindDef))
+            .ToList();
     }
 }

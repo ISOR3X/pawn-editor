@@ -83,7 +83,8 @@ public static partial class PawnEditor
                         () =>
                         {
                             onDelete(pawn);
-                            pawns.RemoveAt(index);
+                            if (!Pregame)
+                                pawns.RemoveAt(index);
                             sections.RemoveAt(index);
                         }, true));
                 }

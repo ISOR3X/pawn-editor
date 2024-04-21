@@ -122,7 +122,7 @@ public class PawnLister : PawnListerBase
         if (PawnEditor.Pregame)
         {
             var startingPawnCount = Find.GameInitData.startingPawnCount;
-            if (fromIndex < startingPawnCount && toIndex > startingPawnCount) Find.GameInitData.startingPawnCount--;
+            if (fromIndex < startingPawnCount && toIndex > startingPawnCount && startingPawnCount > 1) Find.GameInitData.startingPawnCount--;
             if (fromIndex >= startingPawnCount && toIndex < startingPawnCount) Find.GameInitData.startingPawnCount++;
             StartingPawnUtility.ReorderRequests(fromIndex, toIndex);
             NotifyOthers();
