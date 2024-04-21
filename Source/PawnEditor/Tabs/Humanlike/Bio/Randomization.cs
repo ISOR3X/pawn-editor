@@ -10,7 +10,7 @@ public partial class TabWorker_Bio_Humanlike
 {
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
     {
-        yield return new("PawnEditor.All".Translate(), () => RandomizeAll(pawn));
+        // yield return new("PawnEditor.All".Translate(), () => RandomizeAll(pawn));
         yield return new("Appearance".Translate(), () => RandomizeAppearance(pawn));
         yield return new("PawnEditor.Shape".Translate(), () => RandomizeShape(pawn));
         yield return new("Relations".Translate(), () => RandomizeRelations(pawn));
@@ -20,10 +20,31 @@ public partial class TabWorker_Bio_Humanlike
 
     private static void RandomizeAll(Pawn pawn)
     {
-        RandomizeAppearance(pawn);
-        RandomizeTraits(pawn);
-        RandomizeRelations(pawn);
-        RandomizeSkills(pawn);
+        // RandomizeAppearance(pawn);
+        // RandomizeTraits(pawn);
+        // RandomizeRelations(pawn);
+        // RandomizeSkills(pawn);
+
+        var req = new PawnGenerationRequest(pawn.kindDef, pawn.Faction);
+        var newPawn = PawnGenerator.GeneratePawn(req);
+        
+        pawn.skills = newPawn.skills;
+        pawn.story = newPawn.story;
+        pawn.relations = newPawn.relations;
+        pawn.abilities = newPawn.abilities;
+        pawn.style = newPawn.style;
+        pawn.apparel = newPawn.apparel;
+        pawn.inventory = newPawn.inventory;
+        pawn.equipment = newPawn.equipment;
+        pawn.health = newPawn.health;
+        pawn.mindState = newPawn.mindState;
+        pawn.ageTracker = newPawn.ageTracker;
+        pawn.gender = newPawn.gender;
+        pawn.royalty = newPawn.royalty;
+        pawn.genes = newPawn.genes;
+        pawn.ideo = newPawn.ideo;
+        pawn.Name = newPawn.Name;
+
     }
 
     public static void RandomizeAppearance(Pawn pawn)
@@ -54,7 +75,7 @@ public partial class TabWorker_Bio_Humanlike
     public static void RandomizeShape(Pawn pawn)
     {
         var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs
-           .Where(bodyType =>
+            .Where(bodyType =>
                 pawn.DevelopmentalStage switch
                 {
                     DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
@@ -89,10 +110,10 @@ public partial class TabWorker_Bio_Humanlike
         var traitRequirements = (pawn.kindDef.forcedTraits ?? Enumerable.Empty<TraitRequirement>()).Concat(pawn.story.AllBackstories.SelectMany(
                 backstory => backstory.forcedTraits ?? Enumerable.Empty<BackstoryTrait>(),
                 (_, backstoryTrait) => new TraitRequirement { def = backstoryTrait.def, degree = backstoryTrait.degree }))
-           .ToList();
+            .ToList();
         var forcedTraits = pawn.story.traits.allTraits
-           .Where(trait => trait.sourceGene != null || traitRequirements.Any(req => req.def == trait.def && req.degree == trait.degree))
-           .ToHashSet();
+            .Where(trait => trait.sourceGene != null || traitRequirements.Any(req => req.def == trait.def && req.degree == trait.degree))
+            .ToHashSet();
         foreach (var trait in pawn.story.traits.allTraits.Except(forcedTraits).ToList()) pawn.story.traits.RemoveTrait(trait, true);
         var num = Mathf.Min(GrowthUtility.GrowthMomentAges.Length, PawnGenerator.TraitsCountRange.RandomInRange);
         var ageBiologicalYears = pawn.ageTracker.AgeBiologicalYears;
@@ -111,7 +132,7 @@ public partial class TabWorker_Bio_Humanlike
         if (PawnGenerator.HasSexualityTrait(pawn)) return;
 
         if (LovePartnerRelationUtility.HasAnyLovePartnerOfTheSameGender(pawn)
-         || LovePartnerRelationUtility.HasAnyExLovePartnerOfTheSameGender(pawn))
+            || LovePartnerRelationUtility.HasAnyExLovePartnerOfTheSameGender(pawn))
             pawn.story.traits.GainTrait(new(TraitDefOf.Gay, PawnGenerator.RandomTraitDegree(TraitDefOf.Gay)));
 
         if (!ModsConfig.BiotechActive || pawn.ageTracker.AgeBiologicalYears >= 13) PawnGenerator.TryGenerateSexualityTraitFor(pawn, true);

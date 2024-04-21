@@ -19,10 +19,10 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
     }
 
     public ListingMenu_Pawns(List<Pawn> items, List<Pawn> preselectedPawns, string title, Pawn pawn, string nextLabel, Func<List<Pawn>, AddResult> nextAction, IntRange wantedCount, string closeLabel = null,
-    Action closeAction = null, bool highlightGender = false) :
-    base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "PawnEditor.Choose".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
-            title, wantedCount.max), wantedCount,
-        p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
+        Action closeAction = null, bool highlightGender = false, bool optional = false) :
+        base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "PawnEditor.Choose".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
+                title, wantedCount.max) +  (string)(optional ? (" (" + "PawnEditor.Optional".Translate() + ")") : ""), wantedCount,
+            p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
     {
         if (highlightGender) Listing.DoThingExtras = DoThingExtras;
         if (preselectedPawns != null)
@@ -59,6 +59,7 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
 
         list.Add(new Filter_Toggle<Pawn>("PawnEditor.IsColonist".Translate(), p => p.IsColonist));
         list.Add(new Filter_Toggle<Pawn>("PawnEditor.IsHuman".Translate(), p => p.RaceProps.Humanlike));
+        list.Add(new Filter_Toggle<Pawn>("PawnEditor.IsAlive".Translate(), p => !p.Dead, true));
 
         return list;
     }

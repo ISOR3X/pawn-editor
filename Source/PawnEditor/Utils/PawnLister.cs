@@ -220,7 +220,7 @@ public class PawnLister : PawnListerBase
         return null;
     }
 
-    private static void FullyRemove(Pawn pawn)
+    public static void FullyRemove(Pawn pawn)
     {
         if (pawn.SpawnedOrAnyParentSpawned) pawn.ExitMap(false, Rot4.Invalid);
         if (pawn.GetCaravan() is { } caravan) caravan.RemovePawn(pawn);

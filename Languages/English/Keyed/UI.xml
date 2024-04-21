@@ -163,6 +163,7 @@
     <PawnEditor.OccupiesLayer>Occupies layer</PawnEditor.OccupiesLayer>
     <PawnEditor.IsHuman>Is human</PawnEditor.IsHuman>
     <PawnEditor.IsColonist>Is colonist</PawnEditor.IsColonist>
+    <PawnEditor.IsAlive>Is alive</PawnEditor.IsAlive>
 
     <!-- Options -->
     <PawnEditor.Tainted>Tainted</PawnEditor.Tainted>
@@ -221,6 +222,7 @@
     <PawnEditor.Resurrect>Resurrect</PawnEditor.Resurrect>
     <PawnEditor.MechsSection>Mechs</PawnEditor.MechsSection>
     <PawnEditor.SelectedLocation>Selected location</PawnEditor.SelectedLocation>
+    <PawnEditor.Optional>optional</PawnEditor.Optional>
 
     <!-- Quick Actions -->  
     <PawnEditor.RepairAll>Repair all</PawnEditor.RepairAll>

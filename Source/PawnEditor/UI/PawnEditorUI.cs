@@ -103,9 +103,9 @@ public static partial class PawnEditor
             {
                 if (!showFactionInfo && selectedPawn != null)
                     Find.WindowStack.Add(new FloatMenu(Find.Maps.Select(map => PawnList.GetTeleportOption(map, selectedPawn))
-                       .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnList.GetTeleportOption(caravan, selectedPawn)))
-                       .Append(PawnList.GetTeleportOption(Find.World, selectedPawn))
-                       .Append(new("PawnEditor.Teleport.Specific".Translate(), delegate
+                        .Concat(Find.WorldObjects.Caravans.Select(caravan => PawnList.GetTeleportOption(caravan, selectedPawn)))
+                        .Append(PawnList.GetTeleportOption(Find.World, selectedPawn))
+                        .Append(new("PawnEditor.Teleport.Specific".Translate(), delegate
                         {
                             onClose();
                             DebugTools.curTool = new("PawnEditor.Teleport".Translate(), () =>
@@ -119,7 +119,7 @@ public static partial class PawnEditor
                                 DebugTools.curTool = null;
                             });
                         }))
-                       .ToList()));
+                        .ToList()));
             });
     }
 
@@ -129,7 +129,7 @@ public static partial class PawnEditor
         if (Widgets.ButtonText(inRect.TakeLeftPart(Page.BottomButSize.x), Pregame ? "Back".Translate() : "Close".Translate()) && CanExit()) onLeftButton();
 
         if (Widgets.ButtonText(inRect.TakeRightPart(Page.BottomButSize.x), Pregame ? "Start".Translate() : "PawnEditor.Teleport".Translate())
-         && CanExit()) onRightButton();
+            && CanExit()) onRightButton();
 
         var randomRect = new Rect(Vector2.zero, Page.BottomButSize).CenteredOnXIn(inRect).CenteredOnYIn(inRect);
 
@@ -144,6 +144,30 @@ public static partial class PawnEditor
         if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
         {
             var options = GetRandomizationOptions().ToList();
+            if (!showFactionInfo && selectedPawn.RaceProps.Humanlike)
+            {
+                options.Insert(0, new FloatMenuOption("Randomize".Translate() + " " + "PawnEditor.All".Translate().ToLower(), () =>
+                {
+                    // List, for updating left panel
+                    var (pawns, _, _) = PawnList.GetLists();
+                    // Copy values
+                    var map = selectedPawn.Map;
+                    var position = selectedPawn.Position;
+                    var req = new PawnGenerationRequest(selectedPawn.kindDef, selectedPawn.Faction);
+                    var index = pawns.IndexOf(selectedPawn);
+                    // Delete
+                    DeletePawn(selectedPawn, pawns);
+                    TabWorker_FactionOverview.RecachePawns(selectedFaction);
+                    PawnLister.FullyRemove(selectedPawn);
+                    selectedPawn.Destroy();
+                    // Replace
+                    selectedPawn = PawnGenerator.GeneratePawn(req);
+                    GenSpawn.Spawn(selectedPawn, position, map);
+                    pawns.Insert(index, selectedPawn);
+                    Select(selectedPawn);
+                }));
+            }
+
             if (options.Count > 0)
                 Find.WindowStack.Add(new FloatMenu(options));
             else
@@ -154,17 +178,17 @@ public static partial class PawnEditor
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
             Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems()
-               .Select(static item => item.MakeSaveOption())
-               .Where(static option => option != null)
-               .ToList()));
+                .Select(static item => item.MakeSaveOption())
+                .Where(static option => option != null)
+                .ToList()));
 
         buttonRect.x += buttonRect.width * 2 + 10;
 
         if (Widgets.ButtonText(buttonRect, "Load".Translate()))
             Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems()
-               .Select(static item => item.MakeLoadOption())
-               .Where(static option => option != null)
-               .ToList()));
+                .Select(static item => item.MakeLoadOption())
+                .Where(static option => option != null)
+                .ToList()));
     }
 
     public static bool CanExit()
@@ -265,7 +289,7 @@ public static partial class PawnEditor
     {
         if (curTab == null) return Enumerable.Empty<FloatMenuOption>();
         return (showFactionInfo ? curTab.GetRandomizationOptions(selectedFaction) : curTab.GetRandomizationOptions(selectedPawn))
-           .Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
+            .Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
             {
                 lastRandomization = option;
                 option.action();
