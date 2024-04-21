@@ -126,6 +126,7 @@
     <PawnEditor.Relation>Relation</PawnEditor.Relation>
     <PawnEditor.ShowAll.Relations>Show all relations</PawnEditor.ShowAll.Relations>
     <PawnEditor.Pawn>Pawn</PawnEditor.Pawn>
+    <PawnEditor.Parent>Parent</PawnEditor.Parent>
 
     <!-- Color Picker -->
     <PawnEditor.Hex>Hex</PawnEditor.Hex>

@@ -18,13 +18,20 @@ public class ListingMenu_Pawns : ListingMenu<Pawn>
         if (highlightGender) Listing.DoThingExtras = DoThingExtras;
     }
 
-    public ListingMenu_Pawns(List<Pawn> items, Pawn pawn, string nextLabel, Func<List<Pawn>, AddResult> nextAction, int count, string closeLabel = null,
-        Action closeAction = null, bool highlightGender = false) :
-        base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "PawnEditor.Choose".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
-                "PawnEditor.Pawn".Translate(), count), new(count, count),
-            p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
+    public ListingMenu_Pawns(List<Pawn> items, List<Pawn> preselectedPawns, string title, Pawn pawn, string nextLabel, Func<List<Pawn>, AddResult> nextAction, IntRange wantedCount, string closeLabel = null,
+    Action closeAction = null, bool highlightGender = false) :
+    base(items, p => p.Name?.ToStringShort ?? p.LabelShort, nextAction, "PawnEditor.Choose".Translate() + " " + Find.ActiveLanguageWorker.Pluralize(
+            title, wantedCount.max), wantedCount,
+        p => p.DescriptionDetailed, DrawPawnIcon, GetFilters(), pawn, nextLabel, closeLabel, closeAction)
     {
         if (highlightGender) Listing.DoThingExtras = DoThingExtras;
+        if (preselectedPawns != null)
+        {
+            foreach (var pawnToSelect in preselectedPawns)
+            {
+                Listing.MultiSelected.Add(pawnToSelect);
+            }
+        }
     }
 
     public override void PostOpen()

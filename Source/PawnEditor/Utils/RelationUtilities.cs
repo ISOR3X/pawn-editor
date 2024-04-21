@@ -38,8 +38,11 @@ public static class RelationUtilities
                 predicate = p => p.gender == Gender.Female;
                 createAction = list => new SuccessInfo(() =>
                 {
-                    pawn.SetMother(list[0]);
-                    otherPawn.SetMother(list[0]);
+                    if (list.Count >= 1)
+                    {
+                        pawn.SetMother(list[0]);
+                        otherPawn.SetMother(list[0]);
+                    }
                     TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                 });
             }
@@ -49,22 +52,31 @@ public static class RelationUtilities
                 predicate = p => p.gender == Gender.Male;
                 createAction = list => new SuccessInfo(() =>
                 {
-                    pawn.SetFather(list[0]);
-                    otherPawn.SetFather(list[0]);
+                    if (list.Count >= 1)
+                    {
+                        pawn.SetFather(list[0]);
+                        otherPawn.SetFather(list[0]);
+                    }
                     TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                 });
             }
             else
             {
                 requiredCount = 2;
-                createAction = list => list[0].gender == list[1].gender
+                createAction = list => list.Count == 2 && list[0].gender == list[1].gender
                     ? "PawnEditor.MustBeOneEachGender".Translate()
                     : new SuccessInfo(() =>
                     {
-                        pawn.SetParent(list[0]);
-                        otherPawn.SetParent(list[0]);
-                        pawn.SetParent(list[1]);
-                        otherPawn.SetParent(list[1]);
+                        if (list.Count >= 1)
+                        {
+                            pawn.SetParent(list[0]);
+                            otherPawn.SetParent(list[0]);
+                        }
+                        if (list.Count == 2)
+                        {
+                            pawn.SetParent(list[1]);
+                            otherPawn.SetParent(list[1]);
+                        }
                         TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                     });
             }

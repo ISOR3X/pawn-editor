@@ -13,31 +13,41 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
     private readonly Pawn _otherPawn;
 
     public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, UITable<Pawn> table, List<Filter<PawnRelationDef>> filters = null)
-        : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), r => r.LabelCap, def =>
+        : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), 
+            r => r.LabelCap, def =>
             {
                 Func<List<Pawn>, AddResult> createInt = _ => new SuccessInfo(() => def.AddDirectRelation(pawn, otherPawn));
                 var required = 0;
                 Func<Pawn, bool> predicate = null;
                 var highlightGender = false;
 
-                if (def.implied && !def.CanAddImpliedRelation(pawn, otherPawn, out required, out createInt, out predicate, out highlightGender)) return false;
+                if (def.implied && !def.CanAddImpliedRelation(pawn, otherPawn, out required, out createInt, out predicate, 
+                    out highlightGender)) return false;
 
                 AddResult Create(List<Pawn> list) =>
-                    new ConfirmInfo("PawnEditor.RelationExists".Translate(pawn.NameShortColored, def.LabelCap), "RelationExists",
-                        createInt(list),
-                        !def.implied && pawn.relations.GetDirectRelationsCount(def) > 0);
+                    new ConfirmInfo("PawnEditor.RelationExists".Translate(pawn.NameShortColored, def.LabelCap), 
+                    "RelationExists", createInt(list), !def.implied && pawn.relations.GetDirectRelationsCount(def) > 0);
 
                 if (required > 0)
                 {
-                    PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
                     var list = PawnEditor.AllPawns.GetList();
-                    if (PawnEditor.Pregame)
-                        list.AddRange(Find.GameInitData.startingAndOptionalPawns);
                     list.Remove(pawn);
                     list.Remove(otherPawn);
                     if (predicate != null) list.RemoveAll(p => !predicate(p));
-                    Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Add".Translate().CapitalizeFirst(), Create, required, "Back".Translate(),
-                        () => Find.WindowStack.Add(new ListingMenu_Relations(pawn, otherPawn, table, filters)), highlightGender));
+                    PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
+                    var pawnsToSelect = new List<Pawn>();
+                    var title = "PawnEditor.Pawn".Translate();
+
+                    if (def == PawnRelationDefOf.Sibling)
+                    {
+                        TryAddParent(pawn.GetMother(), pawnsToSelect, list);
+                        TryAddParent(pawn.GetFather(), pawnsToSelect, list);
+                        title = "PawnEditor.Parent".Translate();
+                    }
+
+                    Find.WindowStack.Add(new ListingMenu_Pawns(list, pawnsToSelect, title, pawn, "Add".Translate().CapitalizeFirst(), Create,
+                        new IntRange(0, required), "Back".Translate(), () => Find.WindowStack.Add(
+                            new ListingMenu_Relations(pawn, otherPawn, table, filters)), highlightGender));
                     return true;
                 }
 
@@ -48,8 +58,6 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
             {
                 PawnEditor.AllPawns.UpdateCache(null, PawnCategory.Humans);
                 var list = PawnEditor.AllPawns.GetList();
-                if (PawnEditor.Pregame)
-                    list.AddRange(Find.GameInitData.startingAndOptionalPawns);
                 list.Remove(pawn);
                 Find.WindowStack.Add(new ListingMenu_Pawns(list, pawn, "Next".Translate(),
                     p =>
@@ -59,6 +67,18 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
                     }));
             }) =>
         _otherPawn = otherPawn;
+
+    private static void TryAddParent(Pawn parent, List<Pawn> pawnsToSelect, List<Pawn> list)
+    {
+        if (parent != null)
+        {
+            pawnsToSelect.Add(parent);
+            if (list.Contains(parent) is false)
+            {
+                list.Add(parent);
+            }
+        }
+    }
 
     protected override string NextLabel =>
         Listing.Selected.implied && Listing.Selected.CanAddImpliedRelation(Pawn, _otherPawn, out var count, out _, out _, out _) && count > 0
