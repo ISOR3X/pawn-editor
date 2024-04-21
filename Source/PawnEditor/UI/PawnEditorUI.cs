@@ -83,7 +83,8 @@ public static partial class PawnEditor
         inRect = inRect.ContractedBy(6);
         inRect.TakeTopPart(40);
         Widgets.DrawMenuSection(inRect);
-        if (!tabs.NullOrEmpty()) TabDrawer.DrawTabs(inRect, tabs);
+        if (!tabs.NullOrEmpty() && (showFactionInfo || selectedPawn != null))
+            TabDrawer.DrawTabs(inRect, tabs);
         inRect = inRect.ContractedBy(6);
         if (curTab != null)
         {
@@ -91,7 +92,7 @@ public static partial class PawnEditor
                 DoWidgets(inRect);
             else if (showFactionInfo)
                 curTab.DrawTabContents(inRect, selectedFaction);
-            else
+            else if (selectedPawn != null)
                 curTab.DrawTabContents(inRect, selectedPawn);
         }
 
