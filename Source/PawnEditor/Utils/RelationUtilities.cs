@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -43,6 +44,10 @@ public static class RelationUtilities
                         pawn.SetMother(list[0]);
                         otherPawn.SetMother(list[0]);
                     }
+                    else
+                    {
+                        AddSiblingRelationship(def, pawn, otherPawn);
+                    }
                     TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                 });
             }
@@ -57,6 +62,10 @@ public static class RelationUtilities
                         pawn.SetFather(list[0]);
                         otherPawn.SetFather(list[0]);
                     }
+                    else
+                    {
+                        AddSiblingRelationship(def, pawn, otherPawn);
+                    }
                     TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                 });
             }
@@ -67,6 +76,7 @@ public static class RelationUtilities
                     ? "PawnEditor.MustBeOneEachGender".Translate()
                     : new SuccessInfo(() =>
                     {
+                        Log.Message("3: " + list.ToStringSafeEnumerable() + " - pawn: " + pawn + " - otherPawn: " + otherPawn); ;
                         if (list.Count >= 1)
                         {
                             pawn.SetParent(list[0]);
@@ -77,6 +87,10 @@ public static class RelationUtilities
                             pawn.SetParent(list[1]);
                             otherPawn.SetParent(list[1]);
                         }
+                        if (!list.Any())
+                        {
+                            AddSiblingRelationship(def, pawn, otherPawn);
+                        }
                         TabWorker_Table<Pawn>.ClearCacheFor<TabWorker_Social>();
                     });
             }
@@ -85,6 +99,29 @@ public static class RelationUtilities
         }
 
         return false;
+    }
+
+    private static void AddSiblingRelationship(PawnRelationDef def, Pawn pawn, Pawn otherPawn)
+    {
+        def.AddDirectRelation(pawn, otherPawn);
+        var request = new PawnGenerationRequest();
+        def.Worker.CreateRelation(pawn, otherPawn, ref request);
+        TrySyncParents(pawn, otherPawn);
+        TrySyncParents(otherPawn, pawn);
+    }
+
+    private static void TrySyncParents(Pawn pawn, Pawn otherPawn)
+    {
+        var mother = pawn.GetMother();
+        if (mother != null && otherPawn.GetMother() != mother)
+        {
+            otherPawn.SetMother(mother);
+        }
+        var father = pawn.GetFather();
+        if (father != null && otherPawn.GetFather() != father)
+        {
+            otherPawn.SetFather(father);
+        }
     }
 
     // Copy of AddDirectRelation from Pawn_RelationsTracker.cs
@@ -99,9 +136,9 @@ public static class RelationUtilities
             otherPawn.relations.directRelations.Add(new(def, pawn, startTicks));
             pawn.relations.pawnsWithDirectRelationsWithMe.Add(otherPawn);
         }
-
         pawn.relations.GainedOrLostDirectRelation();
         otherPawn.relations.GainedOrLostDirectRelation();
+
         if (Current.ProgramState != ProgramState.Playing)
             return;
         if (!pawn.Dead && pawn.health != null)

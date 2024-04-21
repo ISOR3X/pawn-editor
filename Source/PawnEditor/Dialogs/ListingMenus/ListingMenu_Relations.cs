@@ -14,7 +14,7 @@ public class ListingMenu_Relations : ListingMenu<PawnRelationDef>
 
     public ListingMenu_Relations(Pawn pawn, Pawn otherPawn, UITable<Pawn> table, List<Filter<PawnRelationDef>> filters = null)
         : base(DefDatabase<PawnRelationDef>.AllDefs.Where(rd => rd.CanAddRelation(pawn, otherPawn)).ToList(), 
-            r => r.LabelCap, def =>
+            r => r.GetGenderSpecificLabelCap(otherPawn), def =>
             {
                 Func<List<Pawn>, AddResult> createInt = _ => new SuccessInfo(() => def.AddDirectRelation(pawn, otherPawn));
                 var required = 0;
