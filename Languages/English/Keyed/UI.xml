@@ -132,6 +132,9 @@
     <PawnEditor.Hex>Hex</PawnEditor.Hex>
     <PawnEditor.DefaultColor>Default color</PawnEditor.DefaultColor>
     <PawnEditor.FavoriteColor>Favorite color</PawnEditor.FavoriteColor>
+    <PawnEditor.PasteFromClipboard>Paste HEX</PawnEditor.PasteFromClipboard>
+    <PawnEditor.PasteFromClipboard.Success>Succesfully pasted HEX from clipboard.</PawnEditor.PasteFromClipboard.Success>
+    <PawnEditor.PasteFromClipboard.Failure>Clipboard was not in HEX format.</PawnEditor.PasteFromClipboard.Failure>
 
     <!-- Filters -->
     <PawnEditor.Filters>Filters</PawnEditor.Filters>

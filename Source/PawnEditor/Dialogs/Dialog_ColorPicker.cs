@@ -38,8 +38,8 @@ public class Dialog_ColorPicker : Window
         absorbInputAroundWindow = true;
 
         _colors = DefDatabase<ColorDef>.AllDefs.Where(cd => cd.colorType == colorType)
-           .Select(cd => cd.color)
-           .ToList();
+            .Select(cd => cd.color)
+            .ToList();
     }
 
     public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor)
@@ -48,27 +48,27 @@ public class Dialog_ColorPicker : Window
         _oldColor = oldColor;
         _selectedColor = oldColor;
         _colors = colors
-           .OrderBy(color =>
+            .OrderBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorSat < 0.1 ? 1 : 0; // Place colors with saturation 0 at the end
             })
-           .ThenBy(color =>
+            .ThenBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorHue;
             })
-           .ThenBy(color =>
+            .ThenBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorSat;
             })
-           .ThenBy(color =>
+            .ThenBy(color =>
             {
                 Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
                 return colorVal;
             })
-           .ToList();
+            .ToList();
 
         closeOnAccept = false;
         absorbInputAroundWindow = true;
@@ -192,37 +192,39 @@ public class Dialog_ColorPicker : Window
         var rect = rectDivider1.Rect;
         RectAggregator aggregator = new RectAggregator(rect, layout.GetHashCode());
         const string controlName = "ColorTextfields";
-        bool hue = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_hue", Widgets.ColorComponents.Hue, Widgets.ColorComponents.Hue);
+        bool hue = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_hue", Widgets.ColorComponents.Hue,
+            Widgets.ColorComponents.Hue);
         if (hue)
         {
             Color.RGBToHSV(_selectedColor, out var H, out var S, out var _);
             _selectedColor = Color.HSVToRGB(H, S, 1f);
         }
-        bool sat = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_sat", Widgets.ColorComponents.Sat, Widgets.ColorComponents.Sat);
+
+        bool sat = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_sat", Widgets.ColorComponents.Sat,
+            Widgets.ColorComponents.Sat);
         if (sat)
         {
             Color.RGBToHSV(_selectedColor, out var H, out var S, out var _);
             _selectedColor = Color.HSVToRGB(H, S, 1f);
         }
-        var label = "PawnEditor.Hex".Translate().CapitalizeFirst();
-        var hexRect = new Rect(aggregator.Rect.x, aggregator.Rect.yMax + 4, label.GetWidthCached(), 30f);
-        using (new TextBlock(TextAnchor.MiddleLeft))
+        
+        var hexRect = new Rect(aggregator.Rect.x, aggregator.Rect.yMax + 4, rectDivider1.currentRect.width, UIUtility.RegularButtonHeight);
+        if (Widgets.ButtonText(hexRect, "PawnEditor.PasteFromClipboard".Translate()))
         {
-            Widgets.Label(hexRect, label);
-            var hexFieldRect = new Rect(hexRect.x + 50, hexRect.y, 74, 30f);
-            if (_hexfieldStringBuffer.NullOrEmpty())
-            {
-                _hexfieldStringBuffer = ColorUtility.ToHtmlStringRGB(_selectedColor);
-            }
-            var newHex = Widgets.TextField(hexFieldRect, _hexfieldStringBuffer);
-            if (_hexfieldStringBuffer != newHex && TryGetColorFromHex(newHex, out var tempColor))
+            string clipBoard = GUIUtility.systemCopyBuffer;
+            if (TryGetColorFromHex(clipBoard, out var tempColor))
             {
                 _selectedColor = tempColor;
+                Messages.Message("PawnEditor.PasteFromClipboard.Success".Translate(), MessageTypeDefOf.SilentInput);
             }
-            _hexfieldStringBuffer = newHex;
+            else
+            {
+                Messages.Message("PawnEditor.PasteFromClipboard.Failure".Translate(), MessageTypeDefOf.RejectInput);
+            }
         }
+
         var randomRect = new Rect(hexRect.x, hexRect.yMax + 4, rectDivider1.currentRect.width, UIUtility.RegularButtonHeight);
-        if (Widgets.ButtonText(randomRect, "Random".Translate())) 
+        if (Widgets.ButtonText(randomRect, "Random".Translate()))
             _selectedColor = Random.ColorHSV();
         layout.currentRect.y += 250;
     }
@@ -234,10 +236,12 @@ public class Dialog_ColorPicker : Window
         {
             hex = hex.Substring(1);
         }
+
         if (hex.Length != 6 && hex.Length != 8)
         {
             return false;
         }
+
         int r = int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
         int g = int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
         int b = int.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
@@ -246,6 +250,7 @@ public class Dialog_ColorPicker : Window
         {
             a = int.Parse(hex.Substring(6, 2), NumberStyles.HexNumber);
         }
+
         color = GenColor.FromBytes(r, g, b, a);
         return true;
     }
