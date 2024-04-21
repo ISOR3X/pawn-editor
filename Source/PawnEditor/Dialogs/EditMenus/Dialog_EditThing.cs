@@ -23,7 +23,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
     protected override void DoContents(Listing_Horizontal listing)
     {
         // Stuff
-        if (Selected.def.stuffCategories is { Count: > 1 })
+        if (Selected.def.MadeFromStuff)
             if (listing.ButtonDefLabeled("StatsReport_Material".Translate(), Selected.Stuff, 6))
                 Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(Selected.def)
                     .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
