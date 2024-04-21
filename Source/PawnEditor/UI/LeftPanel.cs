@@ -166,6 +166,7 @@ public static partial class PawnEditor
             if (Find.GameInitData.startingAndOptionalPawns.Contains(selectedPawn) is false)
             {
                 selectedPawn = Find.GameInitData.startingAndOptionalPawns.FirstOrDefault();
+                RefreshTabs();
             }
         }
         else
@@ -174,8 +175,15 @@ public static partial class PawnEditor
             if (pawns.Contains(selectedPawn) is false)
             {
                 selectedPawn = pawns.FirstOrDefault();
+                RefreshTabs();
             }
         }
+    }
+
+    private static void RefreshTabs()
+    {
+        TabWorker<Pawn>.Notify_OpenedDialog();
+        TabWorker_Gear.ClearCaches();
     }
 
     public static void AddPawn(PawnCategory category)
