@@ -32,7 +32,7 @@
     <!-- Selection -->
     <PawnEditor.Selected>selected</PawnEditor.Selected>
     <PawnEditor.Colony>colony</PawnEditor.Colony>
-    <PawnEditor.Selection>selection</PawnEditor.Selection>
+    <PawnEditor.StartingPreset>starting preset</PawnEditor.StartingPreset>
 
     <!-- Load and Randomize -->
     <PawnEditor.LoadPawn>Load pawn</PawnEditor.LoadPawn>
@@ -82,7 +82,7 @@
     <PawnEditor.ShowHeadgear>Show headgear</PawnEditor.ShowHeadgear>
     <PawnEditor.ShowApparel>Show apparel</PawnEditor.ShowApparel>
 
-	
+
     <!-- Name and Hitpoints -->
     <PawnEditor.Name>Name</PawnEditor.Name>
     <PawnEditor.Hitpoints>Hitpoints</PawnEditor.Hitpoints>

@@ -48,7 +48,11 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                              .AllCaravansAndTravelingTransportPods_Alive;
 
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
-                       .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))
+                       .Select(p => new FloatMenuOption(p.LabelCap, () =>
+                       {
+                           DoRomance(pawn, p);
+                           table.ClearCache();
+                       }))
                        .ToList()));
                     // ToDo: Add success message
                 })

@@ -26,8 +26,6 @@ public class Dialog_ColorPicker : Window
     private Color _selectedColor;
 
     private Color _textfieldColorBuffer;
-    private string _hexfieldStringBuffer;
-
     public Dialog_ColorPicker(Action<Color> onSelect, ColorType colorType, Color oldColor)
     {
         _onSelect = onSelect;

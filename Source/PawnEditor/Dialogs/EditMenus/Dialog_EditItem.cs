@@ -40,6 +40,12 @@ public abstract class Dialog_EditItem : Window
         setPosition = false;
     }
 
+    public override void PostClose()
+    {
+        base.PostClose();
+        listing.ClearCache();
+    }
+
     protected abstract void DoContents(Listing_Horizontal listing);
 
     public override void DoWindowContents(Rect inRect)

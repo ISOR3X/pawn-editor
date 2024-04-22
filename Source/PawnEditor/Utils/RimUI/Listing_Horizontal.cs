@@ -19,8 +19,8 @@ public class Listing_Horizontal
     public Rect ListingRect;
     public float curHeight;
 
-    private readonly List<ListingCell> _cells = new();
-    private readonly List<Rect> _cachedRects = new();
+    private List<ListingCell> _cells = new();
+    private List<Rect> _cachedRects = new();
     public List<Rect> Rects = new();
 
     private int _cellIndex;
@@ -47,11 +47,21 @@ public class Listing_Horizontal
         if (Rects.NullOrEmpty())
         {
             if (_rowWidth > 0) CacheCurrentRow(); // Cache final row
-            Rects = _cachedRects;
+            Rects = _cachedRects.ListFullCopy();
         }
 
         Text.Anchor = TextAnchor.UpperLeft;
         Widgets.EndGroup();
+    }
+    
+    public void ClearCache()
+    {
+        _cells.Clear();
+        _cachedRects.Clear();
+        Rects.Clear();
+        _rowWidth = 0;
+        curHeight = 0;
+        _maxLabelWidth = 0;
     }
 
     public Rect GetRect(int relativeWidth = -1, float height = DefaultRowHeight, bool grow = true)
