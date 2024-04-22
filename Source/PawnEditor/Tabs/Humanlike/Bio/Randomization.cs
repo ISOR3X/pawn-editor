@@ -10,41 +10,30 @@ public partial class TabWorker_Bio_Humanlike
 {
     public override IEnumerable<FloatMenuOption> GetRandomizationOptions(Pawn pawn)
     {
-        // yield return new("PawnEditor.All".Translate(), () => RandomizeAll(pawn));
+        yield return new("PawnEditor.All".Translate(), () => RandomizeAll(pawn));
         yield return new("Appearance".Translate(), () => RandomizeAppearance(pawn));
-        yield return new("PawnEditor.Shape".Translate(), () => RandomizeShape(pawn));
+        // yield return new("PawnEditor.Shape".Translate(), () => RandomizeShape(pawn));
         yield return new("Relations".Translate(), () => RandomizeRelations(pawn));
         yield return new("Traits".Translate(), () => RandomizeTraits(pawn));
         yield return new("Skills".Translate(), () => RandomizeSkills(pawn));
     }
 
-    private static void RandomizeAll(Pawn pawn)
+    public static void RandomizeAll(Pawn pawn)
     {
-        // RandomizeAppearance(pawn);
-        // RandomizeTraits(pawn);
-        // RandomizeRelations(pawn);
-        // RandomizeSkills(pawn);
-
-        var req = new PawnGenerationRequest(pawn.kindDef, pawn.Faction);
-        var newPawn = PawnGenerator.GeneratePawn(req);
-        
-        pawn.skills = newPawn.skills;
-        pawn.story = newPawn.story;
-        pawn.relations = newPawn.relations;
-        pawn.abilities = newPawn.abilities;
-        pawn.style = newPawn.style;
-        pawn.apparel = newPawn.apparel;
-        pawn.inventory = newPawn.inventory;
-        pawn.equipment = newPawn.equipment;
-        pawn.health = newPawn.health;
-        pawn.mindState = newPawn.mindState;
-        pawn.ageTracker = newPawn.ageTracker;
-        pawn.gender = newPawn.gender;
-        pawn.royalty = newPawn.royalty;
-        pawn.genes = newPawn.genes;
-        pawn.ideo = newPawn.ideo;
-        pawn.Name = newPawn.Name;
-
+        // Delete
+        var oldPawn = pawn;
+        var position = oldPawn.Position;
+        var map = oldPawn.Map;
+        PawnEditor.PawnList.OnDelete(oldPawn);
+        // Replace
+        pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawn.kindDef, PawnEditor.selectedFaction));
+        PawnEditor.AddPawn(pawn, PawnEditor.selectedCategory).HandleResult();
+        if (!PawnEditor.Pregame && map != null)
+        {
+            GenSpawn.Spawn(pawn, position, map);
+            PawnEditor.PawnList.UpdateCache(PawnEditor.selectedFaction, PawnEditor.selectedCategory);
+        }
+        TabWorker_FactionOverview.RecachePawns(PawnEditor.selectedFaction);
     }
 
     public static void RandomizeAppearance(Pawn pawn)
@@ -74,23 +63,7 @@ public partial class TabWorker_Bio_Humanlike
 
     public static void RandomizeShape(Pawn pawn)
     {
-        var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs
-            .Where(bodyType =>
-                pawn.DevelopmentalStage switch
-                {
-                    DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
-                    DevelopmentalStage.Child => bodyType == BodyTypeDefOf.Child,
-                    DevelopmentalStage.Adult => bodyType != BodyTypeDefOf.Baby && bodyType != BodyTypeDefOf.Child,
-                    _ => true
-                });
-
-        if (HARCompat.Active)
-        {
-            var allowedBodyTypes = HARCompat.AllowedBodyTypes(pawn);
-            if (!allowedBodyTypes.NullOrEmpty()) bodyTypes = bodyTypes.Intersect(allowedBodyTypes);
-        }
-
-        var headTypes = DefDatabase<HeadTypeDef>.AllDefs;
+        var headTypes = DefDatabase<HeadTypeDef>.AllDefs.Where(h => h.gender != pawn.gender.Opposite() && h.randomChosen);
         if (HARCompat.Active)
         {
             headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
@@ -98,7 +71,7 @@ public partial class TabWorker_Bio_Humanlike
             headTypes = headTypes.Where(type => type.gender == Gender.None || type.gender == pawn.gender);
         }
 
-        pawn.story.bodyType = bodyTypes.RandomElement();
+        pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
         pawn.story.headType = headTypes.RandomElement();
 
         pawn.drawer.renderer.SetAllGraphicsDirty();

@@ -16,10 +16,10 @@ public static partial class PawnEditor
     public static bool RenderHeadgear = true;
     private static bool usePointLimit;
     private static float remainingPoints;
-    private static Faction selectedFaction;
+    public static Faction selectedFaction;
     private static Pawn selectedPawn;
     private static bool showFactionInfo;
-    private static PawnCategory selectedCategory;
+    public static PawnCategory selectedCategory;
     private static float cachedValue;
     private static FloatMenuOption lastRandomization;
     private static TabGroupDef tabGroup;
@@ -134,40 +134,17 @@ public static partial class PawnEditor
         var randomRect = new Rect(Vector2.zero, Page.BottomButSize).CenteredOnXIn(inRect).CenteredOnYIn(inRect);
 
         var buttonRect = new Rect(randomRect);
-
+        var options = GetRandomizationOptions().ToList();
         if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
         {
+            var label = lastRandomization.Label.ToLower();
+            lastRandomization = options.First(op => op.Label.Contains(label));
             lastRandomization.action();
             randomRect.TakeRightPart(1);
         }
 
         if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
         {
-            var options = GetRandomizationOptions().ToList();
-            if (!showFactionInfo && selectedPawn.RaceProps.Humanlike)
-            {
-                options.Insert(0, new FloatMenuOption("Randomize".Translate() + " " + "PawnEditor.All".Translate().ToLower(), () =>
-                {
-                    // List, for updating left panel
-                    var (pawns, _, _) = PawnList.GetLists();
-                    // Copy values
-                    var map = selectedPawn.Map;
-                    var position = selectedPawn.Position;
-                    var req = new PawnGenerationRequest(selectedPawn.kindDef, selectedPawn.Faction);
-                    var index = pawns.IndexOf(selectedPawn);
-                    // Delete
-                    DeletePawn(selectedPawn, pawns);
-                    TabWorker_FactionOverview.RecachePawns(selectedFaction);
-                    PawnLister.FullyRemove(selectedPawn);
-                    selectedPawn.Destroy();
-                    // Replace
-                    selectedPawn = PawnGenerator.GeneratePawn(req);
-                    GenSpawn.Spawn(selectedPawn, position, map);
-                    pawns.Insert(index, selectedPawn);
-                    Select(selectedPawn);
-                }));
-            }
-
             if (options.Count > 0)
                 Find.WindowStack.Add(new FloatMenu(options));
             else

@@ -229,7 +229,7 @@ public static partial class PawnEditor
         Find.WindowStack.Add(new FloatMenu(list));
     }
 
-    private static AddResult AddPawn(Pawn addedPawn, PawnCategory category)
+    public static AddResult AddPawn(Pawn addedPawn, PawnCategory category)
     {
         return new ConditionalInfo(CanUsePoints(addedPawn), new SuccessInfo(() =>
         {
