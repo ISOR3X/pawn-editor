@@ -299,15 +299,12 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
 
         if (type == ItemType.Apparel && Pawn != null)
         {
-            var bodyPartDict = occupiableGroupsDefs.ToDictionary<BodyPartGroupDef, string, Func<ThingDef, bool>>(
-                def => def.LabelCap,
-                def => td => td.apparel.bodyPartGroups.Contains(def));
-            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.WornOnBodyPart".Translate(), bodyPartDict));
+            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.WornOnBodyPart".Translate(),
+                Filter_Dropdown<ThingDef>.GetDefFilter((ThingDef td, BodyPartGroupDef def) => 
+                td.apparel.bodyPartGroups.Contains(def), occupiableGroupsDefs)));
 
-            var apparelLayerDict = DefDatabase<ApparelLayerDef>.AllDefs.ToDictionary<ApparelLayerDef, string, Func<ThingDef, bool>>(
-                def => def.LabelCap,
-                def => td => td.apparel.layers.Contains(def));
-            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.OccupiesLayer".Translate(), apparelLayerDict));
+            list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.OccupiesLayer".Translate(), 
+                Filter_Dropdown<ThingDef>.GetDefFilter((ThingDef td, ApparelLayerDef def) => td.apparel.layers.Contains(def))));
         }
 
         return list;
