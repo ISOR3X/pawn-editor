@@ -246,7 +246,7 @@ public class ListingMenu<T> : Window
     private void DrawFilters(Rect inRect)
     {
         var allFilters = Listing.Filters;
-        var activeFilters = Listing.ActiveFilters;
+        var activeFilters = Listing_Thing<T>.ActiveFilters;
 
         UIUtility.ListSeparator(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small) + 8f), $"{"PawnEditor.Filters".Translate().CapitalizeFirst()}");
         string label1 = "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.Filter".Translate().ToLower() + "...";

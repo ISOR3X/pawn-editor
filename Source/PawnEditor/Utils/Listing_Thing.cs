@@ -10,7 +10,7 @@ namespace PawnEditor;
 // If the listing turns out too slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
 public class Listing_Thing<T> : Listing_Tree
 {
-    public readonly List<Filter<T>> ActiveFilters = new();
+    public static List<Filter<T>> ActiveFilters = new();
     public readonly Action<T, Rect> IconDrawer;
 
     public readonly Func<T, string> LabelGetter;
@@ -30,7 +30,9 @@ public class Listing_Thing<T> : Listing_Tree
     protected Rect VisibleRect;
 
     public Listing_Thing(List<T> items, Func<T, string> labelGetter, Func<T, string> descGetter = null,
-        List<Filter<T>> filters = null, IEnumerable<T> auxHighlight = null) : this(items, labelGetter, null, descGetter, filters, auxHighlight) { }
+        List<Filter<T>> filters = null, IEnumerable<T> auxHighlight = null) : this(items, labelGetter, null, descGetter, filters, auxHighlight)
+    {
+    }
 
     public Listing_Thing(List<T> items, int maxCount, Func<T, string> labelGetter, Action<T, Rect> iconDrawer = null, Func<T, string> descGetter = null,
         List<Filter<T>> filters = null, IEnumerable<T> auxHighlight = null) :
@@ -52,7 +54,7 @@ public class Listing_Thing<T> : Listing_Tree
         if (filters != null)
         {
             Filters = filters;
-            ActiveFilters = filters.Where(f => f.EnabledByDefault).ToList();
+            if (ActiveFilters.Count == 0) ActiveFilters = filters.Where(f => f.EnabledByDefault).ToList();
         }
 
         lineHeight = 32f;

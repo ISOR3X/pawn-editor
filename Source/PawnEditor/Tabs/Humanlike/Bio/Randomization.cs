@@ -20,20 +20,29 @@ public partial class TabWorker_Bio_Humanlike
 
     public static void RandomizeAll(Pawn pawn)
     {
-        // Delete
-        var oldPawn = pawn;
-        var position = oldPawn.Position;
-        var map = oldPawn.Map;
-        PawnEditor.PawnList.OnDelete(oldPawn);
-        // Replace
-        pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawn.kindDef, PawnEditor.selectedFaction));
-        PawnEditor.AddPawn(pawn, PawnEditor.selectedCategory).HandleResult();
-        if (!PawnEditor.Pregame && map != null)
+        if (!PawnEditor.Pregame)
         {
-            GenSpawn.Spawn(pawn, position, map);
-            PawnEditor.PawnList.UpdateCache(PawnEditor.selectedFaction, PawnEditor.selectedCategory);
+            // Delete
+            var oldPawn = pawn;
+            var position = oldPawn.Position;
+            var map = oldPawn.Map;
+            PawnEditor.PawnList.OnDelete(oldPawn);
+            // Replace
+            pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawn.kindDef, PawnEditor.selectedFaction));
+            PawnEditor.AddPawn(pawn, PawnEditor.selectedCategory).HandleResult();
+            if (!PawnEditor.Pregame && map != null)
+            {
+                GenSpawn.Spawn(pawn, position, map);
+                PawnEditor.PawnList.UpdateCache(PawnEditor.selectedFaction, PawnEditor.selectedCategory);
+            }
+
+            TabWorker_FactionOverview.RecachePawns(PawnEditor.selectedFaction);
         }
-        TabWorker_FactionOverview.RecachePawns(PawnEditor.selectedFaction);
+        else
+        {
+            var index = StartingPawnUtility.PawnIndex(pawn);
+            StartingPawnUtility.RandomizePawn(index);
+        }
     }
 
     public static void RandomizeAppearance(Pawn pawn)

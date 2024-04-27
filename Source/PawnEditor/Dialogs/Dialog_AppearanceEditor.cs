@@ -172,8 +172,8 @@ public class Dialog_AppearanceEditor : Window
                     switch (shapeTab)
                     {
                         case ShapeTab.Body:
-                            var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs.Where(MatchesSource)
-                               .Where(bodyType =>
+                            var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs.Where(h => MatchesSource(h) && IsAllowed(h, pawn))
+                                .Where(bodyType =>
                                     pawn.DevelopmentalStage switch
                                     {
                                         DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
@@ -189,7 +189,7 @@ public class Dialog_AppearanceEditor : Window
                             }
 
                             DoIconOptions(inRect.ContractedBy(5), bodyTypes
-                                   .ToList(), def =>
+                                    .ToList(), def =>
                                 {
                                     pawn.story.bodyType = def;
                                     TabWorker_Bio_Humanlike.RecacheGraphics(pawn);
@@ -202,7 +202,7 @@ public class Dialog_AppearanceEditor : Window
                                 DefDatabase<ColorDef>.AllDefs.Select(static def => def.color).ToList());
                             break;
                         case ShapeTab.Head:
-                            var headTypes = DefDatabase<HeadTypeDef>.AllDefs.Where(MatchesSource);
+                            var headTypes = DefDatabase<HeadTypeDef>.AllDefs.Where(h => MatchesSource(h) && IsAllowed(h, pawn));
                             if (HARCompat.Active)
                             {
                                 headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
@@ -371,7 +371,8 @@ public class Dialog_AppearanceEditor : Window
                 if (Mouse.IsOver(rect))
                 {
                     Widgets.DrawLightHighlight(rect);
-                    if (def.LabelCap != null) TooltipHandler.TipRegion(rect, def.LabelCap);
+                    var str = def.label ?? def.defName;
+                    TooltipHandler.TipRegion(rect, str.CapitalizeFirst() + "\n\n" + "ModClickToSelect".Translate());
                 }
 
             if (isSelected(option)) Widgets.DrawBox(rect);
@@ -470,6 +471,7 @@ public class Dialog_AppearanceEditor : Window
         {
             return pawn.genes.CustomXenotype.genes.Contains(option);
         }
+
         return false;
     }
 
@@ -488,7 +490,7 @@ public class Dialog_AppearanceEditor : Window
             Widgets.DrawHighlightIfMouseover(sexRect);
 
             if (Widgets.ButtonImageWithBG(sexRect.TakeTopPart(UIUtility.RegularButtonHeight), pawn.gender.GetIcon(), new Vector2(22f, 22f))
-             && pawn.kindDef.fixedGender == null && pawn.RaceProps.hasGenders)
+                && pawn.kindDef.fixedGender == null && pawn.RaceProps.hasGenders)
             {
                 var list = new List<FloatMenuOption>
                 {
@@ -549,10 +551,7 @@ public class Dialog_AppearanceEditor : Window
                     {
                         var xenotype = item;
                         list.Add(new(xenotype.LabelCap,
-                            () =>
-                            {
-                                SetXenotype(xenotype);
-                            }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
+                            () => { SetXenotype(xenotype); }, xenotype.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default,
                             r => TooltipHandler.TipRegion(r, xenotype.descriptionShort ?? xenotype.description), null, 24f,
                             r => Widgets.InfoCardButton(r.x, r.y + 3f, xenotype), extraPartRightJustified: true));
                     }
@@ -567,7 +566,7 @@ public class Dialog_AppearanceEditor : Window
                                 pawn.genes.xenotypeName = customXenotype.name;
                                 pawn.genes.iconDef = customXenotype.IconDef;
                                 foreach (var geneDef in customXenotype.genes) pawn.genes.AddGene(geneDef, !customXenotype.inheritable);
-                            }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate (Rect r)
+                            }, customInner.IconDef.Icon, XenotypeDef.IconColor, MenuOptionPriority.Default, null, null, 24f, delegate(Rect r)
                             {
                                 if (Widgets.ButtonImage(new(r.x, r.y + (r.height - r.width) / 2f, r.width, r.width), TexButton.Delete, GUI.color))
                                 {
@@ -605,7 +604,7 @@ public class Dialog_AppearanceEditor : Window
 
         if (Widgets.ButtonText(inRect.TakeTopPart(30).ContractedBy(3), "Default".Translate()))
             Messages.Message("PawnEditor.NoStyles".Translate(), MessageTypeDefOf.RejectInput, false);
-        
+
         inRect.yMin += 4;
 
         */
@@ -615,11 +614,11 @@ public class Dialog_AppearanceEditor : Window
         {
             var allDefs = GetAllDefsForTab(mainTab, shapeTab);
             var options = LoadedModManager.RunningMods.Intersect(allDefs.Select(def => def.modContentPack).Distinct())
-               .Where(x => x != null)
-               .Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
-               .Prepend(new(
+                .Where(x => x != null)
+                .Select(mod => new FloatMenuOption(mod.Name, () => sourceFilter = mod))
+                .Prepend(new(
                     "PawnEditor.All".Translate().CapitalizeFirst(), () => sourceFilter = null))
-               .ToList();
+                .ToList();
             Find.WindowStack.Add(new FloatMenu(options));
         }
 
@@ -635,6 +634,7 @@ public class Dialog_AppearanceEditor : Window
         {
             pawn.genes.RemoveGene(pawn.genes.endogenes[num]);
         }
+
         pawn.genes.ClearXenogenes();
         PawnGenerator.GenerateGenes(pawn, xenotype, default);
     }
@@ -690,18 +690,56 @@ public class Dialog_AppearanceEditor : Window
                     PortraitsCache.SetDirty(pawn);
                 }));
             }
+
             var options = initialOptions.Select(opt => new FloatMenuOption("Randomize".Translate() + " " + opt.Label, () =>
                 {
                     lastRandomization = opt;
                     opt.action();
                 }))
-               .ToList();
+                .ToList();
 
             Find.WindowStack.Add(new FloatMenu(options));
         }
     }
 
     private bool MatchesSource(Def def) => sourceFilter == null || def.modContentPack == sourceFilter;
+
+    private bool IsAllowed(HeadTypeDef def, Pawn p)
+    {
+        if (ignoreXenotype) return true;
+        if (ModsConfig.BiotechActive && !def.requiredGenes.NullOrEmpty())
+        {
+            if (p.genes == null)
+            {
+                return false;
+            }
+
+            foreach (GeneDef requiredGene in def.requiredGenes)
+            {
+                if (!pawn.genes.HasGene(requiredGene))
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (def.gender != 0)
+        {
+            return def.gender == p.gender;
+        }
+
+        return def.randomChosen;
+    }
+
+    private bool IsAllowed(BodyTypeDef def, Pawn p)
+    {
+        if (ignoreXenotype) return true;
+        if (ModsConfig.BiotechActive && pawn.DevelopmentalStage.Juvenile())
+        {
+            return def == BodyTypeDefOf.Baby || def == BodyTypeDefOf.Child;
+        }
+        return true;
+    }
 
     private IEnumerable<Def> GetAllDefsForTab(MainTab tab, ShapeTab shape)
     {
@@ -712,7 +750,7 @@ public class Dialog_AppearanceEditor : Window
                 {
                     case ShapeTab.Body:
                         var bodyTypes = DefDatabase<BodyTypeDef>.AllDefs
-                           .Where(bodyType =>
+                            .Where(bodyType =>
                                 pawn.DevelopmentalStage switch
                                 {
                                     DevelopmentalStage.Baby or DevelopmentalStage.Newborn => bodyType == BodyTypeDefOf.Baby,
@@ -734,7 +772,7 @@ public class Dialog_AppearanceEditor : Window
                         {
                             headTypes = HARCompat.FilterHeadTypes(headTypes, pawn);
                             // HAR doesn't like head types not matching genders
-                            headTypes = headTypes.Where(type => type.gender == Gender.None || type.gender == pawn.gender);
+                            headTypes = headTypes.Where(type => (type.gender == Gender.None || type.gender == pawn.gender) && type.randomChosen);
                         }
 
                         return headTypes;
@@ -768,6 +806,7 @@ public class Dialog_AppearanceEditor : Window
 
     private enum ShapeTab
     {
-        Body, Head
+        Body,
+        Head
     }
 }
