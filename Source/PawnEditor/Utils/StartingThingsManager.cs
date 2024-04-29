@@ -191,11 +191,22 @@ public static class StartingThingsManager
         }
     }
 
+    public class PawnPossesions : IExposable
+    {
+        public List<ThingDefCount> possessions = new List<ThingDefCount>();
+
+        public void ExposeData()
+        {
+            Scribe_Collections.Look(ref possessions, nameof(possessions), LookMode.Deep);
+        }
+    }
+
     public class StartingPreset : IExposable
     {
         private List<Pawn> animals;
         private List<Pawn> humans;
         private List<Pawn> mechs;
+        public Dictionary<Pawn, PawnPossesions> startingPossessions = new();
         private int takingCount;
         private List<Thing> thingsFar;
         private List<Thing> thingsNear;
@@ -204,6 +215,13 @@ public static class StartingThingsManager
         public StartingPreset()
         {
             humans = Find.GameInitData.startingAndOptionalPawns.ListFullCopy();
+            foreach (var possesion in Find.GameInitData.startingPossessions)
+            {
+                startingPossessions[possesion.Key] = new PawnPossesions
+                {
+                    possessions = possesion.Value,
+                };
+            }
             takingCount = Find.GameInitData.startingPawnCount;
             animals = startingAnimals.ListFullCopy();
             mechs = startingMechs.ListFullCopy();
@@ -221,7 +239,7 @@ public static class StartingThingsManager
             Scribe_Collections.Look(ref thingsNear, nameof(thingsNear), LookMode.Deep);
             Scribe_Collections.Look(ref thingsFar, nameof(thingsFar), LookMode.Deep);
             Scribe_Values.Look(ref takingCount, nameof(takingCount));
-
+            Scribe_Collections.Look(ref startingPossessions, nameof(startingPossessions), LookMode.Deep, LookMode.Deep);
             if (Scribe.mode == LoadSaveMode.PostLoadInit) Apply();
         }
 
@@ -229,6 +247,18 @@ public static class StartingThingsManager
         {
             Find.GameInitData.startingAndOptionalPawns.Clear();
             Find.GameInitData.startingAndOptionalPawns.AddRange(humans);
+            Find.GameInitData.startingPossessions = new Dictionary<Pawn, List<ThingDefCount>>();
+            foreach (var pawn in Find.GameInitData.startingAndOptionalPawns)
+            {
+                Find.GameInitData.startingPossessions[pawn] = new List<ThingDefCount>();
+            }
+            if (startingPossessions != null)
+            {
+                foreach (var possesion in startingPossessions)
+                {
+                    Find.GameInitData.startingPossessions[possesion.Key] = possesion.Value.possessions;
+                }
+            }
             Find.GameInitData.startingPawnCount = takingCount;
             startingAnimals.Clear();
             startingMechs.Clear();
