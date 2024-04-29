@@ -70,6 +70,8 @@ public class Dialog_ColorPicker : Window
 
         closeOnAccept = false;
         absorbInputAroundWindow = true;
+        layer = WindowLayer.Dialog;
+        closeOnClickedOutside = true;
     }
 
     public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor, Color? defaultColor) : this(onSelect, colors, oldColor) =>

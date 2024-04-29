@@ -19,7 +19,7 @@ public abstract class Dialog_EditItem : Window
     {
         Pawn = pawn;
         this.element = element;
-        layer = WindowLayer.Super;
+        layer = WindowLayer.Dialog;
         onlyOneOfTypeAllowed = true;
         absorbInputAroundWindow = false;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;

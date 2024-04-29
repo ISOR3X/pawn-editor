@@ -10,10 +10,12 @@ public abstract class Dialog_PawnEditor : Window
     protected Dialog_PawnEditor()
     {
         forcePause = true;
-        absorbInputAroundWindow = true;
+        absorbInputAroundWindow = false;
         closeOnAccept = false;
         closeOnCancel = true;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
+        closeOnClickedOutside = true;
+        layer = WindowLayer.GameUI;
     }
 
     protected abstract bool Pregame { get; }

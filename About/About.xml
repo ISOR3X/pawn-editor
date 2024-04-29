@@ -6,7 +6,7 @@
     <li>1.5</li>
   </supportedVersions>
   <packageId>ISOREX.PawnEditor</packageId>
-  <modVersion>1.0.6</modVersion>
+  <modVersion>1.0.7</modVersion>
   <modDependencies>
     <li>
       <packageId>brrainz.harmony</packageId>
