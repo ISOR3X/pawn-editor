@@ -15,7 +15,6 @@ public abstract class Dialog_PawnEditor : Window
         closeOnCancel = true;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
         closeOnClickedOutside = true;
-        layer = WindowLayer.GameUI;
     }
 
     protected abstract bool Pregame { get; }

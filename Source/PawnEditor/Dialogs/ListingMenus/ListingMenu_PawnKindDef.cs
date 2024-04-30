@@ -10,6 +10,7 @@ namespace PawnEditor;
 public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
 {
     private static readonly Func<PawnCategory, List<PawnKindDef>> output = GetPawnList;
+    private static readonly List<Filter<PawnKindDef>> filters;
 
     private static PawnCategory type;
     private static List<PawnKindDef> animals;
@@ -19,12 +20,13 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
 
     static ListingMenu_PawnKindDef()
     {
+        filters = GetFilters();
         MakePawnLists();
     }
 
     public ListingMenu_PawnKindDef(PawnCategory pawnCategory, Func<PawnKindDef, AddResult> addAction) : base(output.Invoke(pawnCategory), p => p.LabelCap,
         addAction,
-        "PawnEditor.Choose".Translate() + " " + "PawnEditor.PawnKindDef".Translate().CapitalizeFirst(), null, DrawPawnIcon) =>
+        "PawnEditor.Choose".Translate() + " " + "PawnEditor.PawnKindDef".Translate().CapitalizeFirst(), null, DrawPawnIcon, filters) =>
         type = pawnCategory;
 
     private static void DrawPawnIcon(PawnKindDef pawnKindDef, Rect rect)
@@ -74,5 +76,12 @@ public class ListingMenu_PawnKindDef : ListingMenu<PawnKindDef>
             .ToList();
         humans = all.Where(pk => pk.RaceProps.Humanlike && pk.GetType() == typeof(PawnKindDef))
             .ToList();
+    }
+
+    private static List<Filter<PawnKindDef>> GetFilters()
+    {
+        var list = new List<Filter<PawnKindDef>>();
+        list.Add(new Filter_ModSource<PawnKindDef>());
+        return list;
     }
 }

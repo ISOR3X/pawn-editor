@@ -187,6 +187,7 @@ public class ListingMenu_Hediffs : ListingMenu<HediffDef>
             level => level.ToStringHuman().CapitalizeFirst(),
             level => hediff => hediff.spawnThingOnRemoved?.techLevel == level);
         list.Add(new Filter_Dropdown<HediffDef>("PawnEditor.TechLevel".Translate(), techLevel));
+        list.Add(new Filter_ModSource<HediffDef>());
         return list;
     }
 }

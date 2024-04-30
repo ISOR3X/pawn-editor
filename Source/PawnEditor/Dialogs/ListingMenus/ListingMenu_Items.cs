@@ -306,7 +306,7 @@ public class ListingMenu_Items : ListingMenu<ThingDef>
             list.Add(new Filter_Dropdown<ThingDef>("PawnEditor.OccupiesLayer".Translate(), 
                 Filter_Dropdown<ThingDef>.GetDefFilter((ThingDef td, ApparelLayerDef def) => td.apparel.layers.Contains(def))));
         }
-
+        
         return list;
     }
 

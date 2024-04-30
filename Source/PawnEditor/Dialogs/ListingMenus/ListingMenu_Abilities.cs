@@ -23,7 +23,9 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
 
     public ListingMenu_Abilities(Pawn pawn) : base(items, labelGetter, b => TryAdd(b, pawn),
         "PawnEditor.Choose".Translate() + " " + "PawnEditor.Ability".Translate().ToLower(),
-        b => descGetter(b, pawn), DrawIcon, filters, pawn) { }
+        b => descGetter(b, pawn), DrawIcon, filters, pawn)
+    {
+    }
 
     private static void DrawIcon(AbilityDef abilityDef, Rect rect)
     {
@@ -55,10 +57,10 @@ public class ListingMenu_Abilities : ListingMenu<AbilityDef>
         var list = new List<Filter<AbilityDef>>();
 
         var abilityDefLevels = DefDatabase<AbilityDef>.AllDefs.Select(ad => ad.level).Distinct().ToList();
-
         if (abilityDefLevels.Any())
             list.Add(new Filter_IntRange<AbilityDef>("PawnEditor.MinAbilityLevel".Translate(), new(abilityDefLevels.Min(), abilityDefLevels.Max()),
                 item => item.level, false, "PawnEditor.MinAbilityLevelDesc".Translate()));
+        list.Add(new Filter_ModSource<AbilityDef>());
 
         return list;
     }

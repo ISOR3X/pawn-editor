@@ -75,6 +75,7 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
 
         list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.SkillLose".Translate(), item => item.skillGains.All(sg => sg.amount > 0), false,
             "PawnEditor.SkillLoseDesc".Translate()));
+        list.Add(new Filter_ModSource<BackstoryDef>());
 
         return list;
     }

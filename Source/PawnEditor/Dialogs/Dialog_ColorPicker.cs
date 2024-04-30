@@ -70,7 +70,7 @@ public class Dialog_ColorPicker : Window
 
         closeOnAccept = false;
         absorbInputAroundWindow = true;
-        layer = WindowLayer.Dialog;
+        layer = WindowLayer.SubSuper;
         closeOnClickedOutside = true;
     }
 

@@ -16,6 +16,7 @@ public partial class TabWorker_Bio_Humanlike
         yield return new("Relations".Translate(), () => RandomizeRelations(pawn));
         yield return new("Traits".Translate(), () => RandomizeTraits(pawn));
         yield return new("Skills".Translate(), () => RandomizeSkills(pawn));
+        yield return new("Backstory".Translate(), () => RandomizeBackstory(pawn));
     }
 
     public static void RandomizeAll(Pawn pawn)
@@ -43,6 +44,12 @@ public partial class TabWorker_Bio_Humanlike
             var index = StartingPawnUtility.PawnIndex(pawn);
             StartingPawnUtility.RandomizePawn(index);
         }
+    }
+
+    public static void RandomizeBackstory(Pawn pawn)
+    {
+        if (pawn.story.adulthood != null) PawnBioAndNameGenerator.FillBackstorySlotShuffled(pawn, BackstorySlot.Adulthood, PawnBioAndNameGenerator.GetBackstoryCategoryFiltersFor(pawn, pawn.Faction.def), pawn.Faction.def);
+        if (pawn.story.childhood != null) PawnBioAndNameGenerator.FillBackstorySlotShuffled(pawn, BackstorySlot.Childhood, PawnBioAndNameGenerator.GetBackstoryCategoryFiltersFor(pawn, pawn.Faction.def), pawn.Faction.def);
     }
 
     public static void RandomizeAppearance(Pawn pawn)
