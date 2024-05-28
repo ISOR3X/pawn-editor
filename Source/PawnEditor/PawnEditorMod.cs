@@ -27,6 +27,8 @@ public class PawnEditorMod : Mod
             new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
         Harm.Patch(AccessTools.Method(typeof(Game), nameof(Game.InitNewGame)),
             postfix: new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
+        Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DevToolStarterOnGUI)),
+            new(GetType(), nameof(Keybind)));
 
         LongEventHandler.ExecuteWhenFinished(delegate
         {
@@ -114,6 +116,16 @@ public class PawnEditorMod : Mod
         PawnEditor.Pregame = true;
         PawnEditor.DoUI(rect, __instance.DoBack, __instance.DoNext);
         return false;
+    }
+
+    public static void Keybind()
+    {
+        if (KeyBindingDefOf.PawnEditor_OpenEditor.KeyDownEvent)
+        {
+            if (!PawnEditor.Pregame)
+                if (Find.WindowStack.IsOpen<Dialog_PawnEditor_InGame>()) Find.WindowStack.TryRemove(typeof(Dialog_PawnEditor_InGame));
+                else Find.WindowStack.Add(new Dialog_PawnEditor_InGame());
+        }
     }
 
     public static bool AddEditorButton(Rect rect, Page_ConfigureStartingPawns __instance)
@@ -217,7 +229,7 @@ public class PawnEditorSettings : ModSettings
     public HashSet<string> DontShowAgain = new();
     public HediffLocation HediffLocationLimit = HediffLocation.RecipeDef;
     public bool InGameDevButton = true;
-    public bool OverrideVanilla = true;
+    public bool OverrideVanilla;
     public float PointLimit = 100000;
     public bool ShowOpenButton = true;
     public bool UseSilver;
@@ -226,7 +238,7 @@ public class PawnEditorSettings : ModSettings
     {
         base.ExposeData();
         Scribe_Collections.Look(ref DontShowAgain, nameof(DontShowAgain));
-        Scribe_Values.Look(ref OverrideVanilla, nameof(OverrideVanilla), true);
+        Scribe_Values.Look(ref OverrideVanilla, nameof(OverrideVanilla));
         Scribe_Values.Look(ref InGameDevButton, nameof(InGameDevButton), true);
         Scribe_Values.Look(ref ShowOpenButton, nameof(ShowOpenButton), true);
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));

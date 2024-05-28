@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 using Random = UnityEngine.Random;
 
 namespace PawnEditor;
@@ -12,21 +12,31 @@ namespace PawnEditor;
 [HotSwappable]
 public class Dialog_ColorPicker : Window
 {
+    private Color _selectedColor;
     private readonly List<Color> _colors;
-    private readonly Color? _defaultColor;
-    private readonly Color? _favoriteColor;
+    private readonly Dictionary<string, Color> specialColors; // A dictionary of special colors to display below the color palette.
     private readonly Color _oldColor;
     private readonly Action<Color> _onSelect;
 
-    private string[] _textfieldBuffers = new string[6];
+    private readonly float singleCharWidth = "X".GetWidthCached() + UIUtility.LabelPadding;
+    private readonly string[] _textfieldBuffers = new string[4];
+
     private bool _hsvColorWheelDragging;
     private string _previousFocusedControlName;
+    private string lastFocusedSlider;
     private Vector2 _scrollPosition;
+    private bool doHSV = true;
 
-    private Color _selectedColor;
+    public const float cellSize = 22f + cellPadding; // 22f for the color box, 4f for the margin.
+    public const float cellPadding = 4f;
+    public const float cellGap = 2f;
+    const int columnCount = 10; // 10 colors per row.
 
-    private Color _textfieldColorBuffer;
-    public Dialog_ColorPicker(Action<Color> onSelect, ColorType colorType, Color oldColor)
+    /// <notes>
+    /// BUG - When entering a value in the RGB fields, then clicking outside, the dragging of the color wheel does not work. Just clicking a color works fine.
+    /// Clicking outside the wheel again allows dragging again.
+    /// </notes>
+    public Dialog_ColorPicker(Action<Color> onSelect, ColorType colorType, Color oldColor, Dictionary<string, Color> specialColors = null)
     {
         _onSelect = onSelect;
         _oldColor = oldColor;
@@ -34,52 +44,31 @@ public class Dialog_ColorPicker : Window
 
         closeOnAccept = false;
         absorbInputAroundWindow = true;
+        closeOnClickedOutside = true;
+        // draggable = true;
+
+        this.specialColors = specialColors;
 
         _colors = DefDatabase<ColorDef>.AllDefs.Where(cd => cd.colorType == colorType)
             .Select(cd => cd.color)
             .ToList();
     }
 
-    public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor)
+    public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor, Dictionary<string, Color> specialColors = null)
     {
         _onSelect = onSelect;
         _oldColor = oldColor;
         _selectedColor = oldColor;
-        _colors = colors
-            .OrderBy(color =>
-            {
-                Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
-                return colorSat < 0.1 ? 1 : 0; // Place colors with saturation 0 at the end
-            })
-            .ThenBy(color =>
-            {
-                Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
-                return colorHue;
-            })
-            .ThenBy(color =>
-            {
-                Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
-                return colorSat;
-            })
-            .ThenBy(color =>
-            {
-                Color.RGBToHSV(color, out var colorHue, out var colorSat, out var colorVal);
-                return colorVal;
-            })
-            .ToList();
 
         closeOnAccept = false;
         absorbInputAroundWindow = true;
-        layer = WindowLayer.SubSuper;
         closeOnClickedOutside = true;
+        // draggable = true;
+
+        this.specialColors = specialColors;
+
+        _colors = colors;
     }
-
-    public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor, Color? defaultColor) : this(onSelect, colors, oldColor) =>
-        _defaultColor = defaultColor;
-
-    public Dialog_ColorPicker(Action<Color> onSelect, List<Color> colors, Color oldColor, Color? defaultColor, Color? favoriteColor) : this(onSelect, colors,
-        oldColor, defaultColor) =>
-        _favoriteColor = favoriteColor;
 
     public override Vector2 InitialSize => new(600f, 450f);
 
@@ -87,14 +76,29 @@ public class Dialog_ColorPicker : Window
     {
         using (TextBlock.Default())
         {
-            var layout = new RectDivider(inRect, 91185);
-            HeaderRow(ref layout);
-            BottomButtons(ref layout);
-            ColorPalette(ref layout, ref _selectedColor);
-            ColorReadback(ref layout, _selectedColor, _oldColor);
-            ColorTextFields(ref layout);
-            var rectDivider = layout.NewRow(layout.Rect.width);
-            Widgets.HSVColorWheel(rectDivider.Rect, ref _selectedColor, ref _hsvColorWheelDragging, 1f);
+            DoHeader(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium)));
+            DoFooter(inRect.TakeBottomPart(UIUtility.BottomButtonSize.y));
+
+            inRect = inRect.ContractedBy(0f, 8f);
+            inRect.yMax -= 8f; // Extra bottom clearance for the footer buttons.
+            inRect.SplitVerticallyWithMargin(out Rect leftRect, out Rect rightRect, out float _, 64f, rightWidth: (cellSize + cellGap) * columnCount);
+
+            using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft))
+            {
+                ColorReadback(rightRect.TakeBottomPart(cellSize * 2 + cellGap), ref _selectedColor, _oldColor);
+                ColorPalette(rightRect, ref _selectedColor);
+
+
+                leftRect.SplitHorizontallyWithMargin(out Rect hsvWidgetsRect, out Rect fieldsRect, out float _, 16f, topHeight: 150f);
+                ColorTextFields(fieldsRect);
+
+                hsvWidgetsRect.SplitVerticallyWithMargin(out Rect hsvRect, out Rect widgetsRect, out float _, 16, rightWidth: Widgets.InfoCardButtonSize);
+                var min = Mathf.Min(hsvRect.width, hsvRect.height);
+                hsvRect = hsvRect with { width = min, height = min };
+                hsvRect.x += singleCharWidth;
+                Widgets.HSVColorWheel(hsvRect, ref _selectedColor, ref _hsvColorWheelDragging, 1f);
+                DoWidgets(widgetsRect);
+            }
 
             if (Event.current.type != EventType.Layout)
                 return;
@@ -102,157 +106,161 @@ public class Dialog_ColorPicker : Window
         }
     }
 
-    private static void HeaderRow(ref RectDivider layout)
+    private static void DoHeader(Rect inRect)
     {
         using (new TextBlock(GameFont.Medium))
         {
-            var taggedString = "ChooseAColor".Translate().CapitalizeFirst();
-            var rectDivider = layout.NewRow(Text.CalcHeight(taggedString, layout.Rect.width));
-            Widgets.Label(rectDivider, taggedString);
+            var label = "ChooseAColor".Translate().CapitalizeFirst();
+            Widgets.Label(inRect, label);
         }
     }
 
-    private void BottomButtons(ref RectDivider layout)
+    private void DoFooter(Rect inRect)
     {
-        var rectDivider = layout.NewRow(UIUtility.BottomButtonSize.y, VerticalJustification.Bottom);
-        if (Widgets.ButtonText(rectDivider.NewCol(UIUtility.BottomButtonSize.x), "Cancel".Translate()))
+        if (Widgets.ButtonText(inRect.TakeLeftPart((UIUtility.BottomButtonSize.x)), "Cancel".Translate()))
             Close();
-        if (Widgets.ButtonText(rectDivider.NewCol(UIUtility.BottomButtonSize.x, HorizontalJustification.Right),
-                "Accept".Translate()))
+        if (Widgets.ButtonText(inRect.TakeRightPart((UIUtility.BottomButtonSize.x)), "Accept".Translate()))
             Accept();
     }
 
-    private static void ColorReadback(ref RectDivider layout, Color color, Color oldColor)
+    private void DoWidgets(Rect inRect)
     {
-        var rectDivider1 = layout.NewRow(Text.LineHeightOf(GameFont.Small) * 2 + 26f + 8f, VerticalJustification.Bottom);
-        // Widgets.DrawRectFast(rectDivider1.Rect, Color.green);
-        var label1 = "CurrentColor".Translate().CapitalizeFirst();
-        var label2 = "OldColor".Translate().CapitalizeFirst();
-
-        var width = Mathf.Max(100f, label1.GetWidthCached(), label2.GetWidthCached());
-
-        var rectDivider2 = rectDivider1.NewRow(Text.LineHeight);
-        Widgets.Label(rectDivider2.NewCol(width), label1);
-        Widgets.DrawBoxSolid(rectDivider2, color);
-        var rectDivider3 = rectDivider1.NewRow(Text.LineHeight);
-        Widgets.Label(rectDivider3.NewCol(width), label2);
-        Widgets.DrawBoxSolid(rectDivider3, oldColor);
-    }
-
-    private void ColorPalette(
-        ref RectDivider layout,
-        ref Color color)
-    {
-        using (new TextBlock(TextAnchor.MiddleLeft))
+        var listing = new Listing_Standard();
+        listing.Begin(inRect);
+        if (listing.ButtonImage(TexPawnEditor.Randomize, CopyPasteUI.CopyPasteIconHeight, CopyPasteUI.CopyPasteIconHeight))
         {
-            const int columnCount = 10; // 10 colors per row
-            const float rowHeight = 22f + 4f + 2f; // 22f for the color box, 4f for the margin, 2f for the divider
-            var rowCount = (int)Math.Ceiling((float)_colors.Count / columnCount);
-            var maxRows = _favoriteColor != null || _defaultColor != null ? 10 : 12; // More rows if no quick set buttons are added.
-            var maxHeight = Math.Min(rowCount * rowHeight, maxRows * rowHeight);
-
-            var rectDivider1 = layout.NewCol(columnCount * rowHeight + 16f, HorizontalJustification.Right);
-            var rectDivider3 = rectDivider1.NewRow(maxHeight);
-
-            var outRect = new Rect(rectDivider3.Rect.x, rectDivider3.Rect.y, rectDivider3.Rect.width, rectDivider3.Rect.height);
-            var viewRect = rectDivider3.CreateViewRect(rowCount, rowHeight - 4f);
-            Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
-
-            Widgets.ColorSelector(viewRect, ref color, _colors, out _);
-            Widgets.EndScrollView();
-
-            if (_favoriteColor != null && _defaultColor != null)
-            {
-                var rectDivider2 = rectDivider1.NewRow(UIUtility.RegularButtonHeight);
-
-                var rect = rectDivider2.Rect;
-
-                string label1 = "PawnEditor.DefaultColor".Translate();
-                string label2 = "PawnEditor.FavoriteColor".Translate();
-                var width1 = Text.CalcSize(label1).x;
-                var width2 = Text.CalcSize(label2).x;
-                if (_defaultColor != null)
-                {
-                    if (Widgets.ButtonText(rect.TakeLeftPart(width1 + 32f), label1)) color = _defaultColor.Value;
-
-                    rect.xMin += 8f;
-                }
-
-                if (_favoriteColor != null)
-                    if (Widgets.ButtonText(rect.TakeLeftPart(width2 + 32f), label2))
-                        color = _favoriteColor.Value;
-            }
-        }
-    }
-
-    private void ColorTextFields(ref RectDivider layout)
-    {
-        layout.currentRect.y -= 250;
-        var rectDivider1 = layout.NewCol(layout.Rect.width / 2);
-        var rect = rectDivider1.Rect;
-        RectAggregator aggregator = new RectAggregator(rect, layout.GetHashCode());
-        const string controlName = "ColorTextfields";
-        bool hue = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_hue", Widgets.ColorComponents.Hue,
-            Widgets.ColorComponents.Hue);
-        if (hue)
-        {
-            Color.RGBToHSV(_selectedColor, out var H, out var S, out var _);
-            _selectedColor = Color.HSVToRGB(H, S, 1f);
+            _selectedColor = Random.ColorHSV();
+            SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
         }
 
-        bool sat = Widgets.ColorTextfields(ref aggregator, ref _selectedColor, ref _textfieldBuffers, ref _textfieldColorBuffer, _previousFocusedControlName, controlName + "_sat", Widgets.ColorComponents.Sat,
-            Widgets.ColorComponents.Sat);
-        if (sat)
+        if (listing.ButtonImage(TexButton.Copy, CopyPasteUI.CopyPasteIconHeight, CopyPasteUI.CopyPasteIconHeight))
         {
-            Color.RGBToHSV(_selectedColor, out var H, out var S, out var _);
-            _selectedColor = Color.HSVToRGB(H, S, 1f);
+            var hex = ColorUtility.ToHtmlStringRGB(_selectedColor);
+            GUIUtility.systemCopyBuffer = hex;
+            Messages.Message($"Copied HEX color {hex} to clipboard", MessageTypeDefOf.SilentInput);
+            SoundDefOf.Tick_High.PlayOneShotOnCamera();
         }
-        
-        var hexRect = new Rect(aggregator.Rect.x, aggregator.Rect.yMax + 4, rectDivider1.currentRect.width, UIUtility.RegularButtonHeight);
-        if (Widgets.ButtonText(hexRect, "PawnEditor.PasteFromClipboard".Translate()))
+
+        if (listing.ButtonImage(TexButton.Paste, CopyPasteUI.CopyPasteIconHeight, CopyPasteUI.CopyPasteIconHeight))
         {
             string clipBoard = GUIUtility.systemCopyBuffer;
-            if (TryGetColorFromHex(clipBoard, out var tempColor))
+            clipBoard = clipBoard.Insert(0, "#");
+            if (ColorUtility.TryParseHtmlString(clipBoard, out Color color))
             {
-                _selectedColor = tempColor;
-                Messages.Message("PawnEditor.PasteFromClipboard.Success".Translate(), MessageTypeDefOf.SilentInput);
+                _selectedColor = color;
+                Messages.Message("Succesfully pasted HEX color from clipboard", MessageTypeDefOf.SilentInput);
+                SoundDefOf.Tick_Low.PlayOneShotOnCamera();
             }
             else
             {
-                Messages.Message("PawnEditor.PasteFromClipboard.Failure".Translate(), MessageTypeDefOf.RejectInput);
+                Messages.Message($"Failed pasting clipboard value ({clipBoard}) as color. The value should be in the #RRGGBB format.", MessageTypeDefOf.SilentInput);
+                SoundDefOf.Designate_Failed.PlayOneShotOnCamera();
             }
         }
 
-        var randomRect = new Rect(hexRect.x, hexRect.yMax + 4, rectDivider1.currentRect.width, UIUtility.RegularButtonHeight);
-        if (Widgets.ButtonText(randomRect, "Random".Translate()))
-            _selectedColor = Random.ColorHSV();
-        layout.currentRect.y += 250;
+        listing.End();
     }
 
-    public static bool TryGetColorFromHex(string hex, out Color color)
+    private static void ColorReadback(Rect inRect, ref Color color, Color oldColor)
     {
-        color = Color.white;
-        if (hex.StartsWith("#"))
+        var currentLabel = "CurrentColor".Translate().CapitalizeFirst();
+        var oldLabel = "OldColor".Translate().CapitalizeFirst();
+        var width = Mathf.Max(100f, currentLabel.GetWidthCached(), oldLabel.GetWidthCached());
+        inRect.SplitHorizontallyEqual(out Rect currentRect, out Rect oldRect, cellGap);
+        Widgets.Label(currentRect.TakeLeftPart(width), currentLabel);
+        Widgets.DrawBoxSolid(currentRect, color);
+        oldRect = oldRect.HorizontalCenterPart(cellSize - cellPadding);
+        if (Widgets.ButtonInvisible(oldRect)) color = oldColor;
+        Widgets.Label(oldRect.TakeLeftPart(width), oldLabel);
+        Widgets.DrawBoxSolid(oldRect.HorizontalCenterPart(cellSize - cellPadding), oldColor);
+    }
+
+    private void ColorPalette(Rect inRect, ref Color color)
+    {
+        var rectDivider = new RectDivider(inRect, inRect.GetHashCode());
+        var rowCount = (int)Math.Ceiling((double)_colors.Count / columnCount);
+        var viewRectDivider = rectDivider.CreateViewRect(rowCount, cellSize);
+        var viewRect = viewRectDivider.Rect;
+        if (!specialColors.NullOrEmpty()) viewRect.height += ((specialColors.Count * cellSize) + (cellSize / 2));
+
+        Widgets.BeginScrollView(rectDivider.Rect, ref _scrollPosition, viewRect);
+        Widgets.ColorSelector(viewRect, ref color, _colors, out float height);
+
+        viewRect.yMin += (height + (cellSize / 2)); // The gap between the regular colors and the special colors is the size of exactly one cell.
+        if (!specialColors.NullOrEmpty())
         {
-            hex = hex.Substring(1);
+            for (int i = 0; i < specialColors.Count; i++)
+            {
+                if (i % 2 != 0) continue; // Skip odd pairs, these should already be drawn.
+
+                var kvp = specialColors.ElementAt(i);
+                Rect rowRect = viewRect.TakeTopPart(cellSize);
+                Rect leftRect = rowRect.LeftHalf();
+
+                Widgets.ColorBox(leftRect.TakeLeftPart(cellSize), ref color, kvp.Value);
+                leftRect.xMin += cellPadding;
+                Widgets.Label(leftRect, kvp.Key);
+
+
+                if (i + 1 < specialColors.Count)
+                {
+                    var kvp2 = specialColors.ElementAt(i + 1);
+                    Rect rightRect = leftRect with { x = leftRect.x + (cellSize + cellGap) * 3 - cellGap }; // Align right kvp with the 4th cell.
+
+                    Widgets.ColorBox(rightRect.TakeLeftPart(cellSize), ref color, kvp2.Value);
+                    rightRect.xMin += cellPadding;
+                    Widgets.Label(rightRect, kvp2.Key);
+                }
+            }
         }
 
-        if (hex.Length != 6 && hex.Length != 8)
+        Widgets.EndScrollView();
+    }
+
+    private void ColorTextFields(Rect inRect)
+    {
+        var rect1 = inRect.TakeTopPart(UIUtility.ButtonHeight);
+        inRect.yMin += cellPadding;
+        var rect2 = inRect.TakeTopPart(UIUtility.ButtonHeight);
+        inRect.yMin += cellPadding;
+        var rect3 = inRect.TakeTopPart(UIUtility.ButtonHeight);
+        inRect.yMin += cellPadding;
+        var rect4 = inRect.TakeTopPart(UIUtility.ButtonHeight);
+        var hexRect = rect4.RightHalf();
+        var buttonRect = rect4.LeftHalf();
+
+        if (doHSV)
         {
-            return false;
+            UIComponents.GradientSlider_LabeledWithField(rect1, Widgets.ColorComponents.Hue, ref _selectedColor, ref _textfieldBuffers[0], ref lastFocusedSlider,
+                _previousFocusedControlName);
+            UIComponents.GradientSlider_LabeledWithField(rect2, Widgets.ColorComponents.Sat, ref _selectedColor, ref _textfieldBuffers[1], ref lastFocusedSlider,
+                _previousFocusedControlName);
+            UIComponents.GradientSlider_LabeledWithField(rect3, Widgets.ColorComponents.Value, ref _selectedColor, ref _textfieldBuffers[2], ref lastFocusedSlider,
+                _previousFocusedControlName);
+        }
+        else
+        {
+            UIComponents.GradientSlider_LabeledWithField(rect1, Widgets.ColorComponents.Red, ref _selectedColor, ref _textfieldBuffers[0], ref lastFocusedSlider,
+                _previousFocusedControlName);
+            UIComponents.GradientSlider_LabeledWithField(rect2, Widgets.ColorComponents.Green, ref _selectedColor, ref _textfieldBuffers[1], ref lastFocusedSlider,
+                _previousFocusedControlName);
+            UIComponents.GradientSlider_LabeledWithField(rect3, Widgets.ColorComponents.Blue, ref _selectedColor, ref _textfieldBuffers[2], ref lastFocusedSlider,
+                _previousFocusedControlName);
         }
 
-        int r = int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
-        int g = int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
-        int b = int.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
-        int a = 255;
-        if (hex.Length == 8)
+        using (new TextBlock(GameFont.Tiny))
         {
-            a = int.Parse(hex.Substring(6, 2), NumberStyles.HexNumber);
+            buttonRect = buttonRect.TakeLeftPart("XXX".GetWidthCached() + UIUtility.ButtonPadding / 2);
+            if (Mouse.IsOver(buttonRect)) TooltipHandler.TipRegion(buttonRect, "Switch between RGB and HSV color modes");
+            if (Widgets.ButtonText(buttonRect, doHSV ? "RGB" : "HSV"))
+            {
+                doHSV = !doHSV;
+                SoundDefOf.Tick_High.PlayOneShotOnCamera();
+            }
         }
 
-        color = GenColor.FromBytes(r, g, b, a);
-        return true;
+        Widgets.Label(hexRect.TakeLeftPart(singleCharWidth), "#".Colorize(ColoredText.SubtleGrayColor));
+        _selectedColor = UIComponents.DelayedHexField(hexRect, _selectedColor, ref _textfieldBuffers[3], _previousFocusedControlName);
     }
 
     private void Accept()

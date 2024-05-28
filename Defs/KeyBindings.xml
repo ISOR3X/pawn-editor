@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <KeyBindingDef>
+        <defName>PawnEditor_OpenEditor</defName>
+        <label>Open editor</label>
+        <category>Development</category>
+        <defaultKeyCodeA>KeypadMinus</defaultKeyCodeA>
+    </KeyBindingDef>
+</Defs>

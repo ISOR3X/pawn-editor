@@ -328,7 +328,7 @@ public class Dialog_AppearanceEditor : Window
         {
             var rect = new Rect(inRect.xMax - 26, inRect.yMax - 26, 18, 18);
             if (Widgets.ButtonImage(rect, Designator_Eyedropper.EyeDropperTex))
-                Find.WindowStack.Add(new Dialog_ColorPicker(color => setColor(color, selectedColorIndex), colorType, colors[selectedColorIndex]));
+                Find.WindowStack.Add(new Dialog_ColorPicker(color => setColor(color, selectedColorIndex), availableColors, colors[selectedColorIndex]));
 
             for (var i = 0; i < colorCount; i++)
             {
@@ -738,6 +738,7 @@ public class Dialog_AppearanceEditor : Window
         {
             return def == BodyTypeDefOf.Baby || def == BodyTypeDefOf.Child;
         }
+
         return true;
     }
 

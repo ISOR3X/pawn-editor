@@ -20,6 +20,7 @@ public class ListingMenu<T> : Window
     private readonly Func<List<T>, AddResult> _multiAction;
 
     protected Listing_Thing<T> Listing;
+    protected static Dictionary<string, List<Filter<T>>> cachedActiveFilters = new();
     protected TreeNode_ThingCategory TreeNodeThingCategory;
 
     private Vector2 _scrollPosition;
@@ -75,6 +76,18 @@ public class ListingMenu<T> : Window
         onlyOneOfTypeAllowed = true;
     }
 
+    public override void PreOpen()
+    {
+        base.PreOpen();
+        Listing.ActiveFilters = cachedActiveFilters.TryGetValue(_menuTitle, fallback: new());
+    }
+
+    public override void PostClose()
+    {
+        base.PostClose();
+        cachedActiveFilters[_menuTitle] = Listing.ActiveFilters;
+    }
+
     protected virtual string NextLabel { get; }
 
     public override Vector2 InitialSize => new(400f, 600f);
@@ -91,7 +104,7 @@ public class ListingMenu<T> : Window
         DrawBottomButtons(bottomButRect);
         DrawFooter(ref leftRect);
         DrawFootnote(leftRect.TakeBottomPart(Text.LineHeightOf(GameFont.Small) + 8f));
-        
+
 
         DrawListing(leftRect);
 
@@ -107,7 +120,6 @@ public class ListingMenu<T> : Window
 
     protected virtual void DrawFooter(ref Rect inRect)
     {
-        
     }
 
     private void DrawHeader(Rect inRect)
@@ -246,7 +258,7 @@ public class ListingMenu<T> : Window
     private void DrawFilters(Rect inRect)
     {
         var allFilters = Listing.Filters;
-        var activeFilters = Listing_Thing<T>.ActiveFilters;
+        var activeFilters = Listing.ActiveFilters;
 
         UIUtility.ListSeparator(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Small) + 8f), $"{"PawnEditor.Filters".Translate().CapitalizeFirst()}");
         string label1 = "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.Filter".Translate().ToLower() + "...";

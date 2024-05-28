@@ -10,7 +10,7 @@ namespace PawnEditor;
 // If the listing turns out too slow, this is because of the function calls in the lambda expressions. Previously this was mainly the description function.
 public class Listing_Thing<T> : Listing_Tree
 {
-    public static List<Filter<T>> ActiveFilters = new();
+    public List<Filter<T>> ActiveFilters = new();
     public readonly Action<T, Rect> IconDrawer;
 
     public readonly Func<T, string> LabelGetter;

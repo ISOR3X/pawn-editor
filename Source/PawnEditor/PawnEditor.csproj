@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Defs\Defs.cs" />
+    <Compile Include="Defs\KeyBindDefOf.cs" />
     <Compile Include="Dialogs\Dialog_AppearanceEditor.cs" />
     <Compile Include="Dialogs\Dialog_ColorPicker.cs" />
     <Compile Include="Dialogs\Dialog_Confirm.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="Utils\PointsSystem.cs" />
     <Compile Include="Utils\RelationUtilities.cs" />
     <Compile Include="Utils\RimUI\Listing_Horizontal.cs" />
+    <Compile Include="Utils\RimUI\UIComponents.cs" />
     <Compile Include="Utils\StartingThingsManager.cs" />
     <Compile Include="UI\TexPawnEditor.cs" />
     <Compile Include="Utils\UIUtility.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using RimUI;
 using RimWorld;
@@ -63,9 +64,15 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
             var curColor = apparel2.DrawColor;
             var defaultColor = apparel2.Stuff != null ? apparel2.Stuff.stuffProps.color : apparel2.def.colorGenerator?.NewRandomizedColor() ?? Color.white;
             if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
+            {
+                var specialColors = new Dictionary<string, Color>();
+                specialColors.Add("Default", defaultColor);
+                if (Pawn.story.favoriteColor.HasValue)
+                    specialColors.Add("Favorite", Pawn.story.favoriteColor.Value);
+
                 Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),
-                    DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, defaultColor,
-                    Pawn.story.favoriteColor));
+                    DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, specialColors));
+            }
 
             Widgets.DrawRectFast(colorRect, curColor);
         }

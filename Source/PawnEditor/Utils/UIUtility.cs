@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
@@ -13,9 +14,15 @@ namespace PawnEditor;
 [HotSwappable]
 public static class UIUtility
 {
+    public static bool HasDoneOnce = false; // Helper bool to execute code only once.
+    
     public const float SearchBarHeight = 30f;
     public const float RegularButtonHeight = 30f;
     public static readonly Vector2 BottomButtonSize = new(150f, 38f);
+    public const float ButtonHeight = 30f;
+    public const float ButtonPadding = 40f;
+    public const float LabelPadding = 10f;
+
 
     public static Rect TakeTopPart(ref this Rect rect, float pixels)
     {
@@ -152,7 +159,7 @@ public static class UIUtility
     {
         int intBuff = -1;
         if (buffer == null) intBuff = value;
-        
+
         if (minMaxButtons)
             if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalfDouble))
             {
@@ -163,6 +170,7 @@ public static class UIUtility
                 }
                 else
                     Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+
                 return;
             }
 
@@ -175,6 +183,7 @@ public static class UIUtility
             }
             else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+
             return;
         }
 
@@ -188,6 +197,7 @@ public static class UIUtility
                 }
                 else
                     Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+
                 return;
             }
 
@@ -200,9 +210,10 @@ public static class UIUtility
             }
             else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
+
             return;
         }
-        
+
         Rect fieldRect = inRect.ContractedBy(0f, 4f);
         Widgets.TextFieldNumeric(fieldRect, ref intBuff, ref buffer);
 
@@ -298,4 +309,108 @@ public static class UIUtility
 
     public static Rect GetRectLabeled(this Listing_Standard listing, string label, float? height = null, float labelPct = 0.3f) =>
         listing.GetRect(height ?? Text.LineHeight).LabelItem(label, labelPct);
+
+    public static void SplitHorizontallyEqual(this Rect rect, out Rect top, out Rect bottom, float padding = 0)
+    {
+        var half = rect.height / 2;
+        top = rect.TopPartPixels(half - padding);
+        bottom = rect.BottomPartPixels(half - padding);
+    }
+
+    public static Rect HorizontalCenterPart(this Rect rect, float height)
+    {
+        var remove = (rect.height - height) / 2;
+        rect.yMax -= remove;
+        rect.yMin += remove;
+        return rect;
+    }
+
+    public static Gradient GradientFromColorComponent(Widgets.ColorComponents component, Color color)
+    {
+        var gradient = new Gradient();
+
+        if (component == Widgets.ColorComponents.Hue)
+        {
+            // Create color keys for the gradient
+            GradientColorKey[] colorKeys = new GradientColorKey[7];
+            for (int i = 0; i < colorKeys.Length; i++)
+            {
+                var value = i / 6f;
+                if (i == 6) value -= 0.001f; // Prevent wraparound
+                colorKeys[i] = new GradientColorKey(color.SetComponent(component, value), i / 6f);
+            }
+
+            // Create alpha keys for the gradient
+            GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
+            alphaKeys[0] = new GradientAlphaKey(1.0f, 0.0f);
+            alphaKeys[1] = new GradientAlphaKey(1.0f, 1.0f);
+
+            // Set the color and alpha keys
+            gradient.SetKeys(colorKeys, alphaKeys);
+
+            return gradient;
+        }
+
+        var colors = new GradientColorKey[2];
+        colors[0] = new GradientColorKey(color.SetComponent(component, 0), 0f);
+        colors[0] = new GradientColorKey(color.SetComponent(component, 1), 1f);
+
+        gradient.SetKeys(colors, new[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1) });
+        return gradient;
+    }
+
+    public static float GetComponent(this Color color, Widgets.ColorComponents component)
+    {
+        Color.RGBToHSV(color, out var h, out var s, out var v);
+        switch (component)
+        {
+            case Widgets.ColorComponents.Red:
+                return color.r;
+            case Widgets.ColorComponents.Green:
+                return color.g;
+            case Widgets.ColorComponents.Blue:
+                return color.b;
+            case Widgets.ColorComponents.Hue:
+                return h;
+            case Widgets.ColorComponents.Sat:
+                return s;
+            case Widgets.ColorComponents.Value:
+                return v;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(component), component, "Invalid color component, only RGB/HSV are supported.");
+        }
+    }
+
+    public static Color SetComponent(this Color color, Widgets.ColorComponents component, float value)
+    {
+        Color.RGBToHSV(color, out var h, out var s, out var v);
+        switch (component)
+        {
+            case Widgets.ColorComponents.Red:
+                color.r = value;
+                break;
+            case Widgets.ColorComponents.Green:
+                color.g = value;
+                break;
+            case Widgets.ColorComponents.Blue:
+                color.b = value;
+                break;
+            case Widgets.ColorComponents.Hue:
+                h = value;
+                color = Color.HSVToRGB(h, s, v);
+                break;
+            case Widgets.ColorComponents.Sat:
+                s = value;
+                color = Color.HSVToRGB(h, s, v);
+                break;
+            case Widgets.ColorComponents.Value:
+                v = value;
+                color = Color.HSVToRGB(h, s, v);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(component), component, "Invalid color component, only RGB/HSV are supported.");
+        }
+
+        return color;
+    }
 }
