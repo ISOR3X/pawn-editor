@@ -208,6 +208,7 @@ public static partial class PawnEditor
                     {
                         int id = int.Parse(AllPawns.GetList().Max(o => Regex.Match(o.ThingID, @"\d+$").Value)) + 1; //get max id of any pawn + 1
                         pawn.ThingID = Regex.Replace(p.ThingID, @"\d+$", id.ToString()); //make it id of new pawn
+                        pawn.relations = new(pawn); // clear new pawn relations
                     }
                 },
                 typePostfix: category.ToString());

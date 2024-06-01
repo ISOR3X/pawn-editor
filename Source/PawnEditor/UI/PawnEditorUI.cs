@@ -221,6 +221,7 @@ public static partial class PawnEditor
                     {
                         int id = int.Parse(AllPawns.GetList().Max(o => Regex.Match(o.ThingID, @"\d+$").Value)) + 1; //get max id of any pawn + 1
                         pawn.ThingID = Regex.Replace(pawn.ThingID, @"\d+$", id.ToString()); //make it id of new pawn
+                        pawn.relations = new(pawn); // clear new pawn relations
                     }
                     if (map != null)
                         GenSpawn.Spawn(pawn, pos, map, rot, WipeMode.VanishOrMoveAside, true);
