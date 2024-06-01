@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
@@ -199,7 +200,17 @@ public static partial class PawnEditor
             new("PawnEditor.Add.Saved".Translate(category.Label()), delegate
             {
                 var pawn = new Pawn();
-                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category).HandleResult(), typePostfix: category.ToString());
+                SaveLoadUtility.LoadItem(pawn, p => 
+                {
+                    AddPawn(p, category).HandleResult();
+                    AllPawns.UpdateCache(null, category);
+                    if (AllPawns.GetList().Count(o => o.ThingID == p.ThingID) > 1) // If collision occurs
+                    {
+                        int id = int.Parse(AllPawns.GetList().Max(o => Regex.Match(o.ThingID, @"\d+$").Value)) + 1; //get max id of any pawn + 1
+                        pawn.ThingID = Regex.Replace(p.ThingID, @"\d+$", id.ToString()); //make it id of new pawn
+                    }
+                },
+                typePostfix: category.ToString());
             })
         };
 

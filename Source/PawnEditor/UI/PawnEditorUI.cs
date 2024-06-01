@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using LudeonTK;
 using RimWorld;
 using UnityEngine;
@@ -214,7 +215,13 @@ public static partial class PawnEditor
                     if (Pregame) Find.GameInitData.startingPossessions.Remove(pawn);
                 },
                 OnLoad = pawn =>
-                {
+                {   
+                    AllPawns.UpdateCache(null, selectedCategory);
+                    if (AllPawns.GetList().Count(o => o.ThingID == pawn.ThingID) > 1) // If collision occurs
+                    {
+                        int id = int.Parse(AllPawns.GetList().Max(o => Regex.Match(o.ThingID, @"\d+$").Value)) + 1; //get max id of any pawn + 1
+                        pawn.ThingID = Regex.Replace(pawn.ThingID, @"\d+$", id.ToString()); //make it id of new pawn
+                    }
                     if (map != null)
                         GenSpawn.Spawn(pawn, pos, map, rot, WipeMode.VanishOrMoveAside, true);
                     else if (parent != null && !parent.TryAdd(pawn, false))
