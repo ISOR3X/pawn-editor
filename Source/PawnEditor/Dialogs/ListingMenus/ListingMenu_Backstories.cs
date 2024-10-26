@@ -57,7 +57,7 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
             var spawnCategoriesDict = DefDatabase<BackstoryDef>.AllDefs.SelectMany(bd => bd.spawnCategories).Distinct()
                 .ToDictionary<string, string, Func<BackstoryDef, bool>>(sc => sc.ConvertCamelCase(), sc => bd => bd.spawnCategories.Contains(sc));
             list.Add(
-                new Filter_Dropdown<BackstoryDef>("PawnEditor.BackstoryType".Translate(), spawnCategoriesDict, false, "PawnEditor.BackstorySlotDesc".Translate()));
+                new Filter_Dropdown<BackstoryDef>("PawnEditor.BackstoryType".Translate(), spawnCategoriesDict, false, "PawnEditor.BackstoryTypeDesc".Translate()));
         }
 
         for (var i = 0; i < 5; i++)
@@ -69,12 +69,28 @@ public class ListingMenu_Backstories : ListingMenu<BackstoryDef>
             list.Add(new Filter_Dropdown<BackstoryDef>("PawnEditor.SkillGain".Translate(), skillGainDict, false, "PawnEditor.SkillGainDesc".Translate()));
         }
 
-
         list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.WorkDisables".Translate(), item => item.workDisables == WorkTags.None, false,
-            "PawnEditor.WorkDisablesDesc".Translate()));
+            "PawnEditor.WorkDisables".Translate()));
+
+        for (var i = 0; i < 5; i++)
+        {
+            var workDict = DefDatabase<BackstoryDef>.AllDefs.SelectMany(bd => bd.DisabledWorkTypes).Distinct()
+                .ToDictionary<WorkTypeDef, string, Func<BackstoryDef, bool>>(dwt => dwt.ToStringSafe().ConvertCamelCase(), dwt => bd => bd.DisabledWorkTypes.Contains(dwt));
+            list.Add(new Filter_Dropdown<BackstoryDef>("PawnEditor.DisabledWorkTypes".Translate(), workDict, false, "PawnEditor.DisabledWorkTypesDesc".Translate()));
+        }
 
         list.Add(new Filter_Toggle<BackstoryDef>("PawnEditor.SkillLose".Translate(), item => item.skillGains.All(sg => sg.amount > 0), false,
-            "PawnEditor.SkillLoseDesc".Translate()));
+            "PawnEditor.SkillLose".Translate()));
+
+        for (var i = 0; i < 5; i++)
+        {
+            var skillGainDict = DefDatabase<SkillDef>.AllDefs.Where(sd => backstoriesBySlot
+                    .SelectMany(p => p.Value).Any(bd => bd.skillGains.Any(sg => sg.skill == sd)))
+                .ToDictionary<SkillDef, string, Func<BackstoryDef, bool>>(sd => sd.skillLabel.CapitalizeFirst(),
+                    sd => bd => bd.skillGains.Any(sg => sg.skill == sd && sg.amount < 0));
+            list.Add(new Filter_Dropdown<BackstoryDef>("PawnEditor.SkillLoses".Translate(), skillGainDict, false, "PawnEditor.SkillLosesDesc".Translate()));
+        }
+
         list.Add(new Filter_ModSource<BackstoryDef>());
 
         return list;

@@ -146,13 +146,16 @@
     <PawnEditor.BackstorySlot>Backstory slot</PawnEditor.BackstorySlot>
     <PawnEditor.BackstorySlotDesc>Select which type of backstories should be shown (adulthood/childhood).</PawnEditor.BackstorySlotDesc>
     <PawnEditor.BackstoryType>Backstory category</PawnEditor.BackstoryType>
+    <PawnEditor.BackstoryTypeDesc>Select which categories of backstories should be shown.</PawnEditor.BackstoryTypeDesc>
     <PawnEditor.Categories>categories</PawnEditor.Categories>
     <PawnEditor.SkillGain>Skill bonus</PawnEditor.SkillGain>
-    <PawnEditor.SkillGainDesc>Select a skill for which the pawn should have a postive bonus for.</PawnEditor.SkillGainDesc>
+    <PawnEditor.SkillGainDesc>Select a skill for which the pawn should have a postive bonus.</PawnEditor.SkillGainDesc>
     <PawnEditor.WorkDisables>Hide backstories with disabled work types</PawnEditor.WorkDisables>
-    <PawnEditor.WorkDisablesDesc>Hide backstories that have disabled work types.</PawnEditor.WorkDisablesDesc>
+    <PawnEditor.DisabledWorkTypes>Disabled work types</PawnEditor.DisabledWorkTypes>
+    <PawnEditor.DisabledWorkTypesDesc>Select a work type which the pawn should not be able to do.</PawnEditor.DisabledWorkTypesDesc>
     <PawnEditor.SkillLose>Hide backstories with negative skill gains</PawnEditor.SkillLose>
-    <PawnEditor.SkillLoseDesc>Hide backstories that have disabled work types.</PawnEditor.SkillLoseDesc>
+    <PawnEditor.SkillLoses>Skill loses</PawnEditor.SkillLoses>
+    <PawnEditor.SkillLosesDesc>Select a skill for which the pawn should have a negative bonus.</PawnEditor.SkillLosesDesc>
     <PawnEditor.MinAbilityLevel>Level</PawnEditor.MinAbilityLevel>
     <PawnEditor.MinAbilityLevelDesc>The level range of psycasts to show.</PawnEditor.MinAbilityLevelDesc>
     <PawnEditor.HasStyle>Has style</PawnEditor.HasStyle>
