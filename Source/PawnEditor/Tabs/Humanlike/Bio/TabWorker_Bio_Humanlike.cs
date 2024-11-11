@@ -64,14 +64,27 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         Widgets.Label(headerRect, "Skills".Translate().Colorize(ColoredText.TipSectionTitleColor));
         GUI.color = Color.white;
         if (Widgets.ButtonText(headerRect.TakeRightPart(60), "PawnEditor.Preset".Translate()))
-            Find.WindowStack.Add(new FloatMenu(new()
+            if (VSECompat.Active)
             {
-                new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), 0), GetSetDelegate(pawn, false, 0)),
-                new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), "PawnEditor.Max".Translate()), GetSetDelegate(pawn, false, 20)),
-                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.None.GetLabel()), GetSetDelegate(pawn, true, 0)),
-                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Minor.GetLabel()), GetSetDelegate(pawn, true, 1)),
-                new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Major.GetLabel()), GetSetDelegate(pawn, true, 2))
-            }));
+                var floatMenuList = new List<FloatMenuOption>
+                {
+                    new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), 0), GetSetDelegate(pawn, false, 0)),
+                    new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), "PawnEditor.Max".Translate()), GetSetDelegate(pawn, false, 20)),
+                };
+                VSECompat.AddPassionPresets(floatMenuList, pawn);
+                Find.WindowStack.Add(new FloatMenu(floatMenuList));
+            }
+            else
+            {
+                Find.WindowStack.Add(new FloatMenu(new()
+                {
+                    new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), 0), GetSetDelegate(pawn, false, 0)),
+                    new("PawnEditor.SetAllTo".Translate("Skills".Translate().ToLower(), "PawnEditor.Max".Translate()), GetSetDelegate(pawn, false, 20)),
+                    new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.None.GetLabel()), GetSetDelegate(pawn, true, 0)),
+                    new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Minor.GetLabel()), GetSetDelegate(pawn, true, 1)),
+                    new("PawnEditor.SetAllTo".Translate("PawnEditor.Passions".Translate(), Passion.Major.GetLabel()), GetSetDelegate(pawn, true, 2))
+                }));
+            }
 
         inRect.xMin += 4;
         inRect.yMin += 4f;
@@ -84,20 +97,30 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
                 Widgets.DrawHighlightIfMouseover(rect);
                 TooltipHandler.TipRegion(rect, () => SkillUI.GetSkillDescription(skill), def.GetHashCode() * 397945);
                 Widgets.Label(rect.TakeLeftPart(leftWidth), def.LabelCap);
-                if (Widgets.ButtonImage(rect.TakeLeftPart(30), skill.passion switch
+                if (VSECompat.Active) {
+                    if (Widgets.ButtonImage(rect.TakeLeftPart(30), VSECompat.GetPassionIcon(skill.passion)))
                     {
-                        Passion.None => TexPawnEditor.PassionEmptyTex,
-                        Passion.Minor => SkillUI.PassionMinorIcon,
-                        Passion.Major => SkillUI.PassionMajorIcon,
-                        _ => SkillUI.PassionMajorIcon
-                    }))
-                    skill.passion = skill.passion switch
-                    {
-                        Passion.None => Passion.Minor,
-                        Passion.Minor => Passion.Major,
-                        Passion.Major => Passion.None,
-                        _ => Passion.None
-                    };
+                        var newPassion = VSECompat.ChangePassion(skill.passion);
+                        VSECompat.ClearCacheFor(skill, newPassion);
+                        skill.passion = newPassion;
+                    }
+                } else {
+                    if (Widgets.ButtonImage(rect.TakeLeftPart(30), skill.passion switch
+                        {
+                            Passion.None => TexPawnEditor.PassionEmptyTex,
+                            Passion.Minor => SkillUI.PassionMinorIcon,
+                            Passion.Major => SkillUI.PassionMajorIcon,
+                            _ => SkillUI.PassionMajorIcon
+                        }))
+                        skill.passion = skill.passion switch
+                        {
+                            Passion.None => Passion.Minor,
+                            Passion.Minor => Passion.Major,
+                            Passion.Major => Passion.None,
+                            _ => Passion.None
+                        };
+                }
+
                 var level = skill.GetLevel();
                 var disabled = skill.TotallyDisabled;
                 var texture2D = SkillUI.SkillBarFillTex;
@@ -128,7 +151,7 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
             }
     }
 
-    private static Action GetSetDelegate(Pawn pawn, bool passions, int value)
+    public static Action GetSetDelegate(Pawn pawn, bool passions, int value)
     {
         return () =>
         {
