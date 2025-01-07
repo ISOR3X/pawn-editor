@@ -116,6 +116,7 @@ public class TabDef : Def
 
     private void Initialize()
     {
+
         if (workerClass != null)
         {
             worker = Activator.CreateInstance(workerClass);

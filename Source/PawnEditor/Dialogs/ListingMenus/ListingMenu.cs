@@ -96,6 +96,7 @@ public class ListingMenu<T> : Window
 
     public override void DoWindowContents(Rect inRect)
     {
+
         DrawHeader(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium)));
         inRect.yMin += 16f;
 

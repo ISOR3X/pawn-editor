@@ -27,14 +27,46 @@ public partial class TabWorker_Bio_Humanlike
             var factionRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
             using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(factionRect.TakeLeftPart(leftWidth), faction);
+
+            //Creates the dropdown menu of the factions. On selection, it calls a Lambda Func. In this case it selects the faction.
             if (Widgets.ButtonText(factionRect, "PawnEditor.SelectFaction".Translate()))
-                Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Select(newFaction =>
+            {
+                //create dropdown options
+                List<FloatMenuOption> options = Find.FactionManager.AllFactionsVisibleInViewOrder.Select(newFaction =>
                         new FloatMenuOption(newFaction.Name, delegate
                         {
                             pawn.SetFaction(newFaction);
                             PawnEditor.RecachePawnList();
-                        }, newFaction.def.FactionIcon, newFaction.Color))
-                   .ToList()));
+                        }, newFaction.def.FactionIcon, newFaction.Color)).ToList();
+
+                if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 2)
+                {
+
+                    options.Add(new FloatMenuOption("Random Non-Colonist", () =>
+                    {
+
+                        List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                        var randFac = factions[Random.Range(0, factions.Count - 1)];
+                        pawn.SetFaction(randFac);
+                    }));
+                }
+
+                if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 1)
+                {
+
+                    options.Add(new FloatMenuOption("Random", () =>
+                    {
+
+                        List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                        factions.Add(Find.FactionManager.ofPlayer);
+                        var randFac = factions[Random.Range(0, factions.Count - 1)];
+                        pawn.SetFaction(randFac);
+                    }));
+                }
+
+                //add dropdown to window stack
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
             factionRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
             factionRect.TakeLeftPart(leftWidth);

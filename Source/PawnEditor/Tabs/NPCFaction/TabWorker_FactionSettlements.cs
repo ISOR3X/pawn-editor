@@ -64,9 +64,15 @@ public class TabWorker_FactionSettlements : TabWorker<Faction>
                 massCapacity = CollectionsMassCalculator.Capacity(pawns)
             };
             foreach (var settlement in Find.WorldObjects.Settlements.Where(s => s.Faction == faction))
+            {
+
                 using (var worldPath = Find.WorldPathFinder.FindPath(startingTile, settlement.Tile, null))
+                {
                     distances.Add(settlement, CaravanArrivalTimeEstimator.EstimatedTicksToArrive(startingTile, settlement.Tile, worldPath, 0f,
                         CaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo), Find.TickManager.TicksAbs));
+                }
+            }
+           
             settlementTable.ClearCache();
         }
     }
