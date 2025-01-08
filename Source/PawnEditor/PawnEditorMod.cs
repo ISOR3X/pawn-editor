@@ -131,6 +131,7 @@ public class PawnEditorMod : Mod
     public static bool AddEditorButton(Rect rect, Page_ConfigureStartingPawns __instance)
     {
         float x, y;
+        //moves button to left if biotech is active
         if (ModsConfig.BiotechActive)
         {
             Text.Font = GameFont.Small;
@@ -153,7 +154,7 @@ public class PawnEditorMod : Mod
 
         if (Widgets.ButtonText(new(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "PawnEditor.CharacterEditor".Translate()))
             Find.WindowStack.Add(new Dialog_PawnEditor_Pregame(__instance.DoNext));
-
+        
         return false;
     }
 

@@ -22,7 +22,7 @@ public partial class TabWorker_Bio_Humanlike
         var favColor = "PawnEditor.FavColor".Translate();
         var role = "Role".Translate().CapitalizeFirst();
         var leftWidth = UIUtility.ColumnWidth(3, faction, ideo, certainty, title, honor, favColor) + 4f;
-        if (pawn.Faction != null)
+       // if (pawn.Faction != null)
         {
             var factionRect = inRect.TakeTopPart(30);
             inRect.yMin += 4;
@@ -35,52 +35,119 @@ public partial class TabWorker_Bio_Humanlike
                 List<FloatMenuOption> options = Find.FactionManager.AllFactionsVisibleInViewOrder.Select(newFaction =>
                         new FloatMenuOption(newFaction.Name, delegate
                         {
-                            pawn.SetFaction(newFaction);
+                            if (newFaction != pawn.Faction) pawn.SetFaction(newFaction);
                             PawnEditor.RecachePawnList();
                         }, newFaction.def.FactionIcon, newFaction.Color)).ToList();
 
-                if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 2)
+                
+                if (Find.FactionManager.RandomEnemyFaction() != null)
                 {
 
-                    options.Add(new FloatMenuOption("Random Non-Colonist", () =>
+                    options.Add(new FloatMenuOption("Random Enemy Faction", () =>
+                    {
+
+                        var randFac = Find.FactionManager.RandomEnemyFaction();
+
+                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                    }));
+                }
+                if (Find.FactionManager.RandomAlliedFaction() != null)
+                {
+
+                    options.Add(new FloatMenuOption("Random Ally Faction", () =>
+                    {
+
+                        var randFac = Find.FactionManager.RandomAlliedFaction();
+
+                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                    }));
+
+                }
+                if (Find.FactionManager.RandomNonHostileFaction() != null)
+                {
+
+                    options.Add(new FloatMenuOption("Random Non-Hostile Faction", () =>
+                    {
+                        var randFac = Find.FactionManager.RandomNonHostileFaction();
+
+                        if(randFac != pawn.Faction) pawn.SetFaction(randFac);
+                    }));
+                }
+                if (Find.FactionManager.RandomEnemyFaction() != null && Find.FactionManager.RandomNonHostileFaction() != null)
+                {
+
+                    options.Add(new FloatMenuOption("Random Non-Colonist Faction", () =>
                     {
 
                         List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
-                        var randFac = factions[Random.Range(0, factions.Count - 1)];
-                        pawn.SetFaction(randFac);
+                        Faction randFac = factions[Random.Range(0, factions.Count - 1)];
+
+
+                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
                     }));
                 }
-
                 if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 1)
                 {
 
-                    options.Add(new FloatMenuOption("Random", () =>
+                    options.Add(new FloatMenuOption("Random Faction", () =>
                     {
-
                         List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
                         factions.Add(Find.FactionManager.ofPlayer);
                         var randFac = factions[Random.Range(0, factions.Count - 1)];
+
                         pawn.SetFaction(randFac);
                     }));
                 }
+                if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 1)
+                {
+
+                    options.Add(new FloatMenuOption("No Faction", () =>
+                    {
+
+                        pawn.SetFaction(null);
+                    }));
+                }
+
+                //random on pawn load () => set xml to "Random" else nah.
+
 
                 //add dropdown to window stack
                 Find.WindowStack.Add(new FloatMenu(options));
             }
-            factionRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
-            factionRect.TakeLeftPart(leftWidth);
-            Widgets.DrawHighlight(factionRect);
-            Widgets.DrawHighlightIfMouseover(factionRect);
-            if (Widgets.ButtonInvisible(factionRect)) Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
 
-            GUI.color = pawn.Faction.Color;
-            GUI.DrawTexture(factionRect.TakeLeftPart(30).ContractedBy(6), pawn.Faction.def.FactionIcon);
-            GUI.color = Color.white;
-            using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(factionRect, pawn.Faction.Name);
 
-            inRect.yMin += 16;
+                factionRect = inRect.TakeTopPart(30);
+                inRect.yMin += 4;
+                factionRect.TakeLeftPart(leftWidth);
+            if (pawn.Faction != null)
+            {
+                Widgets.DrawHighlight(factionRect);
+                Widgets.DrawHighlightIfMouseover(factionRect);
+                if (Widgets.ButtonInvisible(factionRect)) Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
+
+
+
+
+                GUI.color = pawn.Faction.Color;
+                GUI.DrawTexture(factionRect.TakeLeftPart(30).ContractedBy(6), pawn.Faction.def.FactionIcon);
+                GUI.color = Color.white;
+                using (new TextBlock(TextAnchor.MiddleLeft))
+                    Widgets.Label(factionRect, pawn.Faction.Name);
+
+            }
+            else
+            {
+                Widgets.Label(factionRect, "No Faction");
+
+            }
+                inRect.yMin += 16;
+
+            //var factionTickboxRect = inRect.TakeTopPart(30);
+                //Draw random tickbox. "ticked" must not be defined in this method. It needs to be a higher scope so it knows what to change to.
+                //            Widgets.CheckboxLabeled(factionTickboxRect, "Assign Random on Game Start", ref ticked);
+              //  Widgets.DrawBox(factionTickboxRect);
+
+            
         }
 
         var empire = Faction.OfEmpire;

@@ -15,6 +15,8 @@ public static partial class SaveLoadUtility
 
     public static bool InterceptReferences(ref ILoadReferenceable refee, string label)
     {
+        
+
         if (!currentlyWorking) return true;
         if (savedItems.Contains(refee)) return true;
         if (Scribe.mode == LoadSaveMode.Saving)
@@ -29,10 +31,36 @@ public static partial class SaveLoadUtility
         }
         else if (Scribe.mode == LoadSaveMode.LoadingVars)
         {
+            //create xml C# object
             XmlNode xmlNode = Scribe.loader.curXmlParent?[label];
+            //get the data Type from the XML Attribute: <tagName Attribute="AttributeValue">Value</tagName>
             var typeName = xmlNode?.Attributes?["Class"]?.Value;
+            //get the value set in xml
             var data = xmlNode?.InnerText;
+
+            //debug logging
+            Log.openOnMessage = true;
+            Log.Message(label);
+            Log.Message(refee?.ToString());
+
+            
+            
+            Log.Message("-----------");
+            
             if (data.NullOrEmpty()) refee = null;
+            else if(typeName == "Faction")
+            {
+                if (data == "Random")
+                {
+                    Faction faction;
+
+                    if(Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out faction, false))
+                    {
+                        refee = faction;
+                    }
+                    Log.Warning("Got yuu");
+                }
+            }
             else
             {
                 var type = typeName.NullOrEmpty() ? null : GenTypes.GetTypeInAnyAssembly(typeName);
@@ -40,6 +68,9 @@ public static partial class SaveLoadUtility
                 if (type == null) return true;
                 refee = LoadReferenceData(data, type);
             }
+
+
+
         }
         else if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs
               && loadInfo.TryGetValue((Scribe.loader.curParent, Scribe.loader.curPathRelToParent + '/' + label), out var info))
