@@ -47,6 +47,8 @@ public static partial class SaveLoadUtility
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Save(typePostfix.NullOrEmpty() ? type : Path.Combine(type, typePostfix!), path =>
         {
+            
+
             currentlyWorking = true;
             currentItem = item as ILoadReferenceable;
             currentPawn = parentPawn;

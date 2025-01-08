@@ -56,6 +56,9 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
                     }, true));
                 }
 
+                /*bool UseRandomFactionOnSave = false;
+                Widgets.Checkbox(0, 0, ref UseRandomFactionOnSave);*/
+
                 TooltipHandler.TipRegionByKey(rect2, deleteTipKey);
                 Text.Font = GameFont.Small;
                 var rect3 = new Rect(rect2.x - 100f, (rect.height - 36f) / 2f, 100f, 36f);

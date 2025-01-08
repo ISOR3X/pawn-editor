@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
+using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -188,6 +189,7 @@ public static partial class PawnEditor
 
     public static void AddPawn(PawnCategory category)
     {
+        bool randFac = false;
         AddResult AddPawnKind(PawnKindDef pawnKind) =>
             AddPawn(PawnGenerator.GeneratePawn(new(pawnKind, selectedFaction,
                 Pregame ? PawnGenerationContext.PlayerStarter : PawnGenerationContext.NonPlayer,
@@ -201,11 +203,18 @@ public static partial class PawnEditor
                 var pawn = new Pawn();
                 SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category).HandleResult(), typePostfix: category.ToString());
             })
+            /*new("new with random faction"*//*.Translate(category.Label())*//*, delegate
+            {
+                var pawn = new Pawn();
+                SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category).HandleResult(), typePostfix: category.ToString());
+                randFac = true;
+            })*/
         };
 
         if (category == PawnCategory.Humans)
             list.Add(new("PawnEditor.Add.Backer".Translate(), delegate
             {
+                
                 Find.WindowStack.Add(new ListingMenu<PawnBio>(SolidBioDatabase.allBios, bio => bio.name.ToStringFull, bio =>
                 {
                     var pawn = PawnGenerator.GeneratePawn(new(selectedFaction.def.basicMemberKind, selectedFaction,
@@ -220,6 +229,8 @@ public static partial class PawnEditor
                     pawn.Name = bio.name;
                     pawn.story.Childhood = bio.childhood;
                     pawn.story.Adulthood = bio.adulthood;
+
+
                     return AddPawn(pawn, category);
                 }, "Add backer pawn"));
             }));
