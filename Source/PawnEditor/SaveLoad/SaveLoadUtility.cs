@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -16,6 +17,7 @@ public static partial class SaveLoadUtility
     private static ILoadReferenceable currentItem;
     private static Pawn currentPawn;
     private static readonly HashSet<ILoadReferenceable> savedItems = new();
+    public static bool UseRandomFactionOnSave = false;
 
     public static MethodInfo ReferenceLook = AccessTools.FirstMethod(typeof(Scribe_References),
         mi => mi.Name == "Look" && mi.GetParameters().All(p => !p.ParameterType.Name.Contains("WeakReference")));
@@ -62,10 +64,15 @@ public static partial class SaveLoadUtility
             Scribe.saver.FinalizeSaving();
             File.Delete(tempFile);
 
+            
+
             Scribe.saver.InitSaving(path, typePostfix.NullOrEmpty() ? type : type + "." + typePostfix);
             ScribeMetaHeaderUtility.WriteMetaHeader();
             item.ExposeData();
             Scribe.saver.FinalizeSaving();
+
+
+            
 
             savedItems.Clear();
             currentItem = null;
@@ -75,8 +82,33 @@ public static partial class SaveLoadUtility
 
             if (item is Pawn pawn) PawnEditor.SavePawnTex(pawn, Path.ChangeExtension(path, ".png"), Rot4.South);
 
+            if (item is Pawn)
+            {
+
+
+
+                if (UseRandomFactionOnSave)
+                {
+                    /*Log.Message("True");
+                    Faction faction = new Faction() { name = "Random", };
+                    Log.openOnMessage = true;
+                    Log.Message("Path: " + path);
+*/
+
+                    XmlDocument doc = new XmlDocument();
+                    doc.Load(path);
+                    XmlNode factionNode = doc.DocumentElement["faction"];
+                    //Log.Message("Before: " + factionNode.InnerText);
+                    factionNode.InnerText = "Random";
+                    //Log.Message("After: " + factionNode.InnerText);
+                    doc.Save(path);
+                }
+               
+            }
+
             callback?.Invoke(item);
-        }, item switch
+        },
+        item switch
         {
             Pawn pawn => pawn.LabelShort,
             Map => "Colony",
@@ -98,6 +130,29 @@ public static partial class SaveLoadUtility
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Load(typePostfix.NullOrEmpty() ? type : Path.Combine(type, typePostfix!), path =>
         {
+            string beforeSave = "";
+            if (item is Pawn)
+            {
+                if (UseRandomFactionOnSave)
+                {
+                    /*Log.Message("True");
+                    Faction faction = new Faction() { name = "Random", };
+                    Log.openOnMessage = true;
+                    Log.Message("Path: " + path);*/
+
+                    XmlDocument doc = new XmlDocument();
+                    doc.Load(path);
+                    XmlNode factionNode = doc.DocumentElement["faction"];
+                    //Log.Message("Before: " + factionNode.InnerText);
+                    beforeSave = factionNode.InnerText;
+                    factionNode.InnerText = "Random";
+                    //Log.Message("After: " + factionNode.InnerText);
+                    doc.Save(path);
+                }
+               
+            }
+
+
             currentlyWorking = true;
             currentItem = item as ILoadReferenceable;
             currentPawn = parentPawn;
@@ -134,6 +189,26 @@ public static partial class SaveLoadUtility
                 Current.ProgramState = ProgramState.Playing;
 
             PawnEditor.Notify_PointsUsed();
+
+            if (item is Pawn)
+            {
+                if (UseRandomFactionOnSave)
+                {
+                    /*Log.Message("True");
+                    Faction faction = new Faction() { name = "Random", };
+                    Log.openOnMessage = true;
+                    Log.Message("Path: " + path);*/
+
+                    XmlDocument doc = new XmlDocument();
+                    doc.Load(path);
+                    XmlNode factionNode = doc.DocumentElement["faction"];
+                    //Log.Message("Before: " + factionNode.InnerText);
+                    factionNode.InnerText = beforeSave;
+                    //Log.Message("After: " + factionNode.InnerText);
+                    doc.Save(path);
+                }
+
+            }
         }));
     }
 

@@ -26,6 +26,7 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
         ReloadFiles();
     }
 
+    //Create the Save/Load Pawn window
     public override void DoWindowContents(Rect inRect)
     {
         var vector = new Vector2(inRect.width - 16f, 40f);
@@ -56,8 +57,7 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
                     }, true));
                 }
 
-                /*bool UseRandomFactionOnSave = false;
-                Widgets.Checkbox(0, 0, ref UseRandomFactionOnSave);*/
+               
 
                 TooltipHandler.TipRegionByKey(rect2, deleteTipKey);
                 Text.Font = GameFont.Small;
@@ -88,9 +88,12 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
             num2 += vector.y;
             num3++;
         }
-
         Widgets.EndScrollView();
         if (ShouldDoTypeInField) DoTypeInField(inRect.TopPartPixels(inRect.height - CloseButSize.y - 18f));
+
+        
+
+       
     }
 
     public override void ReloadFiles()

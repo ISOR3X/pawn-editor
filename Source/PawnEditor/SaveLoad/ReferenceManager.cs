@@ -39,13 +39,13 @@ public static partial class SaveLoadUtility
             var data = xmlNode?.InnerText;
 
             //debug logging
-            Log.openOnMessage = true;
-            Log.Message(label);
-            Log.Message(refee?.ToString());
+       //     Log.openOnMessage = true;
+        //    Log.Message(label);
+        //    Log.Message(refee?.ToString());
 
             
             
-            Log.Message("-----------");
+          //  Log.Message("-----------");
             
             if (data.NullOrEmpty()) refee = null;
             else if(typeName == "Faction")
@@ -58,7 +58,14 @@ public static partial class SaveLoadUtility
                     {
                         refee = faction;
                     }
-                    Log.Warning("Got yuu");
+                   // Log.Warning("Got yuu");
+                }
+                else
+                {
+                    var type = typeName.NullOrEmpty() ? null : GenTypes.GetTypeInAnyAssembly(typeName);
+                    loadInfo.Add((Scribe.loader.curParent, Scribe.loader.curPathRelToParent + '/' + label), (data, type));
+                    if (type == null) return true;
+                    refee = LoadReferenceData(data, type);
                 }
             }
             else

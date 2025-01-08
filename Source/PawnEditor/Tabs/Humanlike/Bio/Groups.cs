@@ -108,7 +108,6 @@ public partial class TabWorker_Bio_Humanlike
                     }));
                 }
 
-                //random on pawn load () => set xml to "Random" else nah.
 
 
                 //add dropdown to window stack

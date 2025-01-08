@@ -21,7 +21,8 @@ public static partial class PawnEditor
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
         {
             // Reversed so player faction is at the top of the float menu.
-            Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
+
+            List<FloatMenuOption> options = Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
                .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
@@ -30,7 +31,15 @@ public static partial class PawnEditor
                         RecachePawnList();
                         CheckChangeTabGroup();
                     }, faction.def.FactionIcon, faction.Color))
-               .ToList()));
+               .ToList();
+            /*options.Add(new FloatMenuOption("No Faction", () =>
+            {
+                RecachePawnList();
+                CheckChangeTabGroup();
+            }));*/
+            Find.WindowStack.Add(new FloatMenu(options));
+
+
             inRect.yMin += 2;
         }
 

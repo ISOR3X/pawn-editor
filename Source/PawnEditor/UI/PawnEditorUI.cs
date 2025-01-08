@@ -154,10 +154,7 @@ public static partial class PawnEditor
         buttonRect.x -= 5 + buttonRect.width;
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
-            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems()
-                .Select(static item => item.MakeSaveOption())
-                .Where(static option => option != null)
-                .ToList()));
+            Find.WindowStack.Add(new FloatMenu(GetSaveLoadItems().Select(static item => item.MakeSaveOption()).Where(static option => option != null).ToList()));
 
         buttonRect.x += buttonRect.width * 2 + 10;
 
