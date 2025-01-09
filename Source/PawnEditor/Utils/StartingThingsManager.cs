@@ -16,6 +16,9 @@ public static class StartingThingsManager
     private static readonly List<ScenPart> removedParts = new();
     private static Scenario cachedScenario;
 
+    /// <summary>
+    /// Load all items from the cached scenario into the static starting things lists, Starting, Near, and Far items, animals, and mechs.
+    /// </summary>
     public static void ProcessScenario()
     {
         startingAnimals.Clear();
@@ -25,17 +28,17 @@ public static class StartingThingsManager
         startingThingsFar.Clear();
         removedParts.Clear();
 
-        Log.openOnMessage = true;
+        //Log.openOnMessage = true;
         foreach (var part in Find.Scenario.AllParts)
         {
-            Log.Message(part.Label);
+            //Log.Message(part.Label);
             switch (part)
             {
                 case ScenPart_StartingAnimal:
 
                     foreach (var animal in part.PlayerStartingThings().OfType<Pawn>())
                     {
-                        Log.Message("- " + animal.KindLabel);
+                        //Log.Message("- " + animal.KindLabel);
 
                     }
 
@@ -52,7 +55,7 @@ public static class StartingThingsManager
                 case ScenPart_StartingThing_Defined:
                     foreach (var thing in part.PlayerStartingThings())
                     {
-                        Log.Message("- " + thing.Label);
+                        //Log.Message("- " + thing.Label);
                     //    startingThings.Add(thing);
                     }
                     startingThings.AddRange(part.PlayerStartingThings());
@@ -61,7 +64,7 @@ public static class StartingThingsManager
                     break;
                 case ScenPart_ScatterThingsNearPlayerStart near:
                     {
-                        Log.Message("- " + near.thingDef.label);
+                       // Log.Message("- " + near.thingDef.label);
 
                         var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
                         thing.stackCount = near.count;
@@ -72,7 +75,7 @@ public static class StartingThingsManager
                     }
                 case ScenPart_ScatterThingsAnywhere far:
                     {
-                        Log.Message("-- " + far.thingDef.label);
+                        //Log.Message("-- " + far.thingDef.label);
 
                         var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
                         thing.stackCount = far.count;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using HarmonyLib;
 using LudeonTK;
 using RimWorld;
 using UnityEngine;
@@ -135,6 +136,35 @@ public static partial class PawnEditor
 
         var buttonRect = new Rect(randomRect);
         var options = GetRandomizationOptions().ToList();
+
+        if (!showFactionInfo)
+        {
+
+            options.Add(curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + "all - including faction", () =>
+            {
+                foreach (var option in options)
+                {
+                    if (option.Label.Contains("all"))
+                        continue;
+
+                    option.action();
+
+                }
+                lastRandomization = option;
+                //option.action();
+                Notify_PointsUsed();
+
+            })).ToList()[0]);
+
+            //Add randomize faction option
+            options.Add(new FloatMenuOption("PawnEditor.SelectRandomFaction".Translate(), () =>
+            {
+                selectedPawn.SetFaction(Find.FactionManager.RandomEnemyFaction());
+            }));
+        }
+
+        //options.AddRange();
+
         if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
         {
             var label = lastRandomization.Label.ToLower();
@@ -142,15 +172,20 @@ public static partial class PawnEditor
             lastRandomization.action();
             randomRect.TakeRightPart(1);
         }
+        
+        //Add randomize all including faction option
+        
 
-        if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
-        {
-            if (options.Count > 0)
+       
+
+        if (options.Count > 0)
+            if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
+            {
                 Find.WindowStack.Add(new FloatMenu(options));
-            else
-                Messages.Message("PawnEditor.NoRandomOptions".Translate(), MessageTypeDefOf.RejectInput, false);
-        }
-
+            }
+        /*else
+            Messages.Message("PawnEditor.NoRandomOptions".Translate(), MessageTypeDefOf.RejectInput, false);
+*/
         buttonRect.x -= 5 + buttonRect.width;
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
@@ -262,13 +297,21 @@ public static partial class PawnEditor
     private static IEnumerable<FloatMenuOption> GetRandomizationOptions()
     {
         if (curTab == null) return Enumerable.Empty<FloatMenuOption>();
-        return (showFactionInfo ? curTab.GetRandomizationOptions(selectedFaction) : curTab.GetRandomizationOptions(selectedPawn))
-            .Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
+        if (showFactionInfo)
+        {
+            return curTab.GetRandomizationOptions(selectedFaction);
+        }
+        else
+        {
+            List<FloatMenuOption> options = curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
             {
                 lastRandomization = option;
                 option.action();
                 Notify_PointsUsed();
-            }));
+                
+            })).ToList();
+            return options as IEnumerable<FloatMenuOption>;
+        }
     }
 
     public static void RecachePawnList()

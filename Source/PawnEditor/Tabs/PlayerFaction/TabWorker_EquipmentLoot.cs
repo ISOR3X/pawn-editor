@@ -40,14 +40,15 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
             new(30)
         };
 
+    /// <summary>
+    /// Gets the rows of the starting item tables. The thing that shows "Items, Weight, Hitpoints, Market value, Count, Edit button, delete button.
+    /// </summary>
+    /// <param name="things"></param>
+    /// <param name="table"></param>
+    /// <returns></returns>
     private IEnumerable<UITable<Faction>.Row> GetRows(List<Thing> things, UITable<Faction> table)
     {
-        /*Log.openOnMessage = true;
-        foreach (var item in StartingThingsManager.GetStartingThingsNear())
-        {
-            Log.Message(item.ToString());
-
-        }*/
+        
         for (var i = 0; i < things.Count; i++)
         {
             var thing = things[i];
