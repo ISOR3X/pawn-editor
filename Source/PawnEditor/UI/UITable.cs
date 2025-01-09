@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using Verse;
+using Verse.Noise;
 using Verse.Sound;
 
 namespace PawnEditor;
@@ -41,10 +43,13 @@ public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
         firstHasIcon = rows.Any(row => row.Items.FirstOrDefault().HasIcon);
     }
 
+    
+
     private void RecacheWidths()
     {
         cachedWidths = headings.Select(h => h.Width).ToList();
         var availWidth = cachedRect.width - cachedWidths.Sum();
+
         if (availWidth < 0)
             for (var i = 0; i < cachedWidths.Count; i++)
                 cachedWidths[i] += availWidth / cachedWidths.Count;
@@ -57,10 +62,14 @@ public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
         }
     }
 
+    
+
     public void ClearCache()
     {
+
         cachedRect = default;
         target = default;
+        
     }
 
     public void CheckRecache(Rect inRect, T target)

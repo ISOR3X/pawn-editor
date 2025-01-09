@@ -25,45 +25,66 @@ public static class StartingThingsManager
         startingThingsFar.Clear();
         removedParts.Clear();
 
+        Log.openOnMessage = true;
         foreach (var part in Find.Scenario.AllParts)
+        {
+            Log.Message(part.Label);
             switch (part)
             {
                 case ScenPart_StartingAnimal:
+
+                    foreach (var animal in part.PlayerStartingThings().OfType<Pawn>())
+                    {
+                        Log.Message("- " + animal.KindLabel);
+
+                    }
+
                     startingAnimals.AddRange(part.PlayerStartingThings().OfType<Pawn>());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
                     break;
                 case ScenPart_StartingMech:
+
                     startingMechs.AddRange(part.PlayerStartingThings().OfType<Pawn>());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
                     break;
                 case ScenPart_StartingThing_Defined:
+                    foreach (var thing in part.PlayerStartingThings())
+                    {
+                        Log.Message("- " + thing.Label);
+                    //    startingThings.Add(thing);
+                    }
                     startingThings.AddRange(part.PlayerStartingThings());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
                     break;
                 case ScenPart_ScatterThingsNearPlayerStart near:
-                {
-                    var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
-                    thing.stackCount = near.count;
-                    startingThingsNear.Add(thing);
-                    Find.Scenario.RemovePart(part);
-                    removedParts.Add(part);
-                    break;
-                }
-                case ScenPart_ScatterThingsAnywhere far:
-                {
-                    var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
-                    thing.stackCount = far.count;
-                    startingThingsFar.Add(thing);
-                    Find.Scenario.RemovePart(part);
-                    removedParts.Add(part);
-                    break;
-                }
-            }
+                    {
+                        Log.Message("- " + near.thingDef.label);
 
-        Find.Scenario.parts.Add(new ScenPart_StartingThingsFromPawnEditor
+                        var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
+                        thing.stackCount = near.count;
+                        startingThingsNear.Add(thing);
+                        Find.Scenario.RemovePart(part);
+                        removedParts.Add(part);
+                        break;
+                    }
+                case ScenPart_ScatterThingsAnywhere far:
+                    {
+                        Log.Message("-- " + far.thingDef.label);
+
+                        var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
+                        thing.stackCount = far.count;
+                        startingThingsFar.Add(thing);
+                        Find.Scenario.RemovePart(part);
+                        removedParts.Add(part);
+                        break;
+                    }
+            }
+        }
+
+        Find.Scenario.parts.Add(new ScenPart_StartingThingsFromPawnEditor()
         {
             def = new()
             {
@@ -111,7 +132,27 @@ public static class StartingThingsManager
         else if (category == PawnCategory.Mechs)
             startingMechs.Add(pawn);
     }
+    
+    public static void RemovePawn(PawnCategory category, Pawn pawn)
+    {
+        if (category == PawnCategory.Animals)
+            startingAnimals.Remove(pawn);
+        else if (category == PawnCategory.Mechs)
+            startingMechs.Remove(pawn);
+    }
 
+    public static void RemoveItemFromStartingThingsNear(Thing thing)
+    {
+        startingThingsNear.Remove(thing);
+    }
+    public static void RemoveItemFromStartingThingsFar(Thing thing)
+    {
+        startingThingsFar.Remove(thing);
+    }public static void RemoveItemFromStartingThings(Thing thing)
+    {
+        startingThings.Remove(thing);
+    }
+    public static List<Thing> GetStartingThings() => startingThings;
     public static List<Thing> GetStartingThingsNear() => startingThingsNear;
     public static List<Thing> GetStartingThingsFar() => startingThingsFar;
 

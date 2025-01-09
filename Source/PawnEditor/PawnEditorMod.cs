@@ -29,7 +29,7 @@ public class PawnEditorMod : Mod
             postfix: new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
         Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DevToolStarterOnGUI)),
             new(GetType(), nameof(Keybind)));
-
+        
         LongEventHandler.ExecuteWhenFinished(delegate
         {
             foreach (var assembly in content.assemblies.loadedAssemblies)
