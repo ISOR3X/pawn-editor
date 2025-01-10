@@ -121,6 +121,7 @@
     <Compile Include="Utils\Listing_Thing.cs" />
     <Compile Include="Utils\Listing_TreeThing.cs" />
     <Compile Include="Utils\ColonyInventory.cs" />
+    <Compile Include="Utils\PawnEditor-PawnsFinder.cs" />
     <Compile Include="Utils\PawnLister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveLoad\ReferenceManager.cs" />

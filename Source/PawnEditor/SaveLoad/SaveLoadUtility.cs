@@ -82,25 +82,15 @@ public static partial class SaveLoadUtility
 
             if (item is Pawn pawn) PawnEditor.SavePawnTex(pawn, Path.ChangeExtension(path, ".png"), Rot4.South);
 
+            //Overwrite saved faction with "Random"
             if (item is Pawn)
             {
-
-
-
                 if (UseRandomFactionOnSave)
                 {
-                    /*Log.Message("True");
-                    Faction faction = new Faction() { name = "Random", };
-                    Log.openOnMessage = true;
-                    Log.Message("Path: " + path);
-*/
-
                     XmlDocument doc = new XmlDocument();
                     doc.Load(path);
                     XmlNode factionNode = doc.DocumentElement["faction"];
-                    //Log.Message("Before: " + factionNode.InnerText);
                     factionNode.InnerText = "Random";
-                    //Log.Message("After: " + factionNode.InnerText);
                     doc.Save(path);
                 }
                
@@ -130,23 +120,18 @@ public static partial class SaveLoadUtility
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Load(typePostfix.NullOrEmpty() ? type : Path.Combine(type, typePostfix!), path =>
         {
+            //Setup loading with random faction
             string beforeSave = "";
             if (item is Pawn)
             {
                 if (UseRandomFactionOnSave)
                 {
-                    /*Log.Message("True");
-                    Faction faction = new Faction() { name = "Random", };
-                    Log.openOnMessage = true;
-                    Log.Message("Path: " + path);*/
 
                     XmlDocument doc = new XmlDocument();
                     doc.Load(path);
                     XmlNode factionNode = doc.DocumentElement["faction"];
-                    //Log.Message("Before: " + factionNode.InnerText);
                     beforeSave = factionNode.InnerText;
                     factionNode.InnerText = "Random";
-                    //Log.Message("After: " + factionNode.InnerText);
                     doc.Save(path);
                 }
                
@@ -192,19 +177,15 @@ public static partial class SaveLoadUtility
 
             if (item is Pawn)
             {
+                //cleanup loading with random faction
+
                 if (UseRandomFactionOnSave)
                 {
-                    /*Log.Message("True");
-                    Faction faction = new Faction() { name = "Random", };
-                    Log.openOnMessage = true;
-                    Log.Message("Path: " + path);*/
 
                     XmlDocument doc = new XmlDocument();
                     doc.Load(path);
                     XmlNode factionNode = doc.DocumentElement["faction"];
-                    //Log.Message("Before: " + factionNode.InnerText);
                     factionNode.InnerText = beforeSave;
-                    //Log.Message("After: " + factionNode.InnerText);
                     doc.Save(path);
                 }
 

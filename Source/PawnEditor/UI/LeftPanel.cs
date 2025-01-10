@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Utils;
 using RimWorld;
 using RimWorld.Planet;
 using RimWorld.QuestGen;
@@ -16,27 +17,49 @@ public static partial class PawnEditor
     {
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.SelectedFaction".Translate());
 
-        if (selectedFaction == null || (pregame && selectedFaction != Faction.OfPlayer)) RecachePawnList();
+        if (/*selectedFaction == null ||*/ (pregame && selectedFaction != Faction.OfPlayer)) RecachePawnList();
 
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
         {
-            // Reversed so player faction is at the top of the float menu.
+            
 
-            List<FloatMenuOption> options = Find.FactionManager.AllFactionsVisibleInViewOrder.Reverse()
+            
+
+            Log.Message("Default faction pawns:");
+            foreach (var noFPawn in PawnsFinder.All_AliveOrDead)
+            {
+                if (noFPawn.AnimalOrWildMan() && !noFPawn.IsWildMan())
+                    continue;
+
+                if(noFPawn.Faction == default)  
+                    Log.Message(noFPawn);
+            }
+
+            IEnumerable<Faction> exFac = PawnEditor_PawnsFinder.GetAllFactionsContainingAtLeastOneHumanLike();
+
+            List<FloatMenuOption> options = exFac
                .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
+                        
+
                         selectedFaction = faction;
                         selectedPawn = null;
                         RecachePawnList();
                         CheckChangeTabGroup();
+                        
                     }, faction.def.FactionIcon, faction.Color))
                .ToList();
-            /*options.Add(new FloatMenuOption("No Faction", () =>
+            //add pawns without faction to pawn cache so they can be edited as normal.
+            options.Add(new FloatMenuOption("No Faction", () =>
             {
-                RecachePawnList();
+                selectedFaction = null;
+                selectedPawn = null;
+                
+                RecachePawnListWithNoFactionPawns();
+                //RecachePawnList();
                 CheckChangeTabGroup();
-            }));*/
+            }));
             Find.WindowStack.Add(new FloatMenu(options));
 
 
@@ -46,13 +69,18 @@ public static partial class PawnEditor
         var factionRect = inRect.TakeTopPart(54f).ContractedBy(3);
         Widgets.DrawOptionBackground(factionRect, showFactionInfo);
         MouseoverSounds.DoRegion(factionRect);
-        var color = selectedFaction.Color;
+        var color = selectedFaction?.Color == null? Color.white : selectedFaction.Color;
         color.a = 0.2f;
         GUI.color = color;
+
+        if(selectedFaction.def.FactionIcon != null)
         GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
+        else
+        Widgets.DrawBox(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f));
+
         GUI.color = Color.white;
         using (new TextBlock(GameFont.Small))
-            Widgets.Label(factionRect.ContractedBy(5f), selectedFaction.Name);
+            Widgets.Label(factionRect.ContractedBy(5f), selectedFaction.Name == null ? "No faction" : selectedFaction.Name);
         if (Widgets.ButtonInvisible(factionRect))
         {
             showFactionInfo = !showFactionInfo;
@@ -136,7 +164,12 @@ public static partial class PawnEditor
             onDelete = pawn =>
             {
                 DeletePawn(pawn, pawns);
+                if(selectedFaction != null)
                 TabWorker_FactionOverview.RecachePawns(selectedFaction);
+                else
+                {
+                    TabWorker_FactionOverview.RecachePawnsWithNullFaction();
+                }
             };
         }
         else

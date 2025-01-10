@@ -13,6 +13,12 @@ public static partial class SaveLoadUtility
 {
     private static readonly Dictionary<(IExposable, string), (string, Type)> loadInfo = new();
 
+    /// <summary>
+    /// This is where Pawn Editor accesses the XML for saving and loading pawns. <paramref name="label"/> is the name of the xml node name, and <paramref name="refee"/> is the type of data loaded from that location.
+    /// </summary>
+    /// <param name="refee"></param>
+    /// <param name="label"></param>
+    /// <returns></returns>
     public static bool InterceptReferences(ref ILoadReferenceable refee, string label)
     {
         
@@ -37,15 +43,6 @@ public static partial class SaveLoadUtility
             var typeName = xmlNode?.Attributes?["Class"]?.Value;
             //get the value set in xml
             var data = xmlNode?.InnerText;
-
-            //debug logging
-       //     Log.openOnMessage = true;
-        //    Log.Message(label);
-        //    Log.Message(refee?.ToString());
-
-            
-            
-          //  Log.Message("-----------");
             
             if (data.NullOrEmpty()) refee = null;
             else if(typeName == "Faction")
@@ -58,7 +55,6 @@ public static partial class SaveLoadUtility
                     {
                         refee = faction;
                     }
-                   // Log.Warning("Got yuu");
                 }
                 else
                 {

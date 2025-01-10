@@ -37,6 +37,23 @@ public class PawnListerBase
         }
         inited = true;
     }
+    
+    public void UpdateCacheWithNullFaction()
+    {
+        ClearCache();
+        this.faction = default;
+        this.category = PawnCategory.Humans;
+        foreach (var map in Find.Maps) AddLocation(map, map.mapPawns.AllPawns);
+
+        foreach (var caravan in Find.WorldObjects.Caravans) AddLocation(caravan, caravan.PawnsListForReading);
+
+        AddLocation(Find.World, Find.WorldPawns.AllPawnsAliveOrDead);
+        if (Find.GameInitData?.startingAndOptionalPawns != null)
+        {
+            AddLocation(Find.World, Find.GameInitData.startingAndOptionalPawns);
+        }
+        inited = true;
+    }
 
     protected virtual bool AddLocation(object location, IEnumerable<Pawn> occupants)
     {
@@ -51,6 +68,7 @@ public class PawnListerBase
 
         return hasAny;
     }
+
 
     protected virtual void AddPawn(object location, Pawn pawn)
     {

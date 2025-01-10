@@ -22,10 +22,10 @@ public static class FacialAnimCompat
         faceTypeDef = AccessTools.TypeByName("FacialAnimation.FaceTypeDef");
         FaceTypeDefs = GenDefDatabase.GetAllDefsInDatabaseForDef(faceTypeDef).ToList();
         
-        foreach (var typeDef in FaceTypeDefs)
+        /*foreach (var typeDef in FaceTypeDefs)
         {
             // Log.Message(typeDef.defName);
-        }
+        }*/
     }
 
 

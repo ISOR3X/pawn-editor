@@ -103,12 +103,9 @@ public partial class TabWorker_Bio_Humanlike
 
                     options.Add(new FloatMenuOption("No Faction", () =>
                     {
-
                         pawn.SetFaction(null);
                     }));
                 }
-
-
 
                 //add dropdown to window stack
                 Find.WindowStack.Add(new FloatMenu(options));

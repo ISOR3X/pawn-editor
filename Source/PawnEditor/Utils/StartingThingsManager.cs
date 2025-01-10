@@ -28,19 +28,13 @@ public static class StartingThingsManager
         startingThingsFar.Clear();
         removedParts.Clear();
 
-        //Log.openOnMessage = true;
         foreach (var part in Find.Scenario.AllParts)
         {
-            //Log.Message(part.Label);
             switch (part)
             {
                 case ScenPart_StartingAnimal:
 
-                    foreach (var animal in part.PlayerStartingThings().OfType<Pawn>())
-                    {
-                        //Log.Message("- " + animal.KindLabel);
-
-                    }
+                    
 
                     startingAnimals.AddRange(part.PlayerStartingThings().OfType<Pawn>());
                     Find.Scenario.RemovePart(part);
@@ -53,18 +47,13 @@ public static class StartingThingsManager
                     removedParts.Add(part);
                     break;
                 case ScenPart_StartingThing_Defined:
-                    foreach (var thing in part.PlayerStartingThings())
-                    {
-                        //Log.Message("- " + thing.Label);
-                    //    startingThings.Add(thing);
-                    }
+                    
                     startingThings.AddRange(part.PlayerStartingThings());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
                     break;
                 case ScenPart_ScatterThingsNearPlayerStart near:
                     {
-                       // Log.Message("- " + near.thingDef.label);
 
                         var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
                         thing.stackCount = near.count;
@@ -75,7 +64,6 @@ public static class StartingThingsManager
                     }
                 case ScenPart_ScatterThingsAnywhere far:
                     {
-                        //Log.Message("-- " + far.thingDef.label);
 
                         var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
                         thing.stackCount = far.count;

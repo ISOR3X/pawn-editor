@@ -137,9 +137,10 @@ public static partial class PawnEditor
         var buttonRect = new Rect(randomRect);
         var options = GetRandomizationOptions().ToList();
 
+
         if (!showFactionInfo)
         {
-
+            //Add randomize all - including faction option
             options.Add(curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + "all - including faction", () =>
             {
                 foreach (var option in options)
@@ -163,8 +164,6 @@ public static partial class PawnEditor
             }));
         }
 
-        //options.AddRange();
-
         if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
         {
             var label = lastRandomization.Label.ToLower();
@@ -172,20 +171,17 @@ public static partial class PawnEditor
             lastRandomization.action();
             randomRect.TakeRightPart(1);
         }
-        
-        //Add randomize all including faction option
-        
 
-       
 
+
+
+        //Don't show the randomize button if no randomization options exist
         if (options.Count > 0)
             if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
             {
                 Find.WindowStack.Add(new FloatMenu(options));
             }
-        /*else
-            Messages.Message("PawnEditor.NoRandomOptions".Translate(), MessageTypeDefOf.RejectInput, false);
-*/
+  
         buttonRect.x -= 5 + buttonRect.width;
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
@@ -314,6 +310,44 @@ public static partial class PawnEditor
         }
     }
 
+    public static void RecachePawnListWithNoFactionPawns()
+    {
+        List<Pawn> noFPawns = new List<Pawn>();
+        Log.Message("Default faction pawns:");
+        foreach (var noFPawn in PawnsFinder.All_AliveOrDead)
+        {
+            if (noFPawn.AnimalOrWildMan() && !noFPawn.IsWildMan())
+                continue;
+
+            if (noFPawn.Faction == default)
+            {
+                Log.Message(noFPawn);
+                noFPawns.Add(noFPawn);
+            }
+        }
+
+        CheckChangeTabGroup();
+        TabWorker_FactionOverview.RecachePawnsWithNullFaction();
+        TabWorker_AnimalMech.Notify_PawnAdded(selectedCategory);
+
+        List<Pawn> pawns;
+        if (Pregame)
+            pawns = selectedCategory == PawnCategory.Humans ? Find.GameInitData.startingAndOptionalPawns : StartingThingsManager.GetPawns(selectedCategory);
+        else
+        {
+            PawnList.UpdateCacheWithNullFaction();
+            pawns = noFPawns;
+        }
+
+        if (selectedPawn == null || !pawns.Contains(selectedPawn))
+        {
+            selectedPawn = pawns.FirstOrDefault();
+            CheckChangeTabGroup();
+        }
+
+        PortraitsCache.Clear();
+    }
+
     public static void RecachePawnList()
     {
         if (selectedFaction == null || !Find.FactionManager.allFactions.Contains(selectedFaction))
@@ -366,7 +400,9 @@ public static partial class PawnEditor
     {
         TabGroupDef desiredTabGroup;
 
+
         if (showFactionInfo && selectedFaction != null) desiredTabGroup = selectedFaction.IsPlayer ? TabGroupDefOf.PlayerFaction : TabGroupDefOf.NPCFaction;
+        else if (showFactionInfo && selectedFaction == null) desiredTabGroup = TabGroupDefOf.NPCFaction;
         else if (selectedPawn != null) desiredTabGroup = selectedCategory == PawnCategory.Humans ? TabGroupDefOf.Humanlike : TabGroupDefOf.AnimalMech;
         else desiredTabGroup = null;
 

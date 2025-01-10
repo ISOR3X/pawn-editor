@@ -64,8 +64,34 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         if (cachedFaction == faction) RecachePawns(faction);
     }
 
+    public static void RecachePawnsWithNullFaction()
+    {
+            List<Pawn> noFPawns = new List<Pawn>();
+            Log.Message("Default faction pawns:");
+            foreach (var noFPawn in PawnsFinder.All_AliveOrDead)
+            {
+                if (noFPawn.AnimalOrWildMan() && !noFPawn.IsWildMan())
+                    continue;
+
+                if (noFPawn.Faction == default)
+                {
+                    Log.Message(noFPawn);
+                    noFPawns.Add(noFPawn);
+                }
+            }
+
+
+            colonistList ??= new();
+            colonistList.UpdateCache(null, PawnCategory.Humans);
+            (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
+            cachedPawns = noFPawns;
+
+            CreateLocationTables(cachedPawns, cachedSections);
+    }
     public static void RecachePawns(Faction faction)
     {
+        
+
         cachedFaction = faction;
         if (PawnEditor.Pregame)
         {
