@@ -142,8 +142,6 @@ public static partial class PawnEditor
         var buttonRect = new Rect(randomRect);
         var options = GetRandomizationOptions().ToList();
 
-        Log.Message(tabGroup.tabs);
-
         //Add randomize options for factions
         if (!showFactionInfo && selectedPawn!=null && curTab == TabGroupDefOf.Humanlike.tabs[0])
         {
@@ -198,8 +196,8 @@ public static partial class PawnEditor
 
 
 
-        //Don't show the randomize button if no randomization options exist
-        if (options.Count > 0)
+        //Don't show the randomize button if no randomization options exist or you can't edit the faction overview
+        if (options.Count > 0 && (selectedPawn != null && selectedFaction!=null))
             if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
             {
                 Find.WindowStack.Add(new FloatMenu(options));
@@ -339,7 +337,7 @@ public static partial class PawnEditor
         PawnEditor.needToRecacheNullFactionPawns = true;
         List<Pawn> noFPawns = PawnEditor_PawnsFinder.GetHumanPawnsWithoutFaction();
         CheckChangeTabGroup();
-        TabWorker_FactionOverview.RecachePawnsWithNullFaction(noFPawns);
+        TabWorker_FactionOverview.RecachePawnsWithPawnList(noFPawns);
         TabWorker_AnimalMech.Notify_PawnAdded(selectedCategory);
 
         List<Pawn> pawns;

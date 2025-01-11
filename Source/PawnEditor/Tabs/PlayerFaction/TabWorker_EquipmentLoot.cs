@@ -9,6 +9,7 @@ namespace PawnEditor;
 [HotSwappable]
 public class TabWorker_EquipmentLoot : TabWorker<Faction>
 {
+    //Added being able to edit the starting equipment (guns, armor, food, etc) to the faction overview - Equpment and Scattered Loot screen.
     private static UITable<Faction> startingThingsTable;
     private static UITable<Faction> equipmentTable;
     private static UITable<Faction> itemsTable;
@@ -87,11 +88,12 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                 new(rect => { EditUtility.EditButton(rect, thing, null, table); }),
                 new(TexButton.Delete, () =>
                 {
-                    //Find a way to take out "thing" from starting equipment
-                    //Starting equipment cannot be taken away from, only added to
                     thing.Destroy();
                     thing.Discard(true);
                     PawnEditor.Notify_PointsUsed();
+
+                    //This fixes not being able to delete items from the faction overview - Equipment and scattered loot menu.
+                    //It is still sort of buggy. Not all items show in the menu, and sometimes when you start with no items it gives you random ones. I (TTDG) experienced getting a book twice.
                     if (StartingThingsManager.GetStartingThingsNear().Contains(thing))
                     {
                         StartingThingsManager.RemoveItemFromStartingThingsNear(thing);
@@ -134,7 +136,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
         if (PawnEditor.Pregame)
         {
 
-
+            //show items on the equipment menu
             using (new TextBlock(GameFont.Tiny))
                 Widgets.Label(inRect.TakeBottomPart(Text.LineHeight), "PawnEditor.EquipmentLootDesc".Translate().Colorize(ColoredText.SubtleGrayColor));
             Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height =  startingThingsTable.Height + equipmentTable.Height+ lootTable.Height, width = inRect.width - 16f });
@@ -164,7 +166,6 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                         list.Clear();
                         list.AddRange(thingList.Things);
                         equipmentTable.ClearCache();
-                        //ClearCaches();
                     }
                 });
             yield return new SaveLoadItem<ThingList>("ScatteredLoot".Translate(), new(StartingThingsManager.GetStartingThingsFar(), "Loot"),
@@ -175,7 +176,6 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                         var list = StartingThingsManager.GetStartingThingsFar();
                         list.Clear();
                         list.AddRange(thingList.Things);
-                        //ClearCaches();
                         lootTable.ClearCache();
                     }
                 });
@@ -186,6 +186,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     {
         if (PawnEditor.Pregame)
         {
+            //add "Add starting things" button
             if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                     "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.StartingThings".Translate()))
                 Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThings(), ListingMenu_Items.ItemType.Starting,

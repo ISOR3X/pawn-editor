@@ -29,7 +29,7 @@ public class PawnEditorMod : Mod
             postfix: new(typeof(StartingThingsManager), nameof(StartingThingsManager.RestoreScenario)));
         Harm.Patch(AccessTools.Method(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DevToolStarterOnGUI)),
             new(GetType(), nameof(Keybind)));
-        
+
         LongEventHandler.ExecuteWhenFinished(delegate
         {
             foreach (var assembly in content.assemblies.loadedAssemblies)
@@ -78,6 +78,7 @@ public class PawnEditorMod : Mod
         if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
         listing.CheckboxLabeled("PawnEditor.EnforceHARRestrictions".Translate(), ref HARCompat.EnforceRestrictions,
             "PawnEditor.EnforceHARRestrictions.Desc".Translate());
+        //new mod setting: Hide non-colony factions on pre-game screen
         listing.CheckboxLabeled("PawnEditor.HideRandomFactions".Translate(), ref Settings.HideFactions, "PawnEditor.HideRandomFactions.Desc".Translate());
         listing.End();
     }

@@ -175,9 +175,9 @@ public static partial class SaveLoadUtility
 
             PawnEditor.Notify_PointsUsed();
 
+            //cleanup loading with random faction
             if (item is Pawn)
             {
-                //cleanup loading with random faction
 
                 if (UseRandomFactionOnSave)
                 {

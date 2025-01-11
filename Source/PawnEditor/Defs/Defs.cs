@@ -39,8 +39,6 @@ public static class TabGroupDefOf
     public static TabGroupDef AnimalMech ;
     public static TabGroupDef PlayerFaction ;
     public static TabGroupDef NPCFaction ;
-//    public static TabGroupDef NoFaction;
-
     static TabGroupDefOf()
     {
         DefOfHelper.EnsureInitializedInCtor(typeof(TabGroupDefOf));
@@ -117,7 +115,6 @@ public class TabDef : Def
 
     private void Initialize()
     {
-
         if (workerClass != null)
         {
             worker = Activator.CreateInstance(workerClass);

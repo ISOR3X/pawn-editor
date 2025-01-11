@@ -64,7 +64,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         if (cachedFaction == faction) RecachePawns(faction);
     }
 
-    public static void RecachePawnsWithNullFaction(List<Pawn> listOfPawns)
+    //used to recache the pawn list when viewing pawns without a faction
+    public static void RecachePawnsWithPawnList(List<Pawn> listOfPawns)
     {
 
             List<Pawn> noFPawns = listOfPawns;
@@ -111,10 +112,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         var sectionIdx = 0;
         for (var i = 0; i < pawns.Count; i++)
         {
-            if (!sections[i].NullOrEmpty()) 
-                sectionIdx = i;
-            if (!pawnsByLocation.TryGetValue(sections[sectionIdx], out var list))
-                pawnsByLocation[sections[sectionIdx]] = list = new();
+            if (!sections[i].NullOrEmpty()) sectionIdx = i;
+            if (!pawnsByLocation.TryGetValue(sections[sectionIdx], out var list)) pawnsByLocation[sections[sectionIdx]] = list = new();
             if (!searchWidget.filter.Matches(pawns[i].Name.ToStringFull)) 
                 continue;
 

@@ -43,6 +43,11 @@
     <PawnEditor.WithRandomFaction>With random faction</PawnEditor.WithRandomFaction>
     <PawnEditor.FactionHidden>Faction Hidden</PawnEditor.FactionHidden>
     <PawnEditor.NoFaction>No Faction</PawnEditor.NoFaction>
+    <PawnEditor.RandomFaction>Random Faction</PawnEditor.RandomFaction>
+    <PawnEditor.RandomAlly>Random Ally Faction</PawnEditor.RandomAlly>
+    <PawnEditor.RandomEnemy>Random Enemy Faction</PawnEditor.RandomEnemy>
+    <PawnEditor.RandomNonHostile>Random Non-Hostile Faction</PawnEditor.RandomNonHostile>
+    <PawnEditor.RandomNonColonist>Random Non-Colonist Faction</PawnEditor.RandomNonColonist>
 
 
     <!-- Edit Appearance -->

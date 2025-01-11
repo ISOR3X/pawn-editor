@@ -45,6 +45,8 @@ public static partial class SaveLoadUtility
             var data = xmlNode?.InnerText;
             
             if (data.NullOrEmpty()) refee = null;
+
+            //loads a random faction for the pawn if the pawn's faction is set to "Random"
             else if(typeName == "Faction")
             {
                 if (data == "Random")

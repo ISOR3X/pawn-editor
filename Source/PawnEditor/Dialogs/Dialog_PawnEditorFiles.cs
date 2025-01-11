@@ -57,8 +57,6 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
                     }, true));
                 }
 
-               
-
                 TooltipHandler.TipRegionByKey(rect2, deleteTipKey);
                 Text.Font = GameFont.Small;
                 var rect3 = new Rect(rect2.x - 100f, (rect.height - 36f) / 2f, 100f, 36f);
@@ -91,15 +89,12 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
         Widgets.EndScrollView();
         if (ShouldDoTypeInField) DoTypeInField(inRect.TopPartPixels(inRect.height - CloseButSize.y - 18f));
 
-
+        //Show tickbox for loading/saving with random faction only if you're saving a human.
         if (type.Contains("Humans"))
         {
-
             Rect useRandomCheckRect = new Rect(420, 625, 160, 30);
             Widgets.CheckboxLabeled(useRandomCheckRect, "PawnEditor.WithRandomFaction".Translate(), ref SaveLoadUtility.UseRandomFactionOnSave);
         }
-
-        
     }
 
     public override void ReloadFiles()

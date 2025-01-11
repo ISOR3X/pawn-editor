@@ -96,7 +96,6 @@ public class ListingMenu<T> : Window
 
     public override void DoWindowContents(Rect inRect)
     {
-
         DrawHeader(inRect.TakeTopPart(Text.LineHeightOf(GameFont.Medium)));
         inRect.yMin += 16f;
 
@@ -105,8 +104,6 @@ public class ListingMenu<T> : Window
         DrawBottomButtons(bottomButRect);
         DrawFooter(ref leftRect);
         DrawFootnote(leftRect.TakeBottomPart(Text.LineHeightOf(GameFont.Small) + 8f));
-
-
         DrawListing(leftRect);
 
         if (Listing.Filters != null && _showFilters)
