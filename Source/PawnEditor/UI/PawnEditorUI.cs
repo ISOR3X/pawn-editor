@@ -142,14 +142,14 @@ public static partial class PawnEditor
         var buttonRect = new Rect(randomRect);
         var options = GetRandomizationOptions().ToList();
 
+        Log.Message(tabGroup.tabs);
 
         //Add randomize options for factions
-        //Log.Message("Code runs up to here!");
-        if (!showFactionInfo && selectedPawn!=null)
+        if (!showFactionInfo && selectedPawn!=null && curTab == TabGroupDefOf.Humanlike.tabs[0])
         {
             //Add randomize all - including faction option
 
-            var randomizeAllWithFactionOption = curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + "all - including faction", () =>
+            var randomizeAllWithFactionOption = curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + "PawnEditor.AllIncludingFaction".Translate(), () =>
             {
                 foreach (var option in options)
                 {
@@ -160,25 +160,31 @@ public static partial class PawnEditor
 
                 }
                 lastRandomization = option;
-                //option.action();
                 Notify_PointsUsed();
 
-            })).ToList();
-
-            if(randomizeAllWithFactionOption.Any())
-                options.Add(randomizeAllWithFactionOption[0]);
-          //  Log.Message("Code also runs up to here!");
-
-            //Add randomize faction option
-            options.Add(new FloatMenuOption("PawnEditor.SelectRandomFaction".Translate(), () =>
-            {
                 List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
                 var chosenFaction = factions[Rand.Range(0, factions.Count - 1)];
+                selectedFaction = chosenFaction;
+                if (chosenFaction != selectedPawn.Faction) selectedPawn.SetFaction(chosenFaction);
+                DoRecache();
+            })).ToList();
 
-                selectedPawn.SetFaction(chosenFaction);
-            }));
+            if (randomizeAllWithFactionOption.Any())
+            {
+
+                options.Add(randomizeAllWithFactionOption[0]);
+
+                //Add randomize faction option
+                options.Add(new FloatMenuOption("PawnEditor.SelectRandomFaction".Translate(), () =>
+                {
+                    List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                    var chosenFaction = factions[Rand.Range(0, factions.Count - 1)];
+                    selectedFaction = chosenFaction;
+                    if (chosenFaction != selectedPawn.Faction) selectedPawn.SetFaction(chosenFaction);
+                    DoRecache();
+                }));
+            }
         }
-        //Log.Message("Outside the selectedPawn if");
 
 
         if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
@@ -331,20 +337,7 @@ public static partial class PawnEditor
     public static void RecachePawnListWithNoFactionPawns()
     {
         PawnEditor.needToRecacheNullFactionPawns = true;
-        //Log.Message("Default faction pawns:");
         List<Pawn> noFPawns = PawnEditor_PawnsFinder.GetHumanPawnsWithoutFaction();
-        /*foreach (var noFPawn in PawnsFinder.All_AliveOrDead)
-        {
-            if (noFPawn.AnimalOrWildMan() && !noFPawn.IsWildMan())
-                continue;
-
-            if (noFPawn.Faction == default)
-            {
-                Log.Message(noFPawn);
-                noFPawns.Add(noFPawn);
-            }
-        }*/
-        Log.Message("RecachePawnListWithNoFactionPawns");
         CheckChangeTabGroup();
         TabWorker_FactionOverview.RecachePawnsWithNullFaction(noFPawns);
         TabWorker_AnimalMech.Notify_PawnAdded(selectedCategory);
@@ -407,11 +400,9 @@ public static partial class PawnEditor
 
     private static void SetTabGroup(TabGroupDef def)
     {
-        Log.Message("Here");
         tabGroup = def;
         curTab = def?.tabs?.FirstOrDefault();
         tabs = def?.tabs?.Select(static tab => new TabRecord(tab.LabelCap, () => curTab = tab, () => curTab == tab)).ToList() ?? new List<TabRecord>();
-        Log.Message("and here");
     }
 
     public static void CheckChangeTabGroup()
@@ -442,9 +433,7 @@ public static partial class PawnEditor
 
 
         }
-            Log.Message("Before");
         RecacheWidgets();
-            Log.Message("After");
     }
 
     private static void RecacheWidgets()

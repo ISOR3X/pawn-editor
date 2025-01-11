@@ -71,7 +71,7 @@ public class Dialog_AppearanceEditor : Window
         closeOnAccept = false;
         closeOnCancel = true;
         forceCatchAcceptAndCancelEventEvenIfUnfocused = true;
-
+        
         if (HARCompat.Active)
             HARCompat.Notify_AppearanceEditorOpen(pawn);
     }

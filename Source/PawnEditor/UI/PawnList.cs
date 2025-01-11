@@ -92,7 +92,6 @@ public static partial class PawnEditor
                 {
                     selectedPawn = pawn;
                     showFactionInfo = false;
-                        Log.Message("Num 12");
                     CheckChangeTabGroup();
                 }
             }

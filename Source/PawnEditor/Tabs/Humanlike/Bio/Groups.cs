@@ -153,7 +153,7 @@ public partial class TabWorker_Bio_Humanlike
                     else
                     {
                         if (pawn.Faction != Find.FactionManager.ofPlayer)
-                            Widgets.Label(factionRect, "Faction Hidden");
+                            Widgets.Label(factionRect, "PawnEditor.FactionHidden".Translate());
                         else
                         {
                             DrawFactionLabel(factionRect, pawn);
@@ -169,17 +169,11 @@ public partial class TabWorker_Bio_Humanlike
             }
             else
             {
-                Widgets.Label(factionRect, "No Faction");
+                Widgets.Label(factionRect, "PawnEditor.NoFaction".Translate());
 
             }
                 inRect.yMin += 16;
 
-            //var factionTickboxRect = inRect.TakeTopPart(30);
-                //Draw random tickbox. "ticked" must not be defined in this method. It needs to be a higher scope so it knows what to change to.
-                //            Widgets.CheckboxLabeled(factionTickboxRect, "Assign Random on Game Start", ref ticked);
-              //  Widgets.DrawBox(factionTickboxRect);
-
-            
         }
 
         var empire = Faction.OfEmpire;

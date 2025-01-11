@@ -96,7 +96,7 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
         {
 
             Rect useRandomCheckRect = new Rect(420, 625, 160, 30);
-            Widgets.CheckboxLabeled(useRandomCheckRect, "With random faction", ref SaveLoadUtility.UseRandomFactionOnSave);
+            Widgets.CheckboxLabeled(useRandomCheckRect, "PawnEditor.WithRandomFaction".Translate(), ref SaveLoadUtility.UseRandomFactionOnSave);
         }
 
         

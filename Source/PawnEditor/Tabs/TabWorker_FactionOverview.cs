@@ -39,7 +39,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)
     {
-        Log.Message("GetSaveLoadData");
         if (PawnEditor.Pregame)
             yield return new SaveLoadItem<ColonistList>("ColonistsSection".Translate(), new(cachedPawns, cachedSections), new()
             {
@@ -68,7 +67,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     public static void RecachePawnsWithNullFaction(List<Pawn> listOfPawns)
     {
 
-        Log.Message("RecacheW/Null");
             List<Pawn> noFPawns = listOfPawns;
             colonistList ??= new();
             colonistList.UpdateCache(null, PawnCategory.Humans);
@@ -80,7 +78,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     public static void RecachePawns(Faction faction)
     {
 
-        Log.Message("RecachePawns");
         cachedFaction = faction;
         if (PawnEditor.Pregame)
         {
@@ -108,7 +105,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     /// <param name="sections"></param>
     private static void CreateLocationTables(List<Pawn> pawns, List<string> sections)
     {
-        Log.Message("CreateLocationTables");
        
 
         Dictionary<string, List<Pawn>> pawnsByLocation = new();
@@ -154,7 +150,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     private static IEnumerable<UITable<Faction>.Row.Item> GetItems(Pawn pawn)
     {
-        Log.Message("GetItems "+pawn.Name) ;
         yield return new(PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South, cameraZoom: 2f));
         yield return new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft);
         if (ModsConfig.BiotechActive) yield return new(pawn.genes.XenotypeIcon, pawn.genes.Xenotype?.index ?? pawn.genes.CustomXenotype.name.ToCharArray()[0]);
