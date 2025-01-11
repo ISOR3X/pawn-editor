@@ -38,6 +38,12 @@
     <PawnEditor.LoadPawn>Load pawn</PawnEditor.LoadPawn>
     <PawnEditor.LoadFaction>Load faction</PawnEditor.LoadFaction>
     <PawnEditor.Randomize>Randomize</PawnEditor.Randomize>
+    <PawnEditor.AllIncludingFaction>all - including faction</PawnEditor.AllIncludingFaction>
+    <PawnEditor.SelectRandomFaction>Randomize Faction</PawnEditor.SelectRandomFaction>
+    <PawnEditor.WithRandomFaction>With random faction</PawnEditor.WithRandomFaction>
+    <PawnEditor.FactionHidden>Faction Hidden</PawnEditor.FactionHidden>
+    <PawnEditor.NoFaction>No Faction</PawnEditor.NoFaction>
+
 
     <!-- Edit Appearance -->
     <PawnEditor.EditAppearance>Edit appearance</PawnEditor.EditAppearance>
@@ -179,9 +185,9 @@
     <PawnEditor.IsPermanent>Is permanent</PawnEditor.IsPermanent>
     <PawnEditor.BodyPart>Body part</PawnEditor.BodyPart>
 
+
     <!-- Unsorted -->
     <PawnEditor.StartingThings>starting things</PawnEditor.StartingThings>
-    <PawnEditor.SelectRandomFaction>Randomize Faction</PawnEditor.SelectRandomFaction>
     <PawnEditor.ScatteredLoot>scattered loot</PawnEditor.ScatteredLoot>
     <PawnEditor.EquipmentLootDesc>Equipment is spawned in the vicinity of colonists, scattered loot (or structures), are randomly spread around the map.</PawnEditor.EquipmentLootDesc>
     <PawnEditor.FactionRep>Faction reputation</PawnEditor.FactionRep>

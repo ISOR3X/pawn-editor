@@ -5,7 +5,7 @@
   <supportedVersions>
     <li>1.5</li>
   </supportedVersions>
-  <packageId>TreadTheDawnGames.PawnEditor</packageId>
+  <packageId>ISOREX.PawnEditor</packageId>
   <modVersion>1.0.9</modVersion>
   <modDependencies>
     <li>
