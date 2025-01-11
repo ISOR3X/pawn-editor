@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using PawnEditor.Utils;
 using RimWorld;
@@ -13,28 +14,32 @@ namespace PawnEditor;
 
 public static partial class PawnEditor
 {
+    static bool needToRecacheNullFactionPawns = false;
+    public static void DoRecache()
+    {
+        if(selectedFaction == null)
+        {
+            RecachePawnListWithNoFactionPawns();
+        }
+        else
+        {
+            RecachePawnList();
+        }
+    }
     private static void DoLeftPanel(Rect inRect, bool pregame)
     {
+
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.SelectedFaction".Translate());
 
-        if (/*selectedFaction == null ||*/ (pregame && selectedFaction != Faction.OfPlayer)) RecachePawnList();
+        if (selectedFaction == null && needToRecacheNullFactionPawns)
+        {
+            RecachePawnListWithNoFactionPawns();
+            needToRecacheNullFactionPawns = false;
+        }
+        else if (/*selectedFaction == null ||*/ (pregame && selectedFaction != Faction.OfPlayer)) RecachePawnList();
 
         if (!pregame && Widgets.ButtonText(inRect.TakeTopPart(30f), "PawnEditor.SelectFaction".Translate()))
         {
-            
-
-            
-
-            Log.Message("Default faction pawns:");
-            foreach (var noFPawn in PawnsFinder.All_AliveOrDead)
-            {
-                if (noFPawn.AnimalOrWildMan() && !noFPawn.IsWildMan())
-                    continue;
-
-                if(noFPawn.Faction == default)  
-                    Log.Message(noFPawn);
-            }
-
             IEnumerable<Faction> exFac = PawnEditor_PawnsFinder.GetAllFactionsContainingAtLeastOneHumanLike();
 
             List<FloatMenuOption> options = exFac
@@ -55,8 +60,8 @@ public static partial class PawnEditor
             {
                 selectedFaction = null;
                 selectedPawn = null;
-                
-                RecachePawnListWithNoFactionPawns();
+                needToRecacheNullFactionPawns = true;
+               // RecachePawnListWithNoFactionPawns();
                 //RecachePawnList();
                 CheckChangeTabGroup();
             }));
@@ -66,21 +71,30 @@ public static partial class PawnEditor
             inRect.yMin += 2;
         }
 
+
         var factionRect = inRect.TakeTopPart(54f).ContractedBy(3);
         Widgets.DrawOptionBackground(factionRect, showFactionInfo);
         MouseoverSounds.DoRegion(factionRect);
         var color = selectedFaction?.Color == null? Color.white : selectedFaction.Color;
+
         color.a = 0.2f;
         GUI.color = color;
 
-        if(selectedFaction.def.FactionIcon != null)
-        GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
+        if (selectedFaction != null)
+        {
+            if (selectedFaction.def.FactionIcon != null)
+                GUI.DrawTexture(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f), selectedFaction.def.FactionIcon);
+        }
         else
-        Widgets.DrawBox(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f));
+        {
+            Widgets.DrawBox(factionRect.ContractedBy(6).RightPart(0.25f).BottomPart(0.75f));
+        }
 
         GUI.color = Color.white;
-        using (new TextBlock(GameFont.Small))
-            Widgets.Label(factionRect.ContractedBy(5f), selectedFaction.Name == null ? "No faction" : selectedFaction.Name);
+
+            using (new TextBlock(GameFont.Small))
+                Widgets.Label(factionRect.ContractedBy(5f), selectedFaction == null ? "No faction" : selectedFaction.Name);
+        
         if (Widgets.ButtonInvisible(factionRect))
         {
             showFactionInfo = !showFactionInfo;
@@ -96,18 +110,23 @@ public static partial class PawnEditor
 
         using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), "PawnEditor.SelectedCategory".Translate());
 
-        if (Widgets.ButtonText(inRect.TakeTopPart(30f), selectedCategory.LabelCapPlural()))
-            Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
-               .Cast<PawnCategory>()
-               .Except(new() { PawnCategory.All })
-               .Select(category =>
-                    new FloatMenuOption(category.LabelCapPlural(), delegate
-                    {
-                        selectedCategory = category;
-                        RecachePawnList();
-                        CheckChangeTabGroup();
-                    }))
-               .ToList()));
+
+            if (Widgets.ButtonText(inRect.TakeTopPart(30f), selectedCategory.LabelCapPlural()))
+                Find.WindowStack.Add(new FloatMenu(Enum.GetValues(typeof(PawnCategory))
+                   .Cast<PawnCategory>()
+                   .Except(new() { PawnCategory.All })
+                   .Select(category =>
+                        new FloatMenuOption(category.LabelCapPlural(), delegate
+                        {
+                            selectedCategory = category;
+                            if (selectedFaction == null)
+                                RecachePawnListWithNoFactionPawns();
+                            else
+                                RecachePawnList();
+                            CheckChangeTabGroup();
+                        }))
+                   .ToList()));
+
 
         if (Widgets.ButtonText(inRect.TakeTopPart(25f), "Add".Translate().CapitalizeFirst()))
         {
@@ -165,16 +184,30 @@ public static partial class PawnEditor
             {
                 DeletePawn(pawn, pawns);
                 if(selectedFaction != null)
-                TabWorker_FactionOverview.RecachePawns(selectedFaction);
+                    TabWorker_FactionOverview.RecachePawns(selectedFaction);
                 else
                 {
-                    TabWorker_FactionOverview.RecachePawnsWithNullFaction();
+                    TabWorker_FactionOverview.RecachePawnsWithNullFaction(PawnEditor_PawnsFinder.GetHumanPawnsWithoutFaction());
                 }
             };
         }
         else
         {
             (pawns, sections, sectionCount) = PawnList.GetLists();
+                
+            if(selectedFaction == null)
+            {
+                pawns = PawnEditor_PawnsFinder.GetHumanPawnsWithoutFaction();
+                if (!pawns.Any())
+                {
+                    sections = new();
+                    sectionCount = 0;
+                }
+                
+            }
+
+            
+
             onReorder = PawnList.OnReorder;
             onDelete = pawn =>
             {

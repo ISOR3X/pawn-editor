@@ -26,12 +26,12 @@ namespace PawnEditor.Utils
                         existingFactions.Add(pawn.Faction);
                     }
                 }
+                
             }
-
             return existingFactions;
         }
 
-        public static List<Pawn> GetPawnsWithoutFaction()
+        public static List<Pawn> GetHumanPawnsWithoutFaction()
         {
             List<Pawn> pawnsWithoutFaction = new List<Pawn>();
 
@@ -40,7 +40,26 @@ namespace PawnEditor.Utils
                 if (pawn.AnimalOrWildMan() && !pawn.IsWildMan())
                     continue;
 
-                if (pawn.Faction == null || pawn.Faction == default)
+                if ((pawn.Faction == null || pawn.Faction == default) && pawn.Faction != Find.FactionManager.ofPlayer)
+                {
+
+                    if (!pawnsWithoutFaction.Contains(pawn))
+                    {
+                        pawnsWithoutFaction.Add(pawn);
+                    }
+                }
+            }
+
+            return pawnsWithoutFaction;
+        }
+        
+        public static List<Pawn> GetAllPawnsWithoutFaction()
+        {
+            List<Pawn> pawnsWithoutFaction = new List<Pawn>();
+
+            foreach (var pawn in PawnsFinder.All_AliveOrDead)
+            {
+                if ((pawn.Faction == null || pawn.Faction == default) && pawn.Faction != Find.FactionManager.ofPlayer)
                 {
 
                     if (!pawnsWithoutFaction.Contains(pawn))

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Utils;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
@@ -47,7 +48,7 @@ public class PawnListerBase
 
         foreach (var caravan in Find.WorldObjects.Caravans) AddLocation(caravan, caravan.PawnsListForReading);
 
-        AddLocation(Find.World, Find.WorldPawns.AllPawnsAliveOrDead);
+        AddLocation(Find.World, PawnEditor_PawnsFinder.GetHumanPawnsWithoutFaction());
         if (Find.GameInitData?.startingAndOptionalPawns != null)
         {
             AddLocation(Find.World, Find.GameInitData.startingAndOptionalPawns);

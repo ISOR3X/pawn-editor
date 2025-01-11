@@ -91,9 +91,15 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
         Widgets.EndScrollView();
         if (ShouldDoTypeInField) DoTypeInField(inRect.TopPartPixels(inRect.height - CloseButSize.y - 18f));
 
-        
 
-       
+        if (type.Contains("Humans"))
+        {
+
+            Rect useRandomCheckRect = new Rect(420, 625, 160, 30);
+            Widgets.CheckboxLabeled(useRandomCheckRect, "With random faction", ref SaveLoadUtility.UseRandomFactionOnSave);
+        }
+
+        
     }
 
     public override void ReloadFiles()

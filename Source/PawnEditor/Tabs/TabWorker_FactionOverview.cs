@@ -39,6 +39,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     public override IEnumerable<SaveLoadItem> GetSaveLoadItems(Faction faction)
     {
+        Log.Message("GetSaveLoadData");
         if (PawnEditor.Pregame)
             yield return new SaveLoadItem<ColonistList>("ColonistsSection".Translate(), new(cachedPawns, cachedSections), new()
             {
@@ -64,23 +65,11 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         if (cachedFaction == faction) RecachePawns(faction);
     }
 
-    public static void RecachePawnsWithNullFaction()
+    public static void RecachePawnsWithNullFaction(List<Pawn> listOfPawns)
     {
-            List<Pawn> noFPawns = new List<Pawn>();
-            Log.Message("Default faction pawns:");
-            foreach (var noFPawn in PawnsFinder.All_AliveOrDead)
-            {
-                if (noFPawn.AnimalOrWildMan() && !noFPawn.IsWildMan())
-                    continue;
 
-                if (noFPawn.Faction == default)
-                {
-                    Log.Message(noFPawn);
-                    noFPawns.Add(noFPawn);
-                }
-            }
-
-
+        Log.Message("RecacheW/Null");
+            List<Pawn> noFPawns = listOfPawns;
             colonistList ??= new();
             colonistList.UpdateCache(null, PawnCategory.Humans);
             (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
@@ -90,8 +79,8 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     }
     public static void RecachePawns(Faction faction)
     {
-        
 
+        Log.Message("RecachePawns");
         cachedFaction = faction;
         if (PawnEditor.Pregame)
         {
@@ -112,20 +101,34 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         CreateLocationTables(cachedPawns, cachedSections);
     }
 
+    /// <summary>
+    /// I think this is where the pawn items rows for the faction overview are made.
+    /// </summary>
+    /// <param name="pawns"></param>
+    /// <param name="sections"></param>
     private static void CreateLocationTables(List<Pawn> pawns, List<string> sections)
     {
+        Log.Message("CreateLocationTables");
+       
+
         Dictionary<string, List<Pawn>> pawnsByLocation = new();
         var sectionIdx = 0;
         for (var i = 0; i < pawns.Count; i++)
         {
-            if (!sections[i].NullOrEmpty()) sectionIdx = i;
-            if (!pawnsByLocation.TryGetValue(sections[sectionIdx], out var list)) pawnsByLocation[sections[sectionIdx]] = list = new();
-            if (!searchWidget.filter.Matches(pawns[i].Name.ToStringFull)) continue;
+            if (!sections[i].NullOrEmpty()) 
+                sectionIdx = i;
+            if (!pawnsByLocation.TryGetValue(sections[sectionIdx], out var list))
+                pawnsByLocation[sections[sectionIdx]] = list = new();
+            if (!searchWidget.filter.Matches(pawns[i].Name.ToStringFull)) 
+                continue;
+
             list.Add(pawns[i]);
         }
 
         pawnLocationTables = pawnsByLocation.SelectValues<string, List<Pawn>, UITable<Faction>>((heading, pawns) =>
             new(GetHeadings(heading), _ => pawns.Select(p => new UITable<Faction>.Row(GetItems(p), p.GetTooltip().text))));
+
+        
     }
 
     private static List<UITable<Faction>.Heading> GetHeadings(string heading)
@@ -151,6 +154,7 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
     private static IEnumerable<UITable<Faction>.Row.Item> GetItems(Pawn pawn)
     {
+        Log.Message("GetItems "+pawn.Name) ;
         yield return new(PawnEditor.GetPawnTex(pawn, new(25, 25), Rot4.South, cameraZoom: 2f));
         yield return new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft);
         if (ModsConfig.BiotechActive) yield return new(pawn.genes.XenotypeIcon, pawn.genes.Xenotype?.index ?? pawn.genes.CustomXenotype.name.ToCharArray()[0]);

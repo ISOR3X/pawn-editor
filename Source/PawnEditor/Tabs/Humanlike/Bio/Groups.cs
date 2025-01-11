@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Utils;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -32,11 +33,12 @@ public partial class TabWorker_Bio_Humanlike
             if (Widgets.ButtonText(factionRect, "PawnEditor.SelectFaction".Translate()))
             {
                 //create dropdown options
-                List<FloatMenuOption> options = Find.FactionManager.AllFactionsVisibleInViewOrder.Select(newFaction =>
+                List<FloatMenuOption> options = PawnEditor_PawnsFinder.GetAllFactionsContainingAtLeastOneHumanLike().Select(newFaction =>
                         new FloatMenuOption(newFaction.Name, delegate
                         {
                             if (newFaction != pawn.Faction) pawn.SetFaction(newFaction);
-                            PawnEditor.RecachePawnList();
+                            PawnEditor.selectedFaction = newFaction;
+                            PawnEditor.DoRecache();
                         }, newFaction.def.FactionIcon, newFaction.Color)).ToList();
 
                 
@@ -49,6 +51,9 @@ public partial class TabWorker_Bio_Humanlike
                         var randFac = Find.FactionManager.RandomEnemyFaction();
 
                         if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                        PawnEditor.selectedFaction = randFac;
+
+                        PawnEditor.DoRecache();
                     }));
                 }
                 if (Find.FactionManager.RandomAlliedFaction() != null)
@@ -60,6 +65,10 @@ public partial class TabWorker_Bio_Humanlike
                         var randFac = Find.FactionManager.RandomAlliedFaction();
 
                         if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                        PawnEditor.selectedFaction = randFac;
+
+                        PawnEditor.DoRecache();
+
                     }));
 
                 }
@@ -71,6 +80,10 @@ public partial class TabWorker_Bio_Humanlike
                         var randFac = Find.FactionManager.RandomNonHostileFaction();
 
                         if(randFac != pawn.Faction) pawn.SetFaction(randFac);
+                        PawnEditor.selectedFaction = randFac;
+
+                        PawnEditor.DoRecache();
+
                     }));
                 }
                 if (Find.FactionManager.RandomEnemyFaction() != null && Find.FactionManager.RandomNonHostileFaction() != null)
@@ -84,6 +97,10 @@ public partial class TabWorker_Bio_Humanlike
 
 
                         if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                        PawnEditor.selectedFaction = randFac;
+
+                        PawnEditor.DoRecache();
+
                     }));
                 }
                 if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 1)
@@ -96,6 +113,10 @@ public partial class TabWorker_Bio_Humanlike
                         var randFac = factions[Random.Range(0, factions.Count - 1)];
 
                         pawn.SetFaction(randFac);
+                        PawnEditor.selectedFaction = randFac;
+
+                        PawnEditor.DoRecache();
+
                     }));
                 }
                 if (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count > 1)
@@ -104,6 +125,10 @@ public partial class TabWorker_Bio_Humanlike
                     options.Add(new FloatMenuOption("No Faction", () =>
                     {
                         pawn.SetFaction(null);
+                        PawnEditor.selectedFaction = null;
+
+                        PawnEditor.DoRecache();
+
                     }));
                 }
 

@@ -35,10 +35,11 @@ public class TabGroupDef : Def
 [DefOf]
 public static class TabGroupDefOf
 {
-    public static TabGroupDef Humanlike;
-    public static TabGroupDef AnimalMech;
-    public static TabGroupDef PlayerFaction;
-    public static TabGroupDef NPCFaction;
+    public static TabGroupDef Humanlike ;
+    public static TabGroupDef AnimalMech ;
+    public static TabGroupDef PlayerFaction ;
+    public static TabGroupDef NPCFaction ;
+    public static TabGroupDef NoFaction;
 
     static TabGroupDefOf()
     {
