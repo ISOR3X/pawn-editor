@@ -142,19 +142,30 @@ public partial class TabWorker_Bio_Humanlike
                 factionRect.TakeLeftPart(leftWidth);
             if (pawn.Faction != null)
             {
-                Widgets.DrawHighlight(factionRect);
-                Widgets.DrawHighlightIfMouseover(factionRect);
-                if (Widgets.ButtonInvisible(factionRect)) Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
+                if (PawnEditor.Pregame)
+                {
 
+                    if (!PawnEditorMod.Settings.HideFactions)
+                    {
 
+                        DrawFactionLabel(factionRect, pawn);
+                    }
+                    else
+                    {
+                        if (pawn.Faction != Find.FactionManager.ofPlayer)
+                            Widgets.Label(factionRect, "Faction Hidden");
+                        else
+                        {
+                            DrawFactionLabel(factionRect, pawn);
+                        }
+                    }
 
+                }
+                else
+                {
+                    DrawFactionLabel(factionRect, pawn);
 
-                GUI.color = pawn.Faction.Color;
-                GUI.DrawTexture(factionRect.TakeLeftPart(30).ContractedBy(6), pawn.Faction.def.FactionIcon);
-                GUI.color = Color.white;
-                using (new TextBlock(TextAnchor.MiddleLeft))
-                    Widgets.Label(factionRect, pawn.Faction.Name);
-
+                }
             }
             else
             {
@@ -260,5 +271,18 @@ public partial class TabWorker_Bio_Humanlike
 
             inRect.yMin += 16;
         }
+    }
+
+    void DrawFactionLabel(Rect factionRect, Pawn pawn)
+    {
+        Widgets.DrawHighlight(factionRect);
+        Widgets.DrawHighlightIfMouseover(factionRect);
+        if (Widgets.ButtonInvisible(factionRect)) Find.WindowStack.Add(new Dialog_InfoCard(pawn.Faction));
+
+        GUI.color = pawn.Faction.Color;
+        GUI.DrawTexture(factionRect.TakeLeftPart(30).ContractedBy(6), pawn.Faction.def.FactionIcon);
+        GUI.color = Color.white;
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(factionRect, pawn.Faction.Name);
     }
 }

@@ -425,7 +425,7 @@ public static partial class PawnEditor
         }
         else if (showFactionInfo && selectedFaction == null)
         {
-            desiredTabGroup = TabGroupDefOf.NoFaction;
+            desiredTabGroup = TabGroupDefOf.NPCFaction;
         }
         else if (selectedPawn != null)
         {
@@ -484,7 +484,7 @@ public static partial class PawnEditor
             recache = true;
         }
 
-        if (recache || tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction || tabGroup == TabGroupDefOf.NoFaction)
+        if (recache || tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction )
         {
             CheckChangeTabGroup();
             DoRecache();
