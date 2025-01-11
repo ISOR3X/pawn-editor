@@ -47,8 +47,6 @@ public static partial class PawnEditor
                .Select(faction =>
                     new FloatMenuOption(faction.Name, delegate
                     {
-                        
-
                         selectedFaction = faction;
                         selectedPawn = null;
                         RecachePawnList();
@@ -65,18 +63,13 @@ public static partial class PawnEditor
                 CheckChangeTabGroup();
             }));
             Find.WindowStack.Add(new FloatMenu(options));
-
-
             inRect.yMin += 2;
         }
 
         var factionRect = inRect.TakeTopPart(54f).ContractedBy(3);
         Widgets.DrawOptionBackground(factionRect, showFactionInfo);
         MouseoverSounds.DoRegion(factionRect);
-        
-        //since selectedFaction may be null, we need to choose a default color.
-        var color = selectedFaction?.Color == null? Color.white : selectedFaction.Color;
-
+        var color = selectedFaction?.Color == null? Color.white : selectedFaction.Color; //since selectedFaction may be null, we need to choose a default color.
         color.a = 0.2f;
         GUI.color = color;
 
@@ -92,10 +85,9 @@ public static partial class PawnEditor
 
         GUI.color = Color.white;
 
-        //since selectedFaction may be null, we need a text to display if it is.
         using (new TextBlock(GameFont.Small))
-                Widgets.Label(factionRect.ContractedBy(5f), selectedFaction == null ? "PawnEditor.NoFaction".Translate().ToString() : selectedFaction.Name);
-        
+                Widgets.Label(factionRect.ContractedBy(5f), selectedFaction == null ? "PawnEditor.NoFaction".Translate().ToString() : selectedFaction.Name); //since selectedFaction may be null, we need a text to display if it is.
+
         if (Widgets.ButtonInvisible(factionRect))
         {
             showFactionInfo = !showFactionInfo;
@@ -120,11 +112,7 @@ public static partial class PawnEditor
                         new FloatMenuOption(category.LabelCapPlural(), delegate
                         {
                             selectedCategory = category;
-
-                            if (selectedFaction == null)
-                                RecachePawnListWithNoFactionPawns();
-                            else
-                                RecachePawnList();
+                            DoRecache();
                             CheckChangeTabGroup();
                         }))
                    .ToList()));
@@ -185,7 +173,6 @@ public static partial class PawnEditor
             {
                 DeletePawn(pawn, pawns);
                 DoRecache();
-
             };
         }
         else
@@ -201,10 +188,7 @@ public static partial class PawnEditor
                     sections = new();
                     sectionCount = 0;
                 }
-                
             }
-
-            
 
             onReorder = PawnList.OnReorder;
             onDelete = pawn =>
@@ -275,7 +259,6 @@ public static partial class PawnEditor
                 var pawn = new Pawn();
                 SaveLoadUtility.LoadItem(pawn, p => AddPawn(p, category).HandleResult(), typePostfix: category.ToString());
             })
-            
         };
 
         if (category == PawnCategory.Humans)
@@ -296,12 +279,9 @@ public static partial class PawnEditor
                     pawn.Name = bio.name;
                     pawn.story.Childhood = bio.childhood;
                     pawn.story.Adulthood = bio.adulthood;
-
-
                     return AddPawn(pawn, category);
                 }, "Add backer pawn"));
             }));
-        
         Find.WindowStack.Add(new FloatMenu(list));
     }
 
@@ -310,7 +290,6 @@ public static partial class PawnEditor
         return new ConditionalInfo(CanUsePoints(addedPawn), new SuccessInfo(() =>
         {
             if (Pregame)
-            {
                 if (category == PawnCategory.Humans)
                 {
                     Find.GameInitData.startingAndOptionalPawns.Add(addedPawn);
@@ -320,14 +299,11 @@ public static partial class PawnEditor
                 {
                     StartingThingsManager.AddPawn(category, addedPawn);
                 }
-            }
             else
-            {
                 addedPawn.teleporting = true;
-                Find.WorldPawns.PassToWorld(addedPawn, PawnDiscardDecideMode.KeepForever);
-                addedPawn.teleporting = false;
-                PawnList.UpdateCache(selectedFaction, category);
-            }
+            Find.WorldPawns.PassToWorld(addedPawn, PawnDiscardDecideMode.KeepForever);
+            addedPawn.teleporting = false;
+            PawnList.UpdateCache(selectedFaction, category);
 
             TabWorker_AnimalMech.Notify_PawnAdded(category);
             Notify_PointsUsed();

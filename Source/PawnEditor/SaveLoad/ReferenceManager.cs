@@ -21,8 +21,6 @@ public static partial class SaveLoadUtility
     /// <returns></returns>
     public static bool InterceptReferences(ref ILoadReferenceable refee, string label)
     {
-        
-
         if (!currentlyWorking) return true;
         if (savedItems.Contains(refee)) return true;
         if (Scribe.mode == LoadSaveMode.Saving)
@@ -37,11 +35,9 @@ public static partial class SaveLoadUtility
         }
         else if (Scribe.mode == LoadSaveMode.LoadingVars)
         {
-            //create xml C# object
+            //setup xml data
             XmlNode xmlNode = Scribe.loader.curXmlParent?[label];
-            //get the data Type from the XML Attribute: <tagName Attribute="AttributeValue">Value</tagName>
             var typeName = xmlNode?.Attributes?["Class"]?.Value;
-            //get the value set in xml
             var data = xmlNode?.InnerText;
             
             if (data.NullOrEmpty()) refee = null;
@@ -73,9 +69,6 @@ public static partial class SaveLoadUtility
                 if (type == null) return true;
                 refee = LoadReferenceData(data, type);
             }
-
-
-
         }
         else if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs
               && loadInfo.TryGetValue((Scribe.loader.curParent, Scribe.loader.curPathRelToParent + '/' + label), out var info))

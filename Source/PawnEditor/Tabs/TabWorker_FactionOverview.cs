@@ -64,21 +64,18 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         if (cachedFaction == faction) RecachePawns(faction);
     }
 
-    //used to recache the pawn list when viewing pawns without a faction
+    //Used to recache the pawn list when viewing pawns without a faction
     public static void RecachePawnsWithPawnList(List<Pawn> listOfPawns)
     {
-
-            List<Pawn> noFPawns = listOfPawns;
-            colonistList ??= new();
-            colonistList.UpdateCache(null, PawnCategory.Humans);
-            (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
-            cachedPawns = noFPawns;
-
-            CreateLocationTables(cachedPawns, cachedSections);
+        List<Pawn> noFPawns = listOfPawns;
+        colonistList ??= new();
+        colonistList.UpdateCache(null, PawnCategory.Humans);
+        (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
+        cachedPawns = noFPawns;
+        CreateLocationTables(cachedPawns, cachedSections);
     }
     public static void RecachePawns(Faction faction)
     {
-
         cachedFaction = faction;
         if (PawnEditor.Pregame)
         {
@@ -106,8 +103,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
     /// <param name="sections"></param>
     private static void CreateLocationTables(List<Pawn> pawns, List<string> sections)
     {
-       
-
         Dictionary<string, List<Pawn>> pawnsByLocation = new();
         var sectionIdx = 0;
         for (var i = 0; i < pawns.Count; i++)
@@ -122,8 +117,6 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
 
         pawnLocationTables = pawnsByLocation.SelectValues<string, List<Pawn>, UITable<Faction>>((heading, pawns) =>
             new(GetHeadings(heading), _ => pawns.Select(p => new UITable<Faction>.Row(GetItems(p), p.GetTooltip().text))));
-
-        
     }
 
     private static List<UITable<Faction>.Heading> GetHeadings(string heading)

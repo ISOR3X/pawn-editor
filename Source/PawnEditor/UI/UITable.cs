@@ -35,16 +35,12 @@ public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
     public Vector2 Position => cachedRect.position;
     public float Width => cachedRect.width;
     public float Height => rows.NullOrEmpty() ? Text.LineHeightOf(GameFont.Small) : Heading.Height + 2f + rows.Count * (rowHeight + 2f);
-
     private void RecacheRows()
     {
         rows = getRows(target).ToList();
         rows.Sort(this);
         firstHasIcon = rows.Any(row => row.Items.FirstOrDefault().HasIcon);
     }
-
-    
-
     private void RecacheWidths()
     {
         cachedWidths = headings.Select(h => h.Width).ToList();
@@ -61,8 +57,6 @@ public class UITable<T> : IComparer<UITable<T>.Row>, UIElement
                     cachedWidths[i] += availWidth / expandables;
         }
     }
-
-    
 
     public void ClearCache()
     {

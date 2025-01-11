@@ -104,6 +104,8 @@ public class ListingMenu<T> : Window
         DrawBottomButtons(bottomButRect);
         DrawFooter(ref leftRect);
         DrawFootnote(leftRect.TakeBottomPart(Text.LineHeightOf(GameFont.Small) + 8f));
+
+
         DrawListing(leftRect);
 
         if (Listing.Filters != null && _showFilters)

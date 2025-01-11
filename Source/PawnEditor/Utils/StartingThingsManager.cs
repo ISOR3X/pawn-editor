@@ -29,13 +29,9 @@ public static class StartingThingsManager
         removedParts.Clear();
 
         foreach (var part in Find.Scenario.AllParts)
-        {
             switch (part)
             {
                 case ScenPart_StartingAnimal:
-
-                    
-
                     startingAnimals.AddRange(part.PlayerStartingThings().OfType<Pawn>());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
@@ -54,7 +50,6 @@ public static class StartingThingsManager
                     break;
                 case ScenPart_ScatterThingsNearPlayerStart near:
                     {
-
                         var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
                         thing.stackCount = near.count;
                         startingThingsNear.Add(thing);
@@ -64,7 +59,6 @@ public static class StartingThingsManager
                     }
                 case ScenPart_ScatterThingsAnywhere far:
                     {
-
                         var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
                         thing.stackCount = far.count;
                         startingThingsFar.Add(thing);
@@ -73,7 +67,6 @@ public static class StartingThingsManager
                         break;
                     }
             }
-        }
 
         Find.Scenario.parts.Add(new ScenPart_StartingThingsFromPawnEditor()
         {
@@ -123,7 +116,6 @@ public static class StartingThingsManager
         else if (category == PawnCategory.Mechs)
             startingMechs.Add(pawn);
     }
-    
     public static void RemovePawn(PawnCategory category, Pawn pawn)
     {
         if (category == PawnCategory.Animals)

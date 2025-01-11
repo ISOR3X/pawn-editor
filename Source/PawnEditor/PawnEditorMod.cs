@@ -78,7 +78,6 @@ public class PawnEditorMod : Mod
         if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
         listing.CheckboxLabeled("PawnEditor.EnforceHARRestrictions".Translate(), ref HARCompat.EnforceRestrictions,
             "PawnEditor.EnforceHARRestrictions.Desc".Translate());
-        //new mod setting: Hide non-colony factions on pre-game screen
         listing.CheckboxLabeled("PawnEditor.HideRandomFactions".Translate(), ref Settings.HideFactions, "PawnEditor.HideRandomFactions.Desc".Translate());
         listing.End();
     }
@@ -156,7 +155,7 @@ public class PawnEditorMod : Mod
 
         if (Widgets.ButtonText(new(x, y, Page.BottomButSize.x, Page.BottomButSize.y), "PawnEditor.CharacterEditor".Translate()))
             Find.WindowStack.Add(new Dialog_PawnEditor_Pregame(__instance.DoNext));
-        
+
         return false;
     }
 

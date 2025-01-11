@@ -23,153 +23,125 @@ public partial class TabWorker_Bio_Humanlike
         var favColor = "PawnEditor.FavColor".Translate();
         var role = "Role".Translate().CapitalizeFirst();
         var leftWidth = UIUtility.ColumnWidth(3, faction, ideo, certainty, title, honor, favColor) + 4f;
-        // if (pawn.Faction != null)
+        var factionRect = inRect.TakeTopPart(30);
+        inRect.yMin += 4;
+        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(factionRect.TakeLeftPart(leftWidth), faction);
+
+        //Creates the dropdown menu of the factions. On selection, it calls a Lambda Func. In this case it selects the faction.
+        if (Widgets.ButtonText(factionRect, "PawnEditor.SelectFaction".Translate()))
         {
-            var factionRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
-            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(factionRect.TakeLeftPart(leftWidth), faction);
+            //create dropdown options
+            List<FloatMenuOption> options = PawnEditor_PawnsFinder.GetAllFactionsContainingAtLeastOneHumanLike().Select(newFaction =>
+                    new FloatMenuOption(newFaction.Name, delegate
+                    {
+                        if (newFaction != pawn.Faction) pawn.SetFaction(newFaction);
+                        PawnEditor.selectedFaction = newFaction;
+                        PawnEditor.DoRecache();
+                    }, newFaction.def.FactionIcon, newFaction.Color)).ToList();
 
-            //Creates the dropdown menu of the factions. On selection, it calls a Lambda Func. In this case it selects the faction.
-            if (Widgets.ButtonText(factionRect, "PawnEditor.SelectFaction".Translate()))
+            //Create a new option for each of the random faction selectors
+            var randomAllyOption = new FloatMenuOption("PawnEditor.RandomAlly".Translate(), () =>
             {
-                //create dropdown options
-                List<FloatMenuOption> options = PawnEditor_PawnsFinder.GetAllFactionsContainingAtLeastOneHumanLike().Select(newFaction =>
-                        new FloatMenuOption(newFaction.Name, delegate
-                        {
-                            if (newFaction != pawn.Faction) pawn.SetFaction(newFaction);
-                            PawnEditor.selectedFaction = newFaction;
-                            PawnEditor.DoRecache();
-                        }, newFaction.def.FactionIcon, newFaction.Color)).ToList();
-                
-                
+                var randFac = Find.FactionManager.RandomAlliedFaction();
+                if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                PawnEditor.selectedFaction = randFac;
+                PawnEditor.DoRecache();
 
-                //Create a new option for each of the random faction selectors
-                    var randomAllyOption = new FloatMenuOption("PawnEditor.RandomAlly".Translate(), () =>
-                    {
+            });
+            randomAllyOption.Disabled = Find.FactionManager.RandomAlliedFaction() == null;
+            options.Add(randomAllyOption);
 
-                        var randFac = Find.FactionManager.RandomAlliedFaction();
-
-                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
-                        PawnEditor.selectedFaction = randFac;
-
-                        PawnEditor.DoRecache();
-
-                    });
-                    randomAllyOption.Disabled = Find.FactionManager.RandomAlliedFaction() == null;
-                    options.Add(randomAllyOption);
-
-                    var randomEnemyFactionOption = new FloatMenuOption("PawnEditor.RandomEnemy".Translate(), () =>
-                    {
-
-                        var randFac = Find.FactionManager.RandomEnemyFaction();
-
-                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
-                        PawnEditor.selectedFaction = randFac;
-
-                        PawnEditor.DoRecache();
-                    });
-                    randomEnemyFactionOption.Disabled = Find.FactionManager.RandomEnemyFaction() == null;
-                    options.Add(randomEnemyFactionOption);
-
-                    var randomNonHostileOption = new FloatMenuOption("PawnEditor.RandomNonHostile".Translate(), () =>
-                    {
-                        var randFac = Find.FactionManager.RandomNonHostileFaction();
-
-                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
-                        PawnEditor.selectedFaction = randFac;
-
-                        PawnEditor.DoRecache();
-
-                    });
-                    randomNonHostileOption.Disabled = Find.FactionManager.RandomNonHostileFaction() == null;
-                    options.Add(randomNonHostileOption);
-
-                    var randomNonColonistOption = new FloatMenuOption("PawnEditor.RandomNonColonist".Translate(), () =>
-                    {
-
-                        List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
-                        Faction randFac = factions[Random.Range(0, factions.Count - 1)];
-
-
-                        if (randFac != pawn.Faction) pawn.SetFaction(randFac);
-                        PawnEditor.selectedFaction = randFac;
-
-                        PawnEditor.DoRecache();
-
-                    });
-                    randomNonColonistOption.Disabled = !(Find.FactionManager.RandomEnemyFaction() != null && Find.FactionManager.RandomNonHostileFaction() != null);
-                options.Add(randomNonColonistOption) ;
-
-                //All factions including colony
-                    var randomOption = new FloatMenuOption("PawnEditor.RandomFaction".Translate(), () =>
-                    {
-                        List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
-                        factions.Add(Find.FactionManager.ofPlayer);
-                        var randFac = factions[Random.Range(0, factions.Count - 1)];
-
-                        pawn.SetFaction(randFac);
-                        PawnEditor.selectedFaction = randFac;
-
-                        PawnEditor.DoRecache();
-
-                    });
-                    randomOption.Disabled = (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count <= 1);
-                    options.Add(randomOption);
-
-                //add option to faction to null 
-                    options.Add(new FloatMenuOption("PawnEditor.NoFaction".Translate(), () =>
-                    {
-                        pawn.SetFaction(null);
-                        PawnEditor.selectedFaction = null;
-
-                        PawnEditor.DoRecache();
-
-                    }));
-
-                //add dropdown to window stack
-                Find.WindowStack.Add(new FloatMenu(options));
-            }
-
-            factionRect = inRect.TakeTopPart(30);
-            inRect.yMin += 4;
-            factionRect.TakeLeftPart(leftWidth);
-
-            //How to draw the faction label depending on mod options
-            if (pawn.Faction != null)
+            var randomEnemyFactionOption = new FloatMenuOption("PawnEditor.RandomEnemy".Translate(), () =>
             {
-                if (PawnEditor.Pregame)
+
+                var randFac = Find.FactionManager.RandomEnemyFaction();
+                if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                    PawnEditor.selectedFaction = randFac;
+                PawnEditor.DoRecache();
+            });
+            randomEnemyFactionOption.Disabled = Find.FactionManager.RandomEnemyFaction() == null;
+            options.Add(randomEnemyFactionOption);
+
+            var randomNonHostileOption = new FloatMenuOption("PawnEditor.RandomNonHostile".Translate(), () =>
+            {
+                var randFac = Find.FactionManager.RandomNonHostileFaction();
+
+                if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                    PawnEditor.selectedFaction = randFac;
+                PawnEditor.DoRecache();
+
+            });
+            randomNonHostileOption.Disabled = Find.FactionManager.RandomNonHostileFaction() == null;
+            options.Add(randomNonHostileOption);
+
+            var randomNonColonistOption = new FloatMenuOption("PawnEditor.RandomNonColonist".Translate(), () =>
+            {
+
+                List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                Faction randFac = factions[Random.Range(0, factions.Count - 1)];
+                if (randFac != pawn.Faction) pawn.SetFaction(randFac);
+                    PawnEditor.selectedFaction = randFac;
+                PawnEditor.DoRecache();
+
+            });
+            randomNonColonistOption.Disabled = !(Find.FactionManager.RandomEnemyFaction() != null && Find.FactionManager.RandomNonHostileFaction() != null);
+            options.Add(randomNonColonistOption);
+
+            //All factions including colony
+            var randomOption = new FloatMenuOption("PawnEditor.RandomFaction".Translate(), () =>
+            {
+                List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                factions.Add(Find.FactionManager.ofPlayer);
+                var randFac = factions[Random.Range(0, factions.Count - 1)];
+                pawn.SetFaction(randFac);
+                PawnEditor.selectedFaction = randFac;
+                PawnEditor.DoRecache();
+
+            });
+            randomOption.Disabled = (Find.FactionManager.AllFactionsVisibleInViewOrder.ToList().Count <= 1);
+            options.Add(randomOption);
+
+            //add option to faction to null 
+            options.Add(new FloatMenuOption("PawnEditor.NoFaction".Translate(), () =>
+            {
+                pawn.SetFaction(null);
+                PawnEditor.selectedFaction = null;
+                PawnEditor.DoRecache();
+            }));
+
+            //add dropdown to window stack
+            Find.WindowStack.Add(new FloatMenu(options));
+        }
+
+        factionRect = inRect.TakeTopPart(30);
+        inRect.yMin += 4;
+        factionRect.TakeLeftPart(leftWidth);
+
+        //How to draw the faction label depending on mod options
+        if (pawn.Faction != null)
+        {
+            if (PawnEditor.Pregame)
+            {
+                if (!PawnEditorMod.Settings.HideFactions)
                 {
-
-                    if (!PawnEditorMod.Settings.HideFactions)
-                    {
-
-                        DrawFactionLabel(factionRect, pawn);
-                    }
-                    else
-                    {
-                        if (pawn.Faction != Find.FactionManager.ofPlayer)
-                            Widgets.Label(factionRect, "PawnEditor.FactionHidden".Translate());
-                        else
-                        {
-                            DrawFactionLabel(factionRect, pawn);
-                        }
-                    }
-
+                    DrawFactionLabel(factionRect, pawn);
                 }
                 else
                 {
-                    DrawFactionLabel(factionRect, pawn);
-
+                    if (pawn.Faction != Find.FactionManager.ofPlayer) 
+                        Widgets.Label(factionRect, "PawnEditor.FactionHidden".Translate());
+                    else 
+                        DrawFactionLabel(factionRect, pawn);
                 }
-            }
-            else
-            {
-                Widgets.Label(factionRect, "PawnEditor.NoFaction".Translate());
 
             }
-            inRect.yMin += 16;
-
+            else 
+                DrawFactionLabel(factionRect, pawn);
         }
+        else 
+            Widgets.Label(factionRect, "PawnEditor.NoFaction".Translate());
+        
+        inRect.yMin += 16;
 
         var empire = Faction.OfEmpire;
         if (ModsConfig.RoyaltyActive && empire != null)
@@ -262,7 +234,6 @@ public partial class TabWorker_Bio_Humanlike
         }
     }
 
-    //Extracted drawing the faction label into its own Function for the Hidden Faction mod option
     void DrawFactionLabel(Rect factionRect, Pawn pawn)
     {
         Widgets.DrawHighlight(factionRect);

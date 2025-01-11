@@ -49,8 +49,6 @@ public static partial class SaveLoadUtility
         var type = typeof(T).Name;
         Find.WindowStack.Add(new Dialog_PawnEditorFiles_Save(typePostfix.NullOrEmpty() ? type : Path.Combine(type, typePostfix!), path =>
         {
-            
-
             currentlyWorking = true;
             currentItem = item as ILoadReferenceable;
             currentPawn = parentPawn;
@@ -64,15 +62,10 @@ public static partial class SaveLoadUtility
             Scribe.saver.FinalizeSaving();
             File.Delete(tempFile);
 
-            
-
             Scribe.saver.InitSaving(path, typePostfix.NullOrEmpty() ? type : type + "." + typePostfix);
             ScribeMetaHeaderUtility.WriteMetaHeader();
             item.ExposeData();
             Scribe.saver.FinalizeSaving();
-
-
-            
 
             savedItems.Clear();
             currentItem = null;
@@ -82,7 +75,7 @@ public static partial class SaveLoadUtility
 
             if (item is Pawn pawn) PawnEditor.SavePawnTex(pawn, Path.ChangeExtension(path, ".png"), Rot4.South);
 
-            //Overwrite saved faction with "Random"
+            //Overwrite saved faction with "Random" if setting is active
             if (item is Pawn)
             {
                 if (UseRandomFactionOnSave)

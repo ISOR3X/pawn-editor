@@ -9,7 +9,6 @@ namespace PawnEditor;
 [HotSwappable]
 public class TabWorker_EquipmentLoot : TabWorker<Faction>
 {
-    //Added being able to edit the starting equipment (guns, armor, food, etc) to the faction overview - Equpment and Scattered Loot screen.
     private static UITable<Faction> startingThingsTable;
     private static UITable<Faction> equipmentTable;
     private static UITable<Faction> itemsTable;
@@ -25,8 +24,6 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
         lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate().CapitalizeFirst()),
             _ => GetRows(StartingThingsManager.GetStartingThingsFar(), lootTable));
         itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(ColonyInventory.AllItemsInInventory(), itemsTable));
-
-
     }
 
     private List<UITable<Faction>.Heading> GetHeadings(string heading) =>
@@ -49,7 +46,6 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     /// <returns></returns>
     private IEnumerable<UITable<Faction>.Row> GetRows(List<Thing> things, UITable<Faction> table)
     {
-        
         for (var i = 0; i < things.Count; i++)
         {
             var thing = things[i];
@@ -92,8 +88,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                     thing.Discard(true);
                     PawnEditor.Notify_PointsUsed();
 
-                    //This fixes not being able to delete items from the faction overview - Equipment and scattered loot menu.
-                    //It is still sort of buggy. Not all items show in the menu, and sometimes when you start with no items it gives you random ones. I (TTDG) experienced getting a book twice.
+                    //remove thing from respective starting list
                     if (StartingThingsManager.GetStartingThingsNear().Contains(thing))
                     {
                         StartingThingsManager.RemoveItemFromStartingThingsNear(thing);
@@ -112,7 +107,6 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                     }
 
                     ClearCaches();
-                    
                 })
             };
 
@@ -122,7 +116,6 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
 
     public static void ClearCaches()
     {
-        
         equipmentTable.ClearCache();
         startingThingsTable.ClearCache();
         itemsTable.ClearCache();
