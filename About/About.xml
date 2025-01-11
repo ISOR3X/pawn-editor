@@ -27,8 +27,6 @@
 Pawn Editor is a new editor for your pawns inspired by great mods like Character Editor and Prepare Carefully.
 
 Your last colonist exerts her final breath as she dies. Not even her ultratech armor orarchotech implants could save your colony from... a rabbit? Tend to your pawns and shape them in a way that fits the story you had in mind.
-
-This mod is forked from ISOR3X's Pawn Editor, which can be found here: https://github.com/ISOR3X/pawn-editor
 </description>
   <modIconPath IgnoreIfNoMatchingField="True">ModIcon</modIconPath>
 </ModMetaData>
