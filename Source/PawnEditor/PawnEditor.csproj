@@ -90,6 +90,7 @@
     <Compile Include="Dialogs\ListingMenus\ListingMenu_Trait.cs" />
     <Compile Include="ModCompat\FacialAnimCompat.cs" />
     <Compile Include="ModCompat\HARCompat.cs" />
+    <Compile Include="ModCompat\VSECompat.cs" />
     <Compile Include="Tabs\AnimalMech\TabWorker_Bio_AnimalMech.cs" />
     <Compile Include="Tabs\Humanlike\Bio\BasicInfo.cs" />
     <Compile Include="Tabs\Humanlike\TabWorker_Gear.cs" />
