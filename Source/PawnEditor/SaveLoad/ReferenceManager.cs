@@ -13,6 +13,12 @@ public static partial class SaveLoadUtility
 {
     private static readonly Dictionary<(IExposable, string), (string, Type)> loadInfo = new();
 
+    /// <summary>
+    /// This is where Pawn Editor accesses the XML for saving and loading pawns. <paramref name="label"/> is the name of the xml node name, and <paramref name="refee"/> is the type of data loaded from that location.
+    /// </summary>
+    /// <param name="refee"></param>
+    /// <param name="label"></param>
+    /// <returns></returns>
     public static bool InterceptReferences(ref ILoadReferenceable refee, string label)
     {
         if (!currentlyWorking) return true;
@@ -29,10 +35,33 @@ public static partial class SaveLoadUtility
         }
         else if (Scribe.mode == LoadSaveMode.LoadingVars)
         {
+            //setup xml data
             XmlNode xmlNode = Scribe.loader.curXmlParent?[label];
             var typeName = xmlNode?.Attributes?["Class"]?.Value;
             var data = xmlNode?.InnerText;
+            
             if (data.NullOrEmpty()) refee = null;
+
+            //loads a random faction for the pawn if the pawn's faction is set to "Random"
+            else if(typeName == "Faction")
+            {
+                if (data == "Random")
+                {
+                    Faction faction;
+
+                    if(Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out faction, false))
+                    {
+                        refee = faction;
+                    }
+                }
+                else
+                {
+                    var type = typeName.NullOrEmpty() ? null : GenTypes.GetTypeInAnyAssembly(typeName);
+                    loadInfo.Add((Scribe.loader.curParent, Scribe.loader.curPathRelToParent + '/' + label), (data, type));
+                    if (type == null) return true;
+                    refee = LoadReferenceData(data, type);
+                }
+            }
             else
             {
                 var type = typeName.NullOrEmpty() ? null : GenTypes.GetTypeInAnyAssembly(typeName);

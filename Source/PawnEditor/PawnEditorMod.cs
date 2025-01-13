@@ -78,6 +78,7 @@ public class PawnEditorMod : Mod
         if (Settings.DontShowAgain.Count > 0 && listing.ButtonText("PawnEditor.ResetConfirmation".Translate())) Settings.DontShowAgain.Clear();
         listing.CheckboxLabeled("PawnEditor.EnforceHARRestrictions".Translate(), ref HARCompat.EnforceRestrictions,
             "PawnEditor.EnforceHARRestrictions.Desc".Translate());
+        listing.CheckboxLabeled("PawnEditor.HideRandomFactions".Translate(), ref Settings.HideFactions, "PawnEditor.HideRandomFactions.Desc".Translate());
         listing.End();
     }
 
@@ -131,6 +132,7 @@ public class PawnEditorMod : Mod
     public static bool AddEditorButton(Rect rect, Page_ConfigureStartingPawns __instance)
     {
         float x, y;
+        //moves button to left if biotech is active
         if (ModsConfig.BiotechActive)
         {
             Text.Font = GameFont.Small;
@@ -233,6 +235,7 @@ public class PawnEditorSettings : ModSettings
     public float PointLimit = 100000;
     public bool ShowOpenButton = true;
     public bool UseSilver;
+    public bool HideFactions;
 
     public override void ExposeData()
     {
@@ -243,6 +246,7 @@ public class PawnEditorSettings : ModSettings
         Scribe_Values.Look(ref ShowOpenButton, nameof(ShowOpenButton), true);
         Scribe_Values.Look(ref PointLimit, nameof(PointLimit));
         Scribe_Values.Look(ref UseSilver, nameof(UseSilver));
+        Scribe_Values.Look(ref HideFactions, nameof(HideFactions));
         Scribe_Values.Look(ref CountNPCs, nameof(CountNPCs));
         Scribe_Values.Look(ref HediffLocationLimit, nameof(HediffLocationLimit), HediffLocation.RecipeDef);
 

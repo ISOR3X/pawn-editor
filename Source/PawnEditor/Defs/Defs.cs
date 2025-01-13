@@ -39,7 +39,6 @@ public static class TabGroupDefOf
     public static TabGroupDef AnimalMech;
     public static TabGroupDef PlayerFaction;
     public static TabGroupDef NPCFaction;
-
     static TabGroupDefOf()
     {
         DefOfHelper.EnsureInitializedInCtor(typeof(TabGroupDefOf));

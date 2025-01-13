@@ -16,6 +16,9 @@ public static class StartingThingsManager
     private static readonly List<ScenPart> removedParts = new();
     private static Scenario cachedScenario;
 
+    /// <summary>
+    /// Load all items from the cached scenario into the static starting things lists, Starting, Near, and Far items, animals, and mechs.
+    /// </summary>
     public static void ProcessScenario()
     {
         startingAnimals.Clear();
@@ -34,36 +37,38 @@ public static class StartingThingsManager
                     removedParts.Add(part);
                     break;
                 case ScenPart_StartingMech:
+
                     startingMechs.AddRange(part.PlayerStartingThings().OfType<Pawn>());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
                     break;
                 case ScenPart_StartingThing_Defined:
+                    
                     startingThings.AddRange(part.PlayerStartingThings());
                     Find.Scenario.RemovePart(part);
                     removedParts.Add(part);
                     break;
                 case ScenPart_ScatterThingsNearPlayerStart near:
-                {
-                    var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
-                    thing.stackCount = near.count;
-                    startingThingsNear.Add(thing);
-                    Find.Scenario.RemovePart(part);
-                    removedParts.Add(part);
-                    break;
-                }
+                    {
+                        var thing = ThingMaker.MakeThing(near.thingDef, near.stuff);
+                        thing.stackCount = near.count;
+                        startingThingsNear.Add(thing);
+                        Find.Scenario.RemovePart(part);
+                        removedParts.Add(part);
+                        break;
+                    }
                 case ScenPart_ScatterThingsAnywhere far:
-                {
-                    var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
-                    thing.stackCount = far.count;
-                    startingThingsFar.Add(thing);
-                    Find.Scenario.RemovePart(part);
-                    removedParts.Add(part);
-                    break;
-                }
+                    {
+                        var thing = ThingMaker.MakeThing(far.thingDef, far.stuff);
+                        thing.stackCount = far.count;
+                        startingThingsFar.Add(thing);
+                        Find.Scenario.RemovePart(part);
+                        removedParts.Add(part);
+                        break;
+                    }
             }
 
-        Find.Scenario.parts.Add(new ScenPart_StartingThingsFromPawnEditor
+        Find.Scenario.parts.Add(new ScenPart_StartingThingsFromPawnEditor()
         {
             def = new()
             {
@@ -111,7 +116,26 @@ public static class StartingThingsManager
         else if (category == PawnCategory.Mechs)
             startingMechs.Add(pawn);
     }
+    public static void RemovePawn(PawnCategory category, Pawn pawn)
+    {
+        if (category == PawnCategory.Animals)
+            startingAnimals.Remove(pawn);
+        else if (category == PawnCategory.Mechs)
+            startingMechs.Remove(pawn);
+    }
 
+    public static void RemoveItemFromStartingThingsNear(Thing thing)
+    {
+        startingThingsNear.Remove(thing);
+    }
+    public static void RemoveItemFromStartingThingsFar(Thing thing)
+    {
+        startingThingsFar.Remove(thing);
+    }public static void RemoveItemFromStartingThings(Thing thing)
+    {
+        startingThings.Remove(thing);
+    }
+    public static List<Thing> GetStartingThings() => startingThings;
     public static List<Thing> GetStartingThingsNear() => startingThingsNear;
     public static List<Thing> GetStartingThingsFar() => startingThingsFar;
 

@@ -46,16 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer">
-      <Version>2.2.1</Version>
+      <Version>2.3.0</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Krafs.Rimworld.Ref">
+      <Version>1.5.4297</Version>
+    </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.3.3</Version>
-      <ExcludeAssets>runtime</ExcludeAssets>
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.5.4066">
       <ExcludeAssets>runtime</ExcludeAssets>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -122,6 +121,7 @@
     <Compile Include="Utils\Listing_Thing.cs" />
     <Compile Include="Utils\Listing_TreeThing.cs" />
     <Compile Include="Utils\ColonyInventory.cs" />
+    <Compile Include="Utils\PawnEditor-PawnsFinder.cs" />
     <Compile Include="Utils\PawnLister.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveLoad\ReferenceManager.cs" />

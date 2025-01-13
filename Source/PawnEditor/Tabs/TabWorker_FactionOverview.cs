@@ -64,6 +64,16 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         if (cachedFaction == faction) RecachePawns(faction);
     }
 
+    //Used to recache the pawn list when viewing pawns without a faction
+    public static void RecachePawnsWithPawnList(List<Pawn> listOfPawns)
+    {
+        List<Pawn> noFPawns = listOfPawns;
+        colonistList ??= new();
+        colonistList.UpdateCache(null, PawnCategory.Humans);
+        (cachedPawns, cachedSections, cachedSectionCount) = colonistList.GetLists();
+        cachedPawns = noFPawns;
+        CreateLocationTables(cachedPawns, cachedSections);
+    }
     public static void RecachePawns(Faction faction)
     {
         cachedFaction = faction;
@@ -86,6 +96,11 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         CreateLocationTables(cachedPawns, cachedSections);
     }
 
+    /// <summary>
+    /// I think this is where the pawn items rows for the faction overview are made.
+    /// </summary>
+    /// <param name="pawns"></param>
+    /// <param name="sections"></param>
     private static void CreateLocationTables(List<Pawn> pawns, List<string> sections)
     {
         Dictionary<string, List<Pawn>> pawnsByLocation = new();
@@ -94,7 +109,9 @@ public abstract class TabWorker_FactionOverview : TabWorker<Faction>
         {
             if (!sections[i].NullOrEmpty()) sectionIdx = i;
             if (!pawnsByLocation.TryGetValue(sections[sectionIdx], out var list)) pawnsByLocation[sections[sectionIdx]] = list = new();
-            if (!searchWidget.filter.Matches(pawns[i].Name.ToStringFull)) continue;
+            if (!searchWidget.filter.Matches(pawns[i].Name.ToStringFull)) 
+                continue;
+
             list.Add(pawns[i]);
         }
 

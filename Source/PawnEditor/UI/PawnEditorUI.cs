@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using LudeonTK;
+using PawnEditor.Utils;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -90,7 +91,7 @@ public static partial class PawnEditor
         {
             if (curTab == widgetTab)
                 DoWidgets(inRect);
-            else if (showFactionInfo)
+            else if (showFactionInfo && selectedFaction != null)
                 curTab.DrawTabContents(inRect, selectedFaction);
             else if (selectedPawn != null)
                 curTab.DrawTabContents(inRect, selectedPawn);
@@ -135,6 +136,46 @@ public static partial class PawnEditor
 
         var buttonRect = new Rect(randomRect);
         var options = GetRandomizationOptions().ToList();
+
+        //Add randomize options for factions
+        if (!showFactionInfo && selectedPawn!=null && curTab == TabGroupDefOf.Humanlike.tabs[0])
+        {
+            //Add randomize all - including faction option
+            var randomizeAllWithFactionOption = curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + "PawnEditor.AllIncludingFaction".Translate(), () =>
+            {
+                foreach (var option in options)
+                {
+                    if (option.Label.Contains("all"))
+                        continue;
+
+                    option.action();
+
+                }
+                lastRandomization = option;
+                Notify_PointsUsed();
+                List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                var chosenFaction = factions[Rand.Range(0, factions.Count - 1)];
+                selectedFaction = chosenFaction;
+                if (chosenFaction != selectedPawn.Faction) selectedPawn.SetFaction(chosenFaction);
+                DoRecache();
+            })).ToList();
+
+            if (randomizeAllWithFactionOption.Any())
+            {
+                options.Add(randomizeAllWithFactionOption[0]);
+
+                //Add randomize faction option
+                options.Add(new FloatMenuOption("PawnEditor.SelectRandomFaction".Translate(), () =>
+                {
+                    List<Faction> factions = Find.FactionManager.AllFactionsVisibleInViewOrder.ToList();
+                    var chosenFaction = factions[Rand.Range(0, factions.Count - 1)];
+                    selectedFaction = chosenFaction;
+                    if (chosenFaction != selectedPawn.Faction) selectedPawn.SetFaction(chosenFaction);
+                    DoRecache();
+                }));
+            }
+        }
+
         if (lastRandomization != null && Widgets.ButtonImageWithBG(randomRect.TakeRightPart(20), TexUI.RotRightTex, new Vector2(12, 12)))
         {
             var label = lastRandomization.Label.ToLower();
@@ -143,14 +184,13 @@ public static partial class PawnEditor
             randomRect.TakeRightPart(1);
         }
 
-        if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
-        {
-            if (options.Count > 0)
+        //Don't show the randomize button if no randomization options exist or you can't edit the faction overview
+        if (options.Count > 0 && (selectedPawn != null && selectedFaction!=null))
+            if (Widgets.ButtonText(randomRect, "Randomize".Translate()))
+            {
                 Find.WindowStack.Add(new FloatMenu(options));
-            else
-                Messages.Message("PawnEditor.NoRandomOptions".Translate(), MessageTypeDefOf.RejectInput, false);
-        }
-
+            }
+  
         buttonRect.x -= 5 + buttonRect.width;
 
         if (Widgets.ButtonText(buttonRect, "Save".Translate()))
@@ -175,7 +215,6 @@ public static partial class PawnEditor
             Messages.Message("PawnEditor.NegativePoints".Translate(), MessageTypeDefOf.RejectInput, false);
             return false;
         }
-
         return true;
     }
 
@@ -230,8 +269,6 @@ public static partial class PawnEditor
                         if (thing != null && GenPlace.TryFindPlaceSpotNear(thing.Position, Rot4.South, thing.MapHeld, pawn, false, out var spot))
                             GenSpawn.Spawn(pawn, spot, thing.MapHeld, Rot4.South, WipeMode.VanishOrMoveAside, true);
                     }
-
-
                     if (Pregame) Find.GameInitData.startingPossessions.Add(pawn, new());
                     // TabWorker<Pawn>.Notify_OpenedDialog(); should recache tables?
                 }
@@ -265,13 +302,41 @@ public static partial class PawnEditor
     private static IEnumerable<FloatMenuOption> GetRandomizationOptions()
     {
         if (curTab == null) return Enumerable.Empty<FloatMenuOption>();
-        return (showFactionInfo ? curTab.GetRandomizationOptions(selectedFaction) : curTab.GetRandomizationOptions(selectedPawn))
-            .Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
+        if (showFactionInfo)
+        {
+            return curTab.GetRandomizationOptions(selectedFaction);
+        }
+        else
+        {
+            List<FloatMenuOption> options = curTab.GetRandomizationOptions(selectedPawn).Select(option => new FloatMenuOption("PawnEditor.Randomize".Translate() + " " + option.Label.ToLower(), () =>
             {
                 lastRandomization = option;
                 option.action();
                 Notify_PointsUsed();
-            }));
+                
+            })).ToList();
+            return options as IEnumerable<FloatMenuOption>;
+        }
+    }
+
+    //Used for viewing null-faction pawns
+    public static void RecachePawnListWithNoFactionPawns()
+    {
+        PawnEditor.needToRecacheNullFactionPawns = true;
+        List<Pawn> noFPawns = PawnEditor_PawnsFinder.GetHumanPawnsWithoutFaction();
+        CheckChangeTabGroup();
+        TabWorker_FactionOverview.RecachePawnsWithPawnList(noFPawns);
+        TabWorker_AnimalMech.Notify_PawnAdded(selectedCategory);
+        List<Pawn> pawns;
+        PawnList.UpdateCacheWithNullFaction();
+        pawns = noFPawns;
+
+        if (selectedPawn == null || !pawns.Contains(selectedPawn))
+        {
+            selectedPawn = pawns.FirstOrDefault();
+            CheckChangeTabGroup();
+        }
+        PortraitsCache.Clear();
     }
 
     public static void RecachePawnList()
@@ -326,11 +391,17 @@ public static partial class PawnEditor
     {
         TabGroupDef desiredTabGroup;
 
-        if (showFactionInfo && selectedFaction != null) desiredTabGroup = selectedFaction.IsPlayer ? TabGroupDefOf.PlayerFaction : TabGroupDefOf.NPCFaction;
-        else if (selectedPawn != null) desiredTabGroup = selectedCategory == PawnCategory.Humans ? TabGroupDefOf.Humanlike : TabGroupDefOf.AnimalMech;
+        if (showFactionInfo && selectedFaction != null)
+            desiredTabGroup = selectedFaction.IsPlayer ? TabGroupDefOf.PlayerFaction : TabGroupDefOf.NPCFaction;
+        else if (showFactionInfo && selectedFaction == null)
+            desiredTabGroup = TabGroupDefOf.NPCFaction;
+        else if (selectedPawn != null)
+            desiredTabGroup = selectedCategory == PawnCategory.Humans ? TabGroupDefOf.Humanlike : TabGroupDefOf.AnimalMech;
         else desiredTabGroup = null;
 
-        if (desiredTabGroup != tabGroup) SetTabGroup(desiredTabGroup);
+        if (desiredTabGroup != tabGroup)
+            SetTabGroup(desiredTabGroup);
+
         RecacheWidgets();
     }
 
@@ -371,10 +442,10 @@ public static partial class PawnEditor
             recache = true;
         }
 
-        if (recache || tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction)
+        if (recache || tabGroup == TabGroupDefOf.PlayerFaction || tabGroup == TabGroupDefOf.NPCFaction )
         {
             CheckChangeTabGroup();
-            RecachePawnList();
+            DoRecache();
         }
     }
 

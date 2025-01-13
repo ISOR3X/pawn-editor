@@ -26,6 +26,7 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
         ReloadFiles();
     }
 
+    //Create the Save/Load Pawn window
     public override void DoWindowContents(Rect inRect)
     {
         var vector = new Vector2(inRect.width - 16f, 40f);
@@ -85,9 +86,15 @@ public abstract class Dialog_PawnEditorFiles : Dialog_FileList
             num2 += vector.y;
             num3++;
         }
-
         Widgets.EndScrollView();
         if (ShouldDoTypeInField) DoTypeInField(inRect.TopPartPixels(inRect.height - CloseButSize.y - 18f));
+
+        //Show tickbox for loading/saving with random faction only if you're saving a human.
+        if (type.Contains("Humans"))
+        {
+            Rect useRandomCheckRect = new Rect(420, 625, 160, 30);
+            Widgets.CheckboxLabeled(useRandomCheckRect, "PawnEditor.WithRandomFaction".Translate(), ref SaveLoadUtility.UseRandomFactionOnSave);
+        }
     }
 
     public override void ReloadFiles()

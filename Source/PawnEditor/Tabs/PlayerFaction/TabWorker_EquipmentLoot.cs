@@ -9,6 +9,7 @@ namespace PawnEditor;
 [HotSwappable]
 public class TabWorker_EquipmentLoot : TabWorker<Faction>
 {
+    private static UITable<Faction> startingThingsTable;
     private static UITable<Faction> equipmentTable;
     private static UITable<Faction> itemsTable;
     private static UITable<Faction> lootTable;
@@ -19,6 +20,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     {
         base.Initialize();
         equipmentTable = new(GetHeadings("Equipment".Translate()), _ => GetRows(StartingThingsManager.GetStartingThingsNear(), equipmentTable));
+        startingThingsTable = new(GetHeadings("PawnEditor.StartingThings".Translate().CapitalizeFirst()), _ => GetRows(StartingThingsManager.GetStartingThings(), startingThingsTable));
         lootTable = new(GetHeadings("PawnEditor.ScatteredLoot".Translate().CapitalizeFirst()),
             _ => GetRows(StartingThingsManager.GetStartingThingsFar(), lootTable));
         itemsTable = new(GetHeadings("ItemsTab".Translate()), _ => GetRows(ColonyInventory.AllItemsInInventory(), itemsTable));
@@ -36,6 +38,12 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
             new(30)
         };
 
+    /// <summary>
+    /// Gets the rows of the starting item tables. The thing that shows "Items, Weight, Hitpoints, Market value, Count, Edit button, delete button.
+    /// </summary>
+    /// <param name="things"></param>
+    /// <param name="table"></param>
+    /// <returns></returns>
     private IEnumerable<UITable<Faction>.Row> GetRows(List<Thing> things, UITable<Faction> table)
     {
         for (var i = 0; i < things.Count; i++)
@@ -79,6 +87,25 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
                     thing.Destroy();
                     thing.Discard(true);
                     PawnEditor.Notify_PointsUsed();
+
+                    //remove thing from respective starting list
+                    if (StartingThingsManager.GetStartingThingsNear().Contains(thing))
+                    {
+                        StartingThingsManager.RemoveItemFromStartingThingsNear(thing);
+                    }
+                    else if (StartingThingsManager.GetStartingThingsFar().Contains(thing))
+                    {
+                        StartingThingsManager.RemoveItemFromStartingThingsFar(thing);
+                    }
+                    else if (StartingThingsManager.GetStartingThings().Contains(thing))
+                    {
+                        StartingThingsManager.RemoveItemFromStartingThings(thing);
+                    }
+                    else
+                    {
+                        Log.Error("Thing was not found in near, far, or starting things.");
+                    }
+
                     ClearCaches();
                 })
             };
@@ -90,6 +117,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     public static void ClearCaches()
     {
         equipmentTable.ClearCache();
+        startingThingsTable.ClearCache();
         itemsTable.ClearCache();
         lootTable.ClearCache();
     }
@@ -100,11 +128,14 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
 
         if (PawnEditor.Pregame)
         {
+
+            //show items on the equipment menu
             using (new TextBlock(GameFont.Tiny))
                 Widgets.Label(inRect.TakeBottomPart(Text.LineHeight), "PawnEditor.EquipmentLootDesc".Translate().Colorize(ColoredText.SubtleGrayColor));
-            Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height = equipmentTable.Height + lootTable.Height, width = inRect.width - 16f });
-            equipmentTable.OnGUI(inRect.TopHalf() with { width = inRect.width - 16f }, faction);
-            lootTable.OnGUI(inRect.BottomHalf() with { width = inRect.width - 16f }, faction);
+            Widgets.BeginScrollView(inRect, ref scrollPosition, inRect with { height =  startingThingsTable.Height + equipmentTable.Height+ lootTable.Height, width = inRect.width - 16f });
+            startingThingsTable.OnGUI(inRect.TakeTopPart(startingThingsTable.Height) with { width = inRect.width - 16f }, faction);
+            equipmentTable.OnGUI(inRect.TakeTopPart(equipmentTable.Height) with { width = inRect.width - 16f }, faction);
+            lootTable.OnGUI(inRect.TakeTopPart(lootTable.Height) with { width = inRect.width - 16f }, faction);
             Widgets.EndScrollView();
         }
         else
@@ -148,12 +179,19 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
     {
         if (PawnEditor.Pregame)
         {
+            //add "Add starting things" button
+            if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
+                    "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.StartingThings".Translate()))
+                Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThings(), ListingMenu_Items.ItemType.Starting,
+                    () => startingThingsTable.ClearCache(),
+                    "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.StartingThings".Translate()));
+
             if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                     "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate()))
                 Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsNear(), ListingMenu_Items.ItemType.Starting,
                     () => equipmentTable.ClearCache(),
                     "Add".Translate().CapitalizeFirst() + " " + "Equipment".Translate()));
-
+            
             if (Widgets.ButtonText(inRect.TakeLeftPart(150).ContractedBy(5),
                     "Add".Translate().CapitalizeFirst() + " " + "PawnEditor.ScatteredLoot".Translate()))
                 Find.WindowStack.Add(new ListingMenu_Items(StartingThingsManager.GetStartingThingsFar(), ListingMenu_Items.ItemType.Starting,
