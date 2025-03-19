@@ -1,4 +1,4 @@
-Steer the story in the direction you want it to go. Heal injuries, teleport missing pawns back, change backstories thatdo not fit the narrative.
+Steer the story in the direction you want it to go. Heal injuries, teleport missing pawns back, change backstories that do not fit the narrative.
 
 Pawn Editor is a new editor for your pawns inspired by great mods like Character Editor and Prepare Carefully.
 
