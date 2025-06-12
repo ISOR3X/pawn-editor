@@ -57,7 +57,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker_FactionOverview
             var skillDef = skillsForSummary[i];
             var r = new Rect(inRect.x + columnWidth * Mathf.FloorToInt((float)i / skillsPerColumn), inRect.y + 24 * (i % skillsPerColumn), columnWidth, 24);
 
-            var skillRecord = new SkillRecord { cachedTotallyDisabled = BoolUnknown.True, def = skillsForSummary[i], cachedPermanentlyDisabled = BoolUnknown.True};
+            var skillRecord = new SkillRecord { cachedTotallyDisabled = BoolUnknown.True, def = skillsForSummary[i], cachedPermanentlyDisabled = BoolUnknown.True };
             var tooltipPrefix = "";
 
             var pawn = FindBestSkillOwner(skillDef, faction);
@@ -76,7 +76,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker_FactionOverview
         var map = Find.CurrentMap ?? Find.AnyPlayerHomeMap;
         var pawns = PawnEditor.Pregame
             ? Find.GameInitData.startingAndOptionalPawns
-            : map?.mapPawns?.PawnsInFaction(faction) ?? PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists;
+            : map?.mapPawns.PawnsInFaction(faction) ?? PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;//;AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists;
         pawns.RemoveAll(pawn => pawn.skills == null);
         if (pawns.NullOrEmpty()) return null;
         var pawn = pawns[0];

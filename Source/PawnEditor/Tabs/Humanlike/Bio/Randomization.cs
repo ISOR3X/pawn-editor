@@ -89,6 +89,7 @@ public partial class TabWorker_Bio_Humanlike
 
         pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
         pawn.story.headType = headTypes.RandomElement();
+        pawn.gender = Rand.Bool ? Gender.Male : Gender.Female;
 
         pawn.drawer.renderer.SetAllGraphicsDirty();
         PortraitsCache.SetDirty(pawn);
