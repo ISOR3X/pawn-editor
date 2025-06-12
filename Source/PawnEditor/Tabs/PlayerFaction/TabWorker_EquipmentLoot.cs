@@ -43,7 +43,7 @@ public class TabWorker_EquipmentLoot : TabWorker<Faction>
             var thing = things[i];
             var items = new List<UITable<Faction>.Row.Item>
             {
-                new(thing.LabelCapNoCount, Widgets.GetIconFor(thing, new(25, 25), Rot4.South, false, out _, out _, out _, out _), i),
+                new(thing.LabelCapNoCount, Widgets.GetIconFor(thing, new(25, 25), Rot4.South, false, out _, out _, out _, out _, out _), i),
                 new(thing.GetStatValue(StatDefOf.Mass).ToStringMass(), (int)thing.GetStatValue(StatDefOf.Mass)),
                 new(((float)thing.HitPoints / thing.MaxHitPoints).ToStringPercent(), thing.HitPoints / thing.MaxHitPoints),
                 new(thing.MarketValue.ToStringMoney(), (int)thing.MarketValue),

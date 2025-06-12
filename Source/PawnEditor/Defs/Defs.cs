@@ -252,6 +252,6 @@ public class WidgetWorker_Blank : WidgetWorker<Pawn>
 {
     public override void Draw(Rect inRect, Pawn pawn)
     {
-        Widgets.DrawBoxSolid(inRect, pawn.story?.favoriteColor ?? Color.cyan);
+        Widgets.DrawBoxSolid(inRect, pawn.story?.favoriteColor.color ?? Color.cyan);
     }
 }

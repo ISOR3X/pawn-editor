@@ -65,7 +65,7 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
             if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
                 Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),
                     DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, defaultColor,
-                    Pawn.story.favoriteColor));
+                    Pawn.story.favoriteColor?.color));
 
             Widgets.DrawRectFast(colorRect, curColor);
         }

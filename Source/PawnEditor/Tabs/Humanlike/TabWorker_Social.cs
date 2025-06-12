@@ -45,7 +45,7 @@ public class TabWorker_Social : TabWorker_Table<Pawn>
                         ? Find.GameInitData.startingAndOptionalPawns
                         : pawn.MapHeld?.mapPawns.AllPawns
                        ?? pawn.GetCaravan()?.PawnsListForReading ?? PawnsFinder
-                             .AllCaravansAndTravelingTransportPods_Alive;
+                             .AllCaravansAndTravellingTransporters_Alive;//AllCaravansAndTravelingTransportPods_Alive;
 
                     Find.WindowStack.Add(new FloatMenu(pawns.Where(p => p.RaceProps.Humanlike)
                        .Select(p => new FloatMenuOption(p.LabelCap, () => DoRomance(pawn, p)))

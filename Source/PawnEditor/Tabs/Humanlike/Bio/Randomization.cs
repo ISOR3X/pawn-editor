@@ -20,7 +20,9 @@ public partial class TabWorker_Bio_Humanlike
 
     private static void RandomizeAll(Pawn pawn)
     {
-        RandomizeAppearance(pawn);
+/*        pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist));
+        PortraitsCache.SetDirty(pawn);
+*/        RandomizeAppearance(pawn);
         RandomizeTraits(pawn);
         RandomizeRelations(pawn);
         RandomizeSkills(pawn);
@@ -79,6 +81,7 @@ public partial class TabWorker_Bio_Humanlike
 
         pawn.story.bodyType = bodyTypes.RandomElement();
         pawn.story.headType = headTypes.RandomElement();
+        pawn.gender = Rand.Bool ? Gender.Male : Gender.Female;
 
         pawn.drawer.renderer.SetAllGraphicsDirty();
         PortraitsCache.SetDirty(pawn);
