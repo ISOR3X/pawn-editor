@@ -251,6 +251,9 @@ public class WidgetWorker_Blank : WidgetWorker<Pawn>
 {
     public override void Draw(Rect inRect, Pawn pawn)
     {
-        Widgets.DrawBoxSolid(inRect, pawn.story?.favoriteColor.color ?? Color.cyan);
+        if (ModsConfig.IdeologyActive)
+        {
+            Widgets.DrawBoxSolid(inRect, pawn.story.favoriteColor != null ? pawn.story.favoriteColor.color : Color.cyan);
+        }
     }
 }

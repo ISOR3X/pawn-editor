@@ -211,6 +211,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
                 }),
                 new("PawnEditor.SetAllTo".Translate("Apparel".Translate().ToLower(), "PawnEditor.FavColor".Translate().ToLower()), () =>
                 {
+                    if (ModsConfig.IdeologyActive)
+                {
                     pawn.apparel.WornApparel.ForEach(a =>
                         {
                             if (a.TryGetComp<CompColorable>() != null)
@@ -221,7 +223,8 @@ public class TabWorker_Gear : TabWorker<Pawn>
                                     Messages.Message("No favourite color found for pawn", MessageTypeDefOf.RejectInput);
                             }
                         }
-                    );
+                    ); 
+                    }
                 })
             }));
 

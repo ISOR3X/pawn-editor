@@ -1,8 +1,9 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RimWorld;
+using System.Reflection;
 using UnityEngine;
 using Verse;
 
@@ -28,6 +29,8 @@ public partial class TabWorker_Bio_Humanlike : TabWorker<Pawn>
         headerRect.xMin += 3;
         DoBasics(headerRect.ContractedBy(5, 0), pawn);
         rect.yMin += 20;
+
+
         var (left, skills, groups) = rect.Split1D(3, false, 15);
         DoLeft(left, pawn);
         DoSkills(skills, pawn);

@@ -50,7 +50,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4488-beta" />
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4489-beta" />
     <PackageReference Include="Lib.Harmony">
       <Version>2.3.3</Version>
       <ExcludeAssets>runtime</ExcludeAssets>

@@ -1,5 +1,7 @@
-﻿using System.Linq;
-using RimWorld;
+﻿using RimWorld;
+using System;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using Verse;
 
@@ -27,7 +29,7 @@ public partial class TabWorker_Bio_Humanlike
             traitsLastHeight = Text.LineHeight;
         }
         else
-            traitsLastHeight = GenUI.DrawElementStack(traitRect, 24, pawn.story.traits.TraitsSorted, delegate(Rect r, Trait trait)
+            traitsLastHeight = GenUI.DrawElementStack(traitRect, 24, pawn.story.traits.TraitsSorted, delegate (Rect r, Trait trait)
                 {
                     GUI.color = CharacterCardUtility.StackElementBackground;
                     GUI.DrawTexture(r, BaseContent.WhiteTex);
@@ -71,7 +73,7 @@ public partial class TabWorker_Bio_Humanlike
             incapableLastHeight = Text.LineHeight;
         }
         else
-            incapableLastHeight = GenUI.DrawElementStack(disabledRect, 22f, disabledTagsList, delegate(Rect r, WorkTags tag)
+            incapableLastHeight = GenUI.DrawElementStack(disabledRect, 22f, disabledTagsList, delegate (Rect r, WorkTags tag)
                 {
                     GUI.color = CharacterCardUtility.StackElementBackground;
                     GUI.DrawTexture(r, BaseContent.WhiteTex);
@@ -98,8 +100,8 @@ public partial class TabWorker_Bio_Humanlike
         if (Widgets.ButtonText(headerRect.TakeRightPart(60), add)) Find.WindowStack.Add(new ListingMenu_Abilities(pawn));
 
         var abilities = (from a in pawn.abilities.abilities
-            orderby a.def.level, a.def.EntropyGain
-            select a).ToList();
+                         orderby a.def.level, a.def.EntropyGain
+                         select a).ToList();
         var abilitiesRect = viewRect.TakeTopPart(abilitiesLastHeight + 14).ContractedBy(6);
         if (abilities.Count == 0)
         {
@@ -111,7 +113,7 @@ public partial class TabWorker_Bio_Humanlike
             abilitiesLastHeight = Text.LineHeight;
         }
         else
-            abilitiesLastHeight = GenUI.DrawElementStack(abilitiesRect, 32f, abilities, delegate(Rect r, Ability abil)
+            abilitiesLastHeight = GenUI.DrawElementStack(abilitiesRect, 32f, abilities, delegate (Rect r, Ability abil)
                 {
                     // GUI.DrawTexture(r, Command.BGTexShrunk);
                     if (Mouse.IsOver(r))
@@ -141,20 +143,42 @@ public partial class TabWorker_Bio_Humanlike
         Widgets.Label(headerRect, "PawnEditor.Extras".Translate().Colorize(ColoredText.TipSectionTitleColor));
 
         // Favourite color
-        var colorRect = viewRect.TakeTopPart(30);
-        colorRect.xMin += 6f;
-        string label = "PawnEditor.FavColor".Translate();
-        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(Text.CalcSize(label).x + 4), label);
-        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor?.color ?? Color.white);
-        if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
+        if (ModsConfig.IdeologyActive)
         {
-            var currentColor = pawn.story.favoriteColor?.color ?? Color.white;
-            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor.color = color, DefDatabase<ColorDef>.AllDefs
-                   .Select(cd => cd.color)
-                   .ToList(),
-                currentColor));
-        }
+            try
+            {
+                var colorRect = viewRect.TakeTopPart(30);
+                colorRect.xMin += 6f;
+                string label = "PawnEditor.FavColor".Translate();
+                using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(Text.CalcSize(label).x + 4), label);
 
+                Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor != null ? pawn.story.favoriteColor.color : Color.white);
+                if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
+                {
+                    var currentColor = pawn.story.favoriteColor != null ? pawn.story.favoriteColor.color : Color.white;
+                    Find.WindowStack.Add(new Dialog_ColorPicker(color =>
+                    {
+                        if (pawn.story.favoriteColor == null)
+                        {
+                            pawn.story.favoriteColor = DefDatabase<ColorDef>.AllDefs.Where(delegate (ColorDef x)
+                            {
+                                ColorType colorType = x.colorType;
+                                return colorType == ColorType.Ideo || colorType == ColorType.Misc;
+                            }).RandomElement();
+                        }
+                        pawn.story.favoriteColor.color = color;
+                    }, DefDatabase<ColorDef>.AllDefs
+                           .Select(cd => cd.color)
+                           .ToList(),
+                        currentColor));
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("[PawnEditor]: " + ex.Message);
+            }
+        }
         var extrasHeight = 30f;
 
         leftLastHeight = Text.LineHeight * 4 + traitsLastHeight + incapableLastHeight + abilitiesLastHeight + extrasHeight + 56;
