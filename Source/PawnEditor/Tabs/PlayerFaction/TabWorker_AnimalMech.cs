@@ -77,7 +77,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
             animalCount++;
             var items = new List<UITable<Faction>.Row.Item>
             {
-                new(Widgets.GetIconFor(pawn, Vector2.one, null, false, out _, out _, out _, out _)),
+                new(Widgets.GetIconFor(pawn, Vector2.one, null, false, out _, out _, out _, out _, out _)),
                 new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft),
                 new(pawn.ageTracker.CurLifeStageRace.GetIcon(pawn), pawn.ageTracker.CurLifeStageIndex),
                 new(pawn.gender.GetIcon(), (int)pawn.gender),
@@ -142,7 +142,7 @@ public class TabWorker_AnimalMech : TabWorker<Faction>
             mechCount++;
             var items = new List<UITable<Faction>.Row.Item>
             {
-                new(Widgets.GetIconFor(pawn, Vector2.one, null, false, out _, out _, out _, out _)),
+                new(Widgets.GetIconFor(pawn, Vector2.one, null, false, out _, out _, out _, out _, out _)),
                 new(pawn.Name.ToStringShort, pawn.Name.ToStringShort.ToCharArray()[0], TextAnchor.MiddleLeft),
                 new(pawn.MarketValue.ToStringMoney(), (int)pawn.MarketValue),
                 new(pawn.GetOverseer()?.Name?.ToStringShort ?? "OverseerNone".Translate(), () =>
