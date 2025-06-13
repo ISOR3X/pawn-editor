@@ -13,6 +13,8 @@ public class TabWorker_FactionSettlements : TabWorker<Faction>
     private readonly Dictionary<Settlement, int> distances = new();
     private UITable<Faction> settlementTable;
 
+    private const int CaravanUnroutableDistance = -1;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -26,7 +28,11 @@ public class TabWorker_FactionSettlements : TabWorker<Faction>
            .Select(s => new UITable<Faction>.Row(new List<UITable<Faction>.Row.Item>
             {
                 new(rect => { s.Name = Widgets.TextField(rect, s.Name); }),
-                new(distances.TryGetValue(s, out var dist) ? dist.ToStringTicksToDays() : ""),
+                new(distances.TryGetValue(s, out var dist)
+                    ? dist == CaravanUnroutableDistance
+                        ? "PawnEditor.DistanceFromColony.NoPath".Translate()
+                        : dist.ToStringTicksToDays()
+                    : ""),
                 new("JumpToTargetCustom".Translate("..."), () =>
                 {
                     Find.WindowStack.RemoveWindowsOfType(typeof(Dialog_PawnEditor_InGame));
@@ -63,12 +69,28 @@ public class TabWorker_FactionSettlements : TabWorker<Faction>
                 massUsage = CollectionsMassCalculator.MassUsage(pawns, IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload),
                 massCapacity = CollectionsMassCalculator.Capacity(pawns)
             };
-            
-            foreach (var settlement in Find.WorldObjects.Settlements.Where(s => s.Faction == faction))
+
+            var settlements = Find.WorldObjects.Settlements.Where(s => s.Faction == faction);
+            var pather = startingTile.Layer.Pather;
+            foreach (var settlement in settlements)
             {
-                using var worldPath = startingTile.Layer.pather.FindPath(startingTile, settlement.Tile, null);
-                distances.Add(settlement, CaravanArrivalTimeEstimator.EstimatedTicksToArrive(startingTile, settlement.Tile, worldPath, 0f,
-                    CaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo), Find.TickManager.TicksAbs));
+                if (!Find.WorldReachability.CanReach(startingTile, settlement.Tile))
+                {
+                    distances.Add(settlement, CaravanUnroutableDistance);
+                    continue;
+                }
+                using var worldPath = pather.FindPath(startingTile, settlement.Tile, null);
+                distances.Add(
+                    settlement,
+                    CaravanArrivalTimeEstimator.EstimatedTicksToArrive(
+                        startingTile,
+                        settlement.Tile,
+                        worldPath,
+                        0f,
+                        CaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo),
+                        Find.TickManager.TicksAbs
+                    )
+                );
             }
            
             settlementTable.ClearCache();
