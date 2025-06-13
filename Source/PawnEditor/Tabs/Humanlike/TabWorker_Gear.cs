@@ -216,9 +216,13 @@ public class TabWorker_Gear : TabWorker<Pawn>
                             if (a.TryGetComp<CompColorable>() != null)
                             {
                                 if (pawn.story.favoriteColor != null)
-                                    a.SetColor((Color)pawn.story.favoriteColor);
+                                {
+                                    a.SetColor(pawn.story.favoriteColor.color);
+                                }
                                 else
+                                {
                                     Messages.Message("No favourite color found for pawn", MessageTypeDefOf.RejectInput);
+                                }
                             }
                         }
                     );
