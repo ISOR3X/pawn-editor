@@ -31,7 +31,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>1.5.4297</Version>
+      <Version>1.6.4489-beta</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.3.3</Version>
