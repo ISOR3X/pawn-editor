@@ -65,10 +65,14 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
             var defaultColor = apparel2.Stuff != null ? apparel2.Stuff.stuffProps.color : apparel2.def.colorGenerator?.NewRandomizedColor() ?? Color.white;
             if (Widgets.ButtonText(widgetRect, "PawnEditor.PickColor".Translate()))
             {
-                var specialColors = new Dictionary<string, Color>();
-                specialColors.Add("Default", defaultColor);
-                if (Pawn.story.favoriteColor.HasValue)
-                    specialColors.Add("Favorite", Pawn.story.favoriteColor.Value);
+                var specialColors = new Dictionary<string, Color>
+                {
+                    { "Default", defaultColor }
+                };
+                if (Pawn.story.favoriteColor != null)
+                {
+                    specialColors.Add("Favorite", Pawn.story.favoriteColor.color);
+                }
 
                 Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel2.SetColor(color),
                     DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList(), curColor, specialColors));

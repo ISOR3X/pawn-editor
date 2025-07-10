@@ -13,7 +13,7 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
 {
     private static readonly List<ThoughtDef> moodMemoryDefs;
     private static readonly List<ThoughtDef> opinionMemoryDefs;
-    private static IntRange maxMoodOffset = IntRange.one;
+    private static IntRange maxMoodOffset = IntRange.One;
 
     private static readonly HashSet<string> extraNeedsOtherPawn = new()
     {
@@ -159,7 +159,7 @@ public class ListingMenu_Thoughts : ListingMenu<ThoughtDef>
             new Filter_ModSource<ThoughtDef>(),
             new Filter_IntRange<ThoughtDef>("PawnEditor.MoodOffset".Translate(), maxMoodOffset, def =>
             {
-                var range = IntRange.zero;
+                var range = IntRange.Zero;
 
                 foreach (var thoughtStage in def.stages)
                 {

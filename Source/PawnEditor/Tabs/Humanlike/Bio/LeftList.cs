@@ -145,11 +145,11 @@ public partial class TabWorker_Bio_Humanlike
         colorRect.xMin += 6f;
         string label = "PawnEditor.FavColor".Translate();
         using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(colorRect.TakeLeftPart(Text.CalcSize(label).x + 4), label);
-        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor ?? Color.white);
+        Widgets.DrawBoxSolid(colorRect.TakeRightPart(30).ContractedBy(2.5f), pawn.story.favoriteColor?.color ?? Color.white);
         if (Widgets.ButtonText(colorRect, "PawnEditor.PickColor".Translate()))
         {
-            var currentColor = pawn.story.favoriteColor ?? Color.white;
-            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor = color, DefDatabase<ColorDef>.AllDefs
+            var currentColor = pawn.story.favoriteColor?.color ?? Color.white;
+            Find.WindowStack.Add(new Dialog_ColorPicker(color => pawn.story.favoriteColor.color = color, DefDatabase<ColorDef>.AllDefs
                    .Select(cd => cd.color)
                    .ToList(),
                 currentColor));

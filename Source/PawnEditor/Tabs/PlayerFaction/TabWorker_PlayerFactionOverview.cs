@@ -76,7 +76,7 @@ public class TabWorker_PlayerFactionOverview : TabWorker_FactionOverview
         var map = Find.CurrentMap ?? Find.AnyPlayerHomeMap;
         var pawns = PawnEditor.Pregame
             ? Find.GameInitData.startingAndOptionalPawns
-            : map?.mapPawns?.PawnsInFaction(faction) ?? PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists;
+            : map?.mapPawns?.PawnsInFaction(faction) ?? PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
         pawns.RemoveAll(pawn => pawn.skills == null);
         if (pawns.NullOrEmpty()) return null;
         var pawn = pawns[0];

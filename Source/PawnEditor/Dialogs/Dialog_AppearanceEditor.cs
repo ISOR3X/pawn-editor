@@ -424,18 +424,25 @@ public class Dialog_AppearanceEditor : Window
             var rect = new Rect(i % itemsPerRow * itemSize, Mathf.Floor((float)i / itemsPerRow) * itemSize, itemSize, itemSize).ContractedBy(2);
             bool enabled = GeneIsAllowed(option);
             Widgets.DrawHighlight(rect);
-            if (pawn.genes.HasGene(option)) Widgets.DrawBox(rect);
+            if (pawn.genes.HasActiveGene(option))
+            {
+                Widgets.DrawBox(rect);
+            }
             if (enabled && Widgets.ButtonInvisible(rect))
             {
-                if (pawn.genes.HasGene(option))
+                if (pawn.genes.HasActiveGene(option))
+                {
                     pawn.genes.RemoveGene(pawn.genes.GetGene(option));
+                }
                 else
+                {
                     foreach (var geneDef in options)
                     {
                         if (pawn.genes.GetGene(geneDef) is { } gene) pawn.genes.RemoveGene(gene);
 
                         pawn.genes.AddGene(option, false);
                     }
+                }
             }
 
             GUI.color = enabled ? Color.white : Color.gray;
@@ -716,7 +723,7 @@ public class Dialog_AppearanceEditor : Window
 
             foreach (GeneDef requiredGene in def.requiredGenes)
             {
-                if (!pawn.genes.HasGene(requiredGene))
+                if (!pawn.genes.HasActiveGene(requiredGene))
                 {
                     return false;
                 }
