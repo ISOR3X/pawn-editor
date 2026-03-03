@@ -6,10 +6,10 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_BioAttributes : SectionWorker
 {
-    private readonly Listing_Horizontal listing = new Listing_Horizontal();
+    private readonly Listing_Horizontal listing = new();
     private float abilitiesHeight;
-    private float traitsHeight;
     private float incapableOfHeight;
+    private float traitsHeight;
 
     public SectionWorker_BioAttributes(SectionDef def) : base(def)
     {
@@ -21,30 +21,28 @@ public class SectionWorker_BioAttributes : SectionWorker
 
         if (PawnUtility.GetPawnCategory(pawn) is PawnUtility.PawnCategory.Humanlike)
         {
-            Rect skillRect = listing.GetRect(8, BioUtility.skillRowHeight + UIUtility.ButtonHeight);
+            var skillRect = listing.GetRect(8, BioUtility.SkillRowHeight + UIUtility.ButtonHeight);
             BioUtility.DoSkillsRect(skillRect, pawn);
 
-            Rect abilityRect = listing.GetRect(4, abilitiesHeight);
+            var abilityRect = listing.GetRect(4, abilitiesHeight);
             BioUtility.DoAbilitiesRect(abilityRect, pawn, out abilitiesHeight);
-            
+
             var height = Mathf.Max(traitsHeight, incapableOfHeight);
             height += UIUtility.ButtonHeight * 2 + 8f;
-            Rect traitRect = listing.GetRect(4, height);
+            var traitRect = listing.GetRect(4, height);
             BioUtility.DoTraitsRect(traitRect, pawn, out traitsHeight);
-            
+
             height -= UIUtility.ButtonHeight;
-            Rect incapableOfRect = listing.GetRect(4, height);
+            var incapableOfRect = listing.GetRect(4, height);
             BioUtility.DoIncapableOfRect(incapableOfRect, pawn, out incapableOfHeight);
         }
 
         listing.End();
-        inRect.TakeTopPart(listing.totalHeight);
+        inRect.TakeTopPart(listing.TotalHeight);
 
-        Rect footerRect = inRect.TakeTopPart(UIUtility.ButtonHeight);
-        WidgetRow row = new WidgetRow(footerRect.x, footerRect.y, UIDirection.RightThenDown);
-        if (row.ButtonText("Presets", fixedWidth: "Presets".GetWidthCached() + (UIUtility.ButtonPadding)))
-        {
+        var footerRect = inRect.TakeTopPart(UIUtility.ButtonHeight);
+        var row = new WidgetRow(footerRect.x, footerRect.y, UIDirection.RightThenDown);
+        if (row.ButtonText("Presets", fixedWidth: "Presets".GetWidthCached() + UIUtility.ButtonPadding))
             listing.ClearCache();
-        }
     }
 }

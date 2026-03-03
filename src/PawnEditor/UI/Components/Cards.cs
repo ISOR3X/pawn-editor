@@ -9,41 +9,55 @@ namespace PawnEditor;
 
 public static partial class UIComponents
 {
+    private const float CardGap = 8f;
+    private const float SectionGap = 8f;
     public static readonly Vector2 CardSize = new(132f, 52f);
-    public static readonly float CardGap = 8f;
-    public static readonly float SectionGap = 8f;
-    private static readonly Dictionary<int, int> reorderableGroupIDs = new(); // A dictionary is used instead of a list for the case that there are multiple reorderable groups.
+
+    private static readonly Dictionary<int, int>
+        ReorderableGroupIDs =
+            new(); // A dictionary is used instead of a list for the case that there are multiple reorderable groups.
+
     private static Vector2 cardScrollPosition;
 
     public static void DrawPawnCard(Rect inRect, Pawn pawn, bool highlight, out bool isHovered)
     {
         string name = pawn.def.LabelCap;
-        string lowerLabel = null;
+        string? lowerLabel = null;
         if (pawn.Name != null)
         {
-            if (pawn.Name is NameTriple nameTriple) name = string.IsNullOrEmpty(nameTriple.Nick) ? nameTriple.First : nameTriple.Nick;
-            else name = Text.CalcSize(pawn.Name.ToStringFull).x > inRect.width - 8f ? pawn.Name.ToStringShort : pawn.Name.ToStringFull;
+            if (pawn.Name is NameTriple nameTriple)
+                name = string.IsNullOrEmpty(nameTriple.Nick) ? nameTriple.First : nameTriple.Nick;
+            else
+                name = Text.CalcSize(pawn.Name.ToStringFull).x > inRect.width - 8f
+                    ? pawn.Name.ToStringShort
+                    : pawn.Name.ToStringFull;
             lowerLabel = pawn.def.LabelCap;
         }
 
-        if (pawn.story != null) lowerLabel = Text.CalcSize(pawn.story.TitleCap).x > inRect.width - 8f ? pawn.story.TitleShortCap : pawn.story.TitleCap;
+        if (pawn.story != null)
+            lowerLabel = Text.CalcSize(pawn.story.TitleCap).x > inRect.width - 8f
+                ? pawn.story.TitleShortCap
+                : pawn.story.TitleCap;
 
-        Rot4 rotation = pawn.RaceProps.Humanlike ? Rot4.South : Rot4.East;
-        float cameraZoom = pawn.def.race.baseBodySize > 1f ? 1.7f / pawn.def.race.baseBodySize : 1f;
-        Texture texture = PortraitsCache.Get(pawn, Page_ConfigureStartingPawns.PawnSelectorPortraitSize, rotation, cameraZoom: cameraZoom);
+        var rotation = pawn.RaceProps.Humanlike ? Rot4.South : Rot4.East;
+        var cameraZoom = pawn.def.race.baseBodySize > 1f ? 1.7f / pawn.def.race.baseBodySize : 1f;
+        Texture texture = PortraitsCache.Get(pawn, Page_ConfigureStartingPawns.PawnSelectorPortraitSize, rotation,
+            cameraZoom: cameraZoom);
         DrawCard(inRect, name, lowerLabel, highlight, texture, out isHovered);
     }
 
-    public static void DrawCard(Rect inRect, string upperLabel, string lowerLabel, bool highlight, Texture texture, out bool isHovered)
+    public static void DrawCard(Rect inRect, string upperLabel, string? lowerLabel, bool highlight, Texture texture,
+        out bool isHovered)
     {
         isHovered = Mouse.IsOver(inRect);
 
         Widgets.BeginGroup(inRect.ExpandedBy(4f));
-        Rect innerRect = inRect with { x = 4f, y = 4f };
+        var innerRect = inRect with { x = 4f, y = 4f };
         Widgets.DrawOptionBackground(innerRect, highlight);
         innerRect = innerRect.ContractedBy(4f, 2f);
         var size = Page_ConfigureStartingPawns.PawnSelectorPortraitSize;
-        var portraitRect = new Rect(innerRect.xMax - innerRect.height + 2f, innerRect.y, innerRect.height, innerRect.height);
+        var portraitRect = new Rect(innerRect.xMax - innerRect.height + 2f, innerRect.y, innerRect.height,
+            innerRect.height);
         Widgets.BeginGroup(portraitRect);
         portraitRect = portraitRect.AtZero();
         GUI.color = new Color(1f, 1f, 1f, 0.2f);
@@ -59,56 +73,64 @@ public static partial class UIComponents
     }
 
 
-    public static void DrawReorderablePawnList(Rect inRect, ref List<Pawn> pawns, Pawn selectedPawn, out Pawn newSelectedPawn, out float height)
+    public static void DrawReorderablePawnList(Rect inRect, ref List<Pawn> pawns, Pawn? selectedPawn,
+        out Pawn? newSelectedPawn, out float height)
     {
         newSelectedPawn = selectedPawn;
         var pawnsByLocation = PawnUtility.GroupByLocation(pawns, PawnLister.AllLocations);
-        height = pawns.Count * (UIComponents.CardSize.y + UIComponents.CardGap); // Height of all cards
-        var singleSectionHeight = UIComponents.SectionGap + Text.LineHeightOf(GameFont.Tiny) * 2; // Height of a single section
+        height = pawns.Count * (CardSize.y + CardGap); // Height of all cards
+        var singleSectionHeight = SectionGap + Text.LineHeightOf(GameFont.Tiny) * 2; // Height of a single section
         height += pawnsByLocation.Sum(p =>
-            p.Value.NullOrEmpty() ? singleSectionHeight + (8f + UIComponents.CardGap) : singleSectionHeight);
-        height -= UIComponents.SectionGap; // Remove the last section gap
-        var viewRect = new Rect(inRect.x, inRect.y, inRect.width - UIUtility.scrollBarWidth, height);
+            p.Value.NullOrEmpty() ? singleSectionHeight + (8f + CardGap) : singleSectionHeight);
+        height -= SectionGap; // Remove the last section gap
+        var viewRect = new Rect(inRect.x, inRect.y, inRect.width - UIUtility.ScrollBarWidth, height);
         Widgets.BeginScrollView(inRect, ref cardScrollPosition, viewRect);
         for (var i = 0; i < pawnsByLocation.Count; i++)
         {
             var (key, pawnsAtLocation) = pawnsByLocation.ElementAt(i);
-            using (new TextBlock(GameFont.Tiny)) Widgets.Label(inRect.TakeTopPart(Text.LineHeight), key.Label.TruncateWithTooltip(inRect));
+            using (new TextBlock(GameFont.Tiny))
+            {
+                Widgets.Label(inRect.TakeTopPart(Text.LineHeight), key.Label.TruncateWithTooltip(inRect));
+            }
 
-            var locationRect = inRect.TakeTopPart(pawnsAtLocation.Count * (UIComponents.CardSize.y + UIComponents.CardGap));
+            var locationRect = inRect.TakeTopPart(pawnsAtLocation.Count * (CardSize.y + CardGap));
 
             if (Event.current.type == EventType.Repaint)
-                reorderableGroupIDs[i] = ReorderableWidget.NewGroup((from, to) => OnReorder(from, to, ref pawnsAtLocation), ReorderableDirection.Vertical, Rect.zero,
-                    UIComponents.CardGap);
+                ReorderableGroupIDs[i] = ReorderableWidget.NewGroup(
+                    (from, to) => OnReorder(from, to, ref pawnsAtLocation), ReorderableDirection.Vertical, Rect.zero,
+                    CardGap);
 
-            if (pawnsAtLocation.NullOrEmpty()) // Add a reorderable widget for empty sections that pawns can be dragged to.
+            if (pawnsAtLocation
+                .NullOrEmpty()) // Add a reorderable widget for empty sections that pawns can be dragged to.
             {
-                Rect r = inRect.TakeTopPart(8f) with { width = UIComponents.CardSize.x, x = locationRect.x + 4f };
+                var r = inRect.TakeTopPart(8f) with { width = CardSize.x, x = locationRect.x + 4f };
                 Widgets.DrawRectFast(r, new Color(1, 1, 1, 0.1f));
                 ReorderableWidget.Reorderable(i, r);
-                inRect.yMin += UIComponents.CardGap;
+                inRect.yMin += CardGap;
             }
 
             if (!pawnsAtLocation.NullOrEmpty()) pawnsAtLocation.SortBy(p => (int)PawnUtility.GetPawnCategory(p));
             foreach (var pawn in pawnsAtLocation)
             {
-                Rect outerCardRect = locationRect.TakeTopPart(UIComponents.CardSize.y) with { width = UIComponents.CardSize.x };
+                var outerCardRect = locationRect.TakeTopPart(CardSize.y) with { width = CardSize.x };
                 outerCardRect.x += 4f;
-                UIComponents.DrawPawnCard(outerCardRect, pawn, pawn == selectedPawn, out bool _);
+                DrawPawnCard(outerCardRect, pawn, pawn == selectedPawn, out _);
 
                 if (Mouse.IsOver(outerCardRect))
                 {
-                    Rect deleteRect = outerCardRect.TopPartPixels(Widgets.InfoCardButtonSize).RightPartPixels(Widgets.InfoCardButtonSize);
+                    var deleteRect = outerCardRect.TopPartPixels(Widgets.InfoCardButtonSize)
+                        .RightPartPixels(Widgets.InfoCardButtonSize);
                     if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
                     {
                         pawn.FullDelete();
-                        if (pawn == selectedPawn) newSelectedPawn = pawnsAtLocation.FirstOrFallback(p => p != pawn, null);
+                        if (pawn == selectedPawn) newSelectedPawn = pawnsAtLocation.FirstOrFallback(p => p != pawn);
                     }
 
                     if (Event.current.type == EventType.MouseDown)
                     {
                         var currentMap = Find.CurrentMap;
-                        if (Event.current.button == 0 && Event.current.clickCount == 2 && (pawn.Map == currentMap || pawn.MapHeld == currentMap))
+                        if (Event.current.button == 0 && Event.current.clickCount == 2 &&
+                            (pawn.Map == currentMap || pawn.MapHeld == currentMap))
                         {
                             var pos = pawn.Position;
                             // pos.x -= 15; // To have the pawn show up next to the window instead of the center of the screen.
@@ -131,31 +153,34 @@ public static partial class UIComponents
                 }
 
                 ReorderableWidget.Reorderable(i, outerCardRect);
-                locationRect.yMin += UIComponents.CardGap;
+                locationRect.yMin += CardGap;
             }
 
-            Rect addRect = inRect.TakeTopPart(Text.LineHeightOf(GameFont.Tiny)) with { width = UIComponents.CardSize.x };
+            var addRect = inRect.TakeTopPart(Text.LineHeightOf(GameFont.Tiny)) with { width = CardSize.x };
             addRect.x += 4f;
             Widgets.ButtonText(addRect, "+");
 
-            inRect.yMin += UIComponents.SectionGap;
+            inRect.yMin += SectionGap;
         }
 
-        ReorderableWidget.NewMultiGroup(reorderableGroupIDs.Values.ToList(), ((from, fromGroup, to, toGroup) => OnReorderMulti(from, fromGroup, to, toGroup, ref pawnsByLocation)));
+        ReorderableWidget.NewMultiGroup(ReorderableGroupIDs.Values.ToList(),
+            (from, fromGroup, to, toGroup) => OnReorderMulti(from, fromGroup, to, toGroup, ref pawnsByLocation));
         Widgets.EndScrollView();
+        return;
 
-        static void OnReorder(int from, int to, ref List<Pawn> list)
+        static void OnReorder(int from, int to, ref List<Pawn> _)
         {
-            // Messages.Message("From: " + from + " To: " + to, MessageTypeDefOf.NeutralEvent);
+            Messages.Message("From: " + from + " To: " + to, MessageTypeDefOf.NeutralEvent);
         }
 
-        static void OnReorderMulti(int from, int fromGroup, int to, int toGroup, ref SortedDictionary<PawnLocation, List<Pawn>> values)
+        static void OnReorderMulti(int from, int fromGroup, int to, int toGroup,
+            ref SortedDictionary<PawnLocation, List<Pawn>> values)
         {
             // Messages.Message($"From: {from} ({fromGroup}) To: {to} ({toGroup})", MessageTypeDefOf.NeutralEvent);
             var fromGroupItems = values.Values.ElementAt(fromGroup);
             var toGroupItems = values.Values.ElementAt(toGroup);
-            Pawn fromPawn = fromGroupItems[from];
-            Pawn toPawn = toGroupItems.Count > to ? toGroupItems[to] : null;
+            var fromPawn = fromGroupItems[from];
+            var toPawn = toGroupItems.Count > to ? toGroupItems[to] : null;
             if (toPawn != null)
                 PawnUtility.TeleportTo(fromPawn, toPawn);
             else

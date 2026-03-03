@@ -9,54 +9,61 @@ namespace PawnEditor;
 
 [UsedImplicitly]
 [HotSwappable]
-public class SectionWorker_AppearanceShape : SectionWorker
+public class SectionWorker_AppearanceShape(SectionDef def) : SectionWorker(def)
 {
-    readonly Listing_Horizontal listing = new Listing_Horizontal();
+    private readonly Listing_Horizontal _listing = new();
 
-    Vector2 scrollPositionBodyType = Vector2.zero;
-    Vector2 scrollPositionHeadType = Vector2.zero;
+    private Vector2 _scrollPositionBodyType = Vector2.zero;
+    private Vector2 _scrollPositionHeadType = Vector2.zero;
 
-    private bool disableRestrictions; // TODO: Implement restrictions (e.g. for body types)
+    // private bool _disableRestrictions; // TODO: Implement restrictions (e.g. for body types)
 
-    private float skinColorHeight = 30f; // Tracks the height of the rows for the skin colors.
-
-    public SectionWorker_AppearanceShape(SectionDef def) : base(def)
-    {
-    }
+    private float _skinColorHeight = 30f; // Tracks the height of the rows for the skin colors.
 
     protected override void DoSectionContents(ref Rect inRect, Pawn pawn)
     {
-        listing.Begin(inRect);
+        var capturedPawn = pawn;
+
+        _listing.Begin(inRect);
         // Body type
-        var rect1 = listing.GetRect(6, UIComponents.CarrouselCellHeight + UIUtility.ButtonHeight);
+        var rect1 = _listing.GetRect(6, UIComponents.CarrouselCellHeight + UIUtility.ButtonHeight);
         UIComponents.WidgetLabel(rect1.TakeTopPart(UIUtility.ButtonHeight), "Body");
-        UIComponents.Carrousel(rect1, DefDatabase<BodyTypeDef>.AllDefsListForReading.Where(d => AppearanceUtility.CanUseBodyType(d, pawn)).ToList(), ref scrollPositionBodyType,
-            pawn.story.bodyType, d => AppearanceUtility.TrySetBodyType(d, pawn), d => AppearanceUtility.BodyTypes[d], pawn.story.SkinColor, d => d.defName);
+        UIComponents.Carrousel(rect1,
+            DefDatabase<BodyTypeDef>.AllDefsListForReading.Where(d => AppearanceUtility.CanUseBodyType(d, pawn))
+                .ToList(), ref _scrollPositionBodyType,
+            pawn.story.bodyType, d => AppearanceUtility.TrySetBodyType(d, capturedPawn),
+            d => AppearanceUtility.BodyTypes[d],
+            pawn.story.SkinColor, d => d.defName);
 
         // Head type
-        var rect2 = listing.GetRect(6, UIComponents.CarrouselCellHeight + UIUtility.ButtonHeight);
+        var rect2 = _listing.GetRect(6, UIComponents.CarrouselCellHeight + UIUtility.ButtonHeight);
         UIComponents.WidgetLabel(rect2.TakeTopPart(UIUtility.ButtonHeight), "Head");
-        UIComponents.Carrousel(rect2, DefDatabase<HeadTypeDef>.AllDefsListForReading.Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList(), ref scrollPositionHeadType,
-            pawn.story.headType, d => AppearanceUtility.SetHeadType(d, pawn), d => d.GetGraphic(pawn, pawn.story.SkinColor).MatSouth.mainTexture, pawn.story.SkinColor,
+        UIComponents.Carrousel(rect2,
+            DefDatabase<HeadTypeDef>.AllDefsListForReading.Where(d => AppearanceUtility.CanUseHeadType(d, pawn))
+                .ToList(), ref _scrollPositionHeadType,
+            pawn.story.headType, d => AppearanceUtility.SetHeadType(d, capturedPawn),
+            d => d.GetGraphic(capturedPawn, capturedPawn.story.SkinColor).MatSouth.mainTexture, pawn.story.SkinColor,
             d => d.defName);
 
-        Color skinColor = pawn.story.SkinColor;
+        var skinColor = pawn.story.SkinColor;
         var availableColors = AppearanceUtility.GetSkinColorsFor(pawn);
         var oldColor = pawn.story.SkinColor;
         var specialColors = new Dictionary<string, Color>
         {
-            { "Old", oldColor },
+            { "Old", oldColor }
         };
         if (pawn.story.favoriteColor != null) specialColors["Favorite"] = pawn.story.favoriteColor.color;
-        if (pawn.story.SkinColorOverriden && pawn.story.skinColorBase.HasValue) specialColors["Base"] = pawn.story.skinColorBase.Value;
+        if (pawn.story.SkinColorOverriden && pawn.story.skinColorBase != null)
+            specialColors["Base"] = pawn.story.skinColorBase.Value;
 
-        listing.ColorPickerLabeled("Skin Color", skinColorHeight, ref skinColor, specialColors, availableColors, c => AppearanceUtility.TrySetSkinColor(c, ref pawn),
-            out skinColorHeight);
+        _listing.ColorPickerLabeled("Skin Color", _skinColorHeight, ref skinColor, specialColors, availableColors,
+            c => AppearanceUtility.TrySetSkinColor(c, ref capturedPawn),
+            out _skinColorHeight);
 
 
         AppearanceUtility.TrySetSkinColor(skinColor, ref pawn);
 
-        listing.End();
-        inRect.TakeTopPart(listing.totalHeight);
+        _listing.End();
+        inRect.TakeTopPart(_listing.TotalHeight);
     }
 }

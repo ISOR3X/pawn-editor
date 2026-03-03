@@ -7,15 +7,15 @@ namespace PawnEditor;
 
 public abstract class TabWorker
 {
-    public TabDef def;
+    public readonly List<FloatMenuOption> QuickActions = [];
+    public TabDef Def;
     protected Vector2 TabScrollPosition = Vector2.zero;
-    public List<FloatMenuOption> quickActions = new List<FloatMenuOption>();
-    
+
     public TabWorker(TabDef def)
     {
-        this.def = def;
+        Def = def;
     }
-    
+
     public virtual void PreOpen()
     {
     }
@@ -23,7 +23,7 @@ public abstract class TabWorker
     public virtual void PostClose()
     {
     }
-    
+
     public virtual void DoTabContents(ref Rect inRect)
     {
         inRect = inRect.ContractedBy(16f);
@@ -31,17 +31,15 @@ public abstract class TabWorker
     }
 
     protected abstract void DoInnerTabContents(ref Rect inRect);
-    
+
     public virtual void Notify_ContentChanged()
     {
-                // Update quick actions
-        QuickActionUtility.actions.TryGetValue(def.defName, out var actions);
+        // Update quick actions
+        QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);
         if (actions.NullOrEmpty()) return;
 
-        quickActions.Clear();
+        QuickActions.Clear();
         foreach (var (attribute, method) in actions!.Where(a => a.Item1.CanUseQuickAction()))
-        {
-            quickActions.Add(attribute.ToFloatMenuOption(method));
-        }
+            QuickActions.Add(attribute.ToFloatMenuOption(method));
     }
 }

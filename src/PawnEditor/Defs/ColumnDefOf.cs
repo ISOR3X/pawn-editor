@@ -7,6 +7,10 @@ namespace PawnEditor;
 [UsedImplicitly]
 public class ColumnDefOf
 {
-    public static ColumnDef PawnEditor_LabelWithIcon; 
-    static ColumnDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof (ColumnDefOf));
+    public static ColumnDef PawnEditor_LabelWithIcon = null!;
+
+    static ColumnDefOf()
+    {
+        DefOfHelper.EnsureInitializedInCtor(typeof(ColumnDefOf));
+    }
 }

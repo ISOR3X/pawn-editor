@@ -21,10 +21,10 @@ public static class PawnUtility
         Insect = 8,
         Entity = 16,
         Other = 32,
-        All = Humanlike | Insect | Mechanoid | Animal | Entity | Other,
+        All = Humanlike | Insect | Mechanoid | Animal | Entity | Other
     }
 
-    public static PawnCategory GetPawnCategory(Pawn pawn)
+    public static PawnCategory GetPawnCategory(Pawn? pawn)
     {
         if (pawn == null) return PawnCategory.Other;
         if (pawn.kindDef.RaceProps.Humanlike)
@@ -42,16 +42,15 @@ public static class PawnUtility
 
     public static SortedDictionary<string, List<Pawn>> SortByCategory(List<Pawn> pawns)
     {
-        return new SortedDictionary<string, List<Pawn>>(pawns.GroupBy(GetPawnCategory).ToDictionary(g => g.Key.ToString(), g => g.ToList()));
+        return new SortedDictionary<string, List<Pawn>>(pawns.GroupBy(GetPawnCategory)
+            .ToDictionary(g => g.Key.ToString(), g => g.ToList()));
     }
 
-    public static SortedDictionary<PawnLocation, List<Pawn>> GroupByLocation(List<Pawn> pawns, List<PawnLocation> locations)
+    public static SortedDictionary<PawnLocation, List<Pawn>> GroupByLocation(List<Pawn> pawns,
+        List<PawnLocation> locations)
     {
         var result = new Dictionary<PawnLocation, List<Pawn>>(locations.ToDictionary(l => l, _ => new List<Pawn>()));
-        foreach (Pawn pawn in pawns)
-        {
-            result.TryAddToValueList(pawn.GetLocation(), pawn);
-        }
+        foreach (var pawn in pawns) result.TryAddToValueList(pawn.GetLocation(), pawn);
 
         return new SortedDictionary<PawnLocation, List<Pawn>>(result);
     }
@@ -97,7 +96,8 @@ public static class PawnUtility
             }
             else if (location is World)
             {
-                if (pawn.IsWorldPawn()) Messages.Message("Pawn already exists as a world pawn", MessageTypeDefOf.RejectInput);
+                if (pawn.IsWorldPawn())
+                    Messages.Message("Pawn already exists as a world pawn", MessageTypeDefOf.RejectInput);
                 pawn.teleporting = true; // To prevent pawn from being moved to another faction.
                 Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
                 pawn.teleporting = false;
@@ -129,7 +129,7 @@ public static class PawnUtility
 
         // Store the old pawn's data and delete the pawn itself.
         var oldPawn = pawn;
-        bool selected = Window_Editor.GetSelectedPawn() == oldPawn;
+        var selected = Window_Editor.GetSelectedPawn() == oldPawn;
         var index = Window_Editor.selectedPawnGroup!.IndexOf(oldPawn);
         var location = oldPawn.GetLocation();
         var position = oldPawn.Position;
@@ -149,10 +149,9 @@ public static class PawnUtility
 
     public static RenderTexture GetScaledPortrait(Pawn pawn, Rect inRect)
     {
-        var rot = PawnUtility.GetPawnCategory(pawn) is not PawnCategory.Humanlike ? Rot4.East : Rot4.South;
+        var rot = GetPawnCategory(pawn) is not PawnCategory.Humanlike ? Rot4.East : Rot4.South;
         var max = Mathf.Max(inRect.width, inRect.height);
-        return PortraitsCache.Get(pawn, new Vector2(max, max) * 2f, rot, new Vector3(0,0,.5f),
+        return PortraitsCache.Get(pawn, new Vector2(max, max) * 2f, rot, new Vector3(0, 0, .5f),
             0.7f, renderHeadgear: Window_Editor.showHeadgear, renderClothes: Window_Editor.showClothes);
     }
-
 }

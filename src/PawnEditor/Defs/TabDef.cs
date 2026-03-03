@@ -8,23 +8,21 @@ namespace PawnEditor;
 [UsedImplicitly]
 public class TabDef : Def
 {
-    private Type workerClass = typeof(TabWorker);
-    public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
+    private readonly Type workerClass = typeof(TabWorker);
+    [Unsaved] private TabWorker? _workerInt;
     public int priority = 10;
-    public List<SectionDef> sections;
-    [Unsaved] private TabWorker _workerInt;
+    public required List<SectionDef> sections;
+    public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
     public TabWorker Worker
     {
         get
         {
-            if (this._workerInt == null)
-            {
-                this._workerInt = (TabWorker)Activator.CreateInstance(this.workerClass, this);
-                this._workerInt.def = this;
-            }
+            if (_workerInt != null) return _workerInt;
+            _workerInt = (TabWorker)Activator.CreateInstance(workerClass, this);
+            _workerInt.Def = this;
 
-            return this._workerInt;
+            return _workerInt;
         }
     }
 }

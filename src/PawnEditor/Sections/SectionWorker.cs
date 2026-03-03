@@ -3,30 +3,23 @@ using Verse;
 
 namespace PawnEditor;
 
-public abstract class SectionWorker
+public abstract class SectionWorker(SectionDef def)
 {
-    public SectionDef def;
-    public TabWorker tab;
-
-    protected SectionWorker(SectionDef def)
-    {
-        this.def = def;
-    }
+    public SectionDef Def = def;
+    public TabWorker? Tab;
 
     protected abstract void DoSectionContents(ref Rect inRect, Pawn pawn);
 
-
-
     private void DoSectionHeader(Rect inRect)
     {
-        UIComponents.SectionSeperator(inRect, def.label);
+        UIComponents.SectionSeparator(inRect, Def.label);
     }
 
     public void DoSection(ref Rect inRect, Pawn pawn)
     {
-        if (!def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(pawn))) return;
-        if (!def.hideHeader) this.DoSectionHeader(inRect.TakeTopPart(30f));
-        this.DoSectionContents(ref inRect, pawn);
+        if (!Def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(pawn))) return;
+        if (!Def.hideHeader) DoSectionHeader(inRect.TakeTopPart(30f));
+        DoSectionContents(ref inRect, pawn);
     }
 
     public virtual void OnPawnChanged(Pawn pawn)

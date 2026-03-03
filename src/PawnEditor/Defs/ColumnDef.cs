@@ -6,43 +6,41 @@ namespace PawnEditor;
 
 public class ColumnDef : Def
 {
-    public Type workerClass = typeof(ColumnWorker);
-    public bool sortable;
-    public bool ignoreWhenCalculatingOptimalTableSize;
-    [NoTranslate] public string headerIcon;
-    public Vector2 headerIconSize;
-    [MustTranslate] public string headerTip;
-    public bool headerAlwaysInteractable;
-    public bool groupable;
-    public int gap;
-    public bool showIcon;
-    public bool iconBackground;
-    public bool useLabelShort;
-    public int widthPriority = 100;
-    public int width = 26;
-    [Unsaved] private ColumnWorker workerInt;
-    [Unsaved] private Texture2D headerIconTex;
     public static readonly Vector2 IconSize = new(26f, 26f);
+    public int gap;
+    public bool groupable;
+    public bool headerAlwaysInteractable;
+    [NoTranslate] public string? headerIcon;
+    public Vector2 headerIconSize;
+    [Unsaved] private Texture2D? headerIconTex;
+    [MustTranslate] public string? headerTip;
+    public bool iconBackground;
+    public bool ignoreWhenCalculatingOptimalTableSize;
+    public bool showIcon;
+    public bool sortable;
+    public bool useLabelShort;
+    public int width = 26;
+    public int widthPriority = 100;
+    public Type workerClass = typeof(ColumnWorker);
+    [Unsaved] private ColumnWorker? workerInt;
 
     public ColumnWorker Worker
     {
         get
         {
-            if (workerInt == null)
-            {
-                workerInt = (ColumnWorker)Activator.CreateInstance(workerClass);
-                workerInt.def = this;
-            }
+            if (workerInt != null) return workerInt;
+            workerInt = (ColumnWorker)Activator.CreateInstance(workerClass);
+            workerInt.Def = this;
 
             return workerInt;
         }
     }
 
-    public Texture2D HeaderIcon
+    public Texture2D? HeaderIcon
     {
         get
         {
-            if (headerIconTex == null && !headerIcon.NullOrEmpty())
+            if (!headerIcon.NullOrEmpty())
                 headerIconTex = ContentFinder<Texture2D>.Get(headerIcon);
             return headerIconTex;
         }

@@ -16,20 +16,19 @@ public class SectionWorker_BioHeader : SectionWorker
         UIComponents.InspectPane(inspectPaneRect.TakeLeftPart(400f), pawn);
 
         // Pawn preview
-        Rect imageRect = inspectPaneRect.LeftPartPixels(inspectPaneRect.height);
+        var imageRect = inspectPaneRect.LeftPartPixels(inspectPaneRect.height);
         var image = PawnUtility.GetScaledPortrait(pawn, imageRect);
         GUI.DrawTexture(imageRect.ExpandedBy(20f), image);
 
-        Rect footerRect = inRect.TakeTopPart(UIUtility.ButtonHeight);
-        WidgetRow row = new WidgetRow(footerRect.x, footerRect.y, UIDirection.RightThenDown);
-        if (row.ButtonText("Quick actions", fixedWidth: 120f)) Find.WindowStack.Add(new FloatMenu(this.tab.quickActions));
+        var footerRect = inRect.TakeTopPart(UIUtility.ButtonHeight);
+        var row = new WidgetRow(footerRect.x, footerRect.y, UIDirection.RightThenDown);
+        if (Tab is { QuickActions: not null })
+            if (row.ButtonText("Quick actions", fixedWidth: 120f))
+                Find.WindowStack.Add(new FloatMenu(Tab.QuickActions));
 
         if (PawnUtility.GetPawnCategory(pawn) is PawnUtility.PawnCategory.Humanlike)
         {
-            if (row.ButtonText("Randomize", fixedWidth: 120f))
-            {
-                PawnUtility.RandomizeInPlace(pawn);
-            }
+            if (row.ButtonText("Randomize", fixedWidth: 120f)) PawnUtility.RandomizeInPlace(pawn);
 
             row.ButtonIcon(TexPawnEditor.Reroll, "Reroll");
             if (row.ButtonIcon(TexButton.Info, "Info")) Find.WindowStack.Add(new Dialog_InfoCard(pawn));

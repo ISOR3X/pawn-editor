@@ -6,29 +6,28 @@ using Verse;
 
 namespace PawnEditor;
 
-public class DefTable_Hair : DefTable
+public class DefTable_Hair(TableDef def, Func<IEnumerable<Def>> thingsGetter, Def defaultThing)
+    : DefTable(def, thingsGetter, defaultThing)
 {
-    public DefTable_Hair(TableDef def, Func<IEnumerable<Def>> thingsGetter, Def defaultThing) : base(def, thingsGetter, defaultThing)
-    {
-    }
-
     protected override void OnSelectChanged(Def thing)
     {
-        if (Window_Editor.GetSelectedPawn() != null)
+        var p = Window_Editor.GetSelectedPawn();
+        if (p == null) return;
+        switch (thing)
         {
-            if (thing is HairDef hairDef)
-            {
-                AppearanceUtility.TrySetHairFor(hairDef, Window_Editor.GetSelectedPawn());
-            }
-            else if (thing is BeardDef beardDef)
-            {
-                AppearanceUtility.TrySetBeardFor(beardDef, Window_Editor.GetSelectedPawn());
-            }
+            case HairDef hairDef:
+                AppearanceUtility.TrySetHairFor(hairDef, p);
+                break;
+            case BeardDef beardDef:
+                AppearanceUtility.TrySetBeardFor(beardDef, p);
+                break;
         }
     }
 
     protected override void DoRowHover(Rect inRect, Def thing)
     {
-        UIUtility.DefIconPreview(inRect, thing, Window_Editor.GetSelectedPawn()?.story.hairColor);
+        var p = Window_Editor.GetSelectedPawn();
+        if (p == null) return;
+        UIUtility.DefIconPreview(inRect, thing, p.story.HairColor);
     }
 }

@@ -8,7 +8,7 @@ namespace PawnEditor;
 [HarmonyPatch(typeof(DebugWindowsOpener), nameof(DebugWindowsOpener.DevToolStarterOnGUI))]
 public class Patch_OpenEditor
 {
-    static void Prefix()
+    private static void Prefix()
     {
         if (KeyBindingDefOf.PawnEditor_OpenEditor.KeyDownEvent)
         {

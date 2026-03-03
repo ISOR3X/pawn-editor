@@ -17,7 +17,7 @@ public class TabWorker_PawnBio : TabWorker_Pawn
         Find.WindowStack.WindowOfType<Window_Editor>()?.Close();
         var pawn = Window_Editor.GetSelectedPawn();
         if (pawn == null) return;
-        DebugTools.curTool = new("Teleport here", () =>
+        DebugTools.curTool = new DebugTool("Teleport here", () =>
         {
             var cell = UI.MouseCell();
             var map = Find.CurrentMap;

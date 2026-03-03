@@ -1,43 +1,45 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 
+namespace PawnEditor;
 
-namespace PawnEditor
+[UsedImplicitly]
+[HotSwappable]
+public class PawnEditorMod : Mod
 {
-    [UsedImplicitly]
-    [HotSwappable]
-    public class PawnEditorMod : Mod
+    public static Settings Settings = new();
+
+    private readonly Listing_Horizontal _listing = new();
+
+    public PawnEditorMod(ModContentPack content) : base(content)
     {
-        public static Settings Settings;
-        public override string SettingsCategory() => "Pawn Editor";
-        private readonly Listing_Horizontal listing = new Listing_Horizontal();
+        var harmony = new Harmony("com.isorex.pawneditor");
+        harmony.PatchAll();
 
-        public PawnEditorMod(ModContentPack content) : base(content)
-        {
-            var harmony = new Harmony("com.isorex.pawneditor");
-            harmony.PatchAll();
+        Settings = GetSettings<Settings>();
+    }
 
-            Settings = GetSettings<Settings>(); 
-        }
+    public override string SettingsCategory()
+    {
+        return "Pawn Editor";
+    }
 
-        public override void DoSettingsWindowContents(Rect inRect)
-        {
-            listing.Begin(inRect);
-            listing.ButtonTextLabeled("Restriction Mode", Settings.Restriction.ToString(), 6);
-            if (listing.ButtonTextLabeled("Window Size", Settings.Size.ToString(), 6))
-            {
-                Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>()
-                {
-                    new FloatMenuOption(Settings.WindowSize.Small.ToString(), () => Settings.Size = Settings.WindowSize.Small),
-                    new FloatMenuOption(Settings.WindowSize.Medium.ToString(), () => Settings.Size = Settings.WindowSize.Medium),
-                    new FloatMenuOption(Settings.WindowSize.Large.ToString(), () => Settings.Size = Settings.WindowSize.Large)
-                }));
-            }
+    public override void DoSettingsWindowContents(Rect inRect)
+    {
+        _listing.Begin(inRect);
+        _listing.ButtonTextLabeled("Restriction Mode", Settings.Restriction.ToString(), 6);
+        if (_listing.ButtonTextLabeled("Window Size", Settings.Size.ToString(), 6))
+            Find.WindowStack.Add(new FloatMenu([
+                new FloatMenuOption(nameof(Settings.WindowSize.Small),
+                    () => Settings.Size = Settings.WindowSize.Small),
+                new FloatMenuOption(nameof(Settings.WindowSize.Medium),
+                    () => Settings.Size = Settings.WindowSize.Medium),
+                new FloatMenuOption(nameof(Settings.WindowSize.Large),
+                    () => Settings.Size = Settings.WindowSize.Large)
+            ]));
 
-            listing.End();
-        }
+        _listing.End();
     }
 }

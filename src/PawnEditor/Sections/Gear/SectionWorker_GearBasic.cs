@@ -1,6 +1,4 @@
-﻿using System.IO;
-using RimWorld;
-using UnityEngine;
+﻿using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -14,6 +12,5 @@ public class SectionWorker_GearBasic : SectionWorker
 
     protected override void DoSectionContents(ref Rect inRect, Pawn pawn)
     {
-       
     }
 }

@@ -6,7 +6,8 @@ namespace PawnEditor;
 
 public class DefTable_Tattoos : DefTable
 {
-    public DefTable_Tattoos(TableDef def, Func<IEnumerable<Def>> thingsGetter, Def defaultThing) : base(def, thingsGetter, defaultThing)
+    public DefTable_Tattoos(TableDef def, Func<IEnumerable<Def>> thingsGetter, Def defaultThing) : base(def,
+        thingsGetter, defaultThing)
     {
     }
 

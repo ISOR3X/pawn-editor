@@ -5,7 +5,7 @@ namespace PawnEditor;
 
 public class GUIColor : IDisposable
 {
-    private Color oldColor;
+    private readonly Color oldColor;
 
     public GUIColor(Color newColor)
     {

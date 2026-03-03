@@ -6,23 +6,21 @@ namespace PawnEditor;
 
 public static class TabUtility
 {
-    private static List<TabDef> allTabDefs;
-
     private static List<TabDef> AllTabDefs
     {
         get
         {
-            if (allTabDefs.NullOrEmpty())
-            {
-                allTabDefs = DefDatabase<TabDef>.AllDefsListForReading;
-            }
+            if (field.NullOrEmpty()) field = DefDatabase<TabDef>.AllDefsListForReading;
 
-            return allTabDefs;
+            return field;
         }
-    }
+    } = [];
 
-    public static List<TabDef> GetTabDefsForPawn(Pawn pawn)
+    public static List<TabDef> GetTabDefsForPawn(Pawn? pawn)
     {
-        return AllTabDefs.Where(tabDef => tabDef.tabCategory.HasFlag(PawnUtility.GetPawnCategory(pawn))).OrderBy(tabDef => tabDef.priority).ToList();
+        if (pawn == null) return [];
+
+        return AllTabDefs.Where(tabDef => tabDef.tabCategory.HasFlag(PawnUtility.GetPawnCategory(pawn)))
+            .OrderBy(tabDef => tabDef.priority).ToList();
     }
 }

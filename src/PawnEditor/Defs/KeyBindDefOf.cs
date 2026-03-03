@@ -2,14 +2,16 @@
 using RimWorld;
 using Verse;
 
-namespace PawnEditor
-{
-    [DefOf]
-    [UsedImplicitly]
-    public static class KeyBindingDefOf
-    {
-        public static KeyBindingDef PawnEditor_OpenEditor;
+namespace PawnEditor;
 
-        static KeyBindingDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof(KeyBindingDefOf));
+[DefOf]
+[UsedImplicitly]
+public static class KeyBindingDefOf
+{
+    public static readonly KeyBindingDef PawnEditor_OpenEditor = null!;
+
+    static KeyBindingDefOf()
+    {
+        DefOfHelper.EnsureInitializedInCtor(typeof(KeyBindingDefOf));
     }
 }

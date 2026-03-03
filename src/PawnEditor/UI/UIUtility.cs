@@ -7,12 +7,12 @@ namespace PawnEditor;
 [HotSwappable]
 public static class UIUtility
 {
-    public const float scrollBarWidth = 16f;
-    public const float scrollBarWidth_WithMargin = scrollBarWidth + 4f;
-    public static readonly Vector2 BottomButtonSize = new(150f, 38f);
+    public const float ScrollBarWidth = 16f;
+    public const float ScrollBarWidth_WithMargin = ScrollBarWidth + 4f;
     public const float ButtonHeight = 30f;
     public const float ButtonPadding = 40f;
     public const float LabelPadding = 10f;
+    public static readonly Vector2 BottomButtonSize = new(150f, 38f);
 
     public static Rect TakeTopPart(ref this Rect rect, float pixels)
     {
@@ -88,8 +88,8 @@ public static class UIUtility
         if (component == Widgets.ColorComponents.Hue)
         {
             // Create color keys for the gradient
-            GradientColorKey[] colorKeys = new GradientColorKey[7];
-            for (int i = 0; i < colorKeys.Length; i++)
+            var colorKeys = new GradientColorKey[7];
+            for (var i = 0; i < colorKeys.Length; i++)
             {
                 var value = i / 6f;
                 if (i == 6) value -= 0.001f; // Prevent wraparound
@@ -97,7 +97,7 @@ public static class UIUtility
             }
 
             // Create alpha keys for the gradient
-            GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
+            var alphaKeys = new GradientAlphaKey[2];
             alphaKeys[0] = new GradientAlphaKey(1.0f, 0.0f);
             alphaKeys[1] = new GradientAlphaKey(1.0f, 1.0f);
 
@@ -111,7 +111,7 @@ public static class UIUtility
         colors[0] = new GradientColorKey(color.SetComponent(component, 0), 0f);
         colors[0] = new GradientColorKey(color.SetComponent(component, 1), 1f);
 
-        gradient.SetKeys(colors, new[] { new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1) });
+        gradient.SetKeys(colors, [new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1)]);
         return gradient;
     }
 
@@ -133,7 +133,8 @@ public static class UIUtility
             case Widgets.ColorComponents.Value:
                 return v;
             default:
-                throw new ArgumentOutOfRangeException(nameof(component), component, "Invalid color component, only RGB/HSV are supported.");
+                throw new ArgumentOutOfRangeException(nameof(component), component,
+                    "Invalid color component, only RGB/HSV are supported.");
         }
     }
 
@@ -164,22 +165,23 @@ public static class UIUtility
                 color = Color.HSVToRGB(h, s, v);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(component), component, "Invalid color component, only RGB/HSV are supported.");
+                throw new ArgumentOutOfRangeException(nameof(component), component,
+                    "Invalid color component, only RGB/HSV are supported.");
         }
 
         return color;
     }
 
-    public static void DefIconPreview(Rect inRect, Def def, Color? color = null, float scale = 1.1f)
+    public static void DefIconPreview(Rect inRect, Def? def, Color? color = null, float scale = 1.1f)
     {
         color ??= Color.white;
 
         if (!Mouse.IsOver(inRect)) return;
-        
-        Rect r = new Rect(UI.MousePositionOnUI.x + 10f, UI.MousePositionOnUIInverted.y, 100f, 100f + Text.LineHeight);
+
+        var r = new Rect(UI.MousePositionOnUI.x + 10f, UI.MousePositionOnUIInverted.y, 100f, 100f + Text.LineHeight);
         Find.WindowStack.ImmediateWindow(12918217, r, WindowLayer.Super, () =>
         {
-            Rect rect2 = r.AtZero();
+            var rect2 = r.AtZero();
             rect2.height -= Text.LineHeight;
             Widgets.DrawHighlight(rect2);
             if (def == null)
@@ -188,22 +190,24 @@ public static class UIUtility
             Widgets.LabelFit(new Rect(0.0f, rect2.yMax, rect2.width, Text.LineHeight), def.LabelCap);
             Text.Anchor = TextAnchor.UpperLeft;
             using (new GUIColor(color.Value))
+            {
                 Widgets.DefIcon(rect2, def, scale: scale);
+            }
         });
     }
 
     public static int IncrementWithScroll(Rect inRect, int value, int shiftIncrement = -1)
     {
         // Increment/ decrement value with mouse scroll. Uses a scrollview to prevent scrolling of other scrollviews due to mouse scroll.
-        Vector2 v = Vector2.zero;
-        Widgets.BeginScrollView(inRect,ref v, inRect);
+        var v = Vector2.zero;
+        Widgets.BeginScrollView(inRect, ref v, inRect);
         if (Mouse.IsOver(inRect))
         {
-            string tooltip = $"Scroll to change value";
+            var tooltip = "Scroll to change value";
             if (shiftIncrement != -1)
                 tooltip += $", hold shift to increment by {shiftIncrement}";
             TooltipHandler.TipRegion(inRect, tooltip);
-            
+
             var scroll = Input.mouseScrollDelta.y;
             if (Mathf.Approximately(scroll, 1) && !Utility.HasDoneOnce)
             {
@@ -226,6 +230,7 @@ public static class UIUtility
                 Utility.HasDoneOnce = false;
             }
         }
+
         Widgets.EndScrollView();
 
         return value;

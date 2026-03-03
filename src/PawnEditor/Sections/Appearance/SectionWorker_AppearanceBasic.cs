@@ -7,7 +7,7 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_AppearanceBasic : SectionWorker
 {
-    readonly Listing_Horizontal listing = new Listing_Horizontal();
+    private readonly Listing_Horizontal listing = new();
 
     public SectionWorker_AppearanceBasic(SectionDef def) : base(def)
     {
@@ -22,17 +22,17 @@ public class SectionWorker_AppearanceBasic : SectionWorker
         if (ModsConfig.BiotechActive)
         {
             listing.ButtonTextLabeled("Xenotype", pawn.genes.XenotypeLabelCap, 4);
-            
+
             var races = GetRacesForPawn(pawn);
             if (!races.NullOrEmpty()) listing.ButtonTextLabeled("Race", pawn.kindDef.race.LabelCap, 4);
         }
 
         listing.End();
-        inRect.TakeTopPart(listing.totalHeight);
+        inRect.TakeTopPart(listing.TotalHeight);
     }
 
     private static List<ThingDef> GetRacesForPawn(Pawn pawn)
     {
-        return new List<ThingDef>();
+        return [];
     }
 }

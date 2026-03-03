@@ -9,10 +9,13 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public abstract class ColumnWorker
 {
-    public ColumnDef def;
     protected const int DefaultCellHeight = 30;
     private static readonly Texture2D SortingIcon = ContentFinder<Texture2D>.Get("UI/Icons/Sorting");
-    private static readonly Texture2D SortingDescendingIcon = ContentFinder<Texture2D>.Get("UI/Icons/SortingDescending");
+
+    private static readonly Texture2D
+        SortingDescendingIcon = ContentFinder<Texture2D>.Get("UI/Icons/SortingDescending");
+
+    public required ColumnDef Def;
     protected virtual TextAnchor LabelAlignment => TextAnchor.LowerCenter;
 
     protected virtual Color HeaderColor => Color.white;
@@ -22,35 +25,39 @@ public abstract class ColumnWorker
 
     public virtual void DoHeader(Rect rect, DefTable defTable)
     {
-        if (!def.label.NullOrEmpty())
+        if (!Def.label.NullOrEmpty())
         {
             using (new TextBlock(HeaderFont, LabelAlignment, false))
             {
-                Rect rect1 = rect;
+                var rect1 = rect;
                 rect1.y += 3f;
-                Widgets.Label(rect1, def.LabelCap.Resolve().Truncate(rect.width).Colorize(HeaderColor));
+                Widgets.Label(rect1, Def.LabelCap.Resolve().Truncate(rect.width).Colorize(HeaderColor));
             }
         }
-        else if (def.HeaderIcon != null)
+        else if (Def.HeaderIcon != null)
         {
-            Vector2 headerIconSize = def.HeaderIconSize;
-            int num = (int)((rect.width - (double)headerIconSize.x) / 2.0);
-            GUI.DrawTexture(new Rect(rect.x + num, rect.yMax - headerIconSize.y, headerIconSize.x, headerIconSize.y).ContractedBy(2f), def.HeaderIcon);
+            var headerIconSize = Def.HeaderIconSize;
+            var num = (int)((rect.width - (double)headerIconSize.x) / 2.0);
+            GUI.DrawTexture(
+                new Rect(rect.x + num, rect.yMax - headerIconSize.y, headerIconSize.x, headerIconSize.y)
+                    .ContractedBy(2f), Def.HeaderIcon);
         }
 
-        if (defTable.SortingBy != null && defTable.SortingBy.Equals(def))
+        if (defTable.SortingBy != null && defTable.SortingBy.Equals(Def))
         {
-            Texture2D image = defTable.SortingDescending ? SortingDescendingIcon : SortingIcon;
-            GUI.DrawTexture(new Rect((float)(rect.xMax - (double)image.width - 1.0), (float)(rect.yMax - (double)image.height - 1.0), image.width, image.height), image);
+            var image = defTable.SortingDescending ? SortingDescendingIcon : SortingIcon;
+            GUI.DrawTexture(
+                new Rect((float)(rect.xMax - (double)image.width - 1.0),
+                    (float)(rect.yMax - (double)image.height - 1.0), image.width, image.height), image);
         }
 
-        if (!def.HeaderInteractable)
+        if (!Def.HeaderInteractable)
             return;
-        Rect interactableHeaderRect = GetInteractableHeaderRect(rect, defTable);
+        var interactableHeaderRect = GetInteractableHeaderRect(rect, defTable);
         if (Mouse.IsOver(interactableHeaderRect))
         {
             Widgets.DrawHighlight(interactableHeaderRect);
-            string headerTip = GetHeaderTip(defTable);
+            var headerTip = GetHeaderTip(defTable);
             if (!headerTip.NullOrEmpty())
                 TooltipHandler.TipRegion(interactableHeaderRect, (TipSignal)headerTip);
         }
@@ -62,62 +69,77 @@ public abstract class ColumnWorker
 
     public abstract void DoCell(Rect inRect, Def thing, DefTable defTable);
 
-    public virtual bool CanGroupWith(Def thing, Def other) => false;
+    public virtual bool CanGroupWith(Def thing, Def other)
+    {
+        return false;
+    }
 
     public virtual int GetMinWidth(DefTable defTable)
     {
-        if (!def.label.NullOrEmpty())
+        if (!Def.label.NullOrEmpty())
         {
             Text.Font = HeaderFont;
-            int minWidth = Mathf.CeilToInt(Text.CalcSize(def.LabelCap).x);
+            var minWidth = Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
             Text.Font = GameFont.Small;
             return minWidth;
         }
 
-        return def.HeaderIcon != null ? Mathf.CeilToInt(def.HeaderIconSize.x) : 1;
+        return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.x) : 1;
     }
 
-    public virtual int GetMaxWidth(DefTable defTable) => 1000000;
+    public virtual int GetMaxWidth(DefTable defTable)
+    {
+        return 1000000;
+    }
 
-    public virtual int GetOptimalWidth(DefTable defTable) => GetMinWidth(defTable);
+    public virtual int GetOptimalWidth(DefTable defTable)
+    {
+        return GetMinWidth(defTable);
+    }
 
-    public virtual int GetMinCellHeight(Def thing) => (int)DefTable.defaultRowHeight;
+    public virtual int GetMinCellHeight(Def thing)
+    {
+        return (int)DefTable.DefaultRowHeight;
+    }
 
     public virtual int GetMinHeaderHeight(DefTable defTable)
     {
-        if (!def.label.NullOrEmpty())
+        if (!Def.label.NullOrEmpty())
         {
             Text.Font = HeaderFont;
-            int minHeaderHeight = Mathf.CeilToInt(Text.CalcSize(def.LabelCap).y);
+            var minHeaderHeight = Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).y);
             Text.Font = GameFont.Small;
             return minHeaderHeight;
         }
 
-        return def.HeaderIcon != null ? Mathf.CeilToInt(def.HeaderIconSize.y) : 0;
+        return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.y) : 0;
     }
 
-    public virtual int Compare(Def a, Def b) => 0;
+    public virtual int Compare(Def a, Def b)
+    {
+        return 0;
+    }
 
     protected virtual Rect GetInteractableHeaderRect(Rect headerRect, DefTable defTable)
     {
-        float height = Mathf.Min(25f, headerRect.height);
+        var height = Mathf.Min(25f, headerRect.height);
         return new Rect(headerRect.x, headerRect.yMax - height, headerRect.width, height);
     }
 
     protected virtual void HeaderClicked(Rect headerRect, DefTable defTable)
     {
-        if (!def.sortable || Event.current.shift)
+        if (!Def.sortable || Event.current.shift)
             return;
         if (Event.current.button == 0)
         {
-            if (defTable.SortingBy == null || !defTable.SortingBy.Equals(def))
+            if (defTable.SortingBy == null || !defTable.SortingBy.Equals(Def))
             {
-                defTable.SortBy(def, true);
+                defTable.SortBy(Def, true);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else if (defTable.SortingDescending)
             {
-                defTable.SortBy(def, false);
+                defTable.SortBy(Def, false);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else
@@ -130,9 +152,9 @@ public abstract class ColumnWorker
         {
             if (Event.current.button != 1)
                 return;
-            if (defTable.SortingBy == null || !defTable.SortingBy.Equals(def))
+            if (defTable.SortingBy == null || !defTable.SortingBy.Equals(Def))
             {
-                defTable.SortBy(def, false);
+                defTable.SortBy(Def, false);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else if (defTable.SortingDescending)
@@ -142,7 +164,7 @@ public abstract class ColumnWorker
             }
             else
             {
-                defTable.SortBy(def, true);
+                defTable.SortBy(Def, true);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
         }
@@ -150,10 +172,10 @@ public abstract class ColumnWorker
 
     protected virtual string GetHeaderTip(DefTable defTable)
     {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (!def.headerTip.NullOrEmpty())
-            stringBuilder.Append(def.headerTip);
-        if (def.sortable)
+        var stringBuilder = new StringBuilder();
+        if (!Def.headerTip.NullOrEmpty())
+            stringBuilder.Append(Def.headerTip);
+        if (Def.sortable)
         {
             if (stringBuilder.Length != 0)
             {

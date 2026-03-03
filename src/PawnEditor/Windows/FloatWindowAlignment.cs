@@ -9,5 +9,5 @@ public enum FloatWindowAlignment
     TopRight,
     TopCenter,
     CenterLeft,
-    CenterRight,
+    CenterRight
 }

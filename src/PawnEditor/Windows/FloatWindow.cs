@@ -7,39 +7,40 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class FloatWindow : Window
 {
-    protected virtual FloatWindowAlignment alignment => FloatWindowAlignment.BottomRight;
-    protected virtual bool UseWidgetWidth => false;
     private static readonly Vector2 InitialPositionShift = new(0, 8f);
-    private readonly Rect boundWidgetRect;
+    private readonly Rect _boundWidgetRect;
 
     protected FloatWindow(Rect boundWidgetRect)
     {
-        this.boundWidgetRect = boundWidgetRect;
+        _boundWidgetRect = boundWidgetRect;
         onlyOneOfTypeAllowed = true;
         layer = WindowLayer.Super;
         // closeOnClickedOutside = true;
         // doCloseX = true;
     }
 
+    protected virtual FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
+    protected virtual bool UseWidgetWidth => false;
+
     public override void SetInitialSizeAndPosition()
     {
         base.SetInitialSizeAndPosition();
-        if (UseWidgetWidth) windowRect.width = boundWidgetRect.width;
-        this.windowRect.position = CalculatePositionFromBoundWidget(boundWidgetRect);
+        if (UseWidgetWidth) windowRect.width = _boundWidgetRect.width;
+        windowRect.position = CalculatePositionFromBoundWidget(_boundWidgetRect);
     }
 
     public override void ExtraOnGUI()
     {
         base.ExtraOnGUI();
-        this.CloseIfOutOfBouds();
-        this.CloseIfClickedOutside();
+        CloseIfOutOfBounds();
+        CloseIfClickedOutside();
     }
 
-    public Vector2 CalculatePositionFromBoundWidget(Rect widgetRect)
+    private Vector2 CalculatePositionFromBoundWidget(Rect widgetRect)
     {
         widgetRect = UI.GUIToScreenRect(widgetRect);
-        Vector2 position = widgetRect.position;
-        switch (alignment)
+        var position = widgetRect.position;
+        switch (Alignment)
         {
             case FloatWindowAlignment.BottomRight:
                 position.x += widgetRect.width - windowRect.width + InitialPositionShift.x;
@@ -49,9 +50,34 @@ public abstract class FloatWindow : Window
                 position.x += InitialPositionShift.x;
                 position.y += widgetRect.height + InitialPositionShift.y;
                 break;
+            case FloatWindowAlignment.BottomCenter:
+                position.x += (widgetRect.width - windowRect.width) / 2 + InitialPositionShift.x;
+                position.y += widgetRect.height + InitialPositionShift.y;
+                break;
+            case FloatWindowAlignment.TopLeft:
+                position.x += InitialPositionShift.x;
+                position.y -= windowRect.height + InitialPositionShift.y;
+                break;
+            case FloatWindowAlignment.TopRight:
+                position.x += widgetRect.width - windowRect.width + InitialPositionShift.x;
+                position.y -= windowRect.height + InitialPositionShift.y;
+                break;
+            case FloatWindowAlignment.TopCenter:
+                position.x += (widgetRect.width - windowRect.width) / 2 + InitialPositionShift.x;
+                position.y -= windowRect.height + InitialPositionShift.y;
+                break;
+            case FloatWindowAlignment.CenterLeft:
+                position.x -= windowRect.width + InitialPositionShift.x;
+                position.y += (widgetRect.height - windowRect.height) / 2 + InitialPositionShift.y;
+                break;
+            case FloatWindowAlignment.CenterRight:
+                position.x += widgetRect.width + InitialPositionShift.x;
+                position.y += (widgetRect.height - windowRect.height) / 2 + InitialPositionShift.y;
+                break;
             default:
-                throw new ArgumentOutOfRangeException(alignment.ToString());
+                throw new ArgumentOutOfRangeException(Alignment.ToString());
         }
+
         const float margin = 10f;
         position.x = Mathf.Clamp(position.x, 0 + margin, Screen.width - margin);
         position.y = Mathf.Clamp(position.y, 0 + margin, Screen.height - margin);
@@ -73,14 +99,14 @@ public abstract class FloatWindow : Window
         }
     }
 
-    private void CloseIfOutOfBouds()
+    private void CloseIfOutOfBounds()
     {
         if (windowRect.Contains(Event.current.mousePosition))
             return;
-        float num = GenUI.DistFromRect(windowRect, Event.current.mousePosition);
+        var num = GenUI.DistFromRect(windowRect, Event.current.mousePosition);
         if (num <= 95.0)
             return;
-        this.Close(false);
+        Close(false);
     }
 
     private void CloseIfClickedOutside()

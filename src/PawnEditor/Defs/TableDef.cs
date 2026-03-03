@@ -6,11 +6,11 @@ namespace PawnEditor;
 
 public class TableDef : Def
 {
-    public List<ColumnDef> columns;
-    public Type workerClass = typeof(DefTable);
-    public bool doAlternateStyle = false;
+    public required List<ColumnDef> columns;
     public float defaultRowHeight = 30f;
+    public bool doAlternateStyle = false;
     public bool highlightSelected = true;
+    public ColumnDef? searchColumn;
     public bool showSearchBar = true;
-    public ColumnDef searchColumn;
+    public Type workerClass = typeof(DefTable);
 }
