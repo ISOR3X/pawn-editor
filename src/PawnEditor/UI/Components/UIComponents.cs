@@ -257,6 +257,7 @@ public static partial class UIComponents
 
     public static void DrawGradient(Rect inRect, Gradient gradient)
     {
+        // TODO: Keep an eye on performance of this function.
         var texture = new Texture2D((int)inRect.width, (int)inRect.height, TextureFormat.RGBA32, false);
 
         for (var i = 0; i < texture.width; i++)

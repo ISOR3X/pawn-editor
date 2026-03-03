@@ -84,23 +84,29 @@ public static class PawnUtility
         {
             var location = pawnLoc.Location;
             if (pawn.Spawned) pawn.DeSpawn();
-            if (location is Map map)
+            switch (location)
             {
-                var pos = position != default ? position : CellFinder.RandomEdgeCell(map);
-                GenPlace.TryPlaceThing(pawn, pos, map, ThingPlaceMode.Near);
-            }
-            else if (location is Caravan caravan)
-            {
-                if (pawn.Faction == Faction.OfPlayer) caravan.AddPawn(pawn, false);
-                else Messages.Message("Cannot add non-player pawn to caravan.", MessageTypeDefOf.RejectInput);
-            }
-            else if (location is World)
-            {
-                if (pawn.IsWorldPawn())
-                    Messages.Message("Pawn already exists as a world pawn", MessageTypeDefOf.RejectInput);
-                pawn.teleporting = true; // To prevent pawn from being moved to another faction.
-                Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
-                pawn.teleporting = false;
+                case Map map:
+                {
+                    var pos = position != default ? position : CellFinder.RandomEdgeCell(map);
+                    GenPlace.TryPlaceThing(pawn, pos, map, ThingPlaceMode.Near);
+                    break;
+                }
+                case Caravan caravan when pawn.Faction == Faction.OfPlayer:
+                    caravan.AddPawn(pawn, false);
+                    break;
+                case Caravan caravan:
+                    Messages.Message("Cannot add non-player pawn to caravan.", MessageTypeDefOf.RejectInput);
+                    break;
+                case World:
+                {
+                    if (pawn.IsWorldPawn())
+                        Messages.Message("Pawn already exists as a world pawn", MessageTypeDefOf.RejectInput);
+                    pawn.teleporting = true; // To prevent pawn from being moved to another faction.
+                    Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
+                    pawn.teleporting = false;
+                    break;
+                }
             }
         }
         catch (Exception e)
@@ -110,30 +116,32 @@ public static class PawnUtility
         }
     }
 
-    public static PawnLocation GetLocation(this Pawn pawn)
+    extension(Pawn pawn)
     {
-        return new PawnLocation(pawn);
+        public PawnLocation GetLocation()
+        {
+            return new PawnLocation(pawn);
+        }
+
+        public void FullDelete()
+        {
+            Window_Editor.selectedPawnGroup?.Remove(pawn);
+            pawn.Destroy();
+            Find.WorldPawns.RemovePawn(pawn);
+        }
     }
 
-
-    public static void FullDelete(this Pawn pawn)
-    {
-        Window_Editor.selectedPawnGroup?.Remove(pawn);
-        pawn.Destroy();
-        Find.WorldPawns.RemovePawn(pawn);
-    }
 
     public static void RandomizeInPlace(Pawn pawn)
     {
         if (pawn.Faction != Window_Editor.GetSelectedFaction()) return;
 
         // Store the old pawn's data and delete the pawn itself.
-        var oldPawn = pawn;
-        var selected = Window_Editor.GetSelectedPawn() == oldPawn;
-        var index = Window_Editor.selectedPawnGroup!.IndexOf(oldPawn);
-        var location = oldPawn.GetLocation();
-        var position = oldPawn.Position;
-        oldPawn.FullDelete();
+        var isSelected = Window_Editor.GetSelectedPawn() == pawn;
+        var index = Window_Editor.selectedPawnGroup.IndexOf(pawn);
+        var location = pawn.GetLocation();
+        var position = pawn.Position;
+        pawn.FullDelete();
 
         // Generate a new pawn.
         var req = new PawnGenerationRequest(PawnKindDefOf.Colonist, Window_Editor.GetSelectedFaction());
@@ -144,7 +152,7 @@ public static class PawnUtility
 
         // Update list
         Window_Editor.selectedPawnGroup.Insert(index, p);
-        if (selected) Window_Editor.TrySelect(p);
+        if (isSelected) Window_Editor.TrySelect(p);
     }
 
     public static RenderTexture GetScaledPortrait(Pawn pawn, Rect inRect)

@@ -2,8 +2,8 @@
 <Defs>
     <KeyBindingDef>
         <defName>PawnEditor_OpenEditor</defName>
-        <label>Open editor</label>
+        <label>Open pawn editor</label>
         <category>Development</category>
-        <defaultKeyCodeA>KeypadMinus</defaultKeyCodeA>
+        <defaultKeyCodeA>KeypadEnter</defaultKeyCodeA>
     </KeyBindingDef>
 </Defs>

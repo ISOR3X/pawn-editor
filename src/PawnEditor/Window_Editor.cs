@@ -9,53 +9,9 @@ namespace PawnEditor;
 [HotSwappable]
 public partial class Window_Editor : Window
 {
-    private void DoLeftSection(Rect inRect)
-    {
-        _listing.Begin(inRect);
-        using (new TextBlock(GameFont.Tiny))
-        {
-            _listing.Label("Selected faction");
-        }
-
-        if (_listing.ButtonText_TruncateWithTooltip(selectedFaction != null ? selectedFaction.Name : "Wildlife"))
-            Find.WindowStack.Add(FactionFloatMenu());
-
-        _listing.Gap();
-        var leftoverRect = _listing.PushDownFromHere();
-
-        _listing.Gap();
-        using (new TextBlock(GameFont.Tiny))
-        {
-            _listing.Label("Overview");
-        }
-
-        if (_listing.ButtonText_TruncateWithTooltip("Colony"))
-        {
-        }
-
-        if (_listing.ButtonText_TruncateWithTooltip("Faction..."))
-        {
-        }
-
-        _listing.Gap();
-        var rowRect = _listing.GetRect(30f);
-        if (UIComponents.ButtonText_TruncateWithTooltip(rowRect.LeftHalf(), "Save"))
-        {
-        }
-
-        if (UIComponents.ButtonText_TruncateWithTooltip(rowRect.RightHalf(), "Load"))
-        {
-        }
-
-        _listing.End();
-
-        UIComponents.DrawReorderablePawnList(leftoverRect, ref selectedPawnGroup, selectedPawn, out var newSelectedPawn,
-            out _);
-        TrySelect(newSelectedPawn);
-    }
-
     #region Fields
-
+    // TODO: Should these fields be static?
+    
     // Pawn-related fields
     // These are private, so they are only set through the TrySelect methods.
     private static Faction? selectedFaction;
@@ -138,6 +94,15 @@ public partial class Window_Editor : Window
         TryRecachePawnGroup();
     }
 
+    public override void PostClose()
+    {
+        base.PostClose();
+        selectedTabDef = null;
+        secondarySelectedTabDef = null;
+        selectedTabDefsForPawn.Clear();
+        tabsList.Clear();
+    }
+
     public override void DoWindowContents(Rect inRect)
     {
         DoLeftSection(inRect.TakeLeftPart(UIComponents.CardSize.x + 24f));
@@ -200,4 +165,51 @@ public partial class Window_Editor : Window
     }
 
     #endregion
+
+    private void DoLeftSection(Rect inRect)
+    {
+        _listing.Begin(inRect);
+        using (new TextBlock(GameFont.Tiny))
+        {
+            _listing.Label("Selected faction");
+        }
+
+        if (_listing.ButtonText_TruncateWithTooltip(selectedFaction != null ? selectedFaction.Name : "Wildlife"))
+            Find.WindowStack.Add(FactionFloatMenu());
+
+        _listing.Gap();
+        var leftoverRect = _listing.PushDownFromHere();
+
+        _listing.Gap();
+        using (new TextBlock(GameFont.Tiny))
+        {
+            _listing.Label("Overview");
+        }
+
+        if (_listing.ButtonText_TruncateWithTooltip("Colony"))
+        {
+            Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
+        }
+
+        if (_listing.ButtonText_TruncateWithTooltip("Faction..."))
+        {
+            Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
+        }
+
+        _listing.Gap();
+        var rowRect = _listing.GetRect(30f);
+        if (UIComponents.ButtonText_TruncateWithTooltip(rowRect.LeftHalf(), "Save"))
+        {
+        }
+
+        if (UIComponents.ButtonText_TruncateWithTooltip(rowRect.RightHalf(), "Load"))
+        {
+        }
+
+        _listing.End();
+
+        UIComponents.DrawReorderablePawnList(leftoverRect, ref selectedPawnGroup, selectedPawn, out var newSelectedPawn,
+            out _);
+        TrySelect(newSelectedPawn);
+    }
 }

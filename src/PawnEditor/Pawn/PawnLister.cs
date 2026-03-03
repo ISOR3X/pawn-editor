@@ -31,6 +31,7 @@ public static class PawnLister
     {
         get
         {
+            // TODO: Keep an eye on performance of this.
             PawnsByFactionTemporary.Clear();
             PawnsNoFactionTemporary.Clear();
             PawnsByFactionTemporary.AddRange(
@@ -39,7 +40,7 @@ public static class PawnLister
                          .Where(p => !(p.IsWorldPawn() && Find.WorldPawns.GetSituation(p) == WorldPawnSituation.Dead) ||
                                      !PawnEditorMod.Settings.HideDeadWorldPawns)
                          .GroupBy(p => p.Faction))
-                if (group.Key != null)
+                if (group.Key != null && PawnsByFactionTemporary.ContainsKey(group.Key))
                     PawnsByFactionTemporary[group.Key] = group.ToList();
                 else
                     PawnsNoFactionTemporary.AddRange(group);

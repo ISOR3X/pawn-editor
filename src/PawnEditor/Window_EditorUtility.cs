@@ -18,19 +18,19 @@ public partial class Window_Editor
     public static void TrySelect(Pawn? pawn)
     {
         if (pawn == selectedPawn) return;
-        var currentSelectedPawn = selectedPawn;
+        var prevSelectedPawn = selectedPawn;
         selectedPawn = pawn;
 
         // selectedTabDef?.Worker.Notify_ContentChanged();
         // secondarySelectedTabDef?.Worker.Notify_ContentChanged();
 
-        if (pawn?.Faction != selectedPawn?.Faction)
+        if (selectedPawn?.Faction != prevSelectedPawn?.Faction)
         {
             selectedFaction = pawn?.Faction;
             TryRecachePawnGroup();
         }
 
-        if (PawnUtility.GetPawnCategory(pawn) != PawnUtility.GetPawnCategory(currentSelectedPawn)) RecacheTabs();
+        if (PawnUtility.GetPawnCategory(pawn) != PawnUtility.GetPawnCategory(prevSelectedPawn)) RecacheTabs();
     }
 
     public static Pawn? GetSelectedPawn()
@@ -47,8 +47,8 @@ public partial class Window_Editor
     {
         selectedTabDefsForPawn.Clear();
         selectedTabDefsForPawn = TabUtility.GetTabDefsForPawn(selectedPawn);
-        selectedTabDef = selectedTabDefsForPawn.First();
-        selectedTabDef.Worker.Notify_ContentChanged();
+        selectedTabDef = selectedTabDefsForPawn.FirstOrDefault();
+        selectedTabDef?.Worker.Notify_ContentChanged();
         var tab = selectedTabDefsForPawn.ElementAtOrDefault(1);
         secondarySelectedTabDef = tab;
         if (tab != null && secondarySelectedTabDef != null) secondarySelectedTabDef.Worker.Notify_ContentChanged();
@@ -94,7 +94,8 @@ public partial class Window_Editor
             if (faction != null)
             {
                 label = faction.def == FactionDefOf.Ancients ? faction.def.LabelCap : faction.Name;
-                pawnCount = Pawns_ByFaction[faction].Count;
+                Pawns_ByFaction.TryGetValue(faction, out var pawnsInFaction);
+                pawnCount = pawnsInFaction?.Count ?? 0;
                 priority = pawnCount == 0
                     ? -1
                     : priority; // To ensure that empty factions are always at the bottom, excluding the wildlife faction.

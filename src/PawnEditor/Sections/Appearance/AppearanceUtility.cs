@@ -81,13 +81,14 @@ public static class AppearanceUtility
     }
 
     public static void TrySetSkinColor(Color color, ref Pawn pawn, bool silent = true)
-        // We use a reference so when this method is used inside of an action it will still update the pawn.
+        // We use a reference, so when this method is used inside of an action it will still update the pawn.
     {
         if (pawn.story.SkinColor == color) return;
         if (ColorsFromGenes.Keys.Contains(color))
         {
             pawn.story.skinColorOverride = null;
             var geneToRemove = pawn.genes.GetFirstEndogeneByCategory(EndogeneCategory.Melanin);
+            if (geneToRemove == null) return;
             pawn.genes.RemoveGene(pawn.genes.GetGene(geneToRemove));
             pawn.genes.AddGene(ColorsFromGenes[color], false);
             if (!silent) Messages.Message("Changed melanin gene for " + pawn.Name, MessageTypeDefOf.NeutralEvent);
