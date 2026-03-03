@@ -12,10 +12,10 @@ namespace PawnEditor
     {
         #region Fields
 
-        // Pawn related fields
-        // These are private so they are only set through the TrySelect methods.
-        [CanBeNull] private static Faction selectedFaction;
-        [CanBeNull] private static Pawn selectedPawn;
+        // Pawn-related fields
+        // These are private, so they are only set through the TrySelect methods.
+        private static Faction? selectedFaction;
+        private static Pawn? selectedPawn;
         public static List<Pawn> selectedPawnGroup = new();
 
         private static Dictionary<Faction, List<Pawn>> Pawns_ByFaction = new();
@@ -23,11 +23,11 @@ namespace PawnEditor
 
         // Tab related fields
         private static TabDef selectedTabDef;
-        private static TabDef secondarySelectedTabDef;
+        private static TabDef? secondarySelectedTabDef;
         private static List<TabDef> selectedTabDefsForPawn = new();
         private static List<TabRecord> tabsList = new();
 
-        // UI related fields
+        // UI-related fields
         private readonly Listing_Advanced listing = new();
         private Settings.WindowSize windowSize => PawnEditorMod.Settings.Size;
 

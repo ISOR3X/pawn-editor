@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -8,7 +7,7 @@ namespace PawnEditor;
 
 public partial class Window_Editor
 {
-    public static void TrySelect([CanBeNull] Faction faction)
+    public static void TrySelect(Faction? faction)
     {
         if (selectedFaction == faction) return;
         selectedFaction = faction;
@@ -16,7 +15,7 @@ public partial class Window_Editor
         TrySelect(selectedPawnGroup.FirstOrDefault());
     }
 
-    public static void TrySelect([CanBeNull] Pawn pawn)
+    public static void TrySelect(Pawn? pawn)
     {
         if (pawn == selectedPawn) return;
         var currentSelectedPawn = selectedPawn;
@@ -34,14 +33,12 @@ public partial class Window_Editor
         if (PawnUtility.GetPawnCategory(pawn) != PawnUtility.GetPawnCategory(currentSelectedPawn)) RecacheTabs();
     }
 
-    [CanBeNull]
-    public static Pawn GetSelectedPawn()
+    public static Pawn? GetSelectedPawn()
     {
         return selectedPawn;
     }
 
-    [CanBeNull]
-    public static Faction GetSelectedFaction()
+    public static Faction? GetSelectedFaction()
     {
         return selectedFaction;
     }
