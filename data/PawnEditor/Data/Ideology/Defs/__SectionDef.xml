@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_AppearanceTattoos</defName>
+        <label>tattoos</label>
+        <workerClass>PawnEditor.SectionWorker_AppearanceTattoos</workerClass>
+    </PawnEditor.SectionDef>
+</Defs>

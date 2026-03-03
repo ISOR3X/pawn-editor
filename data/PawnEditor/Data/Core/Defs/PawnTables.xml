@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnTableDef>
+        <defName>PawnEditor_ColonyOverview</defName>
+        <workerClass>PawnTable_PlayerPawns</workerClass>
+        <columns>
+            <li>LabelWithIcon</li>
+            <li>GapTiny</li>
+            <li>Gender</li>
+            <li>Age</li>
+            <li>PawnEditor_PawnLocation</li>
+            <li>PawnEditor_PawnType</li>
+            <li MayRequire="Ludeon.RimWorld.Ideology">Ideo</li>
+            <li MayRequire="Ludeon.RimWorld.Biotech">Xenotype</li>
+            <!-- <li>RemainingSpace</li> -->
+        </columns>
+    </PawnTableDef>
+</Defs>

@@ -1,0 +1,15 @@
+<Project>
+    <PropertyGroup>
+        <RootNamespace>ProjectRoot</RootNamespace>
+        <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+        <TargetFramework>net472</TargetFramework>
+        <LangVersion>latest</LangVersion>
+
+        <!-- RimWorld version folder, override per-project if needed -->
+        <RimWorldVersion>1.6</RimWorldVersion>
+
+        <!-- Resolve mod output path from env var with fallback -->
+        <RimWorldModsPath Condition="'$(RIMWORLD_MODS_PATH)' != ''">$(RIMWORLD_MODS_PATH)</RimWorldModsPath>
+        <RimWorldModsPath Condition="'$(RimWorldModsPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods</RimWorldModsPath>
+    </PropertyGroup>
+</Project>

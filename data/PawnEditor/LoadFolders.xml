@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<loadFolders>
+    <v1.6>
+        <li>/</li>
+        <li>1.6</li>
+        <li>Data/Core</li>
+        <li IfModActive="Ludeon.RimWorld.Biotech">Data/Biotech</li>
+        <li IfModActive="Ludeon.RimWorld.Ideology">Data/Ideology</li>
+    </v1.6>
+</loadFolders>

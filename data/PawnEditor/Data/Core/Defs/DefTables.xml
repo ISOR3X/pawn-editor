@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnEditor.TableDef>
+        <defName>PawnEditor_Hairs</defName>
+        <workerClass>PawnEditor.DefTable_Hair</workerClass>
+        <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
+        <columns>
+            <li>PawnEditor_LabelWithIcon</li> 
+            <li>PawnEditor_Gender</li>
+            <li>PawnEditor_Style</li>
+            <li>PawnEditor_ContentSource</li>
+        </columns>
+    </PawnEditor.TableDef>
+    <PawnEditor.TableDef>
+        <defName>PawnEditor_Beards</defName>
+        <workerClass>PawnEditor.DefTable_Hair</workerClass>
+        <!-- <defaultRowHeight>60</defaultRowHeight> -->
+        <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
+        <columns>
+            <li>PawnEditor_LabelWithIcon</li>
+            <li>PawnEditor_Style</li>
+            <li>PawnEditor_ContentSource</li>
+        </columns>
+    </PawnEditor.TableDef>
+</Defs>

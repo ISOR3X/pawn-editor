@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnEditor.TableDef>
+        <defName>PawnEditor_FaceTattoos</defName>
+        <workerClass>PawnEditor.DefTable_Tattoos</workerClass>
+        <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
+        <columns>
+            <li>PawnEditor_LabelWithIcon</li>
+            <li>PawnEditor_Style</li>
+            <li>PawnEditor_ContentSource</li>
+        </columns>
+    </PawnEditor.TableDef>
+    <PawnEditor.TableDef>
+        <defName>PawnEditor_BodyTattoos</defName>
+        <workerClass>PawnEditor.DefTable_Tattoos</workerClass>
+        <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
+        <columns>
+            <li>PawnEditor_LabelWithIcon</li>
+            <li>PawnEditor_Style</li>
+            <li>PawnEditor_ContentSource</li>
+        </columns>
+    </PawnEditor.TableDef>
+</Defs>

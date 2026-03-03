@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnColumnDef>
+        <defName>PawnEditor_PawnLocation</defName>
+        <label>Location</label>
+        <workerClass>PawnEditor.PawnColumnWorker_Location</workerClass>
+        <sortable>true</sortable>
+    </PawnColumnDef>
+    <PawnColumnDef>
+        <defName>PawnEditor_PawnType</defName>
+        <label>Type</label>
+        <workerClass>PawnEditor.PawnColumnWorker_Type</workerClass>
+        <sortable>true</sortable>
+    </PawnColumnDef>
+
+</Defs>

@@ -1,7 +1,35 @@
-bin
-obj
-.vs
-*.pdb
-/Art-Source
-/.idea
-/Source/PawnEditor/.idea
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider cache/options
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+project.lock.json
+project.fragment.lock.json
+artifacts/
+project.assets.json
+project.nuget.cache
+*.nuget.props
+*.nuget.targets
+*.nuget.dgspec.json
+rider.project.restore.info
+rider.project.model.nuget.info
+
+# Build Results of an ATL Project
+[Dd]ebugPS/
+[Rr]eleasePS/
+dlldata.c

@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+            Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{960AA103-39B5-44E3-8007-F7758D2F9F00}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>PawnEditor</RootNamespace>
+        <AssemblyName>PawnEditor</AssemblyName>
+        <ModName>PawnEditor</ModName>
+        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="System"/>
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Data"/>
+        <Reference Include="System.Xml"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Defs\ColumnDef.cs" />
+        <Compile Include="Defs\ColumnDefOf.cs" />
+        <Compile Include="Defs\KeyBindDefOf.cs" />
+        <Compile Include="Defs\PawnTableDefOf.cs" />
+        <Compile Include="Defs\SectionDef.cs" />
+        <Compile Include="Defs\TabDef.cs" />
+        <Compile Include="Defs\TableDef.cs" />
+        <Compile Include="Defs\TableDefOf.cs" />
+        <Compile Include="External\Hotswap.cs" />
+        <Compile Include="Harmony\Patch_WindowResizer.cs" />
+        <Compile Include="QuickAction\QuickActionAttribute.cs" />
+        <Compile Include="QuickAction\QuickActionUtility.cs" />
+        <Compile Include="Pawn\PawnLister.cs" />
+        <Compile Include="Pawn\PawnLocation.cs" />
+        <Compile Include="Pawn\PawnUtility.cs" />
+        <Compile Include="SaveLoadUtility.cs" />
+        <Compile Include="Sections\Appearance\AppearanceUtility.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceBasic.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceHair.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceHeader.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceShape.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceTattoos.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceXenotype.cs" />
+        <Compile Include="Sections\Bio\BioUtility.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_BioAttributes.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_BioBasic.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_BioGroups.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_BioHeader.cs" />
+        <Compile Include="Sections\Gear\SectionWorker_GearBasic.cs" />
+        <Compile Include="Sections\SectionWorker.cs" />
+        <Compile Include="Settings.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_ContentSource.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_Gender.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_Icon.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_Label.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_Style.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_Text.cs" />
+        <Compile Include="Table\DefTable.cs" />
+        <Compile Include="Table\DefTable_Hair.cs" />
+        <Compile Include="Table\DefTable_Tattoos.cs" />
+        <Compile Include="Table\PawnColumnWorkers\PawnColumnWorker_Location.cs" />
+        <Compile Include="Table\PawnColumnWorkers\PawnColumnWorker_Type.cs" />
+        <Compile Include="Tabs\TabUtility.cs" />
+        <Compile Include="Tabs\TabWorker.cs" />
+        <Compile Include="Tabs\TabWorker_Faction.cs" />
+        <Compile Include="Tabs\TabWorker_Pawn.cs" />
+        <Compile Include="Tabs\TabWorker_PawnAppearance.cs" />
+        <Compile Include="Tabs\TabWorker_PawnBio.cs" />
+        <Compile Include="Tabs\TabWorker_FactionOverview.cs" />
+        <Compile Include="TexPawnEditor.cs" />
+        <Compile Include="UI\Components\Cards.cs" />
+        <Compile Include="UI\Components\Carrousel.cs" />
+        <Compile Include="UI\Components\InspectPane.cs" />
+        <Compile Include="UI\Components\UIComponents.cs" />
+        <Compile Include="UI\GUIColor.cs" />
+        <Compile Include="UI\Listing_Horizontal.cs" />
+        <Compile Include="UI\Listing_Advanced.cs" />
+        <Compile Include="UI\UIUtility.cs" />
+        <Compile Include="Utility.cs" />
+        <Compile Include="Windows\Dialog_ColorPicker.cs" />
+        <Compile Include="Windows\FloatWindow.cs" />
+        <Compile Include="Windows\FloatWindowAlignment.cs" />
+        <Compile Include="Windows\FloatWindow_NamePawn.cs" />
+        <Compile Include="Window_Editor.cs" />
+        <Compile Include="Harmony\Patch_OpenEditor.cs" />
+        <Compile Include="PawnEditorMod.cs" />
+        <Compile Include="Window_EditorUtility.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <Publicize Include="Assembly-CSharp" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta" />
+      <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <Target Name="Deploy" AfterTargets="Build">
+        <!-- Delete existing mod directory -->
+        <RemoveDir Directories="$(RimWorldModsPath)\$(ModName)" />
+        <!-- Copy static mod files -->
+        <ItemGroup>
+            <ModFiles Include="$(MSBuildThisFileDirectory)..\..\data\$(ModName)\**\*.*" />
+        </ItemGroup>
+        <Copy
+                SourceFiles="@(ModFiles)"
+                DestinationFiles="@(ModFiles->'$(RimWorldModsPath)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')"
+        />
+        <!-- Copy built DLL into versioned assemblies folder -->
+        <Copy
+                SourceFiles="$(OutputPath)$(AssemblyName).dll"
+                DestinationFolder="$(RimWorldModsPath)\$(ModName)\$(RimWorldVersion)\Assemblies"
+        />
+    </Target>
+</Project>

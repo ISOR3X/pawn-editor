@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <!-- Bio -->
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioHeader</defName>
+        <workerClass>PawnEditor.SectionWorker_BioHeader</workerClass>
+        <hideHeader>true</hideHeader>
+        <sticky>true</sticky>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioBasic</defName>
+        <label>basic</label>
+        <workerClass>PawnEditor.SectionWorker_BioBasic</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioAttributes</defName>
+        <label>attributes</label>
+        <sectionCategory>Humanlike, Animal</sectionCategory>
+        <workerClass>PawnEditor.SectionWorker_BioAttributes</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioGroups</defName>
+        <label>groups</label>
+        <sectionCategory>Humanlike</sectionCategory>
+        <workerClass>PawnEditor.SectionWorker_BioGroups</workerClass>
+    </PawnEditor.SectionDef>
+    <!-- Appearance -->
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_AppearanceHeader</defName>
+        <workerClass>PawnEditor.SectionWorker_AppearanceHeader</workerClass>
+        <hideHeader>true</hideHeader>
+        <sticky>true</sticky>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_AppearanceBasic</defName>
+        <label>basic</label>
+        <workerClass>PawnEditor.SectionWorker_AppearanceBasic</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_AppearanceShape</defName>
+        <label>shape</label>
+        <workerClass>PawnEditor.SectionWorker_AppearanceShape</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_AppearanceHair</defName>
+        <label>hair and beards</label>
+        <workerClass>PawnEditor.SectionWorker_AppearanceHair</workerClass>
+    </PawnEditor.SectionDef>
+    <!-- Gear -->
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_GearBasic</defName>
+        <label>basic</label>
+        <workerClass>PawnEditor.SectionWorker_GearBasic</workerClass>
+    </PawnEditor.SectionDef>
+</Defs>

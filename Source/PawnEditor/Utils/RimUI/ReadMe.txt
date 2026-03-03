@@ -1,1 +1,0 @@
-Files in this directory will have to be moved to a separate library (RimUI) at some point.
