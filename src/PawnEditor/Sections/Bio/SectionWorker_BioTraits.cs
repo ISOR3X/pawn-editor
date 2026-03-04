@@ -10,14 +10,13 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(ref Rect rect, Pawn pawn)
+    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        var traitsHeight = GetTraitsHeight(pawn, (rect.width - Listing.ColumnSpacing) / 2);
-        var sectionHeight = traitsHeight + Text.LineHeight + 2f;
+        var traitsHeight = GetTraitsHeight(pawn, (listing.ColumnWidth - Listing.ColumnSpacing) / 2);
+        var sectionHeight = traitsHeight + Text.LineHeight + listing.verticalSpacing;
         
-        var traitsListing = new Listing_Standard {ColumnWidth = rect.width / 2 - Listing.ColumnSpacing};
-
-        var r = rect.TakeTopPart(sectionHeight);
+        var r = listing.GetRect(sectionHeight);
+        var traitsListing = new Listing_Standard {ColumnWidth = r.width / 2 - Listing.ColumnSpacing};
         
         traitsListing.Begin(r);
         
@@ -33,10 +32,16 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
         DoIncapableOfRect(incapableOfRect, pawn);
 
         traitsListing.End();
+        // Log.Message($"after EndSection curY={listing.CurHeight} listingRect.height={listing.listingRect.height}");
+        listing.Gap(listing.verticalSpacing);
+        // Log.Message($"after Gap curY={listing.CurHeight}");
+        // Log.Message($"after Gap curX={listing.curX}");
+        listing.ButtonText_Fit("Add trait");
+        // Log.Message($"after Button curY={listing.CurHeight}");
+        // Log.Message($"after Button curX={listing.curX}");
         
-        rect.Gap();
 
-        UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(30f), "Add trait");
+        // listing.ButtonText_Fit("Add trait");
     }
 
     private static float GetTraitsHeight(Pawn pawn, float width)

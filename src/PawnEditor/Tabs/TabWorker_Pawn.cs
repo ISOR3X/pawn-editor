@@ -42,7 +42,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         foreach (var row in GetLayout(ref _layout, Def.sections))
         {
             var resolvedWidths = FlexLayout.ResolveWidths(row, viewRect.width, FlexLayout.ColumnGap);
-            var rowHeight = row.Select((s, i) => s.section.Worker.MeasureHeight(pawn, viewRect.width * resolvedWidths[i])).Max();
+            var rowHeight = row.Select((s, i) => s.section.Worker.MeasureHeight(pawn, resolvedWidths[i])).Max();
             if (rowHeight <= 0f) continue;
 
             var curX = viewRect.x;
