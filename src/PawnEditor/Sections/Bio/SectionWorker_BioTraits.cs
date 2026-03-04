@@ -12,11 +12,12 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(ref Rect rect, Pawn pawn)
     {
-        var traitsHeight = GetTraitsHeight(pawn, (listing.ColumnWidth - Listing.ColumnSpacing) / 2);
-        var sectionHeight = traitsHeight + Text.LineHeight + listing.verticalSpacing;
+        var traitsHeight = GetTraitsHeight(pawn, (rect.width - Listing.ColumnSpacing) / 2);
+        var sectionHeight = traitsHeight + Text.LineHeight + 2f;
         
-        var r = listing.GetRect(sectionHeight);
-        var traitsListing = new Listing_Standard {ColumnWidth = r.width / 2 - Listing.ColumnSpacing};
+        var traitsListing = new Listing_Standard {ColumnWidth = rect.width / 2 - Listing.ColumnSpacing};
+
+        var r = rect.TakeTopPart(sectionHeight);
         
         traitsListing.Begin(r);
         
@@ -32,12 +33,10 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
         DoIncapableOfRect(incapableOfRect, pawn);
 
         traitsListing.End();
-        Log.Message($"after EndSection curY={listing.CurHeight} listingRect.height={listing.listingRect.height}");
-        listing.Gap(listing.verticalSpacing);
-        Log.Message($"after Gap curY={listing.CurHeight}");
-        listing.ButtonText_Fit("Add trait");
-        Log.Message($"after Button curY={listing.CurHeight}");
         
+        rect.Gap();
+
+        UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(30f), "Add trait");
     }
 
     private static float GetTraitsHeight(Pawn pawn, float width)

@@ -17,9 +17,11 @@ public abstract class SectionWorker(SectionDef def)
         if (!Def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(pawn))) return 0f;
         if (_cachedHeight >= 0f) return _cachedHeight;
 
-        var rect = new Rect(0, 0, width, 99999f);
+        const float maxHeight = 99999f;
+
+        var rect = new Rect(0, 0, width, maxHeight);
         DoSectionContents(ref rect, pawn);
-        _cachedHeight = rect.height;
+        _cachedHeight = maxHeight - rect.height;
         return _cachedHeight;
     }
 
