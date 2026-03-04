@@ -1,38 +1,31 @@
 ﻿using System.Collections.Generic;
+using PawnEditor.Extensions;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
-
-[HotSwappable]
-public class SectionWorker_AppearanceBasic : SectionWorker
+[Reloadable]
+public class SectionWorker_AppearanceBasic(SectionDef def) : SectionWorker(def)
 {
-    private readonly Listing_Horizontal listing = new();
-
-    public SectionWorker_AppearanceBasic(SectionDef def) : base(def)
+    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        listing.Spacing = new Vector2(32f, 16f);
+        var sexRect = listing.RectLabeled("Sex");
+        Widgets.ButtonText(sexRect, pawn.gender.GetLabel().CapitalizeFirst());
+
+        var lifestageRect = listing.RectLabeled("Lifestage");
+        Widgets.ButtonText(lifestageRect, pawn.DevelopmentalStage.ToString());
+
+        if (!ModsConfig.BiotechActive) return;
+
+        var xenotypeRect = listing.RectLabeled("Xenotype");
+        Widgets.ButtonText(xenotypeRect, pawn.genes.XenotypeLabelCap);
+
+        var races = GetRacesForPawn(pawn);
+        if (races.NullOrEmpty()) return;
+
+        var raceRect = listing.RectLabeled("Race");
+        Widgets.ButtonText(raceRect, pawn.kindDef.race.LabelCap);
     }
 
-    protected override void DoSectionContents(ref Rect inRect, Pawn pawn)
-    {
-        listing.Begin(inRect);
-        listing.ButtonTextLabeled("Sex", pawn.gender.GetLabel().CapitalizeFirst(), 4);
-        listing.ButtonTextLabeled("Lifestage", pawn.DevelopmentalStage.ToString(), 4);
-        if (ModsConfig.BiotechActive)
-        {
-            listing.ButtonTextLabeled("Xenotype", pawn.genes.XenotypeLabelCap, 4);
-
-            var races = GetRacesForPawn(pawn);
-            if (!races.NullOrEmpty()) listing.ButtonTextLabeled("Race", pawn.kindDef.race.LabelCap, 4);
-        }
-
-        listing.End();
-        inRect.TakeTopPart(listing.TotalHeight);
-    }
-
-    private static List<ThingDef> GetRacesForPawn(Pawn pawn)
-    {
-        return [];
-    }
+    private static List<ThingDef> GetRacesForPawn(Pawn pawn) => [];
 }

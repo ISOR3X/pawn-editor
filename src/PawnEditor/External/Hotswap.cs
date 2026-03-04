@@ -1,8 +1,7 @@
-﻿using System;
+﻿using HotSwap;
 
 namespace PawnEditor;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public class HotSwappableAttribute : Attribute
+public class ReloadableAttribute : HotSwappableAttribute
 {
 }

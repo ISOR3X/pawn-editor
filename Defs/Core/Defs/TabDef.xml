@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+    <PawnEditor.TabDef>
+        <defName>PawnEditor_Bio</defName>
+        <label>Bio</label>
+        <priority>0</priority>
+        <tabCategory>All</tabCategory>
+        <workerClass>PawnEditor.TabWorker_PawnBio</workerClass>
+        <sections>
+            <li>
+                <section>PawnEditor_BioInfo</section>
+                <width>0.5</width>
+            </li>
+            <li>
+                <section>PawnEditor_BioName</section>
+                <width>0.5</width>
+            </li>
+            <li>
+                <section>PawnEditor_BioAge</section>
+            </li>
+            <li>
+                <section>PawnEditor_BioBackstory</section>
+            </li>
+            <li MayRequire="Ludeon.RimWorld.Ideology">
+                <section>PawnEditor_BioFavColor</section>
+            </li>
+            <li>
+                <section>PawnEditor_BioAbilities</section>
+            </li>
+            <li>
+                <section>PawnEditor_BioTraits</section>
+            </li>
+            <li>
+                <section>PawnEditor_BioSkills</section>
+            </li>
+        </sections>
+    </PawnEditor.TabDef>
+    <!--    <PawnEditor.TabDef>-->
+    <!--        <defName>PawnEditor_Appearance</defName>-->
+    <!--        <label>Appearance</label>-->
+    <!--        <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>-->
+    <!--        <sections>-->
+    <!--            <li>PawnEditor_AppearanceHeader</li>-->
+    <!--            <li>PawnEditor_AppearanceBasic</li>-->
+    <!--            <li>PawnEditor_AppearanceShape</li>-->
+    <!--            <li>PawnEditor_AppearanceHair</li>-->
+    <!--            <li MayRequire="Ludeon.RimWorld.Ideology">PawnEditor_AppearanceTattoos</li>-->
+    <!--            <li MayRequire="Ludeon.RimWorld.Biotech">PawnEditor_AppearanceXenotype</li>-->
+    <!--        </sections>-->
+    <!--    </PawnEditor.TabDef>-->
+    <!--    <PawnEditor.TabDef>-->
+    <!--        <defName>PawnEditor_Gear</defName>-->
+    <!--        <label>Gear</label>-->
+    <!--        <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>-->
+    <!--        <sections>-->
+    <!--            <li>PawnEditor_AppearanceHeader</li>-->
+    <!--            <li>PawnEditor_GearBasic</li>-->
+    <!--        </sections>-->
+    <!--    </PawnEditor.TabDef>-->
+</Defs>

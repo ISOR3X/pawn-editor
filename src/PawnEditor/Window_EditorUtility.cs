@@ -21,8 +21,8 @@ public partial class Window_Editor
         var prevSelectedPawn = selectedPawn;
         selectedPawn = pawn;
 
-        // selectedTabDef?.Worker.Notify_ContentChanged();
-        // secondarySelectedTabDef?.Worker.Notify_ContentChanged();
+        selectedTabDef?.Worker.Notify_ContentChanged();
+        secondarySelectedTabDef?.Worker.Notify_ContentChanged();
 
         if (selectedPawn?.Faction != prevSelectedPawn?.Faction)
         {

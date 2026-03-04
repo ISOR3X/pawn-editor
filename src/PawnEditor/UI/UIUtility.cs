@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using HotSwap;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -234,5 +238,72 @@ public static class UIUtility
         Widgets.EndScrollView();
 
         return value;
+    }
+
+
+    public static void ColorPickerLabeled(this Listing_Standard listing, string label, float height, ref Color color,
+        Dictionary<string, Color>? specialColors, List<Color> colors, Action<Color> onApply, out float newHeight,
+        string? tooltip = null)
+    {
+        listing.Label(label);
+        var rect = listing.GetRect(height);
+
+        if (!tooltip.NullOrEmpty())
+            TooltipHandler.TipRegion(rect, (TipSignal)tooltip);
+
+        var availableColors = colors.Append(new Color(0, 0, 0, 0f)).ToList();
+
+        if (rect.width <= 0)
+        {
+            newHeight = height;
+            return;
+        }
+
+        var oldColor = color;
+        Widgets.ColorSelector(rect, ref color, availableColors, out newHeight,
+            extraOnGUI: (currentColor, r) =>
+            {
+                if (currentColor.a != 0) return;
+                if (Widgets.ButtonImage(r.ExpandedBy(2f), Designator_Eyedropper.EyeDropperTex))
+                    Find.WindowStack.Add(new Dialog_ColorPicker(onApply, oldColor, colors, specialColors));
+            });
+    }
+
+    public static void DrawElementStackSection<T>(
+        Rect inRect,
+        List<T> elements,
+        GenUI.StackElementDrawer<T> drawer,
+        GenUI.StackElementWidthGetter<T> widthGetter,
+        float rowHeight = 22f,
+        string? emptyLabel = null,
+        bool allowOrderOptimization = false)
+    {
+        GUI.DrawTexture(inRect, InspectPaneFiller.HealthTex);
+        var innerRect = inRect.ContractedBy(4f);
+
+        if (elements.NullOrEmpty())
+        {
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Widgets.Label(innerRect, (emptyLabel ?? "None".Translate()).Colorize(ColoredText.SubtleGrayColor));
+            return;
+        }
+
+        GenUI.DrawElementStack(
+            innerRect,
+            rowHeight, elements, drawer, widthGetter,
+            allowOrderOptimization: allowOrderOptimization);
+    }
+
+    public static float DrawElementStackSectionHeight<T>(
+        List<T> elements,
+        GenUI.StackElementWidthGetter<T> widthGetter,
+        float width,
+        float rowHeight = 22f)
+    {
+        if (elements.NullOrEmpty()) return rowHeight;
+        var stackRect = GenUI.DrawElementStack(
+            new Rect(0, 0, width, 99999f),
+            rowHeight, elements, null, widthGetter);
+        return stackRect.height + 8f; // 8f is the extra padding added.
     }
 }

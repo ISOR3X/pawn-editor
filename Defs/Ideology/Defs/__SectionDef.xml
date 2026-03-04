@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioFavColor</defName>
+        <workerClass>PawnEditor.SectionWorker_BioFavColor</workerClass>
+        <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+</Defs>

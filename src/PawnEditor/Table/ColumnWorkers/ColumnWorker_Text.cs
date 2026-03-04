@@ -4,7 +4,7 @@ using Verse.Sound;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public abstract class ColumnWorker_Text : ColumnWorker
 {
     private static readonly NumericStringComparer comparer = new();

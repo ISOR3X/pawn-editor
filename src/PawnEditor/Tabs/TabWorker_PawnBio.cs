@@ -3,7 +3,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public class TabWorker_PawnBio : TabWorker_Pawn
 {
     public TabWorker_PawnBio(TabDef def) : base(def)

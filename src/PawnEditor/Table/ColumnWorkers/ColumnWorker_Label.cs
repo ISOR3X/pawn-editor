@@ -6,7 +6,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public class ColumnWorker_Label : ColumnWorker_Text
 {
     private const int LeftMargin = 3;

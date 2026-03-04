@@ -5,7 +5,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public class PawnLocation : IEquatable<PawnLocation>, IComparable<PawnLocation>
 {
     public PawnLocation(object location)

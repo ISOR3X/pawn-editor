@@ -7,8 +7,9 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 [StaticConstructorOnStartup]
+// [Obsolete("Use Listing_Standard or FlexLayout instead.")]
 public class Listing_Horizontal
 {
     private const float DefaultRowHeight = 30f;

@@ -7,7 +7,7 @@ using static Verse.UnityGUIBugsFixer;
 namespace PawnEditor;
 
 [StaticConstructorOnStartup]
-[HotSwappable]
+[Reloadable]
 public static partial class UIComponents
 {
     public static void SectionSeparator(Rect inRect, string label)
@@ -28,21 +28,10 @@ public static partial class UIComponents
 
     public static void WidgetLabel(Rect inRect, string label)
     {
-        using (new TextBlock(Text.Anchor = TextAnchor.MiddleLeft))
+        using (new TextBlock(TextAnchor.MiddleLeft))
         {
             Widgets.Label(inRect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         }
-    }
-
-    public static bool ButtonText_TruncateWithTooltip(this Listing_Standard listing, string label)
-    {
-        const float padding = 16f;
-        var width = listing.ColumnWidth;
-        if (!(Text.CalcSize(label).x > width - padding)) return listing.ButtonText(label.Truncate(width - padding));
-        TooltipHandler.TipRegion(listing.GetRect(Text.LineHeight), label);
-        listing.curY -= Text.LineHeight; // Remove the height of the tooltip rect.
-
-        return listing.ButtonText(label.Truncate(width - padding));
     }
 
     public static bool ButtonText_TruncateWithTooltip(Rect inRect, string label)

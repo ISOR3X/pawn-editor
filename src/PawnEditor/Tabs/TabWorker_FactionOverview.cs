@@ -7,7 +7,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public class TabWorker_FactionOverview(TabDef def) : TabWorker_Faction(def)
 {
     private readonly PawnTable _pawnTable = (PawnTable)Activator.CreateInstance(

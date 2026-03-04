@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public class Dialog_ColorPicker : Window
 {
     private const float CellSize = 22f + CellPadding; // 22f for the color box, 4f for the margin.

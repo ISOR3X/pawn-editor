@@ -7,7 +7,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public abstract class DefTable
 {
     public const float DefaultRowHeight = 30f;

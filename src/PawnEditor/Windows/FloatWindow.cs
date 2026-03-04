@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public abstract class FloatWindow : Window
 {
     private static readonly Vector2 InitialPositionShift = new(0, 8f);

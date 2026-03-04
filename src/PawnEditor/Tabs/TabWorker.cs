@@ -5,16 +5,11 @@ using Verse;
 
 namespace PawnEditor;
 
-public abstract class TabWorker
+public abstract class TabWorker(TabDef def)
 {
     public readonly List<FloatMenuOption> QuickActions = [];
-    public TabDef Def;
+    public TabDef Def = def;
     protected Vector2 TabScrollPosition = Vector2.zero;
-
-    public TabWorker(TabDef def)
-    {
-        Def = def;
-    }
 
     public virtual void PreOpen()
     {

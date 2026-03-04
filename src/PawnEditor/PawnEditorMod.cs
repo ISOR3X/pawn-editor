@@ -6,7 +6,7 @@ using Verse;
 namespace PawnEditor;
 
 [UsedImplicitly]
-[HotSwappable]
+[Reloadable]
 public class PawnEditorMod : Mod
 {
     public static Settings Settings = new();

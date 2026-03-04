@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public partial class Window_Editor : Window
 {
     #region Fields
@@ -102,7 +103,7 @@ public partial class Window_Editor : Window
         selectedTabDefsForPawn.Clear();
         tabsList.Clear();
     }
-
+    
     public override void DoWindowContents(Rect inRect)
     {
         DoLeftSection(inRect.TakeLeftPart(UIComponents.CardSize.x + 24f));

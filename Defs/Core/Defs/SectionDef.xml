@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <!-- Bio -->
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioInfo</defName>
+        <workerClass>PawnEditor.SectionWorker_BioInfo</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioName</defName>
+        <workerClass>PawnEditor.SectionWorker_BioName</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioAge</defName>
+        <workerClass>PawnEditor.SectionWorker_BioAge</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioBackstory</defName>
+        <workerClass>PawnEditor.SectionWorker_BioBackstory</workerClass>
+        <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioAbilities</defName>
+        <workerClass>PawnEditor.SectionWorker_BioAbilities</workerClass>
+        <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioSkills</defName>
+        <workerClass>PawnEditor.SectionWorker_BioSkills</workerClass>
+        <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioTraits</defName>
+        <workerClass>PawnEditor.SectionWorker_BioTraits</workerClass>
+        <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+    <!-- Bio -->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_BioHeader</defName>-->
+<!--        <workerClass>PawnEditor.SectionWorker_BioHeader</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_BioBasic</defName>-->
+<!--        <label>basic</label>-->
+<!--        <workerClass>PawnEditor.SectionWorker_BioBasic</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_BioAttributes</defName>-->
+<!--        <label>attributes</label>-->
+<!--        <sectionCategory>Humanlike, Animal</sectionCategory>-->
+<!--        <workerClass>PawnEditor.SectionWorker_BioAttributes</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_BioGroups</defName>-->
+<!--        <label>groups</label>-->
+<!--        <sectionCategory>Humanlike</sectionCategory>-->
+<!--        <workerClass>PawnEditor.SectionWorker_BioGroups</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    &lt;!&ndash; Appearance &ndash;&gt;-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_AppearanceHeader</defName>-->
+<!--        <workerClass>PawnEditor.SectionWorker_AppearanceHeader</workerClass>-->
+<!--        <hideHeader>true</hideHeader>-->
+<!--        <sticky>true</sticky>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_AppearanceBasic</defName>-->
+<!--        <label>basic</label>-->
+<!--        <workerClass>PawnEditor.SectionWorker_AppearanceBasic</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_AppearanceShape</defName>-->
+<!--        <label>shape</label>-->
+<!--        <workerClass>PawnEditor.SectionWorker_AppearanceShape</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_AppearanceHair</defName>-->
+<!--        <label>hair and beards</label>-->
+<!--        <workerClass>PawnEditor.SectionWorker_AppearanceHair</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+<!--    &lt;!&ndash; Gear &ndash;&gt;-->
+<!--    <PawnEditor.SectionDef>-->
+<!--        <defName>PawnEditor_GearBasic</defName>-->
+<!--        <label>basic</label>-->
+<!--        <workerClass>PawnEditor.SectionWorker_GearBasic</workerClass>-->
+<!--    </PawnEditor.SectionDef>-->
+</Defs>

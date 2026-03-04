@@ -8,7 +8,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public static class PawnUtility
 {
     [Flags]

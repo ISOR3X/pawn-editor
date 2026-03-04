@@ -9,7 +9,7 @@ public class SectionWorker_BioGroups : SectionWorker
     {
     }
 
-    protected override void DoSectionContents(ref Rect inRect, Pawn pawn)
+    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
     }
 }

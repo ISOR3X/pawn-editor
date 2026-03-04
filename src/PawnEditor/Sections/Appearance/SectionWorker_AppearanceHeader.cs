@@ -4,30 +4,33 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public class SectionWorker_AppearanceHeader(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(ref Rect inRect, Pawn pawn)
+    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        var width = inRect.width;
-        var contentRect = inRect.TakeTopPart(200f);
+        var contentRect = listing.GetRect(200f);
+        var width = contentRect.width;
         for (var index = 0; index < 3; ++index)
         {
             var position = contentRect.TakeLeftPart(width / 3);
             var image = PortraitsCache.Get(pawn, new Vector2(position.width, position.height), new Rot4(2 - index),
-                Dialog_StylingStation.PortraitOffset,
-                1.1f, renderHeadgear: Window_Editor.showHeadgear, renderClothes: Window_Editor.showClothes);
+                Dialog_StylingStation.PortraitOffset, 1.1f,
+                renderHeadgear: Window_Editor.showHeadgear,
+                renderClothes: Window_Editor.showClothes);
             GUI.DrawTexture(position, image);
         }
 
         const string headgear = "Show headgear";
         const string clothing = "Show clothing";
 
-        var footerRect = inRect.TakeTopPart(UIUtility.ButtonHeight);
-        Widgets.CheckboxLabeled(footerRect.TakeLeftPart(headgear.GetWidthCached() + UIUtility.ButtonPadding), headgear,
-            ref Window_Editor.showHeadgear);
-        inRect.xMin += UIUtility.LabelPadding;
-        Widgets.CheckboxLabeled(footerRect.TakeLeftPart(clothing.GetWidthCached() + UIUtility.ButtonPadding), clothing,
-            ref Window_Editor.showClothes);
+        var footerRect = listing.GetRect(UIUtility.ButtonHeight);
+        Widgets.CheckboxLabeled(
+            footerRect.TakeLeftPart(headgear.GetWidthCached() + UIUtility.ButtonPadding),
+            headgear, ref Window_Editor.showHeadgear);
+        footerRect.xMin += UIUtility.LabelPadding;
+        Widgets.CheckboxLabeled(
+            footerRect.TakeLeftPart(clothing.GetWidthCached() + UIUtility.ButtonPadding),
+            clothing, ref Window_Editor.showClothes);
     }
 }

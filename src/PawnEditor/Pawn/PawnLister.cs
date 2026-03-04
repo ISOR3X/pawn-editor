@@ -6,7 +6,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
+[Reloadable]
 public static class PawnLister
 {
     private static readonly Dictionary<Faction, List<Pawn>> PawnsByFactionTemporary = new();
