@@ -35,7 +35,7 @@ public class SectionRef : IFlexItem
 {
     public required SectionDef section;
     public float width = 1f;
-    public float grow = 0f;
+    public float grow = 1f;
     public int priority = 0;
     
     public float Width => width;
