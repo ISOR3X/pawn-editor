@@ -7,39 +7,57 @@
         <priority>0</priority>
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_PawnBio</workerClass>
-        <sections>
-            <li>
-                <section>PawnEditor_BioInfo</section>
-                <width>0.8</width>
-            </li>
-            <li>
+        <layout>
+            <flex direction="row" wrap="true">
+                <section flexBasis="0.5">PawnEditor_BioInfo</section>
+                <section flexBasis="0.5">PawnEditor_BioFake</section>
+                <section>PawnEditor_BioFake</section>
                 <section>PawnEditor_BioName</section>
-                <width>0.5</width>
-            </li>
-            <li MayRequire="Ludeon.RimWorld.Ideology">
-                <section>PawnEditor_BioFavColor</section>
-                <width>0.5</width>
-            </li>
-            <li>
-                <section>PawnEditor_BioBackstory</section>
-                <width>0.5</width>
-            </li>
-            <li>
-                <section>PawnEditor_BioAge</section>
-                <width>0.5</width>
-            </li>
-            <li>
-                <section>PawnEditor_BioAbilities</section>
-                <width>0.3</width>
-            </li>
-            <li>
-                <section>PawnEditor_BioTraits</section>
-                <width>0.6</width>
-            </li>
-            <li>
-                <section>PawnEditor_BioSkills</section>
-            </li>
-        </sections>
+                <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_BioFavColor</section>
+            </flex>
+            <section>PawnEditor_BioAge</section>
+            <flex direction="row">
+                <section flexBasis="0.5">PawnEditor_BioSkills</section>
+                <flex direction="col" flexBasis="0.5">
+                    <section>PawnEditor_BioTraits</section>
+                    <section>PawnEditor_BioAge</section>
+                </flex>
+            </flex>
+        </layout>
+<!--        <sections>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioInfo</section>-->
+<!--                <width>0.8</width>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioName</section>-->
+<!--                <width>0.5</width>-->
+<!--            </li>-->
+<!--            <li MayRequire="Ludeon.RimWorld.Ideology">-->
+<!--                <section>PawnEditor_BioFavColor</section>-->
+<!--                <width>0.5</width>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioBackstory</section>-->
+<!--                <width>0.5</width>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioAge</section>-->
+<!--                <width>0.5</width>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioAbilities</section>-->
+<!--                <width>0.3</width>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioTraits</section>-->
+<!--                <width>0.6</width>-->
+<!--                <grow>1</grow>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <section>PawnEditor_BioSkills</section>-->
+<!--            </li>-->
+<!--        </sections>-->
     </PawnEditor.TabDef>
     <!--    <PawnEditor.TabDef>-->
     <!--        <defName>PawnEditor_Appearance</defName>-->

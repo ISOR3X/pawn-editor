@@ -65,6 +65,9 @@
         <Compile Include="External\Required.cs" />
         <Compile Include="Harmony\Patch_WindowResizer.cs" />
         <Compile Include="FlexLayout.cs" />
+        <Compile Include="Layout\LayoutEngine.cs" />
+        <Compile Include="Layout\LayoutNode.cs" />
+        <Compile Include="Layout\SectionLayoutNode.cs" />
         <Compile Include="QuickAction\QuickActionAttribute.cs" />
         <Compile Include="QuickAction\QuickActionUtility.cs" />
         <Compile Include="Pawn\PawnLister.cs" />
@@ -81,6 +84,7 @@
         <Compile Include="Sections\Bio\BioUtility.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioAbilities.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioAge.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_BioFake.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioSkills.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioBackstory.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioFavColor.cs" />

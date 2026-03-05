@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using PawnEditor.Layout;
 using Verse;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable ConvertToConstant.Global
@@ -16,6 +18,8 @@ public class TabDef : Def
     public required List<SectionRef> sections = [];
     public List<SectionRef> stickySections = [];
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
+
+    public SectionLayoutNode layout = new();
 
     [field: Unsaved]
     public TabWorker Worker
@@ -37,7 +41,7 @@ public class SectionRef : IFlexItem
     public float width = 1f;
     public float grow = 1f;
     public int priority = 0;
-    
+
     public float Width => width;
     public int Priority => priority;
     public float Grow => grow;

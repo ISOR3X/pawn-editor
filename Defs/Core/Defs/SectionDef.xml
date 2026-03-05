@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioFake</defName>
+        <workerClass>PawnEditor.SectionWorker_BioFake</workerClass>
+    </PawnEditor.SectionDef>
     <!-- Bio -->
     <PawnEditor.SectionDef>
         <defName>PawnEditor_BioInfo</defName>

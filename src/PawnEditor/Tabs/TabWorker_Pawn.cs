@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
+using PawnEditor.Layout;
 using UnityEngine;
 using Verse;
 
@@ -11,11 +13,11 @@ namespace PawnEditor;
 public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
 {
     private float _viewRectHeight = 5000;
-    private List<List<SectionRef>>? _layout;
+    // private List<List<SectionRef>>? _layout;
     // private List<List<SectionRef>>? _stickyLayout;
 
     private static Pawn? SelectedPawn => Window_Editor.GetSelectedPawn();
-    
+
     private static List<List<T>> GetLayout<T>(ref List<List<T>>? cache, List<T> sections) where T : IFlexItem
         => cache ??= FlexLayout.ComputeLayout(sections);
 
@@ -27,10 +29,9 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
     protected virtual void DoInnerTabContents(ref Rect inRect, Pawn? pawn)
     {
         DoTabHeader(ref inRect, pawn);
-        inRect.yMin += 8f;
-        inRect.yMax -= 8f;
+        inRect.ContractedBy(0, 8f);
 
-        if (Def.sections is not { Count: > 0 } || pawn == null) return;
+        if (pawn == null) return;
 
         Widgets.BeginGroup(inRect);
         var contentRect = inRect.AtZero();
@@ -39,25 +40,28 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
 
         var curY = viewRect.y;
-        foreach (var row in GetLayout(ref _layout, Def.sections))
+
+        foreach (var child in Def.layout.children)
         {
-            var resolvedWidths = FlexLayout.ResolveWidths(row, viewRect.width, FlexLayout.ColumnGap);
-            var rowHeight = row.Select((s, i) => s.section.Worker.MeasureHeight(pawn, resolvedWidths[i])).Max();
+            var rowHeight = LayoutEngine.Measure(child, viewRect.width,
+                (section, w) => section.Worker.MeasureHeight(pawn, w));
             if (rowHeight <= 0f) continue;
 
-            var curX = viewRect.x;
-            for (var i = 0; i < row.Count; i++)
-            {
-                var sectionRect = new Rect(curX, curY, resolvedWidths[i], rowHeight);
-                Widgets.DrawRectFast(sectionRect, new Color(1, 1, 1, 0.1f));
-                row[i].section.Worker.DoSection(ref sectionRect, pawn);
-                curX += resolvedWidths[i] + FlexLayout.ColumnGap; // add a gap between sections
-            }
+            LayoutEngine.Draw(child, new Rect(viewRect.x, curY, viewRect.width, rowHeight),
+                (section, w) => section.Worker.MeasureHeight(pawn, w),
+                (section, r) =>
+                {
+                    Widgets.DrawRectFast(r, new Color(1, 1, 1, 0.1f));
+                    section.Worker.DoSection(ref r, pawn);
+                });
 
-            curY += rowHeight + FlexLayout.RowGap;
+            curY += rowHeight;
+            if (child != Def.layout.children.Last())
+                curY += Def.layout.gap;
         }
 
-        _viewRectHeight = curY;
+        _viewRectHeight = curY - viewRect.y;
+
 
         Widgets.EndScrollView();
         Widgets.EndGroup();
@@ -104,7 +108,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         if (SelectedPawn == null) return;
 
         Def.sections.ForEach(s => s.section.Worker.OnThingChanged(SelectedPawn));
-        
+
 
         QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);
         if (actions.NullOrEmpty()) return;
@@ -112,7 +116,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         QuickActions.Clear();
         foreach (var (attribute, method) in actions!.Where(a => a.Item1.CanUseQuickAction()))
             QuickActions.Add(attribute.ToFloatMenuOption(method));
-        
+
         Def.sections?.ForEach(s => s.section.Worker.InvalidateHeight());
         Log.Message("NOTIFY");
     }
