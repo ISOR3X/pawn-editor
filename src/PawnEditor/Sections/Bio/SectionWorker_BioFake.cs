@@ -13,6 +13,6 @@ public class SectionWorker_BioFake(SectionDef def) : SectionWorker(def)
     {
         var r = listing.GetRect(64f);
         Widgets.DrawRectFast(r, _c);
-        listing.Label($"{r.width} x {r.height}");
+        Widgets.Label(r, $"{r.width} x {r.height}");
     }
 }
