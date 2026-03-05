@@ -9,21 +9,9 @@ namespace PawnEditor.Layout;
 [HotSwappable]
 public static class LayoutEngine
 {
-    
-    public static float Measure<TLeaf>(
-        LayoutNode<TLeaf> node,
-        float width,
-        Func<TLeaf, Rect, float> runLeaf)
-    {
-        if (node._cachedMeasure.HasValue)
-            return node._cachedMeasure.Value;
+    private const float OffscreenOffset = -99999f;
 
-        var result = MeasureNode(node, new Rect(0, 0, width, 99999f), runLeaf);
-        node._cachedMeasure = result;
-        return result;
-    }
-
-    private static float MeasureNode<TLeaf>(
+    public static float Draw<TLeaf>(
         LayoutNode<TLeaf> node,
         Rect rect,
         Func<TLeaf, Rect, float> runLeaf)
@@ -33,54 +21,13 @@ public static class LayoutEngine
 
         return node.direction switch
         {
-            FlexDirection.Row => MeasureRow(node, rect, runLeaf),
-            FlexDirection.Col => MeasureCol(node, rect, runLeaf),
+            FlexDirection.Row => DrawRow(node, rect, runLeaf),
+            FlexDirection.Col => DrawCol(node, rect, runLeaf),
             _ => 0f
         };
     }
 
-    public static void Draw<TLeaf>(
-        LayoutNode<TLeaf> node,
-        Rect rect,
-        Func<TLeaf, Rect, float> runLeaf)
-    {
-        if (node.IsLeaf)
-        {
-            runLeaf(node.leaf!, rect);
-            return;
-        }
-
-        switch (node.direction)
-        {
-            case FlexDirection.Row: DrawRow(node, rect, runLeaf); break;
-            case FlexDirection.Col: DrawCol(node, rect, runLeaf); break;
-            default: throw new ArgumentOutOfRangeException();
-        }
-    }
-
-    private static float MeasureRow<TLeaf>(
-        LayoutNode<TLeaf> node,
-        Rect rect,
-        Func<TLeaf, Rect, float> runLeaf)
-    {
-        var lines = ComputeLines(node);
-        var totalHeight = 0f;
-
-        for (var i = 0; i < lines.Count; i++)
-        {
-            var widths = ResolveWidths(lines[i], rect.width, node.gap);
-            var lineHeight = 0f;
-            for (var j = 0; j < lines[i].Count; j++)
-                lineHeight = Mathf.Max(lineHeight, Measure(lines[i][j], widths[j], runLeaf));
-            totalHeight += lineHeight;
-            if (i < lines.Count - 1)
-                totalHeight += node.gap;
-        }
-
-        return totalHeight;
-    }
-    
-    private static void DrawRow<TLeaf>(
+    private static float DrawRow<TLeaf>(
         LayoutNode<TLeaf> node,
         Rect rect,
         Func<TLeaf, Rect, float> runLeaf)
@@ -91,10 +38,14 @@ public static class LayoutEngine
         for (var i = 0; i < lines.Count; i++)
         {
             var widths = ResolveWidths(lines[i], rect.width, node.gap);
+
+            // Measuring pass: draw offscreen just to get heights
             var lineHeight = 0f;
             for (var j = 0; j < lines[i].Count; j++)
-                lineHeight = Mathf.Max(lineHeight, Measure(lines[i][j], widths[j], runLeaf));
+                lineHeight = Mathf.Max(lineHeight,
+                    Draw(lines[i][j], new Rect(OffscreenOffset, OffscreenOffset, widths[j], OffscreenOffset), runLeaf));
 
+            // Drawing pass: now we know the line height
             var curX = rect.x;
             for (var j = 0; j < lines[i].Count; j++)
             {
@@ -106,42 +57,28 @@ public static class LayoutEngine
             if (i < lines.Count - 1)
                 curY += node.gap;
         }
+
+        return curY - rect.y;
     }
 
-    private static float MeasureCol<TLeaf>(
-        LayoutNode<TLeaf> node,
-        Rect rect,
-        Func<TLeaf, Rect, float> runLeaf)
-    {
-        var active = ActiveChildren(node);
-        var totalHeight = 0f;
-        for (var i = 0; i < active.Count; i++)
-        {
-            totalHeight += Measure(active[i], rect.width, runLeaf);
-            if (i < active.Count - 1)
-                totalHeight += node.gap;
-        }
-
-        return totalHeight;
-    }
-
-
-
-    private static void DrawCol<TLeaf>(
+    private static float DrawCol<TLeaf>(
         LayoutNode<TLeaf> node,
         Rect rect,
         Func<TLeaf, Rect, float> runLeaf)
     {
         var active = ActiveChildren(node);
         var curY = rect.y;
+
         for (var i = 0; i < active.Count; i++)
         {
-            var childHeight = Measure(active[i], rect.width, runLeaf);
+            var childHeight = Draw(active[i], new Rect(rect.x, OffscreenOffset, rect.width, 99999f), runLeaf);
             Draw(active[i], new Rect(rect.x, curY, rect.width, childHeight), runLeaf);
             curY += childHeight;
             if (i < active.Count - 1)
                 curY += node.gap;
         }
+
+        return curY - rect.y;
     }
 
     private static List<List<LayoutNode<TLeaf>>> ComputeLines<TLeaf>(LayoutNode<TLeaf> node)
@@ -171,7 +108,6 @@ public static class LayoutEngine
         return lines;
     }
 
-
     private static float[] ResolveWidths<TLeaf>(
         List<LayoutNode<TLeaf>> line,
         float totalWidth,
@@ -181,7 +117,6 @@ public static class LayoutEngine
         var totalGap = gap * (line.Count - 1);
         var available = totalWidth - totalGap;
 
-        // First pass: assign a flex basis as absolute widths
         var remaining = available;
         for (var i = 0; i < line.Count; i++)
         {
@@ -189,7 +124,6 @@ public static class LayoutEngine
             remaining -= widths[i];
         }
 
-        // Second pass: distribute remaining space by flexGrow
         var totalGrow = line.Sum(n => n.flexGrow);
         if (totalGrow > 0f && remaining > 0f)
             for (var i = 0; i < line.Count; i++)

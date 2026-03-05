@@ -39,22 +39,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         var viewRect = new Rect(contentRect.x, contentRect.y, contentRect.width - additionalWidth, _viewRectHeight);
         Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
 
-        var curY = viewRect.y;
-
-        Func<SectionDef, Rect, float> runSection = (section, r) => section.Worker.DoSection(pawn, r);
-
-        foreach (var child in Def.layout.children)
-        {
-            var rowHeight = LayoutEngine.Measure(child, viewRect.width, runSection);
-            if (rowHeight <= 0f) continue;
-            LayoutEngine.Draw(child, new Rect(viewRect.x, curY, viewRect.width, rowHeight), runSection);
-            curY += rowHeight;
-            if (child != Def.layout.children.Last())
-                curY += Def.layout.gap;
-        }
-
-        _viewRectHeight = curY - viewRect.y;
-
+        _viewRectHeight = LayoutEngine.Draw(Def.layout, viewRect, (section, r) => section.Worker.DoSection(pawn, r));
 
         Widgets.EndScrollView();
         Widgets.EndGroup();
@@ -110,7 +95,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         foreach (var (attribute, method) in actions!.Where(a => a.Item1.CanUseQuickAction()))
             QuickActions.Add(attribute.ToFloatMenuOption(method));
 
-        Def.layout.InvalidateCache();
+        // Def.layout.InvalidateCache();
         Log.Message("NOTIFY");
     }
 

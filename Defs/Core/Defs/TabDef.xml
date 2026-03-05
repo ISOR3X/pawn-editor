@@ -8,21 +8,18 @@
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_PawnBio</workerClass>
         <layout>
-            <flex direction="row" wrap="true">
-                <section flexBasis="0.5">PawnEditor_BioInfo</section>
-                <section flexBasis="0.5">PawnEditor_BioFake</section>
-                <section>PawnEditor_BioFake</section>
-                <section>PawnEditor_BioName</section>
-                <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_BioFavColor</section>
-            </flex>
-            <section>PawnEditor_BioAge</section>
+            <section>PawnEditor_BioInfo</section>
             <flex direction="row">
-                <section flexBasis="0.5">PawnEditor_BioSkills</section>
-                <flex direction="col" flexBasis="0.5">
-                    <section>PawnEditor_BioTraits</section>
-                    <section>PawnEditor_BioAge</section>
-                </flex>
+                <section flexBasis="0.4" flexGrow="0">PawnEditor_BioName</section>
+                <section>PawnEditor_BioBackstory</section>
+                <section>PawnEditor_BioAge</section>
             </flex>
+            <section>PawnEditor_BioSkills</section>
+            <flex direction="row">
+                <section flexBasis="0.6" flexGrow="1">PawnEditor_BioTraits</section>
+                <section flexBasis="0.3" flexGrow="1">PawnEditor_BioAbilities</section>
+            </flex>
+            <section flexBasis="0.3" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_BioFavColor</section>
         </layout>
 <!--        <sections>-->
 <!--            <li>-->
