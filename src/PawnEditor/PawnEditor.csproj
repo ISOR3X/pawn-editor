@@ -65,9 +65,10 @@
         <Compile Include="External\Required.cs" />
         <Compile Include="Harmony\Patch_WindowResizer.cs" />
         <Compile Include="FlexLayout.cs" />
-        <Compile Include="Layout\LayoutEngine.cs" />
+        <Compile Include="Layout\DefLeafNode.cs" />
+        <Compile Include="Layout\FlexLayoutNode.cs" />
+        <Compile Include="Layout\FlexLayoutEngine.cs" />
         <Compile Include="Layout\LayoutNode.cs" />
-        <Compile Include="Layout\SectionLayoutNode.cs" />
         <Compile Include="QuickAction\QuickActionAttribute.cs" />
         <Compile Include="QuickAction\QuickActionUtility.cs" />
         <Compile Include="Pawn\PawnLister.cs" />

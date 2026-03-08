@@ -39,7 +39,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         var viewRect = new Rect(contentRect.x, contentRect.y, contentRect.width - additionalWidth, _viewRectHeight);
         Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
 
-        _viewRectHeight = LayoutEngine.Draw(Def.layout, viewRect, (section, r) => section.Worker.DoSection(pawn, r));
+        _viewRectHeight = FlexLayoutEngine.Draw(Def.layout, viewRect, (section, r) => section.Worker.DoSection(pawn, r));
 
         Widgets.EndScrollView();
         Widgets.EndGroup();
@@ -85,7 +85,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
 
         if (SelectedPawn == null) return;
 
-        Def.sections.ForEach(s => s.section.Worker.OnThingChanged(SelectedPawn));
+        // Def.sections.ForEach(s => s.section.Worker.OnThingChanged(SelectedPawn));
 
 
         QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);

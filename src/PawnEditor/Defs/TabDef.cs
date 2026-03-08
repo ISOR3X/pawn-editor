@@ -4,10 +4,6 @@ using JetBrains.Annotations;
 using PawnEditor.Layout;
 using Verse;
 
-// ReSharper disable InconsistentNaming
-// ReSharper disable FieldCanBeMadeReadOnly.Global
-// ReSharper disable ConvertToConstant.Global
-
 namespace PawnEditor;
 
 [UsedImplicitly]
@@ -15,11 +11,11 @@ public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
     public int priority = 10;
-    public required List<SectionRef> sections = [];
-    public List<SectionRef> stickySections = [];
+    public required List<SectionDef> sections = [];
+    public List<SectionDef> stickySections = [];
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
-    public SectionLayoutNode layout = new();
+    public SectionFlexLayoutNode layout = new();
 
     [field: Unsaved]
     public TabWorker Worker
@@ -35,14 +31,14 @@ public class TabDef : Def
     }
 }
 
-public class SectionRef : IFlexItem
+public class SectionFlexLayoutNode : FlexLayoutNode<SectionDef>
 {
-    public required SectionDef section;
-    public float width = 1f;
-    public float grow = 1f;
-    public int priority = 0;
-
-    public float Width => width;
-    public int Priority => priority;
-    public float Grow => grow;
+    public SectionFlexLayoutNode()
+    {
+        Registry = new Dictionary<string, Func<LayoutNode<SectionDef>>>
+        {
+            ["section"] = () => new DefLeafNode<SectionDef>(),
+            ["flex"] = () => new SectionFlexLayoutNode(),
+        };
+    }
 }
