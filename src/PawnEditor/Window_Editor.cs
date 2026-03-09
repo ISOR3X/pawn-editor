@@ -1,21 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PawnEditor.Extensions;
+using HotSwap;
 using PawnEditor.Layout;
-using L = PawnEditor.Layout.FlexLayoutHelper;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using L = PawnEditor.Layout.FlexLayoutHelper;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public partial class Window_Editor : Window
 {
     #region Fields
-
-    // TODO: Should these fields be static?
-
+    
     // Pawn-related fields
     // These are private, so they are only set through the TrySelect methods.
     private Faction? _selectedFaction;
@@ -180,21 +178,20 @@ public partial class Window_Editor : Window
                 if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Faction..."))
                     Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
             }, flexBasis: 30f),
-
-
+            
             L.Row([
                 L.Cell(rect =>
                 {
-                    if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Save"))
+                    if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Save"))
                     {
                     }
-                }),
+                }, flexGrow: 1f),
                 L.Cell(rect =>
                 {
-                    if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Load"))
+                    if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Load"))
                     {
                     }
-                })
+                }, flexGrow: 1f)
             ], flexBasis: 30f)
         ]);
 

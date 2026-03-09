@@ -12,7 +12,7 @@ public enum FlexDirection
 public class LayoutNode<TLeaf>
 {
     public float flexBasis;
-    public float flexGrow = 1f;
+    public float flexGrow;
 
     public TLeaf? leaf;
     public bool IsLeaf => leaf != null;

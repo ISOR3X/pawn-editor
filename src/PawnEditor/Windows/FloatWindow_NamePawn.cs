@@ -41,7 +41,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                 if (UIUtility.ButtonTextLabeled(rect, "Culture", _selectedCulture!.LabelCap))
                     Find.WindowStack.Add(new FloatMenu(cultures
                         .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
-            }).When(_selectedCulture != null),
+            }, flexBasis: 0.5f ).When(_selectedCulture != null),
 
             L.Cell(rect =>
             {
@@ -49,7 +49,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                     Find.WindowStack.Add(new FloatMenu(xenotypes
                         .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
                         .Append(new FloatMenuOption("None", () => _selectedXenotype = null)).ToList()));
-            }).When(ModsConfig.BiotechActive),
+            }, flexBasis: 0.5f).When(ModsConfig.BiotechActive),
 
             L.Cell(rect =>
             {
@@ -58,17 +58,17 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                         new List<Gender> { Gender.Male, Gender.Female }
                             .Select(g => new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
                             .ToList()));
-            }),
+            }, flexBasis: 0.5f),
 
-            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Keep last name", ref keepLastName)),
-            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Force no nickname", ref forceNoNick)),
+            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Keep last name", ref keepLastName), flexBasis: 0.5f),
+            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Force no nickname", ref forceNoNick), flexBasis: 0.5f),
 
             L.Row([
                 L.Cell(rect =>
                 {
                     using (new TextBlock(TextAnchor.MiddleLeft, ColoredText.SubtleGrayColor))
                         Widgets.Label(rect, p.Name.ToStringFull);
-                }),
+                }, flexBasis: 0.4f),
                 L.Cell(rect =>
                 {
                     if (Widgets.ButtonText(rect, "Generate"))
@@ -82,7 +82,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                             _selectedCulture, p.IsCreepJoiner, _selectedGender,
                             p.RaceProps.nameCategory, lastName, forceNoNick);
                     }
-                })
+                }, flexBasis: 0.5f, flexGrow:1)
             ], flexBasis: 1f)
         ], gapX: 24f, wrap: true);
 

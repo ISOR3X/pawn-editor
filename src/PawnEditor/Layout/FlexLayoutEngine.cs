@@ -10,17 +10,8 @@ namespace PawnEditor.Layout;
 [HotSwappable]
 public static class FlexLayoutEngine
 {
-    private const float OffscreenOffset = 99999f;
-
-    /// <summary>
-    /// Renders a layout node and its children within the specified rectangle, using the provided function to draw leaf nodes.
-    /// The layout is organized based on the direction of the node and may include rows or columns with optional gaps.
-    /// </summary>
-    /// <typeparam name="TLeaf">The type of the leaf node elements.</typeparam>
-    /// <param name="node">The layout node to be drawn, which may consist of child nodes or a single leaf node.</param>
-    /// <param name="rect">The rectangular area where the layout will be rendered, specifying position and size constraints.</param>
-    /// <param name="runLeaf">A function that renders a leaf node within the given rectangle and returns the rendered height.</param>
-    /// <returns>The total height occupied by the layout, including all child nodes, gaps, and line heights.</returns>
+    private const float OffscreenOffset = -99999f;
+    
     public static float Draw<TLeaf>(
         LayoutNode<TLeaf> node,
         Rect rect,
@@ -60,7 +51,7 @@ public static class FlexLayoutEngine
             var lineHeight = 0f;
             for (var j = 0; j < lines[i].Count; j++)
                 lineHeight = Mathf.Max(lineHeight,
-                    Draw(lines[i][j], new Rect(OffscreenOffset, OffscreenOffset, widths[j], OffscreenOffset), runLeaf));
+                    Draw(lines[i][j], new Rect(OffscreenOffset, OffscreenOffset, widths[j], 99999f), runLeaf));
 
             // Drawing pass: now we know the line height
             var curX = rect.x;
@@ -84,30 +75,45 @@ public static class FlexLayoutEngine
         Func<TLeaf, Rect, float> runLeaf)
     {
         var active = ActiveChildren(node);
-        var curY = rect.y;
+        var gapY = node.gapY ?? node.gap;
+
+        // First pass: resolve all heights
+        var heights = new float[active.Count];
+        var totalGrow = active.Sum(c => c.flexGrow);
+        var fixedTotal = active.Sum(c => c.flexBasis > 1f ? c.flexBasis : 0f)
+                         + gapY * (active.Count - 1);
+        var hasKnownHeight = rect.height < 9999f;
+        var remaining = hasKnownHeight
+            ? rect.height - fixedTotal
+            : 0f;
 
         for (var i = 0; i < active.Count; i++)
         {
-            // Vertical stacked items don't need an initial Draw call to determine their height as they are independent of each other.
             var c = active[i];
-            var childHeight = c.flexBasis > 1f ? c.flexBasis : Draw(c, new Rect(rect.x, curY, rect.width, 99999f), runLeaf);
-            curY += childHeight;
+            float h;
+            if (c.flexBasis > 1f)
+                h = c.flexBasis;
+            else if (hasKnownHeight && c.flexGrow > 0f && totalGrow > 0f)
+                h = (c.flexGrow / totalGrow) * remaining;
+            else
+                h = Draw(c, new Rect(OffscreenOffset, OffscreenOffset, rect.width, 99999f), runLeaf);
+            
+            heights[i] = h;
+        }
+
+        // Second pass: draw with resolved heights
+        var curY = rect.y;
+        for (var i = 0; i < active.Count; i++)
+        {
+            Draw(active[i], new Rect(rect.x, curY, rect.width, heights[i]), runLeaf);
+            curY += heights[i];
             if (i < active.Count - 1)
-                curY += node.gapY ?? node.gap;
+                curY += gapY;
         }
 
         return curY - rect.y;
     }
 
-    /// <summary>
-    /// Computes a list of lines for a given layout node, organizing its children into rows or columns
-    /// based on their flex basis and the wrapping behavior of the node.
-    /// </summary>
-    /// <typeparam name="TLeaf">The type of the leaf node elements.</typeparam>
-    /// <param name="node">The root node for which lines are to be computed. This node contains children
-    /// that are organized into lines.</param>
-    /// <returns>A list of lines where each line is a list of layout nodes grouped together
-    /// according to the layout configuration.</returns>
     private static List<List<LayoutNode<TLeaf>>> ComputeLines<TLeaf>(FlexLayoutNode<TLeaf> node)
     {
         var lines = new List<List<LayoutNode<TLeaf>>>();
@@ -148,7 +154,7 @@ public static class FlexLayoutEngine
         for (var i = 0; i < line.Count; i++)
         {
             var basis = line[i].flexBasis;
-            widths[i] = basis > 1f ? basis : basis * totalWidth;
+            widths[i] = basis > 1f ? basis : basis * available;
             remaining -= widths[i];
         }
 
