@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <PawnEditor.SectionDef>
-        <defName>PawnEditor_BioFake</defName>
-        <workerClass>PawnEditor.SectionWorker_BioFake</workerClass>
-    </PawnEditor.SectionDef>
     <!-- Bio -->
     <PawnEditor.SectionDef>
         <defName>PawnEditor_BioInfo</defName>
@@ -36,6 +32,10 @@
         <defName>PawnEditor_BioTraits</defName>
         <workerClass>PawnEditor.SectionWorker_BioTraits</workerClass>
         <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_BioFaction</defName>
+        <workerClass>PawnEditor.SectionWorker_BioFaction</workerClass>
     </PawnEditor.SectionDef>
     <!-- Bio -->
 <!--    <PawnEditor.SectionDef>-->

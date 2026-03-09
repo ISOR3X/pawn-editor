@@ -16,6 +16,7 @@ public static class UIUtility
     public const float ButtonHeight = 30f;
     public const float ButtonPadding = 40f;
     public const float LabelPadding = 10f;
+    public const float LabelOffset = 24f; // How far a label should be from its widget
     public static readonly Vector2 BottomButtonSize = new(150f, 38f);
 
     public static Rect TakeTopPart(ref this Rect rect, float pixels)
@@ -304,6 +305,57 @@ public static class UIUtility
         var stackRect = GenUI.DrawElementStack(
             new Rect(0, 0, width, 99999f),
             rowHeight, elements, null, widthGetter);
-        return stackRect.height + 8f; // 8f is the extra padding added.
+        return
+            stackRect.height + 8f; // 8f is the extra padding added by ContractedBy(4f) in DrawElementStackSection<T>.
+    }
+
+    public static Rect RectLabeled(Rect rect, string label, float? labelWidth = null)
+    {
+        var w = labelWidth ?? label.GetWidthCached() + LabelOffset;
+        rect.SplitVertically(w, out var left, out var right);
+        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(left, label);
+        return right;
+    }
+
+    public static bool ButtonTextLabeled(Rect rect, string label, string buttonLabel)
+    {
+        var right = RectLabeled(rect, label);
+        return Widgets.ButtonText(right, buttonLabel);
+    }
+
+    public static bool ButtonTextLabeled_WithIcon(Rect rect, string label, string buttonLabel, Texture2D icon,
+        Color? color)
+    {
+        var right = RectLabeled(rect, label);
+
+        return ButtonText_WithIcon(right, buttonLabel, icon, color);
+    }
+
+    public static bool ButtonText_WithIcon(Rect rect, string label, Texture2D icon, Color? color)
+    {
+        const float iconSize = 20f;
+        const float gap = 4f;
+
+        var width = iconSize + gap + label.GetWidthCached();
+        var remaining = rect.width - width;
+
+        bool clicked = Widgets.ButtonInvisible(rect);
+        Widgets.DrawButtonGraphic(rect);
+
+        var contentRect = rect.ContractedBy(remaining / 2, 0f);
+
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Widgets.Label(contentRect.TakeLeftPart(label.GetWidthCached()), label);
+
+        contentRect.xMin += gap;
+
+        var iconRect = new Rect(contentRect.x, rect.y + (rect.height - iconSize) / 2f, iconSize, iconSize);
+
+        var prev = GUI.color;
+        if (color.HasValue) GUI.color = color.Value;
+        GUI.DrawTexture(iconRect, icon);
+        GUI.color = prev;
+
+        return clicked;
     }
 }

@@ -11,7 +11,7 @@ public class DefTable_Hair(TableDef def, Func<IEnumerable<Def>> thingsGetter, De
 {
     protected override void OnSelectChanged(Def thing)
     {
-        var p = Window_Editor.GetSelectedPawn();
+        var p = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         if (p == null) return;
         switch (thing)
         {
@@ -26,7 +26,7 @@ public class DefTable_Hair(TableDef def, Func<IEnumerable<Def>> thingsGetter, De
 
     protected override void DoRowHover(Rect inRect, Def thing)
     {
-        var p = Window_Editor.GetSelectedPawn();
+        var p = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         if (p == null) return;
         UIUtility.DefIconPreview(inRect, thing, p.story.HairColor);
     }

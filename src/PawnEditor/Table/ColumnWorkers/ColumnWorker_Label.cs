@@ -24,7 +24,8 @@ public class ColumnWorker_Label : ColumnWorker_Text
 
             if (Def.iconBackground) Widgets.DrawHighlight(iconRect.ContractedBy(2f));
 
-            var pawn = Window_Editor.GetSelectedPawn();
+            // TODO: Why does this column need direct access to the pawn?
+            var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
 
             if (thing is HairDef or BeardDef)
                 GUI.color = pawn != null ? pawn.story.HairColor : PawnHairColors.DarkReddish;

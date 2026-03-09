@@ -64,8 +64,8 @@
         <Compile Include="External\Hotswap.cs" />
         <Compile Include="External\Required.cs" />
         <Compile Include="Harmony\Patch_WindowResizer.cs" />
-        <Compile Include="FlexLayout.cs" />
         <Compile Include="Layout\DefLeafNode.cs" />
+        <Compile Include="Layout\FlexLayoutHelper.cs" />
         <Compile Include="Layout\FlexLayoutNode.cs" />
         <Compile Include="Layout\FlexLayoutEngine.cs" />
         <Compile Include="Layout\LayoutNode.cs" />
@@ -85,11 +85,10 @@
         <Compile Include="Sections\Bio\BioUtility.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioAbilities.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioAge.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_BioFake.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioSkills.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioBackstory.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioFavColor.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_BioGroups.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_BioFaction.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioInfo.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioName.cs" />
         <Compile Include="Sections\Bio\SectionWorker_BioTraits.cs" />

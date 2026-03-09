@@ -24,12 +24,11 @@ public class SectionWorker_BioBackstory(SectionDef def) : SectionWorker(def)
         string childhoodLabel = "Childhood".Translate();
         string adulthoodLabel = "Adulthood".Translate();
         var labelWidth = Mathf.Max(childhoodLabel.GetWidthCached(), adulthoodLabel.GetWidthCached());
-        labelWidth += UIUtility.LabelPadding * 3f;
+        labelWidth += UIUtility.LabelOffset;
 
         var slots = Enum.GetValues(typeof(BackstorySlot));
         for (var i = 0; i < slots.Length; i++)
         {
-
             var backstorySlot = (BackstorySlot)slots.GetValue(i);
             var backstory = pawn.story.GetBackstory(backstorySlot);
             using (new TextBlock(TextAnchor.MiddleLeft))
@@ -53,9 +52,9 @@ public class SectionWorker_BioBackstory(SectionDef def) : SectionWorker(def)
                     var desc = backstory.FullDescriptionFor(pawn).Resolve();
                     TooltipHandler.TipRegion(rect1, tip + desc);
                 }
+
                 if (i < slots.Length - 1) listing.Gap(2f);
             }
-            
         }
     }
 }

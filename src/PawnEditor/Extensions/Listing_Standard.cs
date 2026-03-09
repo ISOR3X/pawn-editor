@@ -37,9 +37,7 @@ public static class Listing_Standard_Extension
         public Rect RectLabeled(string label, float height = UIUtility.ButtonHeight, float? labelWidth = null)
         {
             var rect = listing.GetRect(height);
-            var intLabelWidth = labelWidth ?? Text.CalcSize(label).x + 18f;
-            using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(rect.TakeLeftPart(intLabelWidth), label);
-            return rect;
+            return UIUtility.RectLabeled(rect, label, labelWidth);
         }
 
         /// <summary>

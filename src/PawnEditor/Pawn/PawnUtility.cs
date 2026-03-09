@@ -125,7 +125,6 @@ public static class PawnUtility
 
         public void FullDelete()
         {
-            Window_Editor.selectedPawnGroup?.Remove(pawn);
             pawn.Destroy();
             Find.WorldPawns.RemovePawn(pawn);
         }
@@ -134,25 +133,26 @@ public static class PawnUtility
 
     public static void RandomizeInPlace(Pawn pawn)
     {
-        if (pawn.Faction != Window_Editor.GetSelectedFaction()) return;
-
-        // Store the old pawn's data and delete the pawn itself.
-        var isSelected = Window_Editor.GetSelectedPawn() == pawn;
-        var index = Window_Editor.selectedPawnGroup.IndexOf(pawn);
-        var location = pawn.GetLocation();
-        var position = pawn.Position;
-        pawn.FullDelete();
-
-        // Generate a new pawn.
-        var req = new PawnGenerationRequest(PawnKindDefOf.Colonist, Window_Editor.GetSelectedFaction());
-        var p = PawnGenerator.GeneratePawn(req);
-
-        // Move the new pawn to the old pawn's location.
-        TeleportTo(p, location, position);
-
-        // Update list
-        Window_Editor.selectedPawnGroup.Insert(index, p);
-        if (isSelected) Window_Editor.TrySelect(p);
+        // if (pawn.Faction != Window_Editor.GetSelectedFaction()) return;
+        //
+        // // Store the old pawn's data and delete the pawn itself.
+        // var isSelected = Window_Editor.GetSelectedPawn() == pawn;
+        // var index = Window_Editor.selectedPawnGroup.IndexOf(pawn);
+        // var location = pawn.GetLocation();
+        // var position = pawn.Position;
+        // pawn.FullDelete();
+        //
+        // // Generate a new pawn.
+        // var req = new PawnGenerationRequest(PawnKindDefOf.Colonist, Window_Editor.GetSelectedFaction());
+        // var p = PawnGenerator.GeneratePawn(req);
+        //
+        // // Move the new pawn to the old pawn's location.
+        // TeleportTo(p, location, position);
+        //
+        // // Update list
+        // Window_Editor.selectedPawnGroup.Insert(index, p);
+        // // TODO: Fix
+        // // if (isSelected) Window_Editor.TrySelect(p);
     }
 
     public static RenderTexture GetScaledPortrait(Pawn pawn, Rect inRect)

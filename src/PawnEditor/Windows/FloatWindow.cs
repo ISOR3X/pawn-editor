@@ -15,26 +15,17 @@ public abstract class FloatWindow : Window
         _boundWidgetRect = boundWidgetRect;
         onlyOneOfTypeAllowed = true;
         layer = WindowLayer.Super;
-        // closeOnClickedOutside = true;
-        // doCloseX = true;
+        closeOnClickedOutside = true;
     }
 
     protected virtual FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
-    protected virtual bool UseWidgetWidth => false;
 
     public override void SetInitialSizeAndPosition()
     {
         base.SetInitialSizeAndPosition();
-        if (UseWidgetWidth) windowRect.width = _boundWidgetRect.width;
         windowRect.position = CalculatePositionFromBoundWidget(_boundWidgetRect);
     }
 
-    public override void ExtraOnGUI()
-    {
-        base.ExtraOnGUI();
-        CloseIfOutOfBounds();
-        CloseIfClickedOutside();
-    }
 
     private Vector2 CalculatePositionFromBoundWidget(Rect widgetRect)
     {
@@ -97,24 +88,5 @@ public abstract class FloatWindow : Window
             var newWindow = (FloatWindow)Activator.CreateInstance(typeof(T), widgetRect);
             Find.WindowStack.Add(newWindow);
         }
-    }
-
-    private void CloseIfOutOfBounds()
-    {
-        if (windowRect.Contains(Event.current.mousePosition))
-            return;
-        var num = GenUI.DistFromRect(windowRect, Event.current.mousePosition);
-        if (num <= 95.0)
-            return;
-        Close(false);
-    }
-
-    private void CloseIfClickedOutside()
-    {
-        // TODO: If the boundWidget is inside of a WidgetGroup, GUIUtility.GUIToScreenRect will not work.
-        // var widgetRect = GUIUtility.GUIToScreenRect(boundWidgetRect);
-        // Vector2 groupPosition = GUIUtility.GUIToScreenPoint(Vector2.zero);
-        // if (!widgetRect.Contains(Event.current.mousePosition))
-        //     Close();
     }
 }

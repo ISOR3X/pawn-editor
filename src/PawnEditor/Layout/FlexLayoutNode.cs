@@ -10,6 +10,8 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
     public FlexDirection direction = FlexDirection.Col;
     public bool wrap;
     public float gap = 4f;
+    public float? gapX;
+    public float? gapY;
     public List<LayoutNode<TLeaf>> children = [];
     
     public Dictionary<string, Func<LayoutNode<TLeaf>>>? Registry;
@@ -28,6 +30,10 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
             direction = (FlexDirection)Enum.Parse(typeof(FlexDirection), dir, ignoreCase: true);
         if (xmlRoot.Attributes?["gap"]?.Value is { } flexGap)
             gap = ParseHelper.FromString<float>(flexGap);
+        if (xmlRoot.Attributes?["gap-x"]?.Value is { } flexGapX)
+            gapX = ParseHelper.FromString<float>(flexGapX);
+        if (xmlRoot.Attributes?["gap-y"]?.Value is { } flexGapY)
+            gapY = ParseHelper.FromString<float>(flexGapY);
         if (xmlRoot.Attributes?["wrap"]?.Value is { } flexWrap)
             wrap = ParseHelper.FromString<bool>(flexWrap);
         

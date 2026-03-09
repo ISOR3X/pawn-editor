@@ -25,8 +25,9 @@ public class SectionWorker_BioAge(SectionDef def) : SectionWorker(def)
 
         const string bioLabel = "Biological";
         const string chronoLabel = "Chronological";
+        
         var labelWidth = Mathf.Max(bioLabel.GetWidthCached(), chronoLabel.GetWidthCached());
-        labelWidth += UIUtility.LabelPadding * 3f;
+        labelWidth += UIUtility.LabelOffset;
 
         using (new TextBlock(TextAnchor.MiddleLeft))
         {

@@ -13,7 +13,7 @@ public class DefTable_Tattoos : DefTable
 
     protected override void OnSelectChanged(Def thing)
     {
-        if (Window_Editor.GetSelectedPawn() != null)
+        if (Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn() != null)
         {
         }
     }

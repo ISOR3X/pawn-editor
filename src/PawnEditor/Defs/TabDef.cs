@@ -11,8 +11,6 @@ public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
     public int priority = 10;
-    public required List<SectionDef> sections = [];
-    public List<SectionDef> stickySections = [];
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
     public SectionFlexLayoutNode layout = new();

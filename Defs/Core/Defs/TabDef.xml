@@ -11,50 +11,21 @@
             <section>PawnEditor_BioInfo</section>
             <flex direction="row">
                 <section flexBasis="0.4" flexGrow="0">PawnEditor_BioName</section>
-                <section flexBasis="0" flexGrow="1">PawnEditor_BioBackstory</section>
                 <section flexBasis="0" flexGrow="1">PawnEditor_BioAge</section>
+                <section flexBasis="0" flexGrow="1">PawnEditor_BioBackstory</section>
             </flex>
             <section>PawnEditor_BioSkills</section>
             <flex direction="row">
                 <section flexBasis="0.6" flexGrow="1">PawnEditor_BioTraits</section>
                 <section flexBasis="0.3" flexGrow="1">PawnEditor_BioAbilities</section>
             </flex>
-            <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_BioFavColor</section>
+            <flex direction="row">
+                <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_BioFavColor</section>
+            </flex>
+            <flex direction="row">
+                <section flexBasis="0.3" flexGrow="0">PawnEditor_BioFaction</section>
+            </flex>
         </layout>
-<!--        <sections>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioInfo</section>-->
-<!--                <width>0.8</width>-->
-<!--            </li>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioName</section>-->
-<!--                <width>0.5</width>-->
-<!--            </li>-->
-<!--            <li MayRequire="Ludeon.RimWorld.Ideology">-->
-<!--                <section>PawnEditor_BioFavColor</section>-->
-<!--                <width>0.5</width>-->
-<!--            </li>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioBackstory</section>-->
-<!--                <width>0.5</width>-->
-<!--            </li>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioAge</section>-->
-<!--                <width>0.5</width>-->
-<!--            </li>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioAbilities</section>-->
-<!--                <width>0.3</width>-->
-<!--            </li>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioTraits</section>-->
-<!--                <width>0.6</width>-->
-<!--                <grow>1</grow>-->
-<!--            </li>-->
-<!--            <li>-->
-<!--                <section>PawnEditor_BioSkills</section>-->
-<!--            </li>-->
-<!--        </sections>-->
     </PawnEditor.TabDef>
     <!--    <PawnEditor.TabDef>-->
     <!--        <defName>PawnEditor_Appearance</defName>-->

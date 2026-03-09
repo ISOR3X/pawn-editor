@@ -7,64 +7,63 @@ namespace PawnEditor;
 
 public partial class Window_Editor
 {
-    private static void TrySelect(Faction? faction)
+    public void TrySelect(Faction? faction)
     {
-        if (selectedFaction == faction) return;
-        selectedFaction = faction;
+        if (_selectedFaction == faction) return;
+        _selectedFaction = faction;
         TryRecachePawnGroup();
-        TrySelect(selectedPawnGroup.FirstOrDefault());
+
+        if (_selectedPawn?.Faction != _selectedFaction)
+            TrySelect(selectedPawnGroup.FirstOrDefault());
     }
 
-    public static void TrySelect(Pawn? pawn)
+    public void TrySelect(Pawn? pawn)
     {
-        if (pawn == selectedPawn) return;
-        var prevSelectedPawn = selectedPawn;
-        selectedPawn = pawn;
+        if (_selectedPawn == pawn) return;
+
+        var prevFaction = _selectedPawn?.Faction;
+        var prevCategory = PawnUtility.GetPawnCategory(_selectedPawn);
+
+        _selectedPawn = pawn;
 
         selectedTabDef?.Worker.Notify_ContentChanged();
-        secondarySelectedTabDef?.Worker.Notify_ContentChanged();
 
-        if (selectedPawn?.Faction != prevSelectedPawn?.Faction)
+        if (pawn?.Faction != prevFaction)
         {
-            selectedFaction = pawn?.Faction;
-            TryRecachePawnGroup();
+            TrySelect(pawn?.Faction);
         }
 
-        if (PawnUtility.GetPawnCategory(pawn) != PawnUtility.GetPawnCategory(prevSelectedPawn)) RecacheTabs();
+        if (PawnUtility.GetPawnCategory(pawn) != prevCategory) RecacheTabs();
     }
 
-    public static Pawn? GetSelectedPawn()
+    public Pawn? GetSelectedPawn()
     {
-        return selectedPawn;
+        return _selectedPawn;
     }
 
-    public static Faction? GetSelectedFaction()
+    public Faction? GetSelectedFaction()
     {
-        return selectedFaction;
+        return _selectedFaction;
     }
 
-    private static void RecacheTabs()
+    private void RecacheTabs()
     {
         selectedTabDefsForPawn.Clear();
-        selectedTabDefsForPawn = TabUtility.GetTabDefsForPawn(selectedPawn);
+        selectedTabDefsForPawn = TabUtility.GetTabDefsForPawn(_selectedPawn);
         selectedTabDef = selectedTabDefsForPawn.FirstOrDefault();
         selectedTabDef?.Worker.Notify_ContentChanged();
-        var tab = selectedTabDefsForPawn.ElementAtOrDefault(1);
-        secondarySelectedTabDef = tab;
-        if (tab != null && secondarySelectedTabDef != null) secondarySelectedTabDef.Worker.Notify_ContentChanged();
     }
 
-    private static void TryRecachePawnGroup()
+    private void TryRecachePawnGroup()
     {
-        var flag = selectedFaction == null
-            ? selectedPawnGroup == Pawns_NoFaction
-            : selectedPawnGroup == Pawns_ByFaction[selectedFaction];
-        if (!flag) selectedPawnGroup = selectedFaction == null ? Pawns_NoFaction : Pawns_ByFaction[selectedFaction];
+        selectedPawnGroup.Clear();
+        selectedPawnGroup.AddRange(PawnLister.Pawns_ByFaction[_selectedFaction ?? Faction.OfPlayer]);
     }
 
-    private static FloatMenu FactionFloatMenu()
+    private FloatMenu FactionFloatMenu()
     {
-        var playerFaction = Pawns_ByFaction.Keys.First(f => f.IsPlayer);
+        var pawnsByFaction = PawnLister.Pawns_ByFaction;
+        var playerFaction = Faction.OfPlayer;
         var playerOption = new FloatMenuOption(
             playerFaction.Name,
             () => TrySelect(playerFaction),
@@ -89,20 +88,17 @@ public partial class Window_Editor
         (string, Texture2D, int) GetFactionInfo(Faction? faction)
         {
             var priority = 0;
-            int pawnCount;
+            var pawnCount = 0;
             var label = "Wildlife";
             if (faction != null)
             {
+                // TODO: Why was this Ancient check needed? Potentially because there are two types of ancients?
                 label = faction.def == FactionDefOf.Ancients ? faction.def.LabelCap : faction.Name;
-                Pawns_ByFaction.TryGetValue(faction, out var pawnsInFaction);
+                pawnsByFaction.TryGetValue(faction, out var pawnsInFaction);
                 pawnCount = pawnsInFaction?.Count ?? 0;
                 priority = pawnCount == 0
                     ? -1
                     : priority; // To ensure that empty factions are always at the bottom, excluding the wildlife faction.
-            }
-            else
-            {
-                pawnCount = Pawns_NoFaction.Count;
             }
 
             return (label.Colorize(pawnCount == 0 ? ColoredText.SubtleGrayColor : Color.white), GetFactionIcon(faction),

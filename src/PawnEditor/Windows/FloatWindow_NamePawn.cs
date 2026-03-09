@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HotSwap;
+using PawnEditor.Layout;
+using L = PawnEditor.Layout.FlexLayoutHelper;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidgetRect)
 {
     private static bool forceNoNick;
     private static bool keepLastName;
-    private readonly Listing_Horizontal _listing = new();
 
     private CultureDef? _selectedCulture;
     private Gender _selectedGender = Gender.Male;
@@ -20,61 +23,89 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
 
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomCenter;
 
-    public override Vector2 InitialSize => new(750, 200);
+    public override Vector2 InitialSize => new(500, 200);
 
 
     public override void DoWindowContents(Rect inRect)
     {
-        var p = Window_Editor.GetSelectedPawn();
+        var p = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         if (p == null) return;
         _selectedCulture ??= p.Faction?.ideos?.PrimaryCulture;
-
 
         var cultures = DefDatabase<CultureDef>.AllDefsListForReading;
         var xenotypes = DefDatabase<XenotypeDef>.AllDefsListForReading;
 
-
-        _listing.Begin(inRect);
-        if (_selectedCulture != null)
-            if (_listing.ButtonTextLabeled("Culture", _selectedCulture.LabelCap, 6))
-                Find.WindowStack.Add(new FloatMenu(cultures
-                    .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
-
-        if (ModsConfig.BiotechActive)
-            if (_listing.ButtonTextLabeled("Xenotype", _selectedXenotype?.LabelCap ?? "None", 6))
-                Find.WindowStack.Add(new FloatMenu(xenotypes
-                    .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
-                    .Append(new FloatMenuOption("None", () => _selectedXenotype = null)).ToList()));
-
-        if (_listing.ButtonTextLabeled("Gender", _selectedGender.GetLabel().CapitalizeFirst(), 4))
-        {
-            var genders = new List<Gender>
+        var layout = L.Row([
+            L.Cell(rect =>
             {
-                Gender.Male, Gender.Female
-            };
-            Find.WindowStack.Add(new FloatMenu(genders
-                .Select(g => new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g)).ToList()));
-        }
+                if (UIUtility.ButtonTextLabeled(rect, "Culture", _selectedCulture!.LabelCap))
+                    Find.WindowStack.Add(new FloatMenu(cultures
+                        .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
+            }).When(_selectedCulture != null),
 
-        _listing.CheckboxLabeled("Keep last name", ref keepLastName, 4);
-        _listing.CheckboxLabeled("Force no nickname", ref forceNoNick, 4);
+            L.Cell(rect =>
+            {
+                if (UIUtility.ButtonTextLabeled(rect, "Xenotype", _selectedXenotype?.LabelCap ?? "None"))
+                    Find.WindowStack.Add(new FloatMenu(xenotypes
+                        .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
+                        .Append(new FloatMenuOption("None", () => _selectedXenotype = null)).ToList()));
+            }).When(ModsConfig.BiotechActive),
 
-        var nameRect =
-            _listing.GetRect(8); // We use GetRect instead of RectLabeled so the label width isnt used for the listing.
-        Widgets.Label(nameRect, p.Name.ToStringFull);
-        if (_listing.ButtonText("Generate", 4))
+            L.Cell(rect =>
+            {
+                if (UIUtility.ButtonTextLabeled(rect, "Gender", _selectedGender.GetLabel().CapitalizeFirst()))
+                    Find.WindowStack.Add(new FloatMenu(
+                        new List<Gender> { Gender.Male, Gender.Female }
+                            .Select(g => new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
+                            .ToList()));
+            }),
+
+            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Keep last name", ref keepLastName)),
+            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Force no nickname", ref forceNoNick)),
+
+            L.Row([
+                L.Cell(rect =>
+                {
+                    using (new TextBlock(TextAnchor.MiddleLeft, ColoredText.SubtleGrayColor))
+                        Widgets.Label(rect, p.Name.ToStringFull);
+                }),
+                L.Cell(rect =>
+                {
+                    if (Widgets.ButtonText(rect, "Generate"))
+                    {
+                        SoundDefOf.Tick_High.PlayOneShotOnCamera();
+                        string? lastName = null;
+                        if (keepLastName && p.Name is NameTriple triple) lastName = triple.Last;
+                        p.Name = PawnBioAndNameGenerator.GenerateFullPawnName(p.def,
+                            p.kindDef.GetNameMaker(p.gender), p.story,
+                            _selectedXenotype, p.RaceProps.GetNameGenerator(_selectedGender),
+                            _selectedCulture, p.IsCreepJoiner, _selectedGender,
+                            p.RaceProps.nameCategory, lastName, forceNoNick);
+                    }
+                })
+            ], flexBasis: 1f)
+        ], gapX: 24f, wrap: true);
+
+        var height = FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
         {
-            string? lastName = null;
-            if (keepLastName && p.Name is NameTriple triple) lastName = triple.Last;
+            action(rect);
+            return UIUtility.ButtonHeight;
+        });
 
-            p.Name = PawnBioAndNameGenerator.GenerateFullPawnName(p.def, p.kindDef.GetNameMaker(p.gender), p.story,
-                _selectedXenotype, p.RaceProps.GetNameGenerator(_selectedGender),
-                _selectedCulture, p.IsCreepJoiner, _selectedGender, p.RaceProps.nameCategory, lastName, forceNoNick);
-        }
-
-        _listing.End();
-
-        var height = _listing.TotalHeight;
-        if (!Mathf.Approximately(windowRect.height, height)) windowRect.height = height + Margin + 2f;
+        if (!Mathf.Approximately(windowRect.height, height))
+            windowRect.height = height + Margin * 2;
     }
+
+    private static LayoutNode<Func<Rect, float>>
+        CreateCell(Action<Rect> draw, float flexGrow = 0f, float flexBasis = 0.5f,
+            float height = UIUtility.ButtonHeight) => new()
+    {
+        flexBasis = flexBasis,
+        flexGrow = flexGrow,
+        leaf = rect =>
+        {
+            draw(rect);
+            return height;
+        }
+    };
 }

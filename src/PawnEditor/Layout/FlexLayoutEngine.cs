@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using UnityEngine;
+using Verse;
 
 namespace PawnEditor.Layout;
 
@@ -26,7 +27,10 @@ public static class FlexLayoutEngine
         Func<TLeaf, Rect, float> runLeaf)
     {
         if (node.IsLeaf)
+        {
+            Widgets.DrawBoxSolidWithOutline(rect, Color.clear, Color.red, 1);
             return runLeaf(node.leaf!, rect);
+        }
 
         if (node is FlexLayoutNode<TLeaf> flex)
             return flex.direction switch
@@ -39,15 +43,6 @@ public static class FlexLayoutEngine
         return 0f;
     }
 
-    /// <summary>
-    /// Draws a row layout by rendering active child nodes horizontally within the specified rectangle,
-    /// arranging them from left to right while respecting the specified gap between children.
-    /// </summary>
-    /// <typeparam name="TLeaf">The type of the leaf node elements.</typeparam>
-    /// <param name="node">The layout node containing the children to be drawn in a horizontal row format.</param>
-    /// <param name="rect">The rectangle within which the row layout will be drawn, defining the starting position and size constraints.</param>
-    /// <param name="runLeaf">A function that renders a leaf node within the given rectangle and returns its height.</param>
-    /// <returns>The total height occupied by the row layout, which includes all child nodes, gaps, and line heights.</returns>
     private static float DrawRow<TLeaf>(
         FlexLayoutNode<TLeaf> node,
         Rect rect,
@@ -55,10 +50,11 @@ public static class FlexLayoutEngine
     {
         var lines = ComputeLines(node);
         var curY = rect.y;
+        var gap = node.gapX ?? node.gap;
 
         for (var i = 0; i < lines.Count; i++)
         {
-            var widths = ResolveWidths(lines[i], rect.width, node.gap);
+            var widths = ResolveWidths(lines[i], rect.width, gap);
 
             // Measuring pass: draw offscreen just to get heights
             var lineHeight = 0f;
@@ -71,26 +67,17 @@ public static class FlexLayoutEngine
             for (var j = 0; j < lines[i].Count; j++)
             {
                 Draw(lines[i][j], new Rect(curX, curY, widths[j], lineHeight), runLeaf);
-                curX += widths[j] + node.gap;
+                curX += widths[j] + gap;
             }
 
             curY += lineHeight;
             if (i < lines.Count - 1)
-                curY += node.gap;
+                curY += node.gapY ?? node.gap;
         }
 
         return curY - rect.y;
     }
 
-    /// <summary>
-    /// Draws a column layout by rendering active child nodes vertically within the specified rectangle,
-    /// stacking them from top to bottom while respecting the specified gap between children.
-    /// </summary>
-    /// <typeparam name="TLeaf">The type of the leaf node elements.</typeparam>
-    /// <param name="node">The layout node containing the children to be drawn in a vertical column format.</param>
-    /// <param name="rect">The rectangle within which the column layout will be drawn, defining the starting position and size constraints.</param>
-    /// <param name="runLeaf">A function that renders a leaf node and returns its height.</param>
-    /// <returns>The total height occupied by the column layout, including all child nodes and gaps.</returns>
     private static float DrawCol<TLeaf>(
         FlexLayoutNode<TLeaf> node,
         Rect rect,
@@ -102,10 +89,11 @@ public static class FlexLayoutEngine
         for (var i = 0; i < active.Count; i++)
         {
             // Vertical stacked items don't need an initial Draw call to determine their height as they are independent of each other.
-            var childHeight = Draw(active[i], new Rect(rect.x, curY, rect.width, 99999f), runLeaf);
+            var c = active[i];
+            var childHeight = c.flexBasis > 1f ? c.flexBasis : Draw(c, new Rect(rect.x, curY, rect.width, 99999f), runLeaf);
             curY += childHeight;
             if (i < active.Count - 1)
-                curY += node.gap;
+                curY += node.gapY ?? node.gap;
         }
 
         return curY - rect.y;
@@ -159,7 +147,8 @@ public static class FlexLayoutEngine
         var remaining = available;
         for (var i = 0; i < line.Count; i++)
         {
-            widths[i] = line[i].flexBasis * available;
+            var basis = line[i].flexBasis;
+            widths[i] = basis > 1f ? basis : basis * totalWidth;
             remaining -= widths[i];
         }
 

@@ -15,7 +15,7 @@ public class TabWorker_PawnBio : TabWorker_Pawn
     private static void TeleportToMapSpecific()
     {
         Find.WindowStack.WindowOfType<Window_Editor>()?.Close();
-        var pawn = Window_Editor.GetSelectedPawn();
+        var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         if (pawn == null) return;
         DebugTools.curTool = new DebugTool("Teleport here", () =>
         {
