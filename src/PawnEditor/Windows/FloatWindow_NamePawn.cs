@@ -14,12 +14,14 @@ namespace PawnEditor;
 [HotSwappable]
 public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidgetRect)
 {
-    private static bool forceNoNick;
-    private static bool keepLastName;
+    private static bool _forceNoNick;
+    private static bool _keepLastName;
 
     private CultureDef? _selectedCulture;
     private Gender _selectedGender = Gender.Male;
     private XenotypeDef? _selectedXenotype;
+
+    protected override Window? Owner => Find.WindowStack.WindowOfType<Window_Editor>();
 
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomCenter;
 
@@ -41,7 +43,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                 if (UIUtility.ButtonTextLabeled(rect, "Culture", _selectedCulture!.LabelCap))
                     Find.WindowStack.Add(new FloatMenu(cultures
                         .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
-            }, flexBasis: 0.5f ).When(_selectedCulture != null),
+            }, flexBasis: 0.5f).When(_selectedCulture != null),
 
             L.Cell(rect =>
             {
@@ -60,8 +62,8 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                             .ToList()));
             }, flexBasis: 0.5f),
 
-            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Keep last name", ref keepLastName), flexBasis: 0.5f),
-            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Force no nickname", ref forceNoNick), flexBasis: 0.5f),
+            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), flexBasis: 0.5f),
+            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), flexBasis: 0.5f),
 
             L.Row([
                 L.Cell(rect =>
@@ -75,37 +77,26 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
                         string? lastName = null;
-                        if (keepLastName && p.Name is NameTriple triple) lastName = triple.Last;
+                        if (_keepLastName && p.Name is NameTriple triple) lastName = triple.Last;
                         p.Name = PawnBioAndNameGenerator.GenerateFullPawnName(p.def,
                             p.kindDef.GetNameMaker(p.gender), p.story,
                             _selectedXenotype, p.RaceProps.GetNameGenerator(_selectedGender),
                             _selectedCulture, p.IsCreepJoiner, _selectedGender,
-                            p.RaceProps.nameCategory, lastName, forceNoNick);
+                            p.RaceProps.nameCategory, lastName, _forceNoNick);
                     }
-                }, flexBasis: 0.5f, flexGrow:1)
+                }, flexBasis: 0.5f, flexGrow: 1)
             ], flexBasis: 1f)
         ], gapX: 24f, wrap: true);
 
-        var height = FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
+        using (new TextBlock(GameFont.Small))
         {
-            action(rect);
-            return UIUtility.ButtonHeight;
-        });
-
-        if (!Mathf.Approximately(windowRect.height, height))
-            windowRect.height = height + Margin * 2;
-    }
-
-    private static LayoutNode<Func<Rect, float>>
-        CreateCell(Action<Rect> draw, float flexGrow = 0f, float flexBasis = 0.5f,
-            float height = UIUtility.ButtonHeight) => new()
-    {
-        flexBasis = flexBasis,
-        flexGrow = flexGrow,
-        leaf = rect =>
-        {
-            draw(rect);
-            return height;
+            var height = FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
+            {
+                action(rect);
+                return UIUtility.ButtonHeight;
+            });
+            if (!Mathf.Approximately(windowRect.height, height))
+                windowRect.height = height + Margin * 2;
         }
-    };
+    }
 }

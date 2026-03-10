@@ -1,14 +1,18 @@
 ﻿using System;
+using HotSwap;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public abstract class FloatWindow : Window
 {
     private static readonly Vector2 InitialPositionShift = new(0, 8f);
     private readonly Rect _boundWidgetRect;
+    protected virtual Window? Owner => null;
+    private Window? _ownerInstance;
 
     protected FloatWindow(Rect boundWidgetRect)
     {
@@ -75,6 +79,20 @@ public abstract class FloatWindow : Window
 
         return position;
     }
+
+    public override void PostOpen()
+    {
+        base.PostOpen();
+        _ownerInstance = Owner;
+    }
+
+    public override void ExtraOnGUI()
+    {
+        base.ExtraOnGUI();
+        if (_ownerInstance != null && !Find.WindowStack.IsOpen(_ownerInstance))
+            Close(false);
+    }
+
 
     public static void ToggleState<T>(Rect widgetRect) where T : FloatWindow
     {
