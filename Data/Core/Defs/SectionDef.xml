@@ -76,11 +76,11 @@
 <!--        <label>shape</label>-->
 <!--        <workerClass>PawnEditor.SectionWorker_AppearanceShape</workerClass>-->
 <!--    </PawnEditor.SectionDef>-->
-<!--    <PawnEditor.SectionDef>-->
-<!--        <defName>PawnEditor_AppearanceHair</defName>-->
-<!--        <label>hair and beards</label>-->
-<!--        <workerClass>PawnEditor.SectionWorker_AppearanceHair</workerClass>-->
-<!--    </PawnEditor.SectionDef>-->
+        <PawnEditor.SectionDef>
+            <defName>PawnEditor_AppearanceHair</defName>
+<!--            <label>hair and beards</label>-->
+            <workerClass>PawnEditor.SectionWorker_AppearanceHair</workerClass>
+        </PawnEditor.SectionDef>
 <!--    &lt;!&ndash; Gear &ndash;&gt;-->
 <!--    <PawnEditor.SectionDef>-->
 <!--        <defName>PawnEditor_GearBasic</defName>-->

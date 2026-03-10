@@ -160,6 +160,6 @@ public static class PawnUtility
         var rot = GetPawnCategory(pawn) is not PawnCategory.Humanlike ? Rot4.East : Rot4.South;
         var max = Mathf.Max(inRect.width, inRect.height);
         return PortraitsCache.Get(pawn, new Vector2(max, max) * 2f, rot, new Vector3(0, 0, .5f),
-            0.7f, renderHeadgear: Window_Editor.showHeadgear, renderClothes: Window_Editor.showClothes);
+            0.7f, renderHeadgear: Window_Editor.ShowHeadgear, renderClothes: Window_Editor.ShowClothes);
     }
 }

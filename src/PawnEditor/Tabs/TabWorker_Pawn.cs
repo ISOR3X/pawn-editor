@@ -34,7 +34,11 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         var viewRect = new Rect(contentRect.x, contentRect.y, contentRect.width - additionalWidth, _viewRectHeight);
         Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
 
-        _viewRectHeight = FlexLayoutEngine.Draw(Def.layout, viewRect, (section, r) => section.Worker.DoSection(pawn, r));
+        _viewRectHeight = FlexLayoutEngine.Draw(
+            Def.layout,
+            viewRect,
+            (section, r) => section.Worker.DoSection(pawn, r),
+            section => section.Worker.ShowSection(pawn));
 
         Widgets.EndScrollView();
         Widgets.EndGroup();

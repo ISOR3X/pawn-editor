@@ -13,18 +13,17 @@ namespace PawnEditor;
 public partial class Window_Editor : Window
 {
     #region Fields
-    
+
     // Pawn-related fields
     // These are private, so they are only set through the TrySelect methods.
     private Faction? _selectedFaction;
     private Pawn? _selectedPawn;
-    private List<Pawn> selectedPawnGroup = [];
-
+    private List<Pawn> _selectedPawnGroup = [];
 
     // Tab related fields
-    private static TabDef? selectedTabDef;
-    private static List<TabDef> selectedTabDefsForPawn = [];
-    private static List<TabRecord> tabsList = [];
+    private static TabDef? _selectedTabDef;
+    private static List<TabDef> _selectedTabDefsForPawn = [];
+    private static List<TabRecord> _tabsList = [];
 
     private static Settings.WindowSize WindowSize => PawnEditorMod.Settings.Size;
 
@@ -44,8 +43,8 @@ public partial class Window_Editor : Window
     public override Vector2 InitialSize => WindowSizes[WindowSize];
 
     // Options
-    public static bool showHeadgear = true;
-    public static bool showClothes = true;
+    public static bool ShowHeadgear = true;
+    public static bool ShowClothes = true;
 
     public static bool Playing => Current.ProgramState == ProgramState.Playing;
 
@@ -93,9 +92,9 @@ public partial class Window_Editor : Window
     public override void PostClose()
     {
         base.PostClose();
-        selectedTabDef = null;
-        selectedTabDefsForPawn.Clear();
-        tabsList.Clear();
+        _selectedTabDef = null;
+        _selectedTabDefsForPawn.Clear();
+        _tabsList.Clear();
     }
 
     public override void DoWindowContents(Rect inRect)
@@ -107,24 +106,24 @@ public partial class Window_Editor : Window
         inRect.yMin += TabDrawer.TabHeight;
         Widgets.DrawMenuSection(inRect);
 
-        tabsList = selectedTabDefsForPawn.Select(tabDef => new TabRecord(tabDef.LabelCap, delegate
+        _tabsList = _selectedTabDefsForPawn.Select(tabDef => new TabRecord(tabDef.LabelCap, delegate
         {
-            selectedTabDef = tabDef;
-            selectedTabDef.Worker.Notify_ContentChanged();
-        }, selectedTabDef == tabDef)).ToList();
-        TabDrawer.DrawTabs(inRect, tabsList);
+            _selectedTabDef = tabDef;
+            _selectedTabDef.Worker.Notify_ContentChanged();
+        }, _selectedTabDef == tabDef)).ToList();
+        TabDrawer.DrawTabs(inRect, _tabsList);
 
         var tabRect = inRect.TopPartPixels(TabDrawer.TabHeight) with
         {
-            y = inRect.y - TabDrawer.TabHeight, width = tabsList.Count * 200f
+            y = inRect.y - TabDrawer.TabHeight, width = _tabsList.Count * 200f
         };
         if (Mouse.IsOver(tabRect))
             TooltipHandler.TipRegion(tabRect,
                 "Click to select");
 
-        if (_selectedPawn != null && selectedTabDef != null)
+        if (_selectedPawn != null && _selectedTabDef != null)
         {
-            selectedTabDef.Worker.DoTabContents(ref inRect);
+            _selectedTabDef.Worker.DoTabContents(ref inRect);
         }
         else
         {
@@ -148,51 +147,50 @@ public partial class Window_Editor : Window
 
             L.Cell(rect =>
             {
-                if (UIComponents.ButtonText_TruncateWithTooltip(rect,
-                        _selectedFaction != null ? _selectedFaction.Name : "Wildlife"))
+                var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
+                if (UIUtility.ButtonText_WithIcon(rect, label, tex, c))
                     Find.WindowStack.Add(FactionFloatMenu());
             }, flexBasis: 30f),
 
 
             L.Cell(rect =>
             {
-                UIComponents.DrawReorderablePawnList(rect, ref selectedPawnGroup, _selectedPawn,
-                    out var newSelectedPawn, out _);
-                if (_selectedPawn != newSelectedPawn) TrySelect(newSelectedPawn);
+                UIComponents.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
             }, flexGrow: 1f),
 
-            L.Cell(rect =>
-            {
-                using (new TextBlock(GameFont.Tiny))
-                    Widgets.Label(rect, "Overview");
-            }, flexBasis: 18f),
-
-            L.Cell(rect =>
-            {
-                if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Colony"))
-                    Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
-            }, flexBasis: 30f),
-
-            L.Cell(rect =>
-            {
-                if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Faction..."))
-                    Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
-            }, flexBasis: 30f),
-            
-            L.Row([
-                L.Cell(rect =>
-                {
-                    if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Save"))
-                    {
-                    }
-                }, flexGrow: 1f),
-                L.Cell(rect =>
-                {
-                    if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Load"))
-                    {
-                    }
-                }, flexGrow: 1f)
-            ], flexBasis: 30f)
+            // L.Cell(rect =>
+            // {
+            //     using (new TextBlock(GameFont.Tiny))
+            //         Widgets.Label(rect, "Overview");
+            // }, flexBasis: 18f),
+            //
+            // L.Cell(rect =>
+            // {
+            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Colony"))
+            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
+            // }, flexBasis: 30f),
+            //
+            // L.Cell(rect =>
+            // {
+            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Faction..."))
+            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
+            // }, flexBasis: 30f),
+            //
+            // L.Row([
+            //     L.Cell(rect =>
+            //     {
+            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Save"))
+            //         {
+            //         }
+            //     }, flexGrow: 1f),
+            //     L.Cell(rect =>
+            //     {
+            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Load"))
+            //         {
+            //         }
+            //     }, flexGrow: 1f)
+            // ], flexBasis: 30f)
         ]);
 
         FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>

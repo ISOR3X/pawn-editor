@@ -16,8 +16,8 @@ public class SectionWorker_AppearanceHeader(SectionDef def) : SectionWorker(def)
             var position = contentRect.TakeLeftPart(width / 3);
             var image = PortraitsCache.Get(pawn, new Vector2(position.width, position.height), new Rot4(2 - index),
                 Dialog_StylingStation.PortraitOffset, 1.1f,
-                renderHeadgear: Window_Editor.showHeadgear,
-                renderClothes: Window_Editor.showClothes);
+                renderHeadgear: Window_Editor.ShowHeadgear,
+                renderClothes: Window_Editor.ShowClothes);
             GUI.DrawTexture(position, image);
         }
 
@@ -27,10 +27,10 @@ public class SectionWorker_AppearanceHeader(SectionDef def) : SectionWorker(def)
         var footerRect = listing.GetRect(UIUtility.ButtonHeight);
         Widgets.CheckboxLabeled(
             footerRect.TakeLeftPart(headgear.GetWidthCached() + UIUtility.ButtonPadding),
-            headgear, ref Window_Editor.showHeadgear);
+            headgear, ref Window_Editor.ShowHeadgear);
         footerRect.xMin += UIUtility.LabelPadding;
         Widgets.CheckboxLabeled(
             footerRect.TakeLeftPart(clothing.GetWidthCached() + UIUtility.ButtonPadding),
-            clothing, ref Window_Editor.showClothes);
+            clothing, ref Window_Editor.ShowClothes);
     }
 }

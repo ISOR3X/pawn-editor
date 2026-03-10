@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
@@ -9,7 +10,7 @@ namespace PawnEditor;
 [Reloadable]
 public static class PawnLister
 {
-    private static readonly Dictionary<Faction, List<Pawn>> PawnsByFactionTemporary = new();
+    private static readonly Dictionary<FactionKey, List<Pawn>> PawnsByFactionTemporary = new();
     private static readonly List<PawnLocation> AllLocationsTemporary = [];
 
     public static List<PawnLocation> AllLocations
@@ -26,7 +27,7 @@ public static class PawnLister
     /// <summary>
     ///     Returns a dictionary of pawns grouped by faction and a list of pawns with no faction.
     /// </summary>
-    public static Dictionary<Faction, List<Pawn>> Pawns_ByFaction
+    public static Dictionary<FactionKey, List<Pawn>> Pawns_ByFaction
     {
         get
         {
@@ -41,18 +42,30 @@ public static class PawnLister
             // Ensure all known factions have an entry, even if empty
             foreach (var faction in Find.FactionManager.AllFactions)
                 PawnsByFactionTemporary[faction] = [];
-            // PawnsByFactionTemporary[null!] = [];
+            PawnsByFactionTemporary[null!] = [];
 
             // Bucket pawns
             foreach (var pawn in availablePawns)
             {
-                var key = pawn.Faction != null && PawnsByFactionTemporary.ContainsKey(pawn.Faction)
-                    ? pawn.Faction
-                    : null;
-                if (key != null) PawnsByFactionTemporary[key].Add(pawn);
+                PawnsByFactionTemporary[pawn.Faction].Add(pawn);
             }
 
             return PawnsByFactionTemporary;
         }
+    }
+
+    // Some trickery so we can use null keys in a dict without our IDE complaining.
+    public readonly struct FactionKey(Faction? faction) : IEquatable<FactionKey>
+    {
+        public static readonly FactionKey None = new(null);
+
+        public readonly Faction? Faction = faction;
+
+        // Allows using Faction as a key in the dict instead of FactionKey
+        public static implicit operator FactionKey(Faction? faction) => new(faction);
+
+        public bool Equals(FactionKey other) => Faction == other.Faction;
+        public override bool Equals(object? obj) => obj is FactionKey other && Equals(other);
+        public override int GetHashCode() => Faction?.GetHashCode() ?? 0;
     }
 }

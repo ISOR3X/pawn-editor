@@ -27,19 +27,19 @@
             </flex>
         </layout>
     </PawnEditor.TabDef>
-    <!--    <PawnEditor.TabDef>-->
-    <!--        <defName>PawnEditor_Appearance</defName>-->
-    <!--        <label>Appearance</label>-->
-    <!--        <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>-->
-    <!--        <sections>-->
-    <!--            <li>PawnEditor_AppearanceHeader</li>-->
-    <!--            <li>PawnEditor_AppearanceBasic</li>-->
-    <!--            <li>PawnEditor_AppearanceShape</li>-->
-    <!--            <li>PawnEditor_AppearanceHair</li>-->
-    <!--            <li MayRequire="Ludeon.RimWorld.Ideology">PawnEditor_AppearanceTattoos</li>-->
-    <!--            <li MayRequire="Ludeon.RimWorld.Biotech">PawnEditor_AppearanceXenotype</li>-->
-    <!--        </sections>-->
-    <!--    </PawnEditor.TabDef>-->
+    <PawnEditor.TabDef>
+        <defName>PawnEditor_Appearance</defName>
+        <label>Appearance</label>
+        <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>
+        <layout>
+            <!--                <li>PawnEditor_AppearanceHeader</li>-->
+            <!--                <li>PawnEditor_AppearanceBasic</li>-->
+            <!--                <li>PawnEditor_AppearanceShape</li>-->
+            <section>PawnEditor_AppearanceHair</section>
+            <!--                <li MayRequire="Ludeon.RimWorld.Ideology">PawnEditor_AppearanceTattoos</li>-->
+            <!--                <li MayRequire="Ludeon.RimWorld.Biotech">PawnEditor_AppearanceXenotype</li>-->
+        </layout>
+    </PawnEditor.TabDef>
     <!--    <PawnEditor.TabDef>-->
     <!--        <defName>PawnEditor_Gear</defName>-->
     <!--        <label>Gear</label>-->

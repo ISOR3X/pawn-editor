@@ -13,8 +13,10 @@ public partial class Window_Editor
         _selectedFaction = faction;
         TryRecachePawnGroup();
 
-        if (_selectedPawn?.Faction != _selectedFaction)
-            TrySelect(selectedPawnGroup.FirstOrDefault());
+        if (_selectedPawn?.Faction != _selectedFaction && PawnLister.Pawns_ByFaction[faction].Count > 0)
+        {
+            TrySelect(_selectedPawnGroup.FirstOrDefault());
+        }
     }
 
     public void TrySelect(Pawn? pawn)
@@ -26,9 +28,9 @@ public partial class Window_Editor
 
         _selectedPawn = pawn;
 
-        selectedTabDef?.Worker.Notify_ContentChanged();
+        _selectedTabDef?.Worker.Notify_ContentChanged();
 
-        if (pawn?.Faction != prevFaction)
+        if (pawn?.Faction != prevFaction && pawn != null)
         {
             TrySelect(pawn?.Faction);
         }
@@ -48,17 +50,19 @@ public partial class Window_Editor
 
     private void RecacheTabs()
     {
-        selectedTabDefsForPawn.Clear();
-        selectedTabDefsForPawn = TabUtility.GetTabDefsForPawn(_selectedPawn);
-        selectedTabDef = selectedTabDefsForPawn.FirstOrDefault();
-        selectedTabDef?.Worker.Notify_ContentChanged();
+        _selectedTabDefsForPawn.Clear();
+        _selectedTabDefsForPawn = TabUtility.GetTabDefsForPawn(_selectedPawn);
+        _selectedTabDef = _selectedTabDefsForPawn.FirstOrDefault();
+        _selectedTabDef?.Worker.Notify_ContentChanged();
     }
 
     private void TryRecachePawnGroup()
     {
-        selectedPawnGroup.Clear();
-        selectedPawnGroup.AddRange(PawnLister.Pawns_ByFaction[_selectedFaction ?? Faction.OfPlayer]);
+        _selectedPawnGroup.Clear();
+        _selectedPawnGroup.AddRange(PawnLister.Pawns_ByFaction[_selectedFaction]);
     }
+
+    
 
     private FloatMenu FactionFloatMenu()
     {
@@ -67,7 +71,7 @@ public partial class Window_Editor
         var playerOption = new FloatMenuOption(
             playerFaction.Name,
             () => TrySelect(playerFaction),
-            GetFactionIcon(playerFaction),
+            playerFaction.def.FactionIcon,
             playerFaction.Color,
             orderInPriority: 100
         );
@@ -89,11 +93,10 @@ public partial class Window_Editor
         {
             var priority = 0;
             var pawnCount = 0;
-            var label = "Wildlife";
+            var (label, icon, _) = FactionUtility.GetFactionMeta(faction);
             if (faction != null)
             {
                 // TODO: Why was this Ancient check needed? Potentially because there are two types of ancients?
-                label = faction.def == FactionDefOf.Ancients ? faction.def.LabelCap : faction.Name;
                 pawnsByFaction.TryGetValue(faction, out var pawnsInFaction);
                 pawnCount = pawnsInFaction?.Count ?? 0;
                 priority = pawnCount == 0
@@ -101,15 +104,8 @@ public partial class Window_Editor
                     : priority; // To ensure that empty factions are always at the bottom, excluding the wildlife faction.
             }
 
-            return (label.Colorize(pawnCount == 0 ? ColoredText.SubtleGrayColor : Color.white), GetFactionIcon(faction),
+            return (label.Colorize(pawnCount == 0 ? ColoredText.SubtleGrayColor : Color.white), icon,
                 priority);
-        }
-
-        Texture2D GetFactionIcon(Faction? faction)
-        {
-            var icon = faction != null ? faction.def.FactionIcon : Widgets.PlaceholderIconTex;
-            icon = icon == BaseContent.BadTex ? Widgets.PlaceholderIconTex : icon;
-            return icon;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,6 +8,7 @@ using Verse.Sound;
 
 namespace PawnEditor;
 
+[HotSwappable]
 public static partial class UIComponents
 {
     private const float CardGap = 8f;
@@ -73,12 +75,13 @@ public static partial class UIComponents
     }
 
 
-    public static void DrawReorderablePawnList(Rect inRect, ref List<Pawn> pawns, Pawn? selectedPawn,
-        out Pawn? newSelectedPawn, out float height)
+    // TODO: Clean up
+    public static void DrawReorderablePawnList(Rect inRect, List<Pawn> pawns, Pawn? selectedPawn,
+        out Pawn? newSelectedPawn)
     {
         newSelectedPawn = selectedPawn;
         var pawnsByLocation = PawnUtility.GroupByLocation(pawns, PawnLister.AllLocations);
-        height = pawns.Count * (CardSize.y + CardGap); // Height of all cards
+        var height = pawns.Count * (CardSize.y + CardGap); // Height of all cards
         var singleSectionHeight = SectionGap + Text.LineHeightOf(GameFont.Tiny) * 2; // Height of a single section
         height += pawnsByLocation.Sum(p =>
             p.Value.NullOrEmpty() ? singleSectionHeight + (8f + CardGap) : singleSectionHeight);
@@ -122,8 +125,10 @@ public static partial class UIComponents
                         .RightPartPixels(Widgets.InfoCardButtonSize);
                     if (Widgets.ButtonImage(deleteRect, TexButton.Delete))
                     {
+                        pawns.Remove(pawn);
                         pawn.FullDelete();
-                        if (pawn == selectedPawn) newSelectedPawn = pawnsAtLocation.FirstOrFallback(p => p != pawn);
+                        if (pawn == selectedPawn) newSelectedPawn = pawnsAtLocation.FirstOrDefault(p => p != pawn);
+                        break;
                     }
 
                     if (Event.current.type == EventType.MouseDown)

@@ -25,7 +25,7 @@ public class LayoutNode<TLeaf>
         if (xmlRoot.Attributes?["flexGrow"]?.Value is { } grow)
             flexGrow = ParseHelper.FromString<float>(grow);
 
-        if (xmlRoot.Attributes?["MayRequire"]?.Value is { } nodeMayRequire
+        if (xmlRoot.Attributes?["mayRequire"]?.Value is { } nodeMayRequire
             && !ModLister.AllModsActiveNoSuffix(nodeMayRequire.Split(',')))
             IsActive = false;
     }

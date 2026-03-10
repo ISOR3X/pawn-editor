@@ -63,6 +63,7 @@
         <Compile Include="Extensions\Listing_Standard.cs" />
         <Compile Include="External\Hotswap.cs" />
         <Compile Include="External\Required.cs" />
+        <Compile Include="FactionUtility.cs" />
         <Compile Include="Harmony\Patch_WindowResizer.cs" />
         <Compile Include="Layout\DefLeafNode.cs" />
         <Compile Include="Layout\FlexLayoutHelper.cs" />
