@@ -78,6 +78,7 @@
         <Compile Include="SaveLoadUtility.cs" />
         <Compile Include="Sections\Appearance\AppearanceUtility.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_AppearanceBasic.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_AppearanceBeard.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_AppearanceHair.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_AppearanceHeader.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_AppearanceShape.cs" />

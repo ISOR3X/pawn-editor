@@ -101,7 +101,7 @@ public static class AppearanceUtility
         pawn.Drawer.renderer.SetAllGraphicsDirty();
     }
 
-    public static void TrySetHairColor(Color color, ref Pawn pawn)
+    public static void TrySetHairColor(Color color, Pawn pawn)
     {
         if (pawn.story.HairColor == color) return;
         pawn.story.HairColor = color;
