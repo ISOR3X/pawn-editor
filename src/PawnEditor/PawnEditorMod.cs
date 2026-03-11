@@ -1,17 +1,15 @@
 ﻿using HarmonyLib;
+using HotSwap;
 using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-[UsedImplicitly]
-[Reloadable]
+[HotSwappable]
 public class PawnEditorMod : Mod
 {
     public static Settings Settings = new();
-
-    private readonly Listing_Horizontal _listing = new();
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
@@ -28,9 +26,10 @@ public class PawnEditorMod : Mod
 
     public override void DoSettingsWindowContents(Rect inRect)
     {
-        _listing.Begin(inRect);
-        _listing.ButtonTextLabeled("Restriction Mode", Settings.Restriction.ToString(), 6);
-        if (_listing.ButtonTextLabeled("Window Size", Settings.Size.ToString(), 6))
+        var listing = new Listing_Standard();
+        listing.Begin(inRect);
+        listing.ButtonTextLabeled("Restriction Mode", Settings.Restriction.ToString());
+        if (listing.ButtonTextLabeled("Window Size", Settings.Size.ToString()))
             Find.WindowStack.Add(new FloatMenu([
                 new FloatMenuOption(nameof(Settings.WindowSize.Small),
                     () => Settings.Size = Settings.WindowSize.Small),
@@ -40,6 +39,6 @@ public class PawnEditorMod : Mod
                     () => Settings.Size = Settings.WindowSize.Large)
             ]));
 
-        _listing.End();
+        listing.End();
     }
 }

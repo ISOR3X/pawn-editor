@@ -20,7 +20,7 @@
         <defName>PawnEditor_Gender</defName>
         <sortable>true</sortable>
         <label>gender</label>
-        <headerTip>The gender preferrence for this hair.</headerTip>
+        <headerTip>The gender preference for this hair.</headerTip>
         <workerClass>PawnEditor.ColumnWorker_Gender</workerClass>
     </PawnEditor.ColumnDef>
     <PawnEditor.ColumnDef>

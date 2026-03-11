@@ -62,18 +62,18 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                             .ToList()));
             }, flexBasis: 0.5f),
 
-            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), flexBasis: 0.5f),
-            L.Cell(rect => Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), flexBasis: 0.5f),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), flexBasis: 0.5f),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), flexBasis: 0.5f),
 
             L.Row([
                 L.Cell(rect =>
                 {
                     using (new TextBlock(TextAnchor.MiddleLeft, ColoredText.SubtleGrayColor))
-                        Widgets.Label(rect, p.Name.ToStringFull);
+                        Verse.Widgets.Label(rect, p.Name.ToStringFull);
                 }, flexBasis: 0.4f),
                 L.Cell(rect =>
                 {
-                    if (Widgets.ButtonText(rect, "Generate"))
+                    if (Verse.Widgets.ButtonText(rect, "Generate"))
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
                         string? lastName = null;

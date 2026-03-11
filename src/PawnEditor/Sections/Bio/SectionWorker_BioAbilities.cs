@@ -36,8 +36,8 @@ public class SectionWorker_BioAbilities(SectionDef def) : SectionWorker(def)
             (r, abil) =>
             {
                 GUI.DrawTexture(r, BaseContent.ClearTex);
-                if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
-                if (Widgets.ButtonImage(r, abil.def.uiIcon, false))
+                if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
+                if (Verse.Widgets.ButtonImage(r, abil.def.uiIcon, false))
                 {
                     if (Event.current.shift) TryDeleteAbility(abil.def, pawn);
                     else Find.WindowStack.Add(new Dialog_InfoCard(abil.def));

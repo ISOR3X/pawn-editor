@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using PawnEditor.Extensions;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -25,11 +26,11 @@ public class SectionWorker_AppearanceHeader(SectionDef def) : SectionWorker(def)
         const string clothing = "Show clothing";
 
         var footerRect = listing.GetRect(UIUtility.ButtonHeight);
-        Widgets.CheckboxLabeled(
+        Verse.Widgets.CheckboxLabeled(
             footerRect.TakeLeftPart(headgear.GetWidthCached() + UIUtility.ButtonPadding),
             headgear, ref Window_Editor.ShowHeadgear);
         footerRect.xMin += UIUtility.LabelPadding;
-        Widgets.CheckboxLabeled(
+        Verse.Widgets.CheckboxLabeled(
             footerRect.TakeLeftPart(clothing.GetWidthCached() + UIUtility.ButtonPadding),
             clothing, ref Window_Editor.ShowClothes);
     }

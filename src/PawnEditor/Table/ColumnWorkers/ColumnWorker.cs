@@ -31,7 +31,7 @@ public abstract class ColumnWorker
             {
                 var rect1 = rect;
                 rect1.y += 3f;
-                Widgets.Label(rect1, Def.LabelCap.Resolve().Truncate(rect.width).Colorize(HeaderColor));
+                Verse.Widgets.Label(rect1, Def.LabelCap.Resolve().Truncate(rect.width).Colorize(HeaderColor));
             }
         }
         else if (Def.HeaderIcon != null)
@@ -56,13 +56,13 @@ public abstract class ColumnWorker
         var interactableHeaderRect = GetInteractableHeaderRect(rect, defTable);
         if (Mouse.IsOver(interactableHeaderRect))
         {
-            Widgets.DrawHighlight(interactableHeaderRect);
+            Verse.Widgets.DrawHighlight(interactableHeaderRect);
             var headerTip = GetHeaderTip(defTable);
             if (!headerTip.NullOrEmpty())
                 TooltipHandler.TipRegion(interactableHeaderRect, (TipSignal)headerTip);
         }
 
-        if (!Widgets.ButtonInvisible(interactableHeaderRect))
+        if (!Verse.Widgets.ButtonInvisible(interactableHeaderRect))
             return;
         HeaderClicked(rect, defTable);
     }
@@ -78,10 +78,9 @@ public abstract class ColumnWorker
     {
         if (!Def.label.NullOrEmpty())
         {
-            Text.Font = HeaderFont;
-            var minWidth = Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
-            Text.Font = GameFont.Small;
-            return minWidth;
+            // Use TextBlock to restore the previous font state rather than hardcoding Small.
+            using (new TextBlock(HeaderFont))
+                return Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
         }
 
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.x) : 1;
@@ -106,10 +105,9 @@ public abstract class ColumnWorker
     {
         if (!Def.label.NullOrEmpty())
         {
-            Text.Font = HeaderFont;
-            var minHeaderHeight = Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).y);
-            Text.Font = GameFont.Small;
-            return minHeaderHeight;
+            // Use TextBlock to restore the previous font state rather than hardcoding Small.
+            using (new TextBlock(HeaderFont))
+                return Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).y);
         }
 
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.y) : 0;

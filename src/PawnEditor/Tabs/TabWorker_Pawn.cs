@@ -28,11 +28,11 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
 
         if (pawn == null) return;
 
-        Widgets.BeginGroup(inRect);
+        Verse.Widgets.BeginGroup(inRect);
         var contentRect = inRect.AtZero();
         var additionalWidth = inRect.height < _viewRectHeight ? UIUtility.ScrollBarWidth_WithMargin : 0;
         var viewRect = new Rect(contentRect.x, contentRect.y, contentRect.width - additionalWidth, _viewRectHeight);
-        Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
+        Verse.Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
 
         _viewRectHeight = FlexLayoutEngine.Draw(
             Def.layout,
@@ -40,8 +40,8 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
             (section, r) => section.Worker.DoSection(pawn, r),
             section => section.Worker.ShowSection(pawn));
 
-        Widgets.EndScrollView();
-        Widgets.EndGroup();
+        Verse.Widgets.EndScrollView();
+        Verse.Widgets.EndGroup();
     }
 
     #region EVENTS

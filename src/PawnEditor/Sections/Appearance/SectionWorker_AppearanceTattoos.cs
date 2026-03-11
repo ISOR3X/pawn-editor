@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Extensions;
 using RimWorld;
 using Verse;
 
@@ -24,11 +25,11 @@ public class SectionWorker_AppearanceTattoos : SectionWorker
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
         var faceTattooRect = listing.GetRect(_faceDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        UIComponents.WidgetLabel(faceTattooRect.TakeTopPart(UIUtility.ButtonHeight), "Face");
+        Widgets.WidgetLabel(faceTattooRect.TakeTopPart(UIUtility.ButtonHeight), "Face");
         _faceDefTable.TableOnGUI(faceTattooRect);
 
         var bodyTattooRect = listing.GetRect(_bodyDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        UIComponents.WidgetLabel(bodyTattooRect.TakeTopPart(UIUtility.ButtonHeight), "Body");
+        Widgets.WidgetLabel(bodyTattooRect.TakeTopPart(UIUtility.ButtonHeight), "Body");
         _bodyDefTable.TableOnGUI(bodyTattooRect);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -8,29 +9,27 @@ namespace PawnEditor;
 
 [StaticConstructorOnStartup]
 [Reloadable]
-public static partial class UIComponents
+public static partial class Widgets
 {
     public static void SectionSeparator(Rect inRect, string label)
     {
         var rect = inRect.TakeTopPart(30f);
-        var color = GUI.color;
-        GUI.color = Widgets.SeparatorLabelColor;
         using (new TextBlock(Text.Anchor = TextAnchor.UpperLeft))
+        using (new GUIColor(Verse.Widgets.SeparatorLabelColor))
         {
-            Widgets.Label(rect, label.CapitalizeFirst());
+            Verse.Widgets.Label(rect, label.CapitalizeFirst());
         }
 
         rect.yMin += 20f;
-        GUI.color = Widgets.SeparatorLineColor;
-        Widgets.DrawLineHorizontal(rect.x, rect.y, rect.width);
-        GUI.color = color;
+        using (new GUIColor(Verse.Widgets.SeparatorLineColor))
+            Verse.Widgets.DrawLineHorizontal(rect.x, rect.y, rect.width);
     }
 
     public static void WidgetLabel(Rect inRect, string label)
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
         {
-            Widgets.Label(inRect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+            Verse.Widgets.Label(inRect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
         }
     }
 
@@ -40,7 +39,7 @@ public static partial class UIComponents
         var width = inRect.width;
         if (Text.CalcSize(label).x > width - padding) TooltipHandler.TipRegion(inRect, label);
 
-        return Widgets.ButtonText(inRect, label.Truncate(width - padding));
+        return Verse.Widgets.ButtonText(inRect, label.Truncate(width - padding));
     }
 
     public static void IntField(Rect inRect, ref int value, int min, int max, ref string? buffer,
@@ -50,7 +49,7 @@ public static partial class UIComponents
         if (buffer == null) intBuff = value;
 
         if (minMaxButtons)
-            if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftDouble))
+            if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftDouble))
             {
                 if (value >= min + 1)
                 {
@@ -65,7 +64,7 @@ public static partial class UIComponents
                 return;
             }
 
-        if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeft))
+        if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeft))
         {
             if (value >= min + 1)
             {
@@ -81,7 +80,7 @@ public static partial class UIComponents
         }
 
         if (minMaxButtons)
-            if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightDouble))
+            if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightDouble))
             {
                 if (value <= max - 1)
                 {
@@ -96,7 +95,7 @@ public static partial class UIComponents
                 return;
             }
 
-        if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRight))
+        if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRight))
         {
             if (value <= max - 1)
             {
@@ -112,7 +111,7 @@ public static partial class UIComponents
         }
 
         var fieldRect = inRect.ContractedBy(0f, 4f);
-        Widgets.TextFieldNumeric(fieldRect, ref intBuff, ref buffer);
+        Verse.Widgets.TextFieldNumeric(fieldRect, ref intBuff, ref buffer);
 
         if (GUI.GetNameOfFocusedControl() != "TextField" + fieldRect.y.ToString("F0") + fieldRect.x.ToString("F0"))
         {
@@ -129,7 +128,7 @@ public static partial class UIComponents
         string? previousFocusedControlName,
         string? controlName = null)
     {
-        return DelayedTextField(inRect, text, ref buffer, (rect, buffer) => Widgets.TextField(rect, buffer, maxLength),
+        return DelayedTextField(inRect, text, ref buffer, (rect, buffer) => Verse.Widgets.TextField(rect, buffer, maxLength),
             previousFocusedControlName, controlName);
     }
 
@@ -146,13 +145,13 @@ public static partial class UIComponents
         // Increment/ decrement value with buttons.
         if (incrementButtons)
         {
-            if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeft))
+            if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeft))
             {
                 value--;
                 buffer = null;
             }
 
-            if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRight))
+            if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRight))
             {
                 value++;
                 buffer = null;
@@ -163,7 +162,7 @@ public static partial class UIComponents
         {
             // float val = value;
             int.TryParse(buff, out var val);
-            Widgets.TextFieldNumeric(rect, ref val, ref buff, min, max);
+            Verse.Widgets.TextFieldNumeric(rect, ref val, ref buff, min, max);
             return buff.ToString();
         }, previousFocusedControlName, controlName);
 
@@ -259,7 +258,7 @@ public static partial class UIComponents
         GUI.DrawTexture(inRect, texture);
     }
 
-    public static void GradientSlider(Rect inRect, Widgets.ColorComponents colorComponent, ref Color color,
+    public static void GradientSlider(Rect inRect, Verse.Widgets.ColorComponents colorComponent, ref Color color,
         ref string? lastFocusedSlider)
     {
         var originalRect = inRect;
@@ -271,7 +270,7 @@ public static partial class UIComponents
 
         if (Event.current.button == 0 && Input.GetKey(KeyCode.Mouse0))
         {
-            if (Widgets.ClickedInsideRect(originalRect) || (MouseDrag() && lastFocusedSlider == hashCode))
+            if (Verse.Widgets.ClickedInsideRect(originalRect) || (MouseDrag() && lastFocusedSlider == hashCode))
             {
                 lastFocusedSlider = hashCode;
                 if (Event.current.type == EventType.MouseDrag)
@@ -291,16 +290,16 @@ public static partial class UIComponents
         DrawGradient(inRect, gradient);
 
         var position = new Rect(xPosition - 6f, inRect.yMax - 6f, 12f, 12f);
-        GUI.DrawTextureWithTexCoords(position, Widgets.SelectionArrow, new Rect(0f, 0, 1f, 1f), true);
+        GUI.DrawTextureWithTexCoords(position, Verse.Widgets.SelectionArrow, new Rect(0f, 0, 1f, 1f), true);
     }
 
-    public static void GradientSlider_LabeledWithField(Rect inRect, Widgets.ColorComponents colorComponent,
+    public static void GradientSlider_LabeledWithField(Rect inRect, Verse.Widgets.ColorComponents colorComponent,
         ref Color color, ref string? buffer, ref string? lastFocusedSlider,
         string? previousFocusedControlName)
     {
         var nameWidth = "X".GetWidthCached() + UIUtility.LabelPadding;
         var valueWidth = "XXX".GetWidthCached() + UIUtility.LabelPadding;
-        Widgets.Label(inRect.TakeLeftPart(nameWidth), colorComponent.ToString()[0].ToString());
+        Verse.Widgets.Label(inRect.TakeLeftPart(nameWidth), colorComponent.ToString()[0].ToString());
         var value = Mathf.RoundToInt(color.GetComponent(colorComponent) * 255);
         var output = DelayedTextFieldNumeric(inRect.TakeRightPart(valueWidth), value, ref buffer, 0, 255,
             previousFocusedControlName);

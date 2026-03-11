@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -90,11 +91,11 @@ public class Dialog_ColorPicker : Window
                 ColorTextFields(fieldsRect);
 
                 hsvWidgetsRect.SplitVerticallyWithMargin(out var hsvRect, out var widgetsRect, out _, 16,
-                    rightWidth: Widgets.InfoCardButtonSize);
+                    rightWidth: Verse.Widgets.InfoCardButtonSize);
                 var min = Mathf.Min(hsvRect.width, hsvRect.height);
                 hsvRect = hsvRect with { width = min, height = min };
                 hsvRect.x += _singleCharWidth;
-                Widgets.HSVColorWheel(hsvRect, ref _selectedColor, ref _hsvColorWheelDragging, 1f);
+                Verse.Widgets.HSVColorWheel(hsvRect, ref _selectedColor, ref _hsvColorWheelDragging, 1f);
                 DoWidgets(widgetsRect);
             }
 
@@ -109,15 +110,15 @@ public class Dialog_ColorPicker : Window
         using (new TextBlock(GameFont.Medium))
         {
             var label = "ChooseAColor".Translate().CapitalizeFirst();
-            Widgets.Label(inRect, label);
+            Verse.Widgets.Label(inRect, label);
         }
     }
 
     private void DoFooter(Rect inRect)
     {
-        if (Widgets.ButtonText(inRect.TakeLeftPart(UIUtility.BottomButtonSize.x), "Cancel".Translate()))
+        if (Verse.Widgets.ButtonText(inRect.TakeLeftPart(UIUtility.BottomButtonSize.x), "Cancel".Translate()))
             Close();
-        if (Widgets.ButtonText(inRect.TakeRightPart(UIUtility.BottomButtonSize.x), "Accept".Translate()))
+        if (Verse.Widgets.ButtonText(inRect.TakeRightPart(UIUtility.BottomButtonSize.x), "Accept".Translate()))
             Accept();
     }
 
@@ -167,12 +168,12 @@ public class Dialog_ColorPicker : Window
         var oldLabel = "OldColor".Translate().CapitalizeFirst();
         var width = Mathf.Max(100f, currentLabel.GetWidthCached(), oldLabel.GetWidthCached());
         inRect.SplitHorizontallyEqual(out var currentRect, out var oldRect, CellGap);
-        Widgets.Label(currentRect.TakeLeftPart(width), currentLabel);
-        Widgets.DrawBoxSolid(currentRect, color);
+        Verse.Widgets.Label(currentRect.TakeLeftPart(width), currentLabel);
+        Verse.Widgets.DrawBoxSolid(currentRect, color);
         oldRect = oldRect.CenteredVertically(CellSize - CellPadding);
-        if (Widgets.ButtonInvisible(oldRect)) color = oldColor;
-        Widgets.Label(oldRect.TakeLeftPart(width), oldLabel);
-        Widgets.DrawBoxSolid(oldRect.CenteredVertically(CellSize - CellPadding), oldColor);
+        if (Verse.Widgets.ButtonInvisible(oldRect)) color = oldColor;
+        Verse.Widgets.Label(oldRect.TakeLeftPart(width), oldLabel);
+        Verse.Widgets.DrawBoxSolid(oldRect.CenteredVertically(CellSize - CellPadding), oldColor);
     }
 
     private void ColorPalette(Rect inRect, ref Color color)
@@ -183,8 +184,8 @@ public class Dialog_ColorPicker : Window
         var viewRect = viewRectDivider.Rect;
         if (_specialColors is { Count: > 0 }) viewRect.height += _specialColors.Count * CellSize + CellSize / 2;
 
-        Widgets.BeginScrollView(rectDivider.Rect, ref _scrollPosition, viewRect);
-        Widgets.ColorSelector(viewRect, ref color, _colors, out var height);
+        Verse.Widgets.BeginScrollView(rectDivider.Rect, ref _scrollPosition, viewRect);
+        Verse.Widgets.ColorSelector(viewRect, ref color, _colors, out var height);
 
         viewRect.yMin +=
             height + CellSize /
@@ -198,9 +199,9 @@ public class Dialog_ColorPicker : Window
                 var rowRect = viewRect.TakeTopPart(CellSize);
                 var leftRect = rowRect.LeftHalf();
 
-                Widgets.ColorBox(leftRect.TakeLeftPart(CellSize), ref color, kvp.Value);
+                Verse.Widgets.ColorBox(leftRect.TakeLeftPart(CellSize), ref color, kvp.Value);
                 leftRect.xMin += CellPadding;
-                Widgets.Label(leftRect, kvp.Key);
+                Verse.Widgets.Label(leftRect, kvp.Key);
 
 
                 if (i + 1 < _specialColors.Count)
@@ -211,13 +212,13 @@ public class Dialog_ColorPicker : Window
                         x = leftRect.x + (CellSize + CellGap) * 3 - CellGap
                     }; // Align right kvp with the 4th cell.
 
-                    Widgets.ColorBox(rightRect.TakeLeftPart(CellSize), ref color, kvp2.Value);
+                    Verse.Widgets.ColorBox(rightRect.TakeLeftPart(CellSize), ref color, kvp2.Value);
                     rightRect.xMin += CellPadding;
-                    Widgets.Label(rightRect, kvp2.Key);
+                    Verse.Widgets.Label(rightRect, kvp2.Key);
                 }
             }
 
-        Widgets.EndScrollView();
+        Verse.Widgets.EndScrollView();
     }
 
     private void ColorTextFields(Rect inRect)
@@ -234,25 +235,25 @@ public class Dialog_ColorPicker : Window
 
         if (_doHSV)
         {
-            UIComponents.GradientSlider_LabeledWithField(rect1, Widgets.ColorComponents.Hue, ref _selectedColor,
+            Widgets.GradientSlider_LabeledWithField(rect1, Verse.Widgets.ColorComponents.Hue, ref _selectedColor,
                 ref _textfieldBuffers[0], ref _lastFocusedSlider,
                 _previousFocusedControlName);
-            UIComponents.GradientSlider_LabeledWithField(rect2, Widgets.ColorComponents.Sat, ref _selectedColor,
+            Widgets.GradientSlider_LabeledWithField(rect2, Verse.Widgets.ColorComponents.Sat, ref _selectedColor,
                 ref _textfieldBuffers[1], ref _lastFocusedSlider,
                 _previousFocusedControlName);
-            UIComponents.GradientSlider_LabeledWithField(rect3, Widgets.ColorComponents.Value, ref _selectedColor,
+            Widgets.GradientSlider_LabeledWithField(rect3, Verse.Widgets.ColorComponents.Value, ref _selectedColor,
                 ref _textfieldBuffers[2], ref _lastFocusedSlider,
                 _previousFocusedControlName);
         }
         else
         {
-            UIComponents.GradientSlider_LabeledWithField(rect1, Widgets.ColorComponents.Red, ref _selectedColor,
+            Widgets.GradientSlider_LabeledWithField(rect1, Verse.Widgets.ColorComponents.Red, ref _selectedColor,
                 ref _textfieldBuffers[0], ref _lastFocusedSlider,
                 _previousFocusedControlName);
-            UIComponents.GradientSlider_LabeledWithField(rect2, Widgets.ColorComponents.Green, ref _selectedColor,
+            Widgets.GradientSlider_LabeledWithField(rect2, Verse.Widgets.ColorComponents.Green, ref _selectedColor,
                 ref _textfieldBuffers[1], ref _lastFocusedSlider,
                 _previousFocusedControlName);
-            UIComponents.GradientSlider_LabeledWithField(rect3, Widgets.ColorComponents.Blue, ref _selectedColor,
+            Widgets.GradientSlider_LabeledWithField(rect3, Verse.Widgets.ColorComponents.Blue, ref _selectedColor,
                 ref _textfieldBuffers[2], ref _lastFocusedSlider,
                 _previousFocusedControlName);
         }
@@ -262,15 +263,15 @@ public class Dialog_ColorPicker : Window
             buttonRect = buttonRect.TakeLeftPart("XXX".GetWidthCached() + UIUtility.ButtonPadding / 2);
             if (Mouse.IsOver(buttonRect))
                 TooltipHandler.TipRegion(buttonRect, "Switch between RGB and HSV color modes");
-            if (Widgets.ButtonText(buttonRect, _doHSV ? "RGB" : "HSV"))
+            if (Verse.Widgets.ButtonText(buttonRect, _doHSV ? "RGB" : "HSV"))
             {
                 _doHSV = !_doHSV;
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
         }
 
-        Widgets.Label(hexRect.TakeLeftPart(_singleCharWidth), "#".Colorize(ColoredText.SubtleGrayColor));
-        _selectedColor = UIComponents.DelayedHexField(hexRect, _selectedColor, ref _textfieldBuffers[3],
+        Verse.Widgets.Label(hexRect.TakeLeftPart(_singleCharWidth), "#".Colorize(ColoredText.SubtleGrayColor));
+        _selectedColor = Widgets.DelayedHexField(hexRect, _selectedColor, ref _textfieldBuffers[3],
             _previousFocusedControlName);
     }
 

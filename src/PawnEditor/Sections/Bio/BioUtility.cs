@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -21,7 +22,7 @@ public static class BioUtility
         if (advanced)
         {
             var iconRect = inRect.TakeRightPart(WidgetRow.IconSize);
-            if (Widgets.ButtonImage(iconRect.CenteredVertically(WidgetRow.IconSize), TexButton.Add))
+            if (Verse.Widgets.ButtonImage(iconRect.CenteredVertically(WidgetRow.IconSize), TexButton.Add))
                 FloatWindow.ToggleState<FloatWindow_NamePawn>(iconRect);
         }
 
@@ -56,7 +57,7 @@ public static class BioUtility
                 break;
             }
             default:
-                Widgets.Label(rect1, pawn.Name.ToStringFull);
+                Verse.Widgets.Label(rect1, pawn.Name.ToStringFull);
                 break;
         }
 
@@ -71,11 +72,11 @@ public static class BioUtility
         var oldColor = pawn.story.favoriteColor?.color ?? Color.white;
         var favColorRect = inRect.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
 
-        Widgets.DrawLightHighlight(favColorRect);
+        Verse.Widgets.DrawLightHighlight(favColorRect);
         favColorRect = favColorRect.ContractedBy(2f);
-        Widgets.DrawRectFast(favColorRect, pawn.story.favoriteColor?.color ?? Color.white);
+        Verse.Widgets.DrawRectFast(favColorRect, pawn.story.favoriteColor?.color ?? Color.white);
         inRect.xMax -= 2f;
-        if (Widgets.ButtonText(inRect, "Choose color"))
+        if (Verse.Widgets.ButtonText(inRect, "Choose color"))
             Find.WindowStack.Add(new Dialog_ColorPicker(c => pawn.story.favoriteColor?.color = c, oldColor));
     }
 }

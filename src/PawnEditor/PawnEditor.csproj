@@ -61,6 +61,7 @@
         <Compile Include="Defs\TableDef.cs"/>
         <Compile Include="Defs\TableDefOf.cs"/>
         <Compile Include="Extensions\Listing_Standard.cs" />
+        <Compile Include="Extensions\Rect.cs" />
         <Compile Include="External\Hotswap.cs" />
         <Compile Include="External\Required.cs" />
         <Compile Include="FactionUtility.cs" />
@@ -75,7 +76,6 @@
         <Compile Include="Pawn\PawnLister.cs" />
         <Compile Include="Pawn\PawnLocation.cs" />
         <Compile Include="Pawn\PawnUtility.cs" />
-        <Compile Include="SaveLoadUtility.cs" />
         <Compile Include="Sections\Appearance\AppearanceUtility.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_AppearanceBasic.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_AppearanceBeard.cs" />
@@ -120,10 +120,8 @@
         <Compile Include="UI\Components\Cards.cs" />
         <Compile Include="UI\Components\Carrousel.cs" />
         <Compile Include="UI\Components\InspectPane.cs" />
-        <Compile Include="UI\Components\UIComponents.cs" />
+        <Compile Include="UI\Components\Widgets.cs" />
         <Compile Include="UI\GUIColor.cs" />
-        <Compile Include="UI\Listing_Horizontal.cs" />
-        <Compile Include="UI\Listing_Advanced.cs" />
         <Compile Include="UI\UIUtility.cs" />
         <Compile Include="Utility.cs" />
         <Compile Include="Windows\Dialog_ColorPicker.cs" />

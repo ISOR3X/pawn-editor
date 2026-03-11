@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
+using PawnEditor.Extensions;
 using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
@@ -99,12 +100,12 @@ public partial class Window_Editor : Window
 
     public override void DoWindowContents(Rect inRect)
     {
-        DoLeftSection(inRect.TakeLeftPart(UIComponents.CardSize.x + 24f));
+        DoLeftSection(inRect.TakeLeftPart(Widgets.CardSize.x + 24f));
         inRect.xMin += UIUtility.ScrollBarWidth;
 
         // Draw tabs
         inRect.yMin += TabDrawer.TabHeight;
-        Widgets.DrawMenuSection(inRect);
+        Verse.Widgets.DrawMenuSection(inRect);
 
         _tabsList = _selectedTabDefsForPawn.Select(tabDef => new TabRecord(tabDef.LabelCap, delegate
         {
@@ -129,7 +130,7 @@ public partial class Window_Editor : Window
         {
             using (new TextBlock(TextAnchor.MiddleCenter))
             {
-                Widgets.Label(inRect, "No pawn selected.".Colorize(ColoredText.SubtleGrayColor));
+                Verse.Widgets.Label(inRect, "No pawn selected.".Colorize(ColoredText.SubtleGrayColor));
             }
         }
     }
@@ -142,7 +143,7 @@ public partial class Window_Editor : Window
             L.Cell(rect =>
             {
                 using (new TextBlock(GameFont.Tiny))
-                    Widgets.Label(rect, "Selected faction");
+                    Verse.Widgets.Label(rect, "Selected faction");
             }, flexBasis: 18f),
 
             L.Cell(rect =>
@@ -155,7 +156,7 @@ public partial class Window_Editor : Window
 
             L.Cell(rect =>
             {
-                UIComponents.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
                 if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
             }, flexGrow: 1f),
 

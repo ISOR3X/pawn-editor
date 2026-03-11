@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -19,33 +20,6 @@ public static class UIUtility
     public const float LabelOffset = 24f; // How far a label should be from its widget
     public static readonly Vector2 BottomButtonSize = new(150f, 38f);
 
-    public static Rect TakeTopPart(ref this Rect rect, float pixels)
-    {
-        var ret = rect.TopPartPixels(pixels);
-        rect.yMin += pixels;
-        return ret;
-    }
-
-    public static Rect TakeBottomPart(ref this Rect rect, float pixels)
-    {
-        var ret = rect.BottomPartPixels(pixels);
-        rect.yMax -= pixels;
-        return ret;
-    }
-
-    public static Rect TakeRightPart(ref this Rect rect, float pixels)
-    {
-        var ret = rect.RightPartPixels(pixels);
-        rect.xMax -= pixels;
-        return ret;
-    }
-
-    public static Rect TakeLeftPart(ref this Rect rect, float pixels)
-    {
-        var ret = rect.LeftPartPixels(pixels);
-        rect.xMin += pixels;
-        return ret;
-    }
 
     public static Rect CenteredVertically(this Rect rect, float height)
     {
@@ -86,11 +60,11 @@ public static class UIUtility
         return label;
     }
 
-    public static Gradient GradientFromColorComponent(Widgets.ColorComponents component, Color color)
+    public static Gradient GradientFromColorComponent(Verse.Widgets.ColorComponents component, Color color)
     {
         var gradient = new Gradient();
 
-        if (component == Widgets.ColorComponents.Hue)
+        if (component == Verse.Widgets.ColorComponents.Hue)
         {
             // Create color keys for the gradient
             var colorKeys = new GradientColorKey[7];
@@ -120,22 +94,22 @@ public static class UIUtility
         return gradient;
     }
 
-    public static float GetComponent(this Color color, Widgets.ColorComponents component)
+    public static float GetComponent(this Color color, Verse.Widgets.ColorComponents component)
     {
         Color.RGBToHSV(color, out var h, out var s, out var v);
         switch (component)
         {
-            case Widgets.ColorComponents.Red:
+            case Verse.Widgets.ColorComponents.Red:
                 return color.r;
-            case Widgets.ColorComponents.Green:
+            case Verse.Widgets.ColorComponents.Green:
                 return color.g;
-            case Widgets.ColorComponents.Blue:
+            case Verse.Widgets.ColorComponents.Blue:
                 return color.b;
-            case Widgets.ColorComponents.Hue:
+            case Verse.Widgets.ColorComponents.Hue:
                 return h;
-            case Widgets.ColorComponents.Sat:
+            case Verse.Widgets.ColorComponents.Sat:
                 return s;
-            case Widgets.ColorComponents.Value:
+            case Verse.Widgets.ColorComponents.Value:
                 return v;
             default:
                 throw new ArgumentOutOfRangeException(nameof(component), component,
@@ -143,29 +117,29 @@ public static class UIUtility
         }
     }
 
-    public static Color SetComponent(this Color color, Widgets.ColorComponents component, float value)
+    public static Color SetComponent(this Color color, Verse.Widgets.ColorComponents component, float value)
     {
         Color.RGBToHSV(color, out var h, out var s, out var v);
         switch (component)
         {
-            case Widgets.ColorComponents.Red:
+            case Verse.Widgets.ColorComponents.Red:
                 color.r = value;
                 break;
-            case Widgets.ColorComponents.Green:
+            case Verse.Widgets.ColorComponents.Green:
                 color.g = value;
                 break;
-            case Widgets.ColorComponents.Blue:
+            case Verse.Widgets.ColorComponents.Blue:
                 color.b = value;
                 break;
-            case Widgets.ColorComponents.Hue:
+            case Verse.Widgets.ColorComponents.Hue:
                 h = value;
                 color = Color.HSVToRGB(h, s, v);
                 break;
-            case Widgets.ColorComponents.Sat:
+            case Verse.Widgets.ColorComponents.Sat:
                 s = value;
                 color = Color.HSVToRGB(h, s, v);
                 break;
-            case Widgets.ColorComponents.Value:
+            case Verse.Widgets.ColorComponents.Value:
                 v = value;
                 color = Color.HSVToRGB(h, s, v);
                 break;
@@ -188,15 +162,15 @@ public static class UIUtility
         {
             var rect2 = r.AtZero();
             rect2.height -= Text.LineHeight;
-            Widgets.DrawHighlight(rect2);
+            Verse.Widgets.DrawHighlight(rect2);
             if (def == null)
                 return;
             Text.Anchor = TextAnchor.UpperCenter;
-            Widgets.LabelFit(new Rect(0.0f, rect2.yMax, rect2.width, Text.LineHeight), def.LabelCap);
+            Verse.Widgets.LabelFit(new Rect(0.0f, rect2.yMax, rect2.width, Text.LineHeight), def.LabelCap);
             Text.Anchor = TextAnchor.UpperLeft;
             using (new GUIColor(color.Value))
             {
-                Widgets.DefIcon(rect2, def, scale: scale);
+                Verse.Widgets.DefIcon(rect2, def, scale: scale);
             }
         });
     }
@@ -205,7 +179,7 @@ public static class UIUtility
     {
         // Increment/ decrement value with mouse scroll. Uses a scrollview to prevent scrolling of other scrollviews due to mouse scroll.
         var v = Vector2.zero;
-        Widgets.BeginScrollView(inRect, ref v, inRect);
+        Verse.Widgets.BeginScrollView(inRect, ref v, inRect);
         if (Mouse.IsOver(inRect))
         {
             var tooltip = "Scroll to change value";
@@ -236,7 +210,7 @@ public static class UIUtility
             }
         }
 
-        Widgets.EndScrollView();
+        Verse.Widgets.EndScrollView();
 
         return value;
     }
@@ -261,11 +235,11 @@ public static class UIUtility
         }
 
         var oldColor = color;
-        Widgets.ColorSelector(rect, ref color, availableColors, out newHeight,
+        Verse.Widgets.ColorSelector(rect, ref color, availableColors, out newHeight,
             extraOnGUI: (currentColor, r) =>
             {
                 if (currentColor.a != 0) return;
-                if (Widgets.ButtonImage(r.ExpandedBy(2f), Designator_Eyedropper.EyeDropperTex))
+                if (Verse.Widgets.ButtonImage(r.ExpandedBy(2f), Designator_Eyedropper.EyeDropperTex))
                     Find.WindowStack.Add(new Dialog_ColorPicker(onApply, oldColor, colors, specialColors));
             });
     }
@@ -285,7 +259,7 @@ public static class UIUtility
         if (elements.NullOrEmpty())
         {
             using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(innerRect, (emptyLabel ?? "None".Translate()).Colorize(ColoredText.SubtleGrayColor));
+                Verse.Widgets.Label(innerRect, (emptyLabel ?? "None".Translate()).Colorize(ColoredText.SubtleGrayColor));
             return;
         }
 
@@ -313,14 +287,14 @@ public static class UIUtility
     {
         var w = labelWidth ?? label.GetWidthCached() + LabelOffset;
         rect.SplitVertically(w, out var left, out var right);
-        using (new TextBlock(TextAnchor.MiddleLeft)) Widgets.Label(left, label);
+        using (new TextBlock(TextAnchor.MiddleLeft)) Verse.Widgets.Label(left, label);
         return right;
     }
 
     public static bool ButtonTextLabeled(Rect rect, string label, string buttonLabel)
     {
         var right = RectLabeled(rect, label);
-        return Widgets.ButtonText(right, buttonLabel);
+        return Verse.Widgets.ButtonText(right, buttonLabel);
     }
 
     public static bool ButtonTextLabeled_WithIcon(Rect rect, string label, string buttonLabel, Texture2D icon,
@@ -339,22 +313,20 @@ public static class UIUtility
         var width = iconSize + gap + label.GetWidthCached();
         var remaining = rect.width - width;
 
-        bool clicked = Widgets.ButtonInvisible(rect);
-        Widgets.DrawButtonGraphic(rect);
+        var clicked = Verse.Widgets.ButtonInvisible(rect);
+        Verse.Widgets.DrawButtonGraphic(rect);
 
         var contentRect = rect.ContractedBy(remaining / 2, 0f);
 
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(contentRect.TakeLeftPart(label.GetWidthCached()), label);
+            Verse.Widgets.Label(contentRect.TakeLeftPart(label.GetWidthCached()), label);
 
         contentRect.xMin += gap;
 
         var iconRect = new Rect(contentRect.x, rect.y + (rect.height - iconSize) / 2f, iconSize, iconSize);
 
-        var prev = GUI.color;
-        if (color.HasValue) GUI.color = color.Value;
-        GUI.DrawTexture(iconRect, icon);
-        GUI.color = prev;
+        using (new GUIColor(color ?? Color.white))
+            GUI.DrawTexture(iconRect, icon);
 
         return clicked;
     }

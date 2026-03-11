@@ -18,9 +18,8 @@ public abstract class ColumnWorker_Icon : ColumnWorker
         var num1 = (int)((inRect.width - (double)iconSize.x) / 2.0);
         var num2 = Mathf.Max((int)((30.0 - iconSize.y) / 2.0), 0);
         var rect1 = new Rect(inRect.x + num1, inRect.y + num2, iconSize.x, iconSize.y);
-        GUI.color = GetIconColor(thing);
-        GUI.DrawTexture(rect1.ContractedBy(Padding), iconFor);
-        GUI.color = Color.white;
+        using (new GUIColor(GetIconColor(thing)))
+            GUI.DrawTexture(rect1.ContractedBy(Padding), iconFor);
         if (Mouse.IsOver(rect1))
         {
             var iconTip = GetIconTip(thing);
@@ -28,7 +27,7 @@ public abstract class ColumnWorker_Icon : ColumnWorker
                 TooltipHandler.TipRegion(rect1, (TipSignal)iconTip);
         }
 
-        if (Widgets.ButtonInvisible(rect1, false))
+        if (Verse.Widgets.ButtonInvisible(rect1, false))
             ClickedIcon(thing);
         if (!Mouse.IsOver(rect1) || !Input.GetMouseButton(0))
             return;

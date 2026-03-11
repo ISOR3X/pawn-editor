@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -22,7 +23,7 @@ public class ColumnWorker_Label : ColumnWorker_Text
             var iconRect = inRect.TakeLeftPart(inRect.height);
             inRect.xMin += 8f;
 
-            if (Def.iconBackground) Widgets.DrawHighlight(iconRect.ContractedBy(2f));
+            if (Def.iconBackground) Verse.Widgets.DrawHighlight(iconRect.ContractedBy(2f));
 
             // TODO: Why does this column need direct access to the pawn?
             var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
@@ -30,7 +31,7 @@ public class ColumnWorker_Label : ColumnWorker_Text
             if (thing is HairDef or BeardDef)
                 GUI.color = pawn != null ? pawn.story.HairColor : PawnHairColors.DarkReddish;
 
-            Widgets.DefIcon(iconRect, thing, scale: IconScale);
+            Verse.Widgets.DefIcon(iconRect, thing, scale: IconScale);
             GUI.color = Color.white;
         }
 
@@ -45,7 +46,7 @@ public class ColumnWorker_Label : ColumnWorker_Text
             str = str.StripTags().Truncate(inRect.width, LabelCache);
         using (new TextBlock(GameFont.Small, LabelAlignment, false))
         {
-            Widgets.Label(inRect, str);
+            Verse.Widgets.Label(inRect, str);
         }
     }
 

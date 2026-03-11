@@ -67,11 +67,11 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
                 if (skillRecord.passion <= Passion.None || skillRecord.TotallyDisabled)
                 {
                     passionRect = passionRect.CenteredVertically(24f);
-                    Widgets.DrawTextureFitted(passionRect, Widgets.PlaceholderIconTex, 1f);
+                    Verse.Widgets.DrawTextureFitted(passionRect, Verse.Widgets.PlaceholderIconTex, 1f);
                 }
 
                 // Increment passion level.
-                if (Widgets.ButtonInvisible(passionRect)) newPassionVal++;
+                if (Verse.Widgets.ButtonInvisible(passionRect)) newPassionVal++;
                 newPassionVal = UIUtility.IncrementWithScroll(passionRect, newPassionVal);
 
                 GUI.DrawTexture(r2, InspectPaneFiller.HealthTex);
@@ -83,7 +83,7 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
 
                 // Increment skill level
                 newLevelVal = UIUtility.IncrementWithScroll(r2, newLevelVal, 5);
-                if (Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f), TexButton.Plus))
+                if (Verse.Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f), TexButton.Plus))
                 {
                     if (Event.current.shift)
                         newLevelVal += 5;
@@ -91,7 +91,7 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
                 }
 
                 r2.xMax -= 4f;
-                if (Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f),
+                if (Verse.Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f),
                         TexButton.Minus))
                 {
                     if (Event.current.shift)

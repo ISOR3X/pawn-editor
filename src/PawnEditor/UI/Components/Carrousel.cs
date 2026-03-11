@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,7 +8,7 @@ using Verse.Sound;
 
 namespace PawnEditor;
 
-public static partial class UIComponents
+public static partial class Widgets
 {
     public const float CarrouselCellHeight = 88f;
 
@@ -33,19 +34,19 @@ public static partial class UIComponents
         var viewRect = new Rect(rowRect.x, rowRect.y, (itemSize.x + itemSpacing) * items.Count - itemSpacing,
             itemSize.y); // Calculate the width of the viewRect. -1 to remove the spacing of the last item.
 
-        Widgets.BeginScrollView(outRect, ref scrollPos, viewRect);
+        Verse.Widgets.BeginScrollView(outRect, ref scrollPos, viewRect);
         foreach (var item in items)
         {
             var r = viewRect.TakeLeftPart(itemSize.x);
             var iconRect = r.ContractedBy(4f);
             viewRect.xMin += itemSpacing;
-            Widgets.DrawHighlightIfMouseover(iconRect);
-            Widgets.DrawHighlight(iconRect);
-            GUI.color = color;
-            GUI.DrawTexture(iconRect, textureFunc(item));
-            GUI.color = Color.white;
+            Verse.Widgets.DrawHighlightIfMouseover(iconRect);
+            Verse.Widgets.DrawHighlight(iconRect);
+            
+            using (new GUIColor(color))
+                GUI.DrawTexture(iconRect, textureFunc(item));
 
-            if (Widgets.ButtonInvisible(r))
+            if (Verse.Widgets.ButtonInvisible(r))
             {
                 clickAction(item);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
@@ -53,22 +54,22 @@ public static partial class UIComponents
 
             if (Mouse.IsOver(r) && hoverLabel != null) TooltipHandler.TipRegion(r, hoverLabel(item));
 
-            if (Equals(item, selected)) Widgets.DrawBox(r);
+            if (Equals(item, selected)) Verse.Widgets.DrawBox(r);
         }
 
-        Widgets.EndScrollView();
+        Verse.Widgets.EndScrollView();
 
         // Left and right buttons
         var nextIndex = items.IndexOf(selected);
         var leftClicked = false;
         var rightClicked = false;
-        if (Widgets.ButtonImage(buttonLeftRight, TexPawnEditor.ArrowLeft))
+        if (Verse.Widgets.ButtonImage(buttonLeftRight, TexPawnEditor.ArrowLeft))
         {
             SoundDefOf.Click.PlayOneShotOnCamera();
             nextIndex = items.IndexOf(selected) - 1;
             leftClicked = true;
         }
-        else if (Widgets.ButtonImage(buttonRightRect, TexPawnEditor.ArrowRight))
+        else if (Verse.Widgets.ButtonImage(buttonRightRect, TexPawnEditor.ArrowRight))
         {
             SoundDefOf.Click.PlayOneShotOnCamera();
             nextIndex = items.IndexOf(selected) + 1;

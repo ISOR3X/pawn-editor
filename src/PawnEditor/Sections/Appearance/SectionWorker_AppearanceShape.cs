@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -19,18 +20,18 @@ public class SectionWorker_AppearanceShape(SectionDef def) : SectionWorker(def)
     {
         var capturedPawn = pawn;
 
-        var rect1 = listing.GetRect(UIComponents.CarrouselCellHeight + UIUtility.ButtonHeight);
-        UIComponents.WidgetLabel(rect1.TakeTopPart(UIUtility.ButtonHeight), "Body");
-        UIComponents.Carrousel(rect1,
+        var rect1 = listing.GetRect(Widgets.CarrouselCellHeight + UIUtility.ButtonHeight);
+        Widgets.WidgetLabel(rect1.TakeTopPart(UIUtility.ButtonHeight), "Body");
+        Widgets.Carrousel(rect1,
             DefDatabase<BodyTypeDef>.AllDefsListForReading
                 .Where(d => AppearanceUtility.CanUseBodyType(d, pawn)).ToList(),
             ref _scrollPositionBodyType,
             pawn.story.bodyType, d => AppearanceUtility.TrySetBodyType(d, capturedPawn),
             d => AppearanceUtility.BodyTypes[d], pawn.story.SkinColor, d => d.defName);
 
-        var rect2 = listing.GetRect(UIComponents.CarrouselCellHeight + UIUtility.ButtonHeight);
-        UIComponents.WidgetLabel(rect2.TakeTopPart(UIUtility.ButtonHeight), "Head");
-        UIComponents.Carrousel(rect2,
+        var rect2 = listing.GetRect(Widgets.CarrouselCellHeight + UIUtility.ButtonHeight);
+        Widgets.WidgetLabel(rect2.TakeTopPart(UIUtility.ButtonHeight), "Head");
+        Widgets.Carrousel(rect2,
             DefDatabase<HeadTypeDef>.AllDefsListForReading
                 .Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList(),
             ref _scrollPositionHeadType,

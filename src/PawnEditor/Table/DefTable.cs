@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -11,6 +12,8 @@ namespace PawnEditor;
 public abstract class DefTable
 {
     public const float DefaultRowHeight = 30f;
+    private const float ScrollbarWidth = 16f;
+
     private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
     private readonly List<float> _cachedColumnWidths = [];
     private readonly List<float> _cachedRowHeights = [];
@@ -24,6 +27,7 @@ public abstract class DefTable
     private float _cachedHeightNoScrollbar;
     private Vector2 _cachedSize;
     private List<Def> _cachedThings = [];
+    private readonly List<ColumnDef> _cachedColumns = [];
     private bool _dirty;
     private Vector2 _scrollPosition;
     private Def? _selected;
@@ -40,49 +44,44 @@ public abstract class DefTable
         SetDirty();
     }
 
-    // TODO:Rework to use Rect instead of Vector2
     private void TableOnGUI(Vector2 position)
     {
         if (Event.current.type == EventType.Layout)
             return;
         RecacheIfDirty();
         var availableWidth = _cachedSize.x - 18f;
-        var columns = Columns;
         var num2 = 0;
-        for (var index = 0; index < columns.Count; ++index)
+        for (var index = 0; index < _cachedColumns.Count; ++index)
         {
-            var width = index != columns.Count - 1
+            var width = index != _cachedColumns.Count - 1
                 ? (int)_cachedColumnWidths[index]
                 : (int)(availableWidth - (double)num2); // Last column takes up all remaining space.
             var rect = new Rect((int)position.x + num2, (int)position.y, width, (int)_cachedHeaderHeight);
-            columns[index].Worker.DoHeader(rect, this);
+            _cachedColumns[index].Worker.DoHeader(rect, this);
             num2 += width;
         }
-
-        GUI.color = _borderColor;
-        Widgets.DrawLineHorizontal(position.x, position.y + _cachedHeaderHeight, num2); // Draw line under header.
-        GUI.color = Color.white;
+        
+        using (new GUIColor(_borderColor))
+            Verse.Widgets.DrawLineHorizontal(position.x, position.y + _cachedHeaderHeight, num2); // Draw line under header.
 
         var outRect = new Rect((int)position.x, (int)position.y + (int)_cachedHeaderHeight, (int)_cachedSize.x,
             (int)_cachedSize.y - (int)_cachedHeaderHeight);
         var viewRect = new Rect(0.0f, 0.0f, outRect.width - 16f,
             (int)_cachedHeightNoScrollbar - (int)_cachedHeaderHeight);
-        Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
+        Verse.Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
         var x = 0;
-        for (var columnIndex = 0; columnIndex < columns.Count; ++columnIndex)
+        for (var columnIndex = 0; columnIndex < _cachedColumns.Count; ++columnIndex)
         {
             var y = 0;
-            var columnDef = columns[columnIndex];
-            // int columnWidth = columnIndex != columns.Count - 1 ? (int)cachedColumnWidths[columnIndex] : (int)(availableWidth - (double)x);
+            var columnDef = _cachedColumns[columnIndex];
             var columnWidth = (int)_cachedColumnWidths[columnIndex];
             for (var thingIndex = 0; thingIndex < _cachedThings.Count; ++thingIndex)
             {
                 var cachedRowHeight = _cachedRowHeights[thingIndex];
                 if (_def.doAlternateStyle)
                 {
-                    GUI.color = _borderColor;
-                    Widgets.DrawLineHorizontal(x, y, columnWidth);
-                    GUI.color = Color.white;
+                    using (new GUIColor(_borderColor))
+                        Verse.Widgets.DrawLineHorizontal(x, y, columnWidth);
                 }
                 else if (thingIndex % 2 == 1)
                 {
@@ -95,14 +94,14 @@ public abstract class DefTable
                         num4 -= (int)iconSize;
                     }
 
-                    Widgets.DrawLightHighlight(new Rect(x2, y, num4, cachedRowHeight));
+                    Verse.Widgets.DrawLightHighlight(new Rect(x2, y, num4, cachedRowHeight));
                 }
 
                 var rect = new Rect(x, y, columnWidth, (int)cachedRowHeight);
                 var cachedThing = _cachedThings[thingIndex];
                 var flag = false;
 
-                if (Widgets.ButtonInvisible(rect))
+                if (Verse.Widgets.ButtonInvisible(rect))
                 {
                     if (_selected != cachedThing && _def.highlightSelected)
                         _selected = cachedThing;
@@ -110,13 +109,13 @@ public abstract class DefTable
                     if (_selected != null) OnSelectChanged(_selected);
                 }
 
-                if (_selected == cachedThing) Widgets.DrawHighlightSelected(rect);
+                if (_selected == cachedThing) Verse.Widgets.DrawHighlightSelected(rect);
 
                 if (columnDef.groupable)
                 {
                     var num4 = thingIndex;
                     for (var index3 = thingIndex + 1;
-                         index3 < _cachedThings.Count && columns[columnIndex].Worker
+                         index3 < _cachedThings.Count && _cachedColumns[columnIndex].Worker
                              .CanGroupWith(_cachedThings[thingIndex], _cachedThings[index3]);
                          ++index3)
                     {
@@ -131,17 +130,17 @@ public abstract class DefTable
                 if ((y - (double)_scrollPosition.y + (int)cachedRowHeight < 0.0 ? 1 :
                         y - (double)_scrollPosition.y > outRect.height ? 1 : 0) == 0)
                 {
-                    DoRow(columns[columnIndex], rect, cachedThing);
+                    DoRow(_cachedColumns[columnIndex], rect, cachedThing);
                     if (columnDef.groupable & flag)
                     {
-                        GUI.color = _borderColor;
-                        Widgets.DrawLineVertical(rect.xMin, rect.yMin, rect.height);
-                        Widgets.DrawLineVertical(rect.xMax, rect.yMin, rect.height);
-                        GUI.color = Color.white;
+                        using (new GUIColor(_borderColor))
+                        {
+                            Verse.Widgets.DrawLineVertical(rect.xMin, rect.yMin, rect.height);
+                            Verse.Widgets.DrawLineVertical(rect.xMax, rect.yMin, rect.height);
+                        }
                     }
                 }
 
-                GUI.color = Color.white;
                 y += (int)rect.height;
             }
 
@@ -161,7 +160,7 @@ public abstract class DefTable
             y1 += (int)_cachedRowHeights[index];
         }
 
-        Widgets.EndScrollView();
+        Verse.Widgets.EndScrollView();
     }
 
     protected virtual void DoRow(ColumnDef columnDef, Rect rect, Def cachedThing)
@@ -199,7 +198,6 @@ public abstract class DefTable
         UIUtility.DefIconPreview(inRect, thing);
     }
 
-
     public void SortBy(ColumnDef? column, bool descending)
     {
         SortingBy = column;
@@ -212,11 +210,19 @@ public abstract class DefTable
         if (!_dirty)
             return;
         _dirty = false;
+        RecacheColumns();
         RecacheThings();
         RecacheRowHeights();
         _cachedHeaderHeight = CalculateHeaderHeight();
         _cachedHeightNoScrollbar = CalculateTotalRequiredHeight();
         RecacheColumnWidths();
+    }
+
+    private void RecacheColumns()
+    {
+        _cachedColumns.Clear();
+        foreach (var column in _def.columns.Where(column => column.Worker.VisibleCurrently))
+            _cachedColumns.Add(column);
     }
 
     private void RecacheThings()
@@ -259,65 +265,38 @@ public abstract class DefTable
     private void RecacheRowHeights()
     {
         _cachedRowHeights.Clear();
-        for (var index = 0; index < _cachedThings.Count; ++index)
-            _cachedRowHeights.Add(CalculateRowHeight(_cachedThings[index]));
+        foreach (var t in _cachedThings)
+            _cachedRowHeights.Add(CalculateRowHeight(t));
     }
 
+    private float GetOptimalWidth(ColumnDef column) =>
+        Mathf.Max(column.Worker.GetOptimalWidth(this), 0.0f);
 
-    private float GetOptimalWidth(ColumnDef column)
-    {
-        return Mathf.Max(column.Worker.GetOptimalWidth(this), 0.0f);
-    }
+    private float GetMinWidth(ColumnDef column) =>
+        Mathf.Max(column.Worker.GetMinWidth(this), 0.0f);
 
-    private float GetMinWidth(ColumnDef column)
-    {
-        return Mathf.Max(column.Worker.GetMinWidth(this), 0.0f);
-    }
-
-    private float GetMaxWidth(ColumnDef column)
-    {
-        return Mathf.Max(column.Worker.GetMaxWidth(this), 0.0f);
-    }
+    private float GetMaxWidth(ColumnDef column) =>
+        Mathf.Max(column.Worker.GetMaxWidth(this), 0.0f);
 
     private float CalculateRowHeight(Def thing)
     {
-        var a = 0.0f;
-        var cols = Columns;
-        foreach (var t in cols)
-            a = Mathf.Max(_def.defaultRowHeight, t.Worker.GetMinCellHeight(thing));
-
-        return a;
+        var height = _def.defaultRowHeight;
+        foreach (var col in _cachedColumns)
+            height = Mathf.Max(height, col.Worker.GetMinCellHeight(thing));
+        return height;
     }
 
     private float CalculateHeaderHeight()
     {
-        var a = 0.0f;
-        var cols = Columns;
-        for (var index = 0; index < cols.Count; ++index)
-            a = Mathf.Max(a, cols[index].Worker.GetMinHeaderHeight(this));
-        return a;
+        return _cachedColumns.Aggregate(0.0f, (current, t) => Mathf.Max(current, t.Worker.GetMinHeaderHeight(this)));
     }
 
     private float CalculateTotalRequiredHeight()
     {
-        var headerHeight = CalculateHeaderHeight();
-        for (var index = 0; index < _cachedThings.Count; ++index)
-            headerHeight += CalculateRowHeight(_cachedThings[index]);
-        return headerHeight;
+        return CalculateHeaderHeight() + _cachedThings.Sum(CalculateRowHeight);
     }
 
     #region Properties
-
-    private List<ColumnDef> Columns
-    {
-        get
-        {
-            field.Clear();
-            foreach (var column in _def.columns.Where(column => column.Worker.VisibleCurrently)) field.Add(column);
-
-            return field;
-        }
-    } = [];
 
     public ColumnDef? SortingBy { get; private set; }
 
@@ -365,7 +344,7 @@ public abstract class DefTable
 
     private void RecacheColumnWidths()
     {
-        var totalAvailableSpaceForColumns = _cachedSize.x - 16f;
+        var totalAvailableSpaceForColumns = _cachedSize.x - ScrollbarWidth;
         RecacheColumnWidths_StartWithMinWidths(out var minWidthsSum);
         if (Mathf.Approximately(minWidthsSum, totalAvailableSpaceForColumns))
             return;
@@ -387,8 +366,7 @@ public abstract class DefTable
     {
         minWidthsSum = 0.0f;
         _cachedColumnWidths.Clear();
-        var col = Columns;
-        foreach (var minWidth in col.Select(GetMinWidth))
+        foreach (var minWidth in _cachedColumns.Select(GetMinWidth))
         {
             _cachedColumnWidths.Add(minWidth);
             minWidthsSum += minWidth;
@@ -401,7 +379,7 @@ public abstract class DefTable
         out bool noMoreFreeSpace)
     {
         _columnAtOptimalWidth.Clear();
-        var cols = Columns;
+        var cols = _cachedColumns;
         for (var index = 0; index < cols.Count; ++index)
             _columnAtOptimalWidth.Add(_cachedColumnWidths[index] >= (double)GetOptimalWidth(cols[index]));
         var num1 = 0;
@@ -416,7 +394,7 @@ public abstract class DefTable
                 break;
             }
 
-            var a = cols.Where((t, index) => !_columnAtOptimalWidth[index]).Aggregate(float.MinValue,
+            var a = cols.Where((_, index) => !_columnAtOptimalWidth[index]).Aggregate(float.MinValue,
                 (current, t) => Mathf.Max(current, t.widthPriority));
 
             var optimalWidth = 0.0f;
@@ -458,10 +436,10 @@ public abstract class DefTable
                 }
             }
 
-            if (usedWidth >= totalAvailableSpaceForColumns - 0.100000001490116)
+            if (usedWidth >= totalAvailableSpaceForColumns - 0.1f)
             {
                 noMoreFreeSpace = true;
-                break;
+                return;
             }
         } while (flag1 && flag2);
 
@@ -474,7 +452,7 @@ public abstract class DefTable
     {
         _columnAtMaxWidth.Clear();
         var sumWidthPriority = 0;
-        var cols = Columns;
+        var cols = _cachedColumns;
         for (var index = 0; index < cols.Count; ++index)
         {
             _columnAtMaxWidth.Add(_cachedColumnWidths[index] >= (double)GetMaxWidth(cols[index]));
@@ -492,45 +470,35 @@ public abstract class DefTable
                 return;
             }
 
-            // float optimalWidth = 0.0f;
-            // for (int index = 0; index < cols.Count; ++index)
-            // {
-            //     if (!columnAtMaxWidth[index])
-            //         optimalWidth += Mathf.Max(GetOptimalWidth(cols[index]), 1f);
-            // }
-
             var remainingWidth = totalAvailableSpaceForColumns - usedWidth;
             flag = false;
             for (var index = 0; index < cols.Count; ++index)
-                if (!_columnAtMaxWidth[index])
-                {
-                    var num4 = remainingWidth * cols[index].widthPriority / sumWidthPriority;
-                    var num5 = GetMaxWidth(cols[index]) - _cachedColumnWidths[index];
-                    if (num4 >= (double)num5)
-                    {
-                        num4 = num5;
-                        _columnAtMaxWidth[index] = true;
-                    }
-                    else
-                    {
-                        flag = true;
-                    }
+            {
+                if (_columnAtMaxWidth[index]) continue;
 
-                    if (num4 > 0.0)
-                    {
-                        _cachedColumnWidths[index] += num4;
-                        usedWidth += num4;
-                    }
+                var num4 = remainingWidth * cols[index].widthPriority / sumWidthPriority;
+                var num5 = GetMaxWidth(cols[index]) - _cachedColumnWidths[index];
+                if (num4 >= (double)num5)
+                {
+                    num4 = num5;
+                    _columnAtMaxWidth[index] = true;
+                }
+                else
+                {
+                    flag = true;
                 }
 
-            if (usedWidth >= totalAvailableSpaceForColumns - 0.100000001490116)
-                goto label_23;
+                if (num4 > 0.0)
+                {
+                    _cachedColumnWidths[index] += num4;
+                    usedWidth += num4;
+                }
+            }
+
+            if (usedWidth >= totalAvailableSpaceForColumns - 0.1f)
+                return;
         } while (flag);
 
-        goto label_22;
-        label_23:
-        return;
-        label_22:
         DistributeRemainingWidthProportionallyAboveMax(totalAvailableSpaceForColumns - usedWidth);
     }
 
@@ -542,10 +510,8 @@ public abstract class DefTable
 
     private void DistributeRemainingWidthProportionallyAboveMax(float toDistribute)
     {
-        var num = 0.0f;
-        var cols = Columns;
-        for (var index = 0; index < cols.Count; ++index)
-            num += Mathf.Max(GetOptimalWidth(cols[index]), 1f);
+        var cols = _cachedColumns;
+        var num = cols.Sum(t => Mathf.Max(GetOptimalWidth(t), 1f));
         for (var index = 0; index < cols.Count; ++index)
             _cachedColumnWidths[index] += toDistribute * Mathf.Max(GetOptimalWidth(cols[index]), 1f) / num;
     }

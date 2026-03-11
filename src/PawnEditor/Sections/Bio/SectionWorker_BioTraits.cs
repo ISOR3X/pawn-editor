@@ -79,10 +79,10 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
             {
                 using (new GUIColor(CharacterCardUtility.StackElementBackground))
                     GUI.DrawTexture(r, BaseContent.WhiteTex);
-                if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
+                if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
                 if (trait.Suppressed) GUI.color = ColoredText.SubtleGrayColor;
                 else if (trait.sourceGene != null) GUI.color = ColoredText.GeneColor;
-                Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), trait.LabelCap);
+                Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), trait.LabelCap);
                 GUI.color = Color.white;
                 if (Mouse.IsOver(r))
                     TooltipHandler.TipRegion(r, new TipSignal(() => trait.TipString(pawn), (int)r.y * 37));
@@ -100,11 +100,10 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
             {
                 using (new GUIColor(CharacterCardUtility.StackElementBackground))
                     GUI.DrawTexture(r, BaseContent.WhiteTex);
-                if (Mouse.IsOver(r)) Widgets.DrawHighlight(r);
+                if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
                 using (new GUIColor(CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, workTag)))
-                    Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height),
+                    Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height),
                         workTag.LabelTranslated().CapitalizeFirst());
-                GUI.color = Color.white;
                 if (Mouse.IsOver(r))
                     TooltipHandler.TipRegion(r, new TipSignal(
                         () => CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, workTag) + "\n" +

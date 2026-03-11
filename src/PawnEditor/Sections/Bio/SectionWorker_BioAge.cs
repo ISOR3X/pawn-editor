@@ -39,7 +39,7 @@ public class SectionWorker_BioAge(SectionDef def) : SectionWorker(def)
             if (pawn.ageTracker.Adult)
                 bioAgeMin = (int)pawn.ageTracker.CurLifeStageRace.minAge;
 
-            bioAge = UIComponents.DelayedTextFieldNumeric(rect1, bioAge, ref TextfieldBuffers[0], bioAgeMin, 9999, null,
+            bioAge = Widgets.DelayedTextFieldNumeric(rect1, bioAge, ref TextfieldBuffers[0], bioAgeMin, 9999, null,
                 true);
             if (bioAge != pawn.ageTracker.AgeBiologicalYears) pawn.ageTracker.AgeBiologicalTicks = bioAge * GenDate.TicksPerYear;
 
@@ -47,7 +47,7 @@ public class SectionWorker_BioAge(SectionDef def) : SectionWorker(def)
             
             // Chronological
             var rect2 = listing.RectLabeled(chronoLabel, labelWidth: labelWidth);
-            chronoAge = UIComponents.DelayedTextFieldNumeric(rect2, chronoAge, ref TextfieldBuffers[1], 0, 9999, null,
+            chronoAge = Widgets.DelayedTextFieldNumeric(rect2, chronoAge, ref TextfieldBuffers[1], 0, 9999, null,
                 true);
             if (chronoAge != pawn.ageTracker.AgeChronologicalYears)
                 pawn.ageTracker.AgeChronologicalTicks = chronoAge * GenDate.TicksPerYear;

@@ -34,17 +34,17 @@ public class SectionWorker_BioBackstory(SectionDef def) : SectionWorker(def)
             using (new TextBlock(TextAnchor.MiddleLeft))
             {
                 var rect1 = listing.GetRect(UIUtility.ButtonHeight);
-                Widgets.Label(rect1.TakeLeftPart(labelWidth),
+                Verse.Widgets.Label(rect1.TakeLeftPart(labelWidth),
                     backstorySlot == BackstorySlot.Adulthood ? adulthoodLabel : childhoodLabel);
                 if (backstory == null)
                 {
                     using (new TextBlock(TextAnchor.MiddleCenter, ColoredText.SubtleGrayColor))
-                        Widgets.Label(rect1, "None".Translate());
+                        Verse.Widgets.Label(rect1, "None".Translate());
                     continue;
                 }
 
                 var backstoryLabel = backstory.TitleCapFor(pawn.gender);
-                Widgets.ButtonText(rect1, backstoryLabel.Truncate(rect1.width - UIUtility.ButtonPadding));
+                Verse.Widgets.ButtonText(rect1, backstoryLabel.Truncate(rect1.width - UIUtility.ButtonPadding));
 
                 if (Mouse.IsOver(rect1))
                 {

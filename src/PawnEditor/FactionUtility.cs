@@ -11,13 +11,13 @@ public static class FactionUtility
     public static (string, Texture2D, Color) GetFactionMeta(Faction? faction)
     {
         var label = "Wildlife";
-        var tex = Widgets.PlaceholderIconTex;
+        var tex = Verse.Widgets.PlaceholderIconTex;
         var color = Color.white;
         if (faction != null)
         {
             label = faction.def == FactionDefOf.Ancients ? faction.def.LabelCap : faction.Name;
             tex = faction.def.FactionIcon;
-            tex = tex == BaseContent.BadTex ? Widgets.PlaceholderIconTex : tex;
+            tex = tex == BaseContent.BadTex ? Verse.Widgets.PlaceholderIconTex : tex;
             color = faction.Color;
         }
 

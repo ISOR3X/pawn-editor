@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PawnEditor.Extensions;
 using RimWorld;
 using Verse;
 
@@ -21,11 +22,11 @@ public class SectionWorker_AppearanceBeard : SectionWorker
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
         var beardTableRect = listing.GetRect(_beardDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        UIComponents.WidgetLabel(beardTableRect.TakeTopPart(UIUtility.ButtonHeight), "Beard");
+        Widgets.WidgetLabel(beardTableRect.TakeTopPart(UIUtility.ButtonHeight), "Beard");
         if (pawn.style.CanWantBeard || PawnEditorMod.Settings.Restriction == Settings.RestrictionMode.None)
             _beardDefTable.TableOnGUI(beardTableRect);
         else
-            Widgets.Label(beardTableRect,
+            Verse.Widgets.Label(beardTableRect,
                 $"No beards available for {pawn.Name.ToStringShort}".Colorize(ColoredText.SubtleGrayColor));
 
         var hairColor = pawn.story.HairColor;

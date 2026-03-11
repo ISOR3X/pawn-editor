@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PawnEditor.Extensions;
 using RimWorld;
 using Verse;
 
@@ -20,7 +21,7 @@ public class SectionWorker_AppearanceHair : SectionWorker
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
         var hairTableRect = listing.GetRect(_hairDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        UIComponents.WidgetLabel(hairTableRect.TakeTopPart(UIUtility.ButtonHeight), "Hair");
+        Widgets.WidgetLabel(hairTableRect.TakeTopPart(UIUtility.ButtonHeight), "Hair");
         _hairDefTable.TableOnGUI(hairTableRect);
 
         var hairColor = pawn.story.HairColor;

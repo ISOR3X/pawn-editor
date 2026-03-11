@@ -26,7 +26,7 @@ public abstract class ColumnWorker_Text : ColumnWorker
             return;
         using (new TextBlock(GameFont.Small, Anchor, false))
         {
-            Widgets.Label(rect1, textFor.Colorize(CellColor));
+            Verse.Widgets.Label(rect1, textFor.Colorize(CellColor));
         }
 
         if (!Mouse.IsOver(rect1))

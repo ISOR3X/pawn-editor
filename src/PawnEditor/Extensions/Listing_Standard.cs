@@ -16,7 +16,7 @@ public static class Listing_Standard_Extension
                 return listing.Label(label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
             }
         }
-        
+
         public bool ButtonText_TruncateWithTooltip(string label, float padding = 16f)
         {
             var width = listing.ColumnWidth;
@@ -31,27 +31,13 @@ public static class Listing_Standard_Extension
         {
             var w = Text.CalcSize(label).x + padding * 2;
             var r = listing.GetRect(UIUtility.ButtonHeight);
-            return Widgets.ButtonText(r.TakeLeftPart(w), label);
+            return Verse.Widgets.ButtonText(r.TakeLeftPart(w), label);
         }
-        
+
         public Rect RectLabeled(string label, float height = UIUtility.ButtonHeight, float? labelWidth = null)
         {
             var rect = listing.GetRect(height);
             return UIUtility.RectLabeled(rect, label, labelWidth);
-        }
-
-        /// <summary>
-        /// BeginSection without borders and a background.
-        /// </summary>
-        public Listing_Standard BeginSection_Bare(float height, int columns)
-        {
-            var r = listing.GetRect(height);
-            var listingStandard = new Listing_Standard
-            {
-                ColumnWidth = r.width / columns - Listing.ColumnSpacing,
-            };
-            listingStandard.Begin(r);
-            return listingStandard;
         }
     }
 }
