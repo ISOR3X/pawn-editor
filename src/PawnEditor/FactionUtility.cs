@@ -41,7 +41,7 @@ public static class FactionUtility
     {
         if (pawn.Faction == faction) return;
         pawn.SetFaction(faction);
-        
+
         var editorWindow = Find.WindowStack.Windows.OfType<Window_Editor>().FirstOrDefault();
         editorWindow?.TrySelect(pawn);
     }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HotSwap;
+﻿using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
@@ -10,13 +7,22 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-[StaticConstructorOnStartup]
-public static class BioUtility
+public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
-    
+    public override bool ShowSection(Pawn p)
+    {
+        return p is { Faction: not null, Name: not null } && base.ShowSection(p);
+    }
+
+    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    {
+        var isHuman = PawnUtility.GetPawnCategory(pawn) is PawnUtility.PawnCategory.Humanlike;
+        var nameRect = listing.RectLabeled("Name");
+        DoNameInputRect(nameRect, pawn, isHuman);
+    }
 
     // REF: CharacterCardUtility.DrawCharacterCard
-    public static void DoNameInputRect(Rect inRect, Pawn pawn, bool advanced = false)
+    private static void DoNameInputRect(Rect inRect, Pawn pawn, bool advanced = false)
     {
         // TODO: Add proper icon
         if (advanced)
@@ -62,21 +68,5 @@ public static class BioUtility
         }
 
         TooltipHandler.TipRegionByKey(rect1, "FirstNameDesc");
-    }
-
-
-
-    public static void DoFavColorInputRect(Rect inRect, Pawn pawn)
-    {
-        inRect = inRect.TakeTopPart(UIUtility.ButtonHeight);
-        var oldColor = pawn.story.favoriteColor?.color ?? Color.white;
-        var favColorRect = inRect.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
-
-        Verse.Widgets.DrawLightHighlight(favColorRect);
-        favColorRect = favColorRect.ContractedBy(2f);
-        Verse.Widgets.DrawRectFast(favColorRect, pawn.story.favoriteColor?.color ?? Color.white);
-        inRect.xMax -= 2f;
-        if (Verse.Widgets.ButtonText(inRect, "Choose color"))
-            Find.WindowStack.Add(new Dialog_ColorPicker(c => pawn.story.favoriteColor?.color = c, oldColor));
     }
 }

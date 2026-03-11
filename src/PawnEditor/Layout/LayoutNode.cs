@@ -13,10 +13,10 @@ public class LayoutNode<TLeaf>
 {
     public float flexBasis;
     public float flexGrow;
+    public bool IsActive = true;
 
     public TLeaf? leaf;
     public bool IsLeaf => leaf != null;
-    public bool IsActive = true;
 
     public virtual void LoadDataFromXmlCustom(XmlNode xmlRoot)
     {

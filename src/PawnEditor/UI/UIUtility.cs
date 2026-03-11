@@ -246,9 +246,7 @@ public static class UIUtility
 
     public static void DrawElementStackSection<T>(
         Rect inRect,
-        List<T> elements,
-        GenUI.StackElementDrawer<T> drawer,
-        GenUI.StackElementWidthGetter<T> widthGetter,
+        List<T> elements, GenUI.StackElementDrawer<T> drawer, GenUI.StackElementWidthGetter<T> widthGetter,
         float rowHeight = 22f,
         string? emptyLabel = null,
         bool allowOrderOptimization = false)
@@ -259,7 +257,11 @@ public static class UIUtility
         if (elements.NullOrEmpty())
         {
             using (new TextBlock(TextAnchor.MiddleLeft))
-                Verse.Widgets.Label(innerRect, (emptyLabel ?? "None".Translate()).Colorize(ColoredText.SubtleGrayColor));
+            {
+                Verse.Widgets.Label(innerRect,
+                    (emptyLabel ?? "None".Translate()).Colorize(ColoredText.SubtleGrayColor));
+            }
+
             return;
         }
 
@@ -270,8 +272,7 @@ public static class UIUtility
     }
 
     public static float DrawElementStackSectionHeight<T>(
-        List<T> elements,
-        GenUI.StackElementWidthGetter<T> widthGetter,
+        List<T> elements, GenUI.StackElementWidthGetter<T> widthGetter,
         float width,
         float rowHeight = 22f)
     {
@@ -287,7 +288,11 @@ public static class UIUtility
     {
         var w = labelWidth ?? label.GetWidthCached() + LabelOffset;
         rect.SplitVertically(w, out var left, out var right);
-        using (new TextBlock(TextAnchor.MiddleLeft)) Verse.Widgets.Label(left, label);
+        using (new TextBlock(TextAnchor.MiddleLeft))
+        {
+            Verse.Widgets.Label(left, label);
+        }
+
         return right;
     }
 
@@ -298,7 +303,7 @@ public static class UIUtility
     }
 
     public static bool ButtonTextLabeled_WithIcon(Rect rect, string label, string buttonLabel, Texture2D icon,
-        Color? color)
+        Color? color = null)
     {
         var right = RectLabeled(rect, label);
 
@@ -319,14 +324,18 @@ public static class UIUtility
         var contentRect = rect.ContractedBy(remaining / 2, 0f);
 
         using (new TextBlock(TextAnchor.MiddleLeft))
+        {
             Verse.Widgets.Label(contentRect.TakeLeftPart(label.GetWidthCached()), label);
+        }
 
         contentRect.xMin += gap;
 
         var iconRect = new Rect(contentRect.x, rect.y + (rect.height - iconSize) / 2f, iconSize, iconSize);
 
         using (new GUIColor(color ?? Color.white))
+        {
             GUI.DrawTexture(iconRect, icon);
+        }
 
         return clicked;
     }

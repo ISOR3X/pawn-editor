@@ -42,9 +42,11 @@ public static partial class Widgets
             viewRect.xMin += itemSpacing;
             Verse.Widgets.DrawHighlightIfMouseover(iconRect);
             Verse.Widgets.DrawHighlight(iconRect);
-            
+
             using (new GUIColor(color))
+            {
                 GUI.DrawTexture(iconRect, textureFunc(item));
+            }
 
             if (Verse.Widgets.ButtonInvisible(r))
             {

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using PawnEditor.Layout;
-using L = PawnEditor.Layout.FlexLayoutHelper;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using L = PawnEditor.Layout.FlexLayoutHelper;
 
 namespace PawnEditor;
 
@@ -43,7 +42,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                 if (UIUtility.ButtonTextLabeled(rect, "Culture", _selectedCulture!.LabelCap))
                     Find.WindowStack.Add(new FloatMenu(cultures
                         .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
-            }, flexBasis: 0.5f).When(_selectedCulture != null),
+            }, 0.5f).When(_selectedCulture != null),
 
             L.Cell(rect =>
             {
@@ -51,7 +50,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                     Find.WindowStack.Add(new FloatMenu(xenotypes
                         .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
                         .Append(new FloatMenuOption("None", () => _selectedXenotype = null)).ToList()));
-            }, flexBasis: 0.5f).When(ModsConfig.BiotechActive),
+            }, 0.5f).When(ModsConfig.BiotechActive),
 
             L.Cell(rect =>
             {
@@ -60,17 +59,19 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                         new List<Gender> { Gender.Male, Gender.Female }
                             .Select(g => new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
                             .ToList()));
-            }, flexBasis: 0.5f),
+            }, 0.5f),
 
-            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), flexBasis: 0.5f),
-            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), flexBasis: 0.5f),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), 0.5f),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), 0.5f),
 
             L.Row([
                 L.Cell(rect =>
                 {
                     using (new TextBlock(TextAnchor.MiddleLeft, ColoredText.SubtleGrayColor))
+                    {
                         Verse.Widgets.Label(rect, p.Name.ToStringFull);
-                }, flexBasis: 0.4f),
+                    }
+                }, 0.4f),
                 L.Cell(rect =>
                 {
                     if (Verse.Widgets.ButtonText(rect, "Generate"))
@@ -84,7 +85,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                             _selectedCulture, p.IsCreepJoiner, _selectedGender,
                             p.RaceProps.nameCategory, lastName, _forceNoNick);
                     }
-                }, flexBasis: 0.5f, flexGrow: 1)
+                }, 0.5f, 1)
             ], flexBasis: 1f)
         ], gapX: 24f, wrap: true);
 

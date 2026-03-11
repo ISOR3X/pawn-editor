@@ -9,7 +9,10 @@ public abstract class SectionWorker(SectionDef def)
 {
     public SectionDef Def = def;
 
-    public virtual bool ShowSection(Pawn p) => Def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(p));
+    public virtual bool ShowSection(Pawn p)
+    {
+        return Def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(p));
+    }
 
     protected abstract void DoSectionContents(Listing_Standard listing, Pawn pawn);
 

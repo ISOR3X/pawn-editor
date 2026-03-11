@@ -15,6 +15,7 @@ public abstract class DefTable
     private const float ScrollbarWidth = 16f;
 
     private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
+    private readonly List<ColumnDef> _cachedColumns = [];
     private readonly List<float> _cachedColumnWidths = [];
     private readonly List<float> _cachedRowHeights = [];
     private readonly List<bool> _columnAtMaxWidth = [];
@@ -27,7 +28,6 @@ public abstract class DefTable
     private float _cachedHeightNoScrollbar;
     private Vector2 _cachedSize;
     private List<Def> _cachedThings = [];
-    private readonly List<ColumnDef> _cachedColumns = [];
     private bool _dirty;
     private Vector2 _scrollPosition;
     private Def? _selected;
@@ -60,9 +60,12 @@ public abstract class DefTable
             _cachedColumns[index].Worker.DoHeader(rect, this);
             num2 += width;
         }
-        
+
         using (new GUIColor(_borderColor))
-            Verse.Widgets.DrawLineHorizontal(position.x, position.y + _cachedHeaderHeight, num2); // Draw line under header.
+        {
+            Verse.Widgets.DrawLineHorizontal(position.x, position.y + _cachedHeaderHeight,
+                num2); // Draw line under header.
+        }
 
         var outRect = new Rect((int)position.x, (int)position.y + (int)_cachedHeaderHeight, (int)_cachedSize.x,
             (int)_cachedSize.y - (int)_cachedHeaderHeight);
@@ -81,7 +84,9 @@ public abstract class DefTable
                 if (_def.doAlternateStyle)
                 {
                     using (new GUIColor(_borderColor))
+                    {
                         Verse.Widgets.DrawLineHorizontal(x, y, columnWidth);
+                    }
                 }
                 else if (thingIndex % 2 == 1)
                 {
@@ -132,13 +137,11 @@ public abstract class DefTable
                 {
                     DoRow(_cachedColumns[columnIndex], rect, cachedThing);
                     if (columnDef.groupable & flag)
-                    {
                         using (new GUIColor(_borderColor))
                         {
                             Verse.Widgets.DrawLineVertical(rect.xMin, rect.yMin, rect.height);
                             Verse.Widgets.DrawLineVertical(rect.xMax, rect.yMin, rect.height);
                         }
-                    }
                 }
 
                 y += (int)rect.height;
@@ -269,14 +272,20 @@ public abstract class DefTable
             _cachedRowHeights.Add(CalculateRowHeight(t));
     }
 
-    private float GetOptimalWidth(ColumnDef column) =>
-        Mathf.Max(column.Worker.GetOptimalWidth(this), 0.0f);
+    private float GetOptimalWidth(ColumnDef column)
+    {
+        return Mathf.Max(column.Worker.GetOptimalWidth(this), 0.0f);
+    }
 
-    private float GetMinWidth(ColumnDef column) =>
-        Mathf.Max(column.Worker.GetMinWidth(this), 0.0f);
+    private float GetMinWidth(ColumnDef column)
+    {
+        return Mathf.Max(column.Worker.GetMinWidth(this), 0.0f);
+    }
 
-    private float GetMaxWidth(ColumnDef column) =>
-        Mathf.Max(column.Worker.GetMaxWidth(this), 0.0f);
+    private float GetMaxWidth(ColumnDef column)
+    {
+        return Mathf.Max(column.Worker.GetMaxWidth(this), 0.0f);
+    }
 
     private float CalculateRowHeight(Def thing)
     {

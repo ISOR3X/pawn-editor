@@ -8,7 +8,7 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_BioBackstory(SectionDef def) : SectionWorker(def)
+public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
@@ -39,7 +39,10 @@ public class SectionWorker_BioBackstory(SectionDef def) : SectionWorker(def)
                 if (backstory == null)
                 {
                     using (new TextBlock(TextAnchor.MiddleCenter, ColoredText.SubtleGrayColor))
+                    {
                         Verse.Widgets.Label(rect1, "None".Translate());
+                    }
+
                     continue;
                 }
 

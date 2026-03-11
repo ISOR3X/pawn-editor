@@ -8,49 +8,40 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
+public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
         var traitsHeight = GetTraitsHeight(pawn, (listing.ColumnWidth - Listing.ColumnSpacing) / 2);
         var sectionHeight = traitsHeight + Text.LineHeight + listing.verticalSpacing;
-        
+
         var r = listing.GetRect(sectionHeight);
-        var traitsListing = new Listing_Standard {ColumnWidth = r.width / 2 - Listing.ColumnSpacing};
-        
+        var traitsListing = new Listing_Standard { ColumnWidth = r.width / 2 - Listing.ColumnSpacing };
+
         traitsListing.Begin(r);
-        
+
         traitsListing.LabelH2("Traits");
-        
+
         var traitRect = traitsListing.GetRect(traitsHeight);
         DoTraitsRect(traitRect, pawn);
-        
-        traitsListing.NewColumn(); 
-        
+
+        traitsListing.NewColumn();
+
         traitsListing.LabelH2("Incapable of");
         var incapableOfRect = traitsListing.GetRect(traitsHeight);
         DoIncapableOfRect(incapableOfRect, pawn);
 
         traitsListing.End();
-        // Log.Message($"after EndSection curY={listing.CurHeight} listingRect.height={listing.listingRect.height}");
         listing.Gap(listing.verticalSpacing);
-        // Log.Message($"after Gap curY={listing.CurHeight}");
-        // Log.Message($"after Gap curX={listing.curX}");
         listing.ButtonText_Fit("Add trait");
-        // Log.Message($"after Button curY={listing.CurHeight}");
-        // Log.Message($"after Button curX={listing.curX}");
-        
-
-        // listing.ButtonText_Fit("Add trait");
     }
 
     private static float GetTraitsHeight(Pawn pawn, float width)
     {
         var traits = pawn.story.traits.TraitsSorted;
         var incapableOf = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
-        
-        // Match the width reductions applied in DrawElementStackSection:
-        // ContractedBy(4f) removes 8f total, then DrawElementStack uses width - 5f
+
+        // Match the width reductions applied in DrawElementStackSection (ContractedBy(4f) removes 8f total)
         var effectiveWidth = width - 8f;
 
         var traitsHeight = UIUtility.DrawElementStackSectionHeight(
@@ -62,7 +53,7 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
             incapableOf,
             workTag => workTag.LabelTranslated().CapitalizeFirst().GetWidthCached() + 10f,
             effectiveWidth);
-        
+
         return Mathf.Max(traitsHeight, incapableHeight);
     }
 
@@ -78,7 +69,10 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
             (r, trait) =>
             {
                 using (new GUIColor(CharacterCardUtility.StackElementBackground))
+                {
                     GUI.DrawTexture(r, BaseContent.WhiteTex);
+                }
+
                 if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
                 if (trait.Suppressed) GUI.color = ColoredText.SubtleGrayColor;
                 else if (trait.sourceGene != null) GUI.color = ColoredText.GeneColor;
@@ -99,11 +93,17 @@ public class SectionWorker_BioTraits(SectionDef def) : SectionWorker(def)
             (r, workTag) =>
             {
                 using (new GUIColor(CharacterCardUtility.StackElementBackground))
+                {
                     GUI.DrawTexture(r, BaseContent.WhiteTex);
+                }
+
                 if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
                 using (new GUIColor(CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, workTag)))
+                {
                     Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height),
                         workTag.LabelTranslated().CapitalizeFirst());
+                }
+
                 if (Mouse.IsOver(r))
                     TooltipHandler.TipRegion(r, new TipSignal(
                         () => CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, workTag) + "\n" +

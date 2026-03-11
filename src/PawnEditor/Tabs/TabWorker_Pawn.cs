@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using HotSwap;
 using PawnEditor.Layout;
 using UnityEngine;
@@ -15,7 +13,7 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
     private float _viewRectHeight = 5000;
 
     private static Pawn? SelectedPawn => Find.WindowStack.WindowOfType<Window_Editor>()?.GetSelectedPawn();
-    
+
 
     protected override void DoInnerTabContents(ref Rect inRect)
     {
@@ -51,14 +49,13 @@ public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
         base.Notify_ContentChanged();
 
         if (SelectedPawn == null) return;
-        
+
         QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);
         if (actions.NullOrEmpty()) return;
 
         QuickActions.Clear();
         foreach (var (attribute, method) in actions!.Where(a => a.Item1.CanUseQuickAction()))
             QuickActions.Add(attribute.ToFloatMenuOption(method));
-        
     }
 
     #endregion

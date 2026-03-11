@@ -5,9 +5,12 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_BioFaction(SectionDef def) : SectionWorker(def)
+public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
 {
-    public override bool ShowSection(Pawn p) => p.def.CanHaveFaction && base.ShowSection(p);
+    public override bool ShowSection(Pawn p)
+    {
+        return p.def.CanHaveFaction && base.ShowSection(p);
+    }
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
@@ -23,9 +26,6 @@ public class SectionWorker_BioFaction(SectionDef def) : SectionWorker(def)
                     c);
             }).ToList()));
 
-        if (Mouse.IsOver(r))
-        {
-            TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction));
-        }
+        if (Mouse.IsOver(r)) TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction));
     }
 }

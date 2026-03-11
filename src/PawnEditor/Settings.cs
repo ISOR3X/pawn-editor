@@ -19,7 +19,7 @@ public class Settings : ModSettings
 
     // When enabled, dead pawns in the world are hidden from the left panel. (Destroyed pawns are moved to the world for compatibility reasons.)
     public bool HideDeadWorldPawns = true;
-    
+
     public RestrictionMode
         Restriction =
             RestrictionMode.Severe; // Decided the flexibility of the mod. None has no restrictions but is less stable.
@@ -33,7 +33,7 @@ public class Settings : ModSettings
     {
         base.ExposeData();
         Scribe_Values.Look(ref Restriction, nameof(Restriction), RestrictionMode.Severe);
-        Scribe_Values.Look(ref Size, nameof(Size), WindowSize.Small);
+        Scribe_Values.Look(ref Size, nameof(Size));
         Scribe_Values.Look(ref SpawnNear, nameof(SpawnNear), true);
         Scribe_Values.Look(ref HideDeadWorldPawns, nameof(HideDeadWorldPawns), true);
     }

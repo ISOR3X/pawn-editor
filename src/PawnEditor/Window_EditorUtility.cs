@@ -14,9 +14,7 @@ public partial class Window_Editor
         TryRecachePawnGroup();
 
         if (_selectedPawn?.Faction != _selectedFaction && PawnLister.Pawns_ByFaction[faction].Count > 0)
-        {
             TrySelect(_selectedPawnGroup.FirstOrDefault());
-        }
     }
 
     public void TrySelect(Pawn? pawn)
@@ -30,10 +28,7 @@ public partial class Window_Editor
 
         _selectedTabDef?.Worker.Notify_ContentChanged();
 
-        if (pawn?.Faction != prevFaction && pawn != null)
-        {
-            TrySelect(pawn?.Faction);
-        }
+        if (pawn?.Faction != prevFaction && pawn != null) TrySelect(pawn?.Faction);
 
         if (PawnUtility.GetPawnCategory(pawn) != prevCategory) RecacheTabs();
     }
@@ -62,7 +57,6 @@ public partial class Window_Editor
         _selectedPawnGroup.AddRange(PawnLister.Pawns_ByFaction[_selectedFaction]);
     }
 
-    
 
     private FloatMenu FactionFloatMenu()
     {

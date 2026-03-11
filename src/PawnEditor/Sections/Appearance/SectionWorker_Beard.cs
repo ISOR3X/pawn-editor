@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using PawnEditor.Extensions;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
 [Reloadable]
-public class SectionWorker_AppearanceBeard : SectionWorker
+public class SectionWorker_Beard : SectionWorker
 {
+    private const int RowCount = 11;
+    private const float RowHeight = 30f;
     private readonly DefTable _beardDefTable;
     private float _hairColorHeight = 30f;
 
-    public SectionWorker_AppearanceBeard(SectionDef def) : base(def)
+    public SectionWorker_Beard(SectionDef def) : base(def)
     {
         var beards = DefDatabase<BeardDef>.AllDefs;
         _beardDefTable = (DefTable_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Beards.workerClass,
@@ -21,13 +24,20 @@ public class SectionWorker_AppearanceBeard : SectionWorker
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        var beardTableRect = listing.GetRect(_beardDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        Widgets.WidgetLabel(beardTableRect.TakeTopPart(UIUtility.ButtonHeight), "Beard");
+        listing.LabelH2("Beard");
+
+        var beardTableRect =
+            listing.GetRect(_beardDefTable.HeaderHeight + (RowCount + 1) * RowHeight + UIUtility.ButtonHeight + 4f);
+
         if (pawn.style.CanWantBeard || PawnEditorMod.Settings.Restriction == Settings.RestrictionMode.None)
             _beardDefTable.TableOnGUI(beardTableRect);
         else
-            Verse.Widgets.Label(beardTableRect,
-                $"No beards available for {pawn.Name.ToStringShort}".Colorize(ColoredText.SubtleGrayColor));
+            using (new TextBlock(TextAnchor.MiddleCenter))
+            {
+                Verse.Widgets.Label(beardTableRect,
+                    $"No beards available for {pawn.Name.ToStringShort}".Colorize(ColoredText.SubtleGrayColor));
+            }
+
 
         var hairColor = pawn.story.HairColor;
         listing.ColorPickerLabeled("Hair color", _hairColorHeight, ref hairColor, null,

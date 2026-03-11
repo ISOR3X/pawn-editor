@@ -5,7 +5,7 @@
         <workerClass>PawnEditor.DefTable_Hair</workerClass>
         <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
         <columns>
-            <li>PawnEditor_LabelWithIcon</li> 
+            <li>PawnEditor_LabelWithIcon</li>
             <li>PawnEditor_Gender</li>
             <li>PawnEditor_Style</li>
             <li>PawnEditor_ContentSource</li>

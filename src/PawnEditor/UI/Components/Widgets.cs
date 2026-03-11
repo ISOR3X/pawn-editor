@@ -22,7 +22,9 @@ public static partial class Widgets
 
         rect.yMin += 20f;
         using (new GUIColor(Verse.Widgets.SeparatorLineColor))
+        {
             Verse.Widgets.DrawLineHorizontal(rect.x, rect.y, rect.width);
+        }
     }
 
     public static void WidgetLabel(Rect inRect, string label)
@@ -128,7 +130,8 @@ public static partial class Widgets
         string? previousFocusedControlName,
         string? controlName = null)
     {
-        return DelayedTextField(inRect, text, ref buffer, (rect, buffer) => Verse.Widgets.TextField(rect, buffer, maxLength),
+        return DelayedTextField(inRect, text, ref buffer,
+            (rect, buffer) => Verse.Widgets.TextField(rect, buffer, maxLength),
             previousFocusedControlName, controlName);
     }
 

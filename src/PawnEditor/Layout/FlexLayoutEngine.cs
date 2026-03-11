@@ -21,7 +21,7 @@ public static class FlexLayoutEngine
     {
         if (node.IsLeaf)
         {
-            Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, Color.red, 1);
+            Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, new Color(1f, 1f, 1f, 0.2f));
             return runLeaf(node.leaf!, rect);
         }
 
@@ -101,7 +101,7 @@ public static class FlexLayoutEngine
             if (c.flexBasis > 1f)
                 h = c.flexBasis;
             else if (hasKnownHeight && c.flexGrow > 0f && totalGrow > 0f)
-                h = (c.flexGrow / totalGrow) * remaining;
+                h = c.flexGrow / totalGrow * remaining;
             else
                 h = Draw(c, new Rect(OffscreenOffset, OffscreenOffset, rect.width, Height), runLeaf, isVisible);
 
@@ -169,7 +169,7 @@ public static class FlexLayoutEngine
         var totalGrow = line.Sum(n => n.flexGrow);
         if (totalGrow > 0f && remaining > 0f)
             for (var i = 0; i < line.Count; i++)
-                widths[i] += (line[i].flexGrow / totalGrow) * remaining;
+                widths[i] += line[i].flexGrow / totalGrow * remaining;
 
         return widths;
     }
@@ -186,5 +186,7 @@ public static class FlexLayoutEngine
     private static List<LayoutNode<TLeaf>> ActiveChildren<TLeaf>(
         FlexLayoutNode<TLeaf> node,
         Func<TLeaf, bool>? isVisible)
-        => node.children.Where(c => c.IsActive && HasVisibleContent(c, isVisible)).ToList();
+    {
+        return node.children.Where(c => c.IsActive && HasVisibleContent(c, isVisible)).ToList();
+    }
 }

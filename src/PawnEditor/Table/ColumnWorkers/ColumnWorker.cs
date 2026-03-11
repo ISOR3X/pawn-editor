@@ -77,11 +77,11 @@ public abstract class ColumnWorker
     public virtual int GetMinWidth(DefTable defTable)
     {
         if (!Def.label.NullOrEmpty())
-        {
             // Use TextBlock to restore the previous font state rather than hardcoding Small.
             using (new TextBlock(HeaderFont))
+            {
                 return Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
-        }
+            }
 
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.x) : 1;
     }
@@ -104,11 +104,11 @@ public abstract class ColumnWorker
     public virtual int GetMinHeaderHeight(DefTable defTable)
     {
         if (!Def.label.NullOrEmpty())
-        {
             // Use TextBlock to restore the previous font state rather than hardcoding Small.
             using (new TextBlock(HeaderFont))
+            {
                 return Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).y);
-        }
+            }
 
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.y) : 0;
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using HotSwap;
-using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -11,7 +10,6 @@ public abstract class FloatWindow : Window
 {
     private static readonly Vector2 InitialPositionShift = new(0, 8f);
     private readonly Rect _boundWidgetRect;
-    protected virtual Window? Owner => null;
     private Window? _ownerInstance;
 
     protected FloatWindow(Rect boundWidgetRect)
@@ -21,6 +19,8 @@ public abstract class FloatWindow : Window
         layer = WindowLayer.Super;
         closeOnClickedOutside = true;
     }
+
+    protected virtual Window? Owner => null;
 
     protected virtual FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
 

@@ -66,7 +66,9 @@ public static partial class Widgets
 
         portraitRect = new Rect(portraitRect.x - 10f, portraitRect.y - 20f, size.x, size.y);
         using (new GUIColor(new Color(1f, 1f, 1f, 0.2f)))
+        {
             GUI.DrawTexture(portraitRect.ContractedBy(8f, 12f), texture);
+        }
 
         Verse.Widgets.EndGroup();
         Verse.Widgets.Label(innerRect.TakeTopPart(Text.LineHeight), upperLabel);
@@ -136,14 +138,21 @@ public static partial class Widgets
                     if (Event.current.type == EventType.MouseDown)
                     {
                         var currentMap = Find.CurrentMap;
-                        if (Event.current.button == 0 && Event.current.clickCount == 2 &&
-                            (pawn.Map == currentMap || pawn.MapHeld == currentMap))
+                        if (Event.current.button == 0 && Event.current.clickCount == 2)
                         {
-                            var pos = pawn.Position;
-                            // pos.x -= 15; // To have the pawn show up next to the window instead of the center of the screen.
-                            CameraJumper.TryJump(pos, pawn.Map ?? pawn.Map);
-                            Find.Selector.ClearSelection();
-                            Find.Selector.Select(pawn);
+                            if (pawn.Map == currentMap || pawn.MapHeld == currentMap)
+                            {
+                                var pos = pawn.Position;
+                                // pos.x -= 15; // To have the pawn show up next to the window instead of the center of the screen.
+                                CameraJumper.TryJump(pos, pawn.Map ?? pawn.Map);
+                                Find.Selector.ClearSelection();
+                                Find.Selector.Select(pawn);
+                            }
+                            else
+                            {
+                                Messages.Message("Cannot jump to a pawn that is not on the current map.",
+                                    MessageTypeDefOf.RejectInput);
+                            }
                         }
                         else
                         {

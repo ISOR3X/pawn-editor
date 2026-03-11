@@ -6,6 +6,7 @@ using RimWorld;
 using Verse;
 
 namespace PawnEditor;
+
 public class SectionWorker_AppearanceTattoos : SectionWorker
 {
     private readonly DefTable _bodyDefTable;

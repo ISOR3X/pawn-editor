@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
@@ -9,7 +8,7 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
+public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
     public const int SkillColCount = 3;
     public const float SkillHeight = 24f;
@@ -21,12 +20,12 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
         var skillRect = listing.GetRect(GetSkillsHeight());
         DoSkillsRect(skillRect, pawn);
     }
-    
+
     private static float GetSkillsHeight()
     {
         return Mathf.FloorToInt(DefDatabase<SkillDef>.DefCount / (float)SkillColCount) * (SkillHeight + SkillGap);
     }
-    
+
     private static void DoSkillsRect(Rect inRect, Pawn pawn)
     {
         var skills = SkillUI.skillDefsInListOrderCached;
@@ -34,7 +33,7 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
 
         var listing = new Listing_Standard
         {
-            ColumnWidth = inRect.width / SkillColCount - Listing.ColumnSpacing,
+            ColumnWidth = inRect.width / SkillColCount - Listing.ColumnSpacing
         };
 
         using (new TextBlock(TextAnchor.MiddleLeft))
@@ -47,9 +46,9 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
                     listing.NewColumn();
 
                 var skillDef = skills[i];
-                
+
                 var r = listing.GetRect(SkillHeight);
-                
+
                 r.xMin -= 6f; // Compensate for the 6f offset from SkillUI.DrawSkill.
                 listing.Gap(SkillGap);
 
@@ -83,7 +82,8 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
 
                 // Increment skill level
                 newLevelVal = UIUtility.IncrementWithScroll(r2, newLevelVal, 5);
-                if (Verse.Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f), TexButton.Plus))
+                if (Verse.Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f),
+                        TexButton.Plus))
                 {
                     if (Event.current.shift)
                         newLevelVal += 5;
@@ -133,5 +133,4 @@ public class SectionWorker_BioSkills(SectionDef def) : SectionWorker(def)
 
         return (min, max);
     }
-    
 }

@@ -5,13 +5,16 @@ using RimWorld;
 using Verse;
 
 namespace PawnEditor;
+
 [Reloadable]
-public class SectionWorker_AppearanceHair : SectionWorker
+public class SectionWorker_Hair : SectionWorker
 {
+    private const int RowCount = 11;
+    private const float RowHeight = 30f;
     private readonly DefTable _hairDefTable;
     private float _hairColorHeight = 30f;
 
-    public SectionWorker_AppearanceHair(SectionDef def) : base(def)
+    public SectionWorker_Hair(SectionDef def) : base(def)
     {
         var hairs = DefDatabase<HairDef>.AllDefs;
         _hairDefTable = (DefTable_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Hairs.workerClass,
@@ -20,8 +23,10 @@ public class SectionWorker_AppearanceHair : SectionWorker
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        var hairTableRect = listing.GetRect(_hairDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        Widgets.WidgetLabel(hairTableRect.TakeTopPart(UIUtility.ButtonHeight), "Hair");
+        listing.LabelH2("Hair");
+        var hairTableRect =
+            listing.GetRect(_hairDefTable.HeaderHeight + (RowCount + 1) * RowHeight + UIUtility.ButtonHeight + 4f);
+
         _hairDefTable.TableOnGUI(hairTableRect);
 
         var hairColor = pawn.story.HairColor;

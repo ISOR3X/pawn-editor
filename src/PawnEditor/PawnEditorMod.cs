@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using HotSwap;
-using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 
@@ -9,10 +8,13 @@ namespace PawnEditor;
 [HotSwappable]
 public class PawnEditorMod : Mod
 {
+    public static string ModName = "PawnEditor";
     public static Settings Settings = new();
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
+        ModName = content.Name;
+
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
 

@@ -8,22 +8,26 @@
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_PawnBio</workerClass>
         <layout>
-            <section>PawnEditor_BioInfo</section>
             <flex direction="row">
-                <section flexBasis="0.4" flexGrow="0">PawnEditor_BioName</section>
-                <section flexBasis="0" flexGrow="1">PawnEditor_BioAge</section>
-                <section flexBasis="0" flexGrow="1">PawnEditor_BioBackstory</section>
-            </flex>
-            <section>PawnEditor_BioSkills</section>
-            <flex direction="row">
-                <section flexBasis="0.6" flexGrow="1">PawnEditor_BioTraits</section>
-                <section flexBasis="0.3" flexGrow="1">PawnEditor_BioAbilities</section>
+                <section flexBasis="0.6">PawnEditor_Info</section>
+                <section flexGrow="1">PawnEditor_Portrait</section>
             </flex>
             <flex direction="row">
-                <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_BioFavColor</section>
+                <section flexBasis="0.4" flexGrow="0">PawnEditor_Name</section>
+                <section flexBasis="0" flexGrow="1">PawnEditor_Age</section>
+                <section flexBasis="0" flexGrow="1">PawnEditor_Backstory</section>
+            </flex>
+            <section>PawnEditor_Skills</section>
+            <flex direction="row">
+                <section flexBasis="0.6" flexGrow="1">PawnEditor_Traits</section>
+                <section flexBasis="0.3" flexGrow="1">PawnEditor_Abilities</section>
             </flex>
             <flex direction="row">
-                <section flexBasis="0.3" flexGrow="0">PawnEditor_BioFaction</section>
+                <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor
+                </section>
+            </flex>
+            <flex direction="row">
+                <section flexBasis="0.3" flexGrow="0">PawnEditor_Faction</section>
             </flex>
         </layout>
     </PawnEditor.TabDef>
@@ -32,10 +36,16 @@
         <label>Appearance</label>
         <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>
         <layout>
-            <!--                <li>PawnEditor_AppearanceHeader</li>-->
-            <!--                <li>PawnEditor_AppearanceBasic</li>-->
-            <!--                <li>PawnEditor_AppearanceShape</li>-->
-            <section>PawnEditor_AppearanceHair</section>
+            <section>PawnEditor_Portrait</section>
+            <section>PawnEditor_Appearance</section>
+            <flex direction="row">
+                <section flexGrow="1">PawnEditor_ShapeHead</section>
+                <section flexGrow="1">PawnEditor_ShapeBody</section>
+            </flex>
+            <flex direction="row">
+                <section flexGrow="1">PawnEditor_Hair</section>
+                <section flexGrow="1">PawnEditor_Beard</section>
+            </flex>
             <!--                <li MayRequire="Ludeon.RimWorld.Ideology">PawnEditor_AppearanceTattoos</li>-->
             <!--                <li MayRequire="Ludeon.RimWorld.Biotech">PawnEditor_AppearanceXenotype</li>-->
         </layout>

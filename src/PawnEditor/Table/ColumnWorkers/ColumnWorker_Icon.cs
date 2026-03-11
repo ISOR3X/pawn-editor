@@ -19,7 +19,10 @@ public abstract class ColumnWorker_Icon : ColumnWorker
         var num2 = Mathf.Max((int)((30.0 - iconSize.y) / 2.0), 0);
         var rect1 = new Rect(inRect.x + num1, inRect.y + num2, iconSize.x, iconSize.y);
         using (new GUIColor(GetIconColor(thing)))
+        {
             GUI.DrawTexture(rect1.ContractedBy(Padding), iconFor);
+        }
+
         if (Mouse.IsOver(rect1))
         {
             var iconTip = GetIconTip(thing);

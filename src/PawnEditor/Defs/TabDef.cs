@@ -10,10 +10,10 @@ namespace PawnEditor;
 public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
-    public int priority = 10;
-    public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
     public SectionFlexLayoutNode layout = new();
+    public int priority = 10;
+    public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
     [field: Unsaved]
     public TabWorker Worker
@@ -36,7 +36,7 @@ public class SectionFlexLayoutNode : FlexLayoutNode<SectionDef>
         Registry = new Dictionary<string, Func<LayoutNode<SectionDef>>>
         {
             ["section"] = () => new DefLeafNode<SectionDef>(),
-            ["flex"] = () => new SectionFlexLayoutNode(),
+            ["flex"] = () => new SectionFlexLayoutNode()
         };
     }
 }

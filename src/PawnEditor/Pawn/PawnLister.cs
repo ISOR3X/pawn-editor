@@ -45,10 +45,7 @@ public static class PawnLister
             PawnsByFactionTemporary[null!] = [];
 
             // Bucket pawns
-            foreach (var pawn in availablePawns)
-            {
-                PawnsByFactionTemporary[pawn.Faction].Add(pawn);
-            }
+            foreach (var pawn in availablePawns) PawnsByFactionTemporary[pawn.Faction].Add(pawn);
 
             return PawnsByFactionTemporary;
         }
@@ -62,10 +59,24 @@ public static class PawnLister
         public readonly Faction? Faction = faction;
 
         // Allows using Faction as a key in the dict instead of FactionKey
-        public static implicit operator FactionKey(Faction? faction) => new(faction);
+        public static implicit operator FactionKey(Faction? faction)
+        {
+            return new FactionKey(faction);
+        }
 
-        public bool Equals(FactionKey other) => Faction == other.Faction;
-        public override bool Equals(object? obj) => obj is FactionKey other && Equals(other);
-        public override int GetHashCode() => Faction?.GetHashCode() ?? 0;
+        public bool Equals(FactionKey other)
+        {
+            return Faction == other.Faction;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is FactionKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return Faction?.GetHashCode() ?? 0;
+        }
     }
 }

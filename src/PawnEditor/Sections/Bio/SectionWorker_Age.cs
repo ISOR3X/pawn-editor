@@ -7,13 +7,14 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_BioAge(SectionDef def) : SectionWorker(def)
+public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
 {
     private static readonly string?[] TextfieldBuffers = new string[2];
-    
+
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
         listing.LabelH2("Age");
+
         DoAgeInputRect(listing, pawn);
     }
 
@@ -25,7 +26,7 @@ public class SectionWorker_BioAge(SectionDef def) : SectionWorker(def)
 
         const string bioLabel = "Biological";
         const string chronoLabel = "Chronological";
-        
+
         var labelWidth = Mathf.Max(bioLabel.GetWidthCached(), chronoLabel.GetWidthCached());
         labelWidth += UIUtility.LabelOffset;
 
@@ -41,10 +42,11 @@ public class SectionWorker_BioAge(SectionDef def) : SectionWorker(def)
 
             bioAge = Widgets.DelayedTextFieldNumeric(rect1, bioAge, ref TextfieldBuffers[0], bioAgeMin, 9999, null,
                 true);
-            if (bioAge != pawn.ageTracker.AgeBiologicalYears) pawn.ageTracker.AgeBiologicalTicks = bioAge * GenDate.TicksPerYear;
+            if (bioAge != pawn.ageTracker.AgeBiologicalYears)
+                pawn.ageTracker.AgeBiologicalTicks = bioAge * GenDate.TicksPerYear;
 
             listing.Gap(listing.verticalSpacing);
-            
+
             // Chronological
             var rect2 = listing.RectLabeled(chronoLabel, labelWidth: labelWidth);
             chronoAge = Widgets.DelayedTextFieldNumeric(rect2, chronoAge, ref TextfieldBuffers[1], 0, 9999, null,

@@ -116,20 +116,6 @@ public static class PawnUtility
         }
     }
 
-    extension(Pawn pawn)
-    {
-        public PawnLocation GetLocation()
-        {
-            return new PawnLocation(pawn);
-        }
-
-        public void FullDelete()
-        {
-            pawn.Destroy();
-            Find.WorldPawns.RemovePawn(pawn);
-        }
-    }
-
 
     public static void RandomizeInPlace(Pawn pawn)
     {
@@ -161,5 +147,19 @@ public static class PawnUtility
         var max = Mathf.Max(inRect.width, inRect.height);
         return PortraitsCache.Get(pawn, new Vector2(max, max) * 2f, rot, new Vector3(0, 0, .5f),
             0.7f, renderHeadgear: Window_Editor.ShowHeadgear, renderClothes: Window_Editor.ShowClothes);
+    }
+
+    extension(Pawn pawn)
+    {
+        public PawnLocation GetLocation()
+        {
+            return new PawnLocation(pawn);
+        }
+
+        public void FullDelete()
+        {
+            pawn.Destroy();
+            Find.WorldPawns.RemovePawn(pawn);
+        }
     }
 }
