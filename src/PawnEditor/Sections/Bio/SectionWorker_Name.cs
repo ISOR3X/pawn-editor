@@ -11,7 +11,7 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p)
     {
-        return p is { Faction: not null, Name: not null } && base.ShowSection(p);
+        return base.ShowSection(p) && p is { Faction: not null, Name: not null };
     }
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)

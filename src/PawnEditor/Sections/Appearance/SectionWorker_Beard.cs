@@ -13,7 +13,6 @@ public class SectionWorker_Beard : SectionWorker
     private const int RowCount = 11;
     private const float RowHeight = 30f;
     private readonly DefTable _beardDefTable;
-    private float _hairColorHeight = 30f;
 
     public SectionWorker_Beard(SectionDef def) : base(def)
     {
@@ -37,11 +36,5 @@ public class SectionWorker_Beard : SectionWorker
                 Verse.Widgets.Label(beardTableRect,
                     $"No beards available for {pawn.Name.ToStringShort}".Colorize(ColoredText.SubtleGrayColor));
             }
-
-
-        var hairColor = pawn.story.HairColor;
-        listing.ColorPickerLabeled("Hair color", _hairColorHeight, ref hairColor, null,
-            AppearanceUtility.GetHairColorsFor(pawn),
-            c => AppearanceUtility.TrySetHairColor(c, pawn), out _hairColorHeight);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Verse;
 
 namespace PawnEditor;
 
@@ -36,5 +38,12 @@ public static class Utility
     public static int ValueCount<T1, T2>(this SortedDictionary<T1, List<T2>> dict)
     {
         return dict.Sum(kvp => kvp.Value.Count);
+    }
+
+    public static string ReadableDefName(this Def def)
+    {
+        var parts = def.defName.Split('_');
+        var result = parts.Select(part => Regex.Replace(part, @"(?<=[a-z])(?=[A-Z])", " ").ToLower());
+        return string.Join(", ", result).CapitalizeFirst();
     }
 }

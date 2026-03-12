@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
@@ -8,7 +9,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public abstract class DefTable
 {
     public const float DefaultRowHeight = 30f;
@@ -64,7 +65,7 @@ public abstract class DefTable
         using (new GUIColor(_borderColor))
         {
             Verse.Widgets.DrawLineHorizontal(position.x, position.y + _cachedHeaderHeight,
-                num2); // Draw line under header.
+                num2); // Draw a line under the header.
         }
 
         var outRect = new Rect((int)position.x, (int)position.y + (int)_cachedHeaderHeight, (int)_cachedSize.x,
@@ -172,12 +173,12 @@ public abstract class DefTable
     }
 
     public void TableOnGUI(Rect inRect)
-    {
+    {   
         if (_def.searchColumn != null)
         {
             var footerRect = inRect.TakeBottomPart(UIUtility.ButtonHeight);
-            _quickSearchWidget.OnGUI(footerRect.RightPartPixels(150f), SetDirty);
             inRect.yMax -= 4f;
+            _quickSearchWidget.OnGUI(footerRect.RightPartPixels(150f), () => {});
         }
 
         if (_cachedSize != inRect.size)

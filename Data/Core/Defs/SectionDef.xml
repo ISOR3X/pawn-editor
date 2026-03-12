@@ -38,6 +38,11 @@
         <workerClass>PawnEditor.SectionWorker_Faction</workerClass>
     </PawnEditor.SectionDef>
     <!-- Appearance -->
+    <PawnEditor.SectionDef>
+        <defName>PawnEditor_Portrait</defName>
+        <workerClass>PawnEditor.SectionWorker_Portrait</workerClass>
+    </PawnEditor.SectionDef>
+    <!-- Appearance.Hair -->
     <PawnEditor.SectionDef ParentName="HumanSectionBase">
         <defName>PawnEditor_Hair</defName>
         <workerClass>PawnEditor.SectionWorker_Hair</workerClass>
@@ -47,9 +52,10 @@
         <workerClass>PawnEditor.SectionWorker_Beard</workerClass>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef ParentName="HumanSectionBase">
-        <defName>PawnEditor_Appearance</defName>
-        <workerClass>PawnEditor.SectionWorker_Appearance</workerClass>
+        <defName>PawnEditor_HairColor</defName>
+        <workerClass>PawnEditor.SectionWorker_HairColor</workerClass>
     </PawnEditor.SectionDef>
+    <!-- Appearance.Shape-->
     <PawnEditor.SectionDef ParentName="HumanSectionBase">
         <defName>PawnEditor_ShapeHead</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeHead</workerClass>
@@ -58,8 +64,17 @@
         <defName>PawnEditor_ShapeBody</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeBody</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef>
-        <defName>PawnEditor_Portrait</defName>
-        <workerClass>PawnEditor.SectionWorker_Portrait</workerClass>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_SkinColor</defName>
+        <workerClass>PawnEditor.SectionWorker_SkinColor</workerClass>
+    </PawnEditor.SectionDef>
+    <!-- Appearance.Misc -->
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_Sex</defName>
+        <workerClass>PawnEditor.SectionWorker_Sex</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_Lifestage</defName>
+        <workerClass>PawnEditor.SectionWorker_Lifestage</workerClass>
     </PawnEditor.SectionDef>
 </Defs>

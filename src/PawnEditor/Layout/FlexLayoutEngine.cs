@@ -21,7 +21,7 @@ public static class FlexLayoutEngine
     {
         if (node.IsLeaf)
         {
-            Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, new Color(1f, 1f, 1f, 0.2f));
+            Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, new Color(1f, 1f, 1f, 0.1f));
             return runLeaf(node.leaf!, rect);
         }
 

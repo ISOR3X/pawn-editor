@@ -23,7 +23,8 @@
                 <section flexBasis="0.3" flexGrow="1">PawnEditor_Abilities</section>
             </flex>
             <flex direction="row">
-                <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor
+                <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">
+                    PawnEditor_FavColor
                 </section>
             </flex>
             <flex direction="row">
@@ -36,15 +37,22 @@
         <label>Appearance</label>
         <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>
         <layout>
-            <section>PawnEditor_Portrait</section>
-            <section>PawnEditor_Appearance</section>
+            <section flexBasis="1">PawnEditor_Portrait</section>
             <flex direction="row">
-                <section flexGrow="1">PawnEditor_ShapeHead</section>
-                <section flexGrow="1">PawnEditor_ShapeBody</section>
+                <section flexBasis="0.3" flexGrow="1">PawnEditor_Sex</section>
+                <section flexBasis="0.3" flexGrow="1">PawnEditor_Lifestage</section>
+                <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
+                <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
             </flex>
-            <flex direction="row">
-                <section flexGrow="1">PawnEditor_Hair</section>
-                <section flexGrow="1">PawnEditor_Beard</section>
+            <flex direction="row" wrap="true">
+                <section flexBasis="0.5" flexGrow="1">PawnEditor_ShapeHead</section>
+                <section flexBasis="0.5" flexGrow="1">PawnEditor_ShapeBody</section>
+                <section flexBasis="1">PawnEditor_SkinColor</section>
+            </flex>
+            <flex direction="row" wrap="true">
+                <section flexBasis="0.5" flexGrow="1">PawnEditor_Hair</section>
+                <section flexBasis="0.5" flexGrow="1">PawnEditor_Beard</section>
+                <section flexBasis="1">PawnEditor_HairColor</section>
             </flex>
             <!--                <li MayRequire="Ludeon.RimWorld.Ideology">PawnEditor_AppearanceTattoos</li>-->
             <!--                <li MayRequire="Ludeon.RimWorld.Biotech">PawnEditor_AppearanceXenotype</li>-->

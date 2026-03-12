@@ -12,7 +12,6 @@ public class SectionWorker_Hair : SectionWorker
     private const int RowCount = 11;
     private const float RowHeight = 30f;
     private readonly DefTable _hairDefTable;
-    private float _hairColorHeight = 30f;
 
     public SectionWorker_Hair(SectionDef def) : base(def)
     {
@@ -28,11 +27,5 @@ public class SectionWorker_Hair : SectionWorker
             listing.GetRect(_hairDefTable.HeaderHeight + (RowCount + 1) * RowHeight + UIUtility.ButtonHeight + 4f);
 
         _hairDefTable.TableOnGUI(hairTableRect);
-
-        var hairColor = pawn.story.HairColor;
-        listing.ColorPickerLabeled("Hair color", _hairColorHeight, ref hairColor, null,
-            AppearanceUtility.GetHairColorsFor(pawn),
-            c => AppearanceUtility.TrySetHairColor(c, pawn), out _hairColorHeight);
-        AppearanceUtility.TrySetHairColor(hairColor, pawn);
     }
 }

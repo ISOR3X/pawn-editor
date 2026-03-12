@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Defs>
-    <PawnEditor.SectionDef>
-        <defName>PawnEditor_AppearanceXenotype</defName>
-        <label>xenotype</label>
-        <workerClass>PawnEditor.SectionWorker_AppearanceXenotype</workerClass>
-    </PawnEditor.SectionDef>
-</Defs>

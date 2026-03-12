@@ -9,7 +9,7 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p)
     {
-        return p.def.CanHaveFaction && base.ShowSection(p);
+        return  base.ShowSection(p) && p.def.CanHaveFaction;
     }
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
