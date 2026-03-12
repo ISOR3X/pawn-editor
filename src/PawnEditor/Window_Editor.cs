@@ -13,79 +13,14 @@ namespace PawnEditor;
 [HotSwappable]
 public partial class Window_Editor : Window
 {
-    private void DoLeftSection(Rect inRect)
-    {
-        var layout = L.Col([
-            L.Cell(rect =>
-            {
-                using (new TextBlock(GameFont.Tiny))
-                {
-                    Verse.Widgets.Label(rect, "Selected faction");
-                }
-            }, 18f),
-
-            L.Cell(rect =>
-            {
-                var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-                if (UIUtility.ButtonText_WithIcon(rect, label, tex, c))
-                    Find.WindowStack.Add(FactionFloatMenu());
-            }, 30f),
-
-
-            L.Cell(rect =>
-            {
-                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
-                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
-            }, flexGrow: 1f)
-
-            // L.Cell(rect =>
-            // {
-            //     using (new TextBlock(GameFont.Tiny))
-            //         Widgets.Label(rect, "Overview");
-            // }, flexBasis: 18f),
-            //
-            // L.Cell(rect =>
-            // {
-            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Colony"))
-            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
-            // }, flexBasis: 30f),
-            //
-            // L.Cell(rect =>
-            // {
-            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Faction..."))
-            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
-            // }, flexBasis: 30f),
-            //
-            // L.Row([
-            //     L.Cell(rect =>
-            //     {
-            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Save"))
-            //         {
-            //         }
-            //     }, flexGrow: 1f),
-            //     L.Cell(rect =>
-            //     {
-            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Load"))
-            //         {
-            //         }
-            //     }, flexGrow: 1f)
-            // ], flexBasis: 30f)
-        ]);
-
-        FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
-        {
-            action(rect);
-            return rect.height > 1000f ? 0f : rect.height;
-        });
-    }
-
     #region Fields
 
     // Pawn-related fields
     // These are private, so they are only set through the TrySelect methods.
-    private Faction? _selectedFaction;
-    private Pawn? _selectedPawn;
-    private readonly List<Pawn> _selectedPawnGroup = [];
+    // Static so their selection persists once a window is closed.
+    private static Faction? _selectedFaction;
+    private static Pawn? _selectedPawn;
+    private static readonly List<Pawn> _selectedPawnGroup = []; // Pawns in the selected faction.
 
     // Tab related fields
     private static TabDef? _selectedTabDef;
@@ -198,4 +133,70 @@ public partial class Window_Editor : Window
     }
 
     #endregion
+
+    private void DoLeftSection(Rect inRect)
+    {
+        var layout = L.Col([
+            L.Cell(rect =>
+            {
+                using (new TextBlock(GameFont.Tiny))
+                {
+                    Verse.Widgets.Label(rect, "Selected faction");
+                }
+            }, 18f),
+
+            L.Cell(rect =>
+            {
+                var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
+                if (UIUtility.ButtonText_WithIcon(rect, label, tex, c))
+                    Find.WindowStack.Add(FactionFloatMenu());
+            }, 30f),
+
+
+            L.Cell(rect =>
+            {
+                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
+            }, flexGrow: 1f)
+
+            // L.Cell(rect =>
+            // {
+            //     using (new TextBlock(GameFont.Tiny))
+            //         Widgets.Label(rect, "Overview");
+            // }, flexBasis: 18f),
+            //
+            // L.Cell(rect =>
+            // {
+            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Colony"))
+            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
+            // }, flexBasis: 30f),
+            //
+            // L.Cell(rect =>
+            // {
+            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Faction..."))
+            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
+            // }, flexBasis: 30f),
+            //
+            // L.Row([
+            //     L.Cell(rect =>
+            //     {
+            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Save"))
+            //         {
+            //         }
+            //     }, flexGrow: 1f),
+            //     L.Cell(rect =>
+            //     {
+            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Load"))
+            //         {
+            //         }
+            //     }, flexGrow: 1f)
+            // ], flexBasis: 30f)
+        ]);
+
+        FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
+        {
+            action(rect);
+            return rect.height > 1000f ? 0f : rect.height;
+        });
+    }
 }
