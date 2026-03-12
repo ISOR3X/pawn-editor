@@ -95,9 +95,8 @@ public abstract class DefTable
                     var num4 = columnWidth;
                     if (columnDef.showIcon)
                     {
-                        var iconSize = cachedRowHeight;
-                        x2 += (int)iconSize;
-                        num4 -= (int)iconSize;
+                        x2 += (int)cachedRowHeight;
+                        num4 -= (int)cachedRowHeight;
                     }
 
                     Verse.Widgets.DrawLightHighlight(new Rect(x2, y, num4, cachedRowHeight));
@@ -173,12 +172,16 @@ public abstract class DefTable
     }
 
     public void TableOnGUI(Rect inRect)
-    {   
+    {
         if (_def.searchColumn != null)
         {
             var footerRect = inRect.TakeBottomPart(UIUtility.ButtonHeight);
             inRect.yMax -= 4f;
-            _quickSearchWidget.OnGUI(footerRect.RightPartPixels(150f), () => {});
+            // FIXME: Why is the search widget unfocused after typing a single character?
+            // Potentially because of layout changes:
+            // - Close button is added when the search bar is not empty.
+            // - Most of the time the table transitions from a scroll view to a regular view.
+            _quickSearchWidget.OnGUI(footerRect.RightPartPixels(150f), SetDirty);
         }
 
         if (_cachedSize != inRect.size)
