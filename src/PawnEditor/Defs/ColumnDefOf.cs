@@ -7,7 +7,7 @@ namespace PawnEditor;
 [UsedImplicitly]
 public class ColumnDefOf
 {
-    public static ColumnDef PawnEditor_LabelWithIcon = null!;
+    public static DefColumnDef PawnEditor_LabelWithIcon = null!;
 
     static ColumnDefOf()
     {

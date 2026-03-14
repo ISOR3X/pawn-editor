@@ -4,14 +4,14 @@ using Verse;
 
 namespace PawnEditor;
 
-public class ColumnWorker_ContentSource : ColumnWorker_Text
+public class DefColumnWorker_ContentSource : DefColumnWorker_Text
 {
     protected override TextAnchor Anchor => TextAnchor.MiddleLeft;
     protected override Color CellColor => ColoredText.SubtleGrayColor;
 
-    public override int GetMinWidth(DefTable defTable)
+    public override int GetMinWidth(TableWorker<Def> table)
     {
-        return Mathf.Max(base.GetMinWidth(defTable), 50);
+        return Mathf.Max(base.GetMinWidth(table), 50);
     }
 
     public override int Compare(Def a, Def b)

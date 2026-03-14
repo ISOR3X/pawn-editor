@@ -9,13 +9,13 @@ namespace PawnEditor;
 
 public class SectionWorker_TattooFace : SectionWorker
 {
-    private readonly DefTable _faceDefTable;
+    private readonly DefTableWorker _faceDefTable;
 
     public SectionWorker_TattooFace(SectionDef def) : base(def)
     {
         IEnumerable<TattooDef> allTattoos = DefDatabase<TattooDef>.AllDefsListForReading;
         var faceTattoos = allTattoos.Where(t => t.tattooType == TattooType.Face);
-        _faceDefTable = (DefTable_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Hairs.workerClass,
+        _faceDefTable = (DefTableWorker_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Hairs.workerClass,
             TableDefOf.PawnEditor_Hairs, (Func<IEnumerable<Def>>)(() => faceTattoos), TattooDefOf.NoTattoo_Face);
     }
 

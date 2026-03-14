@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Defs>
-    <PawnEditor.ColumnDef Name="Label">
+    <PawnEditor.DefColumnDef Name="Label">
         <defName>PawnEditor_Label</defName>
-        <workerClass>PawnEditor.ColumnWorker_Label</workerClass>
+        <workerClass>PawnEditor.DefColumnWorker_Label</workerClass>
         <widthPriority>400</widthPriority>
-    </PawnEditor.ColumnDef>
-    <PawnEditor.ColumnDef Name="LabelWithIcon" ParentName="Label">
+    </PawnEditor.DefColumnDef>
+    <PawnEditor.DefColumnDef Name="LabelWithIcon" ParentName="Label">
         <defName>PawnEditor_LabelWithIcon</defName>
         <iconBackground>true</iconBackground>
         <showIcon>true</showIcon>
-    </PawnEditor.ColumnDef>
-    <PawnEditor.ColumnDef>
+    </PawnEditor.DefColumnDef>
+    <PawnEditor.DefColumnDef>
         <defName>PawnEditor_ContentSource</defName>
         <sortable>true</sortable>
         <label>source</label>
-        <workerClass>PawnEditor.ColumnWorker_ContentSource</workerClass>
-    </PawnEditor.ColumnDef>
-    <PawnEditor.ColumnDef>
+        <workerClass>PawnEditor.DefColumnWorker_ContentSource</workerClass>
+    </PawnEditor.DefColumnDef>
+    <PawnEditor.DefColumnDef>
         <defName>PawnEditor_Gender</defName>
         <sortable>true</sortable>
         <label>gender</label>
         <headerTip>The gender preference for this hair.</headerTip>
-        <workerClass>PawnEditor.ColumnWorker_Gender</workerClass>
-    </PawnEditor.ColumnDef>
-    <PawnEditor.ColumnDef>
+        <workerClass>PawnEditor.DefColumnWorker_Gender</workerClass>
+    </PawnEditor.DefColumnDef>
+    <PawnEditor.DefColumnDef>
         <defName>PawnEditor_Style</defName>
         <sortable>true</sortable>
         <widthPriority>200</widthPriority>
         <label>style</label>
-        <workerClass>PawnEditor.ColumnWorker_Style</workerClass>
-    </PawnEditor.ColumnDef>
+        <workerClass>PawnEditor.DefColumnWorker_Style</workerClass>
+    </PawnEditor.DefColumnDef>
 </Defs>

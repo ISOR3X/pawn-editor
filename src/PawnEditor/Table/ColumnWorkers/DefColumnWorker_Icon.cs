@@ -3,13 +3,13 @@ using Verse;
 
 namespace PawnEditor;
 
-public abstract class ColumnWorker_Icon : ColumnWorker
+public abstract class DefColumnWorker_Icon : DefColumnWorker
 {
     protected virtual int Width => 26;
 
     protected virtual int Padding => 2;
 
-    public override void DoCell(Rect inRect, Def thing, DefTable defTable)
+    public override void DoCell(Rect inRect, Def thing, TableWorker<Def> table)
     {
         var iconFor = GetIconFor(thing);
         if (!(iconFor != null))
@@ -37,14 +37,14 @@ public abstract class ColumnWorker_Icon : ColumnWorker
         PaintedIcon(thing);
     }
 
-    public override int GetMinWidth(DefTable defTable)
+    public override int GetMinWidth(TableWorker<Def> table)
     {
-        return Mathf.Max(base.GetMinWidth(defTable), Width);
+        return Mathf.Max(base.GetMinWidth(table), Width);
     }
 
-    public override int GetMaxWidth(DefTable defTable)
+    public override int GetMaxWidth(TableWorker<Def> table)
     {
-        return Mathf.Min(base.GetMaxWidth(defTable), GetMinWidth(defTable));
+        return Mathf.Min(base.GetMaxWidth(table), GetMinWidth(table));
     }
 
     public override int GetMinCellHeight(Def thing)

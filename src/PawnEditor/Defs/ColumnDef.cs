@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class ColumnDef : Def
+public abstract class ColumnDef<T> : Def where T : class
 {
     public static readonly Vector2 IconSize = new(26f, 26f);
     public int gap;
@@ -21,15 +21,15 @@ public class ColumnDef : Def
     public bool useLabelShort;
     public int width = 26;
     public int widthPriority = 100;
-    public Type workerClass = typeof(ColumnWorker);
-    [Unsaved] private ColumnWorker? workerInt;
+    public Type workerClass = typeof(ColumnWorker<T>);
+    [Unsaved] private ColumnWorker<T>? workerInt;
 
-    public ColumnWorker Worker
+    public ColumnWorker<T> Worker
     {
         get
         {
             if (workerInt != null) return workerInt;
-            workerInt = (ColumnWorker)Activator.CreateInstance(workerClass);
+            workerInt = (ColumnWorker<T>)Activator.CreateInstance(workerClass);
             workerInt.Def = this;
 
             return workerInt;
@@ -58,3 +58,5 @@ public class ColumnDef : Def
 
     public bool HeaderInteractable => sortable || !headerTip.NullOrEmpty() || headerAlwaysInteractable;
 }
+
+public class DefColumnDef : ColumnDef<Def>;

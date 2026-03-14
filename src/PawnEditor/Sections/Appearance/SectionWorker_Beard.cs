@@ -12,12 +12,12 @@ public class SectionWorker_Beard : SectionWorker
 {
     private const int RowCount = 11;
     private const float RowHeight = 30f;
-    private readonly DefTable _beardDefTable;
+    private readonly TableWorker<Def> _beardDefTable;
 
     public SectionWorker_Beard(SectionDef def) : base(def)
     {
         var beards = DefDatabase<BeardDef>.AllDefs;
-        _beardDefTable = (DefTable_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Beards.workerClass,
+        _beardDefTable = (DefTableWorker_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Beards.workerClass,
             TableDefOf.PawnEditor_Beards, (Func<IEnumerable<Def>>)(() => beards), BeardDefOf.NoBeard);
     }
 

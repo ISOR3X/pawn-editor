@@ -5,20 +5,20 @@ using Verse.Sound;
 namespace PawnEditor;
 
 [Reloadable]
-public abstract class ColumnWorker_Text : ColumnWorker
+public abstract class DefColumnWorker_Text : DefColumnWorker
 {
     private static readonly NumericStringComparer comparer = new();
 
     protected virtual TextAnchor Anchor => TextAnchor.MiddleLeft;
     protected virtual Color CellColor => Color.white;
 
-    public override void DoHeader(Rect rect, DefTable defTable)
+    public override void DoHeader(Rect rect, TableWorker<Def> table)
     {
-        base.DoHeader(rect, defTable);
+        base.DoHeader(rect, table);
         MouseoverSounds.DoRegion(rect);
     }
 
-    public override void DoCell(Rect inRect, Def thing, DefTable defTable)
+    public override void DoCell(Rect inRect, Def thing, TableWorker<Def> table)
     {
         var rect1 = new Rect(inRect.x, inRect.y, inRect.width, inRect.height);
         var textFor = GetTextFor(thing);
@@ -37,9 +37,9 @@ public abstract class ColumnWorker_Text : ColumnWorker
         TooltipHandler.TipRegion(rect1, (TipSignal)tip);
     }
 
-    public override int GetMinWidth(DefTable defTable)
+    public override int GetMinWidth(TableWorker<Def> table)
     {
-        return Mathf.Max(base.GetMinWidth(defTable), Def.width);
+        return Mathf.Max(base.GetMinWidth(table), Def.width);
     }
 
     public override int Compare(Def a, Def b)

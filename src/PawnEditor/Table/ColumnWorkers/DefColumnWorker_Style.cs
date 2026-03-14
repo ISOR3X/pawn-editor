@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class ColumnWorker_Style : ColumnWorker_Text
+public class DefColumnWorker_Style : DefColumnWorker_Text
 {
     public override string? GetTextFor(Def thing)
     {
@@ -12,8 +12,8 @@ public class ColumnWorker_Style : ColumnWorker_Text
         return null;
     }
 
-    public override int GetMinWidth(DefTable defTable)
+    public override int GetMinWidth(TableWorker<Def> def)
     {
-        return Mathf.Max(base.GetMinWidth(defTable), 50);
+        return Mathf.Max(base.GetMinWidth(def), 50);
     }
 }

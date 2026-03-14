@@ -10,34 +10,34 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public abstract class DefTable
+public abstract class TableWorker<T> where T : class
 {
     public const float DefaultRowHeight = 30f;
     private const float ScrollbarWidth = 16f;
 
     private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
-    private readonly List<ColumnDef> _cachedColumns = [];
+    private readonly List<ColumnDef<T>> _cachedColumns = [];
     private readonly List<float> _cachedColumnWidths = [];
     private readonly List<float> _cachedRowHeights = [];
     private readonly List<bool> _columnAtMaxWidth = [];
     private readonly List<bool> _columnAtOptimalWidth = [];
-    private readonly TableDef _def;
-    private readonly Def? _default;
+    private readonly TableDef<T> _def;
+    private readonly T? _default;
     private readonly QuickSearchWidget _quickSearchWidget = new();
-    private readonly Func<IEnumerable<Def>> _thingsGetter;
+    private readonly Func<IEnumerable<T>> _thingsGetter;
     private float _cachedHeaderHeight;
     private float _cachedHeightNoScrollbar;
     private Vector2 _cachedSize;
-    private List<Def> _cachedThings = [];
+    private List<T> _cachedThings = [];
     private bool _dirty;
     private Vector2 _scrollPosition;
-    private Def? _selected;
+    private T? _selected;
     private bool _sortDescending;
 
-    protected DefTable(
-        TableDef def,
-        Func<IEnumerable<Def>> thingsGetter,
-        Def? defaultThing = null)
+    protected TableWorker(
+        TableDef<T> def,
+        Func<IEnumerable<T>> thingsGetter,
+        T? defaultThing = null)
     {
         _def = def;
         _default = defaultThing;
@@ -56,7 +56,7 @@ public abstract class DefTable
         {
             var width = index != _cachedColumns.Count - 1
                 ? (int)_cachedColumnWidths[index]
-                : (int)(availableWidth - (double)num2); // Last column takes up all remaining space.
+                : (int)(availableWidth - (double)num2); // The last column takes up all remaining space.
             var rect = new Rect((int)position.x + num2, (int)position.y, width, (int)_cachedHeaderHeight);
             _cachedColumns[index].Worker.DoHeader(rect, this);
             num2 += width;
@@ -166,7 +166,7 @@ public abstract class DefTable
         Verse.Widgets.EndScrollView();
     }
 
-    protected virtual void DoRow(ColumnDef columnDef, Rect rect, Def cachedThing)
+    protected virtual void DoRow(ColumnDef<T> columnDef, Rect rect, T cachedThing)
     {
         columnDef.Worker.DoCell(rect, cachedThing, this);
     }
@@ -193,19 +193,18 @@ public abstract class DefTable
         TableOnGUI(inRect.position);
     }
 
-    protected abstract void OnSelectChanged(Def thing);
+    protected abstract void OnSelectChanged(T thing);
 
     public void SetDirty()
     {
         _dirty = true;
     }
 
-    protected virtual void DoRowHover(Rect inRect, Def thing)
+    protected virtual void DoRowHover(Rect inRect, T thing)
     {
-        UIUtility.DefIconPreview(inRect, thing);
     }
 
-    public void SortBy(ColumnDef? column, bool descending)
+    public void SortBy(ColumnDef<T>? column, bool descending)
     {
         SortingBy = column;
         _sortDescending = descending;
@@ -236,16 +235,16 @@ public abstract class DefTable
     {
         _cachedThings.Clear();
 
-        if (_def.searchColumn?.Worker is ColumnWorker_Text col && _quickSearchWidget.filter.Text != null)
-            _cachedThings.AddRange(_thingsGetter().Where(t =>
-            {
-                var text = col.GetTextFor(t);
-                if (text == null)
-                    return false;
-                return text.ToLower().Contains(_quickSearchWidget.filter.Text.ToLower());
-            }));
-        else
-            _cachedThings.AddRange(_thingsGetter());
+        // if (_def.searchColumn?.Worker is ColumnWorker_Text col && _quickSearchWidget.filter.Text != null)
+        //     _cachedThings.AddRange(_thingsGetter().Where(t =>
+        //     {
+        //         var text = col.GetTextFor(t);
+        //         if (text == null)
+        //             return false;
+        //         return text.ToLower().Contains(_quickSearchWidget.filter.Text.ToLower());
+        //     }));
+        // else
+        //     _cachedThings.AddRange(_thingsGetter());
 
         _cachedThings = LabelSortFunction(_cachedThings).ToList();
         if (SortingBy != null)
@@ -259,12 +258,12 @@ public abstract class DefTable
         _cachedThings = PrimarySortFunction(_cachedThings).ToList();
     }
 
-    protected virtual IEnumerable<Def> LabelSortFunction(IEnumerable<Def> input)
+    protected virtual IEnumerable<T> LabelSortFunction(IEnumerable<T> input)
     {
-        return input.OrderBy(p => p.label);
+        return [];
     }
 
-    protected virtual IEnumerable<Def> PrimarySortFunction(IEnumerable<Def> input)
+    protected virtual IEnumerable<T> PrimarySortFunction(IEnumerable<T> input)
     {
         return input;
     }
@@ -276,22 +275,22 @@ public abstract class DefTable
             _cachedRowHeights.Add(CalculateRowHeight(t));
     }
 
-    private float GetOptimalWidth(ColumnDef column)
+    private float GetOptimalWidth(ColumnDef<T> column)
     {
         return Mathf.Max(column.Worker.GetOptimalWidth(this), 0.0f);
     }
 
-    private float GetMinWidth(ColumnDef column)
+    private float GetMinWidth(ColumnDef<T> column)
     {
         return Mathf.Max(column.Worker.GetMinWidth(this), 0.0f);
     }
 
-    private float GetMaxWidth(ColumnDef column)
+    private float GetMaxWidth(ColumnDef<T> column)
     {
         return Mathf.Max(column.Worker.GetMaxWidth(this), 0.0f);
     }
 
-    private float CalculateRowHeight(Def thing)
+    private float CalculateRowHeight(T thing)
     {
         var height = _def.defaultRowHeight;
         foreach (var col in _cachedColumns)
@@ -311,7 +310,7 @@ public abstract class DefTable
 
     #region Properties
 
-    public ColumnDef? SortingBy { get; private set; }
+    public ColumnDef<T>? SortingBy { get; private set; }
 
     public bool SortingDescending => SortingBy != null && _sortDescending;
 
@@ -342,7 +341,7 @@ public abstract class DefTable
         }
     }
 
-    public List<Def> ThingListForReading
+    public List<T> ThingListForReading
     {
         get
         {
@@ -531,3 +530,6 @@ public abstract class DefTable
 
     #endregion
 }
+
+public abstract class DefTableWorker(TableDef<Def> def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
+    : TableWorker<Def>(def, thingsGetter, defaultThing);

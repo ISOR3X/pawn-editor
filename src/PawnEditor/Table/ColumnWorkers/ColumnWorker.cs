@@ -7,7 +7,7 @@ using Verse.Sound;
 namespace PawnEditor;
 
 [StaticConstructorOnStartup]
-public abstract class ColumnWorker
+public abstract class ColumnWorker<T> where T : class
 {
     protected const int DefaultCellHeight = 30;
     private static readonly Texture2D SortingIcon = ContentFinder<Texture2D>.Get("UI/Icons/Sorting");
@@ -15,7 +15,7 @@ public abstract class ColumnWorker
     private static readonly Texture2D
         SortingDescendingIcon = ContentFinder<Texture2D>.Get("UI/Icons/SortingDescending");
 
-    public required ColumnDef Def;
+    public required ColumnDef<T> Def;
     protected virtual TextAnchor LabelAlignment => TextAnchor.LowerCenter;
 
     protected virtual Color HeaderColor => Color.white;
@@ -23,7 +23,7 @@ public abstract class ColumnWorker
 
     public virtual bool VisibleCurrently => true;
 
-    public virtual void DoHeader(Rect rect, DefTable defTable)
+    public virtual void DoHeader(Rect rect, TableWorker<T> table)
     {
         if (!Def.label.NullOrEmpty())
         {
@@ -43,9 +43,9 @@ public abstract class ColumnWorker
                     .ContractedBy(2f), Def.HeaderIcon);
         }
 
-        if (defTable.SortingBy != null && defTable.SortingBy.Equals(Def))
+        if (table.SortingBy != null && table.SortingBy.Equals(Def))
         {
-            var image = defTable.SortingDescending ? SortingDescendingIcon : SortingIcon;
+            var image = table.SortingDescending ? SortingDescendingIcon : SortingIcon;
             GUI.DrawTexture(
                 new Rect((float)(rect.xMax - (double)image.width - 1.0),
                     (float)(rect.yMax - (double)image.height - 1.0), image.width, image.height), image);
@@ -53,28 +53,28 @@ public abstract class ColumnWorker
 
         if (!Def.HeaderInteractable)
             return;
-        var interactableHeaderRect = GetInteractableHeaderRect(rect, defTable);
+        var interactableHeaderRect = GetInteractableHeaderRect(rect, table);
         if (Mouse.IsOver(interactableHeaderRect))
         {
             Verse.Widgets.DrawHighlight(interactableHeaderRect);
-            var headerTip = GetHeaderTip(defTable);
+            var headerTip = GetHeaderTip(table);
             if (!headerTip.NullOrEmpty())
                 TooltipHandler.TipRegion(interactableHeaderRect, (TipSignal)headerTip);
         }
 
         if (!Verse.Widgets.ButtonInvisible(interactableHeaderRect))
             return;
-        HeaderClicked(rect, defTable);
+        HeaderClicked(rect, table);
     }
 
-    public abstract void DoCell(Rect inRect, Def thing, DefTable defTable);
+    public abstract void DoCell(Rect inRect, T thing, TableWorker<T> table);
 
-    public virtual bool CanGroupWith(Def thing, Def other)
+    public virtual bool CanGroupWith(T thing, T other)
     {
         return false;
     }
 
-    public virtual int GetMinWidth(DefTable defTable)
+    public virtual int GetMinWidth(TableWorker<T> table)
     {
         if (!Def.label.NullOrEmpty())
             // Use TextBlock to restore the previous font state rather than hardcoding Small.
@@ -86,22 +86,22 @@ public abstract class ColumnWorker
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.x) : 1;
     }
 
-    public virtual int GetMaxWidth(DefTable defTable)
+    public virtual int GetMaxWidth(TableWorker<T> table)
     {
         return 1000000;
     }
 
-    public virtual int GetOptimalWidth(DefTable defTable)
+    public virtual int GetOptimalWidth(TableWorker<T> table)
     {
-        return GetMinWidth(defTable);
+        return GetMinWidth(table);
     }
 
-    public virtual int GetMinCellHeight(Def thing)
+    public virtual int GetMinCellHeight(T thing)
     {
-        return (int)DefTable.DefaultRowHeight;
+        return (int)TableWorker<T>.DefaultRowHeight;
     }
 
-    public virtual int GetMinHeaderHeight(DefTable defTable)
+    public virtual int GetMinHeaderHeight(TableWorker<T> table)
     {
         if (!Def.label.NullOrEmpty())
             // Use TextBlock to restore the previous font state rather than hardcoding Small.
@@ -113,36 +113,36 @@ public abstract class ColumnWorker
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.y) : 0;
     }
 
-    public virtual int Compare(Def a, Def b)
+    public virtual int Compare(T a, T b)
     {
         return 0;
     }
 
-    protected virtual Rect GetInteractableHeaderRect(Rect headerRect, DefTable defTable)
+    protected virtual Rect GetInteractableHeaderRect(Rect headerRect, TableWorker<T> table)
     {
         var height = Mathf.Min(25f, headerRect.height);
         return new Rect(headerRect.x, headerRect.yMax - height, headerRect.width, height);
     }
 
-    protected virtual void HeaderClicked(Rect headerRect, DefTable defTable)
+    protected virtual void HeaderClicked(Rect headerRect, TableWorker<T> table)
     {
         if (!Def.sortable || Event.current.shift)
             return;
         if (Event.current.button == 0)
         {
-            if (defTable.SortingBy == null || !defTable.SortingBy.Equals(Def))
+            if (table.SortingBy == null || !table.SortingBy.Equals(Def))
             {
-                defTable.SortBy(Def, true);
+                table.SortBy(Def, true);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
-            else if (defTable.SortingDescending)
+            else if (table.SortingDescending)
             {
-                defTable.SortBy(Def, false);
+                table.SortBy(Def, false);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else
             {
-                defTable.SortBy(null, false);
+                table.SortBy(null, false);
                 SoundDefOf.Tick_Low.PlayOneShotOnCamera();
             }
         }
@@ -150,25 +150,25 @@ public abstract class ColumnWorker
         {
             if (Event.current.button != 1)
                 return;
-            if (defTable.SortingBy == null || !defTable.SortingBy.Equals(Def))
+            if (table.SortingBy == null || !table.SortingBy.Equals(Def))
             {
-                defTable.SortBy(Def, false);
+                table.SortBy(Def, false);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
-            else if (defTable.SortingDescending)
+            else if (table.SortingDescending)
             {
-                defTable.SortBy(null, false);
+                table.SortBy(null, false);
                 SoundDefOf.Tick_Low.PlayOneShotOnCamera();
             }
             else
             {
-                defTable.SortBy(Def, true);
+                table.SortBy(Def, true);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
         }
     }
 
-    protected virtual string GetHeaderTip(DefTable defTable)
+    protected virtual string GetHeaderTip(TableWorker<T> table)
     {
         var stringBuilder = new StringBuilder();
         if (!Def.headerTip.NullOrEmpty())
@@ -187,3 +187,5 @@ public abstract class ColumnWorker
         return stringBuilder.ToString();
     }
 }
+
+public abstract class DefColumnWorker : ColumnWorker<Def>;

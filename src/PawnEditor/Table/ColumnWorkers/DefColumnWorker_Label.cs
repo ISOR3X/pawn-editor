@@ -8,7 +8,7 @@ using Verse;
 namespace PawnEditor;
 
 [Reloadable]
-public class ColumnWorker_Label : ColumnWorker_Text
+public class DefColumnWorker_Label : DefColumnWorker_Text
 {
     private const int LeftMargin = 3;
     private const float IconScale = 1f;
@@ -16,7 +16,7 @@ public class ColumnWorker_Label : ColumnWorker_Text
     private static float labelCacheForWidth = -1f;
     protected override TextAnchor LabelAlignment => TextAnchor.MiddleLeft;
 
-    public override void DoCell(Rect inRect, Def thing, DefTable defTable)
+    public override void DoCell(Rect inRect, Def thing, TableWorker<Def> table)
     {
         if (Def.showIcon)
         {
@@ -50,9 +50,9 @@ public class ColumnWorker_Label : ColumnWorker_Text
         }
     }
 
-    public override int GetMinWidth(DefTable defTable)
+    public override int GetMinWidth(TableWorker<Def> table)
     {
-        return Mathf.Max(base.GetMinWidth(defTable), Def.width);
+        return Mathf.Max(base.GetMinWidth(table), Def.width);
     }
 
     public override string GetTextFor(Def thing)
