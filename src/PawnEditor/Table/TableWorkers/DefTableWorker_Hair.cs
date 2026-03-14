@@ -6,7 +6,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class DefTableWorker_Hair(TableDef<Def> def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
+public class DefTableWorker_Hair(DefTableDef def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
     : DefTableWorker(def, thingsGetter, defaultThing)
 {
     protected override void OnSelectChanged(Def thing)

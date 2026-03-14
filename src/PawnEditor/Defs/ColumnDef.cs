@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public abstract class ColumnDef<T> : Def where T : class
+public abstract class ColumnDef : Def
 {
     public static readonly Vector2 IconSize = new(26f, 26f);
     public int gap;
@@ -21,20 +21,6 @@ public abstract class ColumnDef<T> : Def where T : class
     public bool useLabelShort;
     public int width = 26;
     public int widthPriority = 100;
-    public Type workerClass = typeof(ColumnWorker<T>);
-    [Unsaved] private ColumnWorker<T>? workerInt;
-
-    public ColumnWorker<T> Worker
-    {
-        get
-        {
-            if (workerInt != null) return workerInt;
-            workerInt = (ColumnWorker<T>)Activator.CreateInstance(workerClass);
-            workerInt.Def = this;
-
-            return workerInt;
-        }
-    }
 
     public Texture2D? HeaderIcon
     {
@@ -59,4 +45,19 @@ public abstract class ColumnDef<T> : Def where T : class
     public bool HeaderInteractable => sortable || !headerTip.NullOrEmpty() || headerAlwaysInteractable;
 }
 
-public class DefColumnDef : ColumnDef<Def>;
+public class DefColumnDef : ColumnDef
+{
+    public Type workerClass = typeof(DefColumnWorker);
+    [Unsaved] private ColumnWorker<Def>? workerInt;
+
+    public ColumnWorker<Def> Worker
+    {
+        get
+        {
+            if (workerInt != null) return workerInt;
+            workerInt = (ColumnWorker<Def>)Activator.CreateInstance(workerClass);
+            workerInt.Def = this;
+            return workerInt;
+        }
+    }
+}

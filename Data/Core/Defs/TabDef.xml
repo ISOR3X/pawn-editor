@@ -40,7 +40,7 @@
             <section flexBasis="1">PawnEditor_Portrait</section>
             <flex direction="row">
                 <section flexBasis="0.3" flexGrow="1">PawnEditor_Sex</section>
-                <section flexBasis="0.3" flexGrow="1">PawnEditor_Lifestage</section>
+                <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
                 <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
                 <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
             </flex>

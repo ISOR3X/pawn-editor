@@ -15,7 +15,7 @@ public abstract class ColumnWorker<T> where T : class
     private static readonly Texture2D
         SortingDescendingIcon = ContentFinder<Texture2D>.Get("UI/Icons/SortingDescending");
 
-    public required ColumnDef<T> Def;
+    public required ColumnDef Def;
     protected virtual TextAnchor LabelAlignment => TextAnchor.LowerCenter;
 
     protected virtual Color HeaderColor => Color.white;
@@ -43,7 +43,7 @@ public abstract class ColumnWorker<T> where T : class
                     .ContractedBy(2f), Def.HeaderIcon);
         }
 
-        if (table.SortingBy != null && table.SortingBy.Equals(Def))
+        if (table.SortingBy != null && table.SortingBy == this)
         {
             var image = table.SortingDescending ? SortingDescendingIcon : SortingIcon;
             GUI.DrawTexture(
@@ -130,14 +130,14 @@ public abstract class ColumnWorker<T> where T : class
             return;
         if (Event.current.button == 0)
         {
-            if (table.SortingBy == null || !table.SortingBy.Equals(Def))
+            if (table.SortingBy == null || table.SortingBy != this)
             {
-                table.SortBy(Def, true);
+                table.SortBy(this, true);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else if (table.SortingDescending)
             {
-                table.SortBy(Def, false);
+                table.SortBy(this, false);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else
@@ -150,9 +150,9 @@ public abstract class ColumnWorker<T> where T : class
         {
             if (Event.current.button != 1)
                 return;
-            if (table.SortingBy == null || !table.SortingBy.Equals(Def))
+            if (table.SortingBy == null || table.SortingBy != this)
             {
-                table.SortBy(Def, false);
+                table.SortBy(this, false);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else if (table.SortingDescending)
@@ -162,7 +162,7 @@ public abstract class ColumnWorker<T> where T : class
             }
             else
             {
-                table.SortBy(Def, true);
+                table.SortBy(this, true);
                 SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
         }

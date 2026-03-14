@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class DefColumnWorker_Style : DefColumnWorker_Text
+public class DefColumnWorker_Style : ColumnWorker_Text<Def>
 {
     public override string? GetTextFor(Def thing)
     {

@@ -16,12 +16,12 @@ public abstract class TableWorker<T> where T : class
     private const float ScrollbarWidth = 16f;
 
     private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
-    private readonly List<ColumnDef<T>> _cachedColumns = [];
+    private readonly List<ColumnWorker<T>> _cachedColumns = [];
     private readonly List<float> _cachedColumnWidths = [];
     private readonly List<float> _cachedRowHeights = [];
     private readonly List<bool> _columnAtMaxWidth = [];
     private readonly List<bool> _columnAtOptimalWidth = [];
-    private readonly TableDef<T> _def;
+    private readonly TableDef _def;
     private readonly T? _default;
     private readonly QuickSearchWidget _quickSearchWidget = new();
     private readonly Func<IEnumerable<T>> _thingsGetter;
@@ -35,7 +35,7 @@ public abstract class TableWorker<T> where T : class
     private bool _sortDescending;
 
     protected TableWorker(
-        TableDef<T> def,
+        TableDef def,
         Func<IEnumerable<T>> thingsGetter,
         T? defaultThing = null)
     {
@@ -44,6 +44,12 @@ public abstract class TableWorker<T> where T : class
         _thingsGetter = thingsGetter;
         SetDirty();
     }
+
+    /// <summary>
+    /// All column workers for this table. Implemented by concrete subclasses
+    /// (e.g. <see cref="DefTableWorker"/>) which know the typed column Def list.
+    /// </summary>
+    protected abstract IEnumerable<ColumnWorker<T>> AllColumns { get; }
 
     private void TableOnGUI(Vector2 position)
     {
@@ -58,7 +64,7 @@ public abstract class TableWorker<T> where T : class
                 ? (int)_cachedColumnWidths[index]
                 : (int)(availableWidth - (double)num2); // The last column takes up all remaining space.
             var rect = new Rect((int)position.x + num2, (int)position.y, width, (int)_cachedHeaderHeight);
-            _cachedColumns[index].Worker.DoHeader(rect, this);
+            _cachedColumns[index].DoHeader(rect, this);
             num2 += width;
         }
 
@@ -77,7 +83,7 @@ public abstract class TableWorker<T> where T : class
         for (var columnIndex = 0; columnIndex < _cachedColumns.Count; ++columnIndex)
         {
             var y = 0;
-            var columnDef = _cachedColumns[columnIndex];
+            var columnWorker = _cachedColumns[columnIndex];
             var columnWidth = (int)_cachedColumnWidths[columnIndex];
             for (var thingIndex = 0; thingIndex < _cachedThings.Count; ++thingIndex)
             {
@@ -93,7 +99,7 @@ public abstract class TableWorker<T> where T : class
                 {
                     var x2 = x;
                     var num4 = columnWidth;
-                    if (columnDef.showIcon)
+                    if (columnWorker.Def.showIcon)
                     {
                         x2 += (int)cachedRowHeight;
                         num4 -= (int)cachedRowHeight;
@@ -116,12 +122,12 @@ public abstract class TableWorker<T> where T : class
 
                 if (_selected == cachedThing) Verse.Widgets.DrawHighlightSelected(rect);
 
-                if (columnDef.groupable)
+                if (columnWorker.Def.groupable)
                 {
                     var num4 = thingIndex;
                     for (var index3 = thingIndex + 1;
-                         index3 < _cachedThings.Count && _cachedColumns[columnIndex].Worker
-                             .CanGroupWith(_cachedThings[thingIndex], _cachedThings[index3]);
+                         index3 < _cachedThings.Count &&
+                         _cachedColumns[columnIndex].CanGroupWith(_cachedThings[thingIndex], _cachedThings[index3]);
                          ++index3)
                     {
                         rect.yMax += (int)_cachedRowHeights[index3];
@@ -136,7 +142,7 @@ public abstract class TableWorker<T> where T : class
                         y - (double)_scrollPosition.y > outRect.height ? 1 : 0) == 0)
                 {
                     DoRow(_cachedColumns[columnIndex], rect, cachedThing);
-                    if (columnDef.groupable & flag)
+                    if (columnWorker.Def.groupable & flag)
                         using (new GUIColor(_borderColor))
                         {
                             Verse.Widgets.DrawLineVertical(rect.xMin, rect.yMin, rect.height);
@@ -166,14 +172,14 @@ public abstract class TableWorker<T> where T : class
         Verse.Widgets.EndScrollView();
     }
 
-    protected virtual void DoRow(ColumnDef<T> columnDef, Rect rect, T cachedThing)
+    protected virtual void DoRow(ColumnWorker<T> columnWorker, Rect rect, T cachedThing)
     {
-        columnDef.Worker.DoCell(rect, cachedThing, this);
+        columnWorker.DoCell(rect, cachedThing, this);
     }
 
     public void TableOnGUI(Rect inRect)
     {
-        if (_def.searchColumn != null)
+        if (_def.SearchColumn != null)
         {
             var footerRect = inRect.TakeBottomPart(UIUtility.ButtonHeight);
             inRect.yMax -= 4f;
@@ -204,7 +210,7 @@ public abstract class TableWorker<T> where T : class
     {
     }
 
-    public void SortBy(ColumnDef<T>? column, bool descending)
+    public void SortBy(ColumnWorker<T>? column, bool descending)
     {
         SortingBy = column;
         _sortDescending = descending;
@@ -227,32 +233,37 @@ public abstract class TableWorker<T> where T : class
     private void RecacheColumns()
     {
         _cachedColumns.Clear();
-        foreach (var column in _def.columns.Where(column => column.Worker.VisibleCurrently))
-            _cachedColumns.Add(column);
+        _cachedColumns.AddRange(AllColumns.Where(w => w.VisibleCurrently));
+    }
+
+    protected virtual IEnumerable<T> FilterBySearch(IEnumerable<T> input)
+    {
+        if (_def.SearchColumn is not { } searchCol)
+            return input;
+
+        var searchWorker = _cachedColumns.FirstOrDefault(w => w.Def == searchCol);
+        if (searchWorker is not ColumnWorker_Text<T> textWorker
+            || _quickSearchWidget.filter.Text.NullOrEmpty())
+            return input;
+
+        return input.Where(t =>
+        {
+            var text = textWorker.GetTextFor(t);
+            return text != null && text.IndexOf(_quickSearchWidget.filter.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+        });
     }
 
     private void RecacheThings()
     {
         _cachedThings.Clear();
-
-        // if (_def.searchColumn?.Worker is ColumnWorker_Text col && _quickSearchWidget.filter.Text != null)
-        //     _cachedThings.AddRange(_thingsGetter().Where(t =>
-        //     {
-        //         var text = col.GetTextFor(t);
-        //         if (text == null)
-        //             return false;
-        //         return text.ToLower().Contains(_quickSearchWidget.filter.Text.ToLower());
-        //     }));
-        // else
-        //     _cachedThings.AddRange(_thingsGetter());
-
+        _cachedThings.AddRange(_thingsGetter());
+        _cachedThings = FilterBySearch(_cachedThings).ToList();
         _cachedThings = LabelSortFunction(_cachedThings).ToList();
+        
         if (SortingBy != null)
         {
-            if (_sortDescending)
-                _cachedThings.SortStable((arg1, arg2) => SortingBy.Worker.Compare(arg1, arg2));
-            else
-                _cachedThings.SortStable((a, b) => SortingBy.Worker.Compare(b, a));
+            var sortMult = SortingDescending ? -1 : 1;
+            _cachedThings.SortStable((a, b) => SortingBy.Compare(a, b) * sortMult);
         }
 
         _cachedThings = PrimarySortFunction(_cachedThings).ToList();
@@ -260,7 +271,7 @@ public abstract class TableWorker<T> where T : class
 
     protected virtual IEnumerable<T> LabelSortFunction(IEnumerable<T> input)
     {
-        return [];
+        return input;
     }
 
     protected virtual IEnumerable<T> PrimarySortFunction(IEnumerable<T> input)
@@ -275,32 +286,29 @@ public abstract class TableWorker<T> where T : class
             _cachedRowHeights.Add(CalculateRowHeight(t));
     }
 
-    private float GetOptimalWidth(ColumnDef<T> column)
+    private float GetOptimalWidth(ColumnWorker<T> column)
     {
-        return Mathf.Max(column.Worker.GetOptimalWidth(this), 0.0f);
+        return Mathf.Max(column.GetOptimalWidth(this), 0.0f);
     }
 
-    private float GetMinWidth(ColumnDef<T> column)
+    private float GetMinWidth(ColumnWorker<T> column)
     {
-        return Mathf.Max(column.Worker.GetMinWidth(this), 0.0f);
+        return Mathf.Max(column.GetMinWidth(this), 0.0f);
     }
 
-    private float GetMaxWidth(ColumnDef<T> column)
+    private float GetMaxWidth(ColumnWorker<T> column)
     {
-        return Mathf.Max(column.Worker.GetMaxWidth(this), 0.0f);
+        return Mathf.Max(column.GetMaxWidth(this), 0.0f);
     }
 
     private float CalculateRowHeight(T thing)
     {
-        var height = _def.defaultRowHeight;
-        foreach (var col in _cachedColumns)
-            height = Mathf.Max(height, col.Worker.GetMinCellHeight(thing));
-        return height;
+        return _cachedColumns.Aggregate(_def.defaultRowHeight, (current, col) => Mathf.Max(current, col.GetMinCellHeight(thing)));
     }
 
     private float CalculateHeaderHeight()
     {
-        return _cachedColumns.Aggregate(0.0f, (current, t) => Mathf.Max(current, t.Worker.GetMinHeaderHeight(this)));
+        return _cachedColumns.Aggregate(0.0f, (current, t) => Mathf.Max(current, t.GetMinHeaderHeight(this)));
     }
 
     private float CalculateTotalRequiredHeight()
@@ -310,7 +318,7 @@ public abstract class TableWorker<T> where T : class
 
     #region Properties
 
-    public ColumnDef<T>? SortingBy { get; private set; }
+    public ColumnWorker<T>? SortingBy { get; private set; }
 
     public bool SortingDescending => SortingBy != null && _sortDescending;
 
@@ -391,9 +399,8 @@ public abstract class TableWorker<T> where T : class
         out bool noMoreFreeSpace)
     {
         _columnAtOptimalWidth.Clear();
-        var cols = _cachedColumns;
-        for (var index = 0; index < cols.Count; ++index)
-            _columnAtOptimalWidth.Add(_cachedColumnWidths[index] >= (double)GetOptimalWidth(cols[index]));
+        for (var index = 0; index < _cachedColumns.Count; ++index)
+            _columnAtOptimalWidth.Add(_cachedColumnWidths[index] >= (double)GetOptimalWidth(_cachedColumns[index]));
         var num1 = 0;
         bool flag1;
         bool flag2;
@@ -406,13 +413,13 @@ public abstract class TableWorker<T> where T : class
                 break;
             }
 
-            var a = cols.Where((_, index) => !_columnAtOptimalWidth[index]).Aggregate(float.MinValue,
-                (current, t) => Mathf.Max(current, t.widthPriority));
+            var a = _cachedColumns.Where((_, index) => !_columnAtOptimalWidth[index]).Aggregate(float.MinValue,
+                (current, t) => Mathf.Max(current, t.Def.widthPriority));
 
             var optimalWidth = 0.0f;
             for (var index = 0; index < _cachedColumnWidths.Count; ++index)
-                if (!_columnAtOptimalWidth[index] && Mathf.Approximately(cols[index].widthPriority, a))
-                    optimalWidth += GetOptimalWidth(cols[index]);
+                if (!_columnAtOptimalWidth[index] && Mathf.Approximately(_cachedColumns[index].Def.widthPriority, a))
+                    optimalWidth += GetOptimalWidth(_cachedColumns[index]);
 
             var remainingWidth = totalAvailableSpaceForColumns - usedWidth;
             flag1 = false;
@@ -421,14 +428,14 @@ public abstract class TableWorker<T> where T : class
             {
                 if (_columnAtOptimalWidth[index]) continue;
 
-                if (!Mathf.Approximately(cols[index].widthPriority, a))
+                if (!Mathf.Approximately(_cachedColumns[index].Def.widthPriority, a))
                 {
                     flag1 = true;
                 }
                 else
                 {
-                    var usableWidth = remainingWidth * GetOptimalWidth(cols[index]) / optimalWidth;
-                    var num5 = GetOptimalWidth(cols[index]) - _cachedColumnWidths[index];
+                    var usableWidth = remainingWidth * GetOptimalWidth(_cachedColumns[index]) / optimalWidth;
+                    var num5 = GetOptimalWidth(_cachedColumns[index]) - _cachedColumnWidths[index];
                     if (usableWidth >= (double)num5)
                     {
                         usableWidth = num5;
@@ -468,7 +475,7 @@ public abstract class TableWorker<T> where T : class
         for (var index = 0; index < cols.Count; ++index)
         {
             _columnAtMaxWidth.Add(_cachedColumnWidths[index] >= (double)GetMaxWidth(cols[index]));
-            sumWidthPriority += cols[index].widthPriority;
+            sumWidthPriority += cols[index].Def.widthPriority;
         }
 
         var num1 = 0;
@@ -488,7 +495,7 @@ public abstract class TableWorker<T> where T : class
             {
                 if (_columnAtMaxWidth[index]) continue;
 
-                var num4 = remainingWidth * cols[index].widthPriority / sumWidthPriority;
+                var num4 = remainingWidth * cols[index].Def.widthPriority / sumWidthPriority;
                 var num5 = GetMaxWidth(cols[index]) - _cachedColumnWidths[index];
                 if (num4 >= (double)num5)
                 {
@@ -522,14 +529,16 @@ public abstract class TableWorker<T> where T : class
 
     private void DistributeRemainingWidthProportionallyAboveMax(float toDistribute)
     {
-        var cols = _cachedColumns;
-        var num = cols.Sum(t => Mathf.Max(GetOptimalWidth(t), 1f));
-        for (var index = 0; index < cols.Count; ++index)
-            _cachedColumnWidths[index] += toDistribute * Mathf.Max(GetOptimalWidth(cols[index]), 1f) / num;
+        var num = _cachedColumns.Sum(t => Mathf.Max(GetOptimalWidth(t), 1f));
+        for (var index = 0; index < _cachedColumns.Count; ++index)
+            _cachedColumnWidths[index] += toDistribute * Mathf.Max(GetOptimalWidth(_cachedColumns[index]), 1f) / num;
     }
 
     #endregion
 }
 
-public abstract class DefTableWorker(TableDef<Def> def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
-    : TableWorker<Def>(def, thingsGetter, defaultThing);
+public abstract class DefTableWorker(DefTableDef def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
+    : TableWorker<Def>(def, thingsGetter, defaultThing)
+{
+    protected override IEnumerable<ColumnWorker<Def>> AllColumns => def.columns.Select(c => c.Worker);
+}

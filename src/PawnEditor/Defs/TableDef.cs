@@ -4,15 +4,21 @@ using Verse;
 
 namespace PawnEditor;
 
-public abstract class TableDef<T> : Def where T : class
+public abstract class TableDef : Def
 {
-    public required List<ColumnDef<T>> columns;
     public float defaultRowHeight = 30f;
     public bool doAlternateStyle = false;
     public bool highlightSelected = true;
-    public ColumnDef<T>? searchColumn;
     public bool showSearchBar = true;
-    public Type workerClass = typeof(TableWorker<T>);
+
+    public virtual ColumnDef? SearchColumn => null;
 }
 
-public class DefTableDef : TableDef<Def>;
+public class DefTableDef : TableDef
+{
+    public required List<DefColumnDef> columns;
+    public DefColumnDef? searchColumn;
+    public Type workerClass = typeof(DefTableWorker);
+
+    public override ColumnDef? SearchColumn => searchColumn;
+}

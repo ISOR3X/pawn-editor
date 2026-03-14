@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class DefColumnWorker_ContentSource : DefColumnWorker_Text
+public class DefColumnWorker_ContentSource : ColumnWorker_Text<Def>
 {
     protected override TextAnchor Anchor => TextAnchor.MiddleLeft;
     protected override Color CellColor => ColoredText.SubtleGrayColor;

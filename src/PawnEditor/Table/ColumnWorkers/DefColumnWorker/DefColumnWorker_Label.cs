@@ -8,7 +8,7 @@ using Verse;
 namespace PawnEditor;
 
 [Reloadable]
-public class DefColumnWorker_Label : DefColumnWorker_Text
+public class DefColumnWorker_Label : ColumnWorker_Text<Def>
 {
     private const int LeftMargin = 3;
     private const float IconScale = 1f;
@@ -59,6 +59,4 @@ public class DefColumnWorker_Label : DefColumnWorker_Text
     {
         return thing.label.CapitalizeFirst();
     }
-
-    // public override int GetOptimalWidth(Table table) => Mathf.Clamp(50, GetMinWidth(table), GetMaxWidth(table));
 }
