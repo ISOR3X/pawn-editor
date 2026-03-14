@@ -52,6 +52,7 @@
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="AppearanceUtility.cs" />
         <Compile Include="Defs\ColumnDef.cs"/>
         <Compile Include="Defs\ColumnDefOf.cs"/>
         <Compile Include="Defs\KeyBindDefOf.cs"/>
@@ -76,19 +77,18 @@
         <Compile Include="Pawn\PawnLister.cs"/>
         <Compile Include="Pawn\PawnLocation.cs"/>
         <Compile Include="Pawn\PawnUtility.cs"/>
-        <Compile Include="Sections\Appearance\AppearanceUtility.cs"/>
         <Compile Include="Sections\Appearance\SectionWorker_Beard.cs"/>
         <Compile Include="Sections\Appearance\SectionWorker_Hair.cs"/>
-        <Compile Include="Sections\Appearance\SectionWorker_AppearanceHeader.cs"/>
         <Compile Include="Sections\Appearance\SectionWorker_HairColor.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Lifetage.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Portrait.cs"/>
         <Compile Include="Sections\Appearance\SectionWorker_Race.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Sex.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_ShapeBody.cs"/>
-        <Compile Include="Sections\Appearance\SectionWorker_AppearanceTattoos.cs"/>
+        <Compile Include="Sections\Appearance\SectionWorker_TattooBody.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_ShapeHead.cs"/>
         <Compile Include="Sections\Appearance\SectionWorker_SkinColor.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_TattooFace.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Xenotype.cs" />
         <Compile Include="Sections\Bio\SectionWorker_Abilities.cs"/>
         <Compile Include="Sections\Bio\SectionWorker_Age.cs"/>
@@ -99,7 +99,7 @@
         <Compile Include="Sections\Bio\SectionWorker_Info.cs"/>
         <Compile Include="Sections\Bio\SectionWorker_Name.cs"/>
         <Compile Include="Sections\Bio\SectionWorker_Traits.cs"/>
-        <Compile Include="Sections\Gear\SectionWorker_GearBasic.cs"/>
+        <Compile Include="Sections\Gear\SectionWorker_Apparel.cs" />
         <Compile Include="Sections\SectionWorker.cs"/>
         <Compile Include="Settings.cs"/>
         <Compile Include="Table\ColumnWorkers\ColumnWorker.cs"/>
@@ -112,6 +112,8 @@
         <Compile Include="Table\DefTable.cs"/>
         <Compile Include="Table\DefTable_Hair.cs"/>
         <Compile Include="Table\DefTable_Tattoos.cs"/>
+        <Compile Include="Table\GenColumn.cs" />
+        <Compile Include="Table\GenTable.cs" />
         <Compile Include="Table\PawnColumnWorkers\PawnColumnWorker_Location.cs"/>
         <Compile Include="Table\PawnColumnWorkers\PawnColumnWorker_Type.cs"/>
         <Compile Include="Tabs\TabUtility.cs"/>

@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <PawnEditor.SectionDef>
-        <defName>PawnEditor_BioFavColor</defName>
-        <workerClass>PawnEditor.SectionWorker_BioFavColor</workerClass>
-        <sectionCategory>Humanlike</sectionCategory>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_FavColor</defName>
+        <workerClass>PawnEditor.SectionWorker_FavColor</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_TattooFace</defName>
+        <workerClass>PawnEditor.SectionWorker_TattooFace</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_TattooBody</defName>
+        <workerClass>PawnEditor.SectionWorker_TattooBody</workerClass>
     </PawnEditor.SectionDef>
 </Defs>
