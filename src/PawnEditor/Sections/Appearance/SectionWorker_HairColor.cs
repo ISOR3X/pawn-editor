@@ -1,8 +1,9 @@
-﻿using Verse;
+﻿using HotSwap;
+using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public class SectionWorker_HairColor(SectionDef def) : SectionWorker(def)
 {
     private float _hairColorHeight = 30f;

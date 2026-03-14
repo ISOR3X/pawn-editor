@@ -1,34 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-    <PawnEditor.DefColumnDef Name="Label">
-        <defName>PawnEditor_Label</defName>
+    <!-- DefColumnDefs -->
+    <PawnEditor.DefColumnDef>
+        <defName>PawnEditor_DefLabel</defName>
         <workerClass>PawnEditor.DefColumnWorker_Label</workerClass>
         <widthPriority>400</widthPriority>
     </PawnEditor.DefColumnDef>
-    <PawnEditor.DefColumnDef Name="LabelWithIcon" ParentName="Label">
-        <defName>PawnEditor_LabelWithIcon</defName>
+    <PawnEditor.DefColumnDef>
+        <defName>PawnEditor_DefIcon</defName>
+        <workerClass>PawnEditor.DefColumnWorker_Icon</workerClass>
         <iconBackground>true</iconBackground>
-        <showIcon>true</showIcon>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
-        <defName>PawnEditor_ContentSource</defName>
+        <defName>PawnEditor_DefContentSource</defName>
         <sortable>true</sortable>
         <label>source</label>
         <workerClass>PawnEditor.DefColumnWorker_ContentSource</workerClass>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
-        <defName>PawnEditor_Gender</defName>
+        <defName>PawnEditor_DefGender</defName>
         <sortable>true</sortable>
         <label>gender</label>
         <headerTip>The gender preference for this hair.</headerTip>
         <workerClass>PawnEditor.DefColumnWorker_Gender</workerClass>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
-        <defName>PawnEditor_Style</defName>
+        <defName>PawnEditor_DefStyle</defName>
         <sortable>true</sortable>
         <widthPriority>200</widthPriority>
         <label>style</label>
         <workerClass>PawnEditor.DefColumnWorker_Style</workerClass>
     </PawnEditor.DefColumnDef>
+    <!-- ThingColumnDefs -->
+    <PawnEditor.ThingColumnDef>
+        <defName>PawnEditor_ThingLabel</defName>
+        <workerClass>PawnEditor.ThingColumnWorker_Label</workerClass>
+        <widthPriority>400</widthPriority>
+    </PawnEditor.ThingColumnDef>
+    <PawnEditor.ThingColumnDef>
+        <defName>PawnEditor_ThingIcon</defName>
+        <workerClass>PawnEditor.ThingColumnWorker_Icon</workerClass>
+    </PawnEditor.ThingColumnDef>
+    <PawnEditor.ThingColumnDef>
+        <defName>PawnEditor_ThingInfo</defName>
+        <workerClass>PawnEditor.ThingColumnWorker_Info</workerClass>
+    </PawnEditor.ThingColumnDef>
+    <PawnEditor.ThingColumnDef>
+        <defName>PawnEditor_ThingMass</defName>
+        <label>mass</label>
+        <sortable>true</sortable>
+        <workerClass>PawnEditor.ThingColumnWorker_Mass</workerClass>
+    </PawnEditor.ThingColumnDef>
+    <PawnEditor.ThingColumnDef>
+        <defName>PawnEditor_ThingStuff</defName>
+        <label>stuff</label>
+        <sortable>true</sortable>
+        <workerClass>PawnEditor.ThingColumnWorker_Stuff</workerClass>
+    </PawnEditor.ThingColumnDef>
 </Defs>

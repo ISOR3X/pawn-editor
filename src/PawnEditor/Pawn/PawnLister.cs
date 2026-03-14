@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HotSwap;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public static class PawnLister
 {
     private static readonly Dictionary<FactionKey, List<Pawn>> PawnsByFactionTemporary = new();

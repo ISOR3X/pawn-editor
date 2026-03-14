@@ -1,31 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
-using RimWorld;
 using Verse;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_Apparal : SectionWorker
+public class SectionWorker_Apparel(SectionDef def) : SectionWorker(def)
 {
     private const int RowCount = 11;
     private const float RowHeight = 30f;
-    private readonly DefTableWorker _hairDefTable;
 
-    public SectionWorker_Apparal(SectionDef def) : base(def)
+    private readonly ThingTableWorker _apparelTable = (ThingTableWorker)Activator.CreateInstance(
+        TableDefOf.PawnEditor_Apparel.workerClass,
+        TableDefOf.PawnEditor_Apparel,
+        (Func<IEnumerable<Thing>>)GetCurrentApparel,
+        null);
+
+    private Pawn? _lastPawn;
+
+    private static IEnumerable<Thing> GetCurrentApparel()
     {
-        var hairs = DefDatabase<HairDef>.AllDefs;
-        _hairDefTable = (DefTableWorker_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Hairs.workerClass,
-            TableDefOf.PawnEditor_Hairs, (Func<IEnumerable<Def>>)(() => hairs), HairDefOf.Bald);
+        var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
+        return pawn?.apparel.WornApparel.Cast<Thing>() ?? [];
     }
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        listing.LabelH2("Hair");
-        var hairTableRect =
-            listing.GetRect(_hairDefTable.HeaderHeight + (RowCount + 1) * RowHeight + UIUtility.ButtonHeight + 4f);
-        _hairDefTable.TableOnGUI(hairTableRect);
+        if (_lastPawn != pawn)
+        {
+            _lastPawn = pawn;
+            _apparelTable.SetDirty();
+        }
+
+        listing.LabelH2("Apparel");
+        var tableRect = listing.GetRect(
+            _apparelTable.HeaderHeight + (RowCount + 1) * RowHeight + UIUtility.ButtonHeight + 4f);
+        _apparelTable.TableOnGUI(tableRect);
     }
 }

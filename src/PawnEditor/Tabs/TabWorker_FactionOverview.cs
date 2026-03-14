@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public class TabWorker_FactionOverview(TabDef def) : TabWorker_Faction(def)
 {
     private readonly PawnTable _pawnTable = (PawnTable)Activator.CreateInstance(

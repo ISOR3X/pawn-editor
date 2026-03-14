@@ -3,14 +3,8 @@ using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
-public class TabWorker_PawnBio : TabWorker_Pawn
+public static class QuickActions
 {
-    public TabWorker_PawnBio(TabDef def) : base(def)
-    {
-    }
-
-
     [QuickAction("PawnEditor_Bio", "Teleport pawn to specific location on the current map")]
     private static void TeleportToMapSpecific()
     {

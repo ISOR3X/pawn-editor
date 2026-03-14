@@ -54,7 +54,6 @@
     <ItemGroup>
         <Compile Include="AppearanceUtility.cs" />
         <Compile Include="Defs\ColumnDef.cs"/>
-        <Compile Include="Defs\ColumnDefOf.cs"/>
         <Compile Include="Defs\KeyBindDefOf.cs"/>
         <Compile Include="Defs\PawnTableDefOf.cs"/>
         <Compile Include="Defs\SectionDef.cs"/>
@@ -63,90 +62,96 @@
         <Compile Include="Defs\TableDefOf.cs"/>
         <Compile Include="Extensions\Listing_Standard.cs"/>
         <Compile Include="Extensions\Rect.cs"/>
-        <Compile Include="External\Hotswap.cs"/>
-        <Compile Include="External\Required.cs"/>
-        <Compile Include="FactionUtility.cs"/>
-        <Compile Include="Harmony\Patch_WindowResizer.cs"/>
-        <Compile Include="Layout\DefLeafNode.cs"/>
-        <Compile Include="Layout\FlexLayoutHelper.cs"/>
-        <Compile Include="Layout\FlexLayoutNode.cs"/>
-        <Compile Include="Layout\FlexLayoutEngine.cs"/>
-        <Compile Include="Layout\LayoutNode.cs"/>
-        <Compile Include="QuickAction\QuickActionAttribute.cs"/>
-        <Compile Include="QuickAction\QuickActionUtility.cs"/>
-        <Compile Include="Pawn\PawnLister.cs"/>
-        <Compile Include="Pawn\PawnLocation.cs"/>
-        <Compile Include="Pawn\PawnUtility.cs"/>
-        <Compile Include="Sections\Appearance\SectionWorker_Beard.cs"/>
-        <Compile Include="Sections\Appearance\SectionWorker_Hair.cs"/>
+        <Compile Include="External\Required.cs" />
+        <Compile Include="FactionUtility.cs" />
+        <Compile Include="Harmony\Patch_WindowResizer.cs" />
+        <Compile Include="Layout\DefLeafNode.cs" />
+        <Compile Include="Layout\FlexLayoutHelper.cs" />
+        <Compile Include="Layout\FlexLayoutNode.cs" />
+        <Compile Include="Layout\FlexLayoutEngine.cs" />
+        <Compile Include="Layout\LayoutNode.cs" />
+        <Compile Include="QuickAction\QuickActionAttribute.cs" />
+        <Compile Include="QuickAction\QuickActions.cs" />
+        <Compile Include="QuickAction\QuickActionUtility.cs" />
+        <Compile Include="Pawn\PawnLister.cs" />
+        <Compile Include="Pawn\PawnLocation.cs" />
+        <Compile Include="Pawn\PawnUtility.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_Beard.cs" />
+        <Compile Include="Sections\Appearance\SectionWorker_Hair.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_HairColor.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Lifetage.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Portrait.cs"/>
+        <Compile Include="Sections\Appearance\SectionWorker_Portrait.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Race.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Sex.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_ShapeBody.cs"/>
+        <Compile Include="Sections\Appearance\SectionWorker_ShapeBody.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_TattooBody.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_ShapeHead.cs"/>
+        <Compile Include="Sections\Appearance\SectionWorker_ShapeHead.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_SkinColor.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_TattooFace.cs" />
         <Compile Include="Sections\Appearance\SectionWorker_Xenotype.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Abilities.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Age.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Skills.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Backstory.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_FavColor.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Faction.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Info.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Name.cs"/>
-        <Compile Include="Sections\Bio\SectionWorker_Traits.cs"/>
+        <Compile Include="Sections\Bio\SectionWorker_Abilities.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Age.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Skills.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Backstory.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_FavColor.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Faction.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Info.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Name.cs" />
+        <Compile Include="Sections\Bio\SectionWorker_Traits.cs" />
         <Compile Include="Sections\Gear\SectionWorker_Apparel.cs" />
-        <Compile Include="Sections\SectionWorker.cs"/>
-        <Compile Include="Settings.cs"/>
+        <Compile Include="Sections\SectionWorker.cs" />
+        <Compile Include="Settings.cs" />
         <Compile Include="Table\ColumnWorkers\ColumnWorker.cs" />
         <Compile Include="Table\ColumnWorkers\ColumnWorker_Text.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorker\DefColumnWorker_ContentSource.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorker\DefColumnWorker_Gender.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorker\DefColumnWorker_Icon.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorker\DefColumnWorker_Label.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorker\DefColumnWorker_Style.cs" />
-        <Compile Include="Table\PawnColumnWorkers\PawnColumnWorker_Location.cs"/>
-        <Compile Include="Table\PawnColumnWorkers\PawnColumnWorker_Type.cs"/>
-        <Compile Include="Table\TableWorkers\DefTableWorker_Hair.cs" />
+        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_ContentSource.cs" />
+        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Gender.cs" />
+        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Label.cs" />
+        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Icon.cs" />
+        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Style.cs" />
+        <Compile Include="Table\ColumnWorkers\ColumnWorker_Icon.cs" />
+        <Compile Include="Table\ColumnWorkers\PawnColumnWorkers\PawnColumnWorker_Location.cs" />
+        <Compile Include="Table\ColumnWorkers\PawnColumnWorkers\PawnColumnWorker_Type.cs" />
+        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Icon.cs" />
+        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Info.cs" />
+        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Label.cs" />
+        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Mass.cs" />
+        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Stuff.cs" />
+        <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker_Hair.cs" />
         <Compile Include="Table\TableWorkers\TableWorker.cs" />
-        <Compile Include="Tabs\TabUtility.cs"/>
-        <Compile Include="Tabs\TabWorker.cs"/>
-        <Compile Include="Tabs\TabWorker_Faction.cs"/>
-        <Compile Include="Tabs\TabWorker_Pawn.cs"/>
-        <Compile Include="Tabs\TabWorker_PawnAppearance.cs"/>
-        <Compile Include="Tabs\TabWorker_PawnBio.cs"/>
-        <Compile Include="Tabs\TabWorker_FactionOverview.cs"/>
-        <Compile Include="TexPawnEditor.cs"/>
-        <Compile Include="UI\Components\Cards.cs"/>
-        <Compile Include="UI\Components\Carrousel.cs"/>
-        <Compile Include="UI\Components\InspectPane.cs"/>
-        <Compile Include="UI\Components\Widgets.cs"/>
-        <Compile Include="UI\GUIColor.cs"/>
-        <Compile Include="UI\UIUtility.cs"/>
-        <Compile Include="Utility.cs"/>
-        <Compile Include="Windows\Dialog_ColorPicker.cs"/>
-        <Compile Include="Windows\FloatWindow.cs"/>
-        <Compile Include="Windows\FloatWindowAlignment.cs"/>
-        <Compile Include="Windows\FloatWindow_NamePawn.cs"/>
-        <Compile Include="Window_Editor.cs"/>
-        <Compile Include="Harmony\Patch_OpenEditor.cs"/>
-        <Compile Include="PawnEditorMod.cs"/>
-        <Compile Include="Window_EditorUtility.cs"/>
+        <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker.cs" />
+        <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker_Apparel.cs" />
+        <Compile Include="Tabs\TabUtility.cs" />
+        <Compile Include="Tabs\TabWorker.cs" />
+        <Compile Include="Tabs\TabWorker_Faction.cs" />
+        <Compile Include="Tabs\TabWorker_Pawn.cs" />
+        <Compile Include="Tabs\TabWorker_FactionOverview.cs" />
+        <Compile Include="TexPawnEditor.cs" />
+        <Compile Include="UI\Components\Cards.cs" />
+        <Compile Include="UI\Components\Carrousel.cs" />
+        <Compile Include="UI\Components\InspectPane.cs" />
+        <Compile Include="UI\Components\Widgets.cs" />
+        <Compile Include="UI\GUIColor.cs" />
+        <Compile Include="UI\UIUtility.cs" />
+        <Compile Include="Utility.cs" />
+        <Compile Include="Windows\Dialog_ColorPicker.cs" />
+        <Compile Include="Windows\FloatWindow.cs" />
+        <Compile Include="Windows\FloatWindowAlignment.cs" />
+        <Compile Include="Windows\FloatWindow_NamePawn.cs" />
+        <Compile Include="Window_Editor.cs" />
+        <Compile Include="Harmony\Patch_OpenEditor.cs" />
+        <Compile Include="PawnEditorMod.cs" />
+        <Compile Include="Window_EditorUtility.cs" />
     </ItemGroup>
     <ItemGroup>
-        <Publicize Include="Assembly-CSharp"/>
+        <Publicize Include="Assembly-CSharp" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta"/>
-        <PackageReference Include="Lib.Harmony" Version="2.4.2"/>
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta" />
+        <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!--    <Target Name="Deploy" AfterTargets="Build">-->

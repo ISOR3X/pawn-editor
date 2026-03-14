@@ -112,14 +112,6 @@ public abstract class TableWorker<T> where T : class
                 var cachedThing = _cachedThings[thingIndex];
                 var flag = false;
 
-                if (Verse.Widgets.ButtonInvisible(rect))
-                {
-                    if (_selected != cachedThing && _def.highlightSelected)
-                        _selected = cachedThing;
-                    else if (_default != null) _selected = _default;
-                    if (_selected != null) OnSelectChanged(_selected);
-                }
-
                 if (_selected == cachedThing) Verse.Widgets.DrawHighlightSelected(rect);
 
                 if (columnWorker.Def.groupable)
@@ -148,6 +140,11 @@ public abstract class TableWorker<T> where T : class
                             Verse.Widgets.DrawLineVertical(rect.xMin, rect.yMin, rect.height);
                             Verse.Widgets.DrawLineVertical(rect.xMax, rect.yMin, rect.height);
                         }
+                }
+
+                if (Verse.Widgets.ButtonInvisible(rect))
+                {
+                    OnRowClicked(cachedThing);
                 }
 
                 y += (int)rect.height;
@@ -201,6 +198,14 @@ public abstract class TableWorker<T> where T : class
 
     protected abstract void OnSelectChanged(T thing);
 
+    protected virtual void OnRowClicked(T thing)
+    {
+        if (_selected != thing && _def.highlightSelected)
+            _selected = thing;
+        else if (_default != null) _selected = _default;
+        if (_selected != null) OnSelectChanged(_selected);
+    }
+
     public void SetDirty()
     {
         _dirty = true;
@@ -249,7 +254,8 @@ public abstract class TableWorker<T> where T : class
         return input.Where(t =>
         {
             var text = textWorker.GetTextFor(t);
-            return text != null && text.IndexOf(_quickSearchWidget.filter.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+            return text != null &&
+                   text.IndexOf(_quickSearchWidget.filter.Text, StringComparison.OrdinalIgnoreCase) >= 0;
         });
     }
 
@@ -259,7 +265,7 @@ public abstract class TableWorker<T> where T : class
         _cachedThings.AddRange(_thingsGetter());
         _cachedThings = FilterBySearch(_cachedThings).ToList();
         _cachedThings = LabelSortFunction(_cachedThings).ToList();
-        
+
         if (SortingBy != null)
         {
             var sortMult = SortingDescending ? -1 : 1;
@@ -303,7 +309,8 @@ public abstract class TableWorker<T> where T : class
 
     private float CalculateRowHeight(T thing)
     {
-        return _cachedColumns.Aggregate(_def.defaultRowHeight, (current, col) => Mathf.Max(current, col.GetMinCellHeight(thing)));
+        return _cachedColumns.Aggregate(_def.defaultRowHeight,
+            (current, col) => Mathf.Max(current, col.GetMinCellHeight(thing)));
     }
 
     private float CalculateHeaderHeight()
@@ -471,11 +478,10 @@ public abstract class TableWorker<T> where T : class
     {
         _columnAtMaxWidth.Clear();
         var sumWidthPriority = 0;
-        var cols = _cachedColumns;
-        for (var index = 0; index < cols.Count; ++index)
+        for (var index = 0; index < _cachedColumns.Count; ++index)
         {
-            _columnAtMaxWidth.Add(_cachedColumnWidths[index] >= (double)GetMaxWidth(cols[index]));
-            sumWidthPriority += cols[index].Def.widthPriority;
+            _columnAtMaxWidth.Add(_cachedColumnWidths[index] >= (double)GetMaxWidth(_cachedColumns[index]));
+            sumWidthPriority += _cachedColumns[index].Def.widthPriority;
         }
 
         var num1 = 0;
@@ -491,12 +497,12 @@ public abstract class TableWorker<T> where T : class
 
             var remainingWidth = totalAvailableSpaceForColumns - usedWidth;
             flag = false;
-            for (var index = 0; index < cols.Count; ++index)
+            for (var index = 0; index < _cachedColumns.Count; ++index)
             {
                 if (_columnAtMaxWidth[index]) continue;
 
-                var num4 = remainingWidth * cols[index].Def.widthPriority / sumWidthPriority;
-                var num5 = GetMaxWidth(cols[index]) - _cachedColumnWidths[index];
+                var num4 = remainingWidth * _cachedColumns[index].Def.widthPriority / sumWidthPriority;
+                var num5 = GetMaxWidth(_cachedColumns[index]) - _cachedColumnWidths[index];
                 if (num4 >= (double)num5)
                 {
                     num4 = num5;

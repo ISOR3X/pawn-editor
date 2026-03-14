@@ -6,7 +6,7 @@
         <label>Bio</label>
         <priority>0</priority>
         <tabCategory>All</tabCategory>
-        <workerClass>PawnEditor.TabWorker_PawnBio</workerClass>
+        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
             <flex direction="row">
                 <section flexBasis="0.6">PawnEditor_Info</section>
@@ -35,7 +35,7 @@
     <PawnEditor.TabDef>
         <defName>PawnEditor_Appearance</defName>
         <label>Appearance</label>
-        <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>
+        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
             <section flexBasis="1">PawnEditor_Portrait</section>
             <flex direction="row">
@@ -54,17 +54,14 @@
                 <section flexBasis="0.5" flexGrow="1">PawnEditor_Beard</section>
                 <section flexBasis="1">PawnEditor_HairColor</section>
             </flex>
-            <!--                <li MayRequire="Ludeon.RimWorld.Ideology">PawnEditor_AppearanceTattoos</li>-->
-            <!--                <li MayRequire="Ludeon.RimWorld.Biotech">PawnEditor_AppearanceXenotype</li>-->
         </layout>
     </PawnEditor.TabDef>
-    <!--    <PawnEditor.TabDef>-->
-    <!--        <defName>PawnEditor_Gear</defName>-->
-    <!--        <label>Gear</label>-->
-    <!--        <workerClass>PawnEditor.TabWorker_PawnAppearance</workerClass>-->
-    <!--        <sections>-->
-    <!--            <li>PawnEditor_AppearanceHeader</li>-->
-    <!--            <li>PawnEditor_GearBasic</li>-->
-    <!--        </sections>-->
-    <!--    </PawnEditor.TabDef>-->
+    <PawnEditor.TabDef>
+        <defName>PawnEditor_Gear</defName>
+        <label>Gear</label>
+        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
+        <layout>
+            <section>PawnEditor_Apparel</section>
+        </layout>
+    </PawnEditor.TabDef>
 </Defs>

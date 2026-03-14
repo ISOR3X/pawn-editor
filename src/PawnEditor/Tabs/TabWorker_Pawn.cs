@@ -8,7 +8,7 @@ namespace PawnEditor;
 
 [HotSwappable]
 [StaticConstructorOnStartup]
-public abstract class TabWorker_Pawn(TabDef def) : TabWorker(def)
+public class TabWorker_Pawn(TabDef def) : TabWorker(def)
 {
     private float _viewRectHeight = 5000;
 

@@ -1,9 +1,10 @@
-﻿using PawnEditor.Extensions;
+﻿using HotSwap;
+using PawnEditor.Extensions;
 using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)

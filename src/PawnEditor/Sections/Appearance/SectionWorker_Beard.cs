@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
@@ -7,7 +8,7 @@ using Verse;
 
 namespace PawnEditor;
 
-[Reloadable]
+[HotSwappable]
 public class SectionWorker_Beard : SectionWorker
 {
     private const int RowCount = 11;

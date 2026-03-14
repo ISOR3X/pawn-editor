@@ -61,3 +61,20 @@ public class DefColumnDef : ColumnDef
         }
     }
 }
+
+public class ThingColumnDef : ColumnDef
+{
+    public Type workerClass = typeof(ThingColumnWorker);
+    [Unsaved] private ColumnWorker<Thing>? workerInt;
+
+    public ColumnWorker<Thing> Worker
+    {
+        get
+        {
+            if (workerInt != null) return workerInt;
+            workerInt = (ColumnWorker<Thing>)Activator.CreateInstance(workerClass);
+            workerInt.Def = this;
+            return workerInt;
+        }
+    }
+}

@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
+    <!-- DefTableDefs -->
     <PawnEditor.DefTableDef>
         <defName>PawnEditor_Hairs</defName>
         <workerClass>PawnEditor.DefTableWorker_Hair</workerClass>
-        <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
+        <searchColumn>PawnEditor_DefLabel</searchColumn>
         <columns>
-            <li>PawnEditor_LabelWithIcon</li>
-            <li>PawnEditor_Gender</li>
-            <li>PawnEditor_Style</li>
-            <li>PawnEditor_ContentSource</li>
+            <li>PawnEditor_DefIcon</li>
+            <li>PawnEditor_DefLabel</li>
+            <li>PawnEditor_DefGender</li>
+            <li>PawnEditor_DefStyle</li>
+            <li>PawnEditor_DefContentSource</li>
         </columns>
     </PawnEditor.DefTableDef>
     <PawnEditor.DefTableDef>
         <defName>PawnEditor_Beards</defName>
         <workerClass>PawnEditor.DefTableWorker_Hair</workerClass>
-        <!-- <defaultRowHeight>60</defaultRowHeight> -->
-        <searchColumn>PawnEditor_LabelWithIcon</searchColumn>
+        <searchColumn>PawnEditor_DefLabel</searchColumn>
         <columns>
-            <li>PawnEditor_LabelWithIcon</li>
-            <li>PawnEditor_Style</li>
-            <li>PawnEditor_ContentSource</li>
+            <li>PawnEditor_DefIcon</li>
+            <li>PawnEditor_DefLabel</li>
+            <li>PawnEditor_DefStyle</li>
+            <li>PawnEditor_DefContentSource</li>
         </columns>
     </PawnEditor.DefTableDef>
+    <!-- ThingTableDefs -->
+    <PawnEditor.ThingTableDef>
+        <defName>PawnEditor_Apparel</defName>
+        <workerClass>PawnEditor.ThingTableWorker_Apparel</workerClass>
+        <searchColumn>PawnEditor_ThingLabel</searchColumn>
+        <columns>
+            <li>PawnEditor_ThingIcon</li>
+            <li>PawnEditor_ThingLabel</li>
+            <li>PawnEditor_ThingStuff</li>
+            <li>PawnEditor_ThingMass</li>
+            <li>PawnEditor_ThingInfo</li>
+        </columns>
+    </PawnEditor.ThingTableDef>
 </Defs>

@@ -16,7 +16,7 @@ public abstract class ColumnWorker<T> where T : class
         SortingDescendingIcon = ContentFinder<Texture2D>.Get("UI/Icons/SortingDescending");
 
     public required ColumnDef Def;
-    protected virtual TextAnchor LabelAlignment => TextAnchor.LowerCenter;
+    protected virtual TextAnchor HeaderLabelAlignment => TextAnchor.LowerCenter;
 
     protected virtual Color HeaderColor => Color.white;
     protected virtual GameFont HeaderFont => GameFont.Small;
@@ -27,7 +27,7 @@ public abstract class ColumnWorker<T> where T : class
     {
         if (!Def.label.NullOrEmpty())
         {
-            using (new TextBlock(HeaderFont, LabelAlignment, false))
+            using (new TextBlock(HeaderFont, HeaderLabelAlignment, false))
             {
                 var rect1 = rect;
                 rect1.y += 3f;
@@ -77,11 +77,10 @@ public abstract class ColumnWorker<T> where T : class
     public virtual int GetMinWidth(TableWorker<T> table)
     {
         if (!Def.label.NullOrEmpty())
-            // Use TextBlock to restore the previous font state rather than hardcoding Small.
+        {
             using (new TextBlock(HeaderFont))
-            {
                 return Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
-            }
+        }
 
         return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.x) : 1;
     }
@@ -133,18 +132,17 @@ public abstract class ColumnWorker<T> where T : class
             if (table.SortingBy == null || table.SortingBy != this)
             {
                 table.SortBy(this, true);
-                SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else if (table.SortingDescending)
             {
                 table.SortBy(this, false);
-                SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else
             {
                 table.SortBy(null, false);
-                SoundDefOf.Tick_Low.PlayOneShotOnCamera();
             }
+
+            SoundDefOf.Tick_Low.PlayOneShotOnCamera();
         }
         else
         {
@@ -153,18 +151,17 @@ public abstract class ColumnWorker<T> where T : class
             if (table.SortingBy == null || table.SortingBy != this)
             {
                 table.SortBy(this, false);
-                SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
             else if (table.SortingDescending)
             {
                 table.SortBy(null, false);
-                SoundDefOf.Tick_Low.PlayOneShotOnCamera();
             }
             else
             {
                 table.SortBy(this, true);
-                SoundDefOf.Tick_High.PlayOneShotOnCamera();
             }
+
+            SoundDefOf.Tick_High.PlayOneShotOnCamera();
         }
     }
 
@@ -189,3 +186,5 @@ public abstract class ColumnWorker<T> where T : class
 }
 
 public abstract class DefColumnWorker : ColumnWorker<Def>;
+
+public abstract class ThingColumnWorker : ColumnWorker<Thing>;

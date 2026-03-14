@@ -8,7 +8,6 @@ using static Verse.UnityGUIBugsFixer;
 namespace PawnEditor;
 
 [StaticConstructorOnStartup]
-[Reloadable]
 public static partial class Widgets
 {
     public static void SectionSeparator(Rect inRect, string label)

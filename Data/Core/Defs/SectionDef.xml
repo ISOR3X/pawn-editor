@@ -77,4 +77,9 @@
         <defName>PawnEditor_Lifestage</defName>
         <workerClass>PawnEditor.SectionWorker_Lifestage</workerClass>
     </PawnEditor.SectionDef>
+    <!-- Gear -->
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_Apparel</defName>
+        <workerClass>PawnEditor.SectionWorker_Apparel</workerClass>
+    </PawnEditor.SectionDef>
 </Defs>

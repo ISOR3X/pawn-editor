@@ -5,7 +5,7 @@ using Verse;
 namespace PawnEditor;
 
 [StaticConstructorOnStartup]
-public class DefColumnWorker_Gender : DefColumnWorker_Icon
+public class DefColumnWorker_Gender : ColumnWorker_Icon<Def>
 {
     private static readonly Texture2D MaleUsually = ContentFinder<Texture2D>.Get("UI/Icons/Gender/MaleUsually");
     private static readonly Texture2D FemaleUsually = ContentFinder<Texture2D>.Get("UI/Icons/Gender/FemaleUsually");
