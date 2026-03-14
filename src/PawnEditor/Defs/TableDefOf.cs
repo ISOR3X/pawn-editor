@@ -13,6 +13,8 @@ public static class TableDefOf
     [MayRequireIdeology] public static readonly DefTableDef PawnEditor_BodyTattoos = null!;
 
     public static readonly ThingTableDef PawnEditor_Apparel = null!;
+    public static readonly ThingTableDef PawnEditor_Equipment = null!;
+    public static readonly ThingTableDef PawnEditor_Inventory = null!;
 
     static TableDefOf()
     {

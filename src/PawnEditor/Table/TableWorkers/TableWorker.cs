@@ -196,11 +196,12 @@ public abstract class TableWorker<T> where T : class
         TableOnGUI(inRect.position);
     }
 
-    protected abstract void OnSelectChanged(T thing);
+    protected virtual void OnSelectChanged(T thing) { }
 
     protected virtual void OnRowClicked(T thing)
     {
-        if (_selected != thing && _def.highlightSelected)
+        if (!_def.highlightSelected) return;
+        if (_selected != thing)
             _selected = thing;
         else if (_default != null) _selected = _default;
         if (_selected != null) OnSelectChanged(_selected);

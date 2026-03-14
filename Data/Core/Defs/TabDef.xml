@@ -61,7 +61,9 @@
         <label>Gear</label>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
+            <section>PawnEditor_Equipment</section>
             <section>PawnEditor_Apparel</section>
+            <section>PawnEditor_Inventory</section>
         </layout>
     </PawnEditor.TabDef>
 </Defs>

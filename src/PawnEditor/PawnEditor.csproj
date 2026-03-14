@@ -99,7 +99,11 @@
         <Compile Include="Sections\Bio\SectionWorker_Name.cs" />
         <Compile Include="Sections\Bio\SectionWorker_Traits.cs" />
         <Compile Include="Sections\Gear\SectionWorker_Apparel.cs" />
+        <Compile Include="Sections\Gear\SectionWorker_Equipment.cs" />
+        <Compile Include="Sections\Gear\SectionWorker_Inventory.cs" />
         <Compile Include="Sections\SectionWorker.cs" />
+        <Compile Include="Sections\SectionWorker_DefTable.cs" />
+        <Compile Include="Sections\SectionWorker_ThingTable.cs" />
         <Compile Include="Settings.cs" />
         <Compile Include="Table\ColumnWorkers\ColumnWorker.cs" />
         <Compile Include="Table\ColumnWorkers\ColumnWorker_Text.cs" />
@@ -119,7 +123,6 @@
         <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker_Hair.cs" />
         <Compile Include="Table\TableWorkers\TableWorker.cs" />
         <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker.cs" />
-        <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker_Apparel.cs" />
         <Compile Include="Tabs\TabUtility.cs" />
         <Compile Include="Tabs\TabWorker.cs" />
         <Compile Include="Tabs\TabWorker_Faction.cs" />

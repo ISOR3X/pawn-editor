@@ -27,9 +27,36 @@
     </PawnEditor.DefTableDef>
     <!-- ThingTableDefs -->
     <PawnEditor.ThingTableDef>
-        <defName>PawnEditor_Apparel</defName>
-        <workerClass>PawnEditor.ThingTableWorker_Apparel</workerClass>
+        <defName>PawnEditor_Equipment</defName>
+        <workerClass>PawnEditor.ThingTableWorker</workerClass>
         <searchColumn>PawnEditor_ThingLabel</searchColumn>
+        <highlightSelected>false</highlightSelected>
+        <columns>
+            <li>PawnEditor_ThingIcon</li>
+            <li>PawnEditor_ThingLabel</li>
+            <li>PawnEditor_ThingStuff</li>
+            <li>PawnEditor_ThingMass</li>
+            <li>PawnEditor_ThingInfo</li>
+        </columns>
+    </PawnEditor.ThingTableDef>
+    <PawnEditor.ThingTableDef>
+        <defName>PawnEditor_Apparel</defName>
+        <workerClass>PawnEditor.ThingTableWorker</workerClass>
+        <searchColumn>PawnEditor_ThingLabel</searchColumn>
+        <highlightSelected>false</highlightSelected>
+        <columns>
+            <li>PawnEditor_ThingIcon</li>
+            <li>PawnEditor_ThingLabel</li>
+            <li>PawnEditor_ThingStuff</li>
+            <li>PawnEditor_ThingMass</li>
+            <li>PawnEditor_ThingInfo</li>
+        </columns>
+    </PawnEditor.ThingTableDef>
+    <PawnEditor.ThingTableDef>
+        <defName>PawnEditor_Inventory</defName>
+        <workerClass>PawnEditor.ThingTableWorker</workerClass>
+        <searchColumn>PawnEditor_ThingLabel</searchColumn>
+        <highlightSelected>false</highlightSelected>
         <columns>
             <li>PawnEditor_ThingIcon</li>
             <li>PawnEditor_ThingLabel</li>

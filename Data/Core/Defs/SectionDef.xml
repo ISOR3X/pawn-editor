@@ -79,7 +79,15 @@
     </PawnEditor.SectionDef>
     <!-- Gear -->
     <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_Equipment</defName>
+        <workerClass>PawnEditor.SectionWorker_Equipment</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
         <defName>PawnEditor_Apparel</defName>
         <workerClass>PawnEditor.SectionWorker_Apparel</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+        <defName>PawnEditor_Inventory</defName>
+        <workerClass>PawnEditor.SectionWorker_Inventory</workerClass>
     </PawnEditor.SectionDef>
 </Defs>

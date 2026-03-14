@@ -1,28 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using PawnEditor.Extensions;
+using HotSwap;
 using RimWorld;
 using Verse;
 
 namespace PawnEditor;
 
-public class SectionWorker_TattooFace : SectionWorker
+[HotSwappable]
+public class SectionWorker_TattooFace(SectionDef def) : SectionWorker_DefTable(def)
 {
-    private readonly DefTableWorker _faceDefTable;
+    protected override DefTableDef TableDef => TableDefOf.PawnEditor_Hairs;
+    protected override string Label => "Face";
+    protected override Def? DefaultDef => TattooDefOf.NoTattoo_Face;
 
-    public SectionWorker_TattooFace(SectionDef def) : base(def)
-    {
-        IEnumerable<TattooDef> allTattoos = DefDatabase<TattooDef>.AllDefsListForReading;
-        var faceTattoos = allTattoos.Where(t => t.tattooType == TattooType.Face);
-        _faceDefTable = (DefTableWorker_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Hairs.workerClass,
-            TableDefOf.PawnEditor_Hairs, (Func<IEnumerable<Def>>)(() => faceTattoos), TattooDefOf.NoTattoo_Face);
-    }
-
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
-    {
-        var faceTattooRect = listing.GetRect(_faceDefTable.HeaderHeight + 12 * 30f + UIUtility.ButtonHeight + 4f);
-        listing.LabelH2("Face");
-        _faceDefTable.TableOnGUI(faceTattooRect);
-    }
+    protected override IEnumerable<Def> GetDefs() =>
+        DefDatabase<TattooDef>.AllDefsListForReading.Where(t => t.tattooType == TattooType.Face);
 }

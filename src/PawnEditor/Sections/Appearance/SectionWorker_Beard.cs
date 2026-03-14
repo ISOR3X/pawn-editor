@@ -1,41 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HotSwap;
-using PawnEditor.Extensions;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_Beard : SectionWorker
+public class SectionWorker_Beard(SectionDef def) : SectionWorker_DefTable(def)
 {
-    private const int RowCount = 11;
-    private const float RowHeight = 30f;
-    private readonly TableWorker<Def> _beardDefTable;
+    protected override DefTableDef TableDef => TableDefOf.PawnEditor_Beards;
+    protected override string Label => "Beard";
+    protected override Def? DefaultDef => BeardDefOf.NoBeard;
 
-    public SectionWorker_Beard(SectionDef def) : base(def)
-    {
-        var beards = DefDatabase<BeardDef>.AllDefs;
-        _beardDefTable = (DefTableWorker_Hair)Activator.CreateInstance(TableDefOf.PawnEditor_Beards.workerClass,
-            TableDefOf.PawnEditor_Beards, (Func<IEnumerable<Def>>)(() => beards), BeardDefOf.NoBeard);
-    }
+    protected override IEnumerable<Def> GetDefs() => DefDatabase<BeardDef>.AllDefs;
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
-    {
-        listing.LabelH2("Beard");
-
-        var beardTableRect =
-            listing.GetRect(_beardDefTable.HeaderHeight + (RowCount + 1) * RowHeight + UIUtility.ButtonHeight + 4f);
-
-        if (pawn.style.CanWantBeard || PawnEditorMod.Settings.Restriction == Settings.RestrictionMode.None)
-            _beardDefTable.TableOnGUI(beardTableRect);
-        else
-            using (new TextBlock(TextAnchor.MiddleCenter))
-            {
-                Verse.Widgets.Label(beardTableRect,
-                    $"No beards available for {pawn.Name.ToStringShort}".Colorize(ColoredText.SubtleGrayColor));
-            }
-    }
+    protected override bool CanShowTable(Pawn pawn) =>
+        pawn.style.CanWantBeard || PawnEditorMod.Settings.Restriction == Settings.RestrictionMode.None;
 }

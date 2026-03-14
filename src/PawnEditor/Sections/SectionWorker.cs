@@ -27,6 +27,7 @@ public abstract class SectionWorker(SectionDef def)
     }
 
 
+    // TODO: Call this
     public virtual void OnThingChanged(Pawn pawn)
     {
     }
