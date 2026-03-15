@@ -7,20 +7,18 @@ namespace PawnEditor;
 public abstract class ColumnDef : Def
 {
     public static readonly Vector2 IconSize = new(26f, 26f);
-    public int gap;
     public bool groupable;
     public bool headerAlwaysInteractable;
     [NoTranslate] public string? headerIcon;
     public Vector2 headerIconSize;
     [Unsaved] private Texture2D? headerIconTex;
     [MustTranslate] public string? headerTip;
-    public bool iconBackground;
-    public bool ignoreWhenCalculatingOptimalTableSize;
     public bool showIcon;
     public bool sortable;
-    public bool useLabelShort;
-    public int width = 26;
-    public int widthPriority = 100;
+
+    public float flexBasis = 0;
+    public float flexGrow = 0;
+    public float maxWidth = float.MaxValue;
 
     public Texture2D? HeaderIcon
     {

@@ -36,12 +36,7 @@ public abstract class ColumnWorker_Text<T> : ColumnWorker<T> where T : class
             return;
         TooltipHandler.TipRegion(inRect, (TipSignal)tip);
     }
-
-    public override int GetMinWidth(TableWorker<T> table)
-    {
-        return Mathf.Max(base.GetMinWidth(table), Def.width);
-    }
-
+    
     public override int Compare(T a, T b)
     {
         return comparer.Compare(GetTextFor(a), GetTextFor(b));

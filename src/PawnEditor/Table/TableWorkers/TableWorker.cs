@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -312,21 +313,6 @@ public abstract class TableWorker<T> where T : class
             _cachedRowHeights.Add(CalculateRowHeight(t));
     }
 
-    private float GetOptimalWidth(ColumnWorker<T> column)
-    {
-        return Mathf.Max(column.GetOptimalWidth(this), 0.0f);
-    }
-
-    private float GetMinWidth(ColumnWorker<T> column)
-    {
-        return Mathf.Max(column.GetMinWidth(this), 0.0f);
-    }
-
-    private float GetMaxWidth(ColumnWorker<T> column)
-    {
-        return Mathf.Max(column.GetMaxWidth(this), 0.0f);
-    }
-
     private float CalculateRowHeight(T thing)
     {
         return _cachedColumns.Aggregate(RowHeight,
@@ -387,180 +373,26 @@ public abstract class TableWorker<T> where T : class
 
     #endregion
 
-    #region COLUMN WIDTHS CACHING
 
     private void RecacheColumnWidths()
     {
-        var totalAvailableSpaceForColumns = _cachedSize.x - ScrollbarWidth;
-        RecacheColumnWidths_StartWithMinWidths(out var minWidthsSum);
-        if (Mathf.Approximately(minWidthsSum, totalAvailableSpaceForColumns))
-            return;
-        if (minWidthsSum > (double)totalAvailableSpaceForColumns)
-        {
-            SubtractProportionally(minWidthsSum - totalAvailableSpaceForColumns, minWidthsSum);
-        }
-        else
-        {
-            RecacheColumnWidths_DistributeUntilOptimal(totalAvailableSpaceForColumns, ref minWidthsSum,
-                out var noMoreFreeSpace);
-            if (noMoreFreeSpace)
-                return;
-            RecacheColumnWidths_DistributeAboveOptimal(totalAvailableSpaceForColumns, ref minWidthsSum);
-        }
-    }
+        var available = _cachedSize.x - ScrollbarWidth;
 
-    private void RecacheColumnWidths_StartWithMinWidths(out float minWidthsSum)
-    {
-        minWidthsSum = 0.0f;
+        var line = _cachedColumns.Select(col => new LayoutNode<ColumnWorker<T>>
+        {
+            leaf = col,
+            flexBasis = Mathf.Max(col.Def.flexBasis, col.MeasureHeaderWidth()),
+            flexGrow = col.Def.flexGrow,
+            maxWidth = col.Def.maxWidth,
+        }).ToList();
+
+        var widths = FlexLayoutEngine.ResolveWidths(line, available, 0f);
+
+        Log.Message($"available={available}, widths=[{string.Join(", ", widths)}], sum={widths.Sum()}");
+
         _cachedColumnWidths.Clear();
-        foreach (var minWidth in _cachedColumns.Select(GetMinWidth))
-        {
-            _cachedColumnWidths.Add(minWidth);
-            minWidthsSum += minWidth;
-        }
+        _cachedColumnWidths.AddRange(widths);
     }
-
-    private void RecacheColumnWidths_DistributeUntilOptimal(
-        float totalAvailableSpaceForColumns,
-        ref float usedWidth,
-        out bool noMoreFreeSpace)
-    {
-        _columnAtOptimalWidth.Clear();
-        for (var index = 0; index < _cachedColumns.Count; ++index)
-            _columnAtOptimalWidth.Add(_cachedColumnWidths[index] >= (double)GetOptimalWidth(_cachedColumns[index]));
-        var num1 = 0;
-        bool flag1;
-        bool flag2;
-        do
-        {
-            ++num1;
-            if (num1 >= 10000)
-            {
-                Log.Error("Too many iterations.");
-                break;
-            }
-
-            var a = _cachedColumns.Where((_, index) => !_columnAtOptimalWidth[index]).Aggregate(float.MinValue,
-                (current, t) => Mathf.Max(current, t.Def.widthPriority));
-
-            var optimalWidth = 0.0f;
-            for (var index = 0; index < _cachedColumnWidths.Count; ++index)
-                if (!_columnAtOptimalWidth[index] && Mathf.Approximately(_cachedColumns[index].Def.widthPriority, a))
-                    optimalWidth += GetOptimalWidth(_cachedColumns[index]);
-
-            var remainingWidth = totalAvailableSpaceForColumns - usedWidth;
-            flag1 = false;
-            flag2 = false;
-            for (var index = 0; index < _cachedColumnWidths.Count; ++index)
-            {
-                if (_columnAtOptimalWidth[index]) continue;
-
-                if (!Mathf.Approximately(_cachedColumns[index].Def.widthPriority, a))
-                {
-                    flag1 = true;
-                }
-                else
-                {
-                    var usableWidth = remainingWidth * GetOptimalWidth(_cachedColumns[index]) / optimalWidth;
-                    var num5 = GetOptimalWidth(_cachedColumns[index]) - _cachedColumnWidths[index];
-                    if (usableWidth >= (double)num5)
-                    {
-                        usableWidth = num5;
-                        _columnAtOptimalWidth[index] = true;
-                        flag2 = true;
-                    }
-                    else
-                    {
-                        flag1 = true;
-                    }
-
-                    if (usableWidth > 0.0)
-                    {
-                        _cachedColumnWidths[index] += usableWidth;
-                        usedWidth += usableWidth;
-                    }
-                }
-            }
-
-            if (usedWidth >= totalAvailableSpaceForColumns - 0.1f)
-            {
-                noMoreFreeSpace = true;
-                return;
-            }
-        } while (flag1 && flag2);
-
-        noMoreFreeSpace = false;
-    }
-
-    private void RecacheColumnWidths_DistributeAboveOptimal(
-        float totalAvailableSpaceForColumns,
-        ref float usedWidth)
-    {
-        _columnAtMaxWidth.Clear();
-        var sumWidthPriority = 0;
-        for (var index = 0; index < _cachedColumns.Count; ++index)
-        {
-            _columnAtMaxWidth.Add(_cachedColumnWidths[index] >= (double)GetMaxWidth(_cachedColumns[index]));
-            sumWidthPriority += _cachedColumns[index].Def.widthPriority;
-        }
-
-        var num1 = 0;
-        bool flag;
-        do
-        {
-            ++num1;
-            if (num1 >= 10000)
-            {
-                Log.Error("Too many iterations.");
-                return;
-            }
-
-            var remainingWidth = totalAvailableSpaceForColumns - usedWidth;
-            flag = false;
-            for (var index = 0; index < _cachedColumns.Count; ++index)
-            {
-                if (_columnAtMaxWidth[index]) continue;
-
-                var num4 = remainingWidth * _cachedColumns[index].Def.widthPriority / sumWidthPriority;
-                var num5 = GetMaxWidth(_cachedColumns[index]) - _cachedColumnWidths[index];
-                if (num4 >= (double)num5)
-                {
-                    num4 = num5;
-                    _columnAtMaxWidth[index] = true;
-                }
-                else
-                {
-                    flag = true;
-                }
-
-                if (num4 > 0.0)
-                {
-                    _cachedColumnWidths[index] += num4;
-                    usedWidth += num4;
-                }
-            }
-
-            if (usedWidth >= totalAvailableSpaceForColumns - 0.1f)
-                return;
-        } while (flag);
-
-        DistributeRemainingWidthProportionallyAboveMax(totalAvailableSpaceForColumns - usedWidth);
-    }
-
-    private void SubtractProportionally(float toSubtract, float totalUsedWidth)
-    {
-        for (var index = 0; index < _cachedColumnWidths.Count; ++index)
-            _cachedColumnWidths[index] -= toSubtract * _cachedColumnWidths[index] / totalUsedWidth;
-    }
-
-    private void DistributeRemainingWidthProportionallyAboveMax(float toDistribute)
-    {
-        var num = _cachedColumns.Sum(t => Mathf.Max(GetOptimalWidth(t), 1f));
-        for (var index = 0; index < _cachedColumns.Count; ++index)
-            _cachedColumnWidths[index] += toDistribute * Mathf.Max(GetOptimalWidth(_cachedColumns[index]), 1f) / num;
-    }
-
-    #endregion
 }
 
 public abstract class DefTableWorker(DefTableDef def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)

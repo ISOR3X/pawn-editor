@@ -149,7 +149,7 @@ public static class FlexLayoutEngine
         return lines;
     }
 
-    private static float[] ResolveWidths<TLeaf>(
+    internal static float[] ResolveWidths<TLeaf>(
         List<LayoutNode<TLeaf>> line,
         float totalWidth,
         float gap)
@@ -158,7 +158,7 @@ public static class FlexLayoutEngine
         var totalGap = gap * (line.Count - 1);
         var available = totalWidth - totalGap;
 
-        // Distribute space based on flexBasis.
+        // Distribute space based on the flexBasis.
         var remaining = available;
         for (var i = 0; i < line.Count; i++)
         {

@@ -44,16 +44,6 @@ public abstract class ColumnWorker_Icon<T> : ColumnWorker<T> where T : class
         // if (Mouse.IsOver(rect1) && Input.GetMouseButton(0)) PaintedIcon(thing);
     }
 
-    public override int GetMinWidth(TableWorker<T> table)
-    {
-        return Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(table.RowHeight));
-    }
-
-    public override int GetMaxWidth(TableWorker<T> table)
-    {
-        return Mathf.Min(base.GetMaxWidth(table), GetMinWidth(table));
-    }
-
     public override int Compare(T a, T b)
     {
         return GetValueToCompare(a).CompareTo(GetValueToCompare(b));

@@ -74,26 +74,6 @@ public abstract class ColumnWorker<T> where T : class
         return false;
     }
 
-    public virtual int GetMinWidth(TableWorker<T> table)
-    {
-        if (!Def.label.NullOrEmpty())
-        {
-            using (new TextBlock(HeaderFont))
-                return Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
-        }
-
-        return Def.HeaderIcon != null ? Mathf.CeilToInt(Def.HeaderIconSize.x) : 1;
-    }
-
-    public virtual int GetMaxWidth(TableWorker<T> table)
-    {
-        return 1000000;
-    }
-
-    public virtual int GetOptimalWidth(TableWorker<T> table)
-    {
-        return GetMinWidth(table);
-    }
 
     public virtual int GetMinCellHeight(T thing)
     {
@@ -115,6 +95,19 @@ public abstract class ColumnWorker<T> where T : class
     public virtual int Compare(T a, T b)
     {
         return 0;
+    }
+
+    public float MeasureHeaderWidth()
+    {
+        var w = 0;
+        if (!Def.label.NullOrEmpty())
+            using (new TextBlock(HeaderFont))
+                w += Mathf.CeilToInt(Text.CalcSize(Def.LabelCap).x);
+
+        if (Def.HeaderIcon != null)
+            w += Mathf.CeilToInt(Def.HeaderIconSize.x);
+
+        return w + UIUtility.LabelPadding * 2;
     }
 
     protected virtual Rect GetInteractableHeaderRect(Rect headerRect, TableWorker<T> table)
