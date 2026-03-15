@@ -19,6 +19,7 @@ public class ThingColumnWorker_Stuff : ColumnWorker_Text<Thing>
 
     public override void DoCell(Rect inRect, Thing thing, TableWorker<Thing> table)
     {
+        // TODO: Center content in cell.
         if (!IsStuffable(thing) || thing.Stuff == null) return;
         var stuffDef = thing.Stuff;
         Verse.Widgets.DefIcon(inRect.TakeLeftPart(inRect.height).ContractedBy(4f), stuffDef, scale: 1f);

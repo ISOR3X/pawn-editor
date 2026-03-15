@@ -15,7 +15,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
     protected override Window? Owner => Find.WindowStack.WindowOfType<Window_Editor>();
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
     protected override bool UseWidgetWidth => true;
-    private readonly Thing _thing = thing;
+
+    private static readonly string?[] TextfieldBuffers = new string[2];
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -24,26 +25,26 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
             L.Cell(rect =>
             {
                 if (UIUtility.ButtonTextLabeled_WithIcon(rect, "StatsReport_Material".Translate(),
-                        _thing.Stuff.LabelCap, Verse.Widgets.GetIconFor(_thing.Stuff),
-                        _thing.Stuff.stuffProps.color))
+                        thing.Stuff.LabelCap, Verse.Widgets.GetIconFor(thing.Stuff),
+                        thing.Stuff.stuffProps.color))
                 {
-                    Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(_thing.def)
+                    Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(thing.def)
                         .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
                             {
-                                _thing.SetStuffDirect(stuff);
-                                _thing.SetColor(stuff.stuffProps.color);
-                                _thing.Notify_ColorChanged();
+                                thing.SetStuffDirect(stuff);
+                                thing.SetColor(stuff.stuffProps.color);
+                                thing.Notify_ColorChanged();
                             },
                             Verse.Widgets.GetIconFor(stuff),
                             stuff.stuffProps.color
                         ))
                         .ToList()));
                 }
-            }).When(_thing.def.MadeFromStuff),
+            }).When(thing.def.MadeFromStuff),
             // Quality
             L.Cell(rect =>
             {
-                var compQuality = _thing.TryGetComp<CompQuality>();
+                var compQuality = thing.TryGetComp<CompQuality>();
                 if (UIUtility.ButtonTextLabeled(rect, "Quality", compQuality.Quality.GetLabel().CapitalizeFirst()))
                 {
                     Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories.Select(quality =>
@@ -51,15 +52,15 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                                 () => { compQuality.SetQuality(quality, ArtGenerationContext.Outsider); }))
                         .ToList()));
                 }
-            }).When(_thing.HasComp<CompQuality>()),
+            }).When(thing.HasComp<CompQuality>()),
             // Color
             L.Cell(rect =>
             {
-                var apparel = _thing as Apparel;
+                var apparel = thing as Apparel;
                 var widgetRect = UIUtility.RectLabeled(rect, "Color");
                 var colorRect = widgetRect.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
                 var curColor = apparel?.DrawColor ?? Color.white;
-                
+
                 Verse.Widgets.DrawLightHighlight(colorRect);
                 colorRect = colorRect.ContractedBy(2f);
                 Verse.Widgets.DrawRectFast(colorRect, curColor);
@@ -69,39 +70,119 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                     Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel.SetColor(color), curColor,
                         DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList()));
                 }
-                
-            }).When(_thing is Apparel && _thing.HasComp<CompColorable>()),
+            }).When(thing is Apparel && thing.HasComp<CompColorable>()),
             // Style
             L.Cell(rect =>
             {
-                var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == _thing.def).styleDefs;
+                var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def).styleDefs;
                 if (UIUtility.ButtonTextLabeled(rect, "Stat_Thing_StyleLabel".Translate(),
-                        styleOptions.FirstOrDefault(so => so.Key == _thing.GetStyleDef()).Value.LabelCap))
+                        styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef()).Value.LabelCap))
                 {
                     Find.WindowStack.Add(new FloatMenu(styleOptions.Select(style =>
                             new FloatMenuOption(style.Value.LabelCap, () =>
                             {
-                                _thing.SetStyleDef(style.Key);
-                                _thing.Notify_ColorChanged();
+                                thing.SetStyleDef(style.Key);
+                                thing.Notify_ColorChanged();
                             }, style.Value.Icon, Color.white))
                         .Append(new FloatMenuOption("None", () =>
                         {
-                            _thing.SetStyleDef(null);
-                            _thing.Notify_ColorChanged();
+                            thing.SetStyleDef(null);
+                            thing.Notify_ColorChanged();
                         }))
                         .ToList()));
                 }
-            }).When(ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(_thing.def)),
+            }).When(ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def)),
             // Hit points
-            L.Cell(rect => { }),
+            L.Cell(rect =>
+            {
+                var widgetRect = UIUtility.RectLabeled(rect, "Hitpoints");
+
+                float hitPoints = thing.HitPoints;
+                float maxHitPoints = thing.MaxHitPoints;
+
+                thing.HitPoints = Mathf.CeilToInt(Verse.Widgets.HorizontalSlider(widgetRect, thing.HitPoints, 1,
+                    thing.MaxHitPoints, true,
+                    (hitPoints / maxHitPoints).ToStringPercent()));
+            }),
             // Tainted
-            L.Cell(rect => { }).When(_thing is Apparel),
+            L.Cell(rect =>
+            {
+                var widgetRect = UIUtility.RectLabeled(rect, "Tainted")
+                    .CenteredHorizontally(Verse.Widgets.CheckboxSize);
+
+                var apparel = thing as Apparel;
+                var isTainted = apparel!.WornByCorpse;
+
+                Verse.Widgets.Checkbox(widgetRect.position, ref isTainted);
+                if (isTainted != apparel.WornByCorpse) apparel.WornByCorpse = isTainted;
+            }).When(thing is Apparel),
             // Count
-            L.Cell(rect => { }).When(_thing.def.stackLimit > 1),
+            L.Cell(rect =>
+            {
+                var widgetRect = UIUtility.RectLabeled(rect, "Count");
+
+                Widgets.DelayedTextFieldNumeric(widgetRect, thing.stackCount, ref TextfieldBuffers[0], 1,
+                    thing.def.stackLimit, null,
+                    true);
+            }).When(thing.def.stackLimit > 1),
             // Persona traits
-            L.Cell(rect => { }).When(_thing.HasComp<CompBladelinkWeapon>()),
+            L.Cell(rect =>
+            {
+                var widgetRect = UIUtility.RectLabeled(rect, "Traits");
+
+                WeaponTraitDef? toRemove = null;
+                var bladelink = thing.TryGetComp<CompBladelinkWeapon>();
+                var traitOptions = DefDatabase<WeaponTraitDef>.AllDefs.OrderBy(t => !bladelink.CanAddTrait(t))
+                    .Select(weaponTraitDef =>
+                    {
+                        var canAdd = bladelink.CanAddTrait(weaponTraitDef);
+                        return new FloatMenuOption(
+                            weaponTraitDef.LabelCap.Colorize(canAdd ? Color.white : ColoredText.SubtleGrayColor), () =>
+                            {
+                                if (canAdd) bladelink.traits.Add(weaponTraitDef);
+                                else
+                                    Messages.Message(
+                                        "TraitDisallowedByKind".Translate(weaponTraitDef.label, thing.Label),
+                                        MessageTypeDefOf.RejectInput);
+                            });
+                    }).ToList();
+
+                if (Verse.Widgets.ButtonImage(widgetRect.TakeRightPart(WidgetRow.IconSize), TexButton.Add))
+                    Find.WindowStack.Add(new FloatMenu(traitOptions));
+
+                GenUI.DrawElementStack(widgetRect, 22f, bladelink.traits,
+                    delegate(Rect r, WeaponTraitDef weaponTraitDef)
+                    {
+                        GUI.color = CharacterCardUtility.StackElementBackground;
+                        GUI.DrawTexture(r, BaseContent.WhiteTex);
+                        GUI.color = Color.white;
+                        if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
+
+                        Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), weaponTraitDef.LabelCap);
+                        if (Mouse.IsOver(r))
+                        {
+                            TooltipHandler.TipRegion(r, weaponTraitDef.description);
+                            if (Verse.Widgets.ButtonImage(r.RightPartPixels(r.height).ContractedBy(4),
+                                    TexButton.Delete))
+                            {
+                                toRemove = weaponTraitDef;
+                            }
+                        }
+                    }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f, 5f);
+
+                if (toRemove != null) bladelink.traits.Remove(toRemove);
+            }, flexBasis: 1f).When(thing.HasComp<CompBladelinkWeapon>()),
             // Name
-            L.Cell(rect => { }).When(_thing.HasComp<CompGeneratedNames>()),
+            L.Cell(rect =>
+            {
+                var widgetRect = UIUtility.RectLabeled(rect, "Name");
+
+                var name = thing.TryGetComp<CompGeneratedNames>();
+
+                if (Verse.Widgets.ButtonImage(widgetRect.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
+                    name.Initialize(name.Props);
+                name.name = Verse.Widgets.TextField(widgetRect, name.name);
+            }).When(thing.HasComp<CompGeneratedNames>()),
         ], gapX: 24f, wrap: true, childFlexBasis: 0.5f);
 
         using (new TextBlock(GameFont.Small))

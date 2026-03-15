@@ -2,7 +2,7 @@
 
 <Defs>
     <!-- DefTableDefs -->
-    <PawnEditor.DefTableDef>
+    <PawnEditor.DefTableDef Name="DefTableBase">
         <defName>PawnEditor_Hairs</defName>
         <workerClass>PawnEditor.DefTableWorker_Hair</workerClass>
         <searchColumn>PawnEditor_DefLabel</searchColumn>
@@ -14,19 +14,11 @@
             <li>PawnEditor_DefContentSource</li>
         </columns>
     </PawnEditor.DefTableDef>
-    <PawnEditor.DefTableDef>
+    <PawnEditor.DefTableDef ParentName="DefTableBase">
         <defName>PawnEditor_Beards</defName>
-        <workerClass>PawnEditor.DefTableWorker_Hair</workerClass>
-        <searchColumn>PawnEditor_DefLabel</searchColumn>
-        <columns>
-            <li>PawnEditor_DefIcon</li>
-            <li>PawnEditor_DefLabel</li>
-            <li>PawnEditor_DefStyle</li>
-            <li>PawnEditor_DefContentSource</li>
-        </columns>
     </PawnEditor.DefTableDef>
     <!-- ThingTableDefs -->
-    <PawnEditor.ThingTableDef>
+    <PawnEditor.ThingTableDef Name="ThingTableBase">
         <defName>PawnEditor_Equipment</defName>
         <workerClass>PawnEditor.ThingTableWorker</workerClass>
         <searchColumn>PawnEditor_ThingLabel</searchColumn>
@@ -40,31 +32,10 @@
             <li>PawnEditor_ThingInfo</li>
         </columns>
     </PawnEditor.ThingTableDef>
-    <PawnEditor.ThingTableDef>
+    <PawnEditor.ThingTableDef ParentName="ThingTableBase">
         <defName>PawnEditor_Apparel</defName>
-        <workerClass>PawnEditor.ThingTableWorker</workerClass>
-        <searchColumn>PawnEditor_ThingLabel</searchColumn>
-        <highlightSelected>false</highlightSelected>
-        <columns>
-            <li>PawnEditor_ThingIcon</li>
-            <li>PawnEditor_ThingLabel</li>
-            <li>PawnEditor_ThingStuff</li>
-            <li>PawnEditor_ThingMass</li>
-            <li>PawnEditor_ThingEdit</li>
-            <li>PawnEditor_ThingInfo</li>
-        </columns>
     </PawnEditor.ThingTableDef>
-    <PawnEditor.ThingTableDef>
+    <PawnEditor.ThingTableDef ParentName="ThingTableBase">
         <defName>PawnEditor_Inventory</defName>
-        <workerClass>PawnEditor.ThingTableWorker</workerClass>
-        <searchColumn>PawnEditor_ThingLabel</searchColumn>
-        <highlightSelected>false</highlightSelected>
-        <columns>
-            <li>PawnEditor_ThingIcon</li>
-            <li>PawnEditor_ThingLabel</li>
-            <li>PawnEditor_ThingStuff</li>
-            <li>PawnEditor_ThingMass</li>
-            <li>PawnEditor_ThingInfo</li>
-        </columns>
     </PawnEditor.ThingTableDef>
 </Defs>

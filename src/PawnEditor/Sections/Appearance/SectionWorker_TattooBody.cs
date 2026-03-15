@@ -9,7 +9,7 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_TattooBody(SectionDef def) : SectionWorker_DefTable(def)
 {
-    protected override DefTableDef TableDef => TableDefOf.PawnEditor_Beards;
+    protected override DefTableDef TableDef => TableDefOf.PawnEditor_BodyTattoos;
     protected override string Label => "Body";
     protected override Def? DefaultDef => TattooDefOf.NoTattoo_Body;
 

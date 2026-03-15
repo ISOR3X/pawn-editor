@@ -22,13 +22,11 @@
                 <section flexBasis="0.6" flexGrow="1">PawnEditor_Traits</section>
                 <section flexBasis="0.3" flexGrow="1">PawnEditor_Abilities</section>
             </flex>
-            <flex direction="row">
-                <section flexBasis="0.3" flexGrow="0" mayRequire="Ludeon.Rimworld.Ideology">
+            <flex direction="row" childFlexBasis="0.33">
+                <section flexBasis="0.3" flexGrow="0">PawnEditor_Faction</section>
+                <section mayRequire="Ludeon.Rimworld.Ideology">
                     PawnEditor_FavColor
                 </section>
-            </flex>
-            <flex direction="row">
-                <section flexBasis="0.3" flexGrow="0">PawnEditor_Faction</section>
             </flex>
         </layout>
     </PawnEditor.TabDef>
@@ -53,6 +51,10 @@
                 <section>PawnEditor_Hair</section>
                 <section>PawnEditor_Beard</section>
                 <section>PawnEditor_HairColor</section>
+            </flex>
+            <flex direction="row" wrap="true" childFlexBasis="0.5" childFlexGrow="1" mayRequire="Ludeon.Rimworld.Ideology">
+                <section>PawnEditor_TattooBody</section>
+                <section>PawnEditor_TattooFace</section>
             </flex>
         </layout>
     </PawnEditor.TabDef>

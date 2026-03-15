@@ -27,9 +27,8 @@ public static class UIUtility
         bottom = rect.BottomPartPixels(half - padding);
     }
 
-    public static string TruncateWithTooltip(this string label, Rect inRect)
+    public static string TruncateWithTooltip(this string label, Rect inRect, float padding = 16f)
     {
-        const float padding = 16f;
         var lineRect = inRect.TopPartPixels(Text.LineHeight);
         lineRect.y -= Text.LineHeight;
         if (Text.CalcSize(label).x > inRect.width - padding)
@@ -296,7 +295,8 @@ public static class UIUtility
         const float iconSize = 20f;
         const float gap = 4f;
 
-        var width = iconSize + gap + label.GetWidthCached();
+        var l = label.Truncate(rect.width - (iconSize + gap + LabelPadding * 2));
+        var width = iconSize + gap + l.GetWidthCached();
         var remaining = rect.width - width;
 
         var clicked = Verse.Widgets.ButtonInvisible(rect);
@@ -306,7 +306,9 @@ public static class UIUtility
 
         using (new TextBlock(TextAnchor.MiddleLeft))
         {
-            Verse.Widgets.Label(contentRect.TakeLeftPart(label.GetWidthCached()), label);
+            Text.WordWrap = false;
+            Verse.Widgets.Label(contentRect.TakeLeftPart(l.GetWidthCached()), l);
+            Text.WordWrap = true;
         }
 
         contentRect.xMin += gap;
