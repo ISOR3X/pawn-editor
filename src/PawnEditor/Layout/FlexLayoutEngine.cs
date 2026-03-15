@@ -10,9 +10,6 @@ namespace PawnEditor.Layout;
 [HotSwappable]
 public static class FlexLayoutEngine
 {
-    private const float OffscreenOffset = -99999f;
-    private const float Height = 99999f;
-
     public static float Draw<TLeaf>(
         LayoutNode<TLeaf> node,
         Rect rect,
@@ -55,7 +52,7 @@ public static class FlexLayoutEngine
             var lineHeight = 0f;
             for (var j = 0; j < lines[i].Count; j++)
                 lineHeight = Mathf.Max(lineHeight,
-                    Draw(lines[i][j], new Rect(OffscreenOffset, OffscreenOffset, widths[j], Height), runLeaf,
+                    Draw(lines[i][j], new Rect(LayoutEngineUtils.OffscreenOffset, LayoutEngineUtils.OffscreenOffset, widths[j], LayoutEngineUtils.Height), runLeaf,
                         isVisible));
 
             // Drawing pass: now we know the line height
@@ -89,7 +86,7 @@ public static class FlexLayoutEngine
         var totalGrow = active.Sum(c => c.flexGrow);
         var fixedTotal = active.Sum(c => c.flexBasis > 1f ? c.flexBasis : 0f)
                          + gapY * (active.Count - 1);
-        var hasKnownHeight = rect.height < Height;
+        var hasKnownHeight = rect.height < LayoutEngineUtils.Height;
         var remaining = hasKnownHeight
             ? rect.height - fixedTotal
             : 0f;
@@ -103,7 +100,7 @@ public static class FlexLayoutEngine
             else if (hasKnownHeight && c.flexGrow > 0f && totalGrow > 0f)
                 h = c.flexGrow / totalGrow * remaining;
             else
-                h = Draw(c, new Rect(OffscreenOffset, OffscreenOffset, rect.width, Height), runLeaf, isVisible);
+                h = Draw(c, new Rect(LayoutEngineUtils.OffscreenOffset, LayoutEngineUtils.OffscreenOffset, rect.width, LayoutEngineUtils.Height), runLeaf, isVisible);
 
             heights[i] = h;
         }
@@ -189,6 +186,8 @@ public static class FlexLayoutEngine
             return node.leaf == null || isVisible == null || isVisible(node.leaf);
         if (node is FlexLayoutNode<TLeaf> flex)
             return flex.children.Any(c => c.isActive && HasVisibleContent(c, isVisible));
+        if (node is GridLayoutNode<TLeaf> grid)
+            return grid.Children.Any(c => c.isActive && HasVisibleContent(c, isVisible));
         return false;
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using HotSwap;
 using UnityEngine;
 
@@ -18,23 +19,15 @@ public static class FlexLayoutHelper
             gap = gap,
             flexBasis = flexBasis,
             flexGrow = flexGrow,
+            childFlexGrow = childFlexGrow,
+            childFlexBasis = childFlexBasis,
             wrap = wrap,
             gapX = gapX,
             gapY = gapY,
             children = [..children]
         };
 
-        if (childFlexBasis.HasValue || childFlexGrow.HasValue)
-            foreach (var child in node.children)
-            {
-                if (childFlexBasis.HasValue && child.flexBasis == 0f)
-                    child.flexBasis = childFlexBasis.Value;
-                if (childFlexGrow.HasValue && child.flexGrow == 0f)
-                    child.flexGrow = childFlexGrow.Value;
-            }
-
         node.ApplyChildDefaults();
-
         return node;
     }
 
@@ -51,11 +44,12 @@ public static class FlexLayoutHelper
             gapY = gapY,
             flexBasis = flexBasis,
             flexGrow = flexGrow,
+            childFlexGrow = childFlexGrow,
+            childFlexBasis = childFlexBasis,
             children = [..children]
         };
 
         node.ApplyChildDefaults();
-
         return node;
     }
 
@@ -64,8 +58,7 @@ public static class FlexLayoutHelper
         float flexBasis = 0f,
         float flexGrow = 0f,
         float height = UIUtility.ButtonHeight)
-    {
-        return new LayoutNode<Func<Rect, float>>
+        => new()
         {
             flexBasis = flexBasis,
             flexGrow = flexGrow,
@@ -75,11 +68,24 @@ public static class FlexLayoutHelper
                 return height;
             }
         };
-    }
+    
 
     public static LayoutNode<TLeaf> When<TLeaf>(this LayoutNode<TLeaf> node, bool condition)
     {
         node.isActive = condition;
         return node;
     }
+    
+    public static GridLayoutNode<Func<Rect, float>> Grid(
+        GridTrack[] columns,
+        float gapX = 0f,
+        float gapY = 0f,
+        List<LayoutNode<Func<Rect, float>>>? children = null)
+        => new()
+        {
+            Columns = columns,
+            GapX = gapX,
+            GapY = gapY,
+            Children = children ?? [],
+        };
 }
