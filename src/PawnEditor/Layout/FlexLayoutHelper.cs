@@ -10,27 +10,40 @@ public static class FlexLayoutHelper
     public static FlexLayoutNode<Func<Rect, float>> Row(
         LayoutNode<Func<Rect, float>>[] children,
         float gap = 4f, bool wrap = false, float flexBasis = 0f, float flexGrow = 0f, float? gapX = null,
-        float? gapY = null)
+        float? gapY = null, float? childFlexBasis = null, float? childFlexGrow = null)
     {
-        return new FlexLayoutNode<Func<Rect, float>>
+        var node = new FlexLayoutNode<Func<Rect, float>>
         {
             direction = FlexDirection.Row,
             gap = gap,
-            gapX = gapX,
-            gapY = gapY,
-            wrap = wrap,
             flexBasis = flexBasis,
             flexGrow = flexGrow,
+            wrap = wrap,
+            gapX = gapX,
+            gapY = gapY,
             children = [..children]
         };
+
+        if (childFlexBasis.HasValue || childFlexGrow.HasValue)
+            foreach (var child in node.children)
+            {
+                if (childFlexBasis.HasValue && child.flexBasis == 0f)
+                    child.flexBasis = childFlexBasis.Value;
+                if (childFlexGrow.HasValue && child.flexGrow == 0f)
+                    child.flexGrow = childFlexGrow.Value;
+            }
+
+        node.ApplyChildDefaults();
+
+        return node;
     }
 
     public static FlexLayoutNode<Func<Rect, float>> Col(
         LayoutNode<Func<Rect, float>>[] children,
         float gap = 4f, float flexBasis = 0f, float flexGrow = 0f, float? gapX = null,
-        float? gapY = null)
+        float? gapY = null, float? childFlexBasis = null, float? childFlexGrow = null)
     {
-        return new FlexLayoutNode<Func<Rect, float>>
+        var node = new FlexLayoutNode<Func<Rect, float>>
         {
             direction = FlexDirection.Col,
             gap = gap,
@@ -40,6 +53,10 @@ public static class FlexLayoutHelper
             flexGrow = flexGrow,
             children = [..children]
         };
+
+        node.ApplyChildDefaults();
+
+        return node;
     }
 
     public static LayoutNode<Func<Rect, float>> Cell(

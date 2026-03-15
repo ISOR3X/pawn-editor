@@ -47,6 +47,10 @@
         <workerClass>PawnEditor.ThingColumnWorker_Info</workerClass>
     </PawnEditor.ThingColumnDef>
     <PawnEditor.ThingColumnDef>
+        <defName>PawnEditor_ThingEdit</defName>
+        <workerClass>PawnEditor.ThingColumnWorker_Edit</workerClass>
+    </PawnEditor.ThingColumnDef>
+    <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingMass</defName>
         <label>mass</label>
         <sortable>true</sortable>

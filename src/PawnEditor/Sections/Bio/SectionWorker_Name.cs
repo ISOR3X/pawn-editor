@@ -17,8 +17,8 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
         var isHuman = PawnUtility.GetPawnCategory(pawn) is PawnUtility.PawnCategory.Humanlike;
-        var nameRect = listing.RectLabeled("Name");
-        DoNameInputRect(nameRect, pawn, isHuman);
+        listing.LabelH2("Name");
+        DoNameInputRect(listing.GetRect(UIUtility.ButtonHeight), pawn, isHuman);
     }
 
     // REF: CharacterCardUtility.DrawCharacterCard
@@ -29,7 +29,7 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
         {
             var iconRect = inRect.TakeRightPart(WidgetRow.IconSize);
             if (Verse.Widgets.ButtonImage(iconRect.CenteredVertically(WidgetRow.IconSize), TexButton.Add))
-                FloatWindow.ToggleState<FloatWindow_NamePawn>(iconRect);
+                FloatWindow.ToggleState(iconRect, () => new FloatWindow_NamePawn(iconRect));
         }
 
         var thirdWidth = inRect.width / 3f;

@@ -21,7 +21,7 @@ public static class FlexLayoutEngine
     {
         if (node.IsLeaf)
         {
-            Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, new Color(1f, 1f, 1f, 0.1f));
+            // Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, new Color(1f, 1f, 1f, 0.1f));
             return runLeaf(node.leaf!, rect);
         }
 
@@ -132,7 +132,7 @@ public static class FlexLayoutEngine
         {
             var basis = child.flexBasis;
 
-            if (node.wrap && currentLine.Count > 0 && currentBasis + basis > 1f + float.Epsilon)
+            if (node.wrap && currentLine.Count > 0 && currentBasis + basis > 1.001f)
             {
                 lines.Add(currentLine);
                 currentLine = [];

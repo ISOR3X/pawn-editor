@@ -34,6 +34,23 @@ public abstract class TableWorker<T> where T : class
     private T? _selected;
     private bool _sortDescending;
 
+    private float? _rowHeightOverride;
+
+    public float RowHeight
+    {
+        get => _rowHeightOverride ?? _def.defaultRowHeight;
+        set
+        {
+            _rowHeightOverride = value;
+            SetDirty();
+        }
+    }
+
+    public Rect BoundRect
+    {
+        get => new Rect(0, 0, _cachedSize.x, _cachedSize.y);
+    }
+
     protected TableWorker(
         TableDef def,
         Func<IEnumerable<T>> thingsGetter,
@@ -169,9 +186,9 @@ public abstract class TableWorker<T> where T : class
         Verse.Widgets.EndScrollView();
     }
 
-    protected virtual void DoRow(ColumnWorker<T> columnWorker, Rect rect, T cachedThing)
+    protected virtual void DoRow(ColumnWorker<T> columnWorker, Rect cellRect, T cachedThing)
     {
-        columnWorker.DoCell(rect, cachedThing, this);
+        columnWorker.DoCell(cellRect, cachedThing, this);
     }
 
     public void TableOnGUI(Rect inRect)
@@ -184,7 +201,7 @@ public abstract class TableWorker<T> where T : class
             // Potentially because of layout changes:
             // - Close button is added when the search bar is not empty.
             // - Most of the time the table transitions from a scroll view to a regular view.
-            _quickSearchWidget.OnGUI(footerRect.RightPartPixels(150f), SetDirty);
+            _quickSearchWidget.OnGUI(footerRect.RightPartPixels(180f), SetDirty);
         }
 
         if (_cachedSize != inRect.size)
@@ -196,7 +213,9 @@ public abstract class TableWorker<T> where T : class
         TableOnGUI(inRect.position);
     }
 
-    protected virtual void OnSelectChanged(T thing) { }
+    protected virtual void OnSelectChanged(T thing)
+    {
+    }
 
     protected virtual void OnRowClicked(T thing)
     {
@@ -310,7 +329,7 @@ public abstract class TableWorker<T> where T : class
 
     private float CalculateRowHeight(T thing)
     {
-        return _cachedColumns.Aggregate(_def.defaultRowHeight,
+        return _cachedColumns.Aggregate(RowHeight,
             (current, col) => Mathf.Max(current, col.GetMinCellHeight(thing)));
     }
 

@@ -42,7 +42,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                 if (UIUtility.ButtonTextLabeled(rect, "Culture", _selectedCulture!.LabelCap))
                     Find.WindowStack.Add(new FloatMenu(cultures
                         .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
-            }, 0.5f).When(_selectedCulture != null),
+            }).When(_selectedCulture != null),
 
             L.Cell(rect =>
             {
@@ -50,7 +50,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                     Find.WindowStack.Add(new FloatMenu(xenotypes
                         .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
                         .Append(new FloatMenuOption("None", () => _selectedXenotype = null)).ToList()));
-            }, 0.5f).When(ModsConfig.BiotechActive),
+            }).When(ModsConfig.BiotechActive),
 
             L.Cell(rect =>
             {
@@ -59,10 +59,10 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                         new List<Gender> { Gender.Male, Gender.Female }
                             .Select(g => new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
                             .ToList()));
-            }, 0.5f),
+            }),
 
-            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), 0.5f),
-            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), 0.5f),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName)),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick)),
 
             L.Row([
                 L.Cell(rect =>
@@ -87,7 +87,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
                     }
                 }, 0.5f, 1)
             ], flexBasis: 1f)
-        ], gapX: 24f, wrap: true);
+        ], gapX: 24f, wrap: true, childFlexBasis: 0.5f);
 
         using (new TextBlock(GameFont.Small))
         {

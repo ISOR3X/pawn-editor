@@ -9,6 +9,7 @@ namespace PawnEditor;
 public abstract class FloatWindow : Window
 {
     private static readonly Vector2 InitialPositionShift = new(0, 8f);
+    protected virtual bool UseWidgetWidth => false;
     private readonly Rect _boundWidgetRect;
     private Window? _ownerInstance;
 
@@ -27,6 +28,8 @@ public abstract class FloatWindow : Window
     public override void SetInitialSizeAndPosition()
     {
         base.SetInitialSizeAndPosition();
+        if (UseWidgetWidth)
+            windowRect.width = _boundWidgetRect.width;
         windowRect.position = CalculatePositionFromBoundWidget(_boundWidgetRect);
     }
 
@@ -94,7 +97,7 @@ public abstract class FloatWindow : Window
     }
 
 
-    public static void ToggleState<T>(Rect widgetRect) where T : FloatWindow
+    public static void ToggleState<T>(Rect widgetRect, Func<T> factory) where T : FloatWindow
     {
         var window = Find.WindowStack.WindowOfType<T>();
         if (window != null && window.CalculatePositionFromBoundWidget(widgetRect) == window.windowRect.position)
@@ -103,8 +106,7 @@ public abstract class FloatWindow : Window
         }
         else
         {
-            var newWindow = (FloatWindow)Activator.CreateInstance(typeof(T), widgetRect);
-            Find.WindowStack.Add(newWindow);
+            Find.WindowStack.Add(factory());
         }
     }
 }

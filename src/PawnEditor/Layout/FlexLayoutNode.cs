@@ -13,7 +13,7 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
     public float gap = 4f;
     public float? gapX;
     public float? gapY;
-    
+
     public float? childFlexBasis;
     public float? childFlexGrow;
 
@@ -34,14 +34,14 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
             direction = (FlexDirection)Enum.Parse(typeof(FlexDirection), dir, true);
         if (xmlRoot.Attributes?["wrap"]?.Value is { } flexWrap)
             wrap = ParseHelper.FromString<bool>(flexWrap);
-        
+
         if (xmlRoot.Attributes?["gap"]?.Value is { } flexGap)
             gap = ParseHelper.FromString<float>(flexGap);
         if (xmlRoot.Attributes?["gap-x"]?.Value is { } flexGapX)
             gapX = ParseHelper.FromString<float>(flexGapX);
         if (xmlRoot.Attributes?["gap-y"]?.Value is { } flexGapY)
             gapY = ParseHelper.FromString<float>(flexGapY);
-        
+
         if (xmlRoot.Attributes?["childFlexBasis"]?.Value is { } childBasis)
             childFlexBasis = ParseHelper.FromString<float>(childBasis);
         if (xmlRoot.Attributes?["childFlexGrow"]?.Value is { } childGrow)
@@ -51,7 +51,7 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
         {
             if (child is XmlComment) continue;
             var node = Create(child.Name);
-            
+
             // Check if the layout element exists.
             if (node == null)
             {
@@ -60,17 +60,26 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
                     $"[{PawnEditorMod.ModName}] Unknown layout element <{child.Name}> in {xmlRoot.Name}. Known elements: {string.Join(", ", knownElements)}");
                 continue;
             }
+
             if (node is FlexLayoutNode<TLeaf> flex)
                 flex._root = _root ?? this;
-            
-            // Pass through child styles.
-            if (childFlexBasis.HasValue && node.flexBasis == 0f)
-                node.flexBasis = childFlexBasis.Value;
-            if (childFlexGrow.HasValue && node.flexGrow == 0f)
-                node.flexGrow = childFlexGrow.Value;
-            
+
             node.LoadDataFromXmlCustom(child);
             children.Add(node);
+        }
+        
+        // Pass through child styles.
+        ApplyChildDefaults();
+    }
+
+    public void ApplyChildDefaults()
+    {
+        foreach (var child in children)
+        {
+            if (childFlexBasis.HasValue && child.flexBasis == 0f)
+                child.flexBasis = childFlexBasis.Value;
+            if (childFlexGrow.HasValue && child.flexGrow == 0f)
+                child.flexGrow = childFlexGrow.Value;
         }
     }
 }

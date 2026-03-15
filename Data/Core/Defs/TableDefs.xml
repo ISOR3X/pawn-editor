@@ -36,6 +36,7 @@
             <li>PawnEditor_ThingLabel</li>
             <li>PawnEditor_ThingStuff</li>
             <li>PawnEditor_ThingMass</li>
+            <li>PawnEditor_ThingEdit</li>
             <li>PawnEditor_ThingInfo</li>
         </columns>
     </PawnEditor.ThingTableDef>
@@ -49,6 +50,7 @@
             <li>PawnEditor_ThingLabel</li>
             <li>PawnEditor_ThingStuff</li>
             <li>PawnEditor_ThingMass</li>
+            <li>PawnEditor_ThingEdit</li>
             <li>PawnEditor_ThingInfo</li>
         </columns>
     </PawnEditor.ThingTableDef>

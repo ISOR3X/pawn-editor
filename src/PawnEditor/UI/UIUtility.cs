@@ -19,26 +19,7 @@ public static class UIUtility
     public const float LabelPadding = 10f;
     public const float LabelOffset = 24f; // How far a label should be from its widget
     public static readonly Vector2 BottomButtonSize = new(150f, 38f);
-
-
-    public static Rect CenteredVertically(this Rect rect, float height)
-    {
-        var remove = (rect.height - height) / 2;
-        rect.yMax -= remove;
-        rect.yMin += remove;
-        return rect;
-    }
-
-    public static void Indent(ref this Rect rect, float width = 4f)
-    {
-        rect.xMin += width;
-    }
-
-    public static void Gap(ref this Rect rect, float width = 4f)
-    {
-        rect.yMin += width;
-    }
-
+    
     public static void SplitHorizontallyEqual(this Rect rect, out Rect top, out Rect bottom, float padding = 0)
     {
         var half = rect.height / 2;

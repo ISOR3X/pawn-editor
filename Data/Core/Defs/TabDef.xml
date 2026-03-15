@@ -12,10 +12,10 @@
                 <section flexBasis="0.6">PawnEditor_Info</section>
                 <section flexGrow="1">PawnEditor_Portrait</section>
             </flex>
-            <flex direction="row">
+            <flex direction="row" wrap="true">
                 <section flexBasis="0.6">PawnEditor_Name</section>
                 <section flexBasis="0.4">PawnEditor_Age</section>
-                <section flexGrow="1" maxWidth="0.5">PawnEditor_Backstory</section>
+                <section flexBasis="0.1" flexGrow="1" maxWidth="0.5">PawnEditor_Backstory</section>
             </flex>
             <section>PawnEditor_Skills</section>
             <flex direction="row">

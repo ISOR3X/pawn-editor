@@ -34,5 +34,35 @@ public static class Rect_Extension
             rect.xMin += pixels;
             return ret;
         }
+
+
+        public void Indent(float width = 4f)
+        {
+            rect.xMin += width;
+        }
+
+        public void Gap(float width = 4f)
+        {
+            rect.yMin += width;
+        }
+    }
+
+    extension(Rect rect)
+    {
+        public Rect CenteredVertically(float height)
+        {
+            var remove = (rect.height - height) / 2;
+            rect.yMax -= remove;
+            rect.yMin += remove;
+            return rect;
+        }
+
+        public Rect CenteredHorizontally(float width)
+        {
+            var remove = (rect.width - width) / 2;
+            rect.xMax -= remove;
+            rect.xMin += remove;
+            return rect;
+        }
     }
 }

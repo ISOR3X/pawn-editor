@@ -72,6 +72,10 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                 // Increment passion level.
                 if (Verse.Widgets.ButtonInvisible(passionRect)) newPassionVal++;
                 newPassionVal = UIUtility.IncrementWithScroll(passionRect, newPassionVal);
+                if (Mouse.IsOver(passionRect))
+                {
+                    TooltipHandler.TipRegion(passionRect, "Click to change passion level.");
+                }
 
                 GUI.DrawTexture(r2, InspectPaneFiller.HealthTex);
 

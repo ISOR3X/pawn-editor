@@ -1,4 +1,5 @@
 ﻿using HotSwap;
+using PawnEditor.Extensions;
 using UnityEngine;
 using Verse;
 
@@ -7,16 +8,12 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class ColumnWorker_Icon<T> : ColumnWorker<T> where T : class
 {
-    protected virtual int Width => 26;
+    protected virtual float MaxHeight => TableWorker<T>.DefaultRowHeight;
 
-    protected virtual int Padding => 2;
-
-    protected Rect GetCellRect(T thing, Rect inRect)
+    protected Rect GetCellRect(Rect inRect, TableWorker<T> table)
     {
-        var iconSize = GetIconSize(thing);
-        var num1 = (int)((inRect.width - (double)iconSize.x) / 2.0);
-        var num2 = Mathf.Max((int)((30.0 - iconSize.y) / 2.0), 0);
-        return new Rect(inRect.x + num1, inRect.y + num2, iconSize.x, iconSize.y);
+        var h = Mathf.Min(inRect.height, MaxHeight);
+        return inRect.CenteredVertically(h).CenteredHorizontally(h);
     }
 
     protected virtual void DrawIcon(Rect inRect, T thing, TableWorker<T> table)
@@ -26,13 +23,13 @@ public abstract class ColumnWorker_Icon<T> : ColumnWorker<T> where T : class
             return;
         using (new GUIColor(GetIconColor(thing)))
         {
-            GUI.DrawTexture(inRect.ContractedBy(Padding), iconFor);
+            GUI.DrawTexture(inRect.ContractedBy(2f), iconFor);
         }
     }
 
     public override void DoCell(Rect inRect, T thing, TableWorker<T> table)
     {
-        var rect1 = GetCellRect(thing, inRect);
+        var rect1 = GetCellRect(inRect, table);
         DrawIcon(rect1, thing, table);
 
         if (Mouse.IsOver(rect1))
@@ -49,17 +46,12 @@ public abstract class ColumnWorker_Icon<T> : ColumnWorker<T> where T : class
 
     public override int GetMinWidth(TableWorker<T> table)
     {
-        return Mathf.Max(base.GetMinWidth(table), Width);
+        return Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(table.RowHeight));
     }
 
     public override int GetMaxWidth(TableWorker<T> table)
     {
         return Mathf.Min(base.GetMaxWidth(table), GetMinWidth(table));
-    }
-
-    public override int GetMinCellHeight(T thing)
-    {
-        return Mathf.Max(base.GetMinCellHeight(thing), Mathf.CeilToInt(GetIconSize(thing).y));
     }
 
     public override int Compare(T a, T b)
@@ -76,18 +68,6 @@ public abstract class ColumnWorker_Icon<T> : ColumnWorker<T> where T : class
     protected virtual Texture2D? GetIconFor(T thing) => null;
 
     protected virtual string? GetIconTip(T thing) => null;
-    
 
     protected virtual Color GetIconColor(T thing) => Color.white;
-    
-
-    // protected virtual void ClickedIcon(T thing)
-    // {
-    // }
-    //
-    // protected virtual void PaintedIcon(T thing)
-    // {
-    // }
-
-    protected virtual Vector2 GetIconSize(T thing) => new Vector2(Width, Width);
 }
