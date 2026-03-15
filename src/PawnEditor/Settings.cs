@@ -17,24 +17,27 @@ public class Settings : ModSettings
         Large
     }
 
-    // When enabled, dead pawns in the world are hidden from the left panel. (Destroyed pawns are moved to the world for compatibility reasons.)
-    public bool HideDeadWorldPawns = true;
+    /// <summary> When enabled, dead pawns in the world are hidden from the left panel. (Destroyed pawns are moved to the world for compatibility reasons.) </summary>
+    public bool hideDeadWorldPawns = true;
 
-    public RestrictionMode
-        Restriction =
-            RestrictionMode.Severe; // Decided the flexibility of the mod. None has no restrictions but is less stable.
+    /// <summary> Decides the flexibility of the mod. None has no restrictions but is less stable. </summary>
+    public RestrictionMode restriction = RestrictionMode.Severe;
 
-    public WindowSize Size = WindowSize.Small; // The size of the pawn editor window.
+    /// <summary> The size of the pawn editor window.</summary>
+    public WindowSize size = WindowSize.Small;
 
-    public bool SpawnNear = true; // When enabled, a pawn is spawned near the pawn it is teleported to.
+    /// <summary> When enabled, a pawn is spawned near the pawn it is teleported to. </summary>
+    public bool spawnNear = true; 
+
+    public bool drawDebug = false;
 
 
     public override void ExposeData()
     {
         base.ExposeData();
-        Scribe_Values.Look(ref Restriction, nameof(Restriction), RestrictionMode.Severe);
-        Scribe_Values.Look(ref Size, nameof(Size));
-        Scribe_Values.Look(ref SpawnNear, nameof(SpawnNear), true);
-        Scribe_Values.Look(ref HideDeadWorldPawns, nameof(HideDeadWorldPawns), true);
+        Scribe_Values.Look(ref restriction, nameof(restriction), RestrictionMode.Severe);
+        Scribe_Values.Look(ref size, nameof(size));
+        Scribe_Values.Look(ref spawnNear, nameof(spawnNear), true);
+        Scribe_Values.Look(ref hideDeadWorldPawns, nameof(hideDeadWorldPawns), true);
     }
 }

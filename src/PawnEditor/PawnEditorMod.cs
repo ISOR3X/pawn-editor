@@ -30,16 +30,17 @@ public class PawnEditorMod : Mod
     {
         var listing = new Listing_Standard();
         listing.Begin(inRect);
-        listing.ButtonTextLabeled("Restriction Mode", Settings.Restriction.ToString());
-        if (listing.ButtonTextLabeled("Window Size", Settings.Size.ToString()))
+        listing.ButtonTextLabeled("Restriction Mode", Settings.restriction.ToString());
+        if (listing.ButtonTextLabeled("Window Size", Settings.size.ToString()))
             Find.WindowStack.Add(new FloatMenu([
                 new FloatMenuOption(nameof(Settings.WindowSize.Small),
-                    () => Settings.Size = Settings.WindowSize.Small),
+                    () => Settings.size = Settings.WindowSize.Small),
                 new FloatMenuOption(nameof(Settings.WindowSize.Medium),
-                    () => Settings.Size = Settings.WindowSize.Medium),
+                    () => Settings.size = Settings.WindowSize.Medium),
                 new FloatMenuOption(nameof(Settings.WindowSize.Large),
-                    () => Settings.Size = Settings.WindowSize.Large)
+                    () => Settings.size = Settings.WindowSize.Large)
             ]));
+        listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref Settings.drawDebug);
 
         listing.End();
     }

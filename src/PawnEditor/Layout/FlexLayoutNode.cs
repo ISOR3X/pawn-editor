@@ -2,18 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor.Layout;
 
-public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
+public class FlexLayoutNode<TLeaf> : GroupLayoutNode<TLeaf>
 {
-    public List<LayoutNode<TLeaf>> children = [];
     public FlexDirection direction = FlexDirection.Col;
-    public float gap = 4f;
-    public float? gapX;
-    public float? gapY;
-
+    
     public float? childFlexBasis;
     public float? childFlexGrow;
 
@@ -23,7 +20,7 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
 
     private LayoutNode<TLeaf>? Create(string tag)
     {
-        var rootRegistry = _root?.registry ?? this.registry;
+        var rootRegistry = _root?.registry ?? registry;
         return rootRegistry?.TryGetValue(tag, out var factory) == true ? factory() : null;
     }
 
@@ -35,13 +32,6 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
         if (xmlRoot.Attributes?["wrap"]?.Value is { } flexWrap)
             wrap = ParseHelper.FromString<bool>(flexWrap);
 
-        if (xmlRoot.Attributes?["gap"]?.Value is { } flexGap)
-            gap = ParseHelper.FromString<float>(flexGap);
-        if (xmlRoot.Attributes?["gap-x"]?.Value is { } flexGapX)
-            gapX = ParseHelper.FromString<float>(flexGapX);
-        if (xmlRoot.Attributes?["gap-y"]?.Value is { } flexGapY)
-            gapY = ParseHelper.FromString<float>(flexGapY);
-
         if (xmlRoot.Attributes?["childFlexBasis"]?.Value is { } childBasis)
             childFlexBasis = ParseHelper.FromString<float>(childBasis);
         if (xmlRoot.Attributes?["childFlexGrow"]?.Value is { } childGrow)
@@ -52,7 +42,6 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
             if (child is XmlComment) continue;
             var node = Create(child.Name);
 
-            // Check if the layout element exists.
             if (node == null)
             {
                 var knownElements = (_root?.registry ?? registry)?.Keys.ToList() ?? [];
@@ -67,8 +56,7 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
             node.LoadDataFromXmlCustom(child);
             children.Add(node);
         }
-        
-        // Pass through child styles.
+
         ApplyChildDefaults();
     }
 
@@ -82,4 +70,7 @@ public class FlexLayoutNode<TLeaf> : LayoutNode<TLeaf>
                 child.flexGrow = childFlexGrow.Value;
         }
     }
+    
+    public float Draw(Rect rect, Func<TLeaf, Rect, float> runLeaf, Func<TLeaf, bool>? isVisible = null)
+        => FlexLayoutEngine.Draw(this, rect, runLeaf, isVisible);
 }

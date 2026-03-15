@@ -11,34 +11,24 @@ namespace PawnEditor.Layout;
 public static class FlexLayoutEngine
 {
     public static float Draw<TLeaf>(
-        LayoutNode<TLeaf> node,
+        FlexLayoutNode<TLeaf> node,
         Rect rect,
         Func<TLeaf, Rect, float> runLeaf,
         Func<TLeaf, bool>? isVisible = null)
     {
-        if (node.IsLeaf)
+        return node.direction switch
         {
-            // Verse.Widgets.DrawBoxSolidWithOutline(rect, Color.clear, new Color(1f, 1f, 1f, 0.1f));
-            return runLeaf(node.leaf!, rect);
-        }
-
-        if (node is FlexLayoutNode<TLeaf> flex)
-            return flex.direction switch
-            {
-                FlexDirection.Row => DrawRow(flex, rect, runLeaf, isVisible),
-                FlexDirection.Col => DrawCol(flex, rect, runLeaf, isVisible),
-                _ => 0f
-            };
-
-        return 0f;
+            FlexDirection.Row => DrawRow(node, rect, runLeaf, isVisible),
+            FlexDirection.Col => DrawCol(node, rect, runLeaf, isVisible),
+            _ => 0f
+        };
     }
 
     private static float DrawRow<TLeaf>(
         FlexLayoutNode<TLeaf> node,
         Rect rect,
         Func<TLeaf, Rect, float> runLeaf,
-        Func<TLeaf, bool>? isVisible
-    )
+        Func<TLeaf, bool>? isVisible)
     {
         var lines = ComputeLines(node, isVisible);
         var curY = rect.y;
@@ -48,18 +38,20 @@ public static class FlexLayoutEngine
         {
             var widths = ResolveWidths(lines[i], rect.width, gap);
 
-            // Measuring pass: draw offscreen just to get heights
+            // Measuring pass: draw offscreen just to get heights.
             var lineHeight = 0f;
             for (var j = 0; j < lines[i].Count; j++)
                 lineHeight = Mathf.Max(lineHeight,
-                    Draw(lines[i][j], new Rect(LayoutEngineUtils.OffscreenOffset, LayoutEngineUtils.OffscreenOffset, widths[j], LayoutEngineUtils.Height), runLeaf,
-                        isVisible));
+                    LayoutEngineUtility.DrawNode(lines[i][j],
+                        new Rect(LayoutEngineUtility.OffscreenOffset, LayoutEngineUtility.OffscreenOffset,
+                            widths[j], LayoutEngineUtility.Height),
+                        runLeaf, isVisible));
 
-            // Drawing pass: now we know the line height
+            // Drawing pass: now we know the line height.
             var curX = rect.x;
             for (var j = 0; j < lines[i].Count; j++)
             {
-                Draw(lines[i][j], new Rect(curX, curY, widths[j], lineHeight), runLeaf, isVisible);
+                LayoutEngineUtility.DrawNode(lines[i][j], new Rect(curX, curY, widths[j], lineHeight), runLeaf, isVisible);
                 curX += widths[j] + gap;
             }
 
@@ -75,21 +67,17 @@ public static class FlexLayoutEngine
         FlexLayoutNode<TLeaf> node,
         Rect rect,
         Func<TLeaf, Rect, float> runLeaf,
-        Func<TLeaf, bool>? isVisible
-    )
+        Func<TLeaf, bool>? isVisible)
     {
         var active = ActiveChildren(node, isVisible);
         var gapY = node.gapY ?? node.gap;
 
-        // First pass: resolve all heights
         var heights = new float[active.Count];
         var totalGrow = active.Sum(c => c.flexGrow);
         var fixedTotal = active.Sum(c => c.flexBasis > 1f ? c.flexBasis : 0f)
                          + gapY * (active.Count - 1);
-        var hasKnownHeight = rect.height < LayoutEngineUtils.Height;
-        var remaining = hasKnownHeight
-            ? rect.height - fixedTotal
-            : 0f;
+        var hasKnownHeight = rect.height < LayoutEngineUtility.Height;
+        var remaining = hasKnownHeight ? rect.height - fixedTotal : 0f;
 
         for (var i = 0; i < active.Count; i++)
         {
@@ -100,16 +88,18 @@ public static class FlexLayoutEngine
             else if (hasKnownHeight && c.flexGrow > 0f && totalGrow > 0f)
                 h = c.flexGrow / totalGrow * remaining;
             else
-                h = Draw(c, new Rect(LayoutEngineUtils.OffscreenOffset, LayoutEngineUtils.OffscreenOffset, rect.width, LayoutEngineUtils.Height), runLeaf, isVisible);
+                h = LayoutEngineUtility.DrawNode(c,
+                    new Rect(LayoutEngineUtility.OffscreenOffset, LayoutEngineUtility.OffscreenOffset,
+                        rect.width, LayoutEngineUtility.Height),
+                    runLeaf, isVisible);
 
             heights[i] = h;
         }
 
-        // Second pass: draw with resolved heights
         var curY = rect.y;
         for (var i = 0; i < active.Count; i++)
         {
-            Draw(active[i], new Rect(rect.x, curY, rect.width, heights[i]), runLeaf, isVisible);
+            LayoutEngineUtility.DrawNode(active[i], new Rect(rect.x, curY, rect.width, heights[i]), runLeaf, isVisible);
             curY += heights[i];
             if (i < active.Count - 1)
                 curY += gapY;
@@ -118,7 +108,8 @@ public static class FlexLayoutEngine
         return curY - rect.y;
     }
 
-    private static List<List<LayoutNode<TLeaf>>> ComputeLines<TLeaf>(FlexLayoutNode<TLeaf> node,
+    private static List<List<LayoutNode<TLeaf>>> ComputeLines<TLeaf>(
+        FlexLayoutNode<TLeaf> node,
         Func<TLeaf, bool>? isVisible)
     {
         var lines = new List<List<LayoutNode<TLeaf>>>();
@@ -155,7 +146,6 @@ public static class FlexLayoutEngine
         var totalGap = gap * (line.Count - 1);
         var available = totalWidth - totalGap;
 
-        // Distribute space based on the flexBasis.
         var remaining = available;
         for (var i = 0; i < line.Count; i++)
         {
@@ -164,13 +154,11 @@ public static class FlexLayoutEngine
             remaining -= widths[i];
         }
 
-        // Distribute remaining space.
         var totalGrow = line.Sum(n => n.flexGrow);
         if (totalGrow > 0f && remaining > 0f)
             for (var i = 0; i < line.Count; i++)
                 widths[i] += line[i].flexGrow / totalGrow * remaining;
-        
-        // Make sure widths are never beyond their maxWidth.
+
         for (var i = 0; i < line.Count; i++)
         {
             var max = line[i].maxWidth > 1f ? line[i].maxWidth : line[i].maxWidth * totalWidth;
@@ -184,17 +172,16 @@ public static class FlexLayoutEngine
     {
         if (node.IsLeaf)
             return node.leaf == null || isVisible == null || isVisible(node.leaf);
-        if (node is FlexLayoutNode<TLeaf> flex)
-            return flex.children.Any(c => c.isActive && HasVisibleContent(c, isVisible));
-        if (node is GridLayoutNode<TLeaf> grid)
-            return grid.Children.Any(c => c.isActive && HasVisibleContent(c, isVisible));
+        if (node is GroupLayoutNode<TLeaf> group)
+            return group.children.Any(c => c.isActive() && HasVisibleContent(c, isVisible));
         return false;
     }
 
-    private static List<LayoutNode<TLeaf>> ActiveChildren<TLeaf>(
-        FlexLayoutNode<TLeaf> node,
+    // Accepts GroupLayoutNode so both FlexLayoutNode and GridLayoutNode can use it.
+    internal static List<LayoutNode<TLeaf>> ActiveChildren<TLeaf>(
+        GroupLayoutNode<TLeaf> node,
         Func<TLeaf, bool>? isVisible)
-    {
-        return node.children.Where(c => c.isActive && HasVisibleContent(c, isVisible)).ToList();
-    }
+        => node.children
+            .Where(c => c.isActive() && HasVisibleContent(c, isVisible))
+            .ToList();
 }

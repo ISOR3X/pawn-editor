@@ -5,7 +5,6 @@ using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using L = PawnEditor.Layout.FlexLayoutHelper;
 
 namespace PawnEditor;
 
@@ -20,9 +19,9 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
 
     public override void DoWindowContents(Rect inRect)
     {
-        var layout = L.Row([
+        var layout = LayoutHelper.Row([
             // Stuff
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 if (UIUtility.ButtonTextLabeled_WithIcon(rect, "StatsReport_Material".Translate(),
                         thing.Stuff.LabelCap, Verse.Widgets.GetIconFor(thing.Stuff),
@@ -40,9 +39,9 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         ))
                         .ToList()));
                 }
-            }).When(thing.def.MadeFromStuff),
+            }).When(() => thing.def.MadeFromStuff),
             // Quality
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var compQuality = thing.TryGetComp<CompQuality>();
                 if (UIUtility.ButtonTextLabeled(rect, "Quality", compQuality.Quality.GetLabel().CapitalizeFirst()))
@@ -52,9 +51,9 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                                 () => { compQuality.SetQuality(quality, ArtGenerationContext.Outsider); }))
                         .ToList()));
                 }
-            }).When(thing.HasComp<CompQuality>()),
+            }).When(thing.HasComp<CompQuality>),
             // Color
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var apparel = thing as Apparel;
                 var widgetRect = UIUtility.RectLabeled(rect, "Color");
@@ -70,13 +69,15 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                     Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel.SetColor(color), curColor,
                         DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList()));
                 }
-            }).When(thing is Apparel && thing.HasComp<CompColorable>()),
+            }).When(() => thing is Apparel && thing.HasComp<CompColorable>()),
             // Style
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def).styleDefs;
-                if (UIUtility.ButtonTextLabeled(rect, "Stat_Thing_StyleLabel".Translate(),
-                        styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef()).Value.LabelCap))
+                var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
+                if (UIUtility.ButtonTextLabeled_WithIcon(rect, "Stat_Thing_StyleLabel".Translate(),
+                        currentStyle.Value?.LabelCap ?? "None",
+                        currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex))
                 {
                     Find.WindowStack.Add(new FloatMenu(styleOptions.Select(style =>
                             new FloatMenuOption(style.Value.LabelCap, () =>
@@ -91,9 +92,9 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         }))
                         .ToList()));
                 }
-            }).When(ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def)),
+            }).When(() => ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def)),
             // Hit points
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var widgetRect = UIUtility.RectLabeled(rect, "Hitpoints");
 
@@ -105,7 +106,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                     (hitPoints / maxHitPoints).ToStringPercent()));
             }),
             // Tainted
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var widgetRect = UIUtility.RectLabeled(rect, "Tainted")
                     .CenteredHorizontally(Verse.Widgets.CheckboxSize);
@@ -115,18 +116,18 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
 
                 Verse.Widgets.Checkbox(widgetRect.position, ref isTainted);
                 if (isTainted != apparel.WornByCorpse) apparel.WornByCorpse = isTainted;
-            }).When(thing is Apparel),
+            }).When(() => thing is Apparel),
             // Count
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var widgetRect = UIUtility.RectLabeled(rect, "Count");
 
                 Widgets.DelayedTextFieldNumeric(widgetRect, thing.stackCount, ref TextfieldBuffers[0], 1,
                     thing.def.stackLimit, null,
                     true);
-            }).When(thing.def.stackLimit > 1),
+            }).When(() => thing.def.stackLimit > 1),
             // Persona traits
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var widgetRect = UIUtility.RectLabeled(rect, "Traits");
 
@@ -171,9 +172,9 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                     }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f, 5f);
 
                 if (toRemove != null) bladelink.traits.Remove(toRemove);
-            }, flexBasis: 1f).When(thing.HasComp<CompBladelinkWeapon>()),
+            }, flexBasis: 1f).When(thing.HasComp<CompBladelinkWeapon>),
             // Name
-            L.Cell(rect =>
+            LayoutHelper.Cell(rect =>
             {
                 var widgetRect = UIUtility.RectLabeled(rect, "Name");
 
@@ -182,7 +183,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                 if (Verse.Widgets.ButtonImage(widgetRect.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
                     name.Initialize(name.Props);
                 name.name = Verse.Widgets.TextField(widgetRect, name.name);
-            }).When(thing.HasComp<CompGeneratedNames>()),
+            }).When(thing.HasComp<CompGeneratedNames>),
         ], gapX: 24f, wrap: true, childFlexBasis: 0.5f);
 
         using (new TextBlock(GameFont.Small))

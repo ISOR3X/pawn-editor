@@ -36,7 +36,7 @@
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
             <section flexBasis="1">PawnEditor_Portrait</section>
-            <flex direction="row" childFlexBasis="0.33">
+            <flex direction="row" childFlexBasis="0.33" childFlexGrow="1" gapX="16">
                 <section>PawnEditor_Sex</section>
                 <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
                 <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>

@@ -6,7 +6,7 @@ using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using L = PawnEditor.Layout.FlexLayoutHelper;
+using L = PawnEditor.Layout.LayoutHelper;
 
 namespace PawnEditor;
 
@@ -27,7 +27,7 @@ public partial class Window_Editor : Window
     private static List<TabDef> _selectedTabDefsForPawn = [];
     private static List<TabRecord> _tabsList = [];
 
-    private static Settings.WindowSize WindowSize => PawnEditorMod.Settings.Size;
+    private static Settings.WindowSize WindowSize => PawnEditorMod.Settings.size;
 
     private static readonly Dictionary<Settings.WindowSize, Vector2> WindowSizes = new()
     {

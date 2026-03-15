@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
+using PawnEditor.Extensions;
 using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using L = PawnEditor.Layout.FlexLayoutHelper;
+using L = PawnEditor.Layout.LayoutHelper;
 
 namespace PawnEditor;
 
@@ -36,68 +37,62 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect) : FloatWindow(boundWidge
         var cultures = DefDatabase<CultureDef>.AllDefsListForReading;
         var xenotypes = DefDatabase<XenotypeDef>.AllDefsListForReading;
 
-        var layout = L.Row([
-            L.Cell(rect =>
+        var layout = L.Grid([GridTrack.Fr(), GridTrack.Fr(2), GridTrack.Fr(), GridTrack.Fr(2)], children:
+        [
+            ..L.LabeledWidget("Culture", rect =>
             {
-                if (UIUtility.ButtonTextLabeled(rect, "Culture", _selectedCulture!.LabelCap))
+                if (Verse.Widgets.ButtonText(rect, _selectedCulture!.LabelCap))
                     Find.WindowStack.Add(new FloatMenu(cultures
                         .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c)).ToList()));
-            }).When(_selectedCulture != null),
+            }, () => _selectedCulture != null),
 
-            L.Cell(rect =>
+            ..L.LabeledWidget("Xenotype", rect =>
             {
-                if (UIUtility.ButtonTextLabeled(rect, "Xenotype", _selectedXenotype?.LabelCap ?? "None"))
+                if (Verse.Widgets.ButtonText(rect, _selectedXenotype?.LabelCap ?? "None"))
                     Find.WindowStack.Add(new FloatMenu(xenotypes
                         .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
                         .Append(new FloatMenuOption("None", () => _selectedXenotype = null)).ToList()));
-            }).When(ModsConfig.BiotechActive),
+            }, () => ModsConfig.BiotechActive),
 
-            L.Cell(rect =>
+            ..L.LabeledWidget("Gender", rect =>
             {
-                if (UIUtility.ButtonTextLabeled(rect, "Gender", _selectedGender.GetLabel().CapitalizeFirst()))
+                if (Verse.Widgets.ButtonText(rect, _selectedGender.GetLabel().CapitalizeFirst()))
                     Find.WindowStack.Add(new FloatMenu(
                         new List<Gender> { Gender.Male, Gender.Female }
                             .Select(g => new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
                             .ToList()));
             }),
-
-            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName)),
-            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick)),
-
-            L.Row([
-                L.Cell(rect =>
-                {
-                    using (new TextBlock(TextAnchor.MiddleLeft, ColoredText.SubtleGrayColor))
-                    {
-                        Verse.Widgets.Label(rect, p.Name.ToStringFull);
-                    }
-                }, 0.4f),
-                L.Cell(rect =>
-                {
-                    if (Verse.Widgets.ButtonText(rect, "Generate"))
-                    {
-                        SoundDefOf.Tick_High.PlayOneShotOnCamera();
-                        string? lastName = null;
-                        if (_keepLastName && p.Name is NameTriple triple) lastName = triple.Last;
-                        p.Name = PawnBioAndNameGenerator.GenerateFullPawnName(p.def,
-                            p.kindDef.GetNameMaker(p.gender), p.story,
-                            _selectedXenotype, p.RaceProps.GetNameGenerator(_selectedGender),
-                            _selectedCulture, p.IsCreepJoiner, _selectedGender,
-                            p.RaceProps.nameCategory, lastName, _forceNoNick);
-                    }
-                }, 0.5f, 1)
-            ], flexBasis: 1f)
-        ], gapX: 24f, wrap: true, childFlexBasis: 0.5f);
-
-        using (new TextBlock(GameFont.Small))
-        {
-            var height = FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Keep last name", ref _keepLastName), colSpan: 2),
+            L.Cell(rect => Verse.Widgets.CheckboxLabeled(rect, "Force no nickname", ref _forceNoNick), colSpan: 2),
+            L.Cell(rect =>
             {
-                action(rect);
-                return UIUtility.ButtonHeight;
-            });
-            if (!Mathf.Approximately(windowRect.height, height))
-                windowRect.height = height + Margin * 2;
-        }
+                using (new TextBlock(TextAnchor.MiddleLeft, ColoredText.SubtleGrayColor))
+                {
+                    Verse.Widgets.Label(rect.TakeLeftPart((float)(rect.width * 0.4)), p.Name.ToStringFull);
+                }
+
+                if (Verse.Widgets.ButtonText(rect, "Generate"))
+                {
+                    SoundDefOf.Tick_High.PlayOneShotOnCamera();
+                    string? lastName = null;
+                    if (_keepLastName && p.Name is NameTriple triple) lastName = triple.Last;
+                    p.Name = PawnBioAndNameGenerator.GenerateFullPawnName(p.def,
+                        p.kindDef.GetNameMaker(p.gender), p.story,
+                        _selectedXenotype, p.RaceProps.GetNameGenerator(_selectedGender),
+                        _selectedCulture, p.IsCreepJoiner, _selectedGender,
+                        p.RaceProps.nameCategory, lastName, _forceNoNick);
+                }
+            }, colStart: 1, colSpan: 4),
+        ], gapX: 12f);
+
+
+        var height = layout.Draw(inRect, (action, rect) =>
+        {
+            action(rect);
+            return UIUtility.ButtonHeight;
+        });
+
+        if (!Mathf.Approximately(windowRect.height, height))
+            windowRect.height = height + Margin * 2;
     }
 }

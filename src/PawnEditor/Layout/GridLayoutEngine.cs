@@ -15,41 +15,64 @@ public static class GridLayoutEngine
         Func<TLeaf, Rect, float> runLeaf,
         Func<TLeaf, bool>? isVisible = null)
     {
-        var resolvedWidths = ResolveTrackWidths(node.Columns, rect.width, node.GapX);
-        var activeChildren = ActiveChildren(node, isVisible);
+        if (node.columns.Length == 0) return 0f;
+
+        var gap = node.gapX ?? node.gap;
+        var resolvedWidths = ResolveTrackWidths(node.columns, rect.width, gap);
+        var active = FlexLayoutEngine.ActiveChildren(node, isVisible);
         var columnCount = node.ColumnCount;
         var curY = rect.y;
 
-        for (var i = 0; i < activeChildren.Count; i += columnCount)
+        var i = 0;
+        while (i < active.Count)
         {
-            var rowItems = activeChildren.Skip(i).Take(columnCount).ToList();
-
-            // Measuring pass: draw offscreen to determine row height.
-            var rowHeight = 0f;
-            for (var j = 0; j < rowItems.Count; j++)
-                rowHeight = Mathf.Max(rowHeight,
-                    MeasureHeight(rowItems[j], resolvedWidths[j], runLeaf));
-
-            // Drawing pass: now we know the row height.
-            var curX = rect.x;
-            for (var j = 0; j < rowItems.Count; j++)
+            // Build row by accumulating colSpans until columnCount is filled
+            var rowItems = new List<(LayoutNode<TLeaf> node, int col, int span)>();
+            var col = 0;
+            while (col < columnCount && i < active.Count)
             {
-                // Use FlexLayoutEngine.Draw so nested flex nodes inside grid cells work.
-                FlexLayoutEngine.Draw(rowItems[j], new Rect(curX, curY, resolvedWidths[j], rowHeight), runLeaf, isVisible);
-                curX += resolvedWidths[j];
-                if (j < rowItems.Count - 1)
-                    curX += node.GapX;
+                var childNode = active[i];
+                var start = childNode.colStart > 0 ? childNode.colStart - 1 : col; // convert to 0-indexed
+
+                if (start < col)
+                    break; // can't fit on this row, push to the next
+
+                col = start; // jump to the explicit start column
+                var span = Math.Min(childNode.colSpan, columnCount - col);
+                rowItems.Add((childNode, col, span));
+                col += span;
+                i++;
+            }
+
+            // Measuring pass: draw offscreen to determine row height
+            var rowHeight = 0f;
+            foreach (var (child, itemCol, span) in rowItems)
+            {
+                var spanWidth = resolvedWidths.Skip(itemCol).Take(span).Sum() + gap * (span - 1);
+                rowHeight = Mathf.Max(rowHeight,
+                    LayoutEngineUtility.DrawNode(child,
+                        new Rect(LayoutEngineUtility.OffscreenOffset, LayoutEngineUtility.OffscreenOffset,
+                            spanWidth, LayoutEngineUtility.Height),
+                        runLeaf, isVisible));
+            }
+
+            // Drawing pass: now we know the row height
+            foreach (var (child, itemCol, span) in rowItems)
+            {
+                var spanWidth = resolvedWidths.Skip(itemCol).Take(span).Sum() + gap * (span - 1);
+                var curX = rect.x + resolvedWidths.Take(itemCol).Sum() + gap * itemCol;
+                LayoutEngineUtility.DrawNode(child, new Rect(curX, curY, spanWidth, rowHeight), runLeaf, isVisible);
             }
 
             curY += rowHeight;
-            if (i + columnCount < activeChildren.Count)
-                curY += node.GapY;
+            if (i < active.Count)
+                curY += node.gapY ?? node.gap;
         }
 
         return curY - rect.y;
     }
 
-    internal static float[] ResolveTrackWidths(GridTrack[] columns, float availableWidth, float gapX)
+    private static float[] ResolveTrackWidths(GridTrack[] columns, float availableWidth, float gapX)
     {
         var columnCount = columns.Length;
         var totalGap = gapX * (columnCount - 1);
@@ -76,27 +99,5 @@ public static class GridLayoutEngine
         }
 
         return widths;
-    }
-
-    private static float MeasureHeight<TLeaf>(LayoutNode<TLeaf> node, float width, Func<TLeaf, Rect, float> runLeaf)
-        => FlexLayoutEngine.Draw(node,
-            new Rect(LayoutEngineUtils.OffscreenOffset, LayoutEngineUtils.OffscreenOffset,
-                width, LayoutEngineUtils.Height),
-            runLeaf);
-
-    private static List<LayoutNode<TLeaf>> ActiveChildren<TLeaf>(
-        GridLayoutNode<TLeaf> node,
-        Func<TLeaf, bool>? isVisible)
-        => node.Children
-            .Where(c => c.isActive && HasVisibleContent(c, isVisible))
-            .ToList();
-
-    private static bool HasVisibleContent<TLeaf>(LayoutNode<TLeaf> node, Func<TLeaf, bool>? isVisible)
-    {
-        if (node.IsLeaf)
-            return node.leaf == null || isVisible == null || isVisible(node.leaf);
-        if (node is FlexLayoutNode<TLeaf> flex)
-            return flex.children.Any(c => c.isActive && HasVisibleContent(c, isVisible));
-        return false;
     }
 }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using HotSwap;
 using UnityEngine;
+using Verse;
 
 namespace PawnEditor.Layout;
 
 [HotSwappable]
-public static class FlexLayoutHelper
+public static class LayoutHelper
 {
     public static FlexLayoutNode<Func<Rect, float>> Row(
         LayoutNode<Func<Rect, float>>[] children,
@@ -57,35 +58,52 @@ public static class FlexLayoutHelper
         Action<Rect> draw,
         float flexBasis = 0f,
         float flexGrow = 0f,
+        int colSpan = 1,
+        int colStart = 0,
         float height = UIUtility.ButtonHeight)
         => new()
         {
             flexBasis = flexBasis,
             flexGrow = flexGrow,
+            colSpan = colSpan,
+            colStart = colStart,
             leaf = rect =>
             {
                 draw(rect);
                 return height;
             }
         };
-    
 
-    public static LayoutNode<TLeaf> When<TLeaf>(this LayoutNode<TLeaf> node, bool condition)
+    public static IEnumerable<LayoutNode<Func<Rect, float>>> LabeledWidget(
+        string label,
+        Action<Rect> widget,
+        Func<bool>? when = null)
     {
-        node.isActive = condition;
+        yield return Cell(rect =>
+        {
+            using (new TextBlock(TextAnchor.MiddleLeft)) Verse.Widgets.Label(rect, label);
+        }).When(when);
+        yield return Cell(widget).When(when);
+    }
+
+    public static LayoutNode<TLeaf> When<TLeaf>(this LayoutNode<TLeaf> node, Func<bool>? condition = null)
+    {
+        if (condition != null) node.isActive = condition;
         return node;
     }
-    
+
     public static GridLayoutNode<Func<Rect, float>> Grid(
         GridTrack[] columns,
-        float gapX = 0f,
-        float gapY = 0f,
+        float gap = 4f,
+        float? gapX = null,
+        float? gapY = null,
         List<LayoutNode<Func<Rect, float>>>? children = null)
         => new()
         {
-            Columns = columns,
-            GapX = gapX,
-            GapY = gapY,
-            Children = children ?? [],
+            columns = columns,
+            gap = gap,
+            gapX = gapX,
+            gapY = gapY,
+            children = children ?? [],
         };
 }

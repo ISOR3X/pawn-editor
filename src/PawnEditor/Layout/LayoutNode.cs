@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System;
+using System.Xml;
 using Verse;
 
 namespace PawnEditor.Layout;
@@ -13,8 +14,12 @@ public class LayoutNode<TLeaf>
 {
     public float flexBasis;
     public float flexGrow;
+
+    public int colSpan = 1;
+    public int colStart = 0;
+    
     public float maxWidth = float.MaxValue;
-    public bool isActive = true;
+    public Func<bool> isActive = () => true;
 
     public TLeaf? leaf;
     public bool IsLeaf => leaf != null;
@@ -30,6 +35,6 @@ public class LayoutNode<TLeaf>
 
         if (xmlRoot.Attributes?["mayRequire"]?.Value is { } nodeMayRequire
             && !ModLister.AllModsActiveNoSuffix(nodeMayRequire.Split(',')))
-            isActive = false;
+            isActive = () => false;
     }
 }

@@ -41,9 +41,9 @@ public static class Rect_Extension
             rect.xMin += width;
         }
 
-        public void Gap(float width = 4f)
+        public void Gap(float height = 4f)
         {
-            rect.yMin += width;
+            rect.yMin += height;
         }
     }
 

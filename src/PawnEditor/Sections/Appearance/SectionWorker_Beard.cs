@@ -15,5 +15,5 @@ public class SectionWorker_Beard(SectionDef def) : SectionWorker_DefTable(def)
     protected override IEnumerable<Def> GetDefs() => DefDatabase<BeardDef>.AllDefs;
 
     protected override bool CanShowTable(Pawn pawn) =>
-        pawn.style.CanWantBeard || PawnEditorMod.Settings.Restriction == Settings.RestrictionMode.None;
+        pawn.style.CanWantBeard || PawnEditorMod.Settings.restriction == Settings.RestrictionMode.None;
 }

@@ -358,8 +358,6 @@ public abstract class TableWorker<T> where T : class
 
         var widths = FlexLayoutEngine.ResolveWidths(line, available, 0f);
 
-        Log.Message($"available={available}, widths=[{string.Join(", ", widths)}], sum={widths.Sum()}");
-
         _cachedColumnWidths.Clear();
         _cachedColumnWidths.AddRange(widths);
     }

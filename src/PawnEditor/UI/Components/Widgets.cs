@@ -34,9 +34,8 @@ public static partial class Widgets
         }
     }
 
-    public static bool ButtonText_TruncateWithTooltip(Rect inRect, string label)
+    public static bool ButtonText_TruncateWithTooltip(Rect inRect, string label, float padding = 16f)
     {
-        const float padding = 16f;
         var width = inRect.width;
         if (Text.CalcSize(label).x > width - padding) TooltipHandler.TipRegion(inRect, label);
 

@@ -66,13 +66,14 @@
         <Compile Include="FactionUtility.cs" />
         <Compile Include="Harmony\Patch_WindowResizer.cs" />
         <Compile Include="Layout\DefLeafNode.cs" />
-        <Compile Include="Layout\FlexLayoutHelper.cs" />
+        <Compile Include="Layout\LayoutHelper.cs" />
         <Compile Include="Layout\FlexLayoutNode.cs" />
         <Compile Include="Layout\FlexLayoutEngine.cs" />
         <Compile Include="Layout\GridLayoutEngine.cs" />
         <Compile Include="Layout\GridLayoutNode.cs" />
         <Compile Include="Layout\GridTrack.cs" />
-        <Compile Include="Layout\LayoutEngineUtils.cs" />
+        <Compile Include="Layout\GroupLayoutNode.cs" />
+        <Compile Include="Layout\LayoutEngineUtility.cs" />
         <Compile Include="Layout\LayoutNode.cs" />
         <Compile Include="QuickAction\QuickActionAttribute.cs" />
         <Compile Include="QuickAction\QuickActions.cs" />
