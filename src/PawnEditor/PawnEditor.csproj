@@ -130,6 +130,7 @@
         <Compile Include="Tabs\TabWorker_Pawn.cs" />
         <Compile Include="Tabs\TabWorker_FactionOverview.cs" />
         <Compile Include="TexPawnEditor.cs" />
+        <Compile Include="ThingUtility.cs" />
         <Compile Include="UI\Components\Cards.cs" />
         <Compile Include="UI\Components\Carrousel.cs" />
         <Compile Include="UI\Components\InspectPane.cs" />

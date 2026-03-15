@@ -65,6 +65,7 @@ public class Dialog_ColorPicker : Window
         {
             _colors = colors;
         }
+        layer = WindowLayer.Super;
     }
 
 
@@ -278,7 +279,7 @@ public class Dialog_ColorPicker : Window
 
     private void Accept()
     {
-        _onSelect?.Invoke(_selectedColor);
+        _onSelect.Invoke(_selectedColor);
         Close();
     }
 }

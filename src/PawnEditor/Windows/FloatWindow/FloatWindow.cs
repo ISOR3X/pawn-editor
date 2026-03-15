@@ -17,7 +17,7 @@ public abstract class FloatWindow : Window
     {
         _boundWidgetRect = boundWidgetRect;
         onlyOneOfTypeAllowed = true;
-        layer = WindowLayer.Super;
+        layer = WindowLayer.SubSuper;
         closeOnClickedOutside = true;
     }
 
