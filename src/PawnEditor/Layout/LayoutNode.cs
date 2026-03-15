@@ -13,7 +13,8 @@ public class LayoutNode<TLeaf>
 {
     public float flexBasis;
     public float flexGrow;
-    public bool IsActive = true;
+    public float maxWidth = float.MaxValue;
+    public bool isActive = true;
 
     public TLeaf? leaf;
     public bool IsLeaf => leaf != null;
@@ -24,9 +25,11 @@ public class LayoutNode<TLeaf>
             flexBasis = ParseHelper.FromString<float>(basis);
         if (xmlRoot.Attributes?["flexGrow"]?.Value is { } grow)
             flexGrow = ParseHelper.FromString<float>(grow);
+        if (xmlRoot.Attributes?["maxWidth"]?.Value is { } max)
+            maxWidth = ParseHelper.FromString<float>(max);
 
         if (xmlRoot.Attributes?["mayRequire"]?.Value is { } nodeMayRequire
             && !ModLister.AllModsActiveNoSuffix(nodeMayRequire.Split(',')))
-            IsActive = false;
+            isActive = false;
     }
 }

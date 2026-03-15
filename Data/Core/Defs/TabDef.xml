@@ -13,9 +13,9 @@
                 <section flexGrow="1">PawnEditor_Portrait</section>
             </flex>
             <flex direction="row">
-                <section flexBasis="0.4" flexGrow="0">PawnEditor_Name</section>
-                <section flexBasis="0" flexGrow="1">PawnEditor_Age</section>
-                <section flexBasis="0" flexGrow="1">PawnEditor_Backstory</section>
+                <section flexBasis="0.6">PawnEditor_Name</section>
+                <section flexBasis="0.4">PawnEditor_Age</section>
+                <section flexGrow="1" maxWidth="0.5">PawnEditor_Backstory</section>
             </flex>
             <section>PawnEditor_Skills</section>
             <flex direction="row">
@@ -38,21 +38,21 @@
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
             <section flexBasis="1">PawnEditor_Portrait</section>
-            <flex direction="row">
-                <section flexBasis="0.3" flexGrow="1">PawnEditor_Sex</section>
-                <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
-                <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
-                <section flexBasis="0.3" flexGrow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
+            <flex direction="row" childFlexBasis="0.33">
+                <section>PawnEditor_Sex</section>
+                <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
+                <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
+                <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
             </flex>
-            <flex direction="row" wrap="true">
-                <section flexBasis="0.5" flexGrow="1">PawnEditor_ShapeHead</section>
-                <section flexBasis="0.5" flexGrow="1">PawnEditor_ShapeBody</section>
-                <section flexBasis="1">PawnEditor_SkinColor</section>
+            <flex direction="row" wrap="true" childFlexBasis="0.5" childFlexGrow="1">
+                <section>PawnEditor_ShapeHead</section>
+                <section>PawnEditor_ShapeBody</section>
+                <section>PawnEditor_SkinColor</section>
             </flex>
-            <flex direction="row" wrap="true">
-                <section flexBasis="0.5" flexGrow="1">PawnEditor_Hair</section>
-                <section flexBasis="0.5" flexGrow="1">PawnEditor_Beard</section>
-                <section flexBasis="1">PawnEditor_HairColor</section>
+            <flex direction="row" wrap="true" childFlexBasis="0.5" childFlexGrow="1">
+                <section>PawnEditor_Hair</section>
+                <section>PawnEditor_Beard</section>
+                <section>PawnEditor_HairColor</section>
             </flex>
         </layout>
     </PawnEditor.TabDef>

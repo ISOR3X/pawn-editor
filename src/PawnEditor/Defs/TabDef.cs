@@ -33,7 +33,7 @@ public class SectionFlexLayoutNode : FlexLayoutNode<SectionDef>
 {
     public SectionFlexLayoutNode()
     {
-        Registry = new Dictionary<string, Func<LayoutNode<SectionDef>>>
+        registry = new Dictionary<string, Func<LayoutNode<SectionDef>>>
         {
             ["section"] = () => new DefLeafNode<SectionDef>(),
             ["flex"] = () => new SectionFlexLayoutNode()

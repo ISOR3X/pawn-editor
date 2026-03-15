@@ -25,7 +25,7 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
     protected virtual bool CanShowTable(Pawn pawn) => Table.ThingListForReading.Count > 0;
 
     protected virtual string GetUnavailableLabel(Pawn pawn) =>
-        $"No {Label.ToLower()}s available for {pawn.Name.ToStringShort}";
+        $"No {Label.ToLower()} available for {pawn.Name.ToStringShort}";
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {

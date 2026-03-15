@@ -62,7 +62,7 @@ public static class FlexLayoutHelper
 
     public static LayoutNode<TLeaf> When<TLeaf>(this LayoutNode<TLeaf> node, bool condition)
     {
-        node.IsActive = condition;
+        node.isActive = condition;
         return node;
     }
 }

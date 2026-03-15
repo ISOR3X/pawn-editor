@@ -158,6 +158,7 @@ public static class FlexLayoutEngine
         var totalGap = gap * (line.Count - 1);
         var available = totalWidth - totalGap;
 
+        // Distribute space based on flexBasis.
         var remaining = available;
         for (var i = 0; i < line.Count; i++)
         {
@@ -166,10 +167,18 @@ public static class FlexLayoutEngine
             remaining -= widths[i];
         }
 
+        // Distribute remaining space.
         var totalGrow = line.Sum(n => n.flexGrow);
         if (totalGrow > 0f && remaining > 0f)
             for (var i = 0; i < line.Count; i++)
                 widths[i] += line[i].flexGrow / totalGrow * remaining;
+        
+        // Make sure widths are never beyond their maxWidth.
+        for (var i = 0; i < line.Count; i++)
+        {
+            var max = line[i].maxWidth > 1f ? line[i].maxWidth : line[i].maxWidth * totalWidth;
+            widths[i] = Mathf.Min(widths[i], max);
+        }
 
         return widths;
     }
@@ -179,7 +188,7 @@ public static class FlexLayoutEngine
         if (node.IsLeaf)
             return node.leaf == null || isVisible == null || isVisible(node.leaf);
         if (node is FlexLayoutNode<TLeaf> flex)
-            return flex.children.Any(c => c.IsActive && HasVisibleContent(c, isVisible));
+            return flex.children.Any(c => c.isActive && HasVisibleContent(c, isVisible));
         return false;
     }
 
@@ -187,6 +196,6 @@ public static class FlexLayoutEngine
         FlexLayoutNode<TLeaf> node,
         Func<TLeaf, bool>? isVisible)
     {
-        return node.children.Where(c => c.IsActive && HasVisibleContent(c, isVisible)).ToList();
+        return node.children.Where(c => c.isActive && HasVisibleContent(c, isVisible)).ToList();
     }
 }
