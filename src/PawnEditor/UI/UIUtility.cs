@@ -276,9 +276,9 @@ public static class UIUtility
         return right;
     }
 
-    public static bool ButtonTextLabeled(Rect rect, string label, string buttonLabel)
+    public static bool ButtonTextLabeled(Rect rect, string label, string buttonLabel, float? labelWidth = null)
     {
-        var right = RectLabeled(rect, label);
+        var right = RectLabeled(rect, label, labelWidth);
         return Verse.Widgets.ButtonText(right, buttonLabel);
     }
 

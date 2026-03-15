@@ -37,6 +37,30 @@ public abstract class TableWorker<T> where T : class
 
     private float? _rowHeightOverride;
 
+    #region Properties
+
+    public ColumnWorker<T>? SortingBy { get; private set; }
+
+    public bool SortingDescending => SortingBy != null && _sortDescending;
+
+    public float HeaderHeight
+    {
+        get
+        {
+            RecacheIfDirty();
+            return _cachedHeaderHeight;
+        }
+    }
+
+    public List<T> ThingListForReading
+    {
+        get
+        {
+            RecacheIfDirty();
+            return _cachedThings;
+        }
+    }
+
     public float RowHeight
     {
         get => _rowHeightOverride ?? _def.defaultRowHeight;
@@ -47,10 +71,12 @@ public abstract class TableWorker<T> where T : class
         }
     }
 
-    public Rect BoundRect
-    {
-        get => new Rect(0, 0, _cachedSize.x, _cachedSize.y);
-    }
+    public Rect BoundRect => new(0, 0, _cachedSize.x, _cachedSize.y);
+
+    protected abstract IEnumerable<ColumnWorker<T>> AllColumns { get; }
+
+    #endregion
+
 
     protected TableWorker(
         TableDef def,
@@ -63,11 +89,6 @@ public abstract class TableWorker<T> where T : class
         SetDirty();
     }
 
-    /// <summary>
-    /// All column workers for this table. Implemented by concrete subclasses
-    /// (e.g. <see cref="DefTableWorker"/>) which know the typed column Def list.
-    /// </summary>
-    protected abstract IEnumerable<ColumnWorker<T>> AllColumns { get; }
 
     private void TableOnGUI(Vector2 position)
     {
@@ -106,14 +127,7 @@ public abstract class TableWorker<T> where T : class
             for (var thingIndex = 0; thingIndex < _cachedThings.Count; ++thingIndex)
             {
                 var cachedRowHeight = _cachedRowHeights[thingIndex];
-                if (_def.doAlternateStyle)
-                {
-                    using (new GUIColor(_borderColor))
-                    {
-                        Verse.Widgets.DrawLineHorizontal(x, y, columnWidth);
-                    }
-                }
-                else if (thingIndex % 2 == 1)
+                if (thingIndex % 2 == 1)
                 {
                     var x2 = x;
                     var num4 = columnWidth;
@@ -187,7 +201,7 @@ public abstract class TableWorker<T> where T : class
         Verse.Widgets.EndScrollView();
     }
 
-    protected virtual void DoRow(ColumnWorker<T> columnWorker, Rect cellRect, T cachedThing)
+    protected void DoRow(ColumnWorker<T> columnWorker, Rect cellRect, T cachedThing)
     {
         columnWorker.DoCell(cellRect, cachedThing, this);
     }
@@ -328,50 +342,6 @@ public abstract class TableWorker<T> where T : class
     {
         return CalculateHeaderHeight() + _cachedThings.Sum(CalculateRowHeight);
     }
-
-    #region Properties
-
-    public ColumnWorker<T>? SortingBy { get; private set; }
-
-    public bool SortingDescending => SortingBy != null && _sortDescending;
-
-    public Vector2 Size
-    {
-        get
-        {
-            RecacheIfDirty();
-            return _cachedSize;
-        }
-    }
-
-    public float HeightNoScrollbar
-    {
-        get
-        {
-            RecacheIfDirty();
-            return _cachedHeightNoScrollbar;
-        }
-    }
-
-    public float HeaderHeight
-    {
-        get
-        {
-            RecacheIfDirty();
-            return _cachedHeaderHeight;
-        }
-    }
-
-    public List<T> ThingListForReading
-    {
-        get
-        {
-            RecacheIfDirty();
-            return _cachedThings;
-        }
-    }
-
-    #endregion
 
 
     private void RecacheColumnWidths()
