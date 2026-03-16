@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
+[HotSwappable]
 public class DefTableWorker_Hair(DefTableDef def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
     : DefTableWorker(def, thingsGetter, defaultThing)
 {
     protected override void OnSelectChanged(Def thing)
     {
+        base.OnSelectChanged(thing);
         var p = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         if (p == null) return;
         switch (thing)

@@ -14,6 +14,9 @@ public class SectionWorker_Apparel(SectionDef def) : SectionWorker_ThingTable(de
     protected override IEnumerable<Thing> GetThings()
     {
         var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
-        return pawn?.apparel.WornApparel.Cast<Thing>() ?? [];
+        List<Thing> app = [];
+        for (var i = 0; i < 10; i++)
+            app.AddRange(pawn?.apparel.WornApparel ?? []);
+        return app;
     }
 }

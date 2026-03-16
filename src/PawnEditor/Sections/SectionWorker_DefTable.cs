@@ -11,7 +11,7 @@ namespace PawnEditor;
 public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def)
 {
     private const int RowCount = 11;
-    private float _rowHeight = 30f;
+    private const float RowHeight = 30f;
 
     protected abstract DefTableDef TableDef { get; }
     protected abstract string Label { get; }
@@ -35,14 +35,14 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
         // {
         //     Table.RowHeight = 60f;
         // }
-        var rowCount = Math.Min(Table.ThingListForReading.Count, RowCount);
+        var rowCount = Math.Clamp(Table.ThingListForReading.Count, 1, RowCount);
         var tableRect = listing.GetRect(
-            Table.HeaderHeight + rowCount * _rowHeight + UIUtility.ButtonHeight + 4f);
+            Table.HeaderHeight + RowCount * RowHeight + UIUtility.ButtonHeight + 4f);
 
-        if (CanShowTable(pawn))
-            Table.TableOnGUI(tableRect);
-        else
-            using (new TextBlock(TextAnchor.MiddleCenter))
-                Verse.Widgets.Label(tableRect, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
+        Table.TableOnGUI(tableRect);
+        // if (CanShowTable(pawn))
+        // else
+        //     using (new TextBlock(TextAnchor.MiddleCenter))
+        //         Verse.Widgets.Label(tableRect, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
     }
 }

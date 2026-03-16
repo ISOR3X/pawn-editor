@@ -16,7 +16,7 @@ public abstract class ColumnWorker<T> where T : class
         SortingDescendingIcon = ContentFinder<Texture2D>.Get("UI/Icons/SortingDescending");
 
     public required ColumnDef Def;
-    protected virtual TextAnchor HeaderLabelAlignment => TextAnchor.LowerCenter;
+    protected virtual TextAnchor HeaderLabelAlignment => TextAnchor.MiddleCenter;
 
     protected virtual Color HeaderColor => Color.white;
     protected virtual GameFont HeaderFont => GameFont.Small;

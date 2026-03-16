@@ -36,15 +36,14 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
         }
 
         listing.LabelH2(Label);
-        var rowCount = Math.Min(Table.ThingListForReading.Count, RowCount);
+        var rowCount = Math.Clamp(Table.ThingListForReading.Count, 1, RowCount);
         var tableRect = listing.GetRect(
             Table.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f);
 
-        if (CanShowTable(pawn))
-            Table.TableOnGUI(tableRect);
-        else
-            using (new TextBlock(TextAnchor.MiddleCenter))
-                Verse.Widgets.Label(tableRect, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
+        Table.TableOnGUI(tableRect);
+        // if (CanShowTable(pawn))
+        // else
+        //     using (new TextBlock(TextAnchor.MiddleCenter))
+        //         Verse.Widgets.Label(tableRect, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
     }
-    
 }

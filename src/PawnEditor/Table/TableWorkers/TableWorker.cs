@@ -7,6 +7,7 @@ using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace PawnEditor;
 
@@ -14,7 +15,6 @@ namespace PawnEditor;
 public abstract class TableWorker<T> where T : class
 {
     public const float DefaultRowHeight = 30f;
-    private const float ScrollbarWidth = 16f;
 
     private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
     private readonly List<ColumnWorker<T>> _cachedColumns = [];
@@ -26,11 +26,9 @@ public abstract class TableWorker<T> where T : class
     private readonly List<float> _cachedRowYPositions = [];
 
     private readonly TableDef _def;
-    private readonly T? _default;
     private readonly QuickSearchWidget _quickSearchWidget = new();
     private readonly Func<IEnumerable<T>> _thingsGetter;
     private float _cachedHeaderHeight;
-    private float _cachedHeightNoScrollbar;
     private Vector2 _cachedSize;
     private List<T> _cachedThings = [];
     private bool _dirty;
@@ -87,116 +85,14 @@ public abstract class TableWorker<T> where T : class
         T? defaultThing = null)
     {
         _def = def;
-        _default = defaultThing;
+        _selected = defaultThing;
         _thingsGetter = thingsGetter;
         SetDirty();
     }
 
-
-    private void TableOnGUI(Vector2 position)
-    {
-        if (Event.current.type == EventType.Layout)
-            return;
-        RecacheIfDirty();
-
-        // --- Header ---
-        var availableWidth = _cachedSize.x - UIUtility.ScrollBarWidth;
-        var headerX = 0;
-        for (var colIndex = 0; colIndex < _cachedColumns.Count; ++colIndex)
-        {
-            var width = colIndex != _cachedColumns.Count - 1
-                ? (int)_cachedColumnWidths[colIndex]
-                : (int)(availableWidth - headerX);
-            var rect = new Rect((int)position.x + headerX, (int)position.y, width, (int)_cachedHeaderHeight);
-            _cachedColumns[colIndex].DoHeader(rect, this);
-            headerX += width;
-        }
-
-        using (new GUIColor(_borderColor))
-            Verse.Widgets.DrawLineHorizontal(position.x, position.y + _cachedHeaderHeight, headerX);
-
-        // --- Scroll view ---
-        var outRect = new Rect(
-            (int)position.x,
-            (int)position.y + (int)_cachedHeaderHeight,
-            (int)_cachedSize.x,
-            (int)_cachedSize.y - (int)_cachedHeaderHeight);
-
-        var contentHeight = _cachedRowYPositions.Count > 0
-            ? _cachedRowYPositions[^1]
-            : 0f;
-        var viewRect = new Rect(0f, 0f, outRect.width - 16f, (int)contentHeight);
-
-        Verse.Widgets.BeginScrollView(outRect, ref _scrollPosition, viewRect);
-
-        var visibleTop = _scrollPosition.y;
-        var visibleBottom = _scrollPosition.y + outRect.height;
-
-        // Row-major loop: process one row at a time across all columns.
-        for (var rowIndex = 0; rowIndex < _cachedThings.Count; ++rowIndex)
-        {
-            var rowY = _cachedRowYPositions[rowIndex];
-            var rowHeight = _cachedRowHeights[rowIndex];
-
-            // Skip rows above the viewport.
-            if (rowY + rowHeight < visibleTop)
-                continue;
-
-            // All further rows are below the viewport — stop entirely.
-            if (rowY > visibleBottom)
-                break;
-
-            var thing = _cachedThings[rowIndex];
-            var rowRect = new Rect(0f, rowY, viewRect.width, (int)rowHeight);
-
-            // Hover highlight + hover callback (replaces the separate hover pass).
-            if (Mouse.IsOver(rowRect))
-            {
-                GUI.DrawTexture(rowRect, TexUI.HighlightTex);
-                DoRowHover(rowRect, thing);
-            }
-
-            // Selection highlight.
-            if (_selected == thing)
-                Verse.Widgets.DrawHighlightSelected(rowRect);
-
-            // Per-column cells.
-            var cellX = 0;
-            for (var colIndex = 0; colIndex < _cachedColumns.Count; ++colIndex)
-            {
-                var columnWorker = _cachedColumns[colIndex];
-                var columnWidth = (int)_cachedColumnWidths[colIndex];
-                var cellRect = new Rect(cellX, rowY, columnWidth, (int)rowHeight);
-
-                // Alternating the row background (per column, respecting icon offset).
-                if (rowIndex % 2 == 1)
-                {
-                    var bgX = cellX;
-                    var bgW = columnWidth;
-                    if (columnWorker.Def.showIcon)
-                    {
-                        bgX += (int)rowHeight;
-                        bgW -= (int)rowHeight;
-                    }
-                    Verse.Widgets.DrawLightHighlight(new Rect(bgX, rowY, bgW, rowHeight));
-                }
-                
-                columnWorker.DoCell(cellRect, thing, this);
-                
-                cellX += columnWidth;
-            }
-
-            // Click handler for the full row.
-            if (Verse.Widgets.ButtonInvisible(rowRect))
-                OnRowClicked(thing);
-        }
-
-        Verse.Widgets.EndScrollView();
-    }
-
     public void TableOnGUI(Rect inRect)
     {
-        if (_def.SearchColumn != null)
+        if (_def.SearchColumn != null && inRect.height < 9000f)
         {
             var footerRect = inRect.TakeBottomPart(UIUtility.ButtonHeight);
             inRect.yMax -= 4f;
@@ -208,10 +104,84 @@ public abstract class TableWorker<T> where T : class
             _cachedSize = inRect.size;
             SetDirty();
         }
-        
-        var position = inRect.position;
 
-        TableOnGUI(inRect.position);
+        if (Event.current.type == EventType.Layout)
+            return;
+        RecacheIfDirty();
+
+        // --- Header ---
+        var headerRect = inRect.TakeTopPart(_cachedHeaderHeight);
+
+        using (new GUIColor(_borderColor))
+            Verse.Widgets.DrawLineHorizontal(headerRect.x, headerRect.yMax, inRect.width);
+
+        for (var colIndex = 0; colIndex < _cachedColumns.Count; ++colIndex)
+        {
+            var headerColRect = headerRect.TakeLeftPart(_cachedColumnWidths[colIndex]);
+            _cachedColumns[colIndex].DoHeader(headerColRect, this);
+        }
+        
+        // --- Scroll view ---
+        var contentHeight = _cachedThings.Count > 0 ? _cachedRowYPositions[^1] : UIUtility.ButtonHeight;
+        var viewRect = new Rect(0f, 0f, inRect.width - UIUtility.ScrollBarWidth, contentHeight);
+
+        Verse.Widgets.BeginScrollView(inRect, ref _scrollPosition, viewRect);
+
+        var visibleTop = _scrollPosition.y;
+        var visibleBottom = _scrollPosition.y + inRect.height;
+
+        if (_cachedThings.Count == 0)
+        {
+            using (new GUIColor(ColoredText.SubtleGrayColor))
+            using (new TextBlock(TextAnchor.MiddleCenter))
+                Verse.Widgets.Label(viewRect, "No results");
+        }
+
+        for (var rowIndex = 0; rowIndex < _cachedThings.Count; ++rowIndex)
+        {
+            var rowY = _cachedRowYPositions[rowIndex];
+            var rowHeight = _cachedRowHeights[rowIndex];
+
+            // Skip rows above the viewport.
+            if (rowY + rowHeight < visibleTop)
+                continue;
+
+            // All further rows are below the viewport, stop entirely.
+            if (rowY > visibleBottom)
+                break;
+
+            var thing = _cachedThings[rowIndex];
+            var rowRect = new Rect(0f, rowY, viewRect.width, rowHeight);
+
+            // Row highlights
+            if (_selected == thing && _def.highlightSelected)
+                Verse.Widgets.DrawHighlightSelected(rowRect);
+            else if (rowIndex % 2 == 1)
+            {
+                Verse.Widgets.DrawLightHighlight(rowRect);
+            }
+
+            if (Mouse.IsOver(rowRect))
+            {
+                GUI.DrawTexture(rowRect, TexUI.HighlightTex);
+                DoRowHover(rowRect, thing);
+            }
+
+            // Click handler for the full row.
+            if (Verse.Widgets.ButtonInvisible(rowRect)) OnRowClicked(thing);
+
+
+            for (var colIndex = 0; colIndex < _cachedColumns.Count; ++colIndex)
+            {
+                var columnWorker = _cachedColumns[colIndex];
+                var columnWidth = (int)_cachedColumnWidths[colIndex];
+                var cellRect = rowRect.TakeLeftPart(columnWidth);
+
+                columnWorker.DoCell(cellRect, thing, this);
+            }
+        }
+
+        Verse.Widgets.EndScrollView();
     }
 
     protected virtual void OnSelectChanged(T thing)
@@ -220,11 +190,10 @@ public abstract class TableWorker<T> where T : class
 
     protected virtual void OnRowClicked(T thing)
     {
-        if (!_def.highlightSelected) return;
-        if (_selected != thing)
-            _selected = thing;
-        else if (_default != null) _selected = _default;
-        if (_selected != null) OnSelectChanged(_selected);
+        if (_selected == null || _selected == thing) return;
+        SoundDefOf.Click.PlayOneShotOnCamera();
+        _selected = thing;
+        OnSelectChanged(_selected);
     }
 
     public void SetDirty()
@@ -252,7 +221,6 @@ public abstract class TableWorker<T> where T : class
         RecacheThings();
         RecacheRowHeights();
         _cachedHeaderHeight = CalculateHeaderHeight();
-        _cachedHeightNoScrollbar = CalculateTotalRequiredHeight();
         RecacheColumnWidths();
     }
 
@@ -285,23 +253,17 @@ public abstract class TableWorker<T> where T : class
         _cachedThings.Clear();
         _cachedThings.AddRange(_thingsGetter());
         _cachedThings = FilterBySearch(_cachedThings).ToList();
-        _cachedThings = LabelSortFunction(_cachedThings).ToList();
 
         if (SortingBy != null)
         {
-            var sortMult = SortingDescending ? -1 : 1;
-            _cachedThings.SortStable((a, b) => SortingBy.Compare(a, b) * sortMult);
+            var sortDir = SortingDescending ? -1 : 1;
+            _cachedThings.SortStable((a, b) => SortingBy.Compare(a, b) * sortDir);
         }
 
-        _cachedThings = PrimarySortFunction(_cachedThings).ToList();
+        _cachedThings = SortFunction(_cachedThings).ToList();
     }
 
-    protected virtual IEnumerable<T> LabelSortFunction(IEnumerable<T> input)
-    {
-        return input;
-    }
-
-    protected virtual IEnumerable<T> PrimarySortFunction(IEnumerable<T> input)
+    protected virtual IEnumerable<T> SortFunction(IEnumerable<T> input)
     {
         return input;
     }
@@ -334,14 +296,9 @@ public abstract class TableWorker<T> where T : class
         return _cachedColumns.Aggregate(0.0f, (current, t) => Mathf.Max(current, t.GetMinHeaderHeight(this)));
     }
 
-    private float CalculateTotalRequiredHeight()
-    {
-        return CalculateHeaderHeight() + _cachedThings.Sum(CalculateRowHeight);
-    }
-
     private void RecacheColumnWidths()
     {
-        var available = _cachedSize.x - ScrollbarWidth;
+        var available = _cachedSize.x - UIUtility.ScrollBarWidth;
 
         var line = _cachedColumns.Select(col => new LayoutNode<ColumnWorker<T>>
         {

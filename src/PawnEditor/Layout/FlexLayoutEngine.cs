@@ -38,6 +38,8 @@ public static class FlexLayoutEngine
         {
             var widths = ResolveWidths(lines[i], rect.width, gap);
 
+            var savedState = GUIUtility.hotControl;
+            var savedKeyboard = GUIUtility.keyboardControl;
             // Measuring pass: draw offscreen just to get heights.
             var lineHeight = 0f;
             for (var j = 0; j < lines[i].Count; j++)
@@ -46,6 +48,8 @@ public static class FlexLayoutEngine
                         new Rect(LayoutEngineUtility.OffscreenOffset, LayoutEngineUtility.OffscreenOffset,
                             widths[j], LayoutEngineUtility.Height),
                         runLeaf, isVisible));
+            GUIUtility.hotControl = savedState;
+            GUIUtility.keyboardControl = savedKeyboard;
 
             // Drawing pass: now we know the line height.
             var curX = rect.x;
@@ -79,6 +83,7 @@ public static class FlexLayoutEngine
         var hasKnownHeight = rect.height < LayoutEngineUtility.Height;
         var remaining = hasKnownHeight ? rect.height - fixedTotal : 0f;
 
+        // Measuring pass: draw offscreen just to get heights.
         for (var i = 0; i < active.Count; i++)
         {
             var c = active[i];
@@ -96,6 +101,7 @@ public static class FlexLayoutEngine
             heights[i] = h;
         }
 
+        // Drawing pass: now we know the line height.
         var curY = rect.y;
         for (var i = 0; i < active.Count; i++)
         {
@@ -176,8 +182,7 @@ public static class FlexLayoutEngine
             return group.children.Any(c => c.isActive() && HasVisibleContent(c, isVisible));
         return false;
     }
-
-    // Accepts GroupLayoutNode so both FlexLayoutNode and GridLayoutNode can use it.
+    
     internal static List<LayoutNode<TLeaf>> ActiveChildren<TLeaf>(
         GroupLayoutNode<TLeaf> node,
         Func<TLeaf, bool>? isVisible)
