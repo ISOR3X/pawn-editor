@@ -5,6 +5,7 @@ using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using L = PawnEditor.Layout.LayoutHelper;
 
 namespace PawnEditor;
 
@@ -19,12 +20,12 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
 
     public override void DoWindowContents(Rect inRect)
     {
-        var layout = LayoutHelper.Row([
+        var layout = L.Grid([GridTrack.Fr(), GridTrack.Fr(2), GridTrack.Fr(), GridTrack.Fr(2)], children:
+        [
             // Stuff
-            LayoutHelper.Cell(rect =>
+            ..L.LabeledWidget("Stuff", rect =>
             {
-                if (UIUtility.ButtonTextLabeled_WithIcon(rect, "StatsReport_Material".Translate(),
-                        thing.Stuff.LabelCap, Verse.Widgets.GetIconFor(thing.Stuff),
+                if (UIUtility.ButtonText_WithIcon(rect, thing.Stuff.LabelCap, Verse.Widgets.GetIconFor(thing.Stuff),
                         thing.Stuff.stuffProps.color))
                 {
                     Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(thing.def)
@@ -39,44 +40,42 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         ))
                         .ToList()));
                 }
-            }).When(() => thing.def.MadeFromStuff),
+            }, () => thing.def.MadeFromStuff),
             // Quality
-            LayoutHelper.Cell(rect =>
+            ..L.LabeledWidget("Quality", rect =>
             {
                 var compQuality = thing.TryGetComp<CompQuality>();
-                if (UIUtility.ButtonTextLabeled(rect, "Quality", compQuality.Quality.GetLabel().CapitalizeFirst()))
+                if (Verse.Widgets.ButtonText(rect, compQuality.Quality.GetLabel().CapitalizeFirst()))
                 {
                     Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories.Select(quality =>
                             new FloatMenuOption(quality.GetLabel().CapitalizeFirst(),
                                 () => { compQuality.SetQuality(quality, ArtGenerationContext.Outsider); }))
                         .ToList()));
                 }
-            }).When(thing.HasComp<CompQuality>),
+            }, thing.HasComp<CompQuality>),
             // Color
-            LayoutHelper.Cell(rect =>
+            ..L.LabeledWidget("Color", rect =>
             {
                 var apparel = thing as Apparel;
-                var widgetRect = UIUtility.RectLabeled(rect, "Color");
-                var colorRect = widgetRect.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
+                var colorRect = rect.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
                 var curColor = apparel?.DrawColor ?? Color.white;
 
                 Verse.Widgets.DrawLightHighlight(colorRect);
                 colorRect = colorRect.ContractedBy(2f);
                 Verse.Widgets.DrawRectFast(colorRect, curColor);
-                widgetRect.xMax -= 2f;
-                if (Verse.Widgets.ButtonText(widgetRect, "Pick color"))
+                rect.xMax -= 2f;
+                if (Verse.Widgets.ButtonText(rect, "Pick color"))
                 {
                     Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel.SetColor(color), curColor,
                         DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList()));
                 }
-            }).When(() => thing is Apparel && thing.HasComp<CompColorable>()),
+            }, () => thing is Apparel && thing.HasComp<CompColorable>()),
             // Style
-            LayoutHelper.Cell(rect =>
+            ..L.LabeledWidget("Style", rect =>
             {
                 var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def).styleDefs;
                 var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
-                if (UIUtility.ButtonTextLabeled_WithIcon(rect, "Stat_Thing_StyleLabel".Translate(),
-                        currentStyle.Value?.LabelCap ?? "None",
+                if (UIUtility.ButtonText_WithIcon(rect, currentStyle.Value?.LabelCap ?? "None",
                         currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex))
                 {
                     Find.WindowStack.Add(new FloatMenu(styleOptions.Select(style =>
@@ -92,45 +91,36 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         }))
                         .ToList()));
                 }
-            }).When(() => ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def)),
-            // Hit points
-            LayoutHelper.Cell(rect =>
+            }, () => ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def)),
+            // Hitpoints
+            ..L.LabeledWidget("Hitpoints", rect =>
             {
-                var widgetRect = UIUtility.RectLabeled(rect, "Hitpoints");
-
                 float hitPoints = thing.HitPoints;
                 float maxHitPoints = thing.MaxHitPoints;
 
-                thing.HitPoints = Mathf.CeilToInt(Verse.Widgets.HorizontalSlider(widgetRect, thing.HitPoints, 1,
+                thing.HitPoints = Mathf.CeilToInt(Verse.Widgets.HorizontalSlider(rect, thing.HitPoints, 1,
                     thing.MaxHitPoints, true,
                     (hitPoints / maxHitPoints).ToStringPercent()));
             }),
             // Tainted
-            LayoutHelper.Cell(rect =>
+            L.Cell(rect =>
             {
-                var widgetRect = UIUtility.RectLabeled(rect, "Tainted")
-                    .CenteredHorizontally(Verse.Widgets.CheckboxSize);
-
                 var apparel = thing as Apparel;
                 var isTainted = apparel!.WornByCorpse;
 
-                Verse.Widgets.Checkbox(widgetRect.position, ref isTainted);
+                Verse.Widgets.CheckboxLabeled(rect, "Tainted", ref isTainted);
                 if (isTainted != apparel.WornByCorpse) apparel.WornByCorpse = isTainted;
-            }).When(() => thing is Apparel),
+            }, colSpan: 2).When(() => thing is Apparel),
             // Count
-            LayoutHelper.Cell(rect =>
+            ..L.LabeledWidget("Count", rect =>
             {
-                var widgetRect = UIUtility.RectLabeled(rect, "Count");
-
-                Widgets.DelayedTextFieldNumeric(widgetRect, thing.stackCount, ref TextfieldBuffers[0], 1,
+                Widgets.DelayedTextFieldNumeric(rect, thing.stackCount, ref TextfieldBuffers[0], 1,
                     thing.def.stackLimit, null,
                     true);
-            }).When(() => thing.def.stackLimit > 1),
+            }, () => thing.def.stackLimit > 1),
             // Persona traits
-            LayoutHelper.Cell(rect =>
+            ..L.LabeledWidget("Persona traits", rect =>
             {
-                var widgetRect = UIUtility.RectLabeled(rect, "Traits");
-
                 WeaponTraitDef? toRemove = null;
                 var bladelink = thing.TryGetComp<CompBladelinkWeapon>();
                 var traitOptions = DefDatabase<WeaponTraitDef>.AllDefs.OrderBy(t => !bladelink.CanAddTrait(t))
@@ -148,10 +138,14 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                             });
                     }).ToList();
 
-                if (Verse.Widgets.ButtonImage(widgetRect.TakeRightPart(WidgetRow.IconSize), TexButton.Add))
+                if (Verse.Widgets.ButtonImage(
+                        rect.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize), TexButton.Add))
                     Find.WindowStack.Add(new FloatMenu(traitOptions));
 
-                GenUI.DrawElementStack(widgetRect, 22f, bladelink.traits,
+                const float elementHeight = 22f;
+                const float margin = (UIUtility.ButtonHeight - elementHeight) / 2;
+                var widgetRect = rect.ContractedBy(margin);
+                var s = GenUI.DrawElementStack(widgetRect, elementHeight, bladelink.traits,
                     delegate(Rect r, WeaponTraitDef weaponTraitDef)
                     {
                         GUI.color = CharacterCardUtility.StackElementBackground;
@@ -169,32 +163,24 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                                 toRemove = weaponTraitDef;
                             }
                         }
-                    }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f, 5f);
+                    }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f, 4f);
 
                 if (toRemove != null) bladelink.traits.Remove(toRemove);
-            }, flexBasis: 1f).When(thing.HasComp<CompBladelinkWeapon>),
-            // Name
-            LayoutHelper.Cell(rect =>
+                return s.height + margin * 2;
+            }, thing.HasComp<CompBladelinkWeapon>, colSpan: 4),
+            ..L.LabeledWidget("Name", rect =>
             {
-                var widgetRect = UIUtility.RectLabeled(rect, "Name");
-
                 var name = thing.TryGetComp<CompGeneratedNames>();
 
-                if (Verse.Widgets.ButtonImage(widgetRect.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
+                if (Verse.Widgets.ButtonImage(rect.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
                     name.Initialize(name.Props);
-                name.name = Verse.Widgets.TextField(widgetRect, name.name);
-            }).When(thing.HasComp<CompGeneratedNames>),
-        ], gapX: 24f, wrap: true, childFlexBasis: 0.5f);
+                name.name = Verse.Widgets.TextField(rect, name.name);
+            }, thing.HasComp<CompGeneratedNames>),
+        ], gapX: 12f);
 
-        using (new TextBlock(GameFont.Small))
-        {
-            var height = FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
-            {
-                action(rect);
-                return UIUtility.ButtonHeight;
-            });
-            if (!Mathf.Approximately(windowRect.height, height))
-                windowRect.height = height + Margin * 2;
-        }
+        var height = layout.Draw(inRect, (action, rect) => action(rect));
+
+        if (!Mathf.Approximately(windowRect.height, height))
+            windowRect.height = height + Margin * 2;
     }
 }

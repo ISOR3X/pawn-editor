@@ -290,7 +290,7 @@ public static class UIUtility
         return ButtonText_WithIcon(right, buttonLabel, icon, color);
     }
 
-    public static bool ButtonText_WithIcon(Rect rect, string label, Texture2D icon, Color? color)
+    public static bool ButtonText_WithIcon(Rect rect, string label, Texture2D icon, Color? color = null)
     {
         const float iconSize = 20f;
         const float gap = 4f;

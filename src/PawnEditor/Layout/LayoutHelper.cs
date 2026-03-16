@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using HotSwap;
+using PawnEditor.Extensions;
 using UnityEngine;
 using Verse;
 
@@ -74,16 +75,49 @@ public static class LayoutHelper
             }
         };
 
+    public static LayoutNode<Func<Rect, float>> Cell(
+        Func<Rect, float> draw,
+        float flexBasis = 0f,
+        float flexGrow = 0f,
+        int colSpan = 1,
+        int colStart = 0)
+        => new()
+        {
+            flexBasis = flexBasis,
+            flexGrow = flexGrow,
+            colSpan = colSpan,
+            colStart = colStart,
+            leaf = draw
+        };
+
     public static IEnumerable<LayoutNode<Func<Rect, float>>> LabeledWidget(
         string label,
         Action<Rect> widget,
-        Func<bool>? when = null)
+        Func<bool>? when = null,
+        int colSpan = 2
+    )
     {
         yield return Cell(rect =>
         {
-            using (new TextBlock(TextAnchor.MiddleLeft)) Verse.Widgets.Label(rect, label);
-        }).When(when);
-        yield return Cell(widget).When(when);
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Verse.Widgets.Label(rect, label);
+        }, height: UIUtility.ButtonHeight).When(when);
+        yield return Cell(widget, colSpan: colSpan - 1).When(when);
+    }
+
+    public static IEnumerable<LayoutNode<Func<Rect, float>>> LabeledWidget(
+        string label,
+        Func<Rect, float> widget,
+        Func<bool>? when = null,
+        int colSpan = 2
+    )
+    {
+        yield return Cell(rect =>
+        {
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Verse.Widgets.Label(rect.TakeTopPart(UIUtility.ButtonHeight), label);
+        }, height: UIUtility.ButtonHeight).When(when);
+        yield return Cell(widget, colSpan: colSpan - 1).When(when);
     }
 
     public static LayoutNode<TLeaf> When<TLeaf>(this LayoutNode<TLeaf> node, Func<bool>? condition = null)

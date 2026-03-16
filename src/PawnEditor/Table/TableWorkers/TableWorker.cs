@@ -20,8 +20,6 @@ public abstract class TableWorker<T> where T : class
     private readonly List<ColumnWorker<T>> _cachedColumns = [];
     private readonly List<float> _cachedColumnWidths = [];
     private readonly List<float> _cachedRowHeights = [];
-    private readonly List<bool> _columnAtMaxWidth = [];
-    private readonly List<bool> _columnAtOptimalWidth = [];
     private readonly TableDef _def;
     private readonly T? _default;
     private readonly QuickSearchWidget _quickSearchWidget = new();
@@ -201,7 +199,7 @@ public abstract class TableWorker<T> where T : class
         Verse.Widgets.EndScrollView();
     }
 
-    protected void DoRow(ColumnWorker<T> columnWorker, Rect cellRect, T cachedThing)
+    private void DoRow(ColumnWorker<T> columnWorker, Rect cellRect, T cachedThing)
     {
         columnWorker.DoCell(cellRect, cachedThing, this);
     }

@@ -16,6 +16,6 @@ public readonly struct GridTrack
     }
     
     public static GridTrack Px(float pixels) => new(pixels, false);
-    public static GridTrack Fr(float fraction = 1f) => new(fraction, true);
+    public static GridTrack Fr(int fraction = 1) => new(fraction, true);
     public static implicit operator GridTrack(float pixels) => Px(pixels);
 }

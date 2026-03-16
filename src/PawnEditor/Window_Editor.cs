@@ -150,9 +150,7 @@ public partial class Window_Editor : Window
                 var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
                 if (UIUtility.ButtonText_WithIcon(rect, label, tex, c))
                     Find.WindowStack.Add(FactionFloatMenu());
-            }, 30f),
-
-
+            }, UIUtility.ButtonHeight),
             L.Cell(rect =>
             {
                 Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
