@@ -37,9 +37,7 @@ public static class FlexLayoutEngine
         for (var i = 0; i < lines.Count; i++)
         {
             var widths = ResolveWidths(lines[i], rect.width, gap);
-
-            var savedState = GUIUtility.hotControl;
-            var savedKeyboard = GUIUtility.keyboardControl;
+            
             // Measuring pass: draw offscreen just to get heights.
             var lineHeight = 0f;
             for (var j = 0; j < lines[i].Count; j++)
@@ -48,8 +46,6 @@ public static class FlexLayoutEngine
                         new Rect(LayoutEngineUtility.OffscreenOffset, LayoutEngineUtility.OffscreenOffset,
                             widths[j], LayoutEngineUtility.Height),
                         runLeaf, isVisible));
-            GUIUtility.hotControl = savedState;
-            GUIUtility.keyboardControl = savedKeyboard;
 
             // Drawing pass: now we know the line height.
             var curX = rect.x;
