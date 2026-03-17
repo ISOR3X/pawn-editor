@@ -120,7 +120,7 @@ public abstract class TableWorker<T> where T : class
             var headerColRect = headerRect.TakeLeftPart(_cachedColumnWidths[colIndex]);
             _cachedColumns[colIndex].DoHeader(headerColRect, this);
         }
-        
+
         // --- Scroll view ---
         var contentHeight = _cachedThings.Count > 0 ? _cachedRowYPositions[^1] : UIUtility.ButtonHeight;
         var viewRect = new Rect(0f, 0f, inRect.width - UIUtility.ScrollBarWidth, contentHeight);
@@ -133,8 +133,8 @@ public abstract class TableWorker<T> where T : class
         if (_cachedThings.Count == 0)
         {
             using (new GUIColor(ColoredText.SubtleGrayColor))
-            using (new TextBlock(TextAnchor.MiddleCenter))
-                Verse.Widgets.Label(viewRect, "No results");
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Verse.Widgets.Label(viewRect, "No results available.");
         }
 
         for (var rowIndex = 0; rowIndex < _cachedThings.Count; ++rowIndex)
@@ -167,9 +167,9 @@ public abstract class TableWorker<T> where T : class
                 DoRowHover(rowRect, thing);
             }
 
-            // Click handler for the full row.
-            if (Verse.Widgets.ButtonInvisible(rowRect)) OnRowClicked(thing);
-
+            // Click handler for the full row. We can't use Widgets.InvisibleButton as that consumes the click event.
+            if (Event.current.type == EventType.MouseDown && rowRect.Contains(Event.current.mousePosition))
+                OnRowClicked(thing);
 
             for (var colIndex = 0; colIndex < _cachedColumns.Count; ++colIndex)
             {
@@ -184,7 +184,7 @@ public abstract class TableWorker<T> where T : class
         Verse.Widgets.EndScrollView();
     }
 
-    protected virtual void OnSelectChanged(T thing)
+    protected virtual void OnSelectChanged(T? thing)
     {
     }
 
@@ -192,6 +192,12 @@ public abstract class TableWorker<T> where T : class
     {
         if (_selected == null || _selected == thing) return;
         SoundDefOf.Click.PlayOneShotOnCamera();
+        _selected = thing;
+        OnSelectChanged(_selected);
+    }
+
+    public void SetSelected(T? thing)
+    {
         _selected = thing;
         OnSelectChanged(_selected);
     }
@@ -251,16 +257,16 @@ public abstract class TableWorker<T> where T : class
     private void RecacheThings()
     {
         _cachedThings.Clear();
-        _cachedThings.AddRange(_thingsGetter());
-        _cachedThings = FilterBySearch(_cachedThings).ToList();
+        var things = _thingsGetter();
+        things = FilterBySearch(things).ToList();
+        things = SortFunction(things).ToList();
+        _cachedThings.AddRange(things);
 
         if (SortingBy != null)
         {
             var sortDir = SortingDescending ? -1 : 1;
             _cachedThings.SortStable((a, b) => SortingBy.Compare(a, b) * sortDir);
         }
-
-        _cachedThings = SortFunction(_cachedThings).ToList();
     }
 
     protected virtual IEnumerable<T> SortFunction(IEnumerable<T> input)
@@ -313,10 +319,4 @@ public abstract class TableWorker<T> where T : class
         _cachedColumnWidths.Clear();
         _cachedColumnWidths.AddRange(widths);
     }
-}
-
-public abstract class DefTableWorker(DefTableDef def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
-    : TableWorker<Def>(def, thingsGetter, defaultThing)
-{
-    protected override IEnumerable<ColumnWorker<Def>> AllColumns => def.columns.Select(c => c.Worker);
 }

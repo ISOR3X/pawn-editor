@@ -14,10 +14,10 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
 {
     protected override Window? Owner => Find.WindowStack.WindowOfType<Window_Editor>();
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
+    protected override Vector2 InitialPositionShift => Vector2.zero;
     protected override bool UseWidgetWidth => true;
 
     private static readonly string?[] TextfieldBuffers = new string[2];
-
     public override void DoWindowContents(Rect inRect)
     {
         var layout = L.Grid([GridTrack.Fr(), GridTrack.Fr(2), GridTrack.Fr(), GridTrack.Fr(2)], children:
@@ -163,7 +163,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                                 toRemove = weaponTraitDef;
                             }
                         }
-                    }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f, 4f);
+                    }, weaponTraitDef => Text.CalcSize(weaponTraitDef.LabelCap).x + 10f);
 
                 if (toRemove != null) bladelink.traits.Remove(toRemove);
                 return s.height + margin * 2;

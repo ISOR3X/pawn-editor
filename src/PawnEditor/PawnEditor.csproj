@@ -126,6 +126,7 @@
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Label.cs" />
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Mass.cs" />
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Stuff.cs" />
+        <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker.cs" />
         <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker_Hair.cs" />
         <Compile Include="Table\TableWorkers\TableWorker.cs" />
         <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker.cs" />

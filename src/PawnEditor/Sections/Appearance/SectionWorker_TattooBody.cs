@@ -11,8 +11,9 @@ public class SectionWorker_TattooBody(SectionDef def) : SectionWorker_DefTable(d
 {
     protected override DefTableDef TableDef => TableDefOf.PawnEditor_BodyTattoos;
     protected override string Label => "Body";
-    protected override Def? DefaultDef => TattooDefOf.NoTattoo_Body;
+    protected override Def DefaultDef => TattooDefOf.NoTattoo_Body;
 
     protected override IEnumerable<Def> GetDefs() =>
         DefDatabase<TattooDef>.AllDefsListForReading.Where(t => t.tattooType == TattooType.Body);
+    protected override Def GetDefaultSelectedDef(Pawn p) => p.style.BodyTattoo;
 }

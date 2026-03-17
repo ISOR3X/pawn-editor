@@ -10,13 +10,16 @@ namespace PawnEditor.Layout;
 public class FlexLayoutNode<TLeaf> : GroupLayoutNode<TLeaf>
 {
     public FlexDirection direction = FlexDirection.Col;
-    
+
     public float? childFlexBasis;
     public float? childFlexGrow;
 
     protected Dictionary<string, Func<LayoutNode<TLeaf>>>? registry;
     private FlexLayoutNode<TLeaf>? _root;
     public bool wrap;
+
+    public float[]? cachedLineHeights;
+    public float[]? cachedChildHeights;
 
     private LayoutNode<TLeaf>? Create(string tag)
     {
@@ -70,7 +73,7 @@ public class FlexLayoutNode<TLeaf> : GroupLayoutNode<TLeaf>
                 child.flexGrow = childFlexGrow.Value;
         }
     }
-    
+
     public float Draw(Rect rect, Func<TLeaf, Rect, float> runLeaf, Func<TLeaf, bool>? isVisible = null)
         => FlexLayoutEngine.Draw(this, rect, runLeaf, isVisible);
 }

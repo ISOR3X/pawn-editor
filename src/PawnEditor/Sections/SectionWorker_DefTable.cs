@@ -13,36 +13,41 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
     private const int RowCount = 11;
     private const float RowHeight = 30f;
 
+    private Pawn? _lastPawn;
+
     protected abstract DefTableDef TableDef { get; }
     protected abstract string Label { get; }
-    protected abstract Def? DefaultDef { get; }
+    protected abstract Def DefaultDef { get; }
     protected abstract IEnumerable<Def> GetDefs();
+
+    protected virtual Def GetDefaultSelectedDef(Pawn p) => DefaultDef;
 
     private DefTableWorker Table => field ??= (DefTableWorker)Activator.CreateInstance(
         TableDef.workerClass, TableDef, (Func<IEnumerable<Def>>)GetDefs, DefaultDef);
 
-    protected virtual bool CanShowTable(Pawn pawn) => Table.ThingListForReading.Count > 0;
+    protected virtual bool ShowTableForPawn(Pawn pawn) => true;
 
     protected virtual string GetUnavailableLabel(Pawn pawn) =>
-        $"No {Label.ToLower()} available for {pawn.Name.ToStringShort}";
+        $"No {Label.ToLower()}s available for {pawn.Name.ToStringShort}";
 
     protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
     {
-        var r = listing.LabelH2(Label);
-        // TODO: Add button to view table in larger separate window.
-        // var iconRect = r.TakeRightPart(WidgetRow.IconSize);
-        // if (Verse.Widgets.ButtonImage(iconRect.CenteredVertically(WidgetRow.IconSize), TexButton.Add))
-        // {
-        //     Table.RowHeight = 60f;
-        // }
+        if (_lastPawn != pawn)
+        {
+            _lastPawn = pawn;
+            Table.SetDirty();
+            Table.SetSelected(GetDefaultSelectedDef(pawn));
+        }
+
+        listing.LabelH2(Label);
         var rowCount = Math.Clamp(Table.ThingListForReading.Count, 1, RowCount);
         var tableRect = listing.GetRect(
-            Table.HeaderHeight + RowCount * RowHeight + UIUtility.ButtonHeight + 4f);
+            Table.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f);
 
-        Table.TableOnGUI(tableRect);
-        // if (CanShowTable(pawn))
-        // else
-        //     using (new TextBlock(TextAnchor.MiddleCenter))
-        //         Verse.Widgets.Label(tableRect, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
+        if (ShowTableForPawn(pawn))
+            Table.TableOnGUI(tableRect);
+        else
+            using (new TextBlock(TextAnchor.MiddleCenter))
+                Verse.Widgets.Label(tableRect, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
     }
 }

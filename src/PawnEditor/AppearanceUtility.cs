@@ -126,4 +126,12 @@ public static class AppearanceUtility
         pawn.story.hairDef = hairDef;
         pawn.style.Notify_StyleItemChanged();
     }
+
+    public static void TrySetBodyTattooFor(TattooDef tattooDef, Pawn pawn)
+    {
+        if (tattooDef.tattooType == TattooType.Body)
+            pawn.style.BodyTattoo = tattooDef;
+        else
+            pawn.style.FaceTattoo = tattooDef;
+    }
 }

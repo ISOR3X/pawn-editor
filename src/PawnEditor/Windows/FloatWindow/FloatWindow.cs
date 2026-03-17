@@ -8,7 +8,7 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class FloatWindow : Window
 {
-    private static readonly Vector2 InitialPositionShift = new(0, 8f);
+    protected virtual Vector2 InitialPositionShift => new(0, 8f);
     protected virtual bool UseWidgetWidth => false;
     private readonly Rect _boundWidgetRect;
     private Window? _ownerInstance;
@@ -95,7 +95,6 @@ public abstract class FloatWindow : Window
         if (_ownerInstance != null && !Find.WindowStack.IsOpen(_ownerInstance))
             Close(false);
     }
-
 
     public static void ToggleState<T>(Rect widgetRect, Func<T> factory) where T : FloatWindow
     {

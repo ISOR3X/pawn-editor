@@ -11,9 +11,8 @@ namespace PawnEditor;
 public class DefTableWorker_Hair(DefTableDef def, Func<IEnumerable<Def>> thingsGetter, Def? defaultThing = null)
     : DefTableWorker(def, thingsGetter, defaultThing)
 {
-    protected override void OnSelectChanged(Def thing)
+    protected override void OnSelectChanged(Def? thing)
     {
-        base.OnSelectChanged(thing);
         var p = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         if (p == null) return;
         switch (thing)
@@ -23,6 +22,9 @@ public class DefTableWorker_Hair(DefTableDef def, Func<IEnumerable<Def>> thingsG
                 break;
             case BeardDef beardDef:
                 AppearanceUtility.TrySetBeardFor(beardDef, p);
+                break;
+            case TattooDef tattooDef:
+                AppearanceUtility.TrySetBodyTattooFor(tattooDef, p);
                 break;
         }
     }
