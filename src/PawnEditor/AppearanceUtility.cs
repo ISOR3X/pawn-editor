@@ -133,5 +133,6 @@ public static class AppearanceUtility
             pawn.style.BodyTattoo = tattooDef;
         else
             pawn.style.FaceTattoo = tattooDef;
+        pawn.style.Notify_StyleItemChanged();
     }
 }
