@@ -24,7 +24,7 @@ public class DefTableWorker_Hair(DefTableDef def, Func<IEnumerable<Def>> thingsG
                 AppearanceUtility.TrySetBeardFor(beardDef, p);
                 break;
             case TattooDef tattooDef:
-                AppearanceUtility.TrySetBodyTattooFor(tattooDef, p);
+                AppearanceUtility.TrySetTattooFor(tattooDef, p);
                 break;
         }
     }

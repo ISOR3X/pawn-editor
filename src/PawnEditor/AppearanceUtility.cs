@@ -127,7 +127,7 @@ public static class AppearanceUtility
         pawn.style.Notify_StyleItemChanged();
     }
 
-    public static void TrySetBodyTattooFor(TattooDef tattooDef, Pawn pawn)
+    public static void TrySetTattooFor(TattooDef tattooDef, Pawn pawn)
     {
         if (tattooDef.tattooType == TattooType.Body)
             pawn.style.BodyTattoo = tattooDef;
