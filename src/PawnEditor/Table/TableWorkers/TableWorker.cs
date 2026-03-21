@@ -90,14 +90,22 @@ public abstract class TableWorker<T> where T : class
         SetDirty();
     }
 
-    public void TableOnGUI(Rect inRect)
+    protected virtual Rect DoFooter(Rect inRect)
     {
+        var footerRect = inRect.TakeBottomPart(UIUtility.ButtonHeight);
+
         if (_def.SearchColumn != null && inRect.height < 9000f)
         {
-            var footerRect = inRect.TakeBottomPart(UIUtility.ButtonHeight);
             inRect.yMax -= 4f;
             _quickSearchWidget.OnGUI(footerRect.RightPartPixels(180f), SetDirty);
         }
+
+        return footerRect;
+    }
+
+    public void TableOnGUI(Rect inRect)
+    {
+        DoFooter(inRect.TakeBottomPart(UIUtility.ButtonHeight));
 
         if (_cachedSize != inRect.size)
         {
@@ -190,10 +198,9 @@ public abstract class TableWorker<T> where T : class
 
     protected virtual void OnRowClicked(T thing)
     {
-        if (_selected == null || _selected == thing) return;
+        if (_selected == thing) return;
         SoundDefOf.Click.PlayOneShotOnCamera();
-        _selected = thing;
-        OnSelectChanged(_selected);
+        SetSelected(thing);
     }
 
     public void SetSelected(T? thing)

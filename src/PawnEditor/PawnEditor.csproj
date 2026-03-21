@@ -149,6 +149,7 @@
         <Compile Include="Windows\FloatWindow\FloatWindowAlignment.cs" />
         <Compile Include="Windows\FloatWindow\FloatWindow_EditThing.cs" />
         <Compile Include="Windows\FloatWindow\FloatWindow_NamePawn.cs" />
+        <Compile Include="Windows\Window_Table.cs" />
         <Compile Include="Window_Editor.cs" />
         <Compile Include="Harmony\Patch_OpenEditor.cs" />
         <Compile Include="PawnEditorMod.cs" />

@@ -2,7 +2,7 @@
 
 <Defs>
     <!-- DefTableDefs -->
-    <PawnEditor.DefTableDef Name="DefTableBase">
+    <PawnEditor.DefTableDef Name="DefTableBase_Hair">
         <defName>PawnEditor_Hairs</defName>
         <workerClass>PawnEditor.DefTableWorker_Hair</workerClass>
         <searchColumn>PawnEditor_DefLabel</searchColumn>
@@ -14,8 +14,19 @@
             <li>PawnEditor_DefContentSource</li>
         </columns>
     </PawnEditor.DefTableDef>
-    <PawnEditor.DefTableDef ParentName="DefTableBase">
+    <PawnEditor.DefTableDef ParentName="DefTableBase_Hair">
         <defName>PawnEditor_Beards</defName>
+    </PawnEditor.DefTableDef>
+    <PawnEditor.DefTableDef Name="DefTableBase_Thing">
+        <defName>PawnEditor_ThingDef</defName>
+        <workerClass>PawnEditor.DefTableWorker</workerClass>
+        <searchColumn>PawnEditor_DefLabel</searchColumn>
+        <highlightSelected>true</highlightSelected>
+        <columns>
+            <li>PawnEditor_DefIcon</li>
+            <li>PawnEditor_DefLabel</li>
+            <li>PawnEditor_DefContentSource</li>
+        </columns>
     </PawnEditor.DefTableDef>
     <!-- ThingTableDefs -->
     <PawnEditor.ThingTableDef Name="ThingTableBase">

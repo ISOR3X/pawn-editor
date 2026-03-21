@@ -2,10 +2,10 @@
 
 <Defs>
     <!-- DefTableDefs -->
-    <PawnEditor.DefTableDef ParentName="DefTableBase">
+    <PawnEditor.DefTableDef ParentName="DefTableBase_Hair">
         <defName>PawnEditor_FaceTattoos</defName>
     </PawnEditor.DefTableDef>
-    <PawnEditor.DefTableDef ParentName="DefTableBase">
+    <PawnEditor.DefTableDef ParentName="DefTableBase_Hair">
         <defName>PawnEditor_BodyTattoos</defName>
     </PawnEditor.DefTableDef>
 </Defs>
