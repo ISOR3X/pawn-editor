@@ -32,12 +32,14 @@ namespace FlexLayout
         public struct ScrollState
         {
             public Vector2 ScrollPos;
+            // public float   ContentSize; // height for vertical, width for horizontal
         }
 
-        private static readonly Dictionary<string, ScrollState> ScrollStates = new();
+        private static readonly Dictionary<string, ScrollState> ScrollStates
+            = new Dictionary<string, ScrollState>();
 
         public static ScrollState GetScrollState(string key)
-            => ScrollStates.GetValueOrDefault(key);
+            => ScrollStates.TryGetValue(key, out var s) ? s : default;
 
         public static void SetScrollState(string key, ScrollState state)
             => ScrollStates[key] = state;
@@ -93,18 +95,14 @@ namespace FlexLayout
         {
             var container = new LayoutContainer
             {
-                Style = new ElementStyle
-                {
-                    flexDirection = direction,
-                    columnGap     = columnGap,
-                    rowGap        = rowGap,
-                    flexWrap      = wrap,
-                    display       = Display.Flex,
-                },
+                Style = ElementStyle.Column(gap: 0f)
+                    .Direction(direction)
+                    .ColumnGap(columnGap)
+                    .RowGap(rowGap)
+                    .Wrap(wrap),
             };
 
             build(new FlexBuilder(container));
-
             FlexSolver.Compute(container, rect);
             FlexSolver.Draw(container);
         }

@@ -69,7 +69,7 @@ namespace FlexLayout
 
         // ── Copy-with helper ───────────────────────────────────────────────────
 
-        public ElementStyle With(
+        private ElementStyle With(
             float? grow = null,
             float? shrink = null,
             StyleLength? basis = null,
@@ -103,7 +103,35 @@ namespace FlexLayout
                 rowGap ?? this.rowGap,
                 display ?? this.display);
         }
-        
+
+        // ── Fluent chain methods ───────────────────────────────────────────────
+
+        public ElementStyle Grow(float grow) => With(grow: grow);
+        public ElementStyle Shrink(float shrink) => With(shrink: shrink);
+        public ElementStyle Basis(StyleLength basis) => With(basis: basis);
+        public ElementStyle Width(StyleLength width) => With(width: width);
+        public ElementStyle Height(StyleLength height) => With(height: height);
+        public ElementStyle MinWidth(StyleLength minWidth) => With(minWidth: minWidth);
+        public ElementStyle MinHeight(StyleLength minH) => With(minHeight: minH);
+        public ElementStyle MaxWidth(StyleLength maxWidth) => With(maxWidth: maxWidth);
+        public ElementStyle MaxHeight(StyleLength maxH) => With(maxHeight: maxH);
+        public ElementStyle Order(int order) => With(order: order);
+        public ElementStyle Direction(FlexDirection dir) => With(flexDirection: dir);
+        public ElementStyle Wrap(FlexWrap wrap) => With(flexWrap: wrap);
+        public ElementStyle ColumnGap(float gap) => With(columnGap: gap);
+        public ElementStyle RowGap(float gap) => With(rowGap: gap);
+        public ElementStyle Gap(float gap) => With(columnGap: gap, rowGap: gap);
+        public ElementStyle DisplayAs(Display display) => With(display: display);
+
+        public ElementStyle Size(StyleLength width, StyleLength height)
+            => With(width: width, height: height);
+
+        public ElementStyle MinSize(StyleLength minWidth, StyleLength minHeight)
+            => With(minWidth: minWidth, minHeight: minHeight);
+
+        public ElementStyle MaxSize(StyleLength maxWidth, StyleLength maxHeight)
+            => With(maxWidth: maxWidth, maxHeight: maxHeight);
+
         // ── Presets ───────────────────────────────────────────────────────────
 
         /// <summary>Grows to fill available space. Equivalent to <c>flex-grow: 1</c>.</summary>

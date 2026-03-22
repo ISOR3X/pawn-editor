@@ -136,10 +136,11 @@ namespace FlexLayout
             [System.Runtime.CompilerServices.CallerFilePath] string callerFile = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int callerLine  = 0)
         {
-            var key    = $"{callerFile}:{callerLine}";
+            string key    = $"{callerFile}:{callerLine}";
             var scrollPos = Flex.GetScrollState(key).ScrollPos;
 
-            var isVertical = direction is FlexDirection.Column or FlexDirection.ColumnReverse;
+            bool isVertical = direction == FlexDirection.Column
+                           || direction == FlexDirection.ColumnReverse;
 
             // Default shrink to 0 for scroll views — they should never shrink
             // ScrollView defaults to shrink=0 — it handles overflow via scrolling, not shrinking.
@@ -149,19 +150,16 @@ namespace FlexLayout
             Container.Add(MakeItem(resolvedStyle, nested: null,
                 draw: outerRect =>
                 {
-                    var scrollbarWidth = GenUI.ScrollBarWidth;
+                    float scrollbarWidth = GenUI.ScrollBarWidth;
 
                     LayoutContainer BuildInner(float innerW, float innerH)
                     {
                         var c = new LayoutContainer
                         {
-                            Style = new ElementStyle
-                            {
-                                display       = Display.Flex,
-                                flexDirection = direction,
-                                columnGap     = isVertical ? 0f : gap,
-                                rowGap        = isVertical ? gap : 0f,
-                            },
+                            Style = ElementStyle.Column()
+                                .Direction(direction)
+                                .ColumnGap(isVertical ? 0f : gap)
+                                .RowGap(isVertical ? gap : 0f),
                         };
                         build?.Invoke(new FlexBuilder(c));
                         FlexSolver.Compute(c, new Rect(0f, 0f, innerW, innerH));
@@ -169,8 +167,8 @@ namespace FlexLayout
                     }
 
                     // Step 1: measure at full outer size on constrained axis.
-                    var measureW = isVertical ? outerRect.width  : 100_000f;
-                    var measureH = isVertical ? 100_000f         : outerRect.height;
+                    float measureW = isVertical ? outerRect.width  : 100_000f;
+                    float measureH = isVertical ? 100_000f         : outerRect.height;
                     var innerContainer = BuildInner(measureW, measureH);
 
                     float contentW = 0f, contentH = 0f;
@@ -183,14 +181,14 @@ namespace FlexLayout
                     // Step 2: if content overflows the scroll axis, a scrollbar will
                     // appear and eat into the constrained axis. Recompute at the
                     // reduced size so items don't trigger a cross-axis scrollbar.
-                    var overflows = isVertical
+                    bool overflows = isVertical
                         ? contentH > outerRect.height
                         : contentW > outerRect.width;
 
                     if (overflows)
                     {
-                        var recomputeW = isVertical ? outerRect.width - scrollbarWidth : 100_000f;
-                        var recomputeH = isVertical ? 100_000f : outerRect.height - scrollbarWidth;
+                        float recomputeW = isVertical ? outerRect.width - scrollbarWidth : 100_000f;
+                        float recomputeH = isVertical ? 100_000f : outerRect.height - scrollbarWidth;
                         innerContainer = BuildInner(recomputeW, recomputeH);
 
                         contentW = 0f; contentH = 0f;
@@ -244,14 +242,11 @@ namespace FlexLayout
         {
             return new LayoutContainer
             {
-                Style = new ElementStyle
-                {
-                    flexDirection = direction,
-                    columnGap     = columnGap,
-                    rowGap        = rowGap,
-                    flexWrap      = wrap,
-                    display       = Display.Flex,
-                },
+                Style = ElementStyle.Column()
+                    .Direction(direction)
+                    .ColumnGap(columnGap)
+                    .RowGap(rowGap)
+                    .Wrap(wrap),
             };
         }
     }
