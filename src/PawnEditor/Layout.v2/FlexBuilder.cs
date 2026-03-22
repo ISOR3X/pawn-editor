@@ -15,7 +15,7 @@ namespace FlexLayout;
 
 /// <summary>
 ///     Builder object passed to the layout lambda in <see cref="Flex.Row" /> and
-///     <see cref="UnityEngine.UIElements.Column" />. Call <see cref="Item" /> to add leaf items,
+///     <see cref="Flex.Column" />. Call <see cref="Item" /> to add leaf items,
 ///     <see cref="Button" /> / <see cref="Label" /> for common widgets, and
 ///     <see cref="Row" /> / <see cref="Column" /> for nested containers.
 /// </summary>
@@ -24,9 +24,23 @@ public sealed class FlexBuilder
 {
     private readonly LayoutContainer _container;
 
-    internal FlexBuilder(LayoutContainer container)
+    /// <summary>
+    /// When true, MakeItem sets OnDraw = null — items are registered for sizing
+    /// only, no widget code executes. Used for the fitContent measurement pass.
+    /// </summary>
+    private readonly bool _measureOnly;
+
+    /// <summary>
+    /// The rect available to this container, set at construction time.
+    /// Used by fitContent to measure children before layout runs.
+    /// </summary>
+    private readonly Rect _availableRect;
+
+    internal FlexBuilder(LayoutContainer container, bool measureOnly = false, Rect availableRect = default)
     {
         _container = container;
+        _measureOnly = measureOnly;
+        _availableRect = availableRect;
     }
 
     // ── Leaf item ──────────────────────────────────────────────────────────
@@ -46,8 +60,7 @@ public sealed class FlexBuilder
 
     /// <summary>
     ///     Adds a <see cref="Verse.Widgets.ButtonText" /> item.
-    ///     Defaults to <see cref="Text.LineHeight" /> height if no height is set in
-    ///     <paramref name="style" />.
+    ///     Defaults to <see cref="UIUtility.ButtonHeight" /> if no height is set.
     /// </summary>
     public void Button(
         string label,
@@ -78,9 +91,7 @@ public sealed class FlexBuilder
             rect =>
             {
                 using (new TextBlock(anchor))
-                {
                     Widgets.Label(rect, text);
-                }
             }));
     }
 
@@ -89,6 +100,9 @@ public sealed class FlexBuilder
     /// <summary>
     ///     Adds a nested row container as an item in this container.
     ///     <paramref name="style" /> controls how this row sits inside its parent.
+    ///     When <paramref name="fitContent" /> is true, the row measures its own
+    ///     content height via a silent pre-pass and uses it as the item height,
+    ///     so the parent column can correctly stack rows without a frame lag.
     /// </summary>
     public void Row(
         ElementStyle? style = null,
@@ -96,47 +110,111 @@ public sealed class FlexBuilder
         float columnGap = 0f,
         float rowGap = 0f,
         FlexWrap wrap = FlexWrap.NoWrap,
-        Action<FlexBuilder>? build = null)
+        bool fitContent = false,
+        Action<FlexBuilder>? build = null,
+        [CallerFilePath] string callerFile = "",
+        [CallerLineNumber] int callerLine = 0)
     {
         var s = style ?? ElementStyle.Default();
         var cGap = columnGap > 0 ? columnGap : gap;
         var rGap = rowGap > 0 ? rowGap : gap;
         var nested = MakeContainer(FlexDirection.Row, cGap, rGap, wrap);
+        var nestedRect = new Rect(0f, 0f, _availableRect.width, 100_000f);
+        build?.Invoke(new FlexBuilder(nested, availableRect: nestedRect));
+
+        if (fitContent)
+        {
+            var key = $"{callerFile}:{callerLine}";
+            var parentWidth = _availableRect.width;
+
+            if (parentWidth > 0f)
+            {
+                var measure = MakeContainer(FlexDirection.Row, cGap, rGap, wrap);
+                build?.Invoke(new FlexBuilder(measure, measureOnly: true));
+                FlexSolver.Compute(measure, new Rect(0f, 0f, parentWidth, 100_000f));
+
+                float contentHeight = 0f;
+                foreach (var child in measure.Children)
+                    contentHeight = Mathf.Max(contentHeight, child.ComputedRect.yMax);
+
+                if (contentHeight > 0f)
+                {
+                    s = s.With(height: StyleSize.Px(contentHeight));
+                    Flex.SetFitContentSize(key, contentHeight);
+                }
+            }
+            else
+            {
+                var cached = Flex.GetFitContentSize(key);
+                if (cached > 0f) s = s.With(height: StyleSize.Px(cached));
+            }
+        }
+
         _container.Add(MakeItem(s, nested, null));
-        build?.Invoke(new FlexBuilder(nested));
     }
 
     // ── Nested column ──────────────────────────────────────────────────────
 
     /// <summary>
     ///     Adds a nested column container as an item in this container.
+    ///     When <paramref name="fitContent" /> is true, measures content width
+    ///     via a silent pre-pass.
     /// </summary>
     public void Column(
-        ElementStyle style = default,
+        ElementStyle? style = null,
         float gap = 0f,
         float columnGap = 0f,
         float rowGap = 0f,
         FlexWrap wrap = FlexWrap.NoWrap,
-        Action<FlexBuilder>? build = null)
+        bool fitContent = false,
+        Action<FlexBuilder>? build = null,
+        [CallerFilePath] string callerFile = "",
+        [CallerLineNumber] int callerLine = 0)
     {
+        var s = style ?? ElementStyle.Default();
         var nested = MakeContainer(FlexDirection.Column,
             columnGap, rowGap > 0f ? rowGap : gap, wrap);
-        _container.Add(MakeItem(style, nested, null));
-        build?.Invoke(new FlexBuilder(nested));
+        var nestedRect = new Rect(0f, 0f, 100_000f, _availableRect.height);
+        build?.Invoke(new FlexBuilder(nested, availableRect: nestedRect));
+
+        if (fitContent)
+        {
+            var key = $"{callerFile}:{callerLine}";
+            var parentHeight = _availableRect.height;
+
+            if (parentHeight > 0f)
+            {
+                var measure = MakeContainer(FlexDirection.Column,
+                    columnGap, rowGap > 0f ? rowGap : gap, wrap);
+                build?.Invoke(new FlexBuilder(measure, measureOnly: true));
+                FlexSolver.Compute(measure, new Rect(0f, 0f, 100_000f, parentHeight));
+
+                float contentWidth = 0f;
+                foreach (var child in measure.Children)
+                    contentWidth = Mathf.Max(contentWidth, child.ComputedRect.xMax);
+
+                if (contentWidth > 0f)
+                {
+                    s = s.With(width: StyleSize.Px(contentWidth));
+                    Flex.SetFitContentSize(key, contentWidth);
+                }
+            }
+            else
+            {
+                var cached = Flex.GetFitContentSize(key);
+                if (cached > 0f) s = s.With(width: StyleSize.Px(cached));
+            }
+        }
+
+        _container.Add(MakeItem(s, nested, null));
     }
 
     // ── Scroll view ────────────────────────────────────────────────────────
 
     /// <summary>
     ///     Adds a scrollable container as an item in this container.
-    ///     Use <paramref name="direction" /> to control whether content scrolls
-    ///     vertically (Column, default) or horizontally (Row).
-    ///     Content is measured at unconstrained size along the scroll axis so
-    ///     items are never asked to shrink.
-    ///     The scroll key is derived automatically from the call site — each
-    ///     call location in source gets a unique stable key with no boilerplate.
-    ///     The only edge case is two ScrollView calls on the same source line,
-    ///     which would share state.
+    ///     Use <see cref="ElementStyle.flexDirection"/> to control whether content
+    ///     scrolls vertically (Column, default) or horizontally (Row).
     /// </summary>
     public void ScrollView(
         ElementStyle? style = null,
@@ -146,19 +224,14 @@ public sealed class FlexBuilder
     {
         var key = $"{callerFile}:{callerLine}";
         var scrollPos = Flex.GetScrollState(key).scrollPos;
-        var s = style ?? new ElementStyle();
+        var s = style ?? ElementStyle.Default();
         s.display = Display.Flex;
 
         var isVertical = s.flexDirection is FlexDirection.Column or FlexDirection.ColumnReverse;
 
-        // Default shrink to 0 for scroll views — they should never shrink
-        // ScrollView defaults to shrink=0 — it handles overflow via scrolling, not shrinking.
-        // Callers can override by passing a style with an explicit shrink value via ElementStyle.WithShrink().
-
         _container.Add(MakeItem(s, null,
             outerRect =>
             {
-                // Step 1: measure at full outer size on constrained axis.
                 var measureW = isVertical ? outerRect.width : 100_000f;
                 var measureH = isVertical ? 100_000f : outerRect.height;
                 var innerContainer = BuildInner(measureW, measureH);
@@ -170,9 +243,6 @@ public sealed class FlexBuilder
                     contentH = Mathf.Max(contentH, child.ComputedRect.yMax);
                 }
 
-                // Step 2: if content overflows the scroll axis, a scrollbar will
-                // appear and eat into the constrained axis. Recompute at the
-                // reduced size so items don't trigger a cross-axis scrollbar.
                 var overflows = isVertical
                     ? contentH > outerRect.height
                     : contentW > outerRect.width;
@@ -192,9 +262,6 @@ public sealed class FlexBuilder
                     }
                 }
 
-                // Step 3: build viewRect — non-scroll axis is exactly the outer
-                // size (scrollbar already accounted for), scroll axis is content
-                // size clamped to at least outer size to avoid a spurious scrollbar.
                 var viewRect = isVertical
                     ? new Rect(0f, 0f,
                         overflows ? outerRect.width - GenUI.ScrollBarWidth : outerRect.width,
@@ -203,7 +270,6 @@ public sealed class FlexBuilder
                         Mathf.Max(contentW, outerRect.width),
                         overflows ? outerRect.height - GenUI.ScrollBarWidth : outerRect.height);
 
-                // Step 4: open scroll view, draw, close.
                 Widgets.BeginScrollView(outerRect, ref scrollPos, viewRect);
                 FlexSolver.Draw(innerContainer);
                 Widgets.EndScrollView();
@@ -223,19 +289,22 @@ public sealed class FlexBuilder
 
     // ── Private helpers ────────────────────────────────────────────────────
 
-    private static FlexItem MakeItem(
+    private FlexItem MakeItem(
         ElementStyle style, LayoutContainer? nested, Action<Rect>? draw)
     {
+        // In measureOnly mode, suppress all draw callbacks so no widget code executes.
+        Action<Rect>? onDraw = _measureOnly ? null : rect =>
+        {
+            if (PawnEditorMod.Settings.drawDebug)
+                Widgets.DrawRectFast(rect, new Color(1f, 1f, 1f, 0.1f));
+            draw?.Invoke(rect);
+        };
+
         return new FlexItem
         {
             Style = style,
             AsContainer = nested,
-            OnDraw = rect =>
-            {
-                if (PawnEditorMod.Settings.drawDebug)
-                    Widgets.DrawRectFast(rect, new Color(1f, 1f, 1f, 0.1f));
-                draw?.Invoke(rect);
-            }
+            OnDraw = onDraw
         };
     }
 
@@ -244,9 +313,8 @@ public sealed class FlexBuilder
     {
         return new LayoutContainer
         {
-            Style =
-                new ElementStyle(display: Display.Flex, flexDirection: direction, columnGap: columnGap,
-                    rowGap: rowGap, flexWrap: wrap)
+            Style = new ElementStyle(display: Display.Flex, flexDirection: direction,
+                columnGap: columnGap, rowGap: rowGap, flexWrap: wrap)
         };
     }
 }

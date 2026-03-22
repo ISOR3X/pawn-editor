@@ -24,6 +24,17 @@ public static class Flex
 {
     private static readonly Dictionary<string, ScrollState> ScrollStates = new();
 
+    // Bootstrap cache for fitContent — stores last known content size so the
+    // synchronous measurement has a valid parent size to work with on frame 1.
+    private static readonly Dictionary<string, float> FitContentSizes = new();
+
+    internal static float GetFitContentSize(string key)
+        => FitContentSizes.TryGetValue(key, out var v) ? v : 0f;
+
+    internal static void SetFitContentSize(string key, float size)
+        => FitContentSizes[key] = size;
+
+
     public static ScrollState GetScrollState(string key)
     {
         return ScrollStates.GetValueOrDefault(key);
@@ -106,7 +117,7 @@ public static class Flex
                     rowGap: rowGap, flexWrap: wrap)
         };
 
-        build(new FlexBuilder(container));
+        build(new FlexBuilder(container, availableRect: rect));
         FlexSolver.Compute(container, rect);
         FlexSolver.Draw(container);
     }

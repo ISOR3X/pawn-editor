@@ -33,51 +33,38 @@ public class Window_Dev : Window
     {
         Flex.Column(inRect, col =>
         {
-            col.Row(ElementStyle.FixedHeight(40f), gap: 8f, build: row =>
+            col.Row(ElementStyle.Default(), fitContent: true, gap: 8f, build: row =>
             {
+                row.Item(style: ElementStyle.Default().With(width: 100f),
+                    rect => { Verse.Widgets.DrawRectFast(rect, Color.red); });
                 row.Button("+ Add",
                     onClick: () => _itemCount = Mathf.Min(_itemCount + 1, 50));
                 row.Button("- Remove",
                     onClick: () => _itemCount = Mathf.Max(_itemCount - 1, 0));
                 row.Label($"Items: {_itemCount}", ElementStyle.Fill);
+                row.Item(style: ElementStyle.Default().With(width: 100f),
+                    rect => { Verse.Widgets.DrawRectFast(rect, Color.red); });
             });
-            col.Row(ElementStyle.Default().With(flexWrap: FlexWrap.Wrap, height: 40f), wrap: FlexWrap.Wrap,
-                build: row2 =>
+            col.Row(wrap: FlexWrap.Wrap, fitContent: true,
+                build: inner =>
                 {
-                    for (var i = 0; i < 5; i++)
+                    for (var i = 0; i < _itemCount; i++)
                     {
-                        row2.Label($"Item {i}", new ElementStyle(flexBasis: 200f, maxWidth: 400f, minWidth: 100f));
+                        var color = ItemColors[i % ItemColors.Length];
+                        inner.Item(ElementStyle.FixedWidth(100f).With(height: 100f),
+                            draw: rect => Verse.Widgets.DrawRectFast(rect, color));
                     }
-                }   
-            );
-            // col.ScrollView(ElementStyle.Fill.With(flexDirection: FlexDirection.Row, columnGap: 4f, rowGap: 4f),
-            //     build: inner =>
-            //     {
-            //         for (var i = 0; i < _itemCount; i++)
-            //         {
-            //             var color = ItemColors[i % ItemColors.Length];
-            //             inner.Item(ElementStyle.FixedWidth(100f).With(height: 100f),
-            //                 draw: rect => Verse.Widgets.DrawRectFast(rect, color));
-            //         }
-            //     });
-            col.Row(ElementStyle.Default(), wrap: FlexWrap.Wrap, build: inner =>
-            {
-                for (var i = 0; i < _itemCount; i++)
+                });
+            col.Row(wrap: FlexWrap.Wrap, fitContent: true,
+                build: inner =>
                 {
-                    var color = ItemColors[i % ItemColors.Length];
-                    inner.Item(ElementStyle.FixedWidth(100f).With(height: 100f),
-                        draw: rect => Verse.Widgets.DrawRectFast(rect, color));
-                }
-            });
-            col.Row(ElementStyle.Default(), wrap: FlexWrap.Wrap, build: inner =>
-            {
-                for (var i = 0; i < _itemCount; i++)
-                {
-                    var color = ItemColors[i % ItemColors.Length];
-                    inner.Item(ElementStyle.FixedWidth(50f).With(height: 50f),
-                        draw: rect => Verse.Widgets.DrawRectFast(rect, color));
-                }
-            });
+                    for (var i = 0; i < _itemCount; i++)
+                    {
+                        var color = ItemColors[i % ItemColors.Length];
+                        inner.Item(ElementStyle.FixedWidth(50f).With(height: 50f),
+                            draw: rect => Verse.Widgets.DrawRectFast(rect, color));
+                    }
+                });
         });
     }
 }
