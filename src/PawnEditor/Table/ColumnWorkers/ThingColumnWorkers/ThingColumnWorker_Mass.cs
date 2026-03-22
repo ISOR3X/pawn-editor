@@ -8,7 +8,6 @@ namespace PawnEditor;
 [HotSwappable]
 public class ThingColumnWorker_Mass : ColumnWorker_Text<Thing>
 {
-    protected override TextAnchor RowLabelAlignment => TextAnchor.MiddleCenter;
     protected override Color CellColor => ColoredText.SubtleGrayColor;
 
     private static float GetMass(Thing thing) => thing.GetStatValue(StatDefOf.Mass) * thing.stackCount;

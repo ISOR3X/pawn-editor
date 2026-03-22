@@ -53,8 +53,8 @@
                 <section>PawnEditor_HairColor</section>
             </flex>
             <flex direction="row" wrap="true" childFlexBasis="0.5" childFlexGrow="1" mayRequire="Ludeon.Rimworld.Ideology">
-                <section>PawnEditor_TattooBody</section>
-                <section>PawnEditor_TattooFace</section>
+                <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooBody</section>
+                <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooFace</section>
             </flex>
         </layout>
     </PawnEditor.TabDef>

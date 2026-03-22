@@ -37,6 +37,15 @@
         <flexBasis>50</flexBasis>
         <flexGrow>1</flexGrow>
     </PawnEditor.DefColumnDef>
+    <!-- ThingDefColumnDefs -->
+    <PawnEditor.DefColumnDef>
+        <defName>PawnEditor_DefApparelLayer</defName>
+        <workerClass>PawnEditor.DefColumnWorker_ApparelLayer</workerClass>
+        <label>layer</label>
+        <sortable>true</sortable>
+        <flexBasis>100</flexBasis>
+        <flexGrow>1</flexGrow>
+    </PawnEditor.DefColumnDef>
     <!-- ThingColumnDefs -->
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingLabel</defName>

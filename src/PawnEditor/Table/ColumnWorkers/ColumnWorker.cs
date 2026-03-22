@@ -68,13 +68,7 @@ public abstract class ColumnWorker<T> where T : class
     }
 
     public abstract void DoCell(Rect inRect, T thing, TableWorker<T> table);
-
-    public virtual bool CanGroupWith(T thing, T other)
-    {
-        return false;
-    }
-
-
+    
     public virtual int GetMinCellHeight(T thing)
     {
         return (int)TableWorker<T>.DefaultRowHeight;

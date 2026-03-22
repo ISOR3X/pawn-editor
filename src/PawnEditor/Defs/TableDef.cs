@@ -12,6 +12,9 @@ public abstract class TableDef : Def
     public virtual ColumnDef? SearchColumn => null;
 }
 
+/// <summary>
+/// These casts are required because Defs can't have generic types.
+/// </summary>
 public class DefTableDef : TableDef
 {
     public required List<DefColumnDef> columns;

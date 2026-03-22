@@ -118,6 +118,7 @@
         <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Icon.cs" />
         <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Style.cs" />
         <Compile Include="Table\ColumnWorkers\ColumnWorker_Icon.cs" />
+        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\ThingDef\DefColumnWorker_ApparelLayer.cs" />
         <Compile Include="Table\ColumnWorkers\PawnColumnWorkers\PawnColumnWorker_Location.cs" />
         <Compile Include="Table\ColumnWorkers\PawnColumnWorkers\PawnColumnWorker_Type.cs" />
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Edit.cs" />
@@ -126,6 +127,8 @@
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Label.cs" />
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Mass.cs" />
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Stuff.cs" />
+        <Compile Include="Table\TableFilters\DefTableFilter_ContentSource.cs" />
+        <Compile Include="Table\TableFilters\TableFilter.cs" />
         <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker.cs" />
         <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker_Hair.cs" />
         <Compile Include="Table\TableWorkers\TableWorker.cs" />

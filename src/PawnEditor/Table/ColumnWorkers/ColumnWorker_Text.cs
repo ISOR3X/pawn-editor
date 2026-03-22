@@ -46,6 +46,6 @@ public abstract class ColumnWorker_Text<T> : ColumnWorker<T> where T : class
 
     protected virtual string? GetTip(T thing)
     {
-        return null;
+        return GetTextFor(thing);
     }
 }

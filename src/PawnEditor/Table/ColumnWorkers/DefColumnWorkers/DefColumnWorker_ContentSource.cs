@@ -5,7 +5,6 @@ namespace PawnEditor;
 
 public class DefColumnWorker_ContentSource : ColumnWorker_Text<Def>
 {
-    protected override TextAnchor RowLabelAlignment => TextAnchor.MiddleCenter;
     protected override Color CellColor => ColoredText.SubtleGrayColor;
 
     public override string GetTextFor(Def thing)

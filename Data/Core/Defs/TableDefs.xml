@@ -25,6 +25,7 @@
         <columns>
             <li>PawnEditor_DefIcon</li>
             <li>PawnEditor_DefLabel</li>
+            <li>PawnEditor_DefApparelLayer</li>
             <li>PawnEditor_DefContentSource</li>
         </columns>
     </PawnEditor.DefTableDef>
