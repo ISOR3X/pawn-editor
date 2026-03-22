@@ -68,6 +68,9 @@ public struct ElementStyle(
 
     #region PRESETS
 
+    /// <summary> Explicit primary constructor. <code>new ElementStyle()</code> resolves to the default constructor instead of primary since all arguments are optional.</summary>
+    public static ElementStyle Default() => new(null);
+
     /// <summary>Grows to fill available space. Equivalent to <c>flex-grow: 1</c>.</summary>
     public static ElementStyle Fill => new(1f, 0f);
 

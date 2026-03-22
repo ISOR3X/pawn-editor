@@ -99,6 +99,15 @@ public readonly struct StyleSize : IEquatable<StyleSize>
         return !a.Equals(b);
     }
 
+    public override string ToString() => type switch
+    {
+        Kind.Px => $"Px({value})",
+        Kind.Pct => $"Pct({value}%)",
+        Kind.Auto => "Auto",
+        _ => "Unknown"
+    };
+
+
     // Convenience: implicit from float → Px
     public static implicit operator StyleSize(float px)
     {

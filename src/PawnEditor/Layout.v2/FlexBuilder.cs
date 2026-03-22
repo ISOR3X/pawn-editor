@@ -52,11 +52,12 @@ public sealed class FlexBuilder
     public void Button(
         string label,
         Action onClick,
-        ElementStyle style = default)
+        ElementStyle? style = null)
     {
-        if (style.height == StyleSize.Auto()) style.height = UIUtility.ButtonHeight;
-        if (style.width == StyleSize.Auto()) style.width = Text.CalcSize(label).x + UIUtility.LabelPadding * 2;
-        _container.Add(MakeItem(style, null,
+        var s = style ?? ElementStyle.Default();
+        if (s.height == StyleSize.Auto()) s.height = UIUtility.ButtonHeight;
+        if (s.width == StyleSize.Auto()) s.width = Text.CalcSize(label).x + UIUtility.LabelPadding * 2;
+        _container.Add(MakeItem(s, null,
             rect =>
             {
                 if (Widgets.ButtonText(rect, label)) onClick();
@@ -97,7 +98,7 @@ public sealed class FlexBuilder
         FlexWrap wrap = FlexWrap.NoWrap,
         Action<FlexBuilder>? build = null)
     {
-        var s = style ?? new ElementStyle();
+        var s = style ?? ElementStyle.Default();
         var cGap = columnGap > 0 ? columnGap : gap;
         var rGap = rowGap > 0 ? rowGap : gap;
         var nested = MakeContainer(FlexDirection.Row, cGap, rGap, wrap);
