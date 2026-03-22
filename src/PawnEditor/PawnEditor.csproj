@@ -65,6 +65,13 @@
         <Compile Include="External\Required.cs" />
         <Compile Include="FactionUtility.cs" />
         <Compile Include="Harmony\Patch_WindowResizer.cs" />
+        <Compile Include="Layout.v2\ElementStyle.cs" />
+        <Compile Include="Layout.v2\Flex.cs" />
+        <Compile Include="Layout.v2\FlexBuilder.cs" />
+        <Compile Include="Layout.v2\FlexSolver.cs" />
+        <Compile Include="Layout.v2\FlexTypes.cs" />
+        <Compile Include="Layout.v2\LayoutElement.cs" />
+        <Compile Include="Layout.v2\StyleLength.cs" />
         <Compile Include="Layout\DefLeafNode.cs" />
         <Compile Include="Layout\LayoutHelper.cs" />
         <Compile Include="Layout\FlexLayoutNode.cs" />
@@ -156,6 +163,7 @@
         <Compile Include="Windows\FloatWindow\FloatWindow_EditThing.cs" />
         <Compile Include="Windows\FloatWindow\FloatWindow_NamePawn.cs" />
         <Compile Include="Windows\Window_AddItem.cs" />
+        <Compile Include="Windows\Window_Dev.cs" />
         <Compile Include="Window_Editor.cs" />
         <Compile Include="Harmony\Patch_OpenEditor.cs" />
         <Compile Include="PawnEditorMod.cs" />

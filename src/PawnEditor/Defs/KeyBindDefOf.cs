@@ -9,6 +9,7 @@ namespace PawnEditor;
 public static class KeyBindingDefOf
 {
     public static readonly KeyBindingDef PawnEditor_OpenEditor = null!;
+    public static readonly KeyBindingDef PawnEditor_OpenDev = null!;
 
     static KeyBindingDefOf()
     {

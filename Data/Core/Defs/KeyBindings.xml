@@ -6,4 +6,10 @@
         <category>Development</category>
         <defaultKeyCodeA>KeypadEnter</defaultKeyCodeA>
     </KeyBindingDef>
+    <KeyBindingDef>
+        <defName>PawnEditor_OpenDev</defName>
+        <label>Open dev window</label>
+        <category>Development</category>
+        <defaultKeyCodeA>KeypadPlus</defaultKeyCodeA>
+    </KeyBindingDef>
 </Defs>
