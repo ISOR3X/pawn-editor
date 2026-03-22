@@ -71,7 +71,7 @@
         <Compile Include="Layout.v2\FlexSolver.cs" />
         <Compile Include="Layout.v2\FlexTypes.cs" />
         <Compile Include="Layout.v2\LayoutElement.cs" />
-        <Compile Include="Layout.v2\StyleLength.cs" />
+        <Compile Include="Layout.v2\StyleSize.cs" />
         <Compile Include="Layout\DefLeafNode.cs" />
         <Compile Include="Layout\LayoutHelper.cs" />
         <Compile Include="Layout\FlexLayoutNode.cs" />

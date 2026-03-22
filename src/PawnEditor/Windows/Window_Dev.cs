@@ -14,7 +14,7 @@ public class Window_Dev : Window
     {
         DrawDynamicLayout(inRect);
     }
-    
+
 
     private static readonly Color[] ItemColors =
     {
@@ -39,15 +39,16 @@ public class Window_Dev : Window
                 row.Label($"Items: {_itemCount}", ElementStyle.Fill);
             });
 
-            col.ScrollView(ElementStyle.Fill, gap: 4f, build: inner =>
-            {
-                for (int i = 0; i < _itemCount; i++)
+            col.ScrollView(ElementStyle.Fill.With(flexDirection: FlexDirection.Row, columnGap: 4f, rowGap: 4f),
+                build: inner =>
                 {
-                    var color = ItemColors[i % ItemColors.Length];
-                    inner.Item(ElementStyle.FixedHeight(100f),
-                        draw: rect => Verse.Widgets.DrawRectFast(rect, color));
-                }
-            });
+                    for (var i = 0; i < _itemCount; i++)
+                    {
+                        var color = ItemColors[i % ItemColors.Length];
+                        inner.Item(ElementStyle.FixedWidth(100f).With(height: 100f),
+                            draw: rect => Verse.Widgets.DrawRectFast(rect, color));
+                    }
+                });
         });
     }
 }
