@@ -143,7 +143,7 @@ public partial class Window_Editor : Window
                 {
                     Verse.Widgets.Label(rect, "Selected faction");
                 }
-            }, 18f),
+            }, Text.LineHeightOf(GameFont.Tiny)),
 
             L.Cell(rect =>
             {
@@ -190,8 +190,8 @@ public partial class Window_Editor : Window
             //     }, flexGrow: 1f)
             // ], flexBasis: 30f)
         ]);
-
-        FlexLayoutEngine.Draw(layout, inRect, (action, rect) =>
+        
+        layout.Draw(inRect, (action, rect) =>
         {
             action(rect);
             return rect.height > 1000f ? 0f : rect.height;

@@ -36,7 +36,7 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
         {
             _lastPawn = pawn;
             Table.SetDirty();
-            Table.SetSelected(GetDefaultSelectedDef(pawn));
+            Table.Selected = GetDefaultSelectedDef(pawn);
         }
 
         listing.LabelH2(Label);

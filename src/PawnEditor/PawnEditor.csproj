@@ -128,9 +128,12 @@
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Mass.cs" />
         <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Stuff.cs" />
         <Compile Include="Table\TableFilters\DefTableFilter_ContentSource.cs" />
+        <Compile Include="Table\TableFilters\DefTableFilter_FloatMenu.cs" />
+        <Compile Include="Table\TableFilters\DefTableFilter_StuffCategory.cs" />
         <Compile Include="Table\TableFilters\TableFilter.cs" />
         <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker.cs" />
         <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker_Hair.cs" />
+        <Compile Include="Table\TableWorkers\DefTableWorkers\FilteredDefTableWorker.cs" />
         <Compile Include="Table\TableWorkers\TableWorker.cs" />
         <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker.cs" />
         <Compile Include="Tabs\TabUtility.cs" />
@@ -152,7 +155,7 @@
         <Compile Include="Windows\FloatWindow\FloatWindowAlignment.cs" />
         <Compile Include="Windows\FloatWindow\FloatWindow_EditThing.cs" />
         <Compile Include="Windows\FloatWindow\FloatWindow_NamePawn.cs" />
-        <Compile Include="Windows\Window_Table.cs" />
+        <Compile Include="Windows\Window_AddItem.cs" />
         <Compile Include="Window_Editor.cs" />
         <Compile Include="Harmony\Patch_OpenEditor.cs" />
         <Compile Include="PawnEditorMod.cs" />

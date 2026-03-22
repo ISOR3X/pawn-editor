@@ -27,7 +27,7 @@ public class Settings : ModSettings
     public WindowSize size = WindowSize.Small;
 
     /// <summary> When enabled, a pawn is spawned near the pawn it is teleported to. </summary>
-    public bool spawnNear = true; 
+    public bool spawnNear = true;
 
     public bool drawDebug = false;
 
@@ -38,6 +38,7 @@ public class Settings : ModSettings
         Scribe_Values.Look(ref restriction, nameof(restriction), RestrictionMode.Severe);
         Scribe_Values.Look(ref size, nameof(size));
         Scribe_Values.Look(ref spawnNear, nameof(spawnNear), true);
+        Scribe_Values.Look(ref drawDebug, nameof(drawDebug), defaultValue: false);
         Scribe_Values.Look(ref hideDeadWorldPawns, nameof(hideDeadWorldPawns), true);
     }
 }

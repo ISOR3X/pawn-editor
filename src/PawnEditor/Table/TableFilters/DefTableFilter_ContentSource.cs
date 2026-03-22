@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using Verse;
@@ -7,29 +6,15 @@ using Verse;
 namespace PawnEditor.Table;
 
 [HotSwappable]
-public class DefTableFilter_ContentSource : TableFilter
+public class DefTableFilter_ContentSource : DefTableFilter_FloatMenu<ModContentPack>
 {
     protected override string Label => "Content source";
 
-    private List<ModContentPack> options =
-        LoadedModManager.runningMods.Where(m => m.AllDefs.OfType<ThingDef>().Any()).ToList();
+    protected override IEnumerable<ModContentPack> Options =>
+        LoadedModManager.runningMods.Where(m => m.AllDefs.OfType<ThingDef>().Any());
 
-    private ModContentPack? selected = null;
+    protected override string GetLabel(ModContentPack option) => option.Name;
 
-
-    protected override void DrawFilterWidget(Listing_Standard listing)
-    {
-        if (listing.ButtonText(selected?.Name ?? "Any"))
-        {
-            var opts = options.Select(o => new FloatMenuOption(o.Name, () => selected = o)).ToList();
-            opts.Add(new FloatMenuOption("None", () => selected = null));
-            Find.WindowStack.Add(new FloatMenu(opts));
-        }
-    }
-
-    public override bool Matches(Def thing)
-    {
-        if (selected == null) return true;
-        return thing.modContentPack == selected;
-    }
+    protected override bool MatchesOption(Def thing, ModContentPack option) =>
+        thing.modContentPack == option;
 }

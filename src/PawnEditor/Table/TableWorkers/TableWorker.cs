@@ -30,10 +30,20 @@ public abstract class TableWorker<T> where T : class
     private readonly Func<IEnumerable<T>> _thingsGetter;
     private float _cachedHeaderHeight;
     private Vector2 _cachedSize;
-    private List<T> _cachedThings = [];
+    private readonly List<T> _cachedThings = [];
     private bool _dirty;
     private Vector2 _scrollPosition;
-    private T? _selected;
+
+    public T? Selected
+    {
+        get;
+        set
+        {
+            field = value;
+            OnSelectChanged(field);
+        }
+    }
+
     private bool _sortDescending;
 
     private float? _rowHeightOverride;
@@ -85,7 +95,7 @@ public abstract class TableWorker<T> where T : class
         T? defaultThing = null)
     {
         _def = def;
-        _selected = defaultThing;
+        Selected = defaultThing;
         _thingsGetter = thingsGetter;
         SetDirty();
     }
@@ -162,7 +172,7 @@ public abstract class TableWorker<T> where T : class
             var rowRect = new Rect(0f, rowY, viewRect.width, rowHeight);
 
             // Row highlights
-            if (_selected == thing && _def.highlightSelected)
+            if (Selected == thing && _def.highlightSelected)
                 Verse.Widgets.DrawHighlightSelected(rowRect);
             else if (rowIndex % 2 == 1)
             {
@@ -198,17 +208,11 @@ public abstract class TableWorker<T> where T : class
 
     protected virtual void OnRowClicked(T thing)
     {
-        if (_selected == thing) return;
+        if (Selected == thing) return;
         SoundDefOf.Click.PlayOneShotOnCamera();
-        SetSelected(thing);
+        Selected = thing;
     }
-
-    public void SetSelected(T? thing)
-    {
-        _selected = thing;
-        OnSelectChanged(_selected);
-    }
-
+    
     public void SetDirty()
     {
         _dirty = true;

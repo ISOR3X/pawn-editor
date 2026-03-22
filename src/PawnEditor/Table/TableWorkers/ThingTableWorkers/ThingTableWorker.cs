@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PawnEditor.Extensions;
+using PawnEditor.Table;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -25,7 +27,17 @@ public class ThingTableWorker(ThingTableDef def, Func<IEnumerable<Thing>> things
 
         if (Verse.Widgets.ButtonText(footerRect.TakeLeftPart(100f), "Add item"))
         {
-            Find.WindowStack.Add(new Window_Table());
+            Find.WindowStack.Add(new Window_AddItem(
+                TableDefOf.PawnEditor_ThingDef,
+                () => DefDatabase<ThingDef>.AllDefs
+                    .Where(td => td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
+                    .Cast<Def>()
+                    .ToList(),
+                [
+                    ("Content source", () => new DefTableFilter_ContentSource()),
+                    ("Stuff category", () => new DefTableFilter_StuffCategory())
+                ]
+            ));
         }
 
         return footerRect;

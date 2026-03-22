@@ -75,7 +75,7 @@ public static class LayoutHelper
             }
         };
 
-    public static LayoutNode<Func<Rect, float>> Cell(
+    private static LayoutNode<Func<Rect, float>> Cell(
         Func<Rect, float> draw,
         float flexBasis = 0f,
         float flexGrow = 0f,
