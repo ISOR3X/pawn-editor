@@ -34,3 +34,5 @@ rider.project.model.nuget.info
 [Dd]ebugPS/
 [Rr]eleasePS/
 dlldata.c
+
+.claude/

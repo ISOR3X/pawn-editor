@@ -1,5 +1,5 @@
-using FlexLayout;
 using HotSwap;
+using PawnEditor.TaffySharp;
 using UnityEngine;
 using Verse;
 
@@ -31,40 +31,32 @@ public class Window_Dev : Window
 
     private void DrawDynamicLayout(Rect inRect)
     {
-        Flex.Column(inRect, col =>
+        Taffy.Column(inRect, col =>
         {
-            col.Row(ElementStyle.Default(), fitContent: true, gap: 8f, build: row =>
+            col.Row(gap: 8f, grow: 0f, row =>
             {
-                row.Item(style: ElementStyle.Default().With(width: 100f, height: 40f),
-                    rect => { Verse.Widgets.DrawRectFast(rect, Color.red); });
-                row.Button("+ Add",
-                    onClick: () => _itemCount = Mathf.Min(_itemCount + 1, 50));
-                row.Button("- Remove",
-                    onClick: () => _itemCount = Mathf.Max(_itemCount - 1, 0));
-                row.Label($"Items: {_itemCount}", ElementStyle.Fill);
-                row.Item(style: ElementStyle.Default().With(width: 100f),
-                    rect => { Verse.Widgets.DrawRectFast(rect, Color.gray); });
+                row.Item(width: 100f, height: 40f, draw: rect => Verse.Widgets.DrawRectFast(rect, Color.red));
+                row.Item(width: 80f,  height: 40f, draw: rect => { if (Verse.Widgets.ButtonText(rect, "+ Add"))    _itemCount = Mathf.Min(_itemCount + 1, 50); });
+                row.Item(width: 90f,  height: 40f, draw: rect => { if (Verse.Widgets.ButtonText(rect, "- Remove")) _itemCount = Mathf.Max(_itemCount - 1, 0); });
+                row.Item(grow: 1f,    height: 40f, draw: rect => Verse.Widgets.Label(rect, $"Items: {_itemCount}"));
+                row.Item(width: 100f, height: 40f, draw: rect => Verse.Widgets.DrawRectFast(rect, Color.gray));
             });
-            col.Row(style: ElementStyle.Default().With(flexGrow: 1f),wrap: FlexWrap.Wrap, fitContent: true,
-                build: inner =>
+            col.Row(new Style { flexGrow = 1f, flexWrap = FlexWrap.Wrap }, row =>
+            {
+                for (var i = 0; i < _itemCount; i++)
                 {
-                    for (var i = 0; i < _itemCount; i++)
-                    {
-                        var color = ItemColors[i % ItemColors.Length];
-                        inner.Item(ElementStyle.FixedWidth(100f).With(height: 100f),
-                            draw: rect => Verse.Widgets.DrawRectFast(rect, color));
-                    }
-                });
-            col.Row(wrap: FlexWrap.Wrap, fitContent: true,
-                build: inner =>
+                    var color = ItemColors[i % ItemColors.Length];
+                    row.Item(width: 100f, height: 100f, draw: rect => Verse.Widgets.DrawRectFast(rect, color));
+                }
+            });
+            col.Row(new Style { flexWrap = FlexWrap.Wrap }, row =>
+            {
+                for (var i = 0; i < _itemCount; i++)
                 {
-                    for (var i = 0; i < _itemCount; i++)
-                    {
-                        var color = ItemColors[i % ItemColors.Length];
-                        inner.Item(ElementStyle.FixedWidth(50f).With(height: 50f),
-                            draw: rect => Verse.Widgets.DrawRectFast(rect, color));
-                    }
-                });
+                    var color = ItemColors[i % ItemColors.Length];
+                    row.Item(width: 50f, height: 50f, draw: rect => Verse.Widgets.DrawRectFast(rect, color));
+                }
+            });
         });
     }
 }
