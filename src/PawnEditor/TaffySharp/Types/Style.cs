@@ -115,12 +115,20 @@ namespace PawnEditor.TaffySharp
         /// <summary>Flex shrink factor. Default: 1.</summary>
         public float flexShrink = 1f;
 
+        // ── Block container ───────────────────────────────────────────────────
+
+        /// <summary>Legacy block text-align for children. Default: Auto.</summary>
+        public TextAlign textAlign = TextAlign.Auto;
+
         // ── Grid item (Phase 5 — placeholders) ────────────────────────────────
 
         // gridTemplateRows, gridTemplateColumns, gridAutoRows, gridAutoColumns,
         // gridAutoFlow, gridTemplateAreas, gridRow, gridColumn — added in Phase 5.
 
         // ── Helpers ───────────────────────────────────────────────────────────
+
+        /// <summary>Returns true if this node uses block layout (Display.Block).</summary>
+        public bool IsBlock() => display == Display.Block;
 
         /// <summary>Returns a <see cref="Style"/> with all default values.</summary>
         public static Style Default() => new Style();

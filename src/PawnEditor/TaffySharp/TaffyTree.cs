@@ -367,10 +367,15 @@ namespace PawnEditor.TaffySharp
             throw new NotImplementedException("CSS Grid layout not yet implemented (Phase 5).");
         }
 
-        private LayoutOutput ComputeBlockLayout(NodeId node, LayoutInput input)
+        private LayoutOutput ComputeBlockLayout(NodeId node, LayoutInput input) =>
+            BlockCompute.Compute(this, node, input, null);
+
+        /// <summary>Directly sets a node's layout (used by layout algorithms when placing children).</summary>
+        internal void SetNodeLayout(NodeId node, in Layout layout)
         {
-            // TODO Phase 3: wire to Block.Compute(...)
-            throw new NotImplementedException("Block layout not yet implemented (Phase 3).");
+            var data = _nodes[(int)node.Value];
+            data.FinalLayout     = layout;
+            data.UnroundedLayout = layout;
         }
 
         // ── Internal accessor used by compute algorithms ───────────────────────

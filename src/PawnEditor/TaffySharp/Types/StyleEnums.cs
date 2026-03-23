@@ -109,4 +109,20 @@ namespace PawnEditor.TaffySharp
     {
         public static bool IsRtl(this Direction d) => d == Direction.Rtl;
     }
+
+    /// <summary>
+    /// Used by block layout to implement the legacy <c>&lt;center&gt;</c> / <c>align=</c> behaviour.
+    /// CSS: <c>text-align</c> (legacy subset only).
+    /// </summary>
+    public enum TextAlign : byte
+    {
+        /// <summary>No special legacy text-align behaviour. Default.</summary>
+        Auto,
+        /// <summary>Legacy left-align (corresponds to <c>-webkit-left</c>).</summary>
+        LegacyLeft,
+        /// <summary>Legacy right-align (corresponds to <c>-webkit-right</c>).</summary>
+        LegacyRight,
+        /// <summary>Legacy center-align (corresponds to <c>-webkit-center</c>).</summary>
+        LegacyCenter,
+    }
 }

@@ -67,6 +67,10 @@
         <Compile Include="TaffySharp\Tree\Cache.cs" />
         <!-- TaffySharp: Compute utilities -->
         <Compile Include="TaffySharp\Compute\MathHelpers.cs" />
+        <Compile Include="TaffySharp\Compute\Resolve.cs" />
+        <!-- TaffySharp: Phase 3 — Block compute -->
+        <Compile Include="TaffySharp\Compute\Block\BlockItem.cs" />
+        <Compile Include="TaffySharp\Compute\Block\BlockCompute.cs" />
         <!-- TaffySharp: Public entry point -->
         <Compile Include="TaffySharp\TaffyTree.cs" />
     </ItemGroup>

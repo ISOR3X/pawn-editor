@@ -197,5 +197,32 @@ namespace PawnEditor.TaffySharp
 
         public static Size<AvailableSpace> MaybeSub(this Size<AvailableSpace> self, Size<float?> rhs) =>
             new Size<AvailableSpace>(self.Width.MaybeSub(rhs.Width), self.Height.MaybeSub(rhs.Height));
+
+        // ── Size<float?> op Size<float> ───────────────────────────────────────
+
+        public static Size<float?> MaybeAdd(this Size<float?> self, Size<float> rhs) =>
+            new Size<float?>(self.Width.MaybeAdd(rhs.Width), self.Height.MaybeAdd(rhs.Height));
+
+        public static Size<float?> MaybeSub(this Size<float?> self, Size<float> rhs) =>
+            new Size<float?>(self.Width.MaybeSub(rhs.Width), self.Height.MaybeSub(rhs.Height));
+
+        public static Size<float?> MaybeMax(this Size<float?> self, Size<float> rhs) =>
+            new Size<float?>(self.Width.MaybeMax(rhs.Width), self.Height.MaybeMax(rhs.Height));
+
+        // ── Size<float?> coalescing / clamping ────────────────────────────────
+
+        /// <summary>Per-axis: take <paramref name="self"/> if non-null, else <paramref name="other"/>.</summary>
+        public static Size<float?> Or(this Size<float?> self, Size<float?> other) =>
+            new Size<float?>(self.Width ?? other.Width, self.Height ?? other.Height);
+
+        /// <summary>Per-axis maybe-clamp.</summary>
+        public static Size<float?> MaybeClamp(this Size<float?> self, Size<float?> min, Size<float?> max) =>
+            new Size<float?>(self.Width.MaybeClamp(min.Width, max.Width),
+                             self.Height.MaybeClamp(min.Height, max.Height));
+
+        // ── Size<float> op Size<float> (component-wise max for content_size) ──
+
+        public static Size<float> F32Max(this Size<float> self, Size<float> rhs) =>
+            new Size<float>(MathF.Max(self.Width, rhs.Width), MathF.Max(self.Height, rhs.Height));
     }
 }
