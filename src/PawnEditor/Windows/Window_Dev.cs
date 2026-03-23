@@ -35,7 +35,7 @@ public class Window_Dev : Window
         {
             col.Row(ElementStyle.Default(), fitContent: true, gap: 8f, build: row =>
             {
-                row.Item(style: ElementStyle.Default().With(width: 100f),
+                row.Item(style: ElementStyle.Default().With(width: 100f, height: 40f),
                     rect => { Verse.Widgets.DrawRectFast(rect, Color.red); });
                 row.Button("+ Add",
                     onClick: () => _itemCount = Mathf.Min(_itemCount + 1, 50));
@@ -43,9 +43,9 @@ public class Window_Dev : Window
                     onClick: () => _itemCount = Mathf.Max(_itemCount - 1, 0));
                 row.Label($"Items: {_itemCount}", ElementStyle.Fill);
                 row.Item(style: ElementStyle.Default().With(width: 100f),
-                    rect => { Verse.Widgets.DrawRectFast(rect, Color.red); });
+                    rect => { Verse.Widgets.DrawRectFast(rect, Color.gray); });
             });
-            col.Row(wrap: FlexWrap.Wrap, fitContent: true,
+            col.Row(style: ElementStyle.Default().With(flexGrow: 1f),wrap: FlexWrap.Wrap, fitContent: true,
                 build: inner =>
                 {
                     for (var i = 0; i < _itemCount; i++)
