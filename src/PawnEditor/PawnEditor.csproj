@@ -52,6 +52,25 @@
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
+        <!-- TaffySharp: Phase 1 — Core Types -->
+        <Compile Include="TaffySharp\Types\Geometry.cs" />
+        <Compile Include="TaffySharp\Types\FlexEnums.cs" />
+        <Compile Include="TaffySharp\Types\CompactLength.cs" />
+        <Compile Include="TaffySharp\Types\Dimension.cs" />
+        <Compile Include="TaffySharp\Types\AvailableSpace.cs" />
+        <Compile Include="TaffySharp\Types\Alignment.cs" />
+        <Compile Include="TaffySharp\Types\StyleEnums.cs" />
+        <Compile Include="TaffySharp\Types\Style.cs" />
+        <!-- TaffySharp: Phase 2 — Tree & Cache -->
+        <Compile Include="TaffySharp\Tree\Layout.cs" />
+        <Compile Include="TaffySharp\Tree\NodeId.cs" />
+        <Compile Include="TaffySharp\Tree\Cache.cs" />
+        <!-- TaffySharp: Compute utilities -->
+        <Compile Include="TaffySharp\Compute\MathHelpers.cs" />
+        <!-- TaffySharp: Public entry point -->
+        <Compile Include="TaffySharp\TaffyTree.cs" />
+    </ItemGroup>
+    <ItemGroup>
         <Compile Include="AppearanceUtility.cs" />
         <Compile Include="Defs\ColumnDef.cs"/>
         <Compile Include="Defs\KeyBindDefOf.cs"/>
