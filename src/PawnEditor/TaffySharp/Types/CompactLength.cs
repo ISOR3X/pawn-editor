@@ -15,19 +15,23 @@ namespace PawnEditor.TaffySharp
     public readonly struct CompactLength : System.IEquatable<CompactLength>
     {
         // Tag constants mirror the Rust source exactly (for cross-reference ease).
-        public const byte LENGTH_TAG           = 0b0000_0001; // 1
-        public const byte PERCENT_TAG          = 0b0000_0010; // 2
-        public const byte AUTO_TAG             = 0b0000_0011; // 3
-        public const byte FR_TAG               = 0b0000_0100; // 4
-        public const byte MIN_CONTENT_TAG      = 0b0000_0111; // 7
-        public const byte MAX_CONTENT_TAG      = 0b0000_1111; // 15
-        public const byte FIT_CONTENT_PX_TAG   = 0b0001_0111; // 23
-        public const byte FIT_CONTENT_PCT_TAG  = 0b0001_1111; // 31
+        public const byte LENGTH_TAG = 0b0000_0001; // 1
+        public const byte PERCENT_TAG = 0b0000_0010; // 2
+        public const byte AUTO_TAG = 0b0000_0011; // 3
+        public const byte FR_TAG = 0b0000_0100; // 4
+        public const byte MIN_CONTENT_TAG = 0b0000_0111; // 7
+        public const byte MAX_CONTENT_TAG = 0b0000_1111; // 15
+        public const byte FIT_CONTENT_PX_TAG = 0b0001_0111; // 23
+        public const byte FIT_CONTENT_PCT_TAG = 0b0001_1111; // 31
 
         private readonly byte _tag;
         private readonly float _value;
 
-        private CompactLength(byte tag, float value = 0f) { _tag = tag; _value = value; }
+        private CompactLength(byte tag, float value = 0f)
+        {
+            _tag = tag;
+            _value = value;
+        }
 
         // ── Factory methods ───────────────────────────────────────────────────
 
@@ -56,12 +60,13 @@ namespace PawnEditor.TaffySharp
         public static CompactLength FitContentPx(float limitPx) => new CompactLength(FIT_CONTENT_PX_TAG, limitPx);
 
         /// <summary>fit-content(<paramref name="limitPct"/> %).</summary>
-        public static CompactLength FitContentPercent(float limitPct) => new CompactLength(FIT_CONTENT_PCT_TAG, limitPct);
+        public static CompactLength FitContentPercent(float limitPct) =>
+            new CompactLength(FIT_CONTENT_PCT_TAG, limitPct);
 
         // ── Well-known constants ──────────────────────────────────────────────
 
-        public static readonly CompactLength ZERO        = Length(0f);
-        public static readonly CompactLength AUTO        = Auto();
+        public static readonly CompactLength ZERO = Length(0f);
+        public static readonly CompactLength AUTO = Auto();
         public static readonly CompactLength MIN_CONTENT = MinContent();
         public static readonly CompactLength MAX_CONTENT = MaxContent();
 
@@ -74,15 +79,18 @@ namespace PawnEditor.TaffySharp
 
         // ── Query helpers ─────────────────────────────────────────────────────
 
-        public bool IsZero()              => _tag == LENGTH_TAG && _value == 0f;
-        public bool IsAuto()              => _tag == AUTO_TAG;
-        public bool IsLengthOrPercent()   => _tag == LENGTH_TAG || _tag == PERCENT_TAG;
-        public bool IsMinContent()        => _tag == MIN_CONTENT_TAG;
-        public bool IsMaxContent()        => _tag == MAX_CONTENT_TAG;
-        public bool IsFitContent()        => _tag == FIT_CONTENT_PX_TAG || _tag == FIT_CONTENT_PCT_TAG;
-        public bool IsMaxOrFitContent()   => _tag == MAX_CONTENT_TAG || _tag == FIT_CONTENT_PX_TAG || _tag == FIT_CONTENT_PCT_TAG;
-        public bool IsFr()                => _tag == FR_TAG;
-        public bool IsMinOrMaxContent()   => _tag == MIN_CONTENT_TAG || _tag == MAX_CONTENT_TAG;
+        public bool IsZero() => _tag == LENGTH_TAG && _value == 0f;
+        public bool IsAuto() => _tag == AUTO_TAG;
+        public bool IsLengthOrPercent() => _tag == LENGTH_TAG || _tag == PERCENT_TAG;
+        public bool IsMinContent() => _tag == MIN_CONTENT_TAG;
+        public bool IsMaxContent() => _tag == MAX_CONTENT_TAG;
+        public bool IsFitContent() => _tag == FIT_CONTENT_PX_TAG || _tag == FIT_CONTENT_PCT_TAG;
+
+        public bool IsMaxOrFitContent() =>
+            _tag == MAX_CONTENT_TAG || _tag == FIT_CONTENT_PX_TAG || _tag == FIT_CONTENT_PCT_TAG;
+
+        public bool IsFr() => _tag == FR_TAG;
+        public bool IsMinOrMaxContent() => _tag == MIN_CONTENT_TAG || _tag == MAX_CONTENT_TAG;
 
         /// <summary>
         /// True for Auto, MaxContent, FitContentPx, FitContentPercent.
@@ -124,15 +132,15 @@ namespace PawnEditor.TaffySharp
 
         public override string ToString() => _tag switch
         {
-            LENGTH_TAG          => $"{_value}px",
-            PERCENT_TAG         => $"{_value * 100f}%",
-            AUTO_TAG            => "auto",
-            FR_TAG              => $"{_value}fr",
-            MIN_CONTENT_TAG     => "min-content",
-            MAX_CONTENT_TAG     => "max-content",
-            FIT_CONTENT_PX_TAG  => $"fit-content({_value}px)",
+            LENGTH_TAG => $"{_value}px",
+            PERCENT_TAG => $"{_value * 100f}%",
+            AUTO_TAG => "auto",
+            FR_TAG => $"{_value}fr",
+            MIN_CONTENT_TAG => "min-content",
+            MAX_CONTENT_TAG => "max-content",
+            FIT_CONTENT_PX_TAG => $"fit-content({_value}px)",
             FIT_CONTENT_PCT_TAG => $"fit-content({_value * 100f}%)",
-            _                   => $"unknown(tag={_tag})",
+            _ => $"unknown(tag={_tag})",
         };
     }
 }

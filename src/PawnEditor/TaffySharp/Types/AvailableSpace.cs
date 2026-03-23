@@ -14,19 +14,28 @@ namespace PawnEditor.TaffySharp
     /// </summary>
     public readonly struct AvailableSpace : IEquatable<AvailableSpace>
     {
-        private enum Kind : byte { Definite, MinContent, MaxContent }
+        private enum Kind : byte
+        {
+            Definite,
+            MinContent,
+            MaxContent
+        }
 
         private readonly Kind _kind;
         private readonly float _value; // only meaningful for Definite
 
-        private AvailableSpace(Kind kind, float value = 0f) { _kind = kind; _value = value; }
+        private AvailableSpace(Kind kind, float value = 0f)
+        {
+            _kind = kind;
+            _value = value;
+        }
 
         // ── Factory methods ───────────────────────────────────────────────────
 
         public static AvailableSpace Definite(float value) => new AvailableSpace(Kind.Definite, value);
         public static readonly AvailableSpace MinContent = new AvailableSpace(Kind.MinContent);
         public static readonly AvailableSpace MaxContent = new AvailableSpace(Kind.MaxContent);
-        public static readonly AvailableSpace ZERO       = Definite(0f);
+        public static readonly AvailableSpace ZERO = Definite(0f);
 
         // ── Conversions ───────────────────────────────────────────────────────
 
@@ -72,7 +81,7 @@ namespace PawnEditor.TaffySharp
         {
             Kind.MaxContent => float.PositiveInfinity,
             Kind.MinContent => 0f,
-            _               => _value - usedSpace,
+            _ => _value - usedSpace,
         };
 
         /// <summary>
@@ -95,9 +104,9 @@ namespace PawnEditor.TaffySharp
 
         public override string ToString() => _kind switch
         {
-            Kind.Definite   => $"Definite({_value})",
+            Kind.Definite => $"Definite({_value})",
             Kind.MinContent => "MinContent",
-            _               => "MaxContent",
+            _ => "MaxContent",
         };
     }
 

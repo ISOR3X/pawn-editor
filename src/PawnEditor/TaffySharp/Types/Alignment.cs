@@ -22,22 +22,28 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Items are packed toward the start of the axis.</summary>
         Start,
+
         /// <summary>Items are packed toward the end of the axis.</summary>
         End,
+
         /// <summary>
         /// Flex-relative start. Equivalent to <see cref="End"/> for RowReverse/ColumnReverse,
         /// <see cref="Start"/> otherwise.
         /// </summary>
         FlexStart,
+
         /// <summary>
         /// Flex-relative end. Equivalent to <see cref="Start"/> for RowReverse/ColumnReverse,
         /// <see cref="End"/> otherwise.
         /// </summary>
         FlexEnd,
+
         /// <summary>Items are aligned along the center of the axis.</summary>
         Center,
+
         /// <summary>Items are aligned so their baselines align.</summary>
         Baseline,
+
         /// <summary>Items are stretched to fill the container.</summary>
         Stretch,
     }
@@ -51,20 +57,28 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Items are packed toward the start of the axis.</summary>
         Start,
+
         /// <summary>Items are packed toward the end of the axis.</summary>
         End,
+
         /// <summary>Flex-relative start.</summary>
         FlexStart,
+
         /// <summary>Flex-relative end.</summary>
         FlexEnd,
+
         /// <summary>Items are centered.</summary>
         Center,
+
         /// <summary>Items are stretched to fill the container.</summary>
         Stretch,
+
         /// <summary>First and last items flush with edges; space between items distributed evenly.</summary>
         SpaceBetween,
+
         /// <summary>Gap between first/last items equals the gap between items.</summary>
         SpaceEvenly,
+
         /// <summary>Gap between first/last items is half the gap between items.</summary>
         SpaceAround,
     }
@@ -74,12 +88,12 @@ namespace PawnEditor.TaffySharp
         /// <summary>Returns the reversed alignment for RTL contexts.</summary>
         public static AlignContent Reversed(this AlignContent a) => a switch
         {
-            AlignContent.Start     => AlignContent.End,
-            AlignContent.End       => AlignContent.Start,
+            AlignContent.Start => AlignContent.End,
+            AlignContent.End => AlignContent.Start,
             AlignContent.FlexStart => AlignContent.FlexEnd,
-            AlignContent.FlexEnd   => AlignContent.FlexStart,
-            AlignContent.Stretch   => AlignContent.End,
-            _                      => a,
+            AlignContent.FlexEnd => AlignContent.FlexStart,
+            AlignContent.Stretch => AlignContent.End,
+            _ => a,
         };
     }
 }

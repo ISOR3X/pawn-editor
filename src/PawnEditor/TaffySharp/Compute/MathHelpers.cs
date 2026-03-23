@@ -110,8 +110,9 @@ namespace PawnEditor.TaffySharp
         // ── AvailableSpace op float ───────────────────────────────────────────
 
         public static AvailableSpace MaybeMin(this AvailableSpace self, float rhs) =>
-            self.IsDefinite ? AvailableSpace.Definite(MathF.Min(self.Unwrap(), rhs))
-                            : AvailableSpace.Definite(rhs);
+            self.IsDefinite
+                ? AvailableSpace.Definite(MathF.Min(self.Unwrap(), rhs))
+                : AvailableSpace.Definite(rhs);
 
         public static AvailableSpace MaybeMax(this AvailableSpace self, float rhs) =>
             self.IsDefinite ? AvailableSpace.Definite(MathF.Max(self.Unwrap(), rhs)) : self;
@@ -223,7 +224,7 @@ namespace PawnEditor.TaffySharp
         /// <summary>Per-axis maybe-clamp.</summary>
         public static Size<float?> MaybeClamp(this Size<float?> self, Size<float?> min, Size<float?> max) =>
             new Size<float?>(self.Width.MaybeClamp(min.Width, max.Width),
-                             self.Height.MaybeClamp(min.Height, max.Height));
+                self.Height.MaybeClamp(min.Height, max.Height));
 
         // ── Size<float> op Size<float> (component-wise max for content_size) ──
 

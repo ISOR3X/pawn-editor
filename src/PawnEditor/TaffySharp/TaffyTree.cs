@@ -15,7 +15,9 @@ namespace PawnEditor.TaffySharp
     /// <summary>An error that can occur while accessing or modifying the tree.</summary>
     public class TaffyException : Exception
     {
-        public TaffyException(string message) : base(message) { }
+        public TaffyException(string message) : base(message)
+        {
+        }
     }
 
     /// <summary>Per-node data stored inside the tree.</summary>
@@ -23,14 +25,17 @@ namespace PawnEditor.TaffySharp
     {
         public Style Style;
         public Layout UnroundedLayout = Layout.New();
-        public Layout FinalLayout     = Layout.New();
-        public Cache  Cache           = new Cache();
-        public bool   IsDirty         = true;
+        public Layout FinalLayout = Layout.New();
+        public Cache Cache = new Cache();
+        public bool IsDirty = true;
 
         /// <summary>Optional user-attached context object (measure function, etc.).</summary>
         public object? Context;
 
-        public NodeData(Style style) { Style = style; }
+        public NodeData(Style style)
+        {
+            Style = style;
+        }
     }
 
     /// <summary>
@@ -52,12 +57,12 @@ namespace PawnEditor.TaffySharp
     {
         // ── Internal storage ──────────────────────────────────────────────────
 
-        private readonly List<NodeData>         _nodes    = [];
-        private readonly List<List<NodeId>>     _children = [];
-        private readonly List<NodeId?>          _parents  = [];
+        private readonly List<NodeData> _nodes = [];
+        private readonly List<List<NodeId>> _children = [];
+        private readonly List<NodeId?> _parents = [];
 
         // Slot-reuse for removed nodes
-        private readonly Stack<uint>            _freeSlots = new();
+        private readonly Stack<uint> _freeSlots = new();
 
         public bool UseRounding = true;
 
@@ -84,9 +89,9 @@ namespace PawnEditor.TaffySharp
             if (_freeSlots.Count > 0)
             {
                 id = _freeSlots.Pop();
-                _nodes[(int)id]    = new NodeData(style) { Context = context };
+                _nodes[(int)id] = new NodeData(style) { Context = context };
                 _children[(int)id] = [];
-                _parents[(int)id]  = null;
+                _parents[(int)id] = null;
             }
             else
             {
@@ -95,6 +100,7 @@ namespace PawnEditor.TaffySharp
                 _children.Add([]);
                 _parents.Add(null);
             }
+
             return NodeId.From(id);
         }
 
@@ -109,14 +115,15 @@ namespace PawnEditor.TaffySharp
             {
                 _children[(int)parent.Value].Remove(node);
             }
+
             // Recursively remove children
             var children = new List<NodeId>(_children[(int)id]);
             foreach (var child in children)
                 Remove(child);
             // Free slot
-            _nodes[(int)id]    = null!;
+            _nodes[(int)id] = null!;
             _children[(int)id] = null!;
-            _parents[(int)id]  = null;
+            _parents[(int)id] = null;
             _freeSlots.Push(id);
         }
 
@@ -170,6 +177,7 @@ namespace PawnEditor.TaffySharp
                 SetParent(child, parent);
                 _children[(int)parent.Value].Add(child);
             }
+
             MarkDirty(parent);
         }
 
@@ -257,8 +265,8 @@ namespace PawnEditor.TaffySharp
             // so we apply the computed size directly (mirrors compute_root_layout in Taffy).
             var rootLayout = new TaffySharp.Layout
             {
-                Order       = 0,
-                Size        = output.Size,
+                Order = 0,
+                Size = output.Size,
                 ContentSize = output.ContentSize,
             };
             SetNodeLayout(root, rootLayout);
@@ -295,10 +303,10 @@ namespace PawnEditor.TaffySharp
             {
                 output = style.display switch
                 {
-                    Display.Flex  => ComputeFlexLayout(node, input),
-                    Display.Grid  => ComputeGridLayout(node, input),
+                    Display.Flex => ComputeFlexLayout(node, input),
+                    Display.Grid => ComputeGridLayout(node, input),
                     Display.Block => ComputeBlockLayout(node, input),
-                    _             => ComputeHiddenLayout(node, 0),
+                    _ => ComputeHiddenLayout(node, 0),
                 };
             }
 
@@ -331,9 +339,9 @@ namespace PawnEditor.TaffySharp
             var absX = cumulativeX + layout.Location.X;
             var absY = cumulativeY + layout.Location.Y;
 
-            layout.Location.X  = MathF.Round(absX) - MathF.Round(cumulativeX);
-            layout.Location.Y  = MathF.Round(absY) - MathF.Round(cumulativeY);
-            layout.Size.Width  = MathF.Round(absX + layout.Size.Width)  - MathF.Round(absX);
+            layout.Location.X = MathF.Round(absX) - MathF.Round(cumulativeX);
+            layout.Location.Y = MathF.Round(absY) - MathF.Round(cumulativeY);
+            layout.Size.Width = MathF.Round(absX + layout.Size.Width) - MathF.Round(absX);
             layout.Size.Height = MathF.Round(absY + layout.Size.Height) - MathF.Round(absY);
 
             foreach (var child in _children[(int)node.Value])
@@ -364,9 +372,9 @@ namespace PawnEditor.TaffySharp
 
             var parentWidth = input.ParentSize.Width;
             var padding = style.padding.ResolveOrZero(parentWidth);
-            var border  = style.border.ResolveOrZero(parentWidth);
-            var pbSum   = SizeF.Add(RectF.SumAxes(padding), RectF.SumAxes(border));
-            var boxAdj  = style.boxSizing == BoxSizing.ContentBox ? pbSum : SizeF.ZERO;
+            var border = style.border.ResolveOrZero(parentWidth);
+            var pbSum = SizeF.Add(RectF.SumAxes(padding), RectF.SumAxes(border));
+            var boxAdj = style.boxSizing == BoxSizing.ContentBox ? pbSum : SizeF.ZERO;
 
             Size<float?> nodeSize;
             Size<float?> nodeMinSize;
@@ -374,20 +382,20 @@ namespace PawnEditor.TaffySharp
 
             if (input.SizingMode == SizingMode.ContentSize)
             {
-                nodeSize    = input.KnownDimensions;
+                nodeSize = input.KnownDimensions;
                 nodeMinSize = SizeF.NONE;
                 nodeMaxSize = SizeF.NONE;
             }
             else
             {
-                var ar    = style.aspectRatio;
-                var styleSize    = SizeF.MaybeApplyAspectRatio(
+                var ar = style.aspectRatio;
+                var styleSize = SizeF.MaybeApplyAspectRatio(
                     style.size.MaybeResolve(input.ParentSize).MaybeAdd(boxAdj), ar);
                 var styleMinSize = SizeF.MaybeApplyAspectRatio(
                     style.minSize.MaybeResolve(input.ParentSize).MaybeAdd(boxAdj), ar);
                 var styleMaxSize = style.maxSize.MaybeResolve(input.ParentSize).MaybeAdd(boxAdj);
 
-                nodeSize    = input.KnownDimensions.Or(styleSize);
+                nodeSize = input.KnownDimensions.Or(styleSize);
                 nodeMinSize = styleMinSize;
                 nodeMaxSize = styleMaxSize;
             }
@@ -399,7 +407,7 @@ namespace PawnEditor.TaffySharp
 
             // Combine: prefer known/style size, fall back to measured + padding/border.
             var fallback = new Size<float?>(measuredSize.Width + pbSum.Width, measuredSize.Height + pbSum.Height);
-            var clamped  = nodeSize.Or(fallback).MaybeClamp(nodeMinSize, nodeMaxSize).MaybeMax(pbSum);
+            var clamped = nodeSize.Or(fallback).MaybeClamp(nodeMinSize, nodeMaxSize).MaybeMax(pbSum);
             return LayoutOutput.FromOuterSize(new Size<float>(clamped.Width ?? 0f, clamped.Height ?? 0f));
         }
 
@@ -419,7 +427,7 @@ namespace PawnEditor.TaffySharp
         internal void SetNodeLayout(NodeId node, in Layout layout)
         {
             var data = _nodes[(int)node.Value];
-            data.FinalLayout     = layout;
+            data.FinalLayout = layout;
             data.UnroundedLayout = layout;
         }
 

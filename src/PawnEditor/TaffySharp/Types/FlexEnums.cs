@@ -10,10 +10,13 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Items flow left-to-right along a horizontal main axis.</summary>
         Row,
+
         /// <summary>Items flow top-to-bottom along a vertical main axis.</summary>
         Column,
+
         /// <summary>Items flow right-to-left along a horizontal main axis.</summary>
         RowReverse,
+
         /// <summary>Items flow bottom-to-top along a vertical main axis.</summary>
         ColumnReverse,
     }
@@ -26,8 +29,10 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Items will not wrap and stay on a single line.</summary>
         NoWrap,
+
         /// <summary>Items will wrap onto multiple lines in the forward direction.</summary>
         Wrap,
+
         /// <summary>Items will wrap onto multiple lines in the reverse direction.</summary>
         WrapReverse,
     }

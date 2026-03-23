@@ -33,8 +33,9 @@ namespace PawnEditor.TaffySharp
         /// </summary>
         public static float? MaybeResolve(this LengthPercentageAuto self, float? context)
         {
-            if (self.Tag == CompactLength.LENGTH_TAG)  return self.Value;
-            if (self.Tag == CompactLength.PERCENT_TAG) return context.HasValue ? context.Value * self.Value : (float?)null;
+            if (self.Tag == CompactLength.LENGTH_TAG) return self.Value;
+            if (self.Tag == CompactLength.PERCENT_TAG)
+                return context.HasValue ? context.Value * self.Value : (float?)null;
             return null; // Auto
         }
 
@@ -50,8 +51,9 @@ namespace PawnEditor.TaffySharp
         /// </summary>
         public static float? MaybeResolve(this Dimension self, float? context)
         {
-            if (self.Tag == CompactLength.LENGTH_TAG)  return self.Value;
-            if (self.Tag == CompactLength.PERCENT_TAG) return context.HasValue ? context.Value * self.Value : (float?)null;
+            if (self.Tag == CompactLength.LENGTH_TAG) return self.Value;
+            if (self.Tag == CompactLength.PERCENT_TAG)
+                return context.HasValue ? context.Value * self.Value : (float?)null;
             return null; // Auto
         }
 

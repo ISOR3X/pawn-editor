@@ -27,7 +27,7 @@ namespace PawnEditor
     {
         internal readonly TaffyTree _tree;
         internal readonly List<(NodeId id, Action<Rect>? draw)> _callbacks;
-        internal readonly List<NodeId> _children = new List<NodeId>();
+        internal readonly List<NodeId> _children = new();
 
         internal TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
         {
@@ -156,7 +156,7 @@ namespace PawnEditor
 
         /// <summary>Creates asymmetric gap: <paramref name="column"/> between columns, <paramref name="row"/> between rows.</summary>
         public static Size<LengthPercentage> Gap(float column, float row) =>
-            new Size<LengthPercentage>(LengthPercentage.Length(column), LengthPercentage.Length(row));
+            new(LengthPercentage.Length(column), LengthPercentage.Length(row));
 
         // ── Core ────────────────────────────────────────────────────────────────
 
@@ -196,6 +196,6 @@ namespace PawnEditor
         }
 
         private static Size<LengthPercentage> UniformGap(float v) =>
-            new Size<LengthPercentage>(LengthPercentage.Length(v), LengthPercentage.Length(v));
+            new(LengthPercentage.Length(v), LengthPercentage.Length(v));
     }
 }

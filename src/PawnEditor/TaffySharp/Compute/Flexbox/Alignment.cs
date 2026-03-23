@@ -23,12 +23,12 @@ namespace PawnEditor.TaffySharp
                 {
                     case AlignContent.Stretch:
                     case AlignContent.SpaceBetween:
-                        mode   = AlignContent.FlexStart;
+                        mode = AlignContent.FlexStart;
                         isSafe = true;
                         break;
                     case AlignContent.SpaceAround:
                     case AlignContent.SpaceEvenly:
-                        mode   = AlignContent.Center;
+                        mode = AlignContent.Center;
                         isSafe = true;
                         break;
                 }

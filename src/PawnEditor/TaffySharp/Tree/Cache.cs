@@ -3,7 +3,11 @@
 namespace PawnEditor.TaffySharp
 {
     /// <summary>Outcome of a <see cref="Cache.Clear"/> call.</summary>
-    public enum ClearState { Cleared, AlreadyEmpty }
+    public enum ClearState
+    {
+        Cleared,
+        AlreadyEmpty
+    }
 
     /// <summary>
     /// Per-node layout result cache.
@@ -20,11 +24,13 @@ namespace PawnEditor.TaffySharp
             public T Content;
         }
 
-        private CacheEntry<LayoutOutput>?    _finalLayoutEntry;
-        private CacheEntry<Size<float>>?[]  _measureEntries = new CacheEntry<Size<float>>?[CacheSize];
+        private CacheEntry<LayoutOutput>? _finalLayoutEntry;
+        private CacheEntry<Size<float>>?[] _measureEntries = new CacheEntry<Size<float>>?[CacheSize];
         private bool _isEmpty = true;
 
-        public Cache() { }
+        public Cache()
+        {
+        }
 
         // ── Cache slot selection (mirrors Rust exactly) ───────────────────────
 
@@ -37,9 +43,9 @@ namespace PawnEditor.TaffySharp
             if (hasW && hasH) return 0;
 
             if (hasW) return 1 + (availableSpace.Height == AvailableSpace.MinContent ? 1 : 0);
-            if (hasH) return 3 + (availableSpace.Width  == AvailableSpace.MinContent ? 1 : 0);
+            if (hasH) return 3 + (availableSpace.Width == AvailableSpace.MinContent ? 1 : 0);
 
-            var wIsMin = availableSpace.Width  == AvailableSpace.MinContent;
+            var wIsMin = availableSpace.Width == AvailableSpace.MinContent;
             var hIsMin = availableSpace.Height == AvailableSpace.MinContent;
             return 5 + (wIsMin ? 2 : 0) + (hIsMin ? 1 : 0);
         }
@@ -63,10 +69,14 @@ namespace PawnEditor.TaffySharp
                     var e = _finalLayoutEntry.Value;
                     var cachedSize = e.Content.Size;
                     var match =
-                        (knownDimensions.Width  == e.KnownDimensions.Width  || knownDimensions.Width  == cachedSize.Width) &&
-                        (knownDimensions.Height == e.KnownDimensions.Height || knownDimensions.Height == cachedSize.Height) &&
-                        (knownDimensions.Width.HasValue  || e.AvailableSpace.Width .IsRoughlyEqual(availableSpace.Width)) &&
-                        (knownDimensions.Height.HasValue || e.AvailableSpace.Height.IsRoughlyEqual(availableSpace.Height));
+                        (knownDimensions.Width == e.KnownDimensions.Width ||
+                         knownDimensions.Width == cachedSize.Width) &&
+                        (knownDimensions.Height == e.KnownDimensions.Height ||
+                         knownDimensions.Height == cachedSize.Height) &&
+                        (knownDimensions.Width.HasValue ||
+                         e.AvailableSpace.Width.IsRoughlyEqual(availableSpace.Width)) &&
+                        (knownDimensions.Height.HasValue ||
+                         e.AvailableSpace.Height.IsRoughlyEqual(availableSpace.Height));
                     return match ? e.Content : null;
                 }
 
@@ -78,12 +88,17 @@ namespace PawnEditor.TaffySharp
                         var e = _measureEntries[i]!.Value;
                         var cachedSize = e.Content;
                         var match =
-                            (knownDimensions.Width  == e.KnownDimensions.Width  || knownDimensions.Width  == cachedSize.Width) &&
-                            (knownDimensions.Height == e.KnownDimensions.Height || knownDimensions.Height == cachedSize.Height) &&
-                            (knownDimensions.Width.HasValue  || e.AvailableSpace.Width .IsRoughlyEqual(availableSpace.Width)) &&
-                            (knownDimensions.Height.HasValue || e.AvailableSpace.Height.IsRoughlyEqual(availableSpace.Height));
+                            (knownDimensions.Width == e.KnownDimensions.Width ||
+                             knownDimensions.Width == cachedSize.Width) &&
+                            (knownDimensions.Height == e.KnownDimensions.Height ||
+                             knownDimensions.Height == cachedSize.Height) &&
+                            (knownDimensions.Width.HasValue ||
+                             e.AvailableSpace.Width.IsRoughlyEqual(availableSpace.Width)) &&
+                            (knownDimensions.Height.HasValue ||
+                             e.AvailableSpace.Height.IsRoughlyEqual(availableSpace.Height));
                         if (match) return LayoutOutput.FromOuterSize(cachedSize);
                     }
+
                     return null;
                 }
 

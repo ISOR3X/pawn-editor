@@ -11,11 +11,13 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>A full layout pass for this node and all its children.</summary>
         PerformLayout,
+
         /// <summary>
         /// Execute the algorithm only far enough to determine the node's container size.
         /// Steps not needed for sizing may be skipped.
         /// </summary>
         ComputeSize,
+
         /// <summary>Set a null layout — the node is hidden (<c>Display::None</c>).</summary>
         PerformHiddenLayout,
     }
@@ -27,6 +29,7 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Only content contributions are considered.</summary>
         ContentSize,
+
         /// <summary>Inherent size styles are considered in addition to content.</summary>
         InherentSize,
     }
@@ -49,8 +52,18 @@ namespace PawnEditor.TaffySharp
         /// <summary>Converts to <see cref="AbsoluteAxis"/>; returns false if Both.</summary>
         public static bool TryToAbsolute(this RequestedAxis r, out AbsoluteAxis axis)
         {
-            if (r == RequestedAxis.Horizontal) { axis = AbsoluteAxis.Horizontal; return true; }
-            if (r == RequestedAxis.Vertical)   { axis = AbsoluteAxis.Vertical;   return true; }
+            if (r == RequestedAxis.Horizontal)
+            {
+                axis = AbsoluteAxis.Horizontal;
+                return true;
+            }
+
+            if (r == RequestedAxis.Vertical)
+            {
+                axis = AbsoluteAxis.Vertical;
+                return true;
+            }
+
             axis = default;
             return false;
         }
@@ -80,7 +93,7 @@ namespace PawnEditor.TaffySharp
         public CollapsibleMarginSet CollapseWithMargin(float margin)
         {
             if (margin >= 0f) _positive = MathF.Max(_positive, margin);
-            else              _negative = MathF.Min(_negative, margin);
+            else _negative = MathF.Min(_negative, margin);
             return this;
         }
 

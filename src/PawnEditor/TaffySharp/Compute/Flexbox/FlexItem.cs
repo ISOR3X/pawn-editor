@@ -15,8 +15,10 @@ namespace PawnEditor.TaffySharp
 
         /// <summary>Resolved preferred size (null = auto).</summary>
         public Size<float?> size;
+
         /// <summary>Resolved minimum size.</summary>
         public Size<float?> minSize;
+
         /// <summary>Resolved maximum size.</summary>
         public Size<float?> maxSize;
 
@@ -45,10 +47,13 @@ namespace PawnEditor.TaffySharp
 
         /// <summary>Resolved inset offsets (null = auto).</summary>
         public Rect<float?> inset;
+
         /// <summary>Resolved margin (auto margins resolved to 0 here, then expanded later).</summary>
         public Rect<float> margin;
+
         /// <summary>True for each margin side that was 'auto' in the style.</summary>
         public Rect<bool> marginIsAuto;
+
         public Rect<float> padding;
         public Rect<float> border;
 
@@ -56,10 +61,13 @@ namespace PawnEditor.TaffySharp
 
         /// <summary>The flex base size (main axis).</summary>
         public float flexBasis;
+
         /// <summary>Flex base size minus padding and border on the main axis.</summary>
         public float innerFlexBasis;
+
         /// <summary>Amount by which this item deviated from its target size (for clamping).</summary>
         public float violation;
+
         /// <summary>Whether this item's main size is locked (frozen).</summary>
         public bool frozen;
 
@@ -82,6 +90,7 @@ namespace PawnEditor.TaffySharp
 
         /// <summary>Offset from natural position along the main axis.</summary>
         public float offsetMain;
+
         /// <summary>Offset from natural position along the cross axis.</summary>
         public float offsetCross;
 

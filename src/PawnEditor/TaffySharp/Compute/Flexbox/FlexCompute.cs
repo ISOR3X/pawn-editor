@@ -13,12 +13,16 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Shared item storage (same array for all lines).</summary>
         public FlexItem[] Items;
+
         /// <summary>Index of the first item in <see cref="Items"/> belonging to this line.</summary>
         public int Start;
+
         /// <summary>Number of items in this line.</summary>
         public int Count;
+
         /// <summary>Used cross size of this line.</summary>
         public float CrossSize;
+
         /// <summary>Cross-axis offset assigned by align-content.</summary>
         public float OffsetCross;
     }
@@ -39,10 +43,13 @@ namespace PawnEditor.TaffySharp
         public Size<float?> maxSize;
         public Rect<float> margin;
         public Rect<float> border;
+
         /// <summary>padding + border + scrollbar gutter (inset to the content box).</summary>
         public Rect<float> contentBoxInset;
+
         /// <summary>Space reserved for scrollbars.</summary>
         public Point<float> scrollbarGutter;
+
         public Size<float> gap;
 
         public AlignItems alignItems;
@@ -81,15 +88,17 @@ namespace PawnEditor.TaffySharp
 
             var clampedStyleSize = inputs.SizingMode == SizingMode.InherentSize
                 ? SizeF.MaybeApplyAspectRatio(
-                    style.size.MaybeResolve(inputs.ParentSize).MaybeAdd(boxSizingAdj), ar)
+                        style.size.MaybeResolve(inputs.ParentSize).MaybeAdd(boxSizingAdj), ar)
                     .MaybeClamp(minSize, maxSize)
                 : SizeF.NONE;
 
             var minMaxDefiniteSize = new Size<float?>(
                 (minSize.Width.HasValue && maxSize.Width.HasValue && maxSize.Width <= minSize.Width)
-                    ? minSize.Width : null,
+                    ? minSize.Width
+                    : null,
                 (minSize.Height.HasValue && maxSize.Height.HasValue && maxSize.Height <= minSize.Height)
-                    ? minSize.Height : null);
+                    ? minSize.Height
+                    : null);
 
             var styledKnown = inputs.KnownDimensions.Or(
                 minMaxDefiniteSize.Or(clampedStyleSize).MaybeMax(pbSum));
@@ -222,9 +231,11 @@ namespace PawnEditor.TaffySharp
                 {
                     if (constants.isColumn || firstLine.Items[i].alignSelf == AlignItems.Baseline)
                     {
-                        found = i; break;
+                        found = i;
+                        break;
                     }
                 }
+
                 if (found < 0 && firstLine.Count > 0) found = firstLine.Start;
                 if (found >= 0)
                 {
@@ -263,7 +274,7 @@ namespace PawnEditor.TaffySharp
             var scrollbarW = style.scrollbarWidth;
             var scrollbarGutter = new Point<float>(
                 style.overflow.Y.IsScrollContainer() ? scrollbarW : 0f, // x-gutter from y-overflow
-                style.overflow.X.IsScrollContainer() ? scrollbarW : 0f  // y-gutter from x-overflow
+                style.overflow.X.IsScrollContainer() ? scrollbarW : 0f // y-gutter from x-overflow
             );
 
             var contentBoxInset = RectF.Add(padding, border);
@@ -483,8 +494,8 @@ namespace PawnEditor.TaffySharp
                 child.flexBasis = MathF.Max(child.flexBasis, pbMainSum);
 
                 child.innerFlexBasis = child.flexBasis
-                    - RectF.MainAxisSum(child.padding, dir)
-                    - RectF.MainAxisSum(child.border, dir);
+                                       - RectF.MainAxisSum(child.padding, dir)
+                                       - RectF.MainAxisSum(child.border, dir);
 
                 // Automatic minimum main size
                 var pbAxesSums = RectF.SumAxes(RectF.Add(child.padding, child.border)).Map(v => (float?)v);
@@ -579,9 +590,11 @@ namespace PawnEditor.TaffySharp
                     lineLen += items[i].hypotheticalOuterSize.Main(c.dir) + gapContrib;
                     if (lineLen > mainAvail && i != lineStart)
                     {
-                        lineEnd = i; goto addLine;
+                        lineEnd = i;
+                        goto addLine;
                     }
                 }
+
                 lineEnd = items.Length;
 
                 addLine:
@@ -619,11 +632,11 @@ namespace PawnEditor.TaffySharp
             var dir = c.dir;
 
             switch (available.Main(dir).IsDefinite
-                    ? 0 // definite
-                    : available.Main(dir).IsMinContent && c.isWrap
-                    ? 1 // min-content + wrap
-                    : 2 // min/max-content (or min-content no-wrap)
-                    )
+                        ? 0 // definite
+                        : available.Main(dir).IsMinContent && c.isWrap
+                            ? 1 // min-content + wrap
+                            : 2 // min/max-content (or min-content no-wrap)
+                   )
             {
                 case 0: // Definite
                 {
@@ -642,9 +655,11 @@ namespace PawnEditor.TaffySharp
                                 .MaybeMax(pbSum);
                             total += s;
                         }
+
                         var lineLen = total + gapSum;
                         if (lineLen > longest) longest = lineLen;
                     }
+
                     var size = longest + mainCBI;
                     return lines.Count > 1 ? MathF.Max(size, definiteMain) : size;
                 }
@@ -664,9 +679,11 @@ namespace PawnEditor.TaffySharp
                                 .MaybeMax(pbSum);
                             total += s;
                         }
+
                         var lineLen = total + gapSum;
                         if (lineLen > longest) longest = lineLen;
                     }
+
                     return longest + mainCBI;
                 }
                 default: // MaxContent or MinContent no-wrap
@@ -698,7 +715,7 @@ namespace PawnEditor.TaffySharp
                             {
                                 var pref = stylePreferred!.Value;
                                 contribution = MathF.Max(MathF.Min(pref, maxMain), minMain)
-                                    + RectF.MainAxisSum(item.margin, dir);
+                                               + RectF.MainAxisSum(item.margin, dir);
                             }
                             else if (maxMain <= minMain)
                             {
@@ -766,6 +783,7 @@ namespace PawnEditor.TaffySharp
                         var lineGap = SumAxisGaps(c.gap.Main(c.dir), line.Count);
                         if (itemSum + lineGap > mainSize) mainSize = itemSum + lineGap;
                     }
+
                     return mainSize + mainCBI;
                 }
             }
@@ -828,6 +846,7 @@ namespace PawnEditor.TaffySharp
                     ? child.outerTargetSize.Main(dir)
                     : child.flexBasis + RectF.MainAxisSum(child.margin, dir);
             }
+
             var initialFreeSpace = nodeInnerMain.MaybeSub(usedSpace) ?? 0f;
 
             // Flex loop
@@ -836,7 +855,12 @@ namespace PawnEditor.TaffySharp
                 // Check all frozen
                 var allFrozen = true;
                 for (var i = line.Start; i < line.Start + line.Count; i++)
-                    if (!line.Items[i].frozen) { allFrozen = false; break; }
+                    if (!line.Items[i].frozen)
+                    {
+                        allFrozen = false;
+                        break;
+                    }
+
                 if (allFrozen) break;
 
                 // Recalculate used space
@@ -984,8 +1008,8 @@ namespace PawnEditor.TaffySharp
                             AvailableSpace.Definite(childKnownMain ?? 0f));
 
                     childInnerCross = MeasureChildSize(tree, child.nodeId,
-                        knownForMeasure, c.nodeInnerSize, availForMeasure,
-                        SizingMode.ContentSize, dir.CrossAxis())
+                            knownForMeasure, c.nodeInnerSize, availForMeasure,
+                            SizingMode.ContentSize, dir.CrossAxis())
                         .MaybeClamp(child.minSize.Cross(dir), child.maxSize.Cross(dir))
                         .MaybeMax(pbCrossSum);
                 }
@@ -1009,7 +1033,8 @@ namespace PawnEditor.TaffySharp
                 // Count baseline-aligned items
                 var baselineCount = 0;
                 for (var i = line.Start; i < line.Start + line.Count; i++)
-                    if (line.Items[i].alignSelf == AlignItems.Baseline) baselineCount++;
+                    if (line.Items[i].alignSelf == AlignItems.Baseline)
+                        baselineCount++;
                 if (baselineCount <= 1) continue;
 
                 for (var i = line.Start; i < line.Start + line.Count; i++)
@@ -1056,10 +1081,10 @@ namespace PawnEditor.TaffySharp
                     Items = lines[0].Items, Start = lines[0].Start, Count = lines[0].Count,
                     OffsetCross = lines[0].OffsetCross,
                     CrossSize = nodeSize.Cross(c.dir)
-                        .MaybeClamp(c.minSize.Cross(c.dir), c.maxSize.Cross(c.dir))
-                        .MaybeSub(crossPB)
-                        .MaybeMax(0f)
-                        ?? 0f,
+                                    .MaybeClamp(c.minSize.Cross(c.dir), c.maxSize.Cross(c.dir))
+                                    .MaybeSub(crossPB)
+                                    .MaybeMax(0f)
+                                ?? 0f,
                 };
                 return;
             }
@@ -1069,7 +1094,8 @@ namespace PawnEditor.TaffySharp
                 var line = lines[li];
                 var maxBaseline = 0f;
                 for (var i = line.Start; i < line.Start + line.Count; i++)
-                    if (line.Items[i].baseline > maxBaseline) maxBaseline = line.Items[i].baseline;
+                    if (line.Items[i].baseline > maxBaseline)
+                        maxBaseline = line.Items[i].baseline;
 
                 var maxCross = 0f;
                 for (var i = line.Start; i < line.Start + line.Count; i++)
@@ -1081,14 +1107,16 @@ namespace PawnEditor.TaffySharp
                         && !child.marginIsAuto.CrossEnd(c.dir))
                     {
                         crossSz = maxBaseline - child.baseline
-                            + child.hypotheticalOuterSize.Cross(c.dir);
+                                  + child.hypotheticalOuterSize.Cross(c.dir);
                     }
                     else
                     {
                         crossSz = child.hypotheticalOuterSize.Cross(c.dir);
                     }
+
                     if (crossSz > maxCross) maxCross = crossSz;
                 }
+
                 lines[li] = new FlexLine
                 {
                     Items = line.Items, Start = line.Start, Count = line.Count,
@@ -1218,12 +1246,13 @@ namespace PawnEditor.TaffySharp
                         if (line.Items[i].marginIsAuto.MainStart(c.dir))
                         {
                             if (c.isRow) line.Items[i].margin.Left = margin;
-                            else         line.Items[i].margin.Top  = margin;
+                            else line.Items[i].margin.Top = margin;
                         }
+
                         if (line.Items[i].marginIsAuto.MainEnd(c.dir))
                         {
-                            if (c.isRow) line.Items[i].margin.Right  = margin;
-                            else         line.Items[i].margin.Bottom  = margin;
+                            if (c.isRow) line.Items[i].margin.Right = margin;
+                            else line.Items[i].margin.Bottom = margin;
                         }
                     }
                 }
@@ -1266,29 +1295,38 @@ namespace PawnEditor.TaffySharp
                 var lineCross = line.CrossSize;
                 var maxBaseline = 0f;
                 for (var i = line.Start; i < line.Start + line.Count; i++)
-                    if (line.Items[i].baseline > maxBaseline) maxBaseline = line.Items[i].baseline;
+                    if (line.Items[i].baseline > maxBaseline)
+                        maxBaseline = line.Items[i].baseline;
 
                 for (var i = line.Start; i < line.Start + line.Count; i++)
                 {
                     ref var child = ref line.Items[i];
                     var freeSpace = lineCross - child.outerTargetSize.Cross(c.dir);
                     var crossStart = child.marginIsAuto.CrossStart(c.dir);
-                    var crossEnd   = child.marginIsAuto.CrossEnd(c.dir);
+                    var crossEnd = child.marginIsAuto.CrossEnd(c.dir);
 
                     if (crossStart && crossEnd)
                     {
-                        if (c.isRow) { child.margin.Top = freeSpace / 2f; child.margin.Bottom = freeSpace / 2f; }
-                        else         { child.margin.Left = freeSpace / 2f; child.margin.Right  = freeSpace / 2f; }
+                        if (c.isRow)
+                        {
+                            child.margin.Top = freeSpace / 2f;
+                            child.margin.Bottom = freeSpace / 2f;
+                        }
+                        else
+                        {
+                            child.margin.Left = freeSpace / 2f;
+                            child.margin.Right = freeSpace / 2f;
+                        }
                     }
                     else if (crossStart)
                     {
-                        if (c.isRow) child.margin.Top  = freeSpace;
-                        else         child.margin.Left  = freeSpace;
+                        if (c.isRow) child.margin.Top = freeSpace;
+                        else child.margin.Left = freeSpace;
                     }
                     else if (crossEnd)
                     {
                         if (c.isRow) child.margin.Bottom = freeSpace;
-                        else         child.margin.Right  = freeSpace;
+                        else child.margin.Right = freeSpace;
                     }
                     else
                     {
@@ -1480,7 +1518,7 @@ namespace PawnEditor.TaffySharp
             ref Size<float> contentSize, ref AlgoConstants c)
         {
             var dir = c.dir;
-            var isRtlRow    = dir.IsRow()    && c.layoutDirection == Direction.Rtl;
+            var isRtlRow = dir.IsRow() && c.layoutDirection == Direction.Rtl;
             var isRtlColumn = dir.IsColumn() && c.layoutDirection == Direction.Rtl;
 
             var output = PerformChildLayout(tree, item.nodeId,
@@ -1503,6 +1541,7 @@ namespace PawnEditor.TaffySharp
             {
                 mainRelInset = item.inset.MainStart(dir) ?? -(item.inset.MainEnd(dir) ?? 0f);
             }
+
             if (isRtlColumn)
             {
                 crossRelInset = -(item.inset.CrossEnd(dir) ?? 0f);
@@ -1520,7 +1559,7 @@ namespace PawnEditor.TaffySharp
             if (isRtlRow)
             {
                 offsetMain = totalOffsetMain - item.offsetMain - item.margin.MainEnd(dir)
-                    - mainRelInset - size.Main(dir);
+                             - mainRelInset - size.Main(dir);
             }
             else
             {
@@ -1528,7 +1567,7 @@ namespace PawnEditor.TaffySharp
             }
 
             offsetCross = totalOffsetCross + item.offsetCross + effectiveLineCross
-                + item.margin.CrossStart(dir) + crossRelInset;
+                          + item.margin.CrossStart(dir) + crossRelInset;
 
             // Baseline update
             if (dir.IsRow())
@@ -1612,17 +1651,17 @@ namespace PawnEditor.TaffySharp
                 var pbSize = RectF.SumAxes(RectF.Add(padding, border));
                 var boxAdj = cs.boxSizing == BoxSizing.ContentBox ? pbSize : SizeF.ZERO;
 
-                var left   = cs.inset.Left.MaybeResolve(insetW);
-                var right  = cs.inset.Right.MaybeResolve(insetW);
-                var top    = cs.inset.Top.MaybeResolve(insetRel.Height);
+                var left = cs.inset.Left.MaybeResolve(insetW);
+                var right = cs.inset.Right.MaybeResolve(insetW);
+                var top = cs.inset.Top.MaybeResolve(insetRel.Height);
                 var bottom = cs.inset.Bottom.MaybeResolve(insetRel.Height);
 
                 var styleSize = SizeF.MaybeApplyAspectRatio(
                     cs.size.MaybeResolve(insetRel).MaybeAdd(boxAdj), ar);
                 var minSz = SizeF.MaybeApplyAspectRatio(
                     cs.minSize.MaybeResolve(insetRel).MaybeAdd(boxAdj)
-                    .Or(pbSize.Map(v => (float?)v))
-                    .MaybeMax(pbSize), ar);
+                        .Or(pbSize.Map(v => (float?)v))
+                        .MaybeMax(pbSize), ar);
                 var maxSz = SizeF.MaybeApplyAspectRatio(
                     cs.maxSize.MaybeResolve(insetRel).MaybeAdd(boxAdj), ar);
 
@@ -1653,12 +1692,15 @@ namespace PawnEditor.TaffySharp
                     SizingMode.InherentSize);
 
                 var finalSize = known.Map(v => v ?? 0f)
-                    .ZipMap(SizeF.ZERO, (k, _) => k > 0f ? k : measured.Size.Width > 0f
-                        ? measured.Size.Width : 0f); // use measured if not known
+                    .ZipMap(SizeF.ZERO, (k, _) => k > 0f
+                        ? k
+                        : measured.Size.Width > 0f
+                            ? measured.Size.Width
+                            : 0f); // use measured if not known
                 // Simpler: unwrap or measured
                 finalSize = new Size<float>(
-                    known.Width ?? measured.Size.Width,
-                    known.Height ?? measured.Size.Height)
+                        known.Width ?? measured.Size.Width,
+                        known.Height ?? measured.Size.Height)
                     .MaybeClamp(minSz, maxSz);
 
                 var layoutOut = PerformChildLayout(tree, child,
@@ -1681,7 +1723,7 @@ namespace PawnEditor.TaffySharp
                     margin.Left ?? autoMarginW, margin.Right ?? autoMarginW,
                     margin.Top ?? autoMarginH, margin.Bottom ?? autoMarginH);
 
-                var isRtlRow    = c.isRow    && c.layoutDirection == Direction.Rtl;
+                var isRtlRow = c.isRow && c.layoutDirection == Direction.Rtl;
                 var isRtlColumn = c.isColumn && c.layoutDirection == Direction.Rtl;
 
                 // Determine flex-relative insets
@@ -1693,29 +1735,29 @@ namespace PawnEditor.TaffySharp
                 var crossFlexStartRev = c.isWrapReverse ^ crossIsRtl;
 
                 var startMain = c.isRow ? left : top;
-                var endMain   = c.isRow ? right : bottom;
+                var endMain = c.isRow ? right : bottom;
                 var startCross = c.isRow ? top : left;
-                var endCross   = c.isRow ? bottom : right;
+                var endCross = c.isRow ? bottom : right;
 
                 var mainSBStart = mainIsRtl ? c.scrollbarGutter.Main(c.dir) : 0f;
-                var mainSBEnd   = mainIsRtl ? 0f : c.scrollbarGutter.Main(c.dir);
+                var mainSBEnd = mainIsRtl ? 0f : c.scrollbarGutter.Main(c.dir);
                 var crossSBStart = crossIsRtl ? c.scrollbarGutter.Cross(c.dir) : 0f;
-                var crossSBEnd   = crossIsRtl ? 0f : c.scrollbarGutter.Cross(c.dir);
+                var crossSBEnd = crossIsRtl ? 0f : c.scrollbarGutter.Cross(c.dir);
 
                 float offsetMain;
                 if (startMain.HasValue || endMain.HasValue)
                 {
                     if (mainIsRtl && endMain.HasValue)
                         offsetMain = c.containerSize.Main(c.dir) - c.border.MainEnd(c.dir)
-                            - mainSBEnd - finalSize.Main(c.dir) - endMain!.Value
-                            - resolved.MainEnd(c.dir);
+                                                                 - mainSBEnd - finalSize.Main(c.dir) - endMain!.Value
+                                                                 - resolved.MainEnd(c.dir);
                     else if (startMain.HasValue)
                         offsetMain = startMain!.Value + c.border.MainStart(c.dir)
-                            + mainSBStart + resolved.MainStart(c.dir);
+                                                      + mainSBStart + resolved.MainStart(c.dir);
                     else
                         offsetMain = c.containerSize.Main(c.dir) - c.border.MainEnd(c.dir)
-                            - mainSBEnd - finalSize.Main(c.dir) - (endMain ?? 0f)
-                            - resolved.MainEnd(c.dir);
+                                                                 - mainSBEnd - finalSize.Main(c.dir) - (endMain ?? 0f)
+                                                                 - resolved.MainEnd(c.dir);
                 }
                 else
                 {
@@ -1728,15 +1770,17 @@ namespace PawnEditor.TaffySharp
                 {
                     if (crossIsRtl && endCross.HasValue)
                         offsetCross = c.containerSize.Cross(c.dir) - c.border.CrossEnd(c.dir)
-                            - crossSBEnd - finalSize.Cross(c.dir) - endCross!.Value
-                            - resolved.CrossEnd(c.dir);
+                                                                   - crossSBEnd - finalSize.Cross(c.dir) -
+                                                                   endCross!.Value
+                                                                   - resolved.CrossEnd(c.dir);
                     else if (startCross.HasValue)
                         offsetCross = startCross!.Value + c.border.CrossStart(c.dir)
-                            + crossSBStart + resolved.CrossStart(c.dir);
+                                                        + crossSBStart + resolved.CrossStart(c.dir);
                     else
                         offsetCross = c.containerSize.Cross(c.dir) - c.border.CrossEnd(c.dir)
-                            - crossSBEnd - finalSize.Cross(c.dir) - (endCross ?? 0f)
-                            - resolved.CrossEnd(c.dir);
+                                                                   - crossSBEnd - finalSize.Cross(c.dir) -
+                                                                   (endCross ?? 0f)
+                                                                   - resolved.CrossEnd(c.dir);
                 }
                 else
                 {
@@ -1793,6 +1837,7 @@ namespace PawnEditor.TaffySharp
                             relLoc.X + szContr.Width,
                             relLoc.Y + szContr.Height);
                     }
+
                     contentSize = contentSize.F32Max(contribSz);
                 }
             }
@@ -1815,24 +1860,24 @@ namespace PawnEditor.TaffySharp
                     return c.contentBoxInset.MainStart(c.dir) + resolved.MainStart(c.dir);
                 case (AlignContent.Start, true):
                     return c.containerSize.Main(c.dir) - c.contentBoxInset.MainEnd(c.dir)
-                        - finalSize.Main(c.dir) - resolved.MainEnd(c.dir);
+                                                       - finalSize.Main(c.dir) - resolved.MainEnd(c.dir);
                 case (AlignContent.End, false):
                     return c.containerSize.Main(c.dir) - c.contentBoxInset.MainEnd(c.dir)
-                        - finalSize.Main(c.dir) - resolved.MainEnd(c.dir);
+                                                       - finalSize.Main(c.dir) - resolved.MainEnd(c.dir);
                 case (AlignContent.End, true):
                     return c.contentBoxInset.MainStart(c.dir) + resolved.MainStart(c.dir);
                 case (AlignContent.FlexEnd, false):
                 case (AlignContent.FlexStart, true):
                 case (AlignContent.Stretch, true):
                     return c.containerSize.Main(c.dir) - c.contentBoxInset.MainEnd(c.dir)
-                        - finalSize.Main(c.dir) - resolved.MainEnd(c.dir);
+                                                       - finalSize.Main(c.dir) - resolved.MainEnd(c.dir);
                 default: // SpaceEvenly, SpaceAround, Center
                     return (c.containerSize.Main(c.dir)
-                        + c.contentBoxInset.MainStart(c.dir)
-                        - c.contentBoxInset.MainEnd(c.dir)
-                        - finalSize.Main(c.dir)
-                        + resolved.MainStart(c.dir)
-                        - resolved.MainEnd(c.dir)) / 2f;
+                            + c.contentBoxInset.MainStart(c.dir)
+                            - c.contentBoxInset.MainEnd(c.dir)
+                            - finalSize.Main(c.dir)
+                            + resolved.MainStart(c.dir)
+                            - resolved.MainEnd(c.dir)) / 2f;
             }
         }
 
@@ -1846,10 +1891,10 @@ namespace PawnEditor.TaffySharp
                     return c.contentBoxInset.CrossStart(c.dir) + resolved.CrossStart(c.dir);
                 case (AlignItems.Start, true):
                     return c.containerSize.Cross(c.dir) - c.contentBoxInset.CrossEnd(c.dir)
-                        - finalSize.Cross(c.dir) - resolved.CrossEnd(c.dir);
+                                                        - finalSize.Cross(c.dir) - resolved.CrossEnd(c.dir);
                 case (AlignItems.End, false):
                     return c.containerSize.Cross(c.dir) - c.contentBoxInset.CrossEnd(c.dir)
-                        - finalSize.Cross(c.dir) - resolved.CrossEnd(c.dir);
+                                                        - finalSize.Cross(c.dir) - resolved.CrossEnd(c.dir);
                 case (AlignItems.End, true):
                     return c.contentBoxInset.CrossStart(c.dir) + resolved.CrossStart(c.dir);
                 case (AlignItems.Baseline, false):
@@ -1860,13 +1905,13 @@ namespace PawnEditor.TaffySharp
                 default: // Baseline true, Stretch true, FlexStart true, FlexEnd false
                     if (alignSelf == AlignItems.Center)
                         return (c.containerSize.Cross(c.dir)
-                            + c.contentBoxInset.CrossStart(c.dir)
-                            - c.contentBoxInset.CrossEnd(c.dir)
-                            - finalSize.Cross(c.dir)
-                            + resolved.CrossStart(c.dir)
-                            - resolved.CrossEnd(c.dir)) / 2f;
+                                + c.contentBoxInset.CrossStart(c.dir)
+                                - c.contentBoxInset.CrossEnd(c.dir)
+                                - finalSize.Cross(c.dir)
+                                + resolved.CrossStart(c.dir)
+                                - resolved.CrossEnd(c.dir)) / 2f;
                     return c.containerSize.Cross(c.dir) - c.contentBoxInset.CrossEnd(c.dir)
-                        - finalSize.Cross(c.dir) - resolved.CrossEnd(c.dir);
+                                                        - finalSize.Cross(c.dir) - resolved.CrossEnd(c.dir);
             }
         }
 

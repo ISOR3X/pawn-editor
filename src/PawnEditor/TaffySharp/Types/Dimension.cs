@@ -127,7 +127,7 @@ namespace PawnEditor.TaffySharp
 
         // ── Conversions ───────────────────────────────────────────────────────
 
-        public static implicit operator Dimension(LengthPercentage lp)   => new Dimension(lp.Inner);
+        public static implicit operator Dimension(LengthPercentage lp) => new Dimension(lp.Inner);
         public static implicit operator Dimension(LengthPercentageAuto l) => new Dimension(l.Inner);
 
         // ── Accessors ─────────────────────────────────────────────────────────

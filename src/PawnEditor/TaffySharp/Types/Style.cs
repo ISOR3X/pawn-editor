@@ -143,18 +143,18 @@ namespace PawnEditor.TaffySharp
     {
         public static Rect<LengthPercentage> Zero() =>
             new Rect<LengthPercentage>(LengthPercentage.ZERO, LengthPercentage.ZERO,
-                                       LengthPercentage.ZERO, LengthPercentage.ZERO);
+                LengthPercentage.ZERO, LengthPercentage.ZERO);
     }
 
     internal static class RectLPA
     {
         public static Rect<LengthPercentageAuto> Zero() =>
             new Rect<LengthPercentageAuto>(LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO,
-                                           LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO);
+                LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO);
 
         public static Rect<LengthPercentageAuto> Auto() =>
             new Rect<LengthPercentageAuto>(LengthPercentageAuto.AUTO, LengthPercentageAuto.AUTO,
-                                           LengthPercentageAuto.AUTO, LengthPercentageAuto.AUTO);
+                LengthPercentageAuto.AUTO, LengthPercentageAuto.AUTO);
     }
 
     internal static class SizeDim

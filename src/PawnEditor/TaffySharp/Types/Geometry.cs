@@ -19,6 +19,7 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>The inline dimension (horizontal in horizontal writing modes).</summary>
         Inline,
+
         /// <summary>The block dimension (vertical in horizontal writing modes).</summary>
         Block,
     }
@@ -31,7 +32,11 @@ namespace PawnEditor.TaffySharp
         public T Width;
         public T Height;
 
-        public Size(T width, T height) { Width = width; Height = height; }
+        public Size(T width, T height)
+        {
+            Width = width;
+            Height = height;
+        }
 
         /// <summary>Apply <paramref name="f"/> to both Width and Height, returning a new Size.</summary>
         public Size<R> Map<R>(Func<T, R> f) => new Size<R>(f(Width), f(Height));
@@ -46,16 +51,39 @@ namespace PawnEditor.TaffySharp
         // Flexbox axis helpers
         public T Main(FlexDirection dir) => dir.IsRow() ? Width : Height;
         public T Cross(FlexDirection dir) => dir.IsRow() ? Height : Width;
-        public void SetMain(FlexDirection dir, T value) { if (dir.IsRow()) Width = value; else Height = value; }
-        public void SetCross(FlexDirection dir, T value) { if (dir.IsRow()) Height = value; else Width = value; }
-        public Size<T> WithMain(FlexDirection dir, T value) => dir.IsRow() ? new Size<T>(value, Height) : new Size<T>(Width, value);
-        public Size<T> WithCross(FlexDirection dir, T value) => dir.IsRow() ? new Size<T>(Width, value) : new Size<T>(value, Height);
-        public Size<T> MapMain(FlexDirection dir, Func<T, T> f) => dir.IsRow() ? new Size<T>(f(Width), Height) : new Size<T>(Width, f(Height));
-        public Size<T> MapCross(FlexDirection dir, Func<T, T> f) => dir.IsRow() ? new Size<T>(Width, f(Height)) : new Size<T>(f(Width), Height);
+
+        public void SetMain(FlexDirection dir, T value)
+        {
+            if (dir.IsRow()) Width = value;
+            else Height = value;
+        }
+
+        public void SetCross(FlexDirection dir, T value)
+        {
+            if (dir.IsRow()) Height = value;
+            else Width = value;
+        }
+
+        public Size<T> WithMain(FlexDirection dir, T value) =>
+            dir.IsRow() ? new Size<T>(value, Height) : new Size<T>(Width, value);
+
+        public Size<T> WithCross(FlexDirection dir, T value) =>
+            dir.IsRow() ? new Size<T>(Width, value) : new Size<T>(value, Height);
+
+        public Size<T> MapMain(FlexDirection dir, Func<T, T> f) =>
+            dir.IsRow() ? new Size<T>(f(Width), Height) : new Size<T>(Width, f(Height));
+
+        public Size<T> MapCross(FlexDirection dir, Func<T, T> f) =>
+            dir.IsRow() ? new Size<T>(Width, f(Height)) : new Size<T>(f(Width), Height);
 
         // Grid axis helpers
         public T Get(AbstractAxis axis) => axis == AbstractAxis.Inline ? Width : Height;
-        public void Set(AbstractAxis axis, T value) { if (axis == AbstractAxis.Inline) Width = value; else Height = value; }
+
+        public void Set(AbstractAxis axis, T value)
+        {
+            if (axis == AbstractAxis.Inline) Width = value;
+            else Height = value;
+        }
 
         // AbsoluteAxis helper
         public T GetAbs(AbsoluteAxis axis) => axis == AbsoluteAxis.Horizontal ? Width : Height;
@@ -121,7 +149,10 @@ namespace PawnEditor.TaffySharp
 
         public Rect(T left, T right, T top, T bottom)
         {
-            Left = left; Right = right; Top = top; Bottom = bottom;
+            Left = left;
+            Right = right;
+            Top = top;
+            Bottom = bottom;
         }
 
         /// <summary>Apply <paramref name="f"/> to all four sides, returning a new Rect.</summary>
@@ -176,7 +207,11 @@ namespace PawnEditor.TaffySharp
         public T X;
         public T Y;
 
-        public Point(T x, T y) { X = x; Y = y; }
+        public Point(T x, T y)
+        {
+            X = x;
+            Y = y;
+        }
 
         public Point<R> Map<R>(Func<T, R> f) => new Point<R>(f(X), f(Y));
 
@@ -184,7 +219,12 @@ namespace PawnEditor.TaffySharp
 
         // Grid axis helpers
         public T Get(AbstractAxis axis) => axis == AbstractAxis.Inline ? X : Y;
-        public void Set(AbstractAxis axis, T value) { if (axis == AbstractAxis.Inline) X = value; else Y = value; }
+
+        public void Set(AbstractAxis axis, T value)
+        {
+            if (axis == AbstractAxis.Inline) X = value;
+            else Y = value;
+        }
 
         // Flexbox axis helpers
         public T Main(FlexDirection dir) => dir.IsRow() ? X : Y;
@@ -213,7 +253,11 @@ namespace PawnEditor.TaffySharp
         public T Start;
         public T End;
 
-        public Line(T start, T end) { Start = start; End = end; }
+        public Line(T start, T end)
+        {
+            Start = start;
+            End = end;
+        }
 
         public Line<R> Map<R>(Func<T, R> f) => new Line<R>(f(Start), f(End));
 
@@ -236,7 +280,11 @@ namespace PawnEditor.TaffySharp
         public TMin Min;
         public TMax Max;
 
-        public MinMax(TMin min, TMax max) { Min = min; Max = max; }
+        public MinMax(TMin min, TMax max)
+        {
+            Min = min;
+            Max = max;
+        }
     }
 
     // ── InBothAbsAxis<T> ─────────────────────────────────────────────────────
@@ -247,7 +295,11 @@ namespace PawnEditor.TaffySharp
         public T Horizontal;
         public T Vertical;
 
-        public InBothAbsAxis(T horizontal, T vertical) { Horizontal = horizontal; Vertical = vertical; }
+        public InBothAbsAxis(T horizontal, T vertical)
+        {
+            Horizontal = horizontal;
+            Vertical = vertical;
+        }
 
         public T Get(AbsoluteAxis axis) => axis == AbsoluteAxis.Horizontal ? Horizontal : Vertical;
     }

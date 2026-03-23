@@ -10,10 +10,13 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Children follow the Flexbox layout algorithm.</summary>
         Flex,
+
         /// <summary>Children follow the CSS Grid layout algorithm.</summary>
         Grid,
+
         /// <summary>Children follow the Block layout algorithm.</summary>
         Block,
+
         /// <summary>The node and all its descendants are hidden (generate no boxes).</summary>
         None,
     }
@@ -23,6 +26,7 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>The node generates a box normally.</summary>
         Normal,
+
         /// <summary>The node and its descendants generate no boxes (hidden).</summary>
         None,
     }
@@ -35,6 +39,7 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Size styles include padding and border (excludes margin). Default.</summary>
         BorderBox,
+
         /// <summary>Size styles apply to the content box only (excludes padding, border, margin).</summary>
         ContentBox,
     }
@@ -50,6 +55,7 @@ namespace PawnEditor.TaffySharp
         /// Other items are not affected by the offset.
         /// </summary>
         Relative,
+
         /// <summary>
         /// Offset relative to the nearest positioned ancestor (or the root).
         /// No space is reserved for this item in the flow.
@@ -68,14 +74,17 @@ namespace PawnEditor.TaffySharp
         /// Min-size is content-based. Overflowing content contributes to parent's scroll region.
         /// </summary>
         Visible,
+
         /// <summary>
         /// Min-size is content-based. Overflowing content does NOT contribute to parent's scroll region.
         /// </summary>
         Clip,
+
         /// <summary>
         /// Min-size is 0. Overflowing content does NOT contribute to parent's scroll region.
         /// </summary>
         Hidden,
+
         /// <summary>
         /// Min-size is 0. Space for a scrollbar is reserved (<c>scrollbar_width</c>).
         /// </summary>
@@ -101,6 +110,7 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Left-to-right.</summary>
         Ltr,
+
         /// <summary>Right-to-left.</summary>
         Rtl,
     }
@@ -118,10 +128,13 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>No special legacy text-align behaviour. Default.</summary>
         Auto,
+
         /// <summary>Legacy left-align (corresponds to <c>-webkit-left</c>).</summary>
         LegacyLeft,
+
         /// <summary>Legacy right-align (corresponds to <c>-webkit-right</c>).</summary>
         LegacyRight,
+
         /// <summary>Legacy center-align (corresponds to <c>-webkit-center</c>).</summary>
         LegacyCenter,
     }

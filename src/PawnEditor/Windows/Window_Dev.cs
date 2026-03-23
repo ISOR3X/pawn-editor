@@ -36,9 +36,15 @@ public class Window_Dev : Window
             col.Row(gap: 8f, grow: 0f, row =>
             {
                 row.Item(width: 100f, height: 40f, draw: rect => Verse.Widgets.DrawRectFast(rect, Color.red));
-                row.Item(width: 80f,  height: 40f, draw: rect => { if (Verse.Widgets.ButtonText(rect, "+ Add"))    _itemCount = Mathf.Min(_itemCount + 1, 50); });
-                row.Item(width: 90f,  height: 40f, draw: rect => { if (Verse.Widgets.ButtonText(rect, "- Remove")) _itemCount = Mathf.Max(_itemCount - 1, 0); });
-                row.Item(grow: 1f,    height: 40f, draw: rect => Verse.Widgets.Label(rect, $"Items: {_itemCount}"));
+                row.Item(width: 80f, height: 40f, draw: rect =>
+                {
+                    if (Verse.Widgets.ButtonText(rect, "+ Add")) _itemCount = Mathf.Min(_itemCount + 1, 50);
+                });
+                row.Item(width: 90f, height: 40f, draw: rect =>
+                {
+                    if (Verse.Widgets.ButtonText(rect, "- Remove")) _itemCount = Mathf.Max(_itemCount - 1, 0);
+                });
+                row.Item(grow: 1f, height: 40f, draw: rect => Verse.Widgets.Label(rect, $"Items: {_itemCount}"));
                 row.Item(width: 100f, height: 40f, draw: rect => Verse.Widgets.DrawRectFast(rect, Color.gray));
             });
             col.Row(new Style { flexGrow = 1f, flexWrap = FlexWrap.Wrap }, row =>
