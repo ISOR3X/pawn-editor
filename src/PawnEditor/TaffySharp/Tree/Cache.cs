@@ -31,16 +31,16 @@ namespace PawnEditor.TaffySharp
         private static int ComputeCacheSlot(
             Size<float?> knownDimensions, Size<AvailableSpace> availableSpace)
         {
-            bool hasW = knownDimensions.Width.HasValue;
-            bool hasH = knownDimensions.Height.HasValue;
+            var hasW = knownDimensions.Width.HasValue;
+            var hasH = knownDimensions.Height.HasValue;
 
             if (hasW && hasH) return 0;
 
             if (hasW) return 1 + (availableSpace.Height == AvailableSpace.MinContent ? 1 : 0);
             if (hasH) return 3 + (availableSpace.Width  == AvailableSpace.MinContent ? 1 : 0);
 
-            bool wIsMin = availableSpace.Width  == AvailableSpace.MinContent;
-            bool hIsMin = availableSpace.Height == AvailableSpace.MinContent;
+            var wIsMin = availableSpace.Width  == AvailableSpace.MinContent;
+            var hIsMin = availableSpace.Height == AvailableSpace.MinContent;
             return 5 + (wIsMin ? 2 : 0) + (hIsMin ? 1 : 0);
         }
 
@@ -62,7 +62,7 @@ namespace PawnEditor.TaffySharp
                     if (_finalLayoutEntry is null) return null;
                     var e = _finalLayoutEntry.Value;
                     var cachedSize = e.Content.Size;
-                    bool match =
+                    var match =
                         (knownDimensions.Width  == e.KnownDimensions.Width  || knownDimensions.Width  == cachedSize.Width) &&
                         (knownDimensions.Height == e.KnownDimensions.Height || knownDimensions.Height == cachedSize.Height) &&
                         (knownDimensions.Width.HasValue  || e.AvailableSpace.Width .IsRoughlyEqual(availableSpace.Width)) &&
@@ -72,12 +72,12 @@ namespace PawnEditor.TaffySharp
 
                 case RunMode.ComputeSize:
                 {
-                    for (int i = 0; i < CacheSize; i++)
+                    for (var i = 0; i < CacheSize; i++)
                     {
                         if (_measureEntries[i] is null) continue;
                         var e = _measureEntries[i]!.Value;
                         var cachedSize = e.Content;
-                        bool match =
+                        var match =
                             (knownDimensions.Width  == e.KnownDimensions.Width  || knownDimensions.Width  == cachedSize.Width) &&
                             (knownDimensions.Height == e.KnownDimensions.Height || knownDimensions.Height == cachedSize.Height) &&
                             (knownDimensions.Width.HasValue  || e.AvailableSpace.Width .IsRoughlyEqual(availableSpace.Width)) &&
@@ -115,7 +115,7 @@ namespace PawnEditor.TaffySharp
 
                 case RunMode.ComputeSize:
                     _isEmpty = false;
-                    int slot = ComputeCacheSlot(knownDimensions, availableSpace);
+                    var slot = ComputeCacheSlot(knownDimensions, availableSpace);
                     _measureEntries[slot] = new CacheEntry<Size<float>>
                     {
                         KnownDimensions = knownDimensions,
@@ -136,7 +136,7 @@ namespace PawnEditor.TaffySharp
             if (_isEmpty) return ClearState.AlreadyEmpty;
             _isEmpty = true;
             _finalLayoutEntry = null;
-            for (int i = 0; i < CacheSize; i++) _measureEntries[i] = null;
+            for (var i = 0; i < CacheSize; i++) _measureEntries[i] = null;
             return ClearState.Cleared;
         }
 

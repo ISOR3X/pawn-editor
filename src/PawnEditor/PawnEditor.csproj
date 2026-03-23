@@ -71,6 +71,10 @@
         <!-- TaffySharp: Phase 3 — Block compute -->
         <Compile Include="TaffySharp\Compute\Block\BlockItem.cs" />
         <Compile Include="TaffySharp\Compute\Block\BlockCompute.cs" />
+        <!-- TaffySharp: Phase 4 — Flexbox compute -->
+        <Compile Include="TaffySharp\Compute\Flexbox\FlexItem.cs" />
+        <Compile Include="TaffySharp\Compute\Flexbox\Alignment.cs" />
+        <Compile Include="TaffySharp\Compute\Flexbox\FlexCompute.cs" />
         <!-- TaffySharp: Public entry point -->
         <Compile Include="TaffySharp\TaffyTree.cs" />
     </ItemGroup>

@@ -100,7 +100,7 @@ namespace PawnEditor.TaffySharp
         public static Size<float?> MaybeApplyAspectRatio(in Size<float?> s, float? aspectRatio)
         {
             if (aspectRatio == null) return s;
-            float ratio = aspectRatio.Value;
+            var ratio = aspectRatio.Value;
             if (s.Width.HasValue && !s.Height.HasValue)
                 return new Size<float?>(s.Width, s.Width.Value / ratio);
             if (!s.Width.HasValue && s.Height.HasValue)

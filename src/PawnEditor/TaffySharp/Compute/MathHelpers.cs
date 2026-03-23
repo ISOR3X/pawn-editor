@@ -50,7 +50,7 @@ namespace PawnEditor.TaffySharp
         public static float? MaybeClamp(this float? self, float? min, float? max)
         {
             if (self is null) return null;
-            float v = self.Value;
+            var v = self.Value;
             if (max.HasValue) v = MathF.Min(v, max.Value);
             if (min.HasValue) v = MathF.Max(v, min.Value);
             return v;
@@ -73,6 +73,11 @@ namespace PawnEditor.TaffySharp
         public static float? MaybeClamp(this float? self, float min, float max) =>
             self.HasValue ? MathF.Min(MathF.Max(self.Value, min), max) : null;
 
+        // ── float? coalescing ─────────────────────────────────────────────────
+
+        /// <summary>Returns <paramref name="self"/> if non-null, else <paramref name="other"/> (Option::or).</summary>
+        public static float? Or(this float? self, float? other) => self ?? other;
+
         // ── float op float? ───────────────────────────────────────────────────
 
         public static float MaybeMin(this float self, float? rhs) =>
@@ -89,7 +94,7 @@ namespace PawnEditor.TaffySharp
 
         public static float MaybeClamp(this float self, float? min, float? max)
         {
-            float v = self;
+            var v = self;
             if (max.HasValue) v = MathF.Min(v, max.Value);
             if (min.HasValue) v = MathF.Max(v, min.Value);
             return v;
@@ -150,7 +155,7 @@ namespace PawnEditor.TaffySharp
         public static AvailableSpace MaybeClamp(this AvailableSpace self, float? min, float? max)
         {
             if (!self.IsDefinite) return self;
-            float v = self.Unwrap();
+            var v = self.Unwrap();
             if (max.HasValue) v = MathF.Min(v, max.Value);
             if (min.HasValue) v = MathF.Max(v, min.Value);
             return AvailableSpace.Definite(v);

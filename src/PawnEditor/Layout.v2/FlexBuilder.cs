@@ -133,7 +133,7 @@ public sealed class FlexBuilder
                 build?.Invoke(new FlexBuilder(measure, measureOnly: true));
                 FlexSolver.Compute(measure, new Rect(0f, 0f, parentWidth, 100_000f));
 
-                float contentHeight = 0f;
+                var contentHeight = 0f;
                 foreach (var child in measure.Children)
                     contentHeight = Mathf.Max(contentHeight, child.ComputedRect.yMax);
 
@@ -189,7 +189,7 @@ public sealed class FlexBuilder
                 build?.Invoke(new FlexBuilder(measure, measureOnly: true));
                 FlexSolver.Compute(measure, new Rect(0f, 0f, 100_000f, parentHeight));
 
-                float contentWidth = 0f;
+                var contentWidth = 0f;
                 foreach (var child in measure.Children)
                     contentWidth = Mathf.Max(contentWidth, child.ComputedRect.xMax);
 

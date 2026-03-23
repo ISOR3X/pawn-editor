@@ -163,7 +163,7 @@ namespace PawnEditor.TaffySharp
                     && border.Bottom   == 0f
                     && !size.Height.HasValue);
 
-            bool hasStylesPreventingCollapse =
+            var hasStylesPreventingCollapse =
                 !style.IsBlock()
                 || blockCtx.IsBfcRoot()
                 || isScrollContainer
@@ -190,7 +190,7 @@ namespace PawnEditor.TaffySharp
             {
                 var availableWidth =
                     availableSpace.Width.MaybeSub(RectF.HorizontalAxisSum(contentBoxInset));
-                float intrinsicWidth =
+                var intrinsicWidth =
                     DetermineContentBasedContainerWidth(tree, items, availableWidth)
                     + RectF.HorizontalAxisSum(contentBoxInset);
                 containerOuterWidth = intrinsicWidth
@@ -202,7 +202,7 @@ namespace PawnEditor.TaffySharp
             if (runMode == RunMode.ComputeSize && knownDimensions.Height.HasValue)
                 return LayoutOutput.FromOuterSize(new Size<float>(containerOuterWidth, knownDimensions.Height.Value));
 
-            float? containerPctResolutionHeight =
+            var containerPctResolutionHeight =
                 knownDimensions.Height
                 ?? size.Height.MaybeMax(minSize.Height)
                 ?? minSize.Height;
@@ -219,14 +219,14 @@ namespace PawnEditor.TaffySharp
                 textAlign, direction,
                 ownMarginsCollapseWithChildren,
                 out var inflowContentSize,
-                out float intrinsicOuterHeight,
+                out var intrinsicOuterHeight,
                 out var firstChildTopMarginSet,
                 out var lastChildBottomMarginSet);
 
-            float containerOuterHeight = knownDimensions.Height
-                ?? intrinsicOuterHeight
-                    .MaybeClamp(minSize.Height, maxSize.Height)
-                    .MaybeMax(paddingBorderSize.Height);
+            var containerOuterHeight = knownDimensions.Height
+                                       ?? intrinsicOuterHeight
+                                           .MaybeClamp(minSize.Height, maxSize.Height)
+                                           .MaybeMax(paddingBorderSize.Height);
 
             var finalOuterSize = new Size<float>(containerOuterWidth, containerOuterHeight);
 
@@ -242,8 +242,8 @@ namespace PawnEditor.TaffySharp
                 tree, items, absolutePositionArea, absolutePositionOffset, direction);
 
             // 5. Hidden layout for box-generation:none children.
-            int childCount = tree.ChildCount(nodeId);
-            for (int order = 0; order < childCount; order++)
+            var childCount = tree.ChildCount(nodeId);
+            for (var order = 0; order < childCount; order++)
             {
                 var child = tree.ChildAt(nodeId, order);
                 var childStyle = tree.GetStyle(child);
@@ -255,8 +255,8 @@ namespace PawnEditor.TaffySharp
             }
 
             // 7. Determine margin-collapse-through.
-            bool allInFlowChildrenCanCollapseThrough = true;
-            for (int i = 0; i < items.Count; i++)
+            var allInFlowChildrenCanCollapseThrough = true;
+            for (var i = 0; i < items.Count; i++)
             {
                 var item = items[i];
                 if (item.position != Position.Absolute && !item.canBeCollapsedThrough)
@@ -265,7 +265,7 @@ namespace PawnEditor.TaffySharp
                     break;
                 }
             }
-            bool canBeCollapsedThrough = !hasStylesPreventingCollapse && allInFlowChildrenCanCollapseThrough;
+            var canBeCollapsedThrough = !hasStylesPreventingCollapse && allInFlowChildrenCanCollapseThrough;
 
             var contentSize = inflowContentSize.F32Max(absoluteContentSize);
 
@@ -276,7 +276,7 @@ namespace PawnEditor.TaffySharp
             }
             else
             {
-                float marginTopVal = rawMargin.Top.ResolveOrZero(parentSize.Width);
+                var marginTopVal = rawMargin.Top.ResolveOrZero(parentSize.Width);
                 topMargin = CollapsibleMarginSet.FromMargin(marginTopVal);
             }
 
@@ -287,7 +287,7 @@ namespace PawnEditor.TaffySharp
             }
             else
             {
-                float marginBottomVal = rawMargin.Bottom.ResolveOrZero(parentSize.Width);
+                var marginBottomVal = rawMargin.Bottom.ResolveOrZero(parentSize.Width);
                 bottomMargin = CollapsibleMarginSet.FromMargin(marginBottomVal);
             }
 
@@ -307,11 +307,11 @@ namespace PawnEditor.TaffySharp
         private static List<BlockItem> GenerateItemList(TaffyTree tree, NodeId nodeId,
             Size<float?> nodeInnerSize)
         {
-            int childCount = tree.ChildCount(nodeId);
+            var childCount = tree.ChildCount(nodeId);
             var items = new List<BlockItem>(childCount);
             uint visibleOrder = 0;
 
-            for (int i = 0; i < childCount; i++)
+            for (var i = 0; i < childCount; i++)
             {
                 var childId    = tree.ChildAt(nodeId, i);
                 var childStyle = tree.GetStyle(childId);
@@ -368,9 +368,9 @@ namespace PawnEditor.TaffySharp
         {
             var availableSpace = new Size<AvailableSpace>(availableWidth, AvailableSpace.MinContent);
 
-            float maxChildWidth = 0f;
+            var maxChildWidth = 0f;
 
-            for (int i = 0; i < items.Count; i++)
+            for (var i = 0; i < items.Count; i++)
             {
                 var item = items[i];
                 if (item.position == Position.Absolute)
@@ -378,7 +378,7 @@ namespace PawnEditor.TaffySharp
 
                 var knownDimensions = item.size.MaybeClamp(item.minSize, item.maxSize);
 
-                float itemXMarginSum = RectF.HorizontalAxisSum(
+                var itemXMarginSum = RectF.HorizontalAxisSum(
                     item.margin.MaybeResolve(availableSpace.Width.IntoOption()).map(m => m ?? 0f));
 
                 float width;
@@ -402,7 +402,7 @@ namespace PawnEditor.TaffySharp
                     width = output.Size.Width;
                 }
 
-                float totalWidth = MathF.Max(width, item.paddingBorderSum.Width) + itemXMarginSum;
+                var totalWidth = MathF.Max(width, item.paddingBorderSum.Width) + itemXMarginSum;
                 maxChildWidth = MathF.Max(maxChildWidth, totalWidth);
             }
 
@@ -426,9 +426,9 @@ namespace PawnEditor.TaffySharp
             out CollapsibleMarginSet firstChildTopMarginSet,
             out CollapsibleMarginSet lastChildBottomMarginSet)
         {
-            float containerInnerWidth =
+            var containerInnerWidth =
                 containerOuterWidth - RectF.HorizontalAxisSum(resolvedContentBoxInset);
-            float? resolvedPctHeight =
+            var resolvedPctHeight =
                 containerPctResolutionHeight.MaybeSub(RectF.VerticalAxisSum(resolvedContentBoxInset));
             var parentSize     = new Size<float?>(containerInnerWidth, resolvedPctHeight);
             var availableSpace = new Size<AvailableSpace>(
@@ -436,19 +436,19 @@ namespace PawnEditor.TaffySharp
                 AvailableSpace.MinContent);
 
             inflowContentSize             = SizeF.ZERO;
-            float committedYOffset        = resolvedContentBoxInset.Top;
-            float yOffsetForAbsolute      = resolvedContentBoxInset.Top;
+            var committedYOffset        = resolvedContentBoxInset.Top;
+            var yOffsetForAbsolute      = resolvedContentBoxInset.Top;
             firstChildTopMarginSet        = CollapsibleMarginSet.ZERO;
             var activeCollapsibleMarginSet = CollapsibleMarginSet.ZERO;
-            bool isCollapsingWithFirstMarginSet = true;
+            var isCollapsingWithFirstMarginSet = true;
 
-            for (int idx = 0; idx < items.Count; idx++)
+            for (var idx = 0; idx < items.Count; idx++)
             {
                 var item = items[idx];
 
                 if (item.position == Position.Absolute)
                 {
-                    float staticX = direction == Direction.Ltr
+                    var staticX = direction == Direction.Ltr
                         ? resolvedContentBoxInset.Left
                         : containerOuterWidth - resolvedContentBoxInset.Right;
                     item.staticPosition = new Point<float>(staticX, yOffsetForAbsolute);
@@ -459,7 +459,7 @@ namespace PawnEditor.TaffySharp
                 // Resolve margins (auto → 0 for now; expanded later for x-axis).
                 var itemMargin = item.margin.MaybeResolve((float?)containerOuterWidth);
                 var itemNonAutoMargin = itemMargin.map(m => m ?? 0f);
-                float itemNonAutoXMarginSum = RectF.HorizontalAxisSum(itemNonAutoMargin);
+                var itemNonAutoXMarginSum = RectF.HorizontalAxisSum(itemNonAutoMargin);
 
                 var scrollbarSize = new Size<float>(
                     item.overflow.Y == Overflow.Scroll ? item.scrollbarWidth : 0f,
@@ -476,7 +476,7 @@ namespace PawnEditor.TaffySharp
                 }
                 else
                 {
-                    float yMarginOffset = 0f;
+                    var yMarginOffset = 0f;
                     if (!isCollapsingWithFirstMarginSet || !ownMarginsCollapseWithChildren.Start)
                         yMarginOffset = activeCollapsibleMarginSet.CollapseWithMargin(itemNonAutoMargin.Top).Resolve();
 
@@ -494,7 +494,7 @@ namespace PawnEditor.TaffySharp
                 }
                 else
                 {
-                    float? knownWidth = item.size.Width.HasValue
+                    var knownWidth = item.size.Width.HasValue
                         ? item.size.Width.Value.MaybeClamp(item.minSize.Width, item.maxSize.Width)
                         : (float?)stretchWidth.MaybeClamp(item.minSize.Width, item.maxSize.Width);
                     knownDimensions = new Size<float?>(knownWidth, item.size.Height)
@@ -531,12 +531,12 @@ namespace PawnEditor.TaffySharp
                 var bottomMarginSet = itemLayout.BottomMargin.CollapseWithMargin(itemMargin.Bottom ?? 0f);
 
                 // Expand auto x-margins.
-                float freeXSpace = MathF.Max(0f, stretchWidth - finalSize.Width);
-                byte autoMarginCount = (byte)((itemMargin.Left == null ? 1 : 0)
-                                            + (itemMargin.Right == null ? 1 : 0));
-                float autoMarginSize = autoMarginCount > 0 ? freeXSpace / autoMarginCount : 0f;
+                var freeXSpace = MathF.Max(0f, stretchWidth - finalSize.Width);
+                var autoMarginCount = (byte)((itemMargin.Left == null ? 1 : 0)
+                                             + (itemMargin.Right == null ? 1 : 0));
+                var autoMarginSize = autoMarginCount > 0 ? freeXSpace / autoMarginCount : 0f;
 
-                float yMarginOffsetForSameBfc = 0f;
+                var yMarginOffsetForSameBfc = 0f;
                 if (item.isInSameBfc
                     && (!isCollapsingWithFirstMarginSet || !ownMarginsCollapseWithChildren.Start))
                 {
@@ -546,7 +546,7 @@ namespace PawnEditor.TaffySharp
                 }
 
                 // Use the correct y-margin-offset for same-BFC items.
-                float effectiveYMarginOffset = item.isInSameBfc ? yMarginOffsetForSameBfc : 0f;
+                var effectiveYMarginOffset = item.isInSameBfc ? yMarginOffsetForSameBfc : 0f;
 
                 var resolvedMargin = new Rect<float>(
                     left:   itemMargin.Left  ?? autoMarginSize,
@@ -555,10 +555,10 @@ namespace PawnEditor.TaffySharp
                     bottom: bottomMarginSet.Resolve());
 
                 // Resolve inset.
-                float insetLeft   = item.inset.Left.MaybeResolve((float?)containerInnerWidth) ?? 0f;
-                float insetRight  = item.inset.Right.MaybeResolve((float?)containerInnerWidth) ?? 0f;
-                float insetTop    = item.inset.Top.MaybeResolve((float?)0f) ?? 0f;
-                float insetBottom = item.inset.Bottom.MaybeResolve((float?)0f) ?? 0f;
+                var insetLeft   = item.inset.Left.MaybeResolve((float?)containerInnerWidth) ?? 0f;
+                var insetRight  = item.inset.Right.MaybeResolve((float?)containerInnerWidth) ?? 0f;
+                var insetTop    = item.inset.Top.MaybeResolve((float?)0f) ?? 0f;
+                var insetBottom = item.inset.Bottom.MaybeResolve((float?)0f) ?? 0f;
                 var insetOffset = new Point<float>(
                     x: direction.IsRtl()
                         ? (item.inset.Right.MaybeResolve((float?)containerInnerWidth).HasValue ? -insetRight : insetLeft)
@@ -569,7 +569,7 @@ namespace PawnEditor.TaffySharp
                 Point<float> location;
                 if (item.isInSameBfc)
                 {
-                    float locX = direction == Direction.Ltr
+                    var locX = direction == Direction.Ltr
                         ? resolvedContentBoxInset.Left + insetOffset.X + resolvedMargin.Left
                         : containerOuterWidth - resolvedContentBoxInset.Right - finalSize.Width
                           - resolvedMargin.Right + insetOffset.X;
@@ -578,17 +578,17 @@ namespace PawnEditor.TaffySharp
                 }
                 else
                 {
-                    float locX = direction == Direction.Ltr
+                    var locX = direction == Direction.Ltr
                         ? itemPos.X + resolvedMargin.Left + insetOffset.X
                         : itemPos.X - finalSize.Width - resolvedMargin.Right + insetOffset.X;
                     location = new Point<float>(locX, itemPos.Y + insetOffset.Y);
                 }
 
                 // Apply text-align.
-                float itemOuterWidth = itemLayout.Size.Width + resolvedMargin.Left + resolvedMargin.Right;
+                var itemOuterWidth = itemLayout.Size.Width + resolvedMargin.Left + resolvedMargin.Right;
                 if (itemOuterWidth < containerInnerWidth)
                 {
-                    float freeX = containerInnerWidth - itemOuterWidth;
+                    var freeX = containerInnerWidth - itemOuterWidth;
                     switch (textAlign)
                     {
                         case TextAlign.LegacyLeft:
@@ -619,8 +619,8 @@ namespace PawnEditor.TaffySharp
                 tree.SetNodeLayout(item.nodeId, childLayout);
 
                 // Accumulate inflow content size.
-                float cbLeft = location.X - resolvedContentBoxInset.Left;
-                float cbTop  = location.Y - resolvedContentBoxInset.Top;
+                var cbLeft = location.X - resolvedContentBoxInset.Left;
+                var cbTop  = location.Y - resolvedContentBoxInset.Top;
                 inflowContentSize = inflowContentSize.F32Max(ComputeContentSizeContribution(
                     new Point<float>(cbLeft, cbTop), finalSize, itemLayout.ContentSize, item.overflow));
 
@@ -661,7 +661,7 @@ namespace PawnEditor.TaffySharp
             }
 
             lastChildBottomMarginSet = activeCollapsibleMarginSet;
-            float bottomYMarginOffset = ownMarginsCollapseWithChildren.End
+            var bottomYMarginOffset = ownMarginsCollapseWithChildren.End
                 ? 0f
                 : lastChildBottomMarginSet.Resolve();
 
@@ -675,11 +675,11 @@ namespace PawnEditor.TaffySharp
             TaffyTree tree, List<BlockItem> items,
             Size<float> areaSize, Point<float> areaOffset, Direction direction)
         {
-            float areaWidth  = areaSize.Width;
-            float areaHeight = areaSize.Height;
+            var areaWidth  = areaSize.Width;
+            var areaHeight = areaSize.Height;
             var contentSize  = SizeF.ZERO;
 
-            for (int i = 0; i < items.Count; i++)
+            for (var i = 0; i < items.Count; i++)
             {
                 var item = items[i];
                 if (item.position != Position.Absolute)
@@ -697,10 +697,10 @@ namespace PawnEditor.TaffySharp
                 var pbSum       = RectF.SumAxes(RectF.Add(padding, border));
                 var bsAdj       = childStyle.boxSizing == BoxSizing.ContentBox ? pbSum : SizeF.ZERO;
 
-                float? left   = childStyle.inset.Left.MaybeResolve((float?)areaWidth);
-                float? right  = childStyle.inset.Right.MaybeResolve((float?)areaWidth);
-                float? top    = childStyle.inset.Top.MaybeResolve((float?)areaHeight);
-                float? bottom = childStyle.inset.Bottom.MaybeResolve((float?)areaHeight);
+                var left   = childStyle.inset.Left.MaybeResolve((float?)areaWidth);
+                var right  = childStyle.inset.Right.MaybeResolve((float?)areaWidth);
+                var top    = childStyle.inset.Top.MaybeResolve((float?)areaHeight);
+                var bottom = childStyle.inset.Bottom.MaybeResolve((float?)areaHeight);
 
                 var styleSize = childStyle.size.MaybeResolve(areaSize.Map(v => (float?)v))
                     .MaybeApplyAspectRatio(aspectRatio).MaybeAdd(bsAdj);
@@ -715,7 +715,7 @@ namespace PawnEditor.TaffySharp
                 // Fill in width from left+right inset.
                 if (!knownDimensions.Width.HasValue && left.HasValue && right.HasValue)
                 {
-                    float raw = areaWidth
+                    var raw = areaWidth
                         .MaybeSub(margin.Left).MaybeSub(margin.Right) - left.Value - right.Value;
                     knownDimensions.Width = MathF.Max(raw, 0f);
                     knownDimensions = knownDimensions.MaybeApplyAspectRatio(aspectRatio).MaybeClamp(minSize, maxSize);
@@ -723,7 +723,7 @@ namespace PawnEditor.TaffySharp
                 // Fill in height from top+bottom inset.
                 if (!knownDimensions.Height.HasValue && top.HasValue && bottom.HasValue)
                 {
-                    float raw = areaHeight
+                    var raw = areaHeight
                         .MaybeSub(margin.Top).MaybeSub(margin.Bottom) - top.Value - bottom.Value;
                     knownDimensions.Height = MathF.Max(raw, 0f);
                     knownDimensions = knownDimensions.MaybeApplyAspectRatio(aspectRatio).MaybeClamp(minSize, maxSize);
@@ -760,17 +760,17 @@ namespace PawnEditor.TaffySharp
                     top:    top.HasValue    ? margin.Top    ?? 0f : 0f,
                     bottom: bottom.HasValue ? margin.Bottom ?? 0f : 0f);
 
-                float freeW = right.HasValue
+                var freeW = right.HasValue
                     ? areaSize.Width  - right.Value  - (left  ?? 0f) - finalSize.Width  - nonAutoMargin.Left - nonAutoMargin.Right
                     : finalSize.Width;
-                float freeH = bottom.HasValue
+                var freeH = bottom.HasValue
                     ? areaSize.Height - bottom.Value - (top   ?? 0f) - finalSize.Height - nonAutoMargin.Top  - nonAutoMargin.Bottom
                     : finalSize.Height;
 
-                byte autoW = (byte)((margin.Left  == null ? 1 : 0) + (margin.Right  == null ? 1 : 0));
-                byte autoH = (byte)((margin.Top   == null ? 1 : 0) + (margin.Bottom == null ? 1 : 0));
-                float autoMarginW = autoW > 0 ? freeW / autoW : 0f;
-                float autoMarginH = autoH > 0 ? freeH / autoH : 0f;
+                var autoW = (byte)((margin.Left  == null ? 1 : 0) + (margin.Right  == null ? 1 : 0));
+                var autoH = (byte)((margin.Top   == null ? 1 : 0) + (margin.Bottom == null ? 1 : 0));
+                var autoMarginW = autoW > 0 ? freeW / autoW : 0f;
+                var autoMarginH = autoH > 0 ? freeH / autoH : 0f;
 
                 var resolvedMargin = new Rect<float>(
                     left:   margin.Left   ?? autoMarginW,
@@ -793,13 +793,13 @@ namespace PawnEditor.TaffySharp
                         ? item.staticPosition.X - finalSize.Width - resolvedMargin.Right - areaOffset.X
                         : item.staticPosition.X + resolvedMargin.Left - areaOffset.X;
 
-                float? rawY = top.HasValue
+                var rawY = top.HasValue
                     ? (float?)(top.Value + resolvedMargin.Top)
                     : bottom.HasValue
                         ? (float?)(areaSize.Height - finalSize.Height - bottom.Value - resolvedMargin.Bottom)
                         : null;
 
-                float yLoc = rawY.HasValue
+                var yLoc = rawY.HasValue
                     ? rawY.Value + areaOffset.Y
                     : item.staticPosition.Y + resolvedMargin.Top;
 
@@ -845,8 +845,8 @@ namespace PawnEditor.TaffySharp
         private static Size<float> ComputeContentSizeContribution(
             Point<float> location, Size<float> size, Size<float> contentSize, Point<Overflow> overflow)
         {
-            float width  = overflow.X.IsScrollContainer() ? size.Width  : MathF.Max(size.Width,  contentSize.Width);
-            float height = overflow.Y.IsScrollContainer() ? size.Height : MathF.Max(size.Height, contentSize.Height);
+            var width  = overflow.X.IsScrollContainer() ? size.Width  : MathF.Max(size.Width,  contentSize.Width);
+            var height = overflow.Y.IsScrollContainer() ? size.Height : MathF.Max(size.Height, contentSize.Height);
             return new Size<float>(location.X + width, location.Y + height);
         }
     }

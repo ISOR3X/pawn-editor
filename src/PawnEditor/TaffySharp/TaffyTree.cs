@@ -52,9 +52,9 @@ namespace PawnEditor.TaffySharp
     {
         // ── Internal storage ──────────────────────────────────────────────────
 
-        private readonly List<NodeData>         _nodes    = new();
-        private readonly List<List<NodeId>>     _children = new();
-        private readonly List<NodeId?>          _parents  = new();
+        private readonly List<NodeData>         _nodes    = [];
+        private readonly List<List<NodeId>>     _children = [];
+        private readonly List<NodeId?>          _parents  = [];
 
         // Slot-reuse for removed nodes
         private readonly Stack<uint>            _freeSlots = new();
@@ -85,14 +85,14 @@ namespace PawnEditor.TaffySharp
             {
                 id = _freeSlots.Pop();
                 _nodes[(int)id]    = new NodeData(style) { Context = context };
-                _children[(int)id] = new List<NodeId>();
+                _children[(int)id] = [];
                 _parents[(int)id]  = null;
             }
             else
             {
                 id = (uint)_nodes.Count;
                 _nodes.Add(new NodeData(style) { Context = context });
-                _children.Add(new List<NodeId>());
+                _children.Add([]);
                 _parents.Add(null);
             }
             return NodeId.From(id);
@@ -103,7 +103,7 @@ namespace PawnEditor.TaffySharp
         /// <summary>Removes a node and all its children from the tree.</summary>
         public void Remove(NodeId node)
         {
-            uint id = node.Value;
+            var id = node.Value;
             // Detach from parent
             if (_parents[(int)id] is NodeId parent)
             {
@@ -251,7 +251,17 @@ namespace PawnEditor.TaffySharp
                 VerticalMarginsAreCollapsible = new Line<bool>(false, false),
             };
 
-            PerformLayout(root, input);
+            var output = PerformLayout(root, input);
+
+            // The root node has no parent algorithm to call SetNodeLayout on it,
+            // so we apply the computed size directly (mirrors compute_root_layout in Taffy).
+            var rootLayout = new TaffySharp.Layout
+            {
+                Order       = 0,
+                Size        = output.Size,
+                ContentSize = output.ContentSize,
+            };
+            SetNodeLayout(root, rootLayout);
         }
 
         internal LayoutOutput PerformLayout(NodeId node, LayoutInput input)
@@ -318,8 +328,8 @@ namespace PawnEditor.TaffySharp
         private void RoundLayout(NodeId node, float cumulativeX, float cumulativeY)
         {
             ref var layout = ref _nodes[(int)node.Value].FinalLayout;
-            float absX = cumulativeX + layout.Location.X;
-            float absY = cumulativeY + layout.Location.Y;
+            var absX = cumulativeX + layout.Location.X;
+            var absY = cumulativeY + layout.Location.Y;
 
             layout.Location.X  = MathF.Round(absX) - MathF.Round(cumulativeX);
             layout.Location.Y  = MathF.Round(absY) - MathF.Round(cumulativeY);
@@ -348,18 +358,53 @@ namespace PawnEditor.TaffySharp
 
         private LayoutOutput ComputeLeafLayout(NodeId node, LayoutInput input)
         {
-            // Phase 3: leaf measure via Block compute
-            return LayoutOutput.FromOuterSize(
-                input.KnownDimensions.Width.HasValue && input.KnownDimensions.Height.HasValue
-                    ? new Size<float>(input.KnownDimensions.Width!.Value, input.KnownDimensions.Height!.Value)
-                    : SizeF.ZERO);
+            // Port of taffy/src/compute/leaf.rs: compute_leaf_layout
+            // Resolves style size, combines with known dimensions, then calls the measure function if present.
+            var style = _nodes[(int)node.Value].Style;
+
+            var parentWidth = input.ParentSize.Width;
+            var padding = style.padding.ResolveOrZero(parentWidth);
+            var border  = style.border.ResolveOrZero(parentWidth);
+            var pbSum   = SizeF.Add(RectF.SumAxes(padding), RectF.SumAxes(border));
+            var boxAdj  = style.boxSizing == BoxSizing.ContentBox ? pbSum : SizeF.ZERO;
+
+            Size<float?> nodeSize;
+            Size<float?> nodeMinSize;
+            Size<float?> nodeMaxSize;
+
+            if (input.SizingMode == SizingMode.ContentSize)
+            {
+                nodeSize    = input.KnownDimensions;
+                nodeMinSize = SizeF.NONE;
+                nodeMaxSize = SizeF.NONE;
+            }
+            else
+            {
+                var ar    = style.aspectRatio;
+                var styleSize    = SizeF.MaybeApplyAspectRatio(
+                    style.size.MaybeResolve(input.ParentSize).MaybeAdd(boxAdj), ar);
+                var styleMinSize = SizeF.MaybeApplyAspectRatio(
+                    style.minSize.MaybeResolve(input.ParentSize).MaybeAdd(boxAdj), ar);
+                var styleMaxSize = style.maxSize.MaybeResolve(input.ParentSize).MaybeAdd(boxAdj);
+
+                nodeSize    = input.KnownDimensions.Or(styleSize);
+                nodeMinSize = styleMinSize;
+                nodeMaxSize = styleMaxSize;
+            }
+
+            // Call measure function if present; otherwise measured size is zero.
+            var measuredSize = SizeF.ZERO;
+            if (_nodes[(int)node.Value].Context is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure)
+                measuredSize = measure(nodeSize, input.availableSpace);
+
+            // Combine: prefer known/style size, fall back to measured + padding/border.
+            var fallback = new Size<float?>(measuredSize.Width + pbSum.Width, measuredSize.Height + pbSum.Height);
+            var clamped  = nodeSize.Or(fallback).MaybeClamp(nodeMinSize, nodeMaxSize).MaybeMax(pbSum);
+            return LayoutOutput.FromOuterSize(new Size<float>(clamped.Width ?? 0f, clamped.Height ?? 0f));
         }
 
-        private LayoutOutput ComputeFlexLayout(NodeId node, LayoutInput input)
-        {
-            // TODO Phase 4: wire to Flexbox.Compute(...)
-            throw new NotImplementedException("Flexbox layout not yet implemented (Phase 4).");
-        }
+        private LayoutOutput ComputeFlexLayout(NodeId node, LayoutInput input) =>
+            FlexCompute.Compute(this, node, input);
 
         private LayoutOutput ComputeGridLayout(NodeId node, LayoutInput input)
         {

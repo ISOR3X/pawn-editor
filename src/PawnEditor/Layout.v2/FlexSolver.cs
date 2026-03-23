@@ -164,7 +164,7 @@ namespace FlexLayout
                 if (!firstItem && used + gap + need > mainSize && current.Count > 0)
                 {
                     lines.Add(ComputeLine(current, mainSize, crossSize, actualCrossSize, isRow, gap));
-                    current = new List<FlexItem>();
+                    current = [];
                     used = 0f;
                     firstItem = true;
                 }

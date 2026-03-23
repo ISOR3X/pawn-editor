@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(dotnet build:*)",
+      "Bash(\"/c/Users/Joram/AppData/Local/Programs/Rider/tools/MSBuild/Current/Bin/amd64/MSBuild.exe\" \"/c/Program Files \\(x86\\)/Steam/steamapps/common/RimWorld/Mods/pawn-editor/src/PawnEditor/PawnEditor.csproj\" /p:Configuration=Debug)",
+      "Bash(grep -v \"^$\")",
+      "Bash(MSBUILD=\"/c/Users/Joram/AppData/Local/Programs/Rider/tools/MSBuild/Current/Bin/amd64/MSBuild.exe\" PROJ=\"/c/Program Files \\(x86\\)/Steam/steamapps/common/RimWorld/Mods/pawn-editor/src/PawnEditor/PawnEditor.csproj\" \"$MSBUILD\" \"$PROJ\" /p:Configuration=Debug)",
+      "Bash(\"/c/Users/Joram/AppData/Local/Programs/Rider/tools/MSBuild/Current/Bin/amd64/MSBuild.exe\" PawnEditor.csproj /p:Configuration=Debug)",
+      "Bash(\"C:\\\\Users\\\\Joram\\\\AppData\\\\Local\\\\Programs\\\\Rider\\\\tools\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe\" \"C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\src\\\\PawnEditor\\\\PawnEditor.csproj\" /p:Configuration=Debug /nologo)",
+      "Bash(\"C:\\\\Users\\\\Joram\\\\AppData\\\\Local\\\\Programs\\\\Rider\\\\tools\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe\" PawnEditor.csproj /p:Configuration=Debug /nologo)",
+      "Bash(powershell -Command \"& ''''C:\\\\Users\\\\Joram\\\\AppData\\\\Local\\\\Programs\\\\Rider\\\\tools\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe'''' src\\\\PawnEditor\\\\PawnEditor.csproj /p:Configuration=Debug\")",
+      "Bash(powershell -Command \"& ''''C:\\\\Users\\\\Joram\\\\AppData\\\\Local\\\\Programs\\\\Rider\\\\tools\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe'''' src\\\\PawnEditor\\\\PawnEditor.csproj /p:Configuration=Debug 2>&1\")",
+      "Bash(Select-String -Pattern \"error|warning|Build succeeded|failed\")",
+      "Bash(Select-Object -Last 30)",
+      "Bash(powershell -Command \":*)",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\Joram\\\\AppData\\\\Local\\\\Programs\\\\Rider\\\\tools\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe' 'C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\src\\\\PawnEditor\\\\PawnEditor.csproj' /p:Configuration=Debug 2>&1 | Select-String -Pattern 'error CS|warning CS|Build succeeded|FAILED' | Out-String\")",
+      "Bash(powershell.exe -Command \"ls 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\generated_xml' | Select-Object Name | head -20 | Out-String\")",
+      "Bash(powershell.exe -Command \"ls 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\' | Out-String\")",
+      "Bash(powershell.exe -Command \"ls 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml' | Select-Object Name | Out-String\")",
+      "Bash(powershell.exe -Command \"ls 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' | Select-Object Name | head -30 | Out-String\")",
+      "Bash(powershell.exe -Command \"ls 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' | Where-Object { $_.Name -notlike 'absolute*' -and $_.Name -notlike '*aspect_ratio*' } | Select-Object Name | head -20 | Out-String\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' | Where-Object { $_.Name -notmatch 'absolute|aspect' } | Select-Object -First 20 -ExpandProperty Name | Out-String\")",
+      "Bash(powershell.exe -Command \"\\(Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex'\\).Name | Select-Object -First 30 | Out-String\")",
+      "Bash(powershell.exe -Command \"\\(Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex'\\).Name | Where-Object { $_ -match '^flex_' } | Select-Object -First 20 | Out-String\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' -Filter 'flex_*.xml' | Select-Object -First 20 -ExpandProperty Name | Out-String\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' -Filter 'flex_*.xml' | Where-Object { $_.Name -notmatch 'rtl|content_box|absolute|direction_rtl' } | Select-Object -First 20 -ExpandProperty Name | Out-String\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' -Filter '*border_box_ltr.xml' | Select-Object -First 30 -ExpandProperty Name | Out-String\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' -Filter '*border_box_ltr.xml' | Where-Object { $_.Name -notmatch 'absolute|aspect_ratio|rtl' } | Select-Object -First 15 -ExpandProperty Name | Out-String\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:\\\\Users\\\\Joram\\\\Projects\\\\rust\\\\taffy\\\\tests\\\\xml\\\\flex' -Filter '*justify_content*border_box_ltr.xml' | Select-Object -ExpandProperty Name | Out-String\")",
+      "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force 'C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\tests\\\\TaffySharpTests' | Out-Null; echo 'done'\")",
+      "Bash(powershell.exe -Command \"cd 'C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\tests\\\\TaffySharpTests'; dotnet test --no-restore -v normal 2>&1 | Select-String -Pattern 'error|passed|failed|FAILED|xunit' | Out-String\")",
+      "Bash(powershell.exe -Command \"cd 'C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\tests\\\\TaffySharpTests'; dotnet test 2>&1 | Out-String\")",
+      "Bash(powershell.exe -Command \"Select-String -Path 'C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\src\\\\PawnEditor\\\\TaffySharp\\\\Compute\\\\Flexbox\\\\FlexCompute.cs' -Pattern 'SetNodeLayout' | Out-String\")",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Users\\\\Joram\\\\AppData\\\\Local\\\\Programs\\\\Rider\\\\tools\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe' 'C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\RimWorld\\\\Mods\\\\pawn-editor\\\\src\\\\PawnEditor\\\\PawnEditor.csproj' /p:Configuration=Debug 2>&1 | Select-String -Pattern 'error CS|Build succeeded|FAILED' | Out-String\")"
+    ]
+  }
+}

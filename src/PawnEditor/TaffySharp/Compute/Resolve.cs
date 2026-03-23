@@ -65,6 +65,18 @@ namespace PawnEditor.TaffySharp
         public static Size<float?> MaybeResolve(this Size<Dimension> self, Size<float?> context) =>
             new Size<float?>(self.Width.MaybeResolve(context.Width), self.Height.MaybeResolve(context.Height));
 
+        // ── Size<Dimension> (concrete context) ──────────────────────────────
+
+        /// <summary>Resolves width against context.Width and height against context.Height (non-nullable context).</summary>
+        public static Size<float?> MaybeResolve(this Size<Dimension> self, Size<float> context) =>
+            new Size<float?>(self.Width.MaybeResolve(context.Width), self.Height.MaybeResolve(context.Height));
+
+        // ── Size<LengthPercentage> ───────────────────────────────────────────
+
+        /// <summary>Resolves width against context.Width and height against context.Height.</summary>
+        public static Size<float> ResolveOrZero(this Size<LengthPercentage> self, Size<float?> context) =>
+            new Size<float>(self.Width.ResolveOrZero(context.Width), self.Height.ResolveOrZero(context.Height));
+
         // ── Rect<LengthPercentage> ───────────────────────────────────────────
 
         /// <summary>Resolves all four sides against <paramref name="context"/> (width-based), returning 0 for null.</summary>
@@ -74,6 +86,16 @@ namespace PawnEditor.TaffySharp
                 self.Right.ResolveOrZero(context),
                 self.Top.ResolveOrZero(context),
                 self.Bottom.ResolveOrZero(context));
+
+        /// <summary>
+        /// Resolves left/right sides against context.Width and top/bottom against context.Height.
+        /// </summary>
+        public static Rect<float> ResolveOrZero(this Rect<LengthPercentage> self, Size<float?> context) =>
+            new Rect<float>(
+                self.Left.ResolveOrZero(context.Width),
+                self.Right.ResolveOrZero(context.Width),
+                self.Top.ResolveOrZero(context.Height),
+                self.Bottom.ResolveOrZero(context.Height));
 
         // ── Rect<LengthPercentageAuto> ───────────────────────────────────────
 
