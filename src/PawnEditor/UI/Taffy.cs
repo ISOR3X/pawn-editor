@@ -12,6 +12,14 @@
 //           row.Item(width: 200f, draw: r => DrawSidebar(r));
 //       });
 //   });
+//
+// CSS Grid usage:
+//   Taffy.Grid(inRect, [Taffy.Fr(), Taffy.Fr(2)], gap: 8f, grid =>
+//   {
+//       grid.GridItem(draw: r => Widgets.Label(r, "Left"));
+//       grid.GridItem(draw: r => DrawContent(r));
+//       grid.GridItem(colSpan: 2, draw: r => DrawFooter(r));
+//   });
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +39,7 @@ namespace PawnEditor
 
         internal TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
         {
-            _tree     = tree;
+            _tree = tree;
             _callbacks = callbacks;
         }
 
@@ -39,8 +47,8 @@ namespace PawnEditor
 
         /// <summary>Adds a leaf node with per-axis size/grow convenience parameters.</summary>
         public void Item(float? width = null, float? height = null,
-                         float grow = 0f, float shrink = 1f,
-                         Action<Rect>? draw = null)
+            float grow = 0f, float shrink = 1f,
+            Action<Rect>? draw = null)
         {
             var style = new Style { flexGrow = grow, flexShrink = shrink };
             if (width.HasValue)
@@ -80,6 +88,40 @@ namespace PawnEditor
         /// <summary>Adds a nested column container with a full <see cref="Style"/>.</summary>
         public void Column(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, build);
+
+        // ── Grid items ──────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Adds a grid item with optional column/row placement.
+        /// All parameters use CSS Grid 1-based line indices.
+        /// </summary>
+        /// <param name="draw">Draw callback invoked with the item's computed rect.</param>
+        /// <param name="colSpan">Number of columns to span (default 1).</param>
+        /// <param name="rowSpan">Number of rows to span (default 1).</param>
+        /// <param name="colStart">Explicit column-start line (1-based). Null = auto-placed.</param>
+        /// <param name="rowStart">Explicit row-start line (1-based). Null = auto-placed.</param>
+        public void GridItem(Action<Rect>? draw = null,
+            int colSpan = 1, int rowSpan = 1,
+            int? colStart = null, int? rowStart = null)
+        {
+            var style = new Style();
+
+            if (colStart.HasValue || colSpan > 1)
+            {
+                var start = colStart.HasValue ? GridPlacement.Line(colStart.Value) : GridPlacement.Auto;
+                var end = colSpan > 1 ? GridPlacement.Span(colSpan) : GridPlacement.Auto;
+                style.gridColumn = new Line<GridPlacement>(start, end);
+            }
+
+            if (rowStart.HasValue || rowSpan > 1)
+            {
+                var start = rowStart.HasValue ? GridPlacement.Line(rowStart.Value) : GridPlacement.Auto;
+                var end = rowSpan > 1 ? GridPlacement.Span(rowSpan) : GridPlacement.Auto;
+                style.gridRow = new Line<GridPlacement>(start, end);
+            }
+
+            AddLeaf(style, draw);
+        }
 
         // ── Internals ───────────────────────────────────────────────────────────
 
@@ -134,6 +176,67 @@ namespace PawnEditor
         public static void Column(Rect rect, float gap, Action<TaffyBuilder> build)
             => Execute(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);
 
+        // ── Grid entry points ───────────────────────────────────────────────────
+        //
+        // The autoRowHeight parameter sets gridAutoRows so that implicitly-created rows
+        // have a fixed pixel height. This is required when grid items are leaf nodes with
+        // no intrinsic size (i.e. draw callbacks) — without it CSS auto rows collapse to 0.
+        // Pass 0 only when you supply explicit gridTemplateRows or items with a set size.
+
+        /// <summary>
+        /// Lays out children in a CSS Grid with the given column template inside <paramref name="rect"/>.
+        /// <paramref name="autoRowHeight"/> sets the height of each auto row in pixels (required when
+        /// items have no intrinsic size; otherwise auto rows collapse to 0).
+        /// </summary>
+        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            float autoRowHeight, Action<TaffyBuilder> build)
+            => Execute(rect, MakeGridStyle(columns, null, 0f, 0f, autoRowHeight), build);
+
+        /// <summary>Grid layout with uniform gap and fixed auto-row height.</summary>
+        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            float gap, float autoRowHeight, Action<TaffyBuilder> build)
+            => Execute(rect, MakeGridStyle(columns, null, gap, gap, autoRowHeight), build);
+
+        /// <summary>Grid layout with separate column/row gaps and fixed auto-row height.</summary>
+        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
+            => Execute(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
+
+        /// <summary>Grid layout with explicit column and row templates (no auto-row height needed).</summary>
+        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            IReadOnlyList<TrackSizingFunction> rows,
+            Action<TaffyBuilder> build)
+            => Execute(rect, MakeGridStyle(columns, rows, 0f, 0f, 0f), build);
+
+        /// <summary>Grid layout with explicit templates and uniform gap.</summary>
+        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            IReadOnlyList<TrackSizingFunction> rows, float gap,
+            Action<TaffyBuilder> build)
+            => Execute(rect, MakeGridStyle(columns, rows, gap, gap, 0f), build);
+
+        /// <summary>Grid layout with explicit templates and separate column/row gaps.</summary>
+        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            IReadOnlyList<TrackSizingFunction> rows, float gapX, float gapY,
+            Action<TaffyBuilder> build)
+            => Execute(rect, MakeGridStyle(columns, rows, gapX, gapY, 0f), build);
+
+        // ── Track sizing shorthands ─────────────────────────────────────────────
+
+        /// <summary>A flexible track that takes the given fraction of remaining space (default 1fr).</summary>
+        public static TrackSizingFunction Fr(float fr = 1f) => TrackSizingFunction.Fr(fr);
+
+        /// <summary>A fixed-size track of <paramref name="px"/> pixels.</summary>
+        public static TrackSizingFunction Px(float px) => TrackSizingFunction.Px(px);
+
+        /// <summary>An auto-sized track (sized to content, then stretched to fill).</summary>
+        public static TrackSizingFunction AutoTrack() => TrackSizingFunction.Auto();
+
+        /// <summary>A percent-sized track relative to the grid container.</summary>
+        public static TrackSizingFunction PercentTrack(float pct) => TrackSizingFunction.Percent(pct);
+
+        /// <summary>A fit-content track capped at <paramref name="px"/> pixels.</summary>
+        public static TrackSizingFunction FitContent(float px) => TrackSizingFunction.FitContentPx(px);
+
         // ── Style helpers ───────────────────────────────────────────────────────
 
         /// <summary>Creates uniform padding on all four sides.</summary>
@@ -162,8 +265,14 @@ namespace PawnEditor
 
         private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
         {
-            var tree      = new TaffyTree();
+            var tree = new TaffyTree();
             var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
+
+            // Give the root container a definite width from the rect so that fr columns resolve
+            // correctly. Without this, inner_node_size.Width is None, which causes ExpandFlexibleTracks
+            // to use MaxContent semantics: fr fraction = max content of items = 0 for leaf nodes,
+            // making all fr columns 0px wide. Height is left Auto so the container shrinks to content.
+            rootStyle.size = rootStyle.size.MapWidth(_ => Dimension.Length(rect.width));
 
             var builder = new TaffyBuilder(tree, callbacks);
             build(builder);
@@ -181,7 +290,7 @@ namespace PawnEditor
         }
 
         private static void DrawTree(TaffyTree tree, NodeId node, float originX, float originY,
-                                     Dictionary<NodeId, Action<Rect>?> lookup)
+            Dictionary<NodeId, Action<Rect>?> lookup)
         {
             ref var layout = ref tree.Layout(node);
             var absX = originX + layout.Location.X;
@@ -197,5 +306,25 @@ namespace PawnEditor
 
         private static Size<LengthPercentage> UniformGap(float v) =>
             new(LengthPercentage.Length(v), LengthPercentage.Length(v));
+
+        private static Style MakeGridStyle(IReadOnlyList<TrackSizingFunction> columns,
+            IReadOnlyList<TrackSizingFunction>? rows,
+            float gapX, float gapY, float autoRowHeight)
+        {
+            var s = new Style
+            {
+                display             = TaffySharp.Display.Grid,
+                gridTemplateColumns = new List<TrackSizingFunction>(columns),
+                gridTemplateRows    = rows != null ? new List<TrackSizingFunction>(rows) : null,
+                gap                 = new Size<LengthPercentage>(
+                                          LengthPercentage.Length(gapX),
+                                          LengthPercentage.Length(gapY)),
+            };
+            // When items are leaf nodes with no intrinsic size, CSS auto rows collapse to 0.
+            // An explicit autoRowHeight overrides gridAutoRows to give each row a fixed height.
+            if (autoRowHeight > 0f)
+                s.gridAutoRows = new List<TrackSizingFunction> { TrackSizingFunction.Px(autoRowHeight) };
+            return s;
+        }
     }
 }
