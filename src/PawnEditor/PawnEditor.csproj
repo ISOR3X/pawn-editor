@@ -61,6 +61,7 @@
         <Compile Include="TaffySharp\Types\Alignment.cs" />
         <Compile Include="TaffySharp\Types\StyleEnums.cs" />
         <Compile Include="TaffySharp\Types\Style.cs" />
+        <Compile Include="TaffySharp\Types\GridStyle.cs" />
         <!-- TaffySharp: Phase 2 — Tree & Cache -->
         <Compile Include="TaffySharp\Tree\Layout.cs" />
         <Compile Include="TaffySharp\Tree\NodeId.cs" />
@@ -75,6 +76,14 @@
         <Compile Include="TaffySharp\Compute\Flexbox\FlexItem.cs" />
         <Compile Include="TaffySharp\Compute\Flexbox\Alignment.cs" />
         <Compile Include="TaffySharp\Compute\Flexbox\FlexCompute.cs" />
+        <!-- TaffySharp: Phase 5 — CSS Grid compute -->
+        <Compile Include="TaffySharp\Compute\Grid\GridComputeTypes.cs" />
+        <Compile Include="TaffySharp\Compute\Grid\ImplicitGrid.cs" />
+        <Compile Include="TaffySharp\Compute\Grid\ExplicitGrid.cs" />
+        <Compile Include="TaffySharp\Compute\Grid\Placement.cs" />
+        <Compile Include="TaffySharp\Compute\Grid\TrackSizing.cs" />
+        <Compile Include="TaffySharp\Compute\Grid\GridAlignment.cs" />
+        <Compile Include="TaffySharp\Compute\Grid\GridCompute.cs" />
         <!-- TaffySharp: Public entry point -->
         <Compile Include="TaffySharp\TaffyTree.cs" />
     </ItemGroup>

@@ -1,6 +1,6 @@
 // Port of taffy/src/style/mod.rs (Style struct)
-//
-// Grid template track types are omitted and will be added in Phase 5.
+
+using System.Collections.Generic;
 
 namespace PawnEditor.TaffySharp
 {
@@ -120,10 +120,30 @@ namespace PawnEditor.TaffySharp
         /// <summary>Legacy block text-align for children. Default: Auto.</summary>
         public TextAlign textAlign = TextAlign.Auto;
 
-        // ── Grid item (Phase 5 — placeholders) ────────────────────────────────
+        // ── Grid container ────────────────────────────────────────────────────
 
-        // gridTemplateRows, gridTemplateColumns, gridAutoRows, gridAutoColumns,
-        // gridAutoFlow, gridTemplateAreas, gridRow, gridColumn — added in Phase 5.
+        /// <summary>Explicit grid template for columns. Null means no explicit column template.</summary>
+        public List<TrackSizingFunction>? gridTemplateColumns = null;
+
+        /// <summary>Explicit grid template for rows. Null means no explicit row template.</summary>
+        public List<TrackSizingFunction>? gridTemplateRows = null;
+
+        /// <summary>Sizing for implicitly-created columns (cycled). Defaults to single auto track.</summary>
+        public List<TrackSizingFunction> gridAutoColumns = new List<TrackSizingFunction> { TrackSizingFunction.Auto() };
+
+        /// <summary>Sizing for implicitly-created rows (cycled). Defaults to single auto track.</summary>
+        public List<TrackSizingFunction> gridAutoRows = new List<TrackSizingFunction> { TrackSizingFunction.Auto() };
+
+        /// <summary>Controls how auto-placed items are inserted into the grid. Default: Row.</summary>
+        public GridAutoFlow gridAutoFlow = GridAutoFlow.Row;
+
+        // ── Grid item ─────────────────────────────────────────────────────────
+
+        /// <summary>Column placement (start/end). Default: Auto/Auto.</summary>
+        public Line<GridPlacement> gridColumn = new Line<GridPlacement>(GridPlacement.Auto, GridPlacement.Auto);
+
+        /// <summary>Row placement (start/end). Default: Auto/Auto.</summary>
+        public Line<GridPlacement> gridRow = new Line<GridPlacement>(GridPlacement.Auto, GridPlacement.Auto);
 
         // ── Helpers ───────────────────────────────────────────────────────────
 

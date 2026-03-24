@@ -23,6 +23,7 @@
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\CompactLength.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\Dimension.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\AvailableSpace.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\GridStyle.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\Alignment.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\StyleEnums.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Types\Style.cs" />
@@ -37,5 +38,12 @@
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Flexbox\Alignment.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Flexbox\FlexCompute.cs" />
     <Compile Include="..\..\src\PawnEditor\TaffySharp\TaffyTree.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\GridComputeTypes.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\ExplicitGrid.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\ImplicitGrid.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\Placement.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\TrackSizing.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\GridAlignment.cs" />
+    <Compile Include="..\..\src\PawnEditor\TaffySharp\Compute\Grid\GridCompute.cs" />
   </ItemGroup>
 </Project>

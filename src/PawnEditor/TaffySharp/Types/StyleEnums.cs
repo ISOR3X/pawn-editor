@@ -138,4 +138,28 @@ namespace PawnEditor.TaffySharp
         /// <summary>Legacy center-align (corresponds to <c>-webkit-center</c>).</summary>
         LegacyCenter,
     }
+
+    // ── Axis extension helpers ────────────────────────────────────────────────
+
+    public static class AbstractAxisExt
+    {
+        /// <summary>Returns the opposite axis (Inline ↔ Block).</summary>
+        public static AbstractAxis OtherAxis(this AbstractAxis axis) =>
+            axis == AbstractAxis.Inline ? AbstractAxis.Block : AbstractAxis.Inline;
+
+        /// <summary>Maps AbstractAxis to AbsoluteAxis (Inline = Horizontal, Block = Vertical).</summary>
+        public static AbsoluteAxis AsAbsNaive(this AbstractAxis axis) =>
+            axis == AbstractAxis.Inline ? AbsoluteAxis.Horizontal : AbsoluteAxis.Vertical;
+
+        /// <summary>Maps AbsoluteAxis to AbstractAxis (Horizontal = Inline, Vertical = Block).</summary>
+        public static AbstractAxis AsAbstract(this AbsoluteAxis axis) =>
+            axis == AbsoluteAxis.Horizontal ? AbstractAxis.Inline : AbstractAxis.Block;
+    }
+
+    public static class AbsoluteAxisExt
+    {
+        /// <summary>Returns the opposite axis (Horizontal ↔ Vertical).</summary>
+        public static AbsoluteAxis OtherAxis(this AbsoluteAxis axis) =>
+            axis == AbsoluteAxis.Horizontal ? AbsoluteAxis.Vertical : AbsoluteAxis.Horizontal;
+    }
 }

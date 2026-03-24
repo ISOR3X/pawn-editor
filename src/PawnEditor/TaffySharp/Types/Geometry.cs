@@ -88,6 +88,14 @@ namespace PawnEditor.TaffySharp
         // AbsoluteAxis helper
         public T GetAbs(AbsoluteAxis axis) => axis == AbsoluteAxis.Horizontal ? Width : Height;
 
+        /// <summary>Returns a new Size with the given axis set to <paramref name="value"/>.</summary>
+        public Size<T> WithAxis(AbstractAxis axis, T value) =>
+            axis == AbstractAxis.Inline ? new Size<T>(value, Height) : new Size<T>(Width, value);
+
+        /// <summary>Returns a new Size with the given axis set to <paramref name="value"/>.</summary>
+        public Size<T> WithAxisAbs(AbsoluteAxis axis, T value) =>
+            axis == AbsoluteAxis.Horizontal ? new Size<T>(value, Height) : new Size<T>(Width, value);
+
         public override string ToString() => $"Size({Width}, {Height})";
     }
 

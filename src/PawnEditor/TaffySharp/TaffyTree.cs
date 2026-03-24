@@ -414,14 +414,37 @@ namespace PawnEditor.TaffySharp
         private LayoutOutput ComputeFlexLayout(NodeId node, LayoutInput input) =>
             FlexCompute.Compute(this, node, input);
 
-        private LayoutOutput ComputeGridLayout(NodeId node, LayoutInput input)
-        {
-            // TODO Phase 5: wire to Grid.Compute(...)
-            throw new NotImplementedException("CSS Grid layout not yet implemented (Phase 5).");
-        }
+        private LayoutOutput ComputeGridLayout(NodeId node, LayoutInput input) =>
+            GridCompute.Compute(this, node, input);
 
         private LayoutOutput ComputeBlockLayout(NodeId node, LayoutInput input) =>
             BlockCompute.Compute(this, node, input, null);
+
+        /// <summary>
+        /// Measures a child node's size in the given axis using <see cref="RunMode.ComputeSize"/>.
+        /// Returns the size in the specified axis. Used by the grid track-sizing algorithm.
+        /// </summary>
+        internal float MeasureChildSize(
+            NodeId node,
+            Size<float?> knownDimensions,
+            Size<float?> parentSize,
+            Size<AvailableSpace> availableSpace,
+            SizingMode sizingMode,
+            AbsoluteAxis axis)
+        {
+            var input = new LayoutInput
+            {
+                KnownDimensions = knownDimensions,
+                ParentSize      = parentSize,
+                availableSpace  = availableSpace,
+                SizingMode      = sizingMode,
+                Axis            = RequestedAxis.Both,
+                RunMode         = RunMode.ComputeSize,
+                VerticalMarginsAreCollapsible = new Line<bool>(false, false),
+            };
+            var output = PerformLayout(node, input);
+            return axis == AbsoluteAxis.Horizontal ? output.Size.Width : output.Size.Height;
+        }
 
         /// <summary>Directly sets a node's layout (used by layout algorithms when placing children).</summary>
         internal void SetNodeLayout(NodeId node, in Layout layout)
