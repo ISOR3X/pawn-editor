@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using JetBrains.Annotations;
-using PawnEditor.Layout;
 using Verse;
 
 namespace PawnEditor;
@@ -11,7 +9,7 @@ public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
 
-    public SectionFlexLayoutNode layout = new();
+    public TaffyLayoutNode layout = new();
     public int priority = 10;
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
@@ -26,17 +24,5 @@ public class TabDef : Def
 
             return field;
         }
-    }
-}
-
-public class SectionFlexLayoutNode : FlexLayoutNode<SectionDef>
-{
-    public SectionFlexLayoutNode()
-    {
-        registry = new Dictionary<string, Func<LayoutNode<SectionDef>>>
-        {
-            ["section"] = () => new DefLeafNode<SectionDef>(),
-            ["flex"] = () => new SectionFlexLayoutNode()
-        };
     }
 }

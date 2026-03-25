@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using HotSwap;
-using PawnEditor.Layout;
 using UnityEngine;
 using Verse;
 
@@ -32,8 +31,7 @@ public class TabWorker_Pawn(TabDef def) : TabWorker(def)
         var viewRect = new Rect(contentRect.x, contentRect.y, contentRect.width - additionalWidth, _viewRectHeight);
         Verse.Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
 
-        _viewRectHeight = FlexLayoutEngine.Draw(
-            Def.layout,
+        _viewRectHeight = Def.layout.Draw(
             viewRect,
             (section, r) => section.Worker.DoSection(pawn, r),
             section => section.Worker.ShowSection(pawn));

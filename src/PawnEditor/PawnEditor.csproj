@@ -192,6 +192,7 @@
         <Compile Include="UI\Components\Widgets.cs" />
         <Compile Include="UI\GUIColor.cs" />
         <Compile Include="UI\Taffy.cs" />
+        <Compile Include="UI\TaffyLayoutNode.cs" />
         <Compile Include="UI\UIUtility.cs" />
         <Compile Include="Utility.cs" />
         <Compile Include="Windows\Dialog_ColorPicker.cs" />

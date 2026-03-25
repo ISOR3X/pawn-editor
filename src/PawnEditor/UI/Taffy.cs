@@ -119,7 +119,6 @@ namespace PawnEditor
                 using (new TextBlock(font))
                 {
                     Text.WordWrap = r.width < Text.CalcSize(text).x;
-                    Log.Message(Text.WordWrap.ToString() + " " + r.width.ToString() + " " + Text.CalcSize(text).x);
                     Verse.Widgets.Label(r, text);
                 }
             })));
@@ -198,10 +197,12 @@ namespace PawnEditor
                        + (icon != null ? ButtonIconSize : 0f)
                        + UIUtility.LabelPadding;
 
-            var style = new Style();
-            style.size = new Size<Dimension>(
-                Dimension.Length(totalW),
-                Dimension.Length(UIUtility.ButtonHeight));
+            var style = new Style
+            {
+                size = new Size<Dimension>(
+                    Dimension.Length(totalW),
+                    Dimension.Length(UIUtility.ButtonHeight))
+            };
 
             // Capture for closure.
             var capturedLabel = label;
