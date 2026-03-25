@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using PawnEditor.TaffySharp;
 using UnityEngine;
+using Verse;
 
 namespace PawnEditor
 {
@@ -33,9 +34,12 @@ namespace PawnEditor
     /// </summary>
     public sealed class TaffyBuilder
     {
+        // Memoizes Text.CalcSize(word).x per (word, font) pair — populated once, reused every frame.
+        private static readonly Dictionary<(string word, GameFont font), float> _wordWidthCache = new();
+
         internal readonly TaffyTree _tree;
         internal readonly List<(NodeId id, Action<Rect>? draw)> _callbacks;
-        internal readonly List<NodeId> _children = new();
+        internal readonly List<NodeId> _children = [];
 
         internal TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
         {
@@ -88,6 +92,79 @@ namespace PawnEditor
         /// <summary>Adds a nested column container with a full <see cref="Style"/>.</summary>
         public void Column(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, build);
+
+        // ── Text leaf items (RimWorld integration) ──────────────────────────────
+
+        /// <summary>
+        /// Adds a leaf node that measures its own size using RimWorld's <see cref="Text.CalcSize"/>
+        /// and <see cref="Text.CalcHeight"/>.
+        /// <para>
+        /// When a fixed <paramref name="width"/> is set the node wraps at that width and the height
+        /// is computed via <see cref="Text.CalcHeight"/>. Otherwise the natural (unwrapped) size from
+        /// <see cref="Text.CalcSize"/> is returned, capped at the available width if the axis is definite.
+        /// </para>
+        /// The default draw callback renders the text as a label.
+        /// </summary>
+        public void TextItem(string text, float? width = null, float grow = 0f,
+            GameFont font = GameFont.Small, Action<Rect>? draw = null)
+        {
+            var style = new Style { flexGrow = grow };
+            if (width.HasValue)
+                style.size = style.size.MapWidth(_ => Dimension.Length(width.Value));
+
+            var node = _tree.NewLeafWithContext(style, (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
+            _children.Add(node);
+            _callbacks.Add((node, draw ?? (r =>
+            {
+                using (new TextBlock(font))
+                {
+                    Text.WordWrap = r.width < Text.CalcSize(text).x;
+                    Log.Message(Text.WordWrap.ToString() + " " + r.width.ToString() + " " + Text.CalcSize(text).x);
+                    Verse.Widgets.Label(r, text);
+                }
+            })));
+            return;
+
+            // Store a per-node measure closure as the node's context object.
+            // The tree-level dispatch in Execute will cast it and call it.
+            Size<float> Measure(Size<float?> known, Size<AvailableSpace> available)
+            {
+                using (new TextBlock(font))
+                {
+                    if (known.Width.HasValue)
+                        // Width fully constrained by parent algorithm — wrap and measure height.
+                        return new Size<float>(known.Width.Value, Text.CalcHeight(text, known.Width.Value));
+
+                    if (available.Width.IsMinContent)
+                    {
+                        // Min-content query: return the widest unbreakable word.
+                        // This mirrors CSS min-width:auto — text can shrink and wrap, but never
+                        // below the width of its longest word (which for single-word labels equals
+                        // the full text width, preventing unwanted shrinkage).
+                        // Results are cached in _wordWidthCache so Text.CalcSize is called at most
+                        // once per (word, font) pair across all frames.
+                        var minW = 0f;
+                        foreach (var word in text.Split(' '))
+                        {
+                            var key = (word, font);
+                            if (!_wordWidthCache.TryGetValue(key, out var w))
+                                _wordWidthCache[key] = w = Text.CalcSize(word).x;
+                            if (w > minW) minW = w;
+                        }
+                        var minH = Text.CalcHeight(text, minW);
+                        return new Size<float>(minW, minH);
+                    }
+
+                    if (available.Width.IntoOption() is { } aw)
+                        // Definite available width — wrap at that width.
+                        return new Size<float>(aw, Text.CalcHeight(text, aw));
+
+                    // MaxContent / unconstrained — return natural (unwrapped) size.
+                    var sz = Text.CalcSize(text);
+                    return new Size<float>(sz.x, sz.y);
+                }
+            }
+        }
 
         // ── Grid items ──────────────────────────────────────────────────────────
 
@@ -278,9 +355,13 @@ namespace PawnEditor
             build(builder);
             var root = tree.NewWithChildren(rootStyle, builder._children);
 
-            tree.ComputeLayout(root, new Size<AvailableSpace>(
-                AvailableSpace.Definite(rect.width),
-                AvailableSpace.Definite(rect.height)));
+            tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
+                    AvailableSpace.Definite(rect.width),
+                    AvailableSpace.Definite(rect.height)),
+                (known, available, _, ctx, _) =>
+                    ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
+                        ? measure(known, available)
+                        : SizeF.ZERO);
 
             var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
             foreach (var entry in callbacks)
@@ -297,8 +378,12 @@ namespace PawnEditor
             var absY = originY + layout.Location.Y;
             var r = new Rect(absX, absY, layout.Size.Width, layout.Size.Height);
 
-            if (lookup.TryGetValue(node, out var draw))
-                draw?.Invoke(r);
+            if (lookup.TryGetValue(node, out var draw) && draw != null)
+            {
+                var prevWordWrap = Text.WordWrap;
+                draw(r);
+                Text.WordWrap = prevWordWrap;
+            }
 
             foreach (var child in tree.Children(node))
                 DrawTree(tree, child, absX, absY, lookup);
@@ -313,17 +398,17 @@ namespace PawnEditor
         {
             var s = new Style
             {
-                display             = TaffySharp.Display.Grid,
-                gridTemplateColumns = new List<TrackSizingFunction>(columns),
-                gridTemplateRows    = rows != null ? new List<TrackSizingFunction>(rows) : null,
-                gap                 = new Size<LengthPercentage>(
-                                          LengthPercentage.Length(gapX),
-                                          LengthPercentage.Length(gapY)),
+                display = TaffySharp.Display.Grid,
+                gridTemplateColumns = [..columns],
+                gridTemplateRows = rows != null ? [..rows] : null,
+                gap = new Size<LengthPercentage>(
+                    LengthPercentage.Length(gapX),
+                    LengthPercentage.Length(gapY)),
             };
             // When items are leaf nodes with no intrinsic size, CSS auto rows collapse to 0.
             // An explicit autoRowHeight overrides gridAutoRows to give each row a fixed height.
             if (autoRowHeight > 0f)
-                s.gridAutoRows = new List<TrackSizingFunction> { TrackSizingFunction.Px(autoRowHeight) };
+                s.gridAutoRows = [TrackSizingFunction.Px(autoRowHeight)];
             return s;
         }
     }

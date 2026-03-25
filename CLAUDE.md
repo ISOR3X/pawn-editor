@@ -145,6 +145,22 @@ Work in this order. Do not start a phase until the previous one has passing unit
 - Taffy's Rust test harness (we will write C# unit tests instead)
 - `taffy::style::Style` CSS parsing from strings (we set style properties directly in C#)
 - `taffy::util::debug` — not needed
+- Float layout (`compute/float.rs`, `style/float.rs`) — not needed for RimWorld UI
+
+---
+
+## Do Not Deviate from Rust Taffy in `TaffySharp/`
+
+**The code inside `TaffySharp/` must be a faithful port of the Rust Taffy source.** Do not add
+convenience APIs, C#-specific abstractions, or shortcuts that have no equivalent in Rust. If you
+think a deviation is necessary, stop and explain why before writing any code — the bar is high.
+
+The only accepted difference is mechanical translation noise:
+- `Option<T>` → `T?`, `Vec<T>` → arrays/Span, traits → interfaces, `f32` → `float`, etc.
+- `TaffyTree<NodeContext>` → `TaffyTree` with `object? Context` (type erasure only, no behavioral change)
+
+RimWorld/Unity-specific conveniences belong **exclusively** in `src/PawnEditor/UI/Taffy.cs`, which
+is the integration layer and is explicitly allowed to diverge.
 
 ---
 
@@ -161,7 +177,7 @@ Before writing any code in a new session:
 
 ## Building the Project
 
-Use Rider's bundled MSBuild, **not** `dotnet build`. From the repo root:
+Use Rider's bundled MSBuild, **not** `dotnet build`. From the repo root (this is a PowerShell command):
 
 ```
 & "C:\Users\Joram\AppData\Local\Programs\Rider\tools\MSBuild\Current\Bin\amd64\MSBuild.exe" src\PawnEditor\PawnEditor.csproj /p:Configuration=Debug

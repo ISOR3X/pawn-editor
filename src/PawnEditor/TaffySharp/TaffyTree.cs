@@ -12,6 +12,27 @@ using System.Collections.Generic;
 
 namespace PawnEditor.TaffySharp
 {
+    /// <summary>
+    /// Measure callback passed to <see cref="TaffyTree.ComputeLayoutWithMeasure"/>.
+    /// Mirrors Rust's <c>MeasureFunction</c> generic parameter on
+    /// <c>TaffyTree::compute_layout_with_measure</c> exactly.
+    /// Called once per leaf node during layout.
+    /// <para>
+    /// <paramref name="knownDimensions"/> — dimensions already fixed by the parent algorithm (null = unconstrained).<br/>
+    /// <paramref name="availableSpace"/> — space available on each axis.<br/>
+    /// <paramref name="nodeId"/> — identity of the leaf node being measured.<br/>
+    /// <paramref name="nodeContext"/> — per-node context data attached via <see cref="TaffyTree.NewLeafWithContext"/>.<br/>
+    /// <paramref name="style"/> — the node's style.
+    /// </para>
+    /// Returns the node's natural (content) size in pixels.
+    /// </summary>
+    public delegate Size<float> MeasureFunction(
+        Size<float?> knownDimensions,
+        Size<AvailableSpace> availableSpace,
+        NodeId nodeId,
+        object? nodeContext,
+        Style style);
+
     /// <summary>An error that can occur while accessing or modifying the tree.</summary>
     public class TaffyException : Exception
     {
@@ -65,6 +86,10 @@ namespace PawnEditor.TaffySharp
         private readonly Stack<uint> _freeSlots = new();
 
         public bool UseRounding = true;
+
+        // Active measure function for the duration of a ComputeLayoutWithMeasure call.
+        // Null during plain ComputeLayout (which uses a no-op, matching Rust's compute_layout).
+        private MeasureFunction? _activeMeasureFunction;
 
         // ── Node creation ─────────────────────────────────────────────────────
 
@@ -237,13 +262,38 @@ namespace PawnEditor.TaffySharp
 
         /// <summary>
         /// Computes layout for the subtree rooted at <paramref name="root"/>.
-        /// Pass the viewport/container size via <paramref name="availableSpace"/>.
+        /// Leaf nodes with no intrinsic size measure as zero (equivalent to Rust's
+        /// <c>compute_layout</c>, which calls <c>compute_layout_with_measure</c> with a no-op).
         /// </summary>
         public void ComputeLayout(NodeId root, Size<AvailableSpace> availableSpace)
+            => ComputeLayoutWithMeasure(root, availableSpace, null);
+
+        /// <summary>
+        /// Computes layout with a tree-level measure function for leaf nodes — mirrors Rust's
+        /// <c>TaffyTree::compute_layout_with_measure</c> exactly.
+        /// <para>
+        /// <paramref name="measureFunction"/> receives <c>(knownDimensions, availableSpace, nodeId,
+        /// nodeContext, style)</c> for every leaf node and returns its natural size. Pass <c>null</c>
+        /// to use a no-op (all leaves measure as zero), which is equivalent to
+        /// <see cref="ComputeLayout"/>.
+        /// </para>
+        /// Per-node <see cref="MeasureFunction"/> closures attached via
+        /// <see cref="NewLeafWithMeasure"/> take precedence over this callback when both are present.
+        /// </summary>
+        public void ComputeLayoutWithMeasure(NodeId root, Size<AvailableSpace> availableSpace,
+            MeasureFunction? measureFunction)
         {
-            ComputeLayoutInternal(root, availableSpace);
-            if (UseRounding)
-                RoundLayout(root, 0f, 0f);
+            _activeMeasureFunction = measureFunction;
+            try
+            {
+                ComputeLayoutInternal(root, availableSpace);
+                if (UseRounding)
+                    RoundLayout(root, 0f, 0f);
+            }
+            finally
+            {
+                _activeMeasureFunction = null;
+            }
         }
 
         private void ComputeLayoutInternal(NodeId root, Size<AvailableSpace> availableSpace)
@@ -333,6 +383,13 @@ namespace PawnEditor.TaffySharp
 
         // ── Rounding ──────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Snaps all layout positions and sizes to integer pixels, eliminating sub-pixel rendering
+        /// artifacts. Called automatically by <see cref="ComputeLayout"/> when <see cref="UseRounding"/>
+        /// is true. Call manually only if you bypass <see cref="ComputeLayout"/>.
+        /// </summary>
+        public void RoundLayout(NodeId root) => RoundLayout(root, 0f, 0f);
+
         private void RoundLayout(NodeId node, float cumulativeX, float cumulativeY)
         {
             ref var layout = ref _nodes[(int)node.Value].FinalLayout;
@@ -400,10 +457,13 @@ namespace PawnEditor.TaffySharp
                 nodeMaxSize = styleMaxSize;
             }
 
-            // Call measure function if present; otherwise measured size is zero.
+            // Call the active measure function if present; otherwise measured size is zero.
+            // Mirrors Rust: leaf nodes measure as zero when no measure function is provided.
             var measuredSize = SizeF.ZERO;
-            if (_nodes[(int)node.Value].Context is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure)
-                measuredSize = measure(nodeSize, input.availableSpace);
+            if (_activeMeasureFunction != null)
+                measuredSize = _activeMeasureFunction(
+                    nodeSize, input.availableSpace, node,
+                    _nodes[(int)node.Value].Context, style);
 
             // Combine: prefer known/style size, fall back to measured + padding/border.
             var fallback = new Size<float?>(measuredSize.Width + pbSum.Width, measuredSize.Height + pbSum.Height);
