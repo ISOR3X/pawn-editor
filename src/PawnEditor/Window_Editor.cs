@@ -2,11 +2,9 @@
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
-using PawnEditor.Layout;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using L = PawnEditor.Layout.LayoutHelper;
 
 namespace PawnEditor;
 
@@ -136,65 +134,24 @@ public partial class Window_Editor : Window
 
     private void DoLeftSection(Rect inRect)
     {
-        var layout = L.Col([
-            L.Cell(rect =>
+        Taffy.Column(inRect, col =>
+        {
+            col.Item(height: Text.LineHeightOf(GameFont.Tiny), draw: rect =>
             {
                 using (new TextBlock(GameFont.Tiny))
-                {
                     Verse.Widgets.Label(rect, "Selected faction");
-                }
-            }, Text.LineHeightOf(GameFont.Tiny)),
-
-            L.Cell(rect =>
+            });
+            col.Item(height: UIUtility.ButtonHeight, draw: rect =>
             {
                 var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
                 if (UIUtility.ButtonText_WithIcon(rect, label, tex, c))
                     Find.WindowStack.Add(FactionFloatMenu());
-            }, UIUtility.ButtonHeight),
-            L.Cell(rect =>
+            });
+            col.Item(grow: 1f, draw: rect =>
             {
                 Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
                 if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
-            }, flexGrow: 1f)
-
-            // L.Cell(rect =>
-            // {
-            //     using (new TextBlock(GameFont.Tiny))
-            //         Widgets.Label(rect, "Overview");
-            // }, flexBasis: 18f),
-            //
-            // L.Cell(rect =>
-            // {
-            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Colony"))
-            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
-            // }, flexBasis: 30f),
-            //
-            // L.Cell(rect =>
-            // {
-            //     if (UIComponents.ButtonText_TruncateWithTooltip(rect, "Faction..."))
-            //         Messages.Message("Not yet implemented.", MessageTypeDefOf.RejectInput);
-            // }, flexBasis: 30f),
-            //
-            // L.Row([
-            //     L.Cell(rect =>
-            //     {
-            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Save"))
-            //         {
-            //         }
-            //     }, flexGrow: 1f),
-            //     L.Cell(rect =>
-            //     {
-            //         if (UIComponents.ButtonText_TruncateWithTooltip(rect.TakeTopPart(UIUtility.ButtonHeight), "Load"))
-            //         {
-            //         }
-            //     }, flexGrow: 1f)
-            // ], flexBasis: 30f)
-        ]);
-        
-        layout.Draw(inRect, (action, rect) =>
-        {
-            action(rect);
-            return rect.height > 1000f ? 0f : rect.height;
+            });
         });
     }
 }

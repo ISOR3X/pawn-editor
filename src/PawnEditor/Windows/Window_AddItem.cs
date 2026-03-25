@@ -7,7 +7,6 @@ using PawnEditor.Table;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using L = PawnEditor.Layout.LayoutHelper;
 
 namespace PawnEditor;
 

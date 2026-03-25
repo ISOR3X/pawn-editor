@@ -420,7 +420,7 @@ namespace PawnEditor
             // correctly. Without this, inner_node_size.Width is None, which causes ExpandFlexibleTracks
             // to use MaxContent semantics: fr fraction = max content of items = 0 for leaf nodes,
             // making all fr columns 0px wide. Height is left Auto so the container shrinks to content.
-            rootStyle.size = rootStyle.size.MapWidth(_ => Dimension.Length(rect.width));
+            rootStyle.size = new Size<Dimension>(Dimension.Length(rect.width), Dimension.Length(rect.height));
 
             var builder = new TaffyBuilder(tree, callbacks);
             build(builder);

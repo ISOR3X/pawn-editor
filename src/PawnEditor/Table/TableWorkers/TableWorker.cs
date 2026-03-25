@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
-using PawnEditor.Layout;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -315,19 +315,36 @@ public abstract class TableWorker<T> where T : class
 
     private void RecacheColumnWidths()
     {
-        var available = _cachedSize.x - UIUtility.ScrollBarWidth;
-
-        var line = _cachedColumns.Select(col => new LayoutNode<ColumnWorker<T>>
-        {
-            leaf = col,
-            flexBasis = Mathf.Max(col.Def.flexBasis, col.MeasureHeaderWidth()),
-            flexGrow = col.Def.flexGrow,
-            maxWidth = col.Def.maxWidth,
-        }).ToList();
-
-        var widths = FlexLayoutEngine.ResolveWidths(line, available, 0f);
-
         _cachedColumnWidths.Clear();
-        _cachedColumnWidths.AddRange(widths);
+        if (_cachedColumns.Count == 0) return;
+
+        var available = _cachedSize.x - UIUtility.ScrollBarWidth;
+        var tree = new TaffyTree();
+        var childIds = new List<NodeId>(_cachedColumns.Count);
+
+        for (var i = 0; i < _cachedColumns.Count; i++)
+        {
+            var col = _cachedColumns[i];
+            var style = new Style { flexGrow = col.Def.flexGrow, flexShrink = 1f };
+            style.size = style.size.MapWidth(_ => Dimension.Length(Mathf.Max(col.Def.flexBasis, col.MeasureHeaderWidth())));
+            if (col.Def.maxWidth > 0)
+                style.maxSize = style.maxSize.MapWidth(_ => Dimension.Length(col.Def.maxWidth));
+            childIds.Add(tree.NewLeaf(style));
+        }
+
+        var rootStyle = new Style
+        {
+            display = TaffySharp.Display.Flex,
+            flexDirection = FlexDirection.Row,
+            size = new Size<Dimension>(Dimension.Length(available), Dimension.AUTO),
+        };
+        var root = tree.NewWithChildren(rootStyle, childIds);
+
+        tree.ComputeLayout(root, new Size<AvailableSpace>(
+            AvailableSpace.Definite(available),
+            AvailableSpace.MaxContent));
+
+        for (var i = 0; i < childIds.Count; i++)
+            _cachedColumnWidths.Add(tree.Layout(childIds[i]).Size.Width);
     }
 }
