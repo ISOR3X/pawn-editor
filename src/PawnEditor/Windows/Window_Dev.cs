@@ -21,7 +21,8 @@ public class Window_Dev : Window
         // DrawGridLayout(inRect);
         // DrawFlexLayout(inRect);
         // DrawHolyGrailLayout(inRect);
-        DrawTextItemLayout(inRect);
+        // DrawTextItemLayout(inRect);
+        DrawButtonItemLayout(inRect);
     }
 
 
@@ -208,6 +209,47 @@ public class Window_Dev : Window
             //     });
             //     row.TextItem("Large font label", grow: 1f, font: GameFont.Medium);
             // });
+        });
+    }
+
+    private string _buttonLog = "—";
+
+    private void DrawButtonItemLayout(Rect inRect)
+    {
+        Taffy.Column(inRect.LeftPart(0.5f), gap: 8f, col =>
+        {
+            // Row 1: label-only button
+            col.Row(grow: 0f, row =>
+            {
+                row.TextItem("Label only:");
+                row.ButtonItem(label: "Generate name",
+                    onClick: () => _buttonLog = "Generate name clicked");
+            });
+
+            // Row 2: label + icon button
+            col.Row(grow: 0f, row =>
+            {
+                row.TextItem("Label + icon:");
+                row.ButtonItem(label: "Add trait", icon: TexButton.Add, iconColor: Color.green,
+                    onClick: () => _buttonLog = "Add trait clicked");
+            });
+
+            // Row 3: icon-only button
+            col.Row(grow: 0f, row =>
+            {
+                row.TextItem("Icon only:");
+                row.ButtonItem(icon: TexButton.Delete, iconColor: Color.red,
+                    onClick: () => _buttonLog = "Delete clicked");
+            });
+
+            // Row 4: last clicked feedback
+            col.Item(height: 1f, grow: 0f,
+                draw: r => Verse.Widgets.DrawRectFast(r, new Color(0.4f, 0.4f, 0.4f, 0.5f)));
+            col.Row(grow: 0f, row =>
+            {
+                row.TextItem("Last clicked:");
+                row.TextItem(_buttonLog);
+            });
         });
     }
 
