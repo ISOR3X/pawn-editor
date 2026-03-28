@@ -1,194 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-            Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{960AA103-39B5-44E3-8007-F7758D2F9F00}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>PawnEditor</RootNamespace>
         <AssemblyName>PawnEditor</AssemblyName>
         <ModName>PawnEditor</ModName>
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
+        <TargetFramework>net472</TargetFramework>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <WarningsAsErrors/>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PropertyGroup>
+        <OutputPath>..\..\Assemblies\</OutputPath>
         <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>..\..\Assemblies\</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>..\..\Assemblies\</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="HotSwap">
             <HintPath>..\..\..\HotSwap (1.6)\Assemblies\HotSwap.dll</HintPath>
         </Reference>
-        <Reference Include="System"/>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.Xml"/>
-    </ItemGroup>
-    <ItemGroup>
-        <!-- TaffySharp: Phase 1 — Core Types -->
-        <Compile Include="TaffySharp\Types\Geometry.cs" />
-        <Compile Include="TaffySharp\Types\FlexEnums.cs" />
-        <Compile Include="TaffySharp\Types\CompactLength.cs" />
-        <Compile Include="TaffySharp\Types\Dimension.cs" />
-        <Compile Include="TaffySharp\Types\AvailableSpace.cs" />
-        <Compile Include="TaffySharp\Types\Alignment.cs" />
-        <Compile Include="TaffySharp\Types\StyleEnums.cs" />
-        <Compile Include="TaffySharp\Types\Style.cs" />
-        <Compile Include="TaffySharp\Types\GridStyle.cs" />
-        <!-- TaffySharp: Phase 2 — Tree & Cache -->
-        <Compile Include="TaffySharp\Tree\Layout.cs" />
-        <Compile Include="TaffySharp\Tree\NodeId.cs" />
-        <Compile Include="TaffySharp\Tree\Cache.cs" />
-        <!-- TaffySharp: Compute utilities -->
-        <Compile Include="TaffySharp\Compute\MathHelpers.cs" />
-        <Compile Include="TaffySharp\Compute\Resolve.cs" />
-        <!-- TaffySharp: Phase 3 — Block compute -->
-        <Compile Include="TaffySharp\Compute\Block\BlockItem.cs" />
-        <Compile Include="TaffySharp\Compute\Block\BlockCompute.cs" />
-        <!-- TaffySharp: Phase 4 — Flexbox compute -->
-        <Compile Include="TaffySharp\Compute\Flexbox\FlexItem.cs" />
-        <Compile Include="TaffySharp\Compute\Flexbox\Alignment.cs" />
-        <Compile Include="TaffySharp\Compute\Flexbox\FlexCompute.cs" />
-        <!-- TaffySharp: Phase 5 — CSS Grid compute -->
-        <Compile Include="TaffySharp\Compute\Grid\GridComputeTypes.cs" />
-        <Compile Include="TaffySharp\Compute\Grid\ImplicitGrid.cs" />
-        <Compile Include="TaffySharp\Compute\Grid\ExplicitGrid.cs" />
-        <Compile Include="TaffySharp\Compute\Grid\Placement.cs" />
-        <Compile Include="TaffySharp\Compute\Grid\TrackSizing.cs" />
-        <Compile Include="TaffySharp\Compute\Grid\GridAlignment.cs" />
-        <Compile Include="TaffySharp\Compute\Grid\GridCompute.cs" />
-        <!-- TaffySharp: Public entry point -->
-        <Compile Include="TaffySharp\TaffyTree.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="AppearanceUtility.cs" />
-        <Compile Include="Defs\ColumnDef.cs"/>
-        <Compile Include="Defs\KeyBindDefOf.cs"/>
-        <Compile Include="Defs\PawnTableDefOf.cs"/>
-        <Compile Include="Defs\SectionDef.cs"/>
-        <Compile Include="Defs\TabDef.cs"/>
-        <Compile Include="Defs\TableDef.cs"/>
-        <Compile Include="Defs\TableDefOf.cs"/>
-        <Compile Include="Extensions\Listing_Standard.cs"/>
-        <Compile Include="Extensions\Rect.cs"/>
-        <Compile Include="External\Required.cs" />
-        <Compile Include="FactionUtility.cs" />
-        <Compile Include="Harmony\Patch_WindowResizer.cs" />
-        <Compile Include="QuickAction\QuickActionAttribute.cs" />
-        <Compile Include="QuickAction\QuickActions.cs" />
-        <Compile Include="QuickAction\QuickActionUtility.cs" />
-        <Compile Include="Pawn\PawnLister.cs" />
-        <Compile Include="Pawn\PawnLocation.cs" />
-        <Compile Include="Pawn\PawnUtility.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Beard.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Hair.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_HairColor.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Lifetage.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Portrait.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Race.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Sex.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_ShapeBody.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_TattooBody.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_ShapeHead.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_SkinColor.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_TattooFace.cs" />
-        <Compile Include="Sections\Appearance\SectionWorker_Xenotype.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Abilities.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Age.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Skills.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Backstory.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_FavColor.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Faction.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Info.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Name.cs" />
-        <Compile Include="Sections\Bio\SectionWorker_Traits.cs" />
-        <Compile Include="Sections\Gear\SectionWorker_Apparel.cs" />
-        <Compile Include="Sections\Gear\SectionWorker_Equipment.cs" />
-        <Compile Include="Sections\Gear\SectionWorker_Inventory.cs" />
-        <Compile Include="Sections\SectionWorker.cs" />
-        <Compile Include="Sections\SectionWorker_DefTable.cs" />
-        <Compile Include="Sections\SectionWorker_ThingTable.cs" />
-        <Compile Include="Settings.cs" />
-        <Compile Include="Table\ColumnWorkers\ColumnWorker.cs" />
-        <Compile Include="Table\ColumnWorkers\ColumnWorker_Text.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_ContentSource.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Gender.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Label.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Icon.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\DefColumnWorker_Style.cs" />
-        <Compile Include="Table\ColumnWorkers\ColumnWorker_Icon.cs" />
-        <Compile Include="Table\ColumnWorkers\DefColumnWorkers\ThingDef\DefColumnWorker_ApparelLayer.cs" />
-        <Compile Include="Table\ColumnWorkers\PawnColumnWorkers\PawnColumnWorker_Location.cs" />
-        <Compile Include="Table\ColumnWorkers\PawnColumnWorkers\PawnColumnWorker_Type.cs" />
-        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Edit.cs" />
-        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Icon.cs" />
-        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Info.cs" />
-        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Label.cs" />
-        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Mass.cs" />
-        <Compile Include="Table\ColumnWorkers\ThingColumnWorkers\ThingColumnWorker_Stuff.cs" />
-        <Compile Include="Table\TableFilters\DefTableFilter_ContentSource.cs" />
-        <Compile Include="Table\TableFilters\DefTableFilter_FloatMenu.cs" />
-        <Compile Include="Table\TableFilters\DefTableFilter_StuffCategory.cs" />
-        <Compile Include="Table\TableFilters\TableFilter.cs" />
-        <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker.cs" />
-        <Compile Include="Table\TableWorkers\DefTableWorkers\DefTableWorker_Hair.cs" />
-        <Compile Include="Table\TableWorkers\DefTableWorkers\FilteredDefTableWorker.cs" />
-        <Compile Include="Table\TableWorkers\TableWorker.cs" />
-        <Compile Include="Table\TableWorkers\ThingTableWorkers\ThingTableWorker.cs" />
-        <Compile Include="Tabs\TabUtility.cs" />
-        <Compile Include="Tabs\TabWorker.cs" />
-        <Compile Include="Tabs\TabWorker_Faction.cs" />
-        <Compile Include="Tabs\TabWorker_Pawn.cs" />
-        <Compile Include="Tabs\TabWorker_FactionOverview.cs" />
-        <Compile Include="TexPawnEditor.cs" />
-        <Compile Include="ThingUtility.cs" />
-        <Compile Include="UI\Components\Cards.cs" />
-        <Compile Include="UI\Components\Carrousel.cs" />
-        <Compile Include="UI\Components\InspectPane.cs" />
-        <Compile Include="UI\Components\Widgets.cs" />
-        <Compile Include="UI\GUIColor.cs" />
-        <Compile Include="UI\Taffy.cs" />
-        <Compile Include="UI\TaffyLayoutNode.cs" />
-        <Compile Include="UI\UIUtility.cs" />
-        <Compile Include="Utility.cs" />
-        <Compile Include="Windows\Dialog_ColorPicker.cs" />
-        <Compile Include="Windows\FloatWindow\FloatWindow.cs" />
-        <Compile Include="Windows\FloatWindow\FloatWindowAlignment.cs" />
-        <Compile Include="Windows\FloatWindow\FloatWindow_EditThing.cs" />
-        <Compile Include="Windows\FloatWindow\FloatWindow_NamePawn.cs" />
-        <Compile Include="Windows\Window_AddItem.cs" />
-        <Compile Include="Windows\Window_Dev.cs" />
-        <Compile Include="Window_Editor.cs" />
-        <Compile Include="Harmony\Patch_OpenEditor.cs" />
-        <Compile Include="PawnEditorMod.cs" />
-        <Compile Include="Window_EditorUtility.cs" />
     </ItemGroup>
     <ItemGroup>
         <Publicize Include="Assembly-CSharp" />
@@ -201,20 +45,7 @@
         <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta" />
         <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
-    <!--    <Target Name="Deploy" AfterTargets="Build">-->
-    <!--        &lt;!&ndash; Delete existing mod directory &ndash;&gt;-->
-    <!--        <RemoveDir Directories="$(RimWorldModsPath)\$(ModName)"/>-->
-    <!--        &lt;!&ndash; Copy static mod files &ndash;&gt;-->
-    <!--        <ItemGroup>-->
-    <!--            <ModFiles Include="$(MSBuildThisFileDirectory)..\..\data\$(ModName)\**\*.*"/>-->
-    <!--        </ItemGroup>-->
-    <!--        <Copy-->
-    <!--                SourceFiles="@(ModFiles)"-->
-    <!--                DestinationFiles="@(ModFiles->'$(RimWorldModsPath)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')"/>-->
-    <!--        &lt;!&ndash; Copy built DLL into versioned assemblies folder &ndash;&gt;-->
-    <!--        <Copy-->
-    <!--                SourceFiles="$(OutputPath)$(AssemblyName).dll"-->
-    <!--                DestinationFolder="$(RimWorldModsPath)\$(ModName)\$(RimWorldVersion)\Assemblies"/>-->
-    <!--    </Target>-->
+    <ItemGroup>
+        <Compile Remove="tests\**\*.cs" />
+    </ItemGroup>
 </Project>

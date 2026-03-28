@@ -3,9 +3,6 @@
 // TaffyTree is the main public entry point for the layout engine.
 // It stores the node tree (styles + computed layouts + cache) and
 // exposes the API for building UI trees and computing layout.
-//
-// Phase 2 stub: tree-management and dirty-tracking are complete;
-// layout dispatch to compute algorithms will be wired in Phases 3–5.
 
 using System;
 using System.Collections.Generic;

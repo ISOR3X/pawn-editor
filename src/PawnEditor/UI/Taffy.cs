@@ -21,11 +21,10 @@
 //       grid.GridItem(colSpan: 2, draw: r => DrawFooter(r));
 //   });
 
-using System;
-using System.Collections.Generic;
 using PawnEditor.TaffySharp;
 using UnityEngine;
 using Verse;
+using Display = PawnEditor.TaffySharp.Display;
 
 namespace PawnEditor
 {
@@ -35,16 +34,16 @@ namespace PawnEditor
     public sealed class TaffyBuilder
     {
         // Memoizes Text.CalcSize(word).x per (word, font) pair — populated once, reused every frame.
-        private static readonly Dictionary<(string word, GameFont font), float> _wordWidthCache = new();
+        internal static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
 
-        internal readonly TaffyTree _tree;
-        internal readonly List<(NodeId id, Action<Rect>? draw)> _callbacks;
-        internal readonly List<NodeId> _children = [];
+        internal readonly TaffyTree tree;
+        internal readonly List<(NodeId id, Action<Rect>? draw)> callbacks;
+        internal readonly List<NodeId> children = [];
 
         internal TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
         {
-            _tree = tree;
-            _callbacks = callbacks;
+            this.tree = tree;
+            this.callbacks = callbacks;
         }
 
         // ── Leaf items ──────────────────────────────────────────────────────────
@@ -93,150 +92,6 @@ namespace PawnEditor
         public void Column(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, build);
 
-        // ── Text leaf items (RimWorld integration) ──────────────────────────────
-
-        /// <summary>
-        /// Adds a leaf node that measures its own size using RimWorld's <see cref="Text.CalcSize"/>
-        /// and <see cref="Text.CalcHeight"/>.
-        /// <para>
-        /// When a fixed <paramref name="width"/> is set the node wraps at that width and the height
-        /// is computed via <see cref="Text.CalcHeight"/>. Otherwise the natural (unwrapped) size from
-        /// <see cref="Text.CalcSize"/> is returned, capped at the available width if the axis is definite.
-        /// </para>
-        /// The default draw callback renders the text as a label.
-        /// </summary>
-        public void TextItem(string text, float? width = null, float grow = 0f,
-            GameFont font = GameFont.Small, Action<Rect>? draw = null)
-        {
-            var style = new Style { flexGrow = grow };
-            if (width.HasValue)
-                style.size = style.size.MapWidth(_ => Dimension.Length(width.Value));
-
-            var node = _tree.NewLeafWithContext(style, (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
-            _children.Add(node);
-            _callbacks.Add((node, draw ?? (r =>
-            {
-                using (new TextBlock(font))
-                {
-                    Text.WordWrap = r.width < Text.CalcSize(text).x;
-                    Verse.Widgets.Label(r, text);
-                }
-            })));
-            return;
-
-            // Store a per-node measure closure as the node's context object.
-            // The tree-level dispatch in Execute will cast it and call it.
-            Size<float> Measure(Size<float?> known, Size<AvailableSpace> available)
-            {
-                using (new TextBlock(font))
-                {
-                    if (known.Width.HasValue)
-                        // Width fully constrained by parent algorithm — wrap and measure height.
-                        return new Size<float>(known.Width.Value, Text.CalcHeight(text, known.Width.Value));
-
-                    if (available.Width.IsMinContent)
-                    {
-                        // Min-content query: return the widest unbreakable word.
-                        // This mirrors CSS min-width:auto — text can shrink and wrap, but never
-                        // below the width of its longest word (which for single-word labels equals
-                        // the full text width, preventing unwanted shrinkage).
-                        // Results are cached in _wordWidthCache so Text.CalcSize is called at most
-                        // once per (word, font) pair across all frames.
-                        var minW = 0f;
-                        foreach (var word in text.Split(' '))
-                        {
-                            var key = (word, font);
-                            if (!_wordWidthCache.TryGetValue(key, out var w))
-                                _wordWidthCache[key] = w = Text.CalcSize(word).x;
-                            if (w > minW) minW = w;
-                        }
-                        var minH = Text.CalcHeight(text, minW);
-                        return new Size<float>(minW, minH);
-                    }
-
-                    if (available.Width.IntoOption() is { } aw)
-                        // Definite available width — wrap at that width.
-                        return new Size<float>(aw, Text.CalcHeight(text, aw));
-
-                    // MaxContent / unconstrained — return natural (unwrapped) size.
-                    var sz = Text.CalcSize(text);
-                    return new Size<float>(sz.x, sz.y);
-                }
-            }
-        }
-
-        // ── Button items ────────────────────────────────────────────────────────
-
-        private const float ButtonIconSize = 24f;
-        private const float ButtonIconGap = 4f;
-
-        /// <summary>
-        /// Adds a button with auto-computed width.
-        /// Width = <see cref="UIUtility.LabelPadding"/> × 2 + label width + gap + icon width (24 px).
-        /// Height is always <see cref="UIUtility.ButtonHeight"/>.
-        /// Both <paramref name="label"/> and <paramref name="icon"/> are optional.
-        /// </summary>
-        public void ButtonItem(string? label = null, Texture2D? icon = null,
-            Color? iconColor = null, Action? onClick = null)
-        {
-            // Measure label width at build time (cached across frames).
-            var labelW = 0f;
-            if (label != null)
-            {
-                using (new TextBlock(GameFont.Small))
-                {
-                    var key = (label, GameFont.Small);
-                    if (!_wordWidthCache.TryGetValue(key, out labelW))
-                        _wordWidthCache[key] = labelW = Text.CalcSize(label).x;
-                }
-            }
-
-            var totalW = UIUtility.LabelPadding
-                       + labelW
-                       + (label != null && icon != null ? ButtonIconGap : 0f)
-                       + (icon != null ? ButtonIconSize : 0f)
-                       + UIUtility.LabelPadding;
-
-            var style = new Style
-            {
-                size = new Size<Dimension>(
-                    Dimension.Length(totalW),
-                    Dimension.Length(UIUtility.ButtonHeight))
-            };
-
-            // Capture for closure.
-            var capturedLabel = label;
-            var capturedIcon = icon;
-            var capturedColor = iconColor;
-            var capturedLabelW = labelW;
-
-            AddLeaf(style, r =>
-            {
-                var clicked = Verse.Widgets.ButtonInvisible(r);
-                Verse.Widgets.DrawButtonGraphic(r);
-
-                if (capturedLabel != null)
-                {
-                    using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft))
-                        Verse.Widgets.Label(
-                            new Rect(r.x + UIUtility.LabelPadding, r.y, capturedLabelW, r.height),
-                            capturedLabel);
-                }
-
-                if (capturedIcon != null)
-                {
-                    var ix = capturedLabel != null
-                        ? r.x + UIUtility.LabelPadding + capturedLabelW + ButtonIconGap
-                        : r.x + (r.width - ButtonIconSize) / 2f;
-                    var iy = r.y + (r.height - ButtonIconSize) / 2f;
-                    using (new GUIColor(capturedColor ?? Color.white))
-                        GUI.DrawTexture(new Rect(ix, iy, ButtonIconSize, ButtonIconSize), capturedIcon);
-                }
-
-                if (clicked) onClick?.Invoke();
-            });
-        }
-
         // ── Grid items ──────────────────────────────────────────────────────────
 
         /// <summary>
@@ -273,20 +128,20 @@ namespace PawnEditor
 
         // ── Internals ───────────────────────────────────────────────────────────
 
-        private void AddLeaf(Style style, Action<Rect>? draw)
+        internal void AddLeaf(Style style, Action<Rect>? draw)
         {
-            var node = _tree.NewLeaf(style);
-            _children.Add(node);
-            _callbacks.Add((node, draw));
+            var node = tree.NewLeaf(style);
+            children.Add(node);
+            callbacks.Add((node, draw));
         }
 
-        private void AddContainer(Style style, Action<TaffyBuilder>? build)
+        internal void AddContainer(Style style, Action<TaffyBuilder>? build)
         {
-            var inner = new TaffyBuilder(_tree, _callbacks);
+            var inner = new TaffyBuilder(tree, callbacks);
             build?.Invoke(inner);
-            var node = _tree.NewWithChildren(style, inner._children);
-            _children.Add(node);
-            _callbacks.Add((node, null));
+            var node = tree.NewWithChildren(style, inner.children);
+            children.Add(node);
+            callbacks.Add((node, null));
         }
 
         private static Style MakeContainerStyle(FlexDirection dir, float grow, float? gap, FlexWrap wrap)
@@ -424,7 +279,7 @@ namespace PawnEditor
 
             var builder = new TaffyBuilder(tree, callbacks);
             build(builder);
-            var root = tree.NewWithChildren(rootStyle, builder._children);
+            var root = tree.NewWithChildren(rootStyle, builder.children);
 
             tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
                     AvailableSpace.Definite(rect.width),
@@ -469,7 +324,7 @@ namespace PawnEditor
         {
             var s = new Style
             {
-                display = TaffySharp.Display.Grid,
+                display = Display.Grid,
                 gridTemplateColumns = [..columns],
                 gridTemplateRows = rows != null ? [..rows] : null,
                 gap = new Size<LengthPercentage>(

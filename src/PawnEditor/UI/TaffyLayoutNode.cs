@@ -48,8 +48,7 @@ public class TaffyLayoutNode
         }
 
         // Root <layout> defaults to a flex column (matching the old FlexLayoutEngine default).
-        if (xmlNode.Name == "layout")
-            _style.flexDirection = FlexDirection.Column;
+        if (xmlNode.Name == "layout") _style.flexDirection = FlexDirection.Column;
 
         ParseStyleAttributes(xmlNode);
 

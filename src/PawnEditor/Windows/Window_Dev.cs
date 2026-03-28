@@ -168,8 +168,8 @@ public class Window_Dev : Window
             // Row 2: the wrapping paragraph — height driven entirely by text content
             col.Row(grow: 0f, row =>
             {
-                row.TextItem("Paragraph:");
-                row.TextItem(paragraph, grow: 1f);
+                row.Text("Paragraph:");
+                row.Text(paragraph, grow: 1f);
                 // row.TextItem(paragraph, grow: 1f, draw: r =>
                 // {
                 //     Verse.Widgets.DrawRectFast(r, bg);
@@ -221,24 +221,24 @@ public class Window_Dev : Window
             // Row 1: label-only button
             col.Row(grow: 0f, row =>
             {
-                row.TextItem("Label only:");
-                row.ButtonItem(label: "Generate name",
+                row.Text("Label only:");
+                row.Button(label: "Generate name",
                     onClick: () => _buttonLog = "Generate name clicked");
             });
 
             // Row 2: label + icon button
             col.Row(grow: 0f, row =>
             {
-                row.TextItem("Label + icon:");
-                row.ButtonItem(label: "Add trait", icon: TexButton.Add, iconColor: Color.green,
+                row.Text("Label + icon:");
+                row.Button(label: "Add trait", icon: TexButton.Add, iconColor: Color.green,
                     onClick: () => _buttonLog = "Add trait clicked");
             });
 
             // Row 3: icon-only button
             col.Row(grow: 0f, row =>
             {
-                row.TextItem("Icon only:");
-                row.ButtonItem(icon: TexButton.Delete, iconColor: Color.red,
+                row.Text("Icon only:");
+                row.Button(icon: TexButton.Delete, iconColor: Color.red,
                     onClick: () => _buttonLog = "Delete clicked");
             });
 
@@ -247,8 +247,8 @@ public class Window_Dev : Window
                 draw: r => Verse.Widgets.DrawRectFast(r, new Color(0.4f, 0.4f, 0.4f, 0.5f)));
             col.Row(grow: 0f, row =>
             {
-                row.TextItem("Last clicked:");
-                row.TextItem(_buttonLog);
+                row.Text("Last clicked:");
+                row.Text(_buttonLog);
             });
         });
     }
