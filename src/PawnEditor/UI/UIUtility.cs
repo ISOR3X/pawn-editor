@@ -19,7 +19,7 @@ public static class UIUtility
     public const float LabelPadding = 10f;
     public const float LabelOffset = 24f; // How far a label should be from its widget
     public static readonly Vector2 BottomButtonSize = new(150f, 38f);
-    
+
     public static void SplitHorizontallyEqual(this Rect rect, out Rect top, out Rect bottom, float padding = 0)
     {
         var half = rect.height / 2;
@@ -321,5 +321,13 @@ public static class UIUtility
         }
 
         return clicked;
+    }
+
+    public static void Rotated(this Texture2D texture, Rect rect, float angleDegrees)
+    {
+        Matrix4x4 old = GUI.matrix;
+        GUIUtility.RotateAroundPivot(angleDegrees, rect.center);
+        GUI.DrawTexture(rect, texture);
+        GUI.matrix = old;
     }
 }

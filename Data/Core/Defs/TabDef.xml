@@ -8,14 +8,14 @@
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
-<!--            <div display="flex" flex-direction="row">-->
-<!--                <section flex-basis="60%">PawnEditor_Info</section>-->
-<!--                <section flex-grow="1">PawnEditor_Portrait</section>-->
-<!--            </div>-->
+            <!--            <div display="flex" flex-direction="row">-->
+            <!--                <section flex-basis="60%">PawnEditor_Info</section>-->
+            <section flex-grow="1">PawnEditor_Portrait</section>
+            <!--            </div>-->
             <!--            <div display="flex" flex-direction="row" flex-wrap="wrap">-->
-            <!--                <section flex-basis="60%">PawnEditor_Name</section>-->
-            <!--                <section flex-basis="40%">PawnEditor_Age</section>-->
-            <section display="flex" wrap="true">PawnEditor_Backstory</section>
+            <section>PawnEditor_Name</section>
+            <section>PawnEditor_Age</section>
+            <section>PawnEditor_Backstory</section>
             <!--            </div>-->
             <!--            <section>PawnEditor_Skills</section>-->
             <!--            <div display="flex" flex-direction="row">-->

@@ -17,10 +17,12 @@ public static partial class TaffyExtensions
     /// Both <paramref name="label"/> and <paramref name="icon"/> are optional.
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
-        Color? iconColor = null, Action? onClick = null, Action<Rect>? onHover = null,
-        float paddingInline = ButtonPadding, Style? style = null)
+        Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
+        float paddingInline = ButtonPadding, Style? style = null, bool drawGraphic = true)
     {
         style ??= new Style();
+        // Override so there's no padding if we only have an icon.
+        paddingInline = label == null && icon != null ? ButtonIconGap : paddingInline;
 
         // Measure label width at build time (cached across frames).
         var labelW = 0f;
@@ -53,7 +55,7 @@ public static partial class TaffyExtensions
         b.AddLeaf(style, r =>
         {
             var clicked = Verse.Widgets.ButtonInvisible(r);
-            Verse.Widgets.DrawButtonGraphic(r);
+            if (drawGraphic) Verse.Widgets.DrawButtonGraphic(r);
 
             if (capturedLabel != null)
             {
@@ -78,7 +80,7 @@ public static partial class TaffyExtensions
                 if (Mouse.IsOver(r)) onHover(r);
             }
 
-            if (clicked) onClick?.Invoke();
+            if (clicked) onClick?.Invoke(r);
         });
     }
 }

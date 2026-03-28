@@ -234,7 +234,7 @@ public class Window_Dev : Window
             {
                 row.Text("Label only:");
                 row.Button(label: "Generate name",
-                    onClick: () => _buttonLog = "Generate name clicked");
+                    onClick: (_) => _buttonLog = "Generate name clicked");
             });
 
             // Row 2: label + icon button
@@ -242,7 +242,7 @@ public class Window_Dev : Window
             {
                 row.Text("Label + icon:");
                 row.Button(label: "Add trait", icon: TexButton.Add, iconColor: Color.green,
-                    onClick: () => _buttonLog = "Add trait clicked");
+                    onClick: (_) => _buttonLog = "Add trait clicked");
             });
 
             // Row 3: icon-only button
@@ -250,7 +250,7 @@ public class Window_Dev : Window
             {
                 row.Text("Icon only:");
                 row.Button(icon: TexButton.Delete, iconColor: Color.red,
-                    onClick: () => _buttonLog = "Delete clicked");
+                    onClick: (_) => _buttonLog = "Delete clicked");
             });
 
             // Row 4: last clicked feedback

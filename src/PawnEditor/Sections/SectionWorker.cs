@@ -17,12 +17,20 @@ public abstract class SectionWorker(SectionDef def)
     protected abstract void DoSectionContents(TaffyBuilder col, Pawn pawn);
 
     /// <summary>Adds this section's content items into <paramref name="col"/>. Called by <c>TaffyLayoutNode.BuildInto</c>.</summary>
-    public void BuildSection(TaffyBuilder col, Pawn pawn) => DoSectionContents(col, pawn);
+    public void BuildSection(TaffyBuilder col, Pawn pawn)
+    {
+        col.ContextKey = pawn.thingIDNumber.ToString();
+        DoSectionContents(col, pawn);
+    }
 
     public float DoSection(Pawn pawn, Rect inRect)
     {
         if (!ShowSection(pawn)) return 0f;
-        return Taffy.MeasuredColumn(inRect, col => DoSectionContents(col, pawn));
+        return Taffy.MeasuredColumn(inRect, col =>
+        {
+            col.ContextKey = pawn.thingIDNumber.ToString();
+            DoSectionContents(col, pawn);
+        });
     }
 
 

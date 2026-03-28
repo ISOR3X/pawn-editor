@@ -18,7 +18,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         string adulthoodLabel = "Adulthood".Translate();
 
         col.Text("Backstory", color: ColoredText.TipSectionTitleColor);
-        col.Row(new Style { gap = Taffy.Gap(4f, 4f), flexWrap = FlexWrap.Wrap }, row =>
+        col.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall), flexWrap = FlexWrap.Wrap }, row =>
         {
             DoBackstoryItem(row, pawn, BackstorySlot.Childhood, childhoodLabel);
             DoBackstoryItem(row, pawn, BackstorySlot.Adulthood, adulthoodLabel);
@@ -45,7 +45,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         row.Row(new Style { gap = Taffy.Gap(GenUI.GapLabel) }, row2 =>
         {
             row2.Text(label);
-            row2.Button(buttonLabel, onClick: () =>
+            row2.Button(buttonLabel, onClick: _ =>
                 {
                     Find.WindowStack.Add(new Window_AddItem(
                         new DefTableWorker_Backstory(

@@ -40,6 +40,13 @@ namespace PawnEditor
         internal readonly List<(NodeId id, Action<Rect>? draw)> callbacks;
         internal readonly List<NodeId> children = [];
 
+        /// <summary>
+        /// Stable identifier for the current pawn/context, used by stateful extensions like
+        /// <c>TaffyExtensions.Input(ref string)</c> to key their per-widget persistent state.
+        /// Set by <see cref="SectionWorker.BuildSection"/> before entering section content.
+        /// </summary>
+        internal string? ContextKey { get; set; }
+
         internal TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
         {
             this.tree = tree;
@@ -146,7 +153,7 @@ namespace PawnEditor
 
         private void AddContainer(Style style, Action<TaffyBuilder>? build)
         {
-            var inner = new TaffyBuilder(tree, callbacks);
+            var inner = new TaffyBuilder(tree, callbacks) { ContextKey = ContextKey };
             build?.Invoke(inner);
             var node = tree.NewWithChildren(style, inner.children);
             children.Add(node);

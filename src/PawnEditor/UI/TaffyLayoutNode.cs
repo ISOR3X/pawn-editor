@@ -18,15 +18,18 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
+using HotSwap;
 using PawnEditor.TaffySharp;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
+[HotSwappable]
 public class TaffyLayoutNode
 {
     private Style _style = new();
+
     // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
     public SectionDef? section;
     private readonly List<TaffyLayoutNode> _children = [];
@@ -45,7 +48,11 @@ public class TaffyLayoutNode
         }
 
         // Root <layout> defaults to a flex column (matching the old FlexLayoutEngine default).
-        if (xmlNode.Name == "layout") _style.flexDirection = FlexDirection.Column;
+        if (xmlNode.Name == "layout")
+        {
+            _style.gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall);
+            _style.flexWrap = FlexWrap.Wrap;
+        }
 
         ParseStyleAttributes(xmlNode);
 
@@ -63,7 +70,8 @@ public class TaffyLayoutNode
                 if (child is XmlText txt && txt.Value?.Trim().Length == 0) continue;
                 if (child.Name != "div" && child.Name != "section")
                 {
-                    Log.Error($"[{PawnEditorMod.ModName}] Unknown layout element <{child.Name}>. Expected <div> or <section>.");
+                    Log.Error(
+                        $"[{PawnEditorMod.ModName}] Unknown layout element <{child.Name}>. Expected <div> or <section>.");
                     continue;
                 }
 
@@ -246,54 +254,54 @@ public class TaffyLayoutNode
 
     private static TaffySharp.Display ParseDisplay(string s) => s switch
     {
-        "flex"  => TaffySharp.Display.Flex,
-        "grid"  => TaffySharp.Display.Grid,
+        "flex" => TaffySharp.Display.Flex,
+        "grid" => TaffySharp.Display.Grid,
         "block" => TaffySharp.Display.Block,
-        "none"  => TaffySharp.Display.None,
-        _       => TaffySharp.Display.Flex,
+        "none" => TaffySharp.Display.None,
+        _ => TaffySharp.Display.Flex,
     };
 
     private static FlexDirection ParseFlexDirection(string s) => s switch
     {
-        "row"            => FlexDirection.Row,
-        "column"         => FlexDirection.Column,
-        "row-reverse"    => FlexDirection.RowReverse,
+        "row" => FlexDirection.Row,
+        "column" => FlexDirection.Column,
+        "row-reverse" => FlexDirection.RowReverse,
         "column-reverse" => FlexDirection.ColumnReverse,
-        _                => FlexDirection.Row,
+        _ => FlexDirection.Row,
     };
 
     private static FlexWrap ParseFlexWrap(string s) => s switch
     {
-        "nowrap"       => FlexWrap.NoWrap,
-        "wrap"         => FlexWrap.Wrap,
+        "nowrap" => FlexWrap.NoWrap,
+        "wrap" => FlexWrap.Wrap,
         "wrap-reverse" => FlexWrap.WrapReverse,
-        _              => FlexWrap.NoWrap,
+        _ => FlexWrap.NoWrap,
     };
 
     private static AlignItems? ParseAlignItems(string s) => s switch
     {
-        "start"       => AlignItems.Start,
-        "end"         => AlignItems.End,
-        "flex-start"  => AlignItems.FlexStart,
-        "flex-end"    => AlignItems.FlexEnd,
-        "center"      => AlignItems.Center,
-        "baseline"    => AlignItems.Baseline,
-        "stretch"     => AlignItems.Stretch,
-        _             => null,
+        "start" => AlignItems.Start,
+        "end" => AlignItems.End,
+        "flex-start" => AlignItems.FlexStart,
+        "flex-end" => AlignItems.FlexEnd,
+        "center" => AlignItems.Center,
+        "baseline" => AlignItems.Baseline,
+        "stretch" => AlignItems.Stretch,
+        _ => null,
     };
 
     private static AlignContent? ParseAlignContent(string s) => s switch
     {
-        "start"         => AlignContent.Start,
-        "end"           => AlignContent.End,
-        "flex-start"    => AlignContent.FlexStart,
-        "flex-end"      => AlignContent.FlexEnd,
-        "center"        => AlignContent.Center,
-        "stretch"       => AlignContent.Stretch,
+        "start" => AlignContent.Start,
+        "end" => AlignContent.End,
+        "flex-start" => AlignContent.FlexStart,
+        "flex-end" => AlignContent.FlexEnd,
+        "center" => AlignContent.Center,
+        "stretch" => AlignContent.Stretch,
         "space-between" => AlignContent.SpaceBetween,
-        "space-evenly"  => AlignContent.SpaceEvenly,
-        "space-around"  => AlignContent.SpaceAround,
-        _               => null,
+        "space-evenly" => AlignContent.SpaceEvenly,
+        "space-around" => AlignContent.SpaceAround,
+        _ => null,
     };
 
     private static List<TrackSizingFunction> ParseTrackList(string s)
@@ -341,7 +349,7 @@ public class TaffyLayoutNode
         {
             // Section node → flex-column container populated by the section worker.
             var sectionStyle = node._style;
-            sectionStyle.flexDirection = FlexDirection.Column;
+            sectionStyle.flexDirection = FlexDirection.Column; // Similar to display: block
             col.Container(sectionStyle, inner => node.section.Worker.BuildSection(inner, pawn));
             return;
         }

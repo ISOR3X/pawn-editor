@@ -17,8 +17,15 @@ public class Patch_OpenEditor
         }
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
         {
-            if (Find.WindowStack.IsOpen<Window_Dev>()) Find.WindowStack.TryRemove(typeof(Window_Dev));
-            else Find.WindowStack.Add(new Window_Dev());
+            if (Current.ProgramState == ProgramState.Playing)
+            {
+                PawnEditorMod.Settings.drawDebug = !PawnEditorMod.Settings.drawDebug;
+            }
+            else
+            {
+                if (Find.WindowStack.IsOpen<Window_Dev>()) Find.WindowStack.TryRemove(typeof(Window_Dev));
+                else Find.WindowStack.Add(new Window_Dev());
+            }
         }
     }
 }

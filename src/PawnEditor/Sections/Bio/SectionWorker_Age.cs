@@ -1,7 +1,6 @@
 using HotSwap;
-using PawnEditor.Extensions;
+using PawnEditor.TaffySharp;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -9,45 +8,36 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
 {
-    private static readonly string?[] TextfieldBuffers = new string[2];
-
     protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Age"));
-        DoAgeInputItems(col, pawn);
+        col.Text("Age", color: ColoredText.TipSectionTitleColor);
+        col.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall), flexWrap = FlexWrap.Wrap }, row =>
+        {
+            DoAgeItem(row, pawn, "Biological", isChrono: false);
+            DoAgeItem(row, pawn, "Chronological", isChrono: true);
+        });
     }
 
-    private static void DoAgeInputItems(TaffyBuilder col, Pawn pawn)
+    private static void DoAgeItem(TaffyBuilder col, Pawn pawn, string label, bool isChrono)
     {
-        const string bioLabel = "Biological";
-        const string chronoLabel = "Chronological";
-        var labelWidth = Mathf.Max(bioLabel.GetWidthCached(), chronoLabel.GetWidthCached()) + UIUtility.LabelOffset;
+        var value = isChrono ? pawn.ageTracker.AgeChronologicalYears : pawn.ageTracker.AgeBiologicalYears;
+        var min = !isChrono && pawn.ageTracker.Adult ? (int)pawn.ageTracker.CurLifeStageRace.minAge : 0;
 
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        col.Row(new Style { gap = Taffy.Gap(GenUI.GapLabel) }, row =>
         {
-            using (new TextBlock(TextAnchor.MiddleLeft))
-            {
-                var bioAgeMin = 0;
-                if (pawn.ageTracker.Adult)
-                    bioAgeMin = (int)pawn.ageTracker.CurLifeStageRace.minAge;
-                var right = UIUtility.RectLabeled(r, bioLabel, labelWidth);
-                var ba = pawn.ageTracker.AgeBiologicalYears;
-                ba = Widgets.DelayedTextFieldNumeric(right, ba, ref TextfieldBuffers[0], bioAgeMin, 9999, null, true);
-                if (ba != pawn.ageTracker.AgeBiologicalYears)
-                    pawn.ageTracker.AgeBiologicalTicks = ba * GenDate.TicksPerYear;
-            }
+            row.Text(label);
+            row.InputNumber(ref value, min: min, max: 9999, id: label);
         });
 
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        if (isChrono)
         {
-            using (new TextBlock(TextAnchor.MiddleLeft))
-            {
-                var right = UIUtility.RectLabeled(r, chronoLabel, labelWidth);
-                var ca = pawn.ageTracker.AgeChronologicalYears;
-                ca = Widgets.DelayedTextFieldNumeric(right, ca, ref TextfieldBuffers[1], 0, 9999, null, true);
-                if (ca != pawn.ageTracker.AgeChronologicalYears)
-                    pawn.ageTracker.AgeChronologicalTicks = ca * GenDate.TicksPerYear;
-            }
-        });
+            if (value != pawn.ageTracker.AgeChronologicalYears)
+                pawn.ageTracker.AgeChronologicalTicks = (long)value * GenDate.TicksPerYear;
+        }
+        else
+        {
+            if (value != pawn.ageTracker.AgeBiologicalYears)
+                pawn.ageTracker.AgeBiologicalTicks = (long)value * GenDate.TicksPerYear;
+        }
     }
 }

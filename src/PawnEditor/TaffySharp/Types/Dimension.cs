@@ -44,7 +44,7 @@ namespace PawnEditor.TaffySharp
         public static bool operator !=(LengthPercentage a, LengthPercentage b) => !a.Equals(b);
 
         public override string ToString() => Inner.ToString();
-        
+
         public static implicit operator LengthPercentage(float val) => Length(val);
     }
 
@@ -75,6 +75,9 @@ namespace PawnEditor.TaffySharp
 
         public static implicit operator LengthPercentageAuto(LengthPercentage lp) =>
             new LengthPercentageAuto(lp.Inner);
+
+        public static implicit operator LengthPercentageAuto(float val) =>
+            new LengthPercentageAuto(CompactLength.Length(val));
 
         // ── Accessors ─────────────────────────────────────────────────────────
 
@@ -131,6 +134,8 @@ namespace PawnEditor.TaffySharp
 
         public static implicit operator Dimension(LengthPercentage lp) => new Dimension(lp.Inner);
         public static implicit operator Dimension(LengthPercentageAuto l) => new Dimension(l.Inner);
+        
+        public static implicit operator Dimension(float val) => Length(val);
 
         // ── Accessors ─────────────────────────────────────────────────────────
 
