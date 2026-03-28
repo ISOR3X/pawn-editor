@@ -3,7 +3,7 @@
 <Defs>
     <!-- DefTableDefs -->
     <PawnEditor.DefTableDef Name="DefTableBase_Hair">
-        <defName>PawnEditor_Hairs</defName>
+        <defName>PawnEditor_DefTable_Hair</defName>
         <workerClass>PawnEditor.DefTableWorker_Hair</workerClass>
         <searchColumn>PawnEditor_DefLabel</searchColumn>
         <columns>
@@ -15,13 +15,20 @@
         </columns>
     </PawnEditor.DefTableDef>
     <PawnEditor.DefTableDef ParentName="DefTableBase_Hair">
-        <defName>PawnEditor_Beards</defName>
+        <defName>PawnEditor_DefTable_Beard</defName>
     </PawnEditor.DefTableDef>
-    <PawnEditor.DefTableDef Name="DefTableBase_Thing">
-        <defName>PawnEditor_ThingDef</defName>
+    <PawnEditor.DefTableDef Name="DefTableBase">
+        <defName>PawnEditor_DefTable_ThingDef</defName>
         <workerClass>PawnEditor.DefTableWorker</workerClass>
         <searchColumn>PawnEditor_DefLabel</searchColumn>
         <highlightSelected>true</highlightSelected>
+        <columns>
+            <li>PawnEditor_DefLabel</li>
+            <li>PawnEditor_DefContentSource</li>
+        </columns>
+    </PawnEditor.DefTableDef>
+    <PawnEditor.DefTableDef>
+        <defName>PawnEditor_DefTable_Apparel</defName>
         <columns>
             <li>PawnEditor_DefIcon</li>
             <li>PawnEditor_DefLabel</li>
@@ -31,7 +38,7 @@
     </PawnEditor.DefTableDef>
     <!-- ThingTableDefs -->
     <PawnEditor.ThingTableDef Name="ThingTableBase">
-        <defName>PawnEditor_Equipment</defName>
+        <defName>PawnEditor_ThingTable_Equipment</defName>
         <workerClass>PawnEditor.ThingTableWorker</workerClass>
         <searchColumn>PawnEditor_ThingLabel</searchColumn>
         <highlightSelected>false</highlightSelected>
@@ -45,9 +52,9 @@
         </columns>
     </PawnEditor.ThingTableDef>
     <PawnEditor.ThingTableDef ParentName="ThingTableBase">
-        <defName>PawnEditor_Apparel</defName>
+        <defName>PawnEditor_ThingTable_Apparel</defName>
     </PawnEditor.ThingTableDef>
     <PawnEditor.ThingTableDef ParentName="ThingTableBase">
-        <defName>PawnEditor_Inventory</defName>
+        <defName>PawnEditor_ThingTable_Inventory</defName>
     </PawnEditor.ThingTableDef>
 </Defs>

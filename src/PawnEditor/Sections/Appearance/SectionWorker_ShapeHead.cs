@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using HotSwap;
 using JetBrains.Annotations;
 using PawnEditor.Extensions;
@@ -13,18 +13,19 @@ public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
 {
     private Vector2 _scrollPositionHeadType = Vector2.zero;
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
         var capturedPawn = pawn;
-
-        var rect2 = listing.GetRect(Widgets.CarrouselCellHeight + UIUtility.ButtonHeight);
-        Widgets.WidgetLabel(rect2.TakeTopPart(UIUtility.ButtonHeight), "Head");
-        Widgets.Carrousel(rect2,
-            DefDatabase<HeadTypeDef>.AllDefsListForReading
-                .Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList(),
-            ref _scrollPositionHeadType,
-            pawn.story.headType, d => AppearanceUtility.SetHeadType(d, capturedPawn),
-            d => d.GetGraphic(capturedPawn, capturedPawn.story.SkinColor).MatSouth.mainTexture,
-            pawn.story.SkinColor, d => d.ReadableDefName());
+        col.Item(height: Widgets.CarrouselCellHeight + UIUtility.ButtonHeight, draw: r =>
+        {
+            Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Head");
+            Widgets.Carrousel(r,
+                DefDatabase<HeadTypeDef>.AllDefsListForReading
+                    .Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList(),
+                ref _scrollPositionHeadType,
+                pawn.story.headType, d => AppearanceUtility.SetHeadType(d, capturedPawn),
+                d => d.GetGraphic(capturedPawn, capturedPawn.story.SkinColor).MatSouth.mainTexture,
+                pawn.story.SkinColor, d => d.ReadableDefName());
+        });
     }
 }

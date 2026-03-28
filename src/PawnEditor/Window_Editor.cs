@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using HotSwap;
+﻿using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
@@ -58,6 +56,7 @@ public partial class Window_Editor : Window
         forcePause = true;
         closeOnClickedOutside = true;
         resizeable = true;
+        draggable = true;
     }
 
     public override void SetInitialSizeAndPosition()
@@ -118,9 +117,7 @@ public partial class Window_Editor : Window
         {
             y = inRect.y - TabDrawer.TabHeight, width = _tabsList.Count * 200f
         };
-        if (Mouse.IsOver(tabRect))
-            TooltipHandler.TipRegion(tabRect,
-                "Click to select tab");
+        if (Mouse.IsOver(tabRect)) TooltipHandler.TipRegion(tabRect, "Click to select tab");
 
         if (_selectedPawn != null && _selectedTabDef != null)
             _selectedTabDef.Worker.DoTabContents(ref inRect);

@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
@@ -10,30 +10,35 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    private float _traitsHeight;
+
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        var traitsHeight = GetTraitsHeight(pawn, (listing.ColumnWidth - Listing.ColumnSpacing) / 2);
-        var sectionHeight = traitsHeight + Text.LineHeight + listing.verticalSpacing;
+        var traitsHeight = _traitsHeight > 0f ? _traitsHeight : 50f;
 
-        var r = listing.GetRect(sectionHeight);
-        var traitsListing = new Listing_Standard { ColumnWidth = r.width / 2 - Listing.ColumnSpacing };
+        col.Row(grow: 1f, build: row =>
+        {
+            row.Column(grow: 1f, build: left =>
+            {
+                left.Item(height: Text.LineHeight, draw: r => r.LabelH2("Traits"));
+                left.Item(height: traitsHeight, draw: r =>
+                {
+                    DoTraitsRect(r, pawn);
+                    _traitsHeight = GetTraitsHeight(pawn, r.width);
+                });
+            });
+            row.Column(grow: 1f, build: right =>
+            {
+                right.Item(height: Text.LineHeight, draw: r => r.LabelH2("Incapable of"));
+                right.Item(height: traitsHeight, draw: r => DoIncapableOfRect(r, pawn));
+            });
+        });
 
-        traitsListing.Begin(r);
-
-        traitsListing.LabelH2("Traits");
-
-        var traitRect = traitsListing.GetRect(traitsHeight);
-        DoTraitsRect(traitRect, pawn);
-
-        traitsListing.NewColumn();
-
-        traitsListing.LabelH2("Incapable of");
-        var incapableOfRect = traitsListing.GetRect(traitsHeight);
-        DoIncapableOfRect(incapableOfRect, pawn);
-
-        traitsListing.End();
-        listing.Gap(listing.verticalSpacing);
-        listing.ButtonText_Fit("Add trait");
+        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        {
+            var w = Text.CalcSize("Add trait").x + 32f;
+            Verse.Widgets.ButtonText(r.TakeLeftPart(w), "Add trait");
+        });
     }
 
     private static float GetTraitsHeight(Pawn pawn, float width)
@@ -56,7 +61,6 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 
         return Mathf.Max(traitsHeight, incapableHeight);
     }
-
 
     private static void DoTraitsRect(Rect inRect, Pawn pawn)
     {

@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -16,12 +15,13 @@ public class TabWorker_FactionOverview(TabDef def) : TabWorker_Faction(def)
         (Func<IEnumerable<Pawn>>)(() =>
             PawnLister.Pawns_ByFaction[Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedFaction()!]), 0, 0);
 
-    protected override void DoInnerTabContents(ref Rect inRect, Faction faction)
+    protected override void DoInnerTabContents(TaffyBuilder col, Faction faction)
     {
-        if (!_pawnTable.hasFixedSize) _pawnTable.SetFixedSize(inRect.size);
-
-        if (_pawnTable.PawnsListForReading.First().Faction != faction) _pawnTable.SetDirty();
-
-        _pawnTable.PawnTableOnGUI(inRect.position);
+        col.Item(grow: 1f, draw: r =>
+        {
+            if (!_pawnTable.hasFixedSize) _pawnTable.SetFixedSize(r.size);
+            if (_pawnTable.PawnsListForReading.First().Faction != faction) _pawnTable.SetDirty();
+            _pawnTable.PawnTableOnGUI(r.position);
+        });
     }
 }

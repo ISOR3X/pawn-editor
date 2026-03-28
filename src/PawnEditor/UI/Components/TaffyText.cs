@@ -1,4 +1,3 @@
-using System;
 using PawnEditor.TaffySharp;
 using UnityEngine;
 using Verse;
@@ -12,23 +11,21 @@ public static partial class TaffyExtensions
     /// and <see cref="Text.CalcHeight"/>.
     /// <para>
     /// When a fixed <paramref name="width"/> is set the node wraps at that width and the height
-    /// is computed via <see cref="Text.CalcHeight"/>. Otherwise the natural (unwrapped) size from
+    /// is computed via <see cref="Text.CalcHeight"/>. Otherwise, the natural (unwrapped) size from
     /// <see cref="Text.CalcSize"/> is returned, capped at the available width if the axis is definite.
     /// </para>
     /// The default draw callback renders the text as a label.
     /// </summary>
-    public static void Text(this TaffyBuilder b, string text, float? width = null, float grow = 0f,
-        GameFont font = GameFont.Small, Action<Rect>? draw = null)
+    public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small, TextAnchor anchor = TextAnchor.MiddleLeft, Color? color= null, Style? style = null)
     {
-        var style = new Style { flexGrow = grow };
-        if (width.HasValue)
-            style.size = style.size.MapWidth(_ => Dimension.Length(width.Value));
+        style ??= new Style();
 
         var node = b.tree.NewLeafWithContext(style, (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
         b.children.Add(node);
-        b.callbacks.Add((node, draw ?? (r =>
+        b.callbacks.Add((node, (r =>
         {
-            using (new TextBlock(font))
+            using (new GUIColor(color ?? Color.white))
+            using (new TextBlock(font, anchor))
             {
                 Verse.Text.WordWrap = r.width < Verse.Text.CalcSize(text).x;
                 Verse.Widgets.Label(r, text);

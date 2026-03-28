@@ -28,11 +28,12 @@ public class ThingTableWorker(ThingTableDef def, Func<IEnumerable<Thing>> things
         if (Verse.Widgets.ButtonText(footerRect.TakeLeftPart(100f), "Add item"))
         {
             Find.WindowStack.Add(new Window_AddItem(
-                TableDefOf.PawnEditor_ThingDef,
-                () => DefDatabase<ThingDef>.AllDefs
-                    .Where(td => td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
-                    .Cast<Def>()
-                    .ToList(),
+                new FilteredDefTableWorker(
+                    TableDefOf.PawnEditor_DefTable_ThingDef,
+                    () => DefDatabase<ThingDef>.AllDefs
+                        .Where(td => td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
+                        .Cast<Def>()
+                        .ToList()),
                 [
                     ("Content source", () => new DefTableFilter_ContentSource()),
                     ("Stuff category", () => new DefTableFilter_StuffCategory())

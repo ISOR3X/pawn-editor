@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -7,9 +7,10 @@ namespace PawnEditor;
 
 public abstract class TabWorker(TabDef def)
 {
-    public readonly List<FloatMenuOption> QuickActions = [];
+    public readonly List<FloatMenuOption> quickActions = [];
     public TabDef Def = def;
-    protected Vector2 TabScrollPosition = Vector2.zero;
+    protected Vector2 tabScrollPosition = Vector2.zero;
+    private float _viewRectHeight = 5000f;
 
     public virtual void PreOpen()
     {
@@ -21,11 +22,18 @@ public abstract class TabWorker(TabDef def)
 
     public virtual void DoTabContents(ref Rect inRect)
     {
-        inRect = inRect.ContractedBy(16f);
-        DoInnerTabContents(ref inRect);
+        var r = inRect.ContractedBy(16f);
+        Verse.Widgets.BeginGroup(r);
+        var contentRect = r.AtZero();
+        var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth_WithMargin : 0;
+        var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
+        Verse.Widgets.BeginScrollView(contentRect, ref tabScrollPosition, viewRect);
+        _viewRectHeight = Taffy.MeasuredColumn(viewRect, col => DoInnerTabContents(col));
+        Verse.Widgets.EndScrollView();
+        Verse.Widgets.EndGroup();
     }
 
-    protected abstract void DoInnerTabContents(ref Rect inRect);
+    protected abstract void DoInnerTabContents(TaffyBuilder col);
 
     public virtual void Notify_ContentChanged()
     {
@@ -33,8 +41,8 @@ public abstract class TabWorker(TabDef def)
         QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);
         if (actions.NullOrEmpty()) return;
 
-        QuickActions.Clear();
+        quickActions.Clear();
         foreach (var (attribute, method) in actions!.Where(a => a.Item1.CanUseQuickAction()))
-            QuickActions.Add(attribute.ToFloatMenuOption(method));
+            quickActions.Add(attribute.ToFloatMenuOption(method));
     }
 }

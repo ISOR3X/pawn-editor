@@ -177,13 +177,18 @@ Before writing any code in a new session:
 
 ## Building the Project
 
-Use Rider's bundled MSBuild, **not** `dotnet build`. From the repo root (this is a PowerShell command):
+Use Rider's bundled MSBuild, **not** `dotnet build`. The shell is **bash**, so use a PowerShell heredoc invocation:
 
-```
-& "C:\Users\Joram\AppData\Local\Programs\Rider\tools\MSBuild\Current\Bin\amd64\MSBuild.exe" src\PawnEditor\PawnEditor.csproj /p:Configuration=Debug
+```bash
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File - <<'EOF'
+$msbuild = 'C:\Users\Joram\AppData\Local\Programs\Rider\tools\MSBuild\Current\Bin\amd64\MSBuild.exe'
+$proj = 'C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\pawn-editor\src\PawnEditor\PawnEditor.csproj'
+$output = & $msbuild $proj /p:Configuration=Debug 2>&1
+$output | Select-String -Pattern 'CS[0-9]+|error|Build succeeded|FAILED' | Select-Object -Last 30
+EOF
 ```
 
-`dotnet build` will fail due to SDK version mismatch. Always use the MSBuild path above to verify the project compiles after making changes.
+`dotnet build` will fail due to SDK version mismatch. Always use the command above to verify the project compiles after making changes.
 
 ### After every file you create or edit:
 1. Check that all required `using` directives are present — missing usings are the most common cause of build failures and are easy to overlook.

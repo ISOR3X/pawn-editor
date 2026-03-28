@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HotSwap;
 using PawnEditor.Extensions;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -21,7 +22,7 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
     private ThingTableWorker Table => field ??= (ThingTableWorker)Activator.CreateInstance(
         TableDef.workerClass, TableDef, (Func<IEnumerable<Thing>>)GetThings, null);
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
         if (_lastPawn != pawn)
         {
@@ -29,11 +30,10 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
             Table.SetDirty();
         }
 
-        listing.LabelH2(Label);
         var rowCount = Math.Clamp(Table.ThingListForReading.Count, 1, RowCount);
-        var tableRect = listing.GetRect(
-            Table.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f);
+        var tableHeight = Table.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f;
 
-        Table.TableOnGUI(tableRect);
+        col.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
+        col.Item(height: tableHeight, draw: r => Table.TableOnGUI(r));
     }
 }

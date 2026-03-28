@@ -3,6 +3,7 @@ using HotSwap;
 using PawnEditor.TaffySharp;
 using UnityEngine;
 using Verse;
+using Display = PawnEditor.TaffySharp.Display;
 
 namespace PawnEditor;
 
@@ -14,15 +15,25 @@ public class Window_Dev : Window
     public Window_Dev()
     {
         resizeable = true;
+        draggable = true;
     }
 
     public override void DoWindowContents(Rect inRect)
     {
-        // DrawGridLayout(inRect);
-        // DrawFlexLayout(inRect);
-        // DrawHolyGrailLayout(inRect);
-        // DrawTextItemLayout(inRect);
-        DrawButtonItemLayout(inRect);
+        Taffy.Div(inRect, new Style { display = Display.Block }, div =>
+        {
+            div.Div(new Style { display = Display.Flex, flexWrap = FlexWrap.Wrap }, div1 =>
+            {
+                for (var i = 0; i < 10; i++)
+                {
+                    div1.Div(new Style(), div2 =>
+                    {
+                        div2.Text("Hello");
+                        div2.Item(100f, draw: rect => { Verse.Widgets.DrawRectFast(rect, Color.red); });
+                    });
+                }
+            });
+        });
     }
 
 
@@ -169,7 +180,7 @@ public class Window_Dev : Window
             col.Row(grow: 0f, row =>
             {
                 row.Text("Paragraph:");
-                row.Text(paragraph, grow: 1f);
+                row.Text(paragraph);
                 // row.TextItem(paragraph, grow: 1f, draw: r =>
                 // {
                 //     Verse.Widgets.DrawRectFast(r, bg);

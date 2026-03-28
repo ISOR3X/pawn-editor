@@ -44,6 +44,8 @@ namespace PawnEditor.TaffySharp
         public static bool operator !=(LengthPercentage a, LengthPercentage b) => !a.Equals(b);
 
         public override string ToString() => Inner.ToString();
+        
+        public static implicit operator LengthPercentage(float val) => Length(val);
     }
 
     // ── LengthPercentageAuto ─────────────────────────────────────────────────

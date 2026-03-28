@@ -1,18 +1,16 @@
-﻿using RimWorld;
-using UnityEngine;
+using RimWorld;
 using Verse;
 
 namespace PawnEditor;
 
 public abstract class TabWorker_Faction(TabDef def) : TabWorker(def)
 {
-    protected override void DoInnerTabContents(ref Rect inRect)
+    protected override void DoInnerTabContents(TaffyBuilder col)
     {
-        inRect = inRect.ContractedBy(16f);
         var faction = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedFaction();
         if (faction == null) return;
-        DoInnerTabContents(ref inRect, faction);
+        DoInnerTabContents(col, faction);
     }
 
-    protected abstract void DoInnerTabContents(ref Rect inRect, Faction faction);
+    protected abstract void DoInnerTabContents(TaffyBuilder col, Faction faction);
 }

@@ -77,6 +77,9 @@ namespace PawnEditor
         /// <summary>Adds a nested row container with a full <see cref="Style"/>.</summary>
         public void Row(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, build);
+        
+        public void Div(Style style, Action<TaffyBuilder>? build = null)
+            => AddContainer(style, build);
 
         // ── Nested column containers ────────────────────────────────────────────
 
@@ -125,6 +128,12 @@ namespace PawnEditor
 
             AddLeaf(style, draw);
         }
+
+        // ── Generic container ───────────────────────────────────────────────────
+
+        /// <summary>Adds a container node with an arbitrary <see cref="Style"/> (used by <c>TaffyLayoutNode.BuildInto</c>).</summary>
+        public void Container(Style style, Action<TaffyBuilder>? build = null)
+            => AddContainer(style, build);
 
         // ── Internals ───────────────────────────────────────────────────────────
 
@@ -178,6 +187,9 @@ namespace PawnEditor
         /// <summary>Lays out children in a column with the given gap inside <paramref name="rect"/>.</summary>
         public static void Column(Rect rect, float gap, Action<TaffyBuilder> build)
             => Execute(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);
+
+        public static void Div(Rect rect, Style style, Action<TaffyBuilder> build)
+            => Execute(rect, style, build);
 
         // ── Grid entry points ───────────────────────────────────────────────────
         //
@@ -264,6 +276,45 @@ namespace PawnEditor
         public static Size<LengthPercentage> Gap(float column, float row) =>
             new(LengthPercentage.Length(column), LengthPercentage.Length(row));
 
+        // ── Content-measured entry points ───────────────────────────────────────
+        //
+        // These lay out children with width=rect.width and height=MaxContent (unconstrained),
+        // draw the result, and return the computed root height.  This is the idiomatic Taffy
+        // way to measure natural content height: pass AvailableSpace::MaxContent on the height
+        // axis to compute_layout, just as the Rust library does in its own test suite.
+        // Used by TabWorker.DoTabContents to size the scroll view's viewRect each frame.
+
+        /// <summary>Lays out a column with unconstrained height. Returns the computed content height.</summary>
+        public static float MeasuredColumn(Rect rect, Action<TaffyBuilder> build)
+            => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column }, build);
+
+        /// <summary>Lays out a column with gap and unconstrained height. Returns the computed content height.</summary>
+        public static float MeasuredColumn(Rect rect, float gap, Action<TaffyBuilder> build)
+            => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);
+
+        private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+        {
+            var tree = new TaffyTree();
+            var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
+            // Width is definite; height is AUTO so the engine sizes to content
+            // (equivalent to passing Size::MAX_CONTENT on the height axis in Rust Taffy).
+            rootStyle.size = new Size<Dimension>(Dimension.Length(rect.width), Dimension.AUTO);
+            var builder = new TaffyBuilder(tree, callbacks);
+            build(builder);
+            var root = tree.NewWithChildren(rootStyle, builder.children);
+            tree.ComputeLayoutWithMeasure(root,
+                new Size<AvailableSpace>(AvailableSpace.Definite(rect.width), AvailableSpace.MaxContent),
+                (known, available, _, ctx, _) =>
+                    ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
+                        ? measure(known, available)
+                        : SizeF.ZERO);
+            var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
+            foreach (var entry in callbacks)
+                lookup[entry.id] = entry.draw;
+            DrawTree(tree, root, rect.x, rect.y, lookup);
+            return tree.Layout(root).Size.Height;
+        }
+
         // ── Core ────────────────────────────────────────────────────────────────
 
         private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
@@ -304,6 +355,12 @@ namespace PawnEditor
             var absY = originY + layout.Location.Y;
             var r = new Rect(absX, absY, layout.Size.Width, layout.Size.Height);
 
+            if (PawnEditorMod.Settings.drawDebug)
+            {
+                var h = (node.GetHashCode() * 0.618033988f) % 1f;
+                Verse.Widgets.DrawBoxSolid(r, Color.HSVToRGB(h, 0.6f, 0.9f) with { a = 0.25f });
+            }
+
             if (lookup.TryGetValue(node, out var draw) && draw != null)
             {
                 var prevWordWrap = Text.WordWrap;
@@ -317,6 +374,73 @@ namespace PawnEditor
 
         private static Size<LengthPercentage> UniformGap(float v) =>
             new(LengthPercentage.Length(v), LengthPercentage.Length(v));
+
+        // ── Style merge ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns a new <see cref="Style"/> where each field is taken from <paramref name="primary"/>
+        /// when it has been explicitly set (i.e. differs from the default), or from
+        /// <paramref name="fallback"/> otherwise.  Analogous to <c>defu</c> in JavaScript.
+        /// <list type="bullet">
+        ///   <item>Nullable fields use <c>??</c> — <c>null</c> means "not set".</item>
+        ///   <item><see cref="Dimension"/> / <see cref="LengthPercentageAuto"/> fields use <c>IsAuto()</c>.</item>
+        ///   <item>Non-nullable enum / float fields are compared to a fresh <c>new Style()</c> to detect unset values.</item>
+        /// </list>
+        /// </summary>
+        public static Style WithDefaults(this Style primary, Style fallback)
+        {
+            var s = primary.Clone();
+            var def = new Style();
+
+            // ── Size (per-axis) ──────────────────────────────────────────────────
+            s.size = new Size<Dimension>(
+                s.size.Width.IsAuto()  ? fallback.size.Width  : s.size.Width,
+                s.size.Height.IsAuto() ? fallback.size.Height : s.size.Height);
+            s.minSize = new Size<Dimension>(
+                s.minSize.Width.IsAuto()  ? fallback.minSize.Width  : s.minSize.Width,
+                s.minSize.Height.IsAuto() ? fallback.minSize.Height : s.minSize.Height);
+            s.maxSize = new Size<Dimension>(
+                s.maxSize.Width.IsAuto()  ? fallback.maxSize.Width  : s.maxSize.Width,
+                s.maxSize.Height.IsAuto() ? fallback.maxSize.Height : s.maxSize.Height);
+
+            // ── Nullable fields ──────────────────────────────────────────────────
+            s.aspectRatio         ??= fallback.aspectRatio;
+            s.alignItems          ??= fallback.alignItems;
+            s.alignSelf           ??= fallback.alignSelf;
+            s.justifyItems        ??= fallback.justifyItems;
+            s.justifySelf         ??= fallback.justifySelf;
+            s.alignContent        ??= fallback.alignContent;
+            s.justifyContent      ??= fallback.justifyContent;
+            s.gridTemplateColumns ??= fallback.gridTemplateColumns;
+            s.gridTemplateRows    ??= fallback.gridTemplateRows;
+
+            // ── Margin (per-component, default is ZERO) ──────────────────────────
+            s.margin = new Rect<LengthPercentageAuto>(
+                s.margin.Left   == LengthPercentageAuto.ZERO ? fallback.margin.Left   : s.margin.Left,
+                s.margin.Right  == LengthPercentageAuto.ZERO ? fallback.margin.Right  : s.margin.Right,
+                s.margin.Top    == LengthPercentageAuto.ZERO ? fallback.margin.Top    : s.margin.Top,
+                s.margin.Bottom == LengthPercentageAuto.ZERO ? fallback.margin.Bottom : s.margin.Bottom);
+
+            // ── Padding (per-component, default is ZERO) ─────────────────────────
+            s.padding = new Rect<LengthPercentage>(
+                s.padding.Left   == LengthPercentage.ZERO ? fallback.padding.Left   : s.padding.Left,
+                s.padding.Right  == LengthPercentage.ZERO ? fallback.padding.Right  : s.padding.Right,
+                s.padding.Top    == LengthPercentage.ZERO ? fallback.padding.Top    : s.padding.Top,
+                s.padding.Bottom == LengthPercentage.ZERO ? fallback.padding.Bottom : s.padding.Bottom);
+
+            // ── Enum fields (compare to factory default) ─────────────────────────
+            if (s.display       == def.display)       s.display       = fallback.display;
+            if (s.flexDirection == def.flexDirection) s.flexDirection = fallback.flexDirection;
+            if (s.flexWrap      == def.flexWrap)      s.flexWrap      = fallback.flexWrap;
+            if (s.position      == def.position)      s.position      = fallback.position;
+
+            // ── float fields ─────────────────────────────────────────────────────
+            if (s.flexGrow   == def.flexGrow)   s.flexGrow   = fallback.flexGrow;
+            if (s.flexShrink == def.flexShrink) s.flexShrink = fallback.flexShrink;
+            if (s.flexBasis.IsAuto())           s.flexBasis  = fallback.flexBasis;
+
+            return s;
+        }
 
         private static Style MakeGridStyle(IReadOnlyList<TrackSizingFunction> columns,
             IReadOnlyList<TrackSizingFunction>? rows,

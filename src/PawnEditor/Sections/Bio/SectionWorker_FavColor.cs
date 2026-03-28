@@ -1,4 +1,4 @@
-﻿using HotSwap;
+using HotSwap;
 using PawnEditor.Extensions;
 using UnityEngine;
 using Verse;
@@ -8,13 +8,13 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_FavColor(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        using (new TextBlock(TextAnchor.MiddleLeft))
+        col.Item(height: UIUtility.ButtonHeight, draw: r =>
         {
-            var favColorRect = listing.RectLabeled("Favorite color");
-            DoFavColorInputRect(favColorRect, pawn);
-        }
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                DoFavColorInputRect(UIUtility.RectLabeled(r, "Favorite color"), pawn);
+        });
     }
 
     private static void DoFavColorInputRect(Rect inRect, Pawn pawn)

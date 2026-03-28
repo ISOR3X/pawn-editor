@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
@@ -14,11 +14,10 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
     public const float SkillHeight = 24f;
     public const float SkillGap = 3f;
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        listing.LabelH2("Skills");
-        var skillRect = listing.GetRect(GetSkillsHeight());
-        DoSkillsRect(skillRect, pawn);
+        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Skills"));
+        col.Item(height: GetSkillsHeight(), draw: r => DoSkillsRect(r, pawn));
     }
 
     private static float GetSkillsHeight()

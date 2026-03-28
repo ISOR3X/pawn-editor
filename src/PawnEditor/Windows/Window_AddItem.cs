@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HotSwap;
+﻿using HotSwap;
 using PawnEditor.Extensions;
 using PawnEditor.Table;
 using RimWorld;
@@ -12,8 +9,7 @@ namespace PawnEditor;
 
 [HotSwappable]
 public class Window_AddItem(
-    DefTableDef tableDef,
-    Func<IEnumerable<Def>> itemsGetter,
+    FilteredDefTableWorker table,
     IEnumerable<(string Label, Func<TableFilter> Factory)>? availableFilters = null)
     : Window
 {
@@ -22,7 +18,7 @@ public class Window_AddItem(
     private readonly IReadOnlyList<(string Label, Func<TableFilter> Factory)> _availableFilters =
         availableFilters?.ToList() ?? [];
 
-    private FilteredDefTableWorker Table => field ??= new FilteredDefTableWorker(tableDef, itemsGetter);
+    private FilteredDefTableWorker Table => table;
 
     public override void DoWindowContents(Rect inRect)
     {

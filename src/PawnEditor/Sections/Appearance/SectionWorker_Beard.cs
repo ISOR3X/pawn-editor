@@ -8,7 +8,7 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Beard(SectionDef def) : SectionWorker_DefTable(def)
 {
-    protected override DefTableDef TableDef => TableDefOf.PawnEditor_Beards;
+    protected override DefTableDef TableDef => TableDefOf.PawnEditor_DefTable_Beard;
     protected override string Label => "Beard";
     protected override Def DefaultDef => BeardDefOf.NoBeard;
 

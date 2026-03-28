@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HotSwap;
+﻿using HotSwap;
 using UnityEngine;
 using Verse;
 
@@ -12,7 +9,7 @@ public class DefTableWorker(DefTableDef def, Func<IEnumerable<Def>> thingsGetter
     : TableWorker<Def>(def, thingsGetter, defaultThing)
 {
     protected override IEnumerable<ColumnWorker<Def>> AllColumns => def.columns.Select(c => c.Worker);
-    
+
     protected override void DoRowHover(Rect inRect, Def thing)
     {
         base.DoRowHover(inRect, thing);
@@ -20,7 +17,7 @@ public class DefTableWorker(DefTableDef def, Func<IEnumerable<Def>> thingsGetter
             TooltipHandler.TipRegion(inRect, GetTooltipFor(thing));
     }
 
-    private static string GetTooltipFor(Def thing)
+    protected virtual string GetTooltipFor(Def thing)
     {
         var text = thing.LabelCap.Colorize(ColoredText.TipSectionTitleColor);
 
@@ -28,7 +25,7 @@ public class DefTableWorker(DefTableDef def, Func<IEnumerable<Def>> thingsGetter
         {
             text += "\n\n" + thing.description;
         }
-        
+
         return text;
     }
 }

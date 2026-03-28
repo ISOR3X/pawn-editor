@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using HotSwap;
 using Verse;
 
@@ -12,13 +12,14 @@ public class SectionWorker_Race(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && GetRacesForPawn(p).Any();
     }
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        var r = listing.GetRect(UIUtility.ButtonHeight);
-
-        if (UIUtility.ButtonTextLabeled(r, "Race", pawn.kindDef.race.LabelCap))
+        col.Item(height: UIUtility.ButtonHeight, draw: r =>
         {
-        }
+            if (UIUtility.ButtonTextLabeled(r, "Race", pawn.kindDef.race.LabelCap))
+            {
+            }
+        });
     }
 
     private static List<ThingDef> GetRacesForPawn(Pawn pawn)

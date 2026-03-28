@@ -393,10 +393,11 @@ namespace PawnEditor.TaffySharp
             var absX = cumulativeX + layout.Location.X;
             var absY = cumulativeY + layout.Location.Y;
 
-            layout.Location.X = MathF.Round(absX) - MathF.Round(cumulativeX);
-            layout.Location.Y = MathF.Round(absY) - MathF.Round(cumulativeY);
-            layout.Size.Width = MathF.Round(absX + layout.Size.Width) - MathF.Round(absX);
-            layout.Size.Height = MathF.Round(absY + layout.Size.Height) - MathF.Round(absY);
+            // Use AwayFromZero to match Rust's f32::round() semantics (round half up).
+            layout.Location.X = MathF.Round(absX, MidpointRounding.AwayFromZero) - MathF.Round(cumulativeX, MidpointRounding.AwayFromZero);
+            layout.Location.Y = MathF.Round(absY, MidpointRounding.AwayFromZero) - MathF.Round(cumulativeY, MidpointRounding.AwayFromZero);
+            layout.Size.Width = MathF.Round(absX + layout.Size.Width, MidpointRounding.AwayFromZero) - MathF.Round(absX, MidpointRounding.AwayFromZero);
+            layout.Size.Height = MathF.Round(absY + layout.Size.Height, MidpointRounding.AwayFromZero) - MathF.Round(absY, MidpointRounding.AwayFromZero);
 
             foreach (var child in _children[(int)node.Value])
                 RoundLayout(child, absX, absY);

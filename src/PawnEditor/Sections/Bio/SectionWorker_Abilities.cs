@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
@@ -12,16 +12,25 @@ namespace PawnEditor;
 public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 {
     public const float AbilitiesHeight = 36f;
+    private float _abilitiesHeight;
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        listing.LabelH2("Abilities");
+        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Abilities"));
 
-        var abilityRect = listing.GetRect(GetAbilitiesHeight(pawn, listing.ColumnWidth));
-        DoAbilitiesRect(abilityRect, pawn);
-        listing.Gap(listing.verticalSpacing);
+        col.Item(height: _abilitiesHeight > 0f ? _abilitiesHeight : AbilitiesHeight, draw: r =>
+        {
+            DoAbilitiesRect(r, pawn);
+            _abilitiesHeight = GetAbilitiesHeight(pawn, r.width);
+        });
 
-        listing.ButtonText_Fit("Add ability");
+        col.Item(height: 2f);
+
+        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        {
+            var w = Text.CalcSize("Add ability").x + 32f;
+            Verse.Widgets.ButtonText(r.TakeLeftPart(w), "Add ability");
+        });
     }
 
     private static float GetAbilitiesHeight(Pawn pawn, float width)
@@ -62,7 +71,6 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             .ThenBy(a => a.def.EntropyGain)
             .ToList();
     }
-
 
     private static void TryDeleteAbility(AbilityDef abilityDef, Pawn pawn)
     {

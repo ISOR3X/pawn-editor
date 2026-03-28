@@ -8,62 +8,62 @@
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
-            <div display="flex" flex-direction="row">
-                <section flex-basis="60%">PawnEditor_Info</section>
-                <section flex-grow="1">PawnEditor_Portrait</section>
-            </div>
-            <div display="flex" flex-direction="row" flex-wrap="wrap">
-                <section flex-basis="60%">PawnEditor_Name</section>
-                <section flex-basis="40%">PawnEditor_Age</section>
-                <section flex-basis="10%" flex-grow="1" max-width="50%">PawnEditor_Backstory</section>
-            </div>
-            <section>PawnEditor_Skills</section>
-            <div display="flex" flex-direction="row">
-                <section flex-basis="60%" flex-grow="1">PawnEditor_Traits</section>
-                <section flex-basis="30%" flex-grow="1">PawnEditor_Abilities</section>
-            </div>
-            <div display="flex" flex-direction="row">
-                <section flex-basis="30%" flex-grow="0">PawnEditor_Faction</section>
-                <section flex-basis="33%" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
-            </div>
+<!--            <div display="flex" flex-direction="row">-->
+<!--                <section flex-basis="60%">PawnEditor_Info</section>-->
+<!--                <section flex-grow="1">PawnEditor_Portrait</section>-->
+<!--            </div>-->
+            <!--            <div display="flex" flex-direction="row" flex-wrap="wrap">-->
+            <!--                <section flex-basis="60%">PawnEditor_Name</section>-->
+            <!--                <section flex-basis="40%">PawnEditor_Age</section>-->
+            <section display="flex" wrap="true">PawnEditor_Backstory</section>
+            <!--            </div>-->
+            <!--            <section>PawnEditor_Skills</section>-->
+            <!--            <div display="flex" flex-direction="row">-->
+            <!--                <section flex-basis="60%" flex-grow="1">PawnEditor_Traits</section>-->
+            <!--                <section flex-basis="30%" flex-grow="1">PawnEditor_Abilities</section>-->
+            <!--            </div>-->
+            <!--            <div display="flex" flex-direction="row">-->
+            <!--                <section flex-basis="30%" flex-grow="0">PawnEditor_Faction</section>-->
+            <!--                <section flex-basis="33%" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>-->
+            <!--            </div>-->
         </layout>
     </PawnEditor.TabDef>
-    <PawnEditor.TabDef>
-        <defName>PawnEditor_Appearance</defName>
-        <label>Appearance</label>
-        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
-        <layout>
-            <section>PawnEditor_Portrait</section>
-            <div display="flex" flex-direction="row" column-gap="16px">
-                <section flex-basis="33%" flex-grow="1">PawnEditor_Sex</section>
-                <section flex-basis="33%" flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
-                <section flex-basis="33%" flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
-                <section flex-basis="33%" flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
-            </div>
-            <div display="flex" flex-direction="row" flex-wrap="wrap">
-                <section flex-basis="50%" flex-grow="1">PawnEditor_ShapeHead</section>
-                <section flex-basis="50%" flex-grow="1">PawnEditor_ShapeBody</section>
-                <section flex-basis="50%" flex-grow="1">PawnEditor_SkinColor</section>
-            </div>
-            <div display="flex" flex-direction="row" flex-wrap="wrap">
-                <section flex-basis="50%" flex-grow="1">PawnEditor_Hair</section>
-                <section flex-basis="50%" flex-grow="1">PawnEditor_Beard</section>
-                <section flex-basis="50%" flex-grow="1">PawnEditor_HairColor</section>
-            </div>
-            <div display="flex" flex-direction="row" flex-wrap="wrap" mayRequire="Ludeon.Rimworld.Ideology">
-                <section flex-basis="50%" flex-grow="1" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooBody</section>
-                <section flex-basis="50%" flex-grow="1" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooFace</section>
-            </div>
-        </layout>
-    </PawnEditor.TabDef>
-    <PawnEditor.TabDef>
-        <defName>PawnEditor_Gear</defName>
-        <label>Gear</label>
-        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
-        <layout>
-            <section>PawnEditor_Equipment</section>
-            <section>PawnEditor_Apparel</section>
-            <section>PawnEditor_Inventory</section>
-        </layout>
-    </PawnEditor.TabDef>
+    <!--    <PawnEditor.TabDef>-->
+    <!--        <defName>PawnEditor_Appearance</defName>-->
+    <!--        <label>Appearance</label>-->
+    <!--        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>-->
+    <!--        <layout>-->
+    <!--            <section>PawnEditor_Portrait</section>-->
+    <!--            <div display="flex" flex-direction="row" column-gap="16px">-->
+    <!--                <section flex-basis="33%" flex-grow="1">PawnEditor_Sex</section>-->
+    <!--                <section flex-basis="33%" flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>-->
+    <!--                <section flex-basis="33%" flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>-->
+    <!--                <section flex-basis="33%" flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>-->
+    <!--            </div>-->
+    <!--            <div display="flex" flex-direction="row" flex-wrap="wrap">-->
+    <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_ShapeHead</section>-->
+    <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_ShapeBody</section>-->
+    <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_SkinColor</section>-->
+    <!--            </div>-->
+    <!--            <div display="flex" flex-direction="row" flex-wrap="wrap">-->
+    <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_Hair</section>-->
+    <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_Beard</section>-->
+    <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_HairColor</section>-->
+    <!--            </div>-->
+    <!--            <div display="flex" flex-direction="row" flex-wrap="wrap" mayRequire="Ludeon.Rimworld.Ideology">-->
+    <!--                <section flex-basis="50%" flex-grow="1" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooBody</section>-->
+    <!--                <section flex-basis="50%" flex-grow="1" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooFace</section>-->
+    <!--            </div>-->
+    <!--        </layout>-->
+    <!--    </PawnEditor.TabDef>-->
+    <!--    <PawnEditor.TabDef>-->
+    <!--        <defName>PawnEditor_Gear</defName>-->
+    <!--        <label>Gear</label>-->
+    <!--        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>-->
+    <!--        <layout>-->
+    <!--            <section>PawnEditor_Equipment</section>-->
+    <!--            <section>PawnEditor_Apparel</section>-->
+    <!--            <section>PawnEditor_Inventory</section>-->
+    <!--        </layout>-->
+    <!--    </PawnEditor.TabDef>-->
 </Defs>

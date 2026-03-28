@@ -32,9 +32,6 @@ public class TaffyLayoutNode
     private readonly List<TaffyLayoutNode> _children = [];
     private Func<bool> _isActive = static () => true;
 
-    // Cached rendered height from the previous frame, used as the leaf measure function result.
-    // Updated after each draw pass. 0 on the first frame → falls back to 99999f so sections render.
-    private float _cachedHeight;
 
     // ── XML loading ────────────────────────────────────────────────────────────
 
@@ -327,64 +324,37 @@ public class TaffyLayoutNode
         return GridPlacement.Line(int.Parse(s, CultureInfo.InvariantCulture));
     }
 
-    // ── Draw ───────────────────────────────────────────────────────────────────
+    // ── Draw / BuildInto ───────────────────────────────────────────────────────
 
     /// <summary>
-    /// Computes layout and draws all visible sections inside <paramref name="rect"/>.
-    /// Returns the total content height (for scroll view sizing).
-    /// Section heights are cached between frames; the first frame uses a large fallback height.
+    /// Adds this layout tree's nodes into an existing <paramref name="col"/> builder.
+    /// Section XML nodes become flex-column containers whose items are populated by
+    /// <see cref="SectionWorker.DoSectionContents"/>.
     /// </summary>
-    public float Draw(Rect rect, Func<SectionDef, Rect, float> runLeaf, Func<SectionDef, bool>? isVisible = null)
-    {
-        var tree = new TaffyTree();
-        var leaves = new List<(NodeId id, TaffyLayoutNode node)>();
+    public void BuildInto(TaffyBuilder col, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
+        => BuildNode(col, this, pawn, isVisible);
 
-        var rootStyle = _style.Clone();
-        rootStyle.size = rootStyle.size.MapWidth(_ => Dimension.Length(rect.width));
-
-        var root = BuildNode(tree, this, rootStyle, isVisible, leaves);
-
-        tree.ComputeLayoutWithMeasure(root,
-            new Size<AvailableSpace>(AvailableSpace.Definite(rect.width), AvailableSpace.MaxContent),
-            (known, avail, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> fn
-                    ? fn(known, avail) : SizeF.ZERO);
-
-        var lookup = new Dictionary<NodeId, TaffyLayoutNode>(leaves.Count);
-        foreach (var (id, node) in leaves)
-            lookup[id] = node;
-
-        DrawTree(tree, root, rect.x, rect.y, lookup, runLeaf);
-
-        return tree.Layout(root).Size.Height;
-    }
-
-    private static NodeId BuildNode(TaffyTree tree, TaffyLayoutNode node, Style style,
-        Func<SectionDef, bool>? isVisible, List<(NodeId, TaffyLayoutNode)> leaves)
+    private static void BuildNode(TaffyBuilder col, TaffyLayoutNode node, Pawn pawn,
+        Func<SectionDef, bool>? isVisible)
     {
         if (node.section != null)
         {
-            var captured = node;
-            var nodeId = tree.NewLeafWithContext(style,
-                (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)((known, avail) =>
-                {
-                    var w = known.Width ?? avail.Width.IntoOption() ?? 0f;
-                    var h = known.Height ?? (captured._cachedHeight > 0f ? captured._cachedHeight : 99999f);
-                    return new Size<float>(w, h);
-                }));
-            leaves.Add((nodeId, node));
-            return nodeId;
+            // Section node → flex-column container populated by the section worker.
+            var sectionStyle = node._style;
+            sectionStyle.flexDirection = FlexDirection.Column;
+            col.Container(sectionStyle, inner => node.section.Worker.BuildSection(inner, pawn));
+            return;
         }
 
-        var childIds = new List<NodeId>();
-        foreach (var child in node._children)
+        col.Container(node._style, inner =>
         {
-            if (!child._isActive()) continue;
-            if (!child.HasVisibleContent(isVisible)) continue;
-            childIds.Add(BuildNode(tree, child, child._style, isVisible, leaves));
-        }
-
-        return tree.NewWithChildren(style, childIds);
+            foreach (var child in node._children)
+            {
+                if (!child._isActive()) continue;
+                if (!child.HasVisibleContent(isVisible)) continue;
+                BuildNode(inner, child, pawn, isVisible);
+            }
+        });
     }
 
     private bool HasVisibleContent(Func<SectionDef, bool>? isVisible)
@@ -397,20 +367,10 @@ public class TaffyLayoutNode
         return false;
     }
 
-    private static void DrawTree(TaffyTree tree, NodeId nodeId, float ox, float oy,
-        Dictionary<NodeId, TaffyLayoutNode> lookup, Func<SectionDef, Rect, float> runLeaf)
-    {
-        ref var layout = ref tree.Layout(nodeId);
-        var absX = ox + layout.Location.X;
-        var absY = oy + layout.Location.Y;
-
-        if (lookup.TryGetValue(nodeId, out var node) && node.section != null)
-        {
-            var r = new Rect(absX, absY, layout.Size.Width, layout.Size.Height);
-            node._cachedHeight = runLeaf(node.section, r);
-        }
-
-        foreach (var child in tree.Children(nodeId))
-            DrawTree(tree, child, absX, absY, lookup, runLeaf);
-    }
+    /// <summary>
+    /// Standalone entry point: computes layout with unconstrained height, draws all visible
+    /// sections inside <paramref name="rect"/>, and returns the total content height.
+    /// </summary>
+    public float Draw(Rect rect, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
+        => Taffy.MeasuredColumn(rect, col => BuildInto(col, pawn, isVisible));
 }

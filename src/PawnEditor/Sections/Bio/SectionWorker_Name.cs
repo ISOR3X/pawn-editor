@@ -1,4 +1,4 @@
-﻿using HotSwap;
+using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
@@ -14,11 +14,11 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && p is { Faction: not null, Name: not null };
     }
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
         var isHuman = PawnUtility.GetPawnCategory(pawn) is PawnUtility.PawnCategory.Humanlike;
-        listing.LabelH2("Name");
-        DoNameInputRect(listing.GetRect(UIUtility.ButtonHeight), pawn, isHuman);
+        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Name"));
+        col.Item(height: UIUtility.ButtonHeight, draw: r => DoNameInputRect(r, pawn, isHuman));
     }
 
     // REF: CharacterCardUtility.DrawCharacterCard

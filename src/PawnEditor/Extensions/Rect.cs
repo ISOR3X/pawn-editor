@@ -49,6 +49,12 @@ public static class Rect_Extension
 
     extension(Rect rect)
     {
+        public void LabelH2(string label)
+        {
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Verse.Widgets.Label(rect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+        }
+
         public Rect CenteredVertically(float height)
         {
             var remove = (rect.height - height) / 2;

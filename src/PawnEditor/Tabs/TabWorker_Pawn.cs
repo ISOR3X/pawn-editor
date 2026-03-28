@@ -1,6 +1,5 @@
-﻿using System.Linq;
+using System.Linq;
 using HotSwap;
-using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -9,35 +8,15 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public class TabWorker_Pawn(TabDef def) : TabWorker(def)
 {
-    private float _viewRectHeight = 5000;
-
     private static Pawn? SelectedPawn => Find.WindowStack.WindowOfType<Window_Editor>()?.GetSelectedPawn();
 
+    protected override void DoInnerTabContents(TaffyBuilder col)
+        => DoInnerTabContents(col, SelectedPawn);
 
-    protected override void DoInnerTabContents(ref Rect inRect)
+    protected virtual void DoInnerTabContents(TaffyBuilder col, Pawn? pawn)
     {
-        DoInnerTabContents(ref inRect, SelectedPawn);
-    }
-
-    protected virtual void DoInnerTabContents(ref Rect inRect, Pawn? pawn)
-    {
-        inRect.ContractedBy(0, 8f);
-
         if (pawn == null) return;
-
-        Verse.Widgets.BeginGroup(inRect);
-        var contentRect = inRect.AtZero();
-        var additionalWidth = inRect.height < _viewRectHeight ? UIUtility.ScrollBarWidth_WithMargin : 0;
-        var viewRect = new Rect(contentRect.x, contentRect.y, contentRect.width - additionalWidth, _viewRectHeight);
-        Verse.Widgets.BeginScrollView(contentRect, ref TabScrollPosition, viewRect);
-
-        _viewRectHeight = Def.layout.Draw(
-            viewRect,
-            (section, r) => section.Worker.DoSection(pawn, r),
-            section => section.Worker.ShowSection(pawn));
-
-        Verse.Widgets.EndScrollView();
-        Verse.Widgets.EndGroup();
+        Def.layout.BuildInto(col, pawn, s => s.Worker.ShowSection(pawn));
     }
 
     #region EVENTS
@@ -51,9 +30,9 @@ public class TabWorker_Pawn(TabDef def) : TabWorker(def)
         QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);
         if (actions.NullOrEmpty()) return;
 
-        QuickActions.Clear();
+        quickActions.Clear();
         foreach (var (attribute, method) in actions!.Where(a => a.Item1.CanUseQuickAction()))
-            QuickActions.Add(attribute.ToFloatMenuOption(method));
+            quickActions.Add(attribute.ToFloatMenuOption(method));
     }
 
     #endregion

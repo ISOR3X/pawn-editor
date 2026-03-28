@@ -1,6 +1,6 @@
-﻿using System;
 using HotSwap;
-using PawnEditor.Extensions;
+using PawnEditor.Table;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -10,54 +10,57 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
-    {
-        listing.LabelH2("Backstory");
+    private const float MaxButtonWidth = 160f;
 
-        DoBackstoryRect(listing, pawn);
-    }
-
-
-    // REF: CharacterCardUtility.DoLeftSection
-    private static void DoBackstoryRect(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
         string childhoodLabel = "Childhood".Translate();
         string adulthoodLabel = "Adulthood".Translate();
-        var labelWidth = Mathf.Max(childhoodLabel.GetWidthCached(), adulthoodLabel.GetWidthCached());
-        labelWidth += UIUtility.LabelOffset;
 
-        var slots = Enum.GetValues(typeof(BackstorySlot));
-        for (var i = 0; i < slots.Length; i++)
+        col.Text("Backstory", color: ColoredText.TipSectionTitleColor);
+        col.Row(new Style { gap = Taffy.Gap(4f, 4f), flexWrap = FlexWrap.Wrap }, row =>
         {
-            var backstorySlot = (BackstorySlot)slots.GetValue(i);
-            var backstory = pawn.story.GetBackstory(backstorySlot);
-            using (new TextBlock(TextAnchor.MiddleLeft))
+            DoBackstoryItem(row, pawn, BackstorySlot.Childhood, childhoodLabel);
+            DoBackstoryItem(row, pawn, BackstorySlot.Adulthood, adulthoodLabel);
+        });
+    }
+
+    // REF: CharacterCardUtility.DoLeftSection
+    private static void DoBackstoryItem(TaffyBuilder row, Pawn pawn, BackstorySlot slot, string label)
+    {
+        var backstory = pawn.story.GetBackstory(slot);
+        var buttonLabel = backstory != null ? backstory.TitleCapFor(pawn.gender) : "None".Translate().ToString();
+
+        Action<Rect>? onHover = null;
+        if (backstory != null)
+        {
+            onHover = r =>
             {
-                var rect1 = listing.GetRect(UIUtility.ButtonHeight);
-                Verse.Widgets.Label(rect1.TakeLeftPart(labelWidth),
-                    backstorySlot == BackstorySlot.Adulthood ? adulthoodLabel : childhoodLabel);
-                if (backstory == null)
-                {
-                    using (new TextBlock(TextAnchor.MiddleCenter, ColoredText.SubtleGrayColor))
-                    {
-                        Verse.Widgets.Label(rect1, "None".Translate());
-                    }
-
-                    continue;
-                }
-
-                var backstoryLabel = backstory.TitleCapFor(pawn.gender);
-                Verse.Widgets.ButtonText(rect1, backstoryLabel.Truncate(rect1.width - UIUtility.ButtonPadding));
-
-                if (Mouse.IsOver(rect1))
-                {
-                    var tip = backstoryLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
-                    var desc = backstory.FullDescriptionFor(pawn).Resolve();
-                    TooltipHandler.TipRegion(rect1, tip + desc);
-                }
-
-                if (i < slots.Length - 1) listing.Gap(2f);
-            }
+                var tip = buttonLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
+                var desc = backstory.FullDescriptionFor(pawn).Resolve();
+                TooltipHandler.TipRegion(r, tip + desc);
+            };
         }
+
+        row.Row(new Style { gap = Taffy.Gap(GenUI.GapLabel) }, row2 =>
+        {
+            row2.Text(label);
+            row2.Button(buttonLabel, onClick: () =>
+                {
+                    Find.WindowStack.Add(new Window_AddItem(
+                        new DefTableWorker_Backstory(
+                            TableDefOf.PawnEditor_DefTable_ThingDef,
+                            () => DefDatabase<BackstoryDef>.AllDefs
+                                .Where(td => td.slot == slot)
+                                .Cast<Def>()
+                                .ToList(),
+                            pawn),
+                        [
+                            ("Content source", () => new DefTableFilter_ContentSource()),
+                        ]
+                    ));
+                }, onHover: onHover,
+                style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });
+        });
     }
 }

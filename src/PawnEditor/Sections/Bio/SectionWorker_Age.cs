@@ -1,4 +1,4 @@
-﻿using HotSwap;
+using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
@@ -11,48 +11,43 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
 {
     private static readonly string?[] TextfieldBuffers = new string[2];
 
-    protected override void DoSectionContents(Listing_Standard listing, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
     {
-        listing.LabelH2("Age");
-
-        DoAgeInputRect(listing, pawn);
+        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Age"));
+        DoAgeInputItems(col, pawn);
     }
 
-
-    private static void DoAgeInputRect(Listing_Standard listing, Pawn pawn)
+    private static void DoAgeInputItems(TaffyBuilder col, Pawn pawn)
     {
-        var bioAge = pawn.ageTracker.AgeBiologicalYears;
-        var chronoAge = pawn.ageTracker.AgeChronologicalYears;
-
         const string bioLabel = "Biological";
         const string chronoLabel = "Chronological";
+        var labelWidth = Mathf.Max(bioLabel.GetWidthCached(), chronoLabel.GetWidthCached()) + UIUtility.LabelOffset;
 
-        var labelWidth = Mathf.Max(bioLabel.GetWidthCached(), chronoLabel.GetWidthCached());
-        labelWidth += UIUtility.LabelOffset;
-
-        using (new TextBlock(TextAnchor.MiddleLeft))
+        col.Item(height: UIUtility.ButtonHeight, draw: r =>
         {
-            // Biological
-            // TODO: Add event when age is changed to below adult age.
-            var rect1 = listing.RectLabeled(bioLabel, labelWidth: labelWidth);
+            using (new TextBlock(TextAnchor.MiddleLeft))
+            {
+                var bioAgeMin = 0;
+                if (pawn.ageTracker.Adult)
+                    bioAgeMin = (int)pawn.ageTracker.CurLifeStageRace.minAge;
+                var right = UIUtility.RectLabeled(r, bioLabel, labelWidth);
+                var ba = pawn.ageTracker.AgeBiologicalYears;
+                ba = Widgets.DelayedTextFieldNumeric(right, ba, ref TextfieldBuffers[0], bioAgeMin, 9999, null, true);
+                if (ba != pawn.ageTracker.AgeBiologicalYears)
+                    pawn.ageTracker.AgeBiologicalTicks = ba * GenDate.TicksPerYear;
+            }
+        });
 
-            var bioAgeMin = 0;
-            if (pawn.ageTracker.Adult)
-                bioAgeMin = (int)pawn.ageTracker.CurLifeStageRace.minAge;
-
-            bioAge = Widgets.DelayedTextFieldNumeric(rect1, bioAge, ref TextfieldBuffers[0], bioAgeMin, 9999, null,
-                true);
-            if (bioAge != pawn.ageTracker.AgeBiologicalYears)
-                pawn.ageTracker.AgeBiologicalTicks = bioAge * GenDate.TicksPerYear;
-
-            listing.Gap(listing.verticalSpacing);
-
-            // Chronological
-            var rect2 = listing.RectLabeled(chronoLabel, labelWidth: labelWidth);
-            chronoAge = Widgets.DelayedTextFieldNumeric(rect2, chronoAge, ref TextfieldBuffers[1], 0, 9999, null,
-                true);
-            if (chronoAge != pawn.ageTracker.AgeChronologicalYears)
-                pawn.ageTracker.AgeChronologicalTicks = chronoAge * GenDate.TicksPerYear;
-        }
+        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        {
+            using (new TextBlock(TextAnchor.MiddleLeft))
+            {
+                var right = UIUtility.RectLabeled(r, chronoLabel, labelWidth);
+                var ca = pawn.ageTracker.AgeChronologicalYears;
+                ca = Widgets.DelayedTextFieldNumeric(right, ca, ref TextfieldBuffers[1], 0, 9999, null, true);
+                if (ca != pawn.ageTracker.AgeChronologicalYears)
+                    pawn.ageTracker.AgeChronologicalTicks = ca * GenDate.TicksPerYear;
+            }
+        });
     }
 }

@@ -10,7 +10,7 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Equipment(SectionDef def) : SectionWorker_ThingTable(def)
 {
-    protected override ThingTableDef TableDef => TableDefOf.PawnEditor_Equipment;
+    protected override ThingTableDef TableDef => TableDefOf.PawnEditor_ThingTable_Equipment;
     protected override string Label => "Equipment";
 
     protected override IEnumerable<Thing> GetThings()
