@@ -135,7 +135,7 @@ namespace PawnEditor
             callbacks.Add((node, draw));
         }
 
-        internal void AddContainer(Style style, Action<TaffyBuilder>? build)
+        private void AddContainer(Style style, Action<TaffyBuilder>? build)
         {
             var inner = new TaffyBuilder(tree, callbacks);
             build?.Invoke(inner);
@@ -157,7 +157,7 @@ namespace PawnEditor
 
     /// <summary>
     /// Static entry points for TaffySharp-backed layout in RimWorld.
-    /// Creates a fresh layout tree per call; layout is computed and draw callbacks invoked before returning.
+    /// Creates a fresh layout tree per call; the layout is computed and draws callbacks invoked before returning.
     /// </summary>
     public static class Taffy
     {
@@ -181,7 +181,7 @@ namespace PawnEditor
 
         // ── Grid entry points ───────────────────────────────────────────────────
         //
-        // The autoRowHeight parameter sets gridAutoRows so that implicitly-created rows
+        // The autoRowHeight parameter sets gridAutoRows so that implicitly created rows
         // have a fixed pixel height. This is required when grid items are leaf nodes with
         // no intrinsic size (i.e. draw callbacks) — without it CSS auto rows collapse to 0.
         // Pass 0 only when you supply explicit gridTemplateRows or items with a set size.
