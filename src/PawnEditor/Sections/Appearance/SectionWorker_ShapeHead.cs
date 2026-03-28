@@ -13,10 +13,10 @@ public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
 {
     private Vector2 _scrollPositionHeadType = Vector2.zero;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         var capturedPawn = pawn;
-        col.Item(height: Widgets.CarrouselCellHeight + UIUtility.ButtonHeight, draw: r =>
+        builder.Item(height: Widgets.CarrouselCellHeight + UIUtility.ButtonHeight, draw: r =>
         {
             Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Head");
             Widgets.Carrousel(r,

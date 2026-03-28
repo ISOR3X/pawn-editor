@@ -1,6 +1,7 @@
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -10,29 +11,25 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
-    public const int SkillColCount = 3;
-    public const float SkillHeight = 24f;
-    public const float SkillGap = 3f;
+    private const float MinSkillWidth = 100f;
+    private const float SkillHeight = 24f;
+    private const float SkillGap = 3f;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Skills"));
-        col.Item(height: GetSkillsHeight(), draw: r => DoSkillsRect(r, pawn));
-    }
-
-    private static float GetSkillsHeight()
-    {
-        return Mathf.FloorToInt(DefDatabase<SkillDef>.DefCount / (float)SkillColCount) * (SkillHeight + SkillGap);
+        builder.Text("Skills", color: ColoredText.TipSectionTitleColor);
+        builder.Item(new Style { }, draw: r => DoSkillsRect(r, pawn));
     }
 
     private static void DoSkillsRect(Rect inRect, Pawn pawn)
     {
+        var cols = Mathf.CeilToInt(inRect.width / MinSkillWidth);
         var skills = SkillUI.skillDefsInListOrderCached;
-        var skillsPerColumn = Mathf.CeilToInt(skills.Count / (float)SkillColCount);
+        var skillsPerColumn = Mathf.CeilToInt(skills.Count / (float)cols);
 
         var listing = new Listing_Standard
         {
-            ColumnWidth = inRect.width / SkillColCount - Listing.ColumnSpacing
+            ColumnWidth = inRect.width / cols - Listing.ColumnSpacing
         };
 
         using (new TextBlock(TextAnchor.MiddleLeft))

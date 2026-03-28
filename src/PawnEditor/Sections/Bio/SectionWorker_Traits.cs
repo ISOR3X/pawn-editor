@@ -1,6 +1,7 @@
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -10,35 +11,57 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
-    private float _traitsHeight;
+    private float? _traitsHeight;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        var traitsHeight = _traitsHeight > 0f ? _traitsHeight : 50f;
+        var traitsHeight = _traitsHeight ?? 50f;
 
-        col.Row(grow: 1f, build: row =>
-        {
-            row.Column(grow: 1f, build: left =>
+        builder.Div(
+            new Style
             {
-                left.Item(height: Text.LineHeight, draw: r => r.LabelH2("Traits"));
-                left.Item(height: traitsHeight, draw: r =>
-                {
-                    DoTraitsRect(r, pawn);
-                    _traitsHeight = GetTraitsHeight(pawn, r.width);
-                });
-            });
-            row.Column(grow: 1f, build: right =>
+                flexDirection = FlexDirection.Row, gap = Taffy.Gap(GenUI.GapSmall), flexGrow = 1f,
+                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO)
+            },
+            row =>
             {
-                right.Item(height: Text.LineHeight, draw: r => r.LabelH2("Incapable of"));
-                right.Item(height: traitsHeight, draw: r => DoIncapableOfRect(r, pawn));
+                row.Div(
+                    new Style
+                    {
+                        minSize = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
+                        flexBasis = Dimension.Percent(0.5f)
+                    }, build: left =>
+                    {
+                        left.Text("Traits", color: ColoredText.TipSectionTitleColor);
+                        left.Item(
+                            new Style
+                            {
+                                size = new Size<Dimension>(Dimension.Percent(1f), traitsHeight), flexGrow = 1f
+                            },
+                            draw: r =>
+                            {
+                                DoTraitsRect(r, pawn);
+                                _traitsHeight = GetTraitsHeight(pawn, r.width);
+                            });
+                    });
+                row.Div(
+                    new Style
+                    {
+                        minSize = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
+                        flexBasis = Dimension.Percent(0.5f)
+                    }, build: right =>
+                    {
+                        right.Text("Incapable of", color: ColoredText.TipSectionTitleColor);
+                        right.Item(
+                            new Style
+                            {
+                                size = new Size<Dimension>(Dimension.Percent(1f), traitsHeight), flexGrow = 1f
+                            },
+                            draw: r => DoIncapableOfRect(r, pawn));
+                    });
             });
-        });
 
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
-        {
-            var w = Text.CalcSize("Add trait").x + 32f;
-            Verse.Widgets.ButtonText(r.TakeLeftPart(w), "Add trait");
-        });
+        builder.Button("Add trait");
     }
 
     private static float GetTraitsHeight(Pawn pawn, float width)

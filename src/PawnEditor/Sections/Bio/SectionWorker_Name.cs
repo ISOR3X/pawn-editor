@@ -12,10 +12,10 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p) => base.ShowSection(p) && p is { Faction: not null, Name: not null };
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Text("Name", color: ColoredText.TipSectionTitleColor);
-        col.Div(new Style { flexDirection = FlexDirection.Row }, row =>
+        builder.Text("Name", color: ColoredText.TipSectionTitleColor);
+        builder.Div(new Style { flexDirection = FlexDirection.Row }, row =>
         {
             switch (pawn.Name)
             {

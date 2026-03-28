@@ -12,20 +12,19 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 {
     private const float MaxButtonWidth = 160f;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         string childhoodLabel = "Childhood".Translate();
         string adulthoodLabel = "Adulthood".Translate();
 
-        col.Text("Backstory", color: ColoredText.TipSectionTitleColor);
-        col.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall), flexWrap = FlexWrap.Wrap }, row =>
+        builder.Text("Backstory", color: ColoredText.TipSectionTitleColor);
+        builder.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall), flexWrap = FlexWrap.Wrap }, row =>
         {
             DoBackstoryItem(row, pawn, BackstorySlot.Childhood, childhoodLabel);
             DoBackstoryItem(row, pawn, BackstorySlot.Adulthood, adulthoodLabel);
         });
     }
-
-    // REF: CharacterCardUtility.DoLeftSection
+    
     private static void DoBackstoryItem(TaffyBuilder row, Pawn pawn, BackstorySlot slot, string label)
     {
         var backstory = pawn.story.GetBackstory(slot);

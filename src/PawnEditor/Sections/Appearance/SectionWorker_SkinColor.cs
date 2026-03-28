@@ -12,9 +12,9 @@ public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
 {
     private float _skinColorHeight = 30f;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: Text.LineHeight + _skinColorHeight, draw: r =>
+        builder.Item(height: Text.LineHeight + _skinColorHeight, draw: r =>
         {
             var listing = new Listing_Standard { maxOneColumn = true };
             listing.Begin(r);

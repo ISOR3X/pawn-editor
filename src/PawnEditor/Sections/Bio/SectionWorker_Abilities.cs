@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -11,26 +12,25 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 {
-    public const float AbilitiesHeight = 36f;
-    private float _abilitiesHeight;
+    private const float AbilitiesHeight = 36f;
+    private float? _abilitiesHeight;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: Text.LineHeight, draw: r => r.LabelH2("Abilities"));
+        builder.Text("Abilities", color: ColoredText.TipSectionTitleColor);
 
-        col.Item(height: _abilitiesHeight > 0f ? _abilitiesHeight : AbilitiesHeight, draw: r =>
-        {
-            DoAbilitiesRect(r, pawn);
-            _abilitiesHeight = GetAbilitiesHeight(pawn, r.width);
-        });
+        builder.Item(
+            new Style
+            {
+                size = new Size<Dimension>(Dimension.Percent(1f), _abilitiesHeight ?? AbilitiesHeight), flexGrow = 1f
+            },
+            draw: r =>
+            {
+                DoAbilitiesRect(r, pawn);
+                _abilitiesHeight = GetAbilitiesHeight(pawn, r.width);
+            });
 
-        col.Item(height: 2f);
-
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
-        {
-            var w = Text.CalcSize("Add ability").x + 32f;
-            Verse.Widgets.ButtonText(r.TakeLeftPart(w), "Add ability");
-        });
+        builder.Button("Add ability");
     }
 
     private static float GetAbilitiesHeight(Pawn pawn, float width)
@@ -42,19 +42,19 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
     private static void DoAbilitiesRect(Rect inRect, Pawn pawn)
     {
         UIUtility.DrawElementStackSection(inRect, GetAbilities(pawn),
-            (r, abil) =>
+            (r, ability) =>
             {
                 GUI.DrawTexture(r, BaseContent.ClearTex);
                 if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
-                if (Verse.Widgets.ButtonImage(r, abil.def.uiIcon, false))
+                if (Verse.Widgets.ButtonImage(r, ability.def.uiIcon, false))
                 {
-                    if (Event.current.shift) TryDeleteAbility(abil.def, pawn);
-                    else Find.WindowStack.Add(new Dialog_InfoCard(abil.def));
+                    if (Event.current.shift) TryDeleteAbility(ability.def, pawn);
+                    else Find.WindowStack.Add(new Dialog_InfoCard(ability.def));
                 }
 
                 if (Mouse.IsOver(r))
                     TooltipHandler.TipRegion(r, new TipSignal(() =>
-                            abil.Tooltip + "\n\n" +
+                            ability.Tooltip + "\n\n" +
                             "ClickToLearnMore".Translate().Colorize(ColoredText.SubtleGrayColor) +
                             "\n" + "Shift + left click to delete.".Colorize(ColoredText.SubtleGrayColor),
                         (int)r.y * 37));

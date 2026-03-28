@@ -30,7 +30,7 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
     protected virtual string GetUnavailableLabel(Pawn pawn) =>
         $"No {Label.ToLower()}s available for {pawn.Name.ToStringShort}";
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         if (_lastPawn != pawn)
         {
@@ -42,8 +42,8 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
         var rowCount = Math.Clamp(Table.ThingListForReading.Count, 1, RowCount);
         var tableHeight = Table.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f;
 
-        col.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
-        col.Item(height: tableHeight, draw: r =>
+        builder.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
+        builder.Item(height: tableHeight, draw: r =>
         {
             if (ShowTableForPawn(pawn))
                 Table.TableOnGUI(r);

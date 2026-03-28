@@ -12,9 +12,9 @@ public class SectionWorker_Race(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && GetRacesForPawn(p).Any();
     }
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        builder.Item(height: UIUtility.ButtonHeight, draw: r =>
         {
             if (UIUtility.ButtonTextLabeled(r, "Race", pawn.kindDef.race.LabelCap))
             {

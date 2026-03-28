@@ -13,9 +13,9 @@ public class SectionWorker_Portrait(SectionDef def) : SectionWorker(def)
     private const float PortraitWidth = 200f;
     private readonly int idx = 0;
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(new Style { size = new Size<Dimension>(PortraitWidth, PortraitWidth) }, draw: r =>
+        builder.Item(new Style { size = new Size<Dimension>(PortraitWidth, PortraitWidth) }, draw: r =>
         {
             var image = PortraitsCache.Get(pawn, new Vector2(r.width, r.height), new Rot4(2 - idx),
                 Dialog_StylingStation.PortraitOffset, 1.1f,

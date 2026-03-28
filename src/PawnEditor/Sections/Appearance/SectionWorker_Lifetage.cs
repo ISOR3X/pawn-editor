@@ -6,9 +6,9 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Lifestage(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        builder.Item(height: UIUtility.ButtonHeight, draw: r =>
         {
             if (UIUtility.ButtonTextLabeled_WithIcon(r, "Lifestage", pawn.DevelopmentalStage.ToString(),
                     pawn.DevelopmentalStage.Icon().Texture))

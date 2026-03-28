@@ -23,8 +23,8 @@ namespace PawnEditor.TaffySharp
 
         // ── Factories ─────────────────────────────────────────────────────────
 
-        public static LengthPercentage Length(float val) => new LengthPercentage(CompactLength.Length(val));
-        public static LengthPercentage Percent(float val) => new LengthPercentage(CompactLength.Percent(val));
+        public static LengthPercentage Length(float val) => new(CompactLength.Length(val));
+        public static LengthPercentage Percent(float val) => new(CompactLength.Percent(val));
 
         // ── Constants ─────────────────────────────────────────────────────────
 
@@ -62,9 +62,9 @@ namespace PawnEditor.TaffySharp
 
         // ── Factories ─────────────────────────────────────────────────────────
 
-        public static LengthPercentageAuto Length(float val) => new LengthPercentageAuto(CompactLength.Length(val));
-        public static LengthPercentageAuto Percent(float val) => new LengthPercentageAuto(CompactLength.Percent(val));
-        public static LengthPercentageAuto Auto() => new LengthPercentageAuto(CompactLength.Auto());
+        public static LengthPercentageAuto Length(float val) => new(CompactLength.Length(val));
+        public static LengthPercentageAuto Percent(float val) => new(CompactLength.Percent(val));
+        public static LengthPercentageAuto Auto() => new(CompactLength.Auto());
 
         // ── Constants ─────────────────────────────────────────────────────────
 
@@ -74,10 +74,10 @@ namespace PawnEditor.TaffySharp
         // ── Conversions ───────────────────────────────────────────────────────
 
         public static implicit operator LengthPercentageAuto(LengthPercentage lp) =>
-            new LengthPercentageAuto(lp.Inner);
+            new(lp.Inner);
 
         public static implicit operator LengthPercentageAuto(float val) =>
-            new LengthPercentageAuto(CompactLength.Length(val));
+            new(CompactLength.Length(val));
 
         // ── Accessors ─────────────────────────────────────────────────────────
 
@@ -121,9 +121,9 @@ namespace PawnEditor.TaffySharp
 
         // ── Factories ─────────────────────────────────────────────────────────
 
-        public static Dimension Length(float val) => new Dimension(CompactLength.Length(val));
-        public static Dimension Percent(float val) => new Dimension(CompactLength.Percent(val));
-        public static Dimension Auto() => new Dimension(CompactLength.Auto());
+        public static Dimension Length(float val) => new(CompactLength.Length(val));
+        public static Dimension Percent(float val) => new(CompactLength.Percent(val));
+        public static Dimension Auto() => new(CompactLength.Auto());
 
         // ── Constants ─────────────────────────────────────────────────────────
 
@@ -132,8 +132,8 @@ namespace PawnEditor.TaffySharp
 
         // ── Conversions ───────────────────────────────────────────────────────
 
-        public static implicit operator Dimension(LengthPercentage lp) => new Dimension(lp.Inner);
-        public static implicit operator Dimension(LengthPercentageAuto l) => new Dimension(l.Inner);
+        public static implicit operator Dimension(LengthPercentage lp) => new(lp.Inner);
+        public static implicit operator Dimension(LengthPercentageAuto l) => new(l.Inner);
         
         public static implicit operator Dimension(float val) => Length(val);
 

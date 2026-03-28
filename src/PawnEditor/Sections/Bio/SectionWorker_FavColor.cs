@@ -8,9 +8,9 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_FavColor(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
+        builder.Item(height: UIUtility.ButtonHeight, draw: r =>
         {
             using (new TextBlock(TextAnchor.MiddleLeft))
                 DoFavColorInputRect(UIUtility.RectLabeled(r, "Favorite color"), pawn);

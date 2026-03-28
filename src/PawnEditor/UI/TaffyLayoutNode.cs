@@ -349,7 +349,6 @@ public class TaffyLayoutNode
         {
             // Section node → flex-column container populated by the section worker.
             var sectionStyle = node._style;
-            sectionStyle.flexDirection = FlexDirection.Column; // Similar to display: block
             col.Container(sectionStyle, inner => node.section.Worker.BuildSection(inner, pawn));
             return;
         }

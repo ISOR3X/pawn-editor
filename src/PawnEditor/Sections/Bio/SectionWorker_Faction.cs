@@ -12,20 +12,19 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && p.def.CanHaveFaction;
     }
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        col.Item(height: UIUtility.ButtonHeight, draw: r =>
-        {
-            var (label, icon, color) = FactionUtility.GetFactionMeta(pawn.Faction);
+        var (label, icon, color) = FactionUtility.GetFactionMeta(pawn.Faction);
 
-            if (UIUtility.ButtonTextLabeled_WithIcon(r, "Faction", label, icon, color))
+        builder.Text("Faction", color: ColoredText.TipSectionTitleColor);
+        builder.Button(label, icon, color, onClick: _ =>
+            {
                 Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsInViewOrder.Select(f =>
                 {
                     var (l, i, c) = FactionUtility.GetFactionMeta(f);
                     return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c);
                 }).ToList()));
-
-            if (Mouse.IsOver(r)) TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction));
-        });
+            }, onHover: r => { TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction)); }
+        );
     }
 }

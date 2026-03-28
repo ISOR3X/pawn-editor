@@ -22,7 +22,7 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
     private ThingTableWorker Table => field ??= (ThingTableWorker)Activator.CreateInstance(
         TableDef.workerClass, TableDef, (Func<IEnumerable<Thing>>)GetThings, null);
 
-    protected override void DoSectionContents(TaffyBuilder col, Pawn pawn)
+    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         if (_lastPawn != pawn)
         {
@@ -33,7 +33,7 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
         var rowCount = Math.Clamp(Table.ThingListForReading.Count, 1, RowCount);
         var tableHeight = Table.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f;
 
-        col.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
-        col.Item(height: tableHeight, draw: r => Table.TableOnGUI(r));
+        builder.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
+        builder.Item(height: tableHeight, draw: r => Table.TableOnGUI(r));
     }
 }

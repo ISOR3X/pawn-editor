@@ -14,13 +14,13 @@ public abstract class SectionWorker(SectionDef def)
         return Def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(p));
     }
 
-    protected abstract void DoSectionContents(TaffyBuilder col, Pawn pawn);
+    protected abstract void DoSectionContents(TaffyBuilder builder, Pawn pawn);
 
-    /// <summary>Adds this section's content items into <paramref name="col"/>. Called by <c>TaffyLayoutNode.BuildInto</c>.</summary>
-    public void BuildSection(TaffyBuilder col, Pawn pawn)
+    /// <summary>Adds this section's content items into <paramref name="builder"/>. Called by <c>TaffyLayoutNode.BuildInto</c>.</summary>
+    public void BuildSection(TaffyBuilder builder, Pawn pawn)
     {
-        col.ContextKey = pawn.thingIDNumber.ToString();
-        DoSectionContents(col, pawn);
+        builder.ContextKey = pawn.thingIDNumber.ToString();
+        DoSectionContents(builder, pawn);
     }
 
     public float DoSection(Pawn pawn, Rect inRect)
