@@ -17,6 +17,7 @@
     <PropertyGroup>
         <OutputPath>..\..\Assemblies\</OutputPath>
         <PlatformTarget>AnyCPU</PlatformTarget>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <DebugSymbols>true</DebugSymbols>

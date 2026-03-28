@@ -57,6 +57,7 @@ public partial class Window_Editor : Window
         layer = Playing ? WindowLayer.Dialog : WindowLayer.Super;
         forcePause = true;
         closeOnClickedOutside = true;
+        resizeable = true;
     }
 
     public override void SetInitialSizeAndPosition()
