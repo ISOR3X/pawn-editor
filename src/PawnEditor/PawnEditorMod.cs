@@ -13,34 +13,29 @@ public class PawnEditorMod : Mod
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
-        ModName = content.Name;
-
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
 
+        ModName = content.Name;
         Settings = GetSettings<Settings>();
+
+        // Save settings when the game quits.
+        Application.quitting += () => Settings.Write();
     }
 
-    public override string SettingsCategory()
-    {
-        return "Pawn Editor";
-    }
+    public override string SettingsCategory() => "Pawn Editor";
+
 
     public override void DoSettingsWindowContents(Rect inRect)
     {
         var listing = new Listing_Standard();
         listing.Begin(inRect);
         listing.ButtonTextLabeled("Restriction Mode", Settings.restriction.ToString());
-        if (listing.ButtonTextLabeled("Window Size", Settings.size.ToString()))
-            Find.WindowStack.Add(new FloatMenu([
-                new FloatMenuOption(nameof(Settings.WindowSize.Small),
-                    () => Settings.size = Settings.WindowSize.Small),
-                new FloatMenuOption(nameof(Settings.WindowSize.Medium),
-                    () => Settings.size = Settings.WindowSize.Medium),
-                new FloatMenuOption(nameof(Settings.WindowSize.Large),
-                    () => Settings.size = Settings.WindowSize.Large)
-            ]));
         listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref Settings.drawDebug);
+        if (listing.ButtonText("Reset window size and position"))
+        {
+            Window_Editor.SavedWindowRect = Window_Editor.DefaultWindowRect;
+        }
 
         listing.End();
     }

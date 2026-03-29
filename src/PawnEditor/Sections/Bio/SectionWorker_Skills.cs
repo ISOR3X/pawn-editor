@@ -73,8 +73,8 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                     var r2 = r.TakeRightPart(r.height / 2f);
                     r2.SplitHorizontallyEqual(out var upRect, out var downRect);
 
-                    if (Verse.Widgets.ButtonImage(upRect, TexPawnEditor.Up)) newSkillLevel++;
-                    if (Verse.Widgets.ButtonImage(downRect, TexPawnEditor.Down)) newSkillLevel--;
+                    if (Widgets.ButtonImageWithHold(upRect, TexPawnEditor.Up, $"{builder.ContextKey}:{skillDef.defName}:up")) newSkillLevel++;
+                    if (Widgets.ButtonImageWithHold(downRect, TexPawnEditor.Down, $"{builder.ContextKey}:{skillDef.defName}:down")) newSkillLevel--;
 
                     var skillProgressPct = Mathf.Max(0.0f, skill.GetLevel() / (float)SkillRecord.MaxLevel);
                     var texture2D = SkillUI.SkillBarFillTex;

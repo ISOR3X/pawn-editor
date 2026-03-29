@@ -9,7 +9,7 @@
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
             <!--            <div display="flex" flex-direction="row">-->
-            <!--                <section flex-basis="60%">PawnEditor_Info</section>-->
+            <section flex-direction="column" min-width="240px">PawnEditor_Info</section>
             <section>PawnEditor_Portrait</section>
             <!--            </div>-->
             <!--            <div display="flex" flex-direction="row" flex-wrap="wrap">-->

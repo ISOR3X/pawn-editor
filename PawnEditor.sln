@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7188113B-E33B-49B5-ADD8-F6B078B0B3AD}"
+	ProjectSection(SolutionItems) = preProject
+		src\error.txt = src\error.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PawnEditor", "src\PawnEditor\PawnEditor.csproj", "{960AA103-39B5-44E3-8007-F7758D2F9F00}"
 EndProject

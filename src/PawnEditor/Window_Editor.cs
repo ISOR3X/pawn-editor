@@ -7,7 +7,7 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public partial class Window_Editor : Window
+public partial class Window_Editor : Window, IExposable
 {
     #region Fields
 
@@ -23,22 +23,12 @@ public partial class Window_Editor : Window
     private static List<TabDef> _selectedTabDefsForPawn = [];
     private static List<TabRecord> _tabsList = [];
 
-    private static Settings.WindowSize WindowSize => PawnEditorMod.Settings.size;
+    // TODO: Save on game close (right now settings window needs to be opened to save it).
+    public static Rect DefaultWindowRect = new(
+        new Vector2((UI.screenWidth - Page.StandardSize.x) / 2, (UI.screenHeight - Page.StandardSize.y) / 2),
+        Page.StandardSize);
 
-    private static readonly Dictionary<Settings.WindowSize, Vector2> WindowSizes = new()
-    {
-        { Settings.WindowSize.Small, Page.StandardSize },
-        {
-            Settings.WindowSize.Medium,
-            new Vector2(Mathf.Min(1010f, UI.screenWidth), UI.screenHeight - (Playing ? MainButtonDef.ButtonHeight : 0f))
-        },
-        {
-            Settings.WindowSize.Large,
-            new Vector2(UI.screenWidth, UI.screenHeight - (Playing ? MainButtonDef.ButtonHeight : 0f))
-        }
-    };
-
-    public override Vector2 InitialSize => WindowSizes[WindowSize];
+    public static Rect SavedWindowRect = DefaultWindowRect;
 
     // Options
     public static bool ShowHeadgear = true;
@@ -62,11 +52,7 @@ public partial class Window_Editor : Window
     public override void SetInitialSizeAndPosition()
     {
         base.SetInitialSizeAndPosition();
-        if (WindowSize is Settings.WindowSize.Medium or Settings.WindowSize.Large)
-        {
-            windowRect.x = 0f;
-            windowRect.y = 0f;
-        }
+        windowRect = SavedWindowRect;
     }
 
     public override void PreOpen()
@@ -92,6 +78,8 @@ public partial class Window_Editor : Window
     public override void PostClose()
     {
         base.PostClose();
+        SavedWindowRect = windowRect;
+
         _selectedTabDef = null;
         _selectedTabDefsForPawn.Clear();
         _tabsList.Clear();
@@ -151,5 +139,10 @@ public partial class Window_Editor : Window
                 if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
             });
         });
+    }
+
+    public void ExposeData()
+    {
+        Scribe_Values.Look(ref SavedWindowRect, nameof(SavedWindowRect));
     }
 }
