@@ -11,7 +11,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         builder.Text("Age", color: ColoredText.TipSectionTitleColor);
-        builder.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall), flexWrap = FlexWrap.Wrap }, row =>
+        builder.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap }, row =>
         {
             DoAgeItem(row, pawn, "Biological", isChrono: false);
             DoAgeItem(row, pawn, "Chronological", isChrono: true);

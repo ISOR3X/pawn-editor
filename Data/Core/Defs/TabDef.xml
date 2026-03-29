@@ -17,8 +17,8 @@
             <section flex-direction="column">PawnEditor_Age</section>
             <section flex-direction="column">PawnEditor_Backstory</section>
             <!--            </div>-->
-            <section>PawnEditor_Skills</section>
-            <div display="flex" flex-basis="100%" flex-direction="row" gap="10px">
+            <section flex-direction="column" min-width="400px">PawnEditor_Skills</section>
+            <div display="flex" flex-basis="100%" flex-wrap="wrap" flex-direction="row" gap="10px">
                 <section flex-direction="column" flex-grow="1" gap="4px">PawnEditor_Traits</section>
                 <section flex-direction="column" flex-grow="1" gap="4px">PawnEditor_Abilities</section>
             </div>

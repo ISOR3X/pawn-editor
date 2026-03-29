@@ -56,6 +56,7 @@ public static partial class TaffyExtensions
         {
             var clicked = Verse.Widgets.ButtonInvisible(r);
             if (drawGraphic) Verse.Widgets.DrawButtonGraphic(r);
+            else Verse.Widgets.DrawHighlightIfMouseover(r);
 
             if (capturedLabel != null)
             {

@@ -75,32 +75,36 @@ namespace PawnEditor
 
         /// <summary>Adds a nested row container (grow + optional build).</summary>
         public void Row(float grow = 0f, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Row, grow, null, FlexWrap.NoWrap), build);
+            => AddContainer(MakeContainerStyle(FlexDirection.Row, grow, null, FlexWrap.NoWrap), null, build);
 
         /// <summary>Adds a nested row container with gap and grow.</summary>
         public void Row(float gap, float grow, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Row, grow, gap, FlexWrap.NoWrap), build);
+            => AddContainer(MakeContainerStyle(FlexDirection.Row, grow, gap, FlexWrap.NoWrap), null, build);
 
         /// <summary>Adds a nested row container with a full <see cref="Style"/>.</summary>
         public void Row(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, build);
-        
+            => AddContainer(style, null, build);
+
         public void Div(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, build);
+            => AddContainer(style, null, build);
+
+        /// <summary>Adds a container that runs <paramref name="draw"/> on its own rect (e.g. highlight/tooltip) before drawing children.</summary>
+        public void Div(Style style, Action<Rect>? draw, Action<TaffyBuilder>? build = null)
+            => AddContainer(style, draw, build);
 
         // ── Nested column containers ────────────────────────────────────────────
 
         /// <summary>Adds a nested column container (grow + optional build).</summary>
         public void Column(float grow = 0f, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Column, grow, null, FlexWrap.NoWrap), build);
+            => AddContainer(MakeContainerStyle(FlexDirection.Column, grow, null, FlexWrap.NoWrap), null, build);
 
         /// <summary>Adds a nested column container with gap and grow.</summary>
         public void Column(float gap, float grow, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Column, grow, gap, FlexWrap.NoWrap), build);
+            => AddContainer(MakeContainerStyle(FlexDirection.Column, grow, gap, FlexWrap.NoWrap), null, build);
 
         /// <summary>Adds a nested column container with a full <see cref="Style"/>.</summary>
         public void Column(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, build);
+            => AddContainer(style, null, build);
 
         // ── Grid items ──────────────────────────────────────────────────────────
 
@@ -136,11 +140,16 @@ namespace PawnEditor
             AddLeaf(style, draw);
         }
 
+        public void GridItem(Style style, Action<Rect>? draw = null)
+        {
+            AddLeaf(style, draw);
+        }
+
         // ── Generic container ───────────────────────────────────────────────────
 
         /// <summary>Adds a container node with an arbitrary <see cref="Style"/> (used by <c>TaffyLayoutNode.BuildInto</c>).</summary>
         public void Container(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, build);
+            => AddContainer(style, null, build);
 
         // ── Internals ───────────────────────────────────────────────────────────
 
@@ -151,13 +160,13 @@ namespace PawnEditor
             callbacks.Add((node, draw));
         }
 
-        private void AddContainer(Style style, Action<TaffyBuilder>? build)
+        private void AddContainer(Style style, Action<Rect>? draw, Action<TaffyBuilder>? build)
         {
             var inner = new TaffyBuilder(tree, callbacks) { ContextKey = ContextKey };
             build?.Invoke(inner);
             var node = tree.NewWithChildren(style, inner.children);
             children.Add(node);
-            callbacks.Add((node, null));
+            callbacks.Add((node, draw));
         }
 
         private static Style MakeContainerStyle(FlexDirection dir, float grow, float? gap, FlexWrap wrap)
@@ -364,7 +373,7 @@ namespace PawnEditor
 
             if (PawnEditorMod.Settings.drawDebug)
             {
-                var h = (node.GetHashCode() * 0.618033988f) % 1f;
+                var h = node.GetHashCode() * 0.618033988f % 1f;
                 Verse.Widgets.DrawBoxSolid(r, Color.HSVToRGB(h, 0.6f, 0.9f) with { a = 0.25f });
             }
 
@@ -401,50 +410,50 @@ namespace PawnEditor
 
             // ── Size (per-axis) ──────────────────────────────────────────────────
             s.size = new Size<Dimension>(
-                s.size.Width.IsAuto()  ? fallback.size.Width  : s.size.Width,
+                s.size.Width.IsAuto() ? fallback.size.Width : s.size.Width,
                 s.size.Height.IsAuto() ? fallback.size.Height : s.size.Height);
             s.minSize = new Size<Dimension>(
-                s.minSize.Width.IsAuto()  ? fallback.minSize.Width  : s.minSize.Width,
+                s.minSize.Width.IsAuto() ? fallback.minSize.Width : s.minSize.Width,
                 s.minSize.Height.IsAuto() ? fallback.minSize.Height : s.minSize.Height);
             s.maxSize = new Size<Dimension>(
-                s.maxSize.Width.IsAuto()  ? fallback.maxSize.Width  : s.maxSize.Width,
+                s.maxSize.Width.IsAuto() ? fallback.maxSize.Width : s.maxSize.Width,
                 s.maxSize.Height.IsAuto() ? fallback.maxSize.Height : s.maxSize.Height);
 
             // ── Nullable fields ──────────────────────────────────────────────────
-            s.aspectRatio         ??= fallback.aspectRatio;
-            s.alignItems          ??= fallback.alignItems;
-            s.alignSelf           ??= fallback.alignSelf;
-            s.justifyItems        ??= fallback.justifyItems;
-            s.justifySelf         ??= fallback.justifySelf;
-            s.alignContent        ??= fallback.alignContent;
-            s.justifyContent      ??= fallback.justifyContent;
+            s.aspectRatio ??= fallback.aspectRatio;
+            s.alignItems ??= fallback.alignItems;
+            s.alignSelf ??= fallback.alignSelf;
+            s.justifyItems ??= fallback.justifyItems;
+            s.justifySelf ??= fallback.justifySelf;
+            s.alignContent ??= fallback.alignContent;
+            s.justifyContent ??= fallback.justifyContent;
             s.gridTemplateColumns ??= fallback.gridTemplateColumns;
-            s.gridTemplateRows    ??= fallback.gridTemplateRows;
+            s.gridTemplateRows ??= fallback.gridTemplateRows;
 
             // ── Margin (per-component, default is ZERO) ──────────────────────────
             s.margin = new Rect<LengthPercentageAuto>(
-                s.margin.Left   == LengthPercentageAuto.ZERO ? fallback.margin.Left   : s.margin.Left,
-                s.margin.Right  == LengthPercentageAuto.ZERO ? fallback.margin.Right  : s.margin.Right,
-                s.margin.Top    == LengthPercentageAuto.ZERO ? fallback.margin.Top    : s.margin.Top,
+                s.margin.Left == LengthPercentageAuto.ZERO ? fallback.margin.Left : s.margin.Left,
+                s.margin.Right == LengthPercentageAuto.ZERO ? fallback.margin.Right : s.margin.Right,
+                s.margin.Top == LengthPercentageAuto.ZERO ? fallback.margin.Top : s.margin.Top,
                 s.margin.Bottom == LengthPercentageAuto.ZERO ? fallback.margin.Bottom : s.margin.Bottom);
 
             // ── Padding (per-component, default is ZERO) ─────────────────────────
             s.padding = new Rect<LengthPercentage>(
-                s.padding.Left   == LengthPercentage.ZERO ? fallback.padding.Left   : s.padding.Left,
-                s.padding.Right  == LengthPercentage.ZERO ? fallback.padding.Right  : s.padding.Right,
-                s.padding.Top    == LengthPercentage.ZERO ? fallback.padding.Top    : s.padding.Top,
+                s.padding.Left == LengthPercentage.ZERO ? fallback.padding.Left : s.padding.Left,
+                s.padding.Right == LengthPercentage.ZERO ? fallback.padding.Right : s.padding.Right,
+                s.padding.Top == LengthPercentage.ZERO ? fallback.padding.Top : s.padding.Top,
                 s.padding.Bottom == LengthPercentage.ZERO ? fallback.padding.Bottom : s.padding.Bottom);
 
             // ── Enum fields (compare to factory default) ─────────────────────────
-            if (s.display       == def.display)       s.display       = fallback.display;
+            if (s.display == def.display) s.display = fallback.display;
             if (s.flexDirection == def.flexDirection) s.flexDirection = fallback.flexDirection;
-            if (s.flexWrap      == def.flexWrap)      s.flexWrap      = fallback.flexWrap;
-            if (s.position      == def.position)      s.position      = fallback.position;
+            if (s.flexWrap == def.flexWrap) s.flexWrap = fallback.flexWrap;
+            if (s.position == def.position) s.position = fallback.position;
 
             // ── float fields ─────────────────────────────────────────────────────
-            if (s.flexGrow   == def.flexGrow)   s.flexGrow   = fallback.flexGrow;
+            if (s.flexGrow == def.flexGrow) s.flexGrow = fallback.flexGrow;
             if (s.flexShrink == def.flexShrink) s.flexShrink = fallback.flexShrink;
-            if (s.flexBasis.IsAuto())           s.flexBasis  = fallback.flexBasis;
+            if (s.flexBasis.IsAuto()) s.flexBasis = fallback.flexBasis;
 
             return s;
         }

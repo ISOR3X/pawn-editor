@@ -1,4 +1,3 @@
-using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
 using PawnEditor.TaffySharp;
@@ -11,126 +10,141 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
-    private const float MinSkillWidth = 100f;
-    private const float SkillHeight = 24f;
-    private const float SkillGap = 3f;
+    private static readonly int PassionMin;
+    private static readonly int PassionMax;
+
+    static SectionWorker_Skills()
+    {
+        var passions = (Passion[])Enum.GetValues(typeof(Passion));
+        PassionMin = passions.Min(p => (int)p);
+        PassionMax = passions.Max(p => (int)p);
+    }
+
+    private static readonly Vector2 SkillRectSize = new(230f, 24f); // REF: GenUI.DrawSkill(... Vector2)
+
+    private static readonly float LevelLabelWidth =
+        DefDatabase<SkillDef>.AllDefsListForReading.Max(s => s.skillLabel.GetWidthCached()) + GenUI.GapLabel;
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         builder.Text("Skills", color: ColoredText.TipSectionTitleColor);
-        builder.Item(new Style { }, draw: r => DoSkillsRect(r, pawn));
+        builder.Div(
+            new Style
+            {
+                flexGrow = 1f, flexDirection = FlexDirection.Row, flexWrap = FlexWrap.Wrap,
+                minSize = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO),
+                justifyContent = AlignContent.SpaceBetween
+            },
+            col =>
+            {
+                var skills = SkillUI.skillDefsInListOrderCached;
+                foreach (var skillDef in skills)
+                {
+                    DrawSkill(col, pawn, skillDef);
+                }
+            });
     }
 
-    private static void DoSkillsRect(Rect inRect, Pawn pawn)
+    // REF: SkillUI.DrawSkill
+    private static void DrawSkill(TaffyBuilder builder, Pawn pawn, SkillDef skillDef)
     {
-        var cols = Mathf.CeilToInt(inRect.width / MinSkillWidth);
-        var skills = SkillUI.skillDefsInListOrderCached;
-        var skillsPerColumn = Mathf.CeilToInt(skills.Count / (float)cols);
+        var skill = pawn.skills.GetSkill(skillDef);
+        var newSkillLevel = skill.GetLevel();
+        var newPassionLevel = (int)skill.passion;
+        builder.Div(
+            new Style
+            {
+                size = new Size<Dimension>(SkillRectSize.x, SkillRectSize.y), gap = Taffy.Gap(GenUI.GapTiny)
+            },
+            r =>
+            {
+                Verse.Widgets.DrawHighlightIfMouseover(r);
+                var text = SkillUI.GetSkillDescription(skill);
+                TooltipHandler.TipRegion(r, new TipSignal(text));
+            },
+            row =>
+            {
+                row.Text(skillDef.LabelCap,
+                    style: new Style { size = new Size<Dimension>(LevelLabelWidth, Dimension.AUTO) });
+                row.Button(icon: GetTextureForPassion(pawn.skills.GetSkill(skillDef).passion), drawGraphic: false,
+                    style: new Style { size = new Size<Dimension>(24f, 24f) }, onClick: (_) => { newPassionLevel++; });
+                row.Item(new Style { flexGrow = 1f }, r =>
+                {
+                    var r2 = r.TakeRightPart(r.height / 2f);
+                    r2.SplitHorizontallyEqual(out var upRect, out var downRect);
 
-        var listing = new Listing_Standard
+                    if (Verse.Widgets.ButtonImage(upRect, TexPawnEditor.Up)) newSkillLevel++;
+                    if (Verse.Widgets.ButtonImage(downRect, TexPawnEditor.Down)) newSkillLevel--;
+
+                    var skillProgressPct = Mathf.Max(0.0f, skill.GetLevel() / (float)SkillRecord.MaxLevel);
+                    var texture2D = SkillUI.SkillBarFillTex;
+                    if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && skill.Aptitude != 0)
+                        texture2D = skill.Aptitude > 0
+                            ? SkillUI.SkillBarAptitudePositiveTex
+                            : SkillUI.SkillBarAptitudeNegativeTex;
+                    var fillTex = texture2D;
+                    Verse.Widgets.FillableBar(r, skillProgressPct, fillTex, InspectPaneFiller.HealthTex, false);
+
+                    DrawSkillLevelLabel(r with { xMin = r.xMin + GenUI.GapTiny }, skill);
+                    TrySetSkill(skill, newSkillLevel, newPassionLevel);
+                });
+            });
+    }
+
+    private static void DrawSkillLevelLabel(Rect inRect, SkillRecord skill)
+    {
+        string label;
+        var color = Color.white;
+        var level = skill.GetLevel();
+        if (skill.TotallyDisabled)
         {
-            ColumnWidth = inRect.width / cols - Listing.ColumnSpacing
-        };
+            color = SkillUI.DisabledSkillColor;
+            label = "-";
+        }
+        else
+        {
+            if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && level == 0 && skill.Aptitude != 0)
+                color = skill.Aptitude > 0 ? ColorLibrary.BrightGreen : ColorLibrary.RedReadable;
+            label = level.ToStringCached();
+        }
 
         using (new TextBlock(TextAnchor.MiddleLeft))
-        {
-            listing.Begin(inRect);
-
-            for (var i = 0; i < skills.Count; i++)
-            {
-                if (i > 0 && i % skillsPerColumn == 0)
-                    listing.NewColumn();
-
-                var skillDef = skills[i];
-
-                var r = listing.GetRect(SkillHeight);
-
-                r.xMin -= 6f; // Compensate for the 6f offset from SkillUI.DrawSkill.
-                listing.Gap(SkillGap);
-
-                var skillRecord = pawn.skills.GetSkill(skillDef);
-                var passionVal = (int)skillRecord.passion;
-                var levelVal = skillRecord.GetLevel();
-                var newPassionVal = passionVal;
-                var newLevelVal = levelVal;
-
-                // Recreate the rects for the skill sections so we can draw in our own widgets but still use SkillUI.DrawSkill
-                var r2 = r;
-                r2.TakeLeftPart(SkillUI.levelLabelWidth);
-                r2.xMin += 12f;
-                var passionRect = r2.TakeLeftPart(24f);
-                if (skillRecord.passion <= Passion.None || skillRecord.TotallyDisabled)
-                {
-                    passionRect = passionRect.CenteredVertically(24f);
-                    Verse.Widgets.DrawTextureFitted(passionRect, Verse.Widgets.PlaceholderIconTex, 1f);
-                }
-
-                // Increment passion level.
-                if (Verse.Widgets.ButtonInvisible(passionRect)) newPassionVal++;
-                newPassionVal = UIUtility.IncrementWithScroll(passionRect, newPassionVal);
-                if (Mouse.IsOver(passionRect))
-                {
-                    TooltipHandler.TipRegion(passionRect, "Click to change passion level.");
-                }
-
-                GUI.DrawTexture(r2, InspectPaneFiller.HealthTex);
-
-                if (Mathf.Approximately(SkillUI.levelLabelWidth, -1))
-                    SkillUI.levelLabelWidth =
-                        DefDatabase<SkillDef>.AllDefsListForReading.Max(s => s.skillLabel.GetWidthCached());
-                SkillUI.DrawSkill(skillRecord, r, SkillUI.SkillDrawMode.Gameplay);
-
-                // Increment skill level
-                newLevelVal = UIUtility.IncrementWithScroll(r2, newLevelVal, 5);
-                if (Verse.Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f),
-                        TexButton.Plus))
-                {
-                    if (Event.current.shift)
-                        newLevelVal += 5;
-                    else newLevelVal++;
-                }
-
-                r2.xMax -= 4f;
-                if (Verse.Widgets.ButtonImage(r2.TakeRightPart(24f).CenteredVertically(24f).ContractedBy(2f),
-                        TexButton.Minus))
-                {
-                    if (Event.current.shift)
-                        newLevelVal -= 5;
-                    else newLevelVal--;
-                }
-
-                var (min, max) = GetPassionRange();
-                if (newPassionVal > max) newPassionVal = min;
-                else if (newPassionVal < min) newPassionVal = max;
-
-                if (skillRecord.TotallyDisabled)
-                {
-                    if (passionVal != newPassionVal)
-                        Messages.Message("Can't change passion level of disabled skill", MessageTypeDefOf.RejectInput);
-                    if (levelVal != newLevelVal)
-                        Messages.Message("Can't change skill level of disabled skill", MessageTypeDefOf.RejectInput);
-                }
-                else
-                {
-                    skillRecord.passion = (Passion)newPassionVal;
-                    skillRecord.levelInt = Mathf.Clamp(newLevelVal, 0, 20);
-                }
-            }
-
-            listing.End();
-        }
+        using (new GUIColor(color))
+            Verse.Widgets.Label(inRect, label);
     }
 
-    private static (int, int) GetPassionRange()
+    private static Texture2D GetTextureForPassion(Passion passion)
     {
-        var min = 0;
-        var max = 2;
+        return passion switch
+        {
+            Passion.None => Verse.Widgets.PlaceholderIconTex,
+            Passion.Minor => SkillUI.PassionMinorIcon,
+            Passion.Major => SkillUI.PassionMajorIcon,
+            _ => Verse.Widgets.PlaceholderIconTex
+        };
+    }
 
-        // TODO: Convert into a proper check for the mod.
-        if (!ModsConfig.IsActive("vanillaexpanded.skills")) return (min, max);
-        min = 0;
-        max = 5;
 
-        return (min, max);
+    private static void TrySetSkill(SkillRecord skill, int level, int passion)
+    {
+        if (skill.TotallyDisabled)
+        {
+            if (skill.GetLevel() != level)
+                Messages.Message("Can't change the passion level of disabled skill", MessageTypeDefOf.RejectInput);
+            if ((int)skill.passion != passion)
+                Messages.Message("Can't change skill level of disabled skill", MessageTypeDefOf.RejectInput);
+        }
+        else
+        {
+            if (passion != (int)skill.passion)
+            {
+                var range = PassionMax - PassionMin + 1;
+                var wrappedPassion = ((passion - PassionMin) % range + range) % range + PassionMin;
+                skill.passion = (Passion)wrappedPassion;
+            }
+
+            if (level != skill.GetLevel())
+                skill.levelInt = Mathf.Clamp(level, SkillRecord.MinLevel, SkillRecord.MaxLevel);
+        }
     }
 }
