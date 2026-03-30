@@ -71,6 +71,8 @@ namespace PawnEditor
         /// <summary>Adds a leaf node with a full TaffySharp <see cref="Style"/>.</summary>
         public void Item(Style style, Action<Rect>? draw = null) => AddLeaf(style, draw);
 
+        public void Item(Action<Rect>? draw = null) => AddLeaf(new Style(), draw);
+
         // ── Nested row containers ───────────────────────────────────────────────
 
         /// <summary>Adds a nested row container (grow + optional build).</summary>
@@ -87,6 +89,9 @@ namespace PawnEditor
 
         public void Div(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, null, build);
+
+        public void Div(Action<TaffyBuilder>? build = null)
+            => AddContainer(new Style(), null, build);
 
         /// <summary>Adds a container that runs <paramref name="draw"/> on its own rect (e.g. highlight/tooltip) before drawing children.</summary>
         public void Div(Style style, Action<Rect>? draw, Action<TaffyBuilder>? build = null)
@@ -307,6 +312,21 @@ namespace PawnEditor
         /// <summary>Lays out a column with gap and unconstrained height. Returns the computed content height.</summary>
         public static float MeasuredColumn(Rect rect, float gap, Action<TaffyBuilder> build)
             => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);
+
+        /// <summary>Grid layout with unconstrained height. Draws items and returns the computed content height.</summary>
+        public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            float autoRowHeight, Action<TaffyBuilder> build)
+            => ExecuteMeasured(rect, MakeGridStyle(columns, null, 0f, 0f, autoRowHeight), build);
+
+        /// <summary>Grid layout with uniform gap and unconstrained height. Returns the computed content height.</summary>
+        public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            float gap, float autoRowHeight, Action<TaffyBuilder> build)
+            => ExecuteMeasured(rect, MakeGridStyle(columns, null, gap, gap, autoRowHeight), build);
+
+        /// <summary>Grid layout with separate column/row gaps and unconstrained height. Returns the computed content height.</summary>
+        public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+            float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
+            => ExecuteMeasured(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
 
         private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
         {

@@ -41,9 +41,9 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             };
         }
 
-        row.Row(new Style { gap = Taffy.Gap(GenUI.GapLabel) }, row2 =>
+        row.Div(row2 =>
         {
-            row2.Text(label);
+            row2.Text(label, style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
             row2.Button(buttonLabel, onClick: _ =>
                 {
                     Find.WindowStack.Add(new Window_AddItem(

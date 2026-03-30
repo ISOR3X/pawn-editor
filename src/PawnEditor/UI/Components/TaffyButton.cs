@@ -11,7 +11,7 @@ public static partial class TaffyExtensions
 {
     private const float ButtonIconSize = GenUI.SmallIconSize - 4f;
     private const float ButtonIconGap = GenUI.GapTiny + 2f;
-    private const float ButtonPadding = UIUtility.ButtonPadding;
+    private const float ButtonPadding = GenUI.GapLabel;
 
     /// <summary>
     /// Adds a button with auto-computed width.
@@ -19,7 +19,8 @@ public static partial class TaffyExtensions
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
         Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
-        float paddingInline = ButtonPadding, Style? style = null, bool drawGraphic = true)
+        float paddingInline = ButtonPadding, Style? style = null, bool drawGraphic = true,
+        bool block = false)
     {
         style ??= new Style();
         // Override so there's no padding if we only have an icon.
@@ -41,10 +42,19 @@ public static partial class TaffyExtensions
                         (icon != null ? ButtonIconSize : 0f);
         var totalW = unpaddedW + paddingInline * 2f;
 
-        style = style.WithDefaults(new Style
-        {
-            size = new Size<Dimension>(Dimension.Length(totalW), Dimension.Length(UIUtility.ButtonHeight))
-        });
+        // fillWidth: AUTO lets the layout engine stretch the button to fill its cell/track.
+        //            minSize guards against collapsing below content width.
+        // default:   fixed content width — no stretch in either grid or flex contexts.
+        style = style.WithDefaults(block
+            ? new Style
+            {
+                size = new Size<Dimension>(Dimension.AUTO, Dimension.Length(UIUtility.ButtonHeight)),
+                minSize = new Size<Dimension>(Dimension.Length(totalW), Dimension.AUTO)
+            }
+            : new Style
+            {
+                size = new Size<Dimension>(Dimension.Length(totalW), Dimension.Length(UIUtility.ButtonHeight))
+            });
 
 
         // Capture for closure.

@@ -12,8 +12,10 @@ public static partial class TaffyExtensions
     private const float DefaultInputWidth = 120f;
 
     // Persistent per-widget state: keyed by "{contextKey}:{file}:{line}".
-    // The draw callback writes here; the next frame's Input call reads it back into ref text.
-    private static readonly Dictionary<string, string> SInputState = new();
+    // Stores (Source, Typed): Source is the caller's value last frame; Typed is what the user
+    // has typed. The cache is only applied when Source matches the current caller value,
+    // so external changes (e.g. Generate button) are never overwritten by stale cache.
+    private static readonly Dictionary<string, (string Source, string Typed)> SInputState = new();
 
     /// <summary>
     /// Adds a text-input leaf. Works like <c>CharacterCardUtility.DoNameInputRect</c>:
@@ -28,15 +30,16 @@ public static partial class TaffyExtensions
     /// the builder so that state is isolated per pawn.
     /// </summary>
     public static void Input(this TaffyBuilder b, ref string text, int? maxLength = null,
-        Regex? pattern = null, Style? style = null, Color? color = null,
+        Regex? pattern = null, Style? style = null, Color? color = null, Action<Rect>? onHover = null,
         [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        // Read the last frame's typed value and write it back to the ref so the caller
-        // can detect changes (and act on them) during the current build phase.
-        if (SInputState.TryGetValue(key, out var stored))
-            text = stored;
+        // Only use the cached typed value if the source (pawn-side value) hasn't changed
+        // externally since last frame. If it has (e.g. Generate button fired), prefer the
+        // new source value so the external change is not overwritten.
+        if (SInputState.TryGetValue(key, out var stored) && stored.Source == text)
+            text = stored.Typed;
 
         style ??= new Style();
         style = style.WithDefaults(new Style
@@ -48,6 +51,9 @@ public static partial class TaffyExtensions
         b.AddLeaf(style, r =>
         {
             string input;
+
+            if (onHover != null && Mouse.IsOver(r)) onHover(r);
+
             using (new GUIColor(color ?? Color.white))
             {
                 input = Verse.Widgets.TextField(r, displayValue);
@@ -55,7 +61,7 @@ public static partial class TaffyExtensions
 
             if (maxLength.HasValue && input.Length > maxLength.Value) return;
             if (pattern != null && !pattern.IsMatch(input)) return;
-            SInputState[key] = input;
+            SInputState[key] = (displayValue, input);
         });
     }
 

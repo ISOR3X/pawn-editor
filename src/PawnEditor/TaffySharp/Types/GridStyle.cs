@@ -17,17 +17,24 @@ namespace PawnEditor.TaffySharp
     public readonly struct MinTrackSizingFunction : System.IEquatable<MinTrackSizingFunction>
     {
         internal readonly CompactLength _cl;
-        private MinTrackSizingFunction(CompactLength cl) { _cl = cl; }
+
+        private MinTrackSizingFunction(CompactLength cl)
+        {
+            _cl = cl;
+        }
 
         // ── Factories ─────────────────────────────────────────────────────────
         public static MinTrackSizingFunction Length(float px) => new MinTrackSizingFunction(CompactLength.Length(px));
-        public static MinTrackSizingFunction Percent(float pct) => new MinTrackSizingFunction(CompactLength.Percent(pct));
+
+        public static MinTrackSizingFunction Percent(float pct) =>
+            new MinTrackSizingFunction(CompactLength.Percent(pct));
+
         public static MinTrackSizingFunction Auto() => new MinTrackSizingFunction(CompactLength.Auto());
         public static MinTrackSizingFunction MinContent() => new MinTrackSizingFunction(CompactLength.MinContent());
         public static MinTrackSizingFunction MaxContent() => new MinTrackSizingFunction(CompactLength.MaxContent());
 
-        public static readonly MinTrackSizingFunction ZERO       = Length(0f);
-        public static readonly MinTrackSizingFunction AUTO       = Auto();
+        public static readonly MinTrackSizingFunction ZERO = Length(0f);
+        public static readonly MinTrackSizingFunction AUTO = Auto();
         public static readonly MinTrackSizingFunction MIN_CONTENT = MinContent();
         public static readonly MinTrackSizingFunction MAX_CONTENT = MaxContent();
 
@@ -44,14 +51,14 @@ namespace PawnEditor.TaffySharp
         }
 
         // ── Queries ───────────────────────────────────────────────────────────
-        public bool IsIntrinsic()     => _cl.IsIntrinsic();
+        public bool IsIntrinsic() => _cl.IsIntrinsic();
         public bool IsMinOrMaxContent() => _cl.IsMinOrMaxContent();
-        public bool UsesPercentage()  => _cl.UsesPercentage();
+        public bool UsesPercentage() => _cl.UsesPercentage();
 
         /// <summary>Resolves the definite value (if any) for this min function.</summary>
         public float? DefiniteValue(float? parentSize)
         {
-            if (_cl.Tag == CompactLength.LENGTH_TAG)  return _cl.Value;
+            if (_cl.Tag == CompactLength.LENGTH_TAG) return _cl.Value;
             if (_cl.Tag == CompactLength.PERCENT_TAG && parentSize.HasValue) return _cl.Value * parentSize.Value;
             return null;
         }
@@ -77,20 +84,32 @@ namespace PawnEditor.TaffySharp
     public readonly struct MaxTrackSizingFunction : System.IEquatable<MaxTrackSizingFunction>
     {
         internal readonly CompactLength _cl;
-        private MaxTrackSizingFunction(CompactLength cl) { _cl = cl; }
+
+        private MaxTrackSizingFunction(CompactLength cl)
+        {
+            _cl = cl;
+        }
 
         // ── Factories ─────────────────────────────────────────────────────────
-        public static MaxTrackSizingFunction Length(float px)           => new MaxTrackSizingFunction(CompactLength.Length(px));
-        public static MaxTrackSizingFunction Percent(float pct)         => new MaxTrackSizingFunction(CompactLength.Percent(pct));
-        public static MaxTrackSizingFunction Auto()                     => new MaxTrackSizingFunction(CompactLength.Auto());
-        public static MaxTrackSizingFunction MinContent()               => new MaxTrackSizingFunction(CompactLength.MinContent());
-        public static MaxTrackSizingFunction MaxContent()               => new MaxTrackSizingFunction(CompactLength.MaxContent());
-        public static MaxTrackSizingFunction FitContentPx(float px)     => new MaxTrackSizingFunction(CompactLength.FitContentPx(px));
-        public static MaxTrackSizingFunction FitContentPercent(float p) => new MaxTrackSizingFunction(CompactLength.FitContentPercent(p));
-        public static MaxTrackSizingFunction Fr(float fr)               => new MaxTrackSizingFunction(CompactLength.Fr(fr));
+        public static MaxTrackSizingFunction Length(float px) => new MaxTrackSizingFunction(CompactLength.Length(px));
 
-        public static readonly MaxTrackSizingFunction ZERO        = Length(0f);
-        public static readonly MaxTrackSizingFunction AUTO        = Auto();
+        public static MaxTrackSizingFunction Percent(float pct) =>
+            new MaxTrackSizingFunction(CompactLength.Percent(pct));
+
+        public static MaxTrackSizingFunction Auto() => new MaxTrackSizingFunction(CompactLength.Auto());
+        public static MaxTrackSizingFunction MinContent() => new MaxTrackSizingFunction(CompactLength.MinContent());
+        public static MaxTrackSizingFunction MaxContent() => new MaxTrackSizingFunction(CompactLength.MaxContent());
+
+        public static MaxTrackSizingFunction FitContentPx(float px) =>
+            new MaxTrackSizingFunction(CompactLength.FitContentPx(px));
+
+        public static MaxTrackSizingFunction FitContentPercent(float p) =>
+            new MaxTrackSizingFunction(CompactLength.FitContentPercent(p));
+
+        public static MaxTrackSizingFunction Fr(float fr) => new MaxTrackSizingFunction(CompactLength.Fr(fr));
+
+        public static readonly MaxTrackSizingFunction ZERO = Length(0f);
+        public static readonly MaxTrackSizingFunction AUTO = Auto();
         public static readonly MaxTrackSizingFunction MIN_CONTENT = MinContent();
         public static readonly MaxTrackSizingFunction MAX_CONTENT = MaxContent();
 
@@ -99,17 +118,17 @@ namespace PawnEditor.TaffySharp
             new MaxTrackSizingFunction(lp.Inner);
 
         // ── Queries ───────────────────────────────────────────────────────────
-        public bool IsFr()           => _cl.IsFr();
-        public bool IsIntrinsic()    => _cl.IsIntrinsic();
-        public bool IsFitContent()   => _cl.IsFitContent();
+        public bool IsFr() => _cl.IsFr();
+        public bool IsIntrinsic() => _cl.IsIntrinsic();
+        public bool IsFitContent() => _cl.IsFitContent();
         public bool IsMaxContentAlike() => _cl.IsMaxContentAlike();
         public bool UsesPercentage() => _cl.UsesPercentage();
-        public float FlexFactor()    => _cl.IsFr() ? _cl.Value : 0f;
+        public float FlexFactor() => _cl.IsFr() ? _cl.Value : 0f;
 
         /// <summary>Resolves to a definite value if the function is fixed (Length or resolvable Percent).</summary>
         public float? DefiniteValue(float? parentSize)
         {
-            if (_cl.Tag == CompactLength.LENGTH_TAG)  return _cl.Value;
+            if (_cl.Tag == CompactLength.LENGTH_TAG) return _cl.Value;
             if (_cl.Tag == CompactLength.PERCENT_TAG && parentSize.HasValue) return _cl.Value * parentSize.Value;
             return null;
         }
@@ -117,8 +136,8 @@ namespace PawnEditor.TaffySharp
         /// <summary>Resolves the percentage component of this function, if any.</summary>
         public float? ResolvedPercentageSize(float parentSize)
         {
-            if (_cl.Tag == CompactLength.PERCENT_TAG)             return _cl.Value * parentSize;
-            if (_cl.Tag == CompactLength.FIT_CONTENT_PCT_TAG)     return _cl.Value * parentSize;
+            if (_cl.Tag == CompactLength.PERCENT_TAG) return _cl.Value * parentSize;
+            if (_cl.Tag == CompactLength.FIT_CONTENT_PCT_TAG) return _cl.Value * parentSize;
             return null;
         }
 
@@ -128,7 +147,7 @@ namespace PawnEditor.TaffySharp
         /// </summary>
         public float FitContentLimit(float? axisAvailableSpace)
         {
-            if (_cl.Tag == CompactLength.FIT_CONTENT_PX_TAG)  return _cl.Value;
+            if (_cl.Tag == CompactLength.FIT_CONTENT_PX_TAG) return _cl.Value;
             if (_cl.Tag == CompactLength.FIT_CONTENT_PCT_TAG)
                 return axisAvailableSpace.HasValue ? _cl.Value * axisAvailableSpace.Value : float.PositiveInfinity;
             return float.PositiveInfinity;
@@ -199,7 +218,12 @@ namespace PawnEditor.TaffySharp
     public readonly struct GridLine : System.IEquatable<GridLine>
     {
         public readonly short Value;
-        public GridLine(short value) { Value = value; }
+
+        public GridLine(short value)
+        {
+            Value = value;
+        }
+
         public static implicit operator GridLine(short v) => new GridLine(v);
 
         /// <summary>Converts to OriginZero coordinates.</summary>
@@ -207,8 +231,8 @@ namespace PawnEditor.TaffySharp
         {
             int explicitLineCount = explicitTrackCount + 1;
             short oz;
-            if (Value > 0)       oz = (short)(Value - 1);
-            else if (Value < 0)  oz = (short)(Value + explicitLineCount);
+            if (Value > 0) oz = (short)(Value - 1);
+            else if (Value < 0) oz = (short)(Value + explicitLineCount);
             else throw new System.InvalidOperationException("Grid line of zero is invalid");
             return new OriginZeroLine(oz);
         }
@@ -226,10 +250,18 @@ namespace PawnEditor.TaffySharp
         : System.IEquatable<OriginZeroLine>, System.IComparable<OriginZeroLine>
     {
         public readonly short Value;
-        public OriginZeroLine(short value) { Value = value; }
 
-        public static OriginZeroLine operator +(OriginZeroLine a, OriginZeroLine b) => new OriginZeroLine((short)(a.Value + b.Value));
-        public static OriginZeroLine operator -(OriginZeroLine a, OriginZeroLine b) => new OriginZeroLine((short)(a.Value - b.Value));
+        public OriginZeroLine(short value)
+        {
+            Value = value;
+        }
+
+        public static OriginZeroLine operator +(OriginZeroLine a, OriginZeroLine b) =>
+            new OriginZeroLine((short)(a.Value + b.Value));
+
+        public static OriginZeroLine operator -(OriginZeroLine a, OriginZeroLine b) =>
+            new OriginZeroLine((short)(a.Value - b.Value));
+
         public static OriginZeroLine operator +(OriginZeroLine a, ushort b) => new OriginZeroLine((short)(a.Value + b));
         public static OriginZeroLine operator -(OriginZeroLine a, ushort b) => new OriginZeroLine((short)(a.Value - b));
 
@@ -244,7 +276,7 @@ namespace PawnEditor.TaffySharp
         {
             if (Value < -(short)counts.NegativeImplicit) return null;
             if (Value > (short)(counts.Explicit + counts.PositiveImplicit)) return null;
-            return 2 * ((Value + counts.NegativeImplicit) );
+            return 2 * ((Value + counts.NegativeImplicit));
         }
 
         public ushort ImpliedNegativeImplicitTracks() =>
@@ -275,15 +307,15 @@ namespace PawnEditor.TaffySharp
 
         public TrackCounts(ushort negativeImplicit, ushort @explicit, ushort positiveImplicit)
         {
-            NegativeImplicit  = negativeImplicit;
-            Explicit          = @explicit;
-            PositiveImplicit  = positiveImplicit;
+            NegativeImplicit = negativeImplicit;
+            Explicit = @explicit;
+            PositiveImplicit = positiveImplicit;
         }
 
         public int Len() => NegativeImplicit + Explicit + PositiveImplicit;
 
         public OriginZeroLine ImplicitStartLine() => new OriginZeroLine((short)-(NegativeImplicit));
-        public OriginZeroLine ImplicitEndLine()   => new OriginZeroLine((short)(Explicit + PositiveImplicit));
+        public OriginZeroLine ImplicitEndLine() => new OriginZeroLine((short)(Explicit + PositiveImplicit));
 
         // ── CellOccupancyMatrix track-index ↔ OriginZero conversions ──────────
 
@@ -297,12 +329,14 @@ namespace PawnEditor.TaffySharp
 
         public bool Equals(TrackCounts other) =>
             NegativeImplicit == other.NegativeImplicit &&
-            Explicit         == other.Explicit         &&
+            Explicit == other.Explicit &&
             PositiveImplicit == other.PositiveImplicit;
 
         public override bool Equals(object? obj) => obj is TrackCounts o && Equals(o);
         public override int GetHashCode() => System.HashCode.Combine(NegativeImplicit, Explicit, PositiveImplicit);
-        public override string ToString() => $"TrackCounts(-{NegativeImplicit} explicit={Explicit} +{PositiveImplicit})";
+
+        public override string ToString() =>
+            $"TrackCounts(-{NegativeImplicit} explicit={Explicit} +{PositiveImplicit})";
     }
 
     // ── GridPlacement ─────────────────────────────────────────────────────────
@@ -312,29 +346,38 @@ namespace PawnEditor.TaffySharp
     /// <summary>How a grid item is placed on a grid axis.</summary>
     public readonly struct GridPlacement : System.IEquatable<GridPlacement>
     {
-        private enum Kind : byte { Auto, Line, Span }
+        private enum Kind : byte
+        {
+            Auto,
+            Line,
+            Span
+        }
 
         private readonly Kind _kind;
         private readonly short _value; // GridLine.Value for Line; span count for Span
 
-        private GridPlacement(Kind kind, short value = 0) { _kind = kind; _value = value; }
+        private GridPlacement(Kind kind, short value = 0)
+        {
+            _kind = kind;
+            _value = value;
+        }
 
         // ── Factories ─────────────────────────────────────────────────────────
         public static readonly GridPlacement Auto = new GridPlacement(Kind.Auto);
 
         public static GridPlacement Line(short lineIndex) => new GridPlacement(Kind.Line, lineIndex);
-        public static GridPlacement Line(int  lineIndex)  => new GridPlacement(Kind.Line, (short)lineIndex);
+        public static GridPlacement Line(int lineIndex) => new GridPlacement(Kind.Line, (short)lineIndex);
 
         public static GridPlacement Span(ushort span) => new GridPlacement(Kind.Span, (short)span);
-        public static GridPlacement Span(int    span) => new GridPlacement(Kind.Span, (short)span);
+        public static GridPlacement Span(int span) => new GridPlacement(Kind.Span, (short)span);
 
         // ── Queries ───────────────────────────────────────────────────────────
         public bool IsAuto => _kind == Kind.Auto;
         public bool IsLine => _kind == Kind.Line;
         public bool IsSpan => _kind == Kind.Span;
 
-        public GridLine  AsLine()  => new GridLine((short)_value);
-        public ushort    AsSpan()  => (ushort)_value;
+        public GridLine AsLine() => new GridLine((short)_value);
+        public ushort AsSpan() => (ushort)_value;
 
         /// <summary>Converts to OriginZero placement, ignoring named lines (unsupported).</summary>
         public OriginZeroGridPlacement IntoOriginZeroIgnoringNamed(ushort explicitTrackCount)
@@ -345,19 +388,20 @@ namespace PawnEditor.TaffySharp
                 Kind.Span => OriginZeroGridPlacement.Span(AsSpan()),
                 Kind.Line when _value == 0 => OriginZeroGridPlacement.Auto,
                 Kind.Line => OriginZeroGridPlacement.Line(AsLine().IntoOriginZeroLine(explicitTrackCount)),
-                _         => OriginZeroGridPlacement.Auto,
+                _ => OriginZeroGridPlacement.Auto,
             };
         }
 
         public bool Equals(GridPlacement other) => _kind == other._kind && _value == other._value;
         public override bool Equals(object? obj) => obj is GridPlacement o && Equals(o);
         public override int GetHashCode() => System.HashCode.Combine((byte)_kind, _value);
+
         public override string ToString() => _kind switch
         {
             Kind.Auto => "auto",
             Kind.Line => $"line({_value})",
             Kind.Span => $"span({_value})",
-            _         => "auto",
+            _ => "auto",
         };
     }
 
@@ -366,23 +410,35 @@ namespace PawnEditor.TaffySharp
     /// <summary>GridPlacement in OriginZero coordinates (used internally during placement).</summary>
     public readonly struct OriginZeroGridPlacement : System.IEquatable<OriginZeroGridPlacement>
     {
-        private enum Kind : byte { Auto, Line, Span }
+        private enum Kind : byte
+        {
+            Auto,
+            Line,
+            Span
+        }
 
         private readonly Kind _kind;
         private readonly short _value;
 
-        private OriginZeroGridPlacement(Kind kind, short value = 0) { _kind = kind; _value = value; }
+        private OriginZeroGridPlacement(Kind kind, short value = 0)
+        {
+            _kind = kind;
+            _value = value;
+        }
 
         public static readonly OriginZeroGridPlacement Auto = new OriginZeroGridPlacement(Kind.Auto);
-        public static OriginZeroGridPlacement Line(OriginZeroLine line) => new OriginZeroGridPlacement(Kind.Line, line.Value);
-        public static OriginZeroGridPlacement Span(ushort span)         => new OriginZeroGridPlacement(Kind.Span, (short)span);
+
+        public static OriginZeroGridPlacement Line(OriginZeroLine line) =>
+            new OriginZeroGridPlacement(Kind.Line, line.Value);
+
+        public static OriginZeroGridPlacement Span(ushort span) => new OriginZeroGridPlacement(Kind.Span, (short)span);
 
         public bool IsAuto => _kind == Kind.Auto;
         public bool IsLine => _kind == Kind.Line;
         public bool IsSpan => _kind == Kind.Span;
 
         public OriginZeroLine AsLine() => new OriginZeroLine(_value);
-        public ushort         AsSpan() => (ushort)_value;
+        public ushort AsSpan() => (ushort)_value;
 
         public bool Equals(OriginZeroGridPlacement other) => _kind == other._kind && _value == other._value;
         public override bool Equals(object? obj) => obj is OriginZeroGridPlacement o && Equals(o);
@@ -396,10 +452,13 @@ namespace PawnEditor.TaffySharp
     {
         /// <summary>Fill rows first (default).</summary>
         Row = 0,
+
         /// <summary>Fill columns first.</summary>
         Column = 1,
+
         /// <summary>Fill rows first, dense packing.</summary>
         RowDense = 2,
+
         /// <summary>Fill columns first, dense packing.</summary>
         ColumnDense = 3,
     }
@@ -408,10 +467,12 @@ namespace PawnEditor.TaffySharp
 
     public static class GridAutoFlowExt
     {
-        public static bool IsRow(this GridAutoFlow f)    => f == GridAutoFlow.Row    || f == GridAutoFlow.RowDense;
-        public static bool IsDense(this GridAutoFlow f)  => f == GridAutoFlow.RowDense || f == GridAutoFlow.ColumnDense;
+        public static bool IsRow(this GridAutoFlow f) => f == GridAutoFlow.Row || f == GridAutoFlow.RowDense;
+        public static bool IsDense(this GridAutoFlow f) => f == GridAutoFlow.RowDense || f == GridAutoFlow.ColumnDense;
+
         public static AbsoluteAxis PrimaryAxis(this GridAutoFlow f) =>
             f.IsRow() ? AbsoluteAxis.Horizontal : AbsoluteAxis.Vertical;
+
         public static AbsoluteAxis SecondaryAxis(this GridAutoFlow f) =>
             f.IsRow() ? AbsoluteAxis.Vertical : AbsoluteAxis.Horizontal;
     }
@@ -447,7 +508,7 @@ namespace PawnEditor.TaffySharp
         public static ushort IndefiniteSpan(this Line<OriginZeroGridPlacement> self)
         {
             if (self.Start.IsSpan) return self.Start.AsSpan();
-            if (self.End.IsSpan)   return self.End.AsSpan();
+            if (self.End.IsSpan) return self.End.AsSpan();
             return 1;
         }
 
@@ -466,6 +527,7 @@ namespace PawnEditor.TaffySharp
                     return new Line<OriginZeroLine>(s, new OriginZeroLine((short)(s.Value + 1)));
                 return new Line<OriginZeroLine>(s, e);
             }
+
             if (self.Start.IsLine)
             {
                 var s = self.Start.AsLine();
@@ -474,6 +536,7 @@ namespace PawnEditor.TaffySharp
                     : new OriginZeroLine((short)(s.Value + 1));
                 return new Line<OriginZeroLine>(s, e);
             }
+
             if (self.End.IsLine)
             {
                 var e = self.End.AsLine();
@@ -482,6 +545,7 @@ namespace PawnEditor.TaffySharp
                     : new OriginZeroLine((short)(e.Value - 1));
                 return new Line<OriginZeroLine>(s, e);
             }
+
             throw new System.InvalidOperationException(
                 "ResolveDefiniteGridLines called on non-definite placement");
         }

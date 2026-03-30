@@ -1,5 +1,6 @@
 ﻿using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,7 +8,7 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public partial class Window_Editor : Window, IExposable
+public partial class Window_Editor : Window
 {
     #region Fields
 
@@ -120,29 +121,19 @@ public partial class Window_Editor : Window, IExposable
 
     private void DoLeftSection(Rect inRect)
     {
-        Taffy.Column(inRect, col =>
-        {
-            col.Item(height: Text.LineHeightOf(GameFont.Tiny), draw: rect =>
-            {
-                using (new TextBlock(GameFont.Tiny))
-                    Verse.Widgets.Label(rect, "Selected faction");
-            });
-            col.Item(height: UIUtility.ButtonHeight, draw: rect =>
-            {
-                var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-                if (UIUtility.ButtonText_WithIcon(rect, label, tex, c))
-                    Find.WindowStack.Add(FactionFloatMenu());
-            });
-            col.Item(grow: 1f, draw: rect =>
-            {
-                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
-                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
-            });
-        });
-    }
+        var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
 
-    public void ExposeData()
-    {
-        Scribe_Values.Look(ref SavedWindowRect, nameof(SavedWindowRect));
+        Taffy.Div(inRect, new Style { flexDirection = FlexDirection.Column }, builder =>
+        {
+            builder.Text("Selected faction", font: GameFont.Tiny);
+            builder.Button(label, icon: tex, iconColor: c, paddingInline: 0f,
+                style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) });
+            builder.Item(new Style { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) },
+                draw: rect =>
+                {
+                    Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                    if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
+                });
+        });
     }
 }
