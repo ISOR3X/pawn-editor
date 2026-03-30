@@ -19,7 +19,6 @@ public static class Patch_ParseHelperRect
         str = str.Trim('(', ')').Trim();
         var parts = str.Split(',');
         __result = new Rect(ParseValue(parts[0]), ParseValue(parts[1]), ParseValue(parts[2]), ParseValue(parts[3]));
-        Log.Message(__result);
         return false;
 
         static float ParseValue(string part)

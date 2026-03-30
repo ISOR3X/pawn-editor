@@ -451,8 +451,8 @@ namespace PawnEditor
             if (s.position == def.position) s.position = fallback.position;
 
             // ── float fields ─────────────────────────────────────────────────────
-            if (s.flexGrow == def.flexGrow) s.flexGrow = fallback.flexGrow;
-            if (s.flexShrink == def.flexShrink) s.flexShrink = fallback.flexShrink;
+            if (Mathf.Approximately(s.flexGrow, def.flexGrow)) s.flexGrow = fallback.flexGrow;
+            if (Mathf.Approximately(s.flexShrink, def.flexShrink)) s.flexShrink = fallback.flexShrink;
             if (s.flexBasis.IsAuto()) s.flexBasis = fallback.flexBasis;
 
             return s;

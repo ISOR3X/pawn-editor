@@ -33,7 +33,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             {
                 flexGrow = 1f, flexDirection = FlexDirection.Row, flexWrap = FlexWrap.Wrap,
                 minSize = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO),
-                justifyContent = AlignContent.SpaceBetween
+                gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny)
             },
             col =>
             {

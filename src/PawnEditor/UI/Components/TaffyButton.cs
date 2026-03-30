@@ -1,4 +1,5 @@
 using HotSwap;
+using PawnEditor.Extensions;
 using PawnEditor.TaffySharp;
 using UnityEngine;
 using Verse;
@@ -8,8 +9,8 @@ namespace PawnEditor;
 [HotSwappable]
 public static partial class TaffyExtensions
 {
-    private const float ButtonIconSize = 24f;
-    private const float ButtonIconGap = 4f;
+    private const float ButtonIconSize = GenUI.SmallIconSize - 4f;
+    private const float ButtonIconGap = GenUI.GapTiny + 2f;
     private const float ButtonPadding = UIUtility.ButtonPadding;
 
     /// <summary>
@@ -58,23 +59,30 @@ public static partial class TaffyExtensions
             if (drawGraphic) Verse.Widgets.DrawButtonGraphic(r);
             else Verse.Widgets.DrawHighlightIfMouseover(r);
 
-            if (capturedLabel != null)
+            if (capturedIcon != null || capturedLabel != null)
             {
-                var xOffset = capturedIcon != null ? ButtonIconSize + ButtonIconGap : 0f;
-                using (new TextBlock(GameFont.Small, TextAnchor.MiddleCenter, false))
-                    Verse.Widgets.Label(r with { xMin = r.xMin - xOffset },
-                        capturedLabel.Truncate(r.width - ButtonPadding));
+                var contentW = (capturedIcon != null ? ButtonIconSize : 0f)
+                               + (capturedIcon != null && capturedLabel != null ? ButtonIconGap : 0f)
+                               + capturedLabelW;
+                var groupX = r.xMin + (r.width - contentW) / 2f;
+
+                if (capturedIcon != null)
+                {
+                    using (new GUIColor(capturedColor ?? Color.white))
+                        GUI.DrawTexture(
+                            r.CenteredVertically(ButtonIconSize) with { xMin = groupX, width = ButtonIconSize },
+                            capturedIcon);
+                }
+
+                if (capturedLabel != null)
+                {
+                    var labelX = groupX + (capturedIcon != null ? ButtonIconSize + ButtonIconGap : 0f);
+                    using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft, false))
+                        Verse.Widgets.Label(r with { xMin = labelX, width = capturedLabelW },
+                            capturedLabel.Truncate(capturedLabelW));
+                }
             }
 
-            if (capturedIcon != null)
-            {
-                var ix = capturedLabel != null
-                    ? r.x + paddingInline + capturedLabelW + ButtonIconGap
-                    : r.x + (r.width - ButtonIconSize) / 2f;
-                var iy = r.y + (r.height - ButtonIconSize) / 2f;
-                using (new GUIColor(capturedColor ?? Color.white))
-                    GUI.DrawTexture(new Rect(ix, iy, ButtonIconSize, ButtonIconSize), capturedIcon);
-            }
 
             if (onHover != null)
             {

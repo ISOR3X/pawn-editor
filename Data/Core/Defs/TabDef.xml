@@ -23,8 +23,8 @@
                 <section flex-direction="column" flex-grow="1" gap="4px">PawnEditor_Abilities</section>
             </div>
             <!--            <div display="flex" flex-direction="row">-->
-            <section flex-direction="column">PawnEditor_Faction</section>
-            <!--                <section flex-basis="33%" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>-->
+            <section align-items="center" gap="24px">PawnEditor_Faction</section>
+            <section align-items="center" gap="4px" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
             <!--            </div>-->
         </layout>
     </PawnEditor.TabDef>
