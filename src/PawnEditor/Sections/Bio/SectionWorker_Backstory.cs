@@ -4,6 +4,7 @@ using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
 
 namespace PawnEditor;
 
@@ -46,18 +47,31 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             row2.Text(label, style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
             row2.Button(buttonLabel, onClick: _ =>
                 {
-                    Find.WindowStack.Add(new Window_AddItem(
-                        new DefTableWorker_Backstory(
-                            TableDefOf.PawnEditor_DefTable_ThingDef,
-                            () => DefDatabase<BackstoryDef>.AllDefs
-                                .Where(td => td.slot == slot)
-                                .Cast<Def>()
-                                .ToList(),
-                            pawn),
-                        [
-                            ("Content source", () => new DefTableFilter_ContentSource()),
-                        ]
-                    ));
+                    var filter = new ContentSourceFilter<BackstoryDef>();
+                    var t = new Table<BackstoryDef>(
+                        rows: DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
+                        columns: [
+                            Col.Create(
+                                "Def Name", 150f,
+                                (r, def) => Verse.Widgets.Label(r, (TaggedString)def.defName)
+                            ),
+                            Col.Create<PawnContext>(
+                                "Title", 200f,
+                                (r, def, ctx) => Verse.Widgets.Label(r, def.TitleCapFor(ctx.Value.gender))
+                            ),
+                            Col.Create(
+                                "Mod", 150f,
+                                (r, def) =>
+                                {
+                                    using (new GUIColor(ColoredText.SubtleGrayColor))
+                                        Verse.Widgets.Label(r, (TaggedString)(def.modContentPack?.Name ?? ""));
+                                }
+                            ),
+                        ],
+                        context: new PawnContext(pawn),
+                        filters: [filter]
+                    );
+                    Find.WindowStack.Add(new Window_AddItemNew(t, filter, pawn));
                 }, onHover: onHover,
                 style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });
         });

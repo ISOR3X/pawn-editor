@@ -1,196 +1,197 @@
-# CLAUDE.md — RimWorld Layout Engine (Taffy Port)
+# Table System Implementation Plan
 
-This file gives you persistent context for every session. Read it fully before doing any work.
+## Overview
 
----
-
-## Project Goal
-
-We are porting [Taffy](https://github.com/DioxusLabs/taffy) — a high-performance Rust UI layout library — to C# for use as a RimWorld mod. The port targets **Block**, **Flexbox**, and **CSS Grid** layout algorithms. The result should be a self-contained `TaffySharp/` module that RimWorld UI code can call into, with no dependency on Taffy's Rust runtime.
+Replace the existing Def-driven `TableWorker<T>` / `ColumnWorker<T>` system with a new, code-first table architecture. The existing classes should be considered deprecated — new tables are constructed directly via `Table<TRow>`. An XML connector can be layered on top later without changing the core.
 
 ---
 
-## Repository Layout
+## 1. Context System (`ITableContext`)
 
-```
-<mod-root>/
-├── CLAUDE.md                  ← you are here
-└── src/
-    └── PawnEditor/
-        ├── Layout/            ← IGNORE — abandoned first attempt, do not use or reference
-        ├── Layout.v2/         ← IGNORE — abandoned second attempt, do not use or reference
-        └── TaffySharp/                    ← all new ported Taffy code lives here
-            ├── Types/                     ← core data structures (Style, Size, Rect, …)
-            ├── Tree/                      ← node tree, dirty flags, layout cache
-            ├── Compute/
-            │   ├── Block/                 ← port of src/compute/block.rs
-            │   ├── Flexbox/               ← port of src/compute/flexbox.rs
-            │   └── Grid/                  ← port of src/compute/grid/
-            └── TaffyTree.cs               ← public entry point
-```
-
-The Taffy Rust source lives at:
-```
-C:\Users\Joram\Projects\rust\taffy\src\
-├── compute/
-│   ├── block.rs               ← Block layout reference
-│   ├── flexbox.rs             ← Flexbox reference
-│   └── grid/                  ← Grid reference
-├── style/                     ← Style structs reference
-└── tree/                      ← tree/node reference
-```
-
-When asked to port something, always read the corresponding Rust source file from `C:\Users\Joram\Projects\rust\taffy\src\` before writing any C#.
-
-### Important: Ignore Previous Attempts
-
-The folders `src/PawnEditor/Layout/` and `src/PawnEditor/Layout.v2/` are earlier abandoned attempts at a flexbox engine. **Do not read, reference, copy from, or base any decisions on code found in these folders.** They have known issues and are the reason we are starting fresh from Taffy. All new code goes exclusively into `src/PawnEditor/TaffySharp/`.
-
----
-
-## Unity / RimWorld Type Reuse
-
-RimWorld runs on Unity, so `UnityEngine` types are available at runtime. Use them as follows:
-
-- **Inside `TaffySharp/` compute code** — use plain C# structs (`Size<float>`, `Point<float>`, etc.). Keep compute logic decoupled from Unity so it remains unit-testable without a Unity context.
-- **At the RimWorld integration boundary** (where `TaffySharp` results are handed to `Widgets` calls) — convert to Unity types freely:
-    - `UnityEngine.Vector2` for positions and sizes passed to RimWorld UI calls
-    - `UnityEngine.Rect` for final widget rects passed to `Widgets.Draw*` etc.
-
-Provide explicit conversion helpers (e.g. `Layout.ToUnityRect()`) rather than scattering manual conversions throughout calling code.
-
----
-
-## Porting Rules (follow these every time, without being asked)
-
-### 1. Structs over classes for all layout primitives
-Every layout type that is passed around during compute — `Size<T>`, `Rect<T>`, `Point<T>`, `AvailableSpace`, `FlexItem`, `GridItem`, `LineItem` — **must be a `struct`**, not a `class`. This is the single most important performance rule.
+Some columns require runtime state (e.g. a `Pawn`) to render their cells. Context is optional and per-table — at most one context object per table instance.
 
 ```csharp
-// correct
-public readonly struct Size<T> { public T Width; public T Height; }
+// Marker interface — allows storing context without generics at the table level
+public interface ITableContext { }
 
-// wrong — causes heap allocation on every layout pass
-public class Size<T> { public T Width; public T Height; }
+// Typed accessor used by context-aware column workers
+public interface ITableContext<T> : ITableContext {
+    T Value { get; }
+}
 ```
 
-### 2. No heap allocation in hot paths
-Inside any method that runs per-node or per-frame, flag every `new List<>`, `new []`, `new SomeClass()` as a red flag. Use:
-- `Span<T>` or `stackalloc` for small temporary collections
-- Array pools (`ArrayPool<T>.Shared`) for larger temporary buffers
-- Pre-allocated arrays on the node/tree for collections that persist
-
-### 3. `readonly struct` + `in` parameters for read-only data
-When passing layout types into compute methods without mutation, use `in` to avoid defensive copies:
+**Concrete implementations** are plain sealed classes, one per context type needed:
 
 ```csharp
-public static Size<float> ComputeSize(in Style style, in Size<AvailableSpace> space) { … }
+public sealed class PawnContext : ITableContext<Pawn> {
+    public Pawn Value { get; }
+    public PawnContext(Pawn pawn) => Value = pawn;
+}
 ```
 
-### 4. Dirty flag caching — never skip this
-Every node must track an `IsDirty` flag. Layout should only be recomputed for subtrees that are dirty. Mirror Taffy's `LayoutTree` trait: nodes store a cached `Layout` result and only recompute when marked dirty by a style or tree change.
-
-### 5. Rust → C# translation patterns
-
-| Rust pattern | C# equivalent |
-|---|---|
-| `Option<T>` | `T?` (nullable value type) or a dedicated `Option<T>` struct |
-| `enum` with data (sum types) | Discriminated union struct or separate fields with a `Kind` enum |
-| `Vec<T>` in hot path | `Span<T>` / `stackalloc` / pooled array |
-| Trait implementations | Interface + explicit struct implementation |
-| `f32` | `float` |
-| `Iterator` chains | `for` loops (avoid LINQ in hot paths — it allocates) |
-| `match` | `switch` expression |
-| Tuple returns `(A, B)` | `out` parameters or a small dedicated `readonly struct` |
-
-### 6. No LINQ in compute methods
-LINQ is convenient but allocates enumerators. Use plain `for` / `foreach` loops inside `Compute/`. LINQ is fine in test code or one-time setup.
-
-### 7. Keep TaffySharp/ independent of RimWorld
-Nothing inside `TaffySharp/` should reference RimWorld or UnityEngine assemblies directly. All RimWorld/Unity integration belongs in the calling code outside this module. This keeps the layout engine unit-testable in isolation.
+Context is passed into `Table<TRow>` at construction time. It is stored as `ITableContext?` — nullable, so context-free tables are equally first-class.
 
 ---
 
-## Porting Order
+## 2. Column Workers
 
-Work in this order. Do not start a phase until the previous one has passing unit tests.
+Column workers are the rendering unit for a single column. The hierarchy has three levels:
 
-1. **Core types** — `Style`, `Size<T>`, `Rect<T>`, `Point<T>`, `AvailableSpace`, `Dimension`, `LengthPercentage`, `FlexDirection`, `AlignItems`, etc.  
-   Reference: `C:\Users\Joram\Projects\rust\taffy\src\style\`
+### 2a. `ColumnWorker<TRow>` — base, no context
 
-2. **Tree & cache** — `TaffyTree`, `NodeId`, `Layout`, dirty flags, layout cache.  
-   Reference: `C:\Users\Joram\Projects\rust\taffy\src\tree\`
+Handles header drawing, width hints, and cell rendering for rows that need no runtime context.
 
-3. **Block compute** — required by both Flexbox and Grid to measure leaf node intrinsic sizes. Port this before the container algorithms. Expose as a full public layout mode.  
-   Reference: `C:\Users\Joram\Projects\rust\taffy\src\compute\block.rs`
-
-4. **Flexbox compute** — the main algorithm.  
-   Reference: `C:\Users\Joram\Projects\rust\taffy\src\compute\flexbox.rs`
-
-5. **CSS Grid compute** — port after Flexbox is solid.  
-   Reference: `C:\Users\Joram\Projects\rust\taffy\src\compute\grid\`
-
----
-
-## Performance Budget (goals, not hard limits)
-
-- Layout of a 200-node tree should complete in **< 1ms** on a mid-range CPU.
-- Zero allocations per frame once the tree is built and unchanged.
-- Dirty re-layout of a single leaf node should recompute only its ancestors, not the full tree.
-
----
-
-## What We Are NOT Porting
-
-- Taffy's Rust test harness (we will write C# unit tests instead)
-- `taffy::style::Style` CSS parsing from strings (we set style properties directly in C#)
-- `taffy::util::debug` — not needed
-- Float layout (`compute/float.rs`, `style/float.rs`) — not needed for RimWorld UI
-
----
-
-## Do Not Deviate from Rust Taffy in `TaffySharp/`
-
-**The code inside `TaffySharp/` must be a faithful port of the Rust Taffy source.** Do not add
-convenience APIs, C#-specific abstractions, or shortcuts that have no equivalent in Rust. If you
-think a deviation is necessary, stop and explain why before writing any code — the bar is high.
-
-The only accepted difference is mechanical translation noise:
-- `Option<T>` → `T?`, `Vec<T>` → arrays/Span, traits → interfaces, `f32` → `float`, etc.
-- `TaffyTree<NodeContext>` → `TaffyTree` with `object? Context` (type erasure only, no behavioral change)
-
-RimWorld/Unity-specific conveniences belong **exclusively** in `src/PawnEditor/UI/Taffy.cs`, which
-is the integration layer and is explicitly allowed to diverge.
-
----
-
-## Session Startup Checklist
-
-Before writing any code in a new session:
-1. Re-read this file.
-2. Check `src/PawnEditor/TaffySharp/` to understand what has already been ported.
-3. Read the relevant Rust source file from `C:\Users\Joram\Projects\rust\taffy\src\` before starting a new port task.
-4. If a type already exists in `TaffySharp/Types/`, do not recreate it — extend it.
-5. Do not look at or reference `src/PawnEditor/Layout/` or `src/PawnEditor/Layout.v2/`.
-
----
-
-## Building the Project
-
-Use Rider's bundled MSBuild, **not** `dotnet build`. The shell is **bash**, so use a PowerShell heredoc invocation:
-
-```bash
-powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File - <<'EOF'
-$msbuild = 'C:\Users\Joram\AppData\Local\Programs\Rider\tools\MSBuild\Current\Bin\amd64\MSBuild.exe'
-$proj = 'C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\pawn-editor\src\PawnEditor\PawnEditor.csproj'
-$output = & $msbuild $proj /p:Configuration=Debug 2>&1
-$output | Select-String -Pattern 'CS[0-9]+|error|Build succeeded|FAILED' | Select-Object -Last 30
-EOF
+```csharp
+public abstract class ColumnWorker<TRow> {
+    public abstract float Width { get; }           // flexBasis hint passed to layout engine
+    public abstract void DrawHeader(Rect r);
+    public abstract void DrawCell(Rect r, TRow row);
+}
 ```
 
-`dotnet build` will fail due to SDK version mismatch. Always use the command above to verify the project compiles after making changes.
+### 2b. `IContextColumn` — internal marker interface
 
-### After every file you create or edit:
-1. Check that all required `using` directives are present — missing usings are the most common cause of build failures and are easy to overlook.
-2. Run the build command above to confirm no new errors were introduced.
-3. Fix any errors before moving on to the next file.
+Allows the table renderer to check for context-awareness without reflection and without exposing `ITableContext` in the base class signature.
+
+```csharp
+internal interface IContextColumn {
+    void DrawCell(Rect r, object row, ITableContext ctx);
+}
+```
+
+### 2c. `ColumnWorker<TRow, TContext>` — context-aware
+
+Subclasses override `DrawCell(Rect, TRow, TContext)`. The base plumbs the untyped `IContextColumn` implementation internally.
+
+```csharp
+public abstract class ColumnWorker<TRow, TContext> : ColumnWorker<TRow>, IContextColumn
+    where TContext : ITableContext {
+
+    // Context-aware entry point for subclasses
+    protected abstract void DrawCell(Rect r, TRow row, TContext ctx);
+
+    // Fallback — called when table has no context; subclasses may override
+    public override void DrawCell(Rect r, TRow row) { }
+
+    // IContextColumn — casts and dispatches
+    void IContextColumn.DrawCell(Rect r, object row, ITableContext ctx)
+        => DrawCell(r, (TRow)row, (TContext)ctx);
+}
+```
+
+### 2d. `ColumnWorker<TRow>.Create` — delegate factory for one-offs
+
+A pair of static factory methods on `ColumnWorker<TRow>` covers simple columns without requiring a new class:
+
+```csharp
+// No context
+ColumnWorker<TRow>.Create(
+    header: "Def Name",
+    width: 120f,
+    drawCell: (rect, row) => Widgets.Label(rect, row.defName)
+);
+
+// Context-aware
+ColumnWorker<TRow>.Create<PawnContext>(
+    header: "Title",
+    width: 120f,
+    drawCell: (rect, row, ctx) => Widgets.Label(rect, row.GetTitleFor(ctx.Value))
+);
+```
+
+Both return a `ColumnWorker<TRow>` (or `ColumnWorker<TRow, TContext>`) backed by a private delegate-holding subclass. Use a full subclass for anything non-trivial.
+
+Context-free and context-aware columns coexist in the same column list. The renderer pattern:
+
+```csharp
+foreach (var col in _columns) {
+    if (col is IContextColumn ctxCol && _context != null)
+        ctxCol.DrawCell(cellRect, row, _context);
+    else
+        col.DrawCell(cellRect, row);
+}
+```
+
+---
+
+## 3. Filter Layer (`IRowFilter<TRow>`)
+
+Filters are a separate concern from context but may share it (e.g. a filter that checks backstory applicability still needs the pawn). Filters are applied before rendering to cull the visible row set.
+
+```csharp
+public interface IRowFilter<TRow> {
+    bool Passes(TRow row, ITableContext? ctx);
+}
+```
+
+The table holds an `IReadOnlyList<IRowFilter<TRow>>` (empty by default). Filtered rows are computed once per frame before the render loop, not inside the per-cell draw call.
+
+Multiple filters are AND-composed — a row must pass all active filters to be visible.
+
+---
+
+## 4. `Table<TRow>` — runtime table instance
+
+Constructed directly — context and filters are both optional.
+
+```csharp
+public sealed class Table<TRow> {
+    public Table(
+        IEnumerable<TRow> rows,
+        IReadOnlyList<ColumnWorker<TRow>> columns,
+        ITableContext? context = null,
+        IReadOnlyList<IRowFilter<TRow>>? filters = null);
+
+    public void Draw(Rect r);
+}
+```
+
+**Example — backstory table mixing subclassed and delegate columns:**
+
+```csharp
+var table = new Table<BackstoryDef>(
+    rows: DefDatabase<BackstoryDef>.AllDefs,
+    columns: new ColumnWorker<BackstoryDef>[] {
+        ColumnWorker<BackstoryDef>.Create(            // delegate, no context
+            header: "Def Name",
+            width: 120f,
+            drawCell: (r, row) => Widgets.Label(r, row.defName)
+        ),
+        ColumnWorker<BackstoryDef>.Create<PawnContext>( // delegate, context-aware
+            header: "Title",
+            width: 200f,
+            drawCell: (r, row, ctx) => Widgets.Label(r, row.GetTitleFor(ctx.Value))
+        ),
+        new ApplicabilityIconColumn(),               // subclass, for anything non-trivial
+    },
+    context: new PawnContext(pawn),
+    filters: new IRowFilter<BackstoryDef>[] {
+        new ApplicableBackstoryFilter(),
+    }
+);
+```
+
+Key responsibilities:
+- Apply filters to produce the visible row list (cached per frame, invalidated when filter set or row source changes). Filters receive the same `ITableContext?` instance the columns do — a filter checking backstory applicability gets the pawn the same way `TitleCapColumn` does.
+- Drive the layout engine for column widths using each column's `Width` property as `flexBasis`
+- Handle scrolling and early culling (row height caching, same pattern as the existing `TableWorker`)
+- Dispatch to `IContextColumn.DrawCell` or `ColumnWorker.DrawCell` per column per visible row
+
+---
+
+## 6. XML Connector (future)
+
+When XML-defined tables are needed, a thin `TableDef` → `Table<TRow>` bridge is added. The non-generic `ColumnDefBase` / `TableDefBase` hierarchy remains (to avoid open-generic issues with RimWorld's `PlayDataLoader`), but during `ResolveReferences` they construct and cache a `Table<TRow>` directly. No changes to the core system are required.
+
+---
+
+## Implementation Order
+
+1. `ITableContext` / `ITableContext<T>` + first concrete context (`PawnContext`)
+2. `ColumnWorker<TRow>` base + `IContextColumn` marker
+3. `ColumnWorker<TRow, TContext>` with internal dispatch
+4. `ColumnWorker<TRow>.Create` delegate factories (context-free and context-aware)
+5. `IRowFilter<TRow>`
+6. `Table<TRow>` with constructor + rendering loop
+7. Migrate one real table (backstory table is a good candidate — exercises both column types, delegate columns, and a context-aware filter)
+8. XML connector (deferred)

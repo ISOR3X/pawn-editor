@@ -49,4 +49,7 @@
     <ItemGroup>
         <Compile Remove="tests\**\*.cs" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Table\" />
+    </ItemGroup>
 </Project>
