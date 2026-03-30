@@ -47,31 +47,31 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             row2.Text(label, style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
             row2.Button(buttonLabel, onClick: _ =>
                 {
-                    var filter = new ContentSourceFilter<BackstoryDef>();
+                    var sourceFilter = new ContentSourceFilter<BackstoryDef>();
+                    var compatFilter = new PawnCompatibleFilter();
                     var t = new Table<BackstoryDef>(
                         rows: DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
                         columns: [
                             Col.Create(
-                                "Def Name", 150f,
-                                (r, def) => Verse.Widgets.Label(r, (TaggedString)def.defName)
+                                Taffy.Px(150f),
+                                (grid, def) => grid.Text(def.defName),
+                                "Def Name"
                             ),
                             Col.Create<PawnContext>(
-                                "Title", 200f,
-                                (r, def, ctx) => Verse.Widgets.Label(r, def.TitleCapFor(ctx.Value.gender))
+                                Taffy.Fr(),
+                                (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
+                                "Title"
                             ),
                             Col.Create(
-                                "Mod", 150f,
-                                (r, def) =>
-                                {
-                                    using (new GUIColor(ColoredText.SubtleGrayColor))
-                                        Verse.Widgets.Label(r, (TaggedString)(def.modContentPack?.Name ?? ""));
-                                }
+                                Taffy.Px(150f),
+                                (grid, def) => grid.Text(def.modContentPack?.Name ?? "", color: ColoredText.SubtleGrayColor),
+                                "Mod"
                             ),
                         ],
                         context: new PawnContext(pawn),
-                        filters: [filter]
+                        filters: [sourceFilter, compatFilter]
                     );
-                    Find.WindowStack.Add(new Window_AddItemNew(t, filter, pawn));
+                    Find.WindowStack.Add(new Window_AddItemNew(t, sourceFilter, compatFilter, pawn));
                 }, onHover: onHover,
                 style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });
         });
