@@ -26,7 +26,6 @@ public sealed class Table<TRow>(
     private const float DefaultRowHeight = 30f;
     private const float HeaderHeight = 30f;
 
-    private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
     private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = columns.Select(c => c.TrackSize).ToList();
     private readonly List<TRow> _rows = rows.ToList();
 
@@ -36,6 +35,7 @@ public sealed class Table<TRow>(
     private Vector2 _scrollPosition;
 
     public TRow? Selected { get; private set; }
+    public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
 
     public void SetDirty() => _dirty = true;
 
@@ -52,13 +52,13 @@ public sealed class Table<TRow>(
 
         // --- Header ---
         var headerRect = r.TakeTopPart(HeaderHeight);
-        Taffy.Grid(headerRect, _columnTracks, HeaderHeight, grid =>
+        Taffy.Grid(headerRect, _columnTracks, GenUI.GapSmall, GenUI.GapTiny, HeaderHeight, grid =>
         {
             foreach (var col in columns)
                 grid.Item(draw: colRect => col.DrawHeader(colRect));
         });
 
-        using (new GUIColor(_borderColor))
+        using (new GUIColor(PawnTable.BorderColor))
             Verse.Widgets.DrawLineHorizontal(r.x, r.y, r.width);
 
         // --- Scroll view ---
@@ -96,7 +96,7 @@ public sealed class Table<TRow>(
 
                 Verse.Widgets.DrawHighlightIfMouseover(rowRect);
                 MouseoverSounds.DoRegion(rowRect);
-                if (onRowHover != null) onRowHover(rowRect, row, context);
+                onRowHover?.Invoke(rowRect, row, context);
 
                 if (Event.current.type == EventType.MouseDown && rowRect.Contains(Event.current.mousePosition))
                 {
@@ -110,7 +110,7 @@ public sealed class Table<TRow>(
             var gridRect = new Rect(0f, firstVisible * DefaultRowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * DefaultRowHeight);
 
-            Taffy.Grid(gridRect, _columnTracks, DefaultRowHeight, grid =>
+            Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, GenUI.GapTiny, DefaultRowHeight, grid =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {

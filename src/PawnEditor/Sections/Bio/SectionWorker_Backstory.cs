@@ -26,6 +26,37 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         });
     }
 
+    private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
+    {
+        return new Table<BackstoryDef>(
+            rows: DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
+            columns:
+            [
+                Col.Create<PawnContext>(
+                    Taffy.Fr(),
+                    (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
+                    "Title"
+                ),
+                Col.Create(
+                    Taffy.Px(150f),
+                    (grid, def) => grid.Text(def.modContentPack?.Name ?? "",
+                        color: ColoredText.SubtleGrayColor),
+                    "Source"
+                ),
+            ],
+            onRowHover: (rowRect, rowBackstory, ctx) =>
+            {
+                if (ctx is not ITableContext<Pawn> pawnCtx) return;
+                var tip = rowBackstory.TitleCapFor(pawnCtx.Value.gender)
+                    .Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
+                var desc = rowBackstory.FullDescriptionFor(pawn).Resolve();
+                TooltipHandler.TipRegion(rowRect, tip + desc);
+            },
+            context: new PawnContext(pawn),
+            filters: [new ContentSourceFilter<BackstoryDef>()]
+        );
+    }
+
     private static void DoBackstoryItem(TaffyBuilder row, Pawn pawn, BackstorySlot slot, string label)
     {
         var backstory = pawn.story.GetBackstory(slot);
@@ -45,43 +76,9 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         row.Div(row2 =>
         {
             row2.Text(label, style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
-            row2.Button(buttonLabel, onClick: _ =>
-                {
-                    var sourceFilter = new ContentSourceFilter<BackstoryDef>();
-                    var compatFilter = new PawnCompatibleFilter();
-                    var t = new Table<BackstoryDef>(
-                        rows: DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
-                        columns:
-                        [
-                            Col.Create(
-                                Taffy.Px(150f),
-                                (grid, def) => grid.Text(def.defName),
-                                "Def Name"
-                            ),
-                            Col.Create<PawnContext>(
-                                Taffy.Fr(),
-                                (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
-                                "Title"
-                            ),
-                            Col.Create(
-                                Taffy.Px(150f),
-                                (grid, def) => grid.Text(def.modContentPack?.Name ?? "",
-                                    color: ColoredText.SubtleGrayColor),
-                                "Mod"
-                            ),
-                        ],
-                        onRowHover: (rowRect, rowBackstory, ctx) =>
-                        {
-                            if (ctx is not ITableContext<Pawn> pawnCtx) return;
-                            var tip = rowBackstory.TitleCapFor(pawnCtx.Value.gender).Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
-                            var desc = rowBackstory.FullDescriptionFor(pawn).Resolve();
-                            TooltipHandler.TipRegion(rowRect, tip + desc);
-                        },
-                        context: new PawnContext(pawn),
-                        filters: [sourceFilter, compatFilter]
-                    );
-                    Find.WindowStack.Add(new Window_AddItemNew(t, filters: [sourceFilter, compatFilter], pawn));
-                }, onHover: onHover,
+            row2.Button(buttonLabel,
+                onClick: _ => { Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot), pawn)); },
+                onHover: onHover,
                 style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });
         });
     }

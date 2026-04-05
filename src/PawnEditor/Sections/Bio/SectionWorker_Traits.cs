@@ -1,10 +1,10 @@
-using System.Linq;
 using HotSwap;
-using PawnEditor.Extensions;
+using PawnEditor.Table;
 using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
 
 namespace PawnEditor;
 
@@ -61,7 +61,12 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                     });
             });
 
-        builder.Button("Add trait");
+        builder.Button("Add trait",
+            onClick: _ =>
+            {
+                Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn), pawn));
+            }
+        );
     }
 
     private static float GetTraitsHeight(Pawn pawn, float width)
@@ -83,6 +88,26 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             effectiveWidth);
 
         return Mathf.Max(traitsHeight, incapableHeight);
+    }
+
+    private static Table<TraitUtility.TraitRecord> GetTraitsTable(Pawn pawn)
+    {
+        return new Table<TraitUtility.TraitRecord>(
+            rows: TraitUtility.AllTraits,
+            columns:
+            [
+                Col.Create(
+                    Taffy.Fr(),
+                    (grid, record) => grid.Text(record.Degree.LabelCap),
+                    "Label"
+                ),
+                Col.Create(
+                    Taffy.Fr(),
+                    (grid, record) => grid.Text(record.TraitDef.modContentPack?.Name ?? "",
+                        color: ColoredText.SubtleGrayColor),
+                    "Source"
+                ),
+            ]);
     }
 
     private static void DoTraitsRect(Rect inRect, Pawn pawn)

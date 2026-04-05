@@ -1,11 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
 using HotSwap;
-using PawnEditor.Extensions;
+using PawnEditor.Table;
 using PawnEditor.TaffySharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Col = PawnEditor.Table.ColumnWorker<RimWorld.AbilityDef>;
 
 namespace PawnEditor;
 
@@ -30,7 +29,33 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 _abilitiesHeight = GetAbilitiesHeight(pawn, r.width);
             });
 
-        builder.Button("Add ability");
+        builder.Button("Add ability",
+            onClick: _ => Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), pawn))
+        );
+    }
+
+    private static Table<AbilityDef> GetTraitsTable(Pawn pawn)
+    {
+        return new Table<AbilityDef>(
+            rows: DefDatabase<AbilityDef>.AllDefsListForReading,
+            columns:
+            [
+                Col.Create(
+                    Taffy.Px(20f),
+                    (grid, def) => grid.Icon(def.uiIcon)
+                ),
+                Col.Create(
+                    Taffy.Fr(),
+                    (grid, def) => grid.Text(def.LabelCap),
+                    "Label"
+                ),
+                Col.Create(
+                    Taffy.Fr(),
+                    (grid, def) => grid.Text(def.modContentPack?.Name ?? "",
+                        color: ColoredText.SubtleGrayColor),
+                    "Source"
+                ),
+            ]);
     }
 
     private static float GetAbilitiesHeight(Pawn pawn, float width)
