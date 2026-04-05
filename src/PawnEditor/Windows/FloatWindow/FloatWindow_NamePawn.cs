@@ -37,7 +37,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn) : FloatWindow
         // which we use to auto-resize the window below.
         var contentHeight = Taffy.MeasuredGrid(inRect,
             columns: [Taffy.Fr(), Taffy.Fr(2), Taffy.Fr(), Taffy.Fr(2)],
-            gapX: GenUI.GapLabel, gapY: GenUI.GapSmall, autoRowHeight: UIUtility.ButtonHeight,
+            gapX: GenUI.GapLabel, gapY: GenUI.GapTiny, autoRowHeight: UIUtility.ButtonHeight,
             build: grid =>
             {
                 if (_selectedCulture != null)
