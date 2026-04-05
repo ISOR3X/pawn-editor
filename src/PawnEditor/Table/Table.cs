@@ -1,4 +1,3 @@
-using System;
 using HotSwap;
 using PawnEditor.Extensions;
 using PawnEditor.TaffySharp;
@@ -9,18 +8,27 @@ using Verse.Sound;
 
 namespace PawnEditor.Table;
 
+/// <summary>
+/// TODO:
+/// - Sortable headers
+/// - Offset in header last column (scrollbar)
+/// - Search widget
+/// </summary>
 [HotSwappable]
-public sealed class Table<TRow>
+public sealed class Table<TRow>(
+    IEnumerable<TRow> rows,
+    IReadOnlyList<ColumnWorker<TRow>> columns,
+    ITableContext? context = null,
+    IReadOnlyList<IRowFilter<TRow>>? filters = null,
+    Action<Rect, TRow, ITableContext?>? onRowHover = null
+)
 {
     private const float DefaultRowHeight = 30f;
     private const float HeaderHeight = 30f;
 
     private readonly Color _borderColor = new(1f, 1f, 1f, 0.2f);
-    private readonly IReadOnlyList<ColumnWorker<TRow>> _columns;
-    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks;
-    private readonly ITableContext? _context;
-    private readonly IReadOnlyList<IRowFilter<TRow>>? _filters;
-    private readonly List<TRow> _rows;
+    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = columns.Select(c => c.TrackSize).ToList();
+    private readonly List<TRow> _rows = rows.ToList();
 
     private readonly List<TRow> _cachedFilteredRows = [];
 
@@ -28,19 +36,6 @@ public sealed class Table<TRow>
     private Vector2 _scrollPosition;
 
     public TRow? Selected { get; private set; }
-
-    public Table(
-        IEnumerable<TRow> rows,
-        IReadOnlyList<ColumnWorker<TRow>> columns,
-        ITableContext? context = null,
-        IReadOnlyList<IRowFilter<TRow>>? filters = null)
-    {
-        _rows = rows.ToList();
-        _columns = columns;
-        _columnTracks = columns.Select(c => c.TrackSize).ToList();
-        _context = context;
-        _filters = filters;
-    }
 
     public void SetDirty() => _dirty = true;
 
@@ -59,7 +54,7 @@ public sealed class Table<TRow>
         var headerRect = r.TakeTopPart(HeaderHeight);
         Taffy.Grid(headerRect, _columnTracks, HeaderHeight, grid =>
         {
-            foreach (var col in _columns)
+            foreach (var col in columns)
                 grid.Item(draw: colRect => col.DrawHeader(colRect));
         });
 
@@ -99,14 +94,15 @@ public sealed class Table<TRow>
                 else if (i % 2 == 1)
                     Verse.Widgets.DrawLightHighlight(rowRect);
 
-                if (Mouse.IsOver(rowRect))
-                    GUI.DrawTexture(rowRect, TexUI.HighlightTex);
+                Verse.Widgets.DrawHighlightIfMouseover(rowRect);
+                MouseoverSounds.DoRegion(rowRect);
+                if (onRowHover != null) onRowHover(rowRect, row, context);
 
                 if (Event.current.type == EventType.MouseDown && rowRect.Contains(Event.current.mousePosition))
                 {
                     Selected = row;
                     SoundDefOf.Click.PlayOneShotOnCamera();
-                    Event.current.Use();
+                    Event.current.Use(); // Use the event so other widgets don't get it.
                 }
             }
 
@@ -119,10 +115,10 @@ public sealed class Table<TRow>
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {
                     var row = _cachedFilteredRows[i];
-                    foreach (var col in _columns)
+                    foreach (var col in columns)
                     {
-                        if (col is IContextColumn<TRow> ctxCol && _context != null)
-                            ctxCol.DrawCell(grid, row, _context);
+                        if (col is IContextColumn<TRow> ctxCol && context != null)
+                            ctxCol.DrawCell(grid, row, context);
                         else
                             col.DrawCell(grid, row);
                     }
@@ -138,7 +134,7 @@ public sealed class Table<TRow>
         _cachedFilteredRows.Clear();
         foreach (var row in _rows)
         {
-            if (_filters == null || _filters.All(f => f.Passes(row, _context)))
+            if (filters == null || filters.All(f => f.Passes(row, context)))
                 _cachedFilteredRows.Add(row);
         }
     }

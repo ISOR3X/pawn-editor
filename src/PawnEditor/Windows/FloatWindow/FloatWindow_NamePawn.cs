@@ -33,7 +33,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn) : FloatWindow
         var cultures = DefDatabase<CultureDef>.AllDefsListForReading;
         var xenotypes = DefDatabase<XenotypeDef>.AllDefsListForReading;
 
-        // MeasuredGrid runs with unconstrained height so Taffy computes the exact content height,
+        // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
         var contentHeight = Taffy.MeasuredGrid(inRect,
             columns: [Taffy.Fr(), Taffy.Fr(2), Taffy.Fr(), Taffy.Fr(2)],

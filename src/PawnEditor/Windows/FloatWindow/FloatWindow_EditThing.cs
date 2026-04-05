@@ -1,4 +1,3 @@
-using System.Linq;
 using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
@@ -17,31 +16,16 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
 
     private static readonly string?[] TextfieldBuffers = new string[2];
 
-    private const float Gap = 12f;
-
     public override void DoWindowContents(Rect inRect)
     {
-        var hasMadeFromStuff = thing.def.MadeFromStuff;
-        var hasQuality        = thing.HasComp<CompQuality>();
-        var hasColor          = thing is Apparel && thing.HasComp<CompColorable>();
-        var hasStyle          = ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def);
-        var isApparel         = thing is Apparel;
-        var hasCount          = thing.def.stackLimit > 1;
-        var hasPersonaTraits  = thing.HasComp<CompBladelinkWeapon>();
-        var hasName           = thing.HasComp<CompGeneratedNames>();
-        var hasRow4           = hasCount || hasName;
-
-        var rows = 3;
-        if (hasRow4)         rows++;
-        if (hasPersonaTraits) rows++;
-
-        Taffy.Grid(inRect,
+        // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
+        // which we use to auto-resize the window below.
+        var contentHeight = Taffy.MeasuredGrid(inRect,
             columns: [Taffy.Fr(), Taffy.Fr(2), Taffy.Fr(), Taffy.Fr(2)],
-            gap: Gap, autoRowHeight: UIUtility.ButtonHeight,
+            gapX: GenUI.GapLabel, gapY: GenUI.GapSmall, autoRowHeight: UIUtility.ButtonHeight,
             build: grid =>
             {
-                // ── Row 1: Stuff + Quality ─────────────────────────────────────
-                if (hasMadeFromStuff)
+                if (thing.def.MadeFromStuff)
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Stuff"));
                     grid.GridItem(draw: r =>
@@ -62,10 +46,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         }
                     });
                 }
-                else
-                    grid.GridItem(colSpan: 2);
 
-                if (hasQuality)
+                if (thing.HasComp<CompQuality>())
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Quality"));
                     grid.GridItem(draw: r =>
@@ -80,18 +62,15 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         }
                     });
                 }
-                else
-                    grid.GridItem(colSpan: 2);
 
-                // ── Row 2: Color + Style ───────────────────────────────────────
-                if (hasColor)
+                if (thing is Apparel && thing.HasComp<CompColorable>())
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Color"));
                     grid.GridItem(draw: r =>
                     {
-                        var apparel   = (Apparel)thing;
+                        var apparel = (Apparel)thing;
                         var colorRect = r.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
-                        var curColor  = apparel.DrawColor;
+                        var curColor = apparel.DrawColor;
 
                         Verse.Widgets.DrawLightHighlight(colorRect);
                         colorRect = colorRect.ContractedBy(2f);
@@ -104,16 +83,15 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         }
                     });
                 }
-                else
-                    grid.GridItem(colSpan: 2);
 
-                if (hasStyle)
+                if (ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def))
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Style"));
                     grid.GridItem(draw: r =>
                     {
-                        var styleOptions  = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def).styleDefs;
-                        var currentStyle  = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
+                        var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def)
+                            .styleDefs;
+                        var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
                         if (UIUtility.ButtonText_WithIcon(r, currentStyle.Value?.LabelCap ?? "None",
                                 currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex))
                         {
@@ -132,62 +110,49 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                         }
                     });
                 }
-                else
-                    grid.GridItem(colSpan: 2);
 
-                // ── Row 3: Hitpoints + Tainted ─────────────────────────────────
                 grid.GridItem(draw: r => Verse.Widgets.Label(r, "Hitpoints"));
                 grid.GridItem(draw: r =>
                 {
-                    float hitPoints    = thing.HitPoints;
+                    float hitPoints = thing.HitPoints;
                     float maxHitPoints = thing.MaxHitPoints;
                     thing.HitPoints = Mathf.CeilToInt(Verse.Widgets.HorizontalSlider(r,
                         thing.HitPoints, 1, thing.MaxHitPoints, true,
                         (hitPoints / maxHitPoints).ToStringPercent()));
                 });
-                if (isApparel)
+
+                if (thing is Apparel)
                 {
                     grid.GridItem(colSpan: 2, draw: r =>
                     {
-                        var apparel   = (Apparel)thing;
+                        var apparel = (Apparel)thing;
                         var isTainted = apparel.WornByCorpse;
                         Verse.Widgets.CheckboxLabeled(r, "Tainted", ref isTainted);
                         if (isTainted != apparel.WornByCorpse) apparel.WornByCorpse = isTainted;
                     });
                 }
-                else
-                    grid.GridItem(colSpan: 2);
 
-                // ── Row 4: Count + Name (if needed) ────────────────────────────
-                if (hasRow4)
+                if (thing.def.stackLimit > 1)
                 {
-                    if (hasCount)
-                    {
-                        grid.GridItem(draw: r => Verse.Widgets.Label(r, "Count"));
-                        grid.GridItem(draw: r =>
-                            Widgets.DelayedTextFieldNumeric(r, thing.stackCount, ref TextfieldBuffers[0],
-                                1, thing.def.stackLimit, null, true));
-                    }
-                    else
-                        grid.GridItem(colSpan: 2);
-
-                    if (hasName)
-                    {
-                        var name = thing.TryGetComp<CompGeneratedNames>();
-                        grid.GridItem(draw: r => Verse.Widgets.Label(r, "Name"));
-                        grid.GridItem(draw: r =>
-                        {
-                            if (Verse.Widgets.ButtonImage(r.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
-                                name.Initialize(name.Props);
-                            name.name = Verse.Widgets.TextField(r, name.name);
-                        });
-                    }
-                    else
-                        grid.GridItem(colSpan: 2);
+                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Count"));
+                    grid.GridItem(draw: r =>
+                        Widgets.DelayedTextFieldNumeric(r, thing.stackCount, ref TextfieldBuffers[0],
+                            1, thing.def.stackLimit, null, true));
                 }
 
-                // ── Row 5: Persona traits (if needed) ──────────────────────────
-                if (hasPersonaTraits)
+                if (thing.HasComp<CompGeneratedNames>())
+                {
+                    var name = thing.TryGetComp<CompGeneratedNames>();
+                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Name"));
+                    grid.GridItem(draw: r =>
+                    {
+                        if (Verse.Widgets.ButtonImage(r.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
+                            name.Initialize(name.Props);
+                        name.name = Verse.Widgets.TextField(r, name.name);
+                    });
+                }
+
+                if (thing.HasComp<CompBladelinkWeapon>())
                 {
                     var bladelink = thing.TryGetComp<CompBladelinkWeapon>();
                     WeaponTraitDef? toRemove = null;
@@ -201,13 +166,16 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                             {
                                 var canAdd = bladelink.CanAddTrait(weaponTraitDef);
                                 return new FloatMenuOption(
-                                    weaponTraitDef.LabelCap.Colorize(canAdd ? Color.white : ColoredText.SubtleGrayColor),
+                                    weaponTraitDef.LabelCap.Colorize(canAdd
+                                        ? Color.white
+                                        : ColoredText.SubtleGrayColor),
                                     () =>
                                     {
                                         if (canAdd) bladelink.traits.Add(weaponTraitDef);
-                                        else Messages.Message(
-                                            "TraitDisallowedByKind".Translate(weaponTraitDef.label, thing.Label),
-                                            MessageTypeDefOf.RejectInput);
+                                        else
+                                            Messages.Message(
+                                                "TraitDisallowedByKind".Translate(weaponTraitDef.label, thing.Label),
+                                                MessageTypeDefOf.RejectInput);
                                     });
                             }).ToList();
 
@@ -217,7 +185,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                             Find.WindowStack.Add(new FloatMenu(traitOptions));
 
                         const float elementHeight = 22f;
-                        const float margin        = (UIUtility.ButtonHeight - elementHeight) / 2;
+                        const float margin = (UIUtility.ButtonHeight - elementHeight) / 2;
                         var widgetRect = r.ContractedBy(margin);
                         GenUI.DrawElementStack(widgetRect, elementHeight, bladelink.traits,
                             delegate(Rect er, WeaponTraitDef weaponTraitDef)
@@ -243,8 +211,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWin
                 }
             });
 
-        var expectedHeight = rows * UIUtility.ButtonHeight + (rows - 1) * Gap;
-        if (!Mathf.Approximately(windowRect.height, expectedHeight))
-            windowRect.height = expectedHeight + Margin * 2;
+        if (!Mathf.Approximately(windowRect.height, contentHeight + Margin * 2))
+            windowRect.height = contentHeight + Margin * 2;
     }
 }

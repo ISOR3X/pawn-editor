@@ -1,4 +1,4 @@
-using System.Linq;
+using PawnEditor.TaffySharp;
 using RimWorld;
 using Verse;
 
@@ -10,16 +10,27 @@ namespace PawnEditor.Table;
 /// </summary>
 public sealed class PawnCompatibleFilter : IRowFilter<BackstoryDef>
 {
-    public bool Enabled = true;
+    private bool _enabled = true;
 
     public bool Passes(BackstoryDef row, ITableContext? ctx)
     {
-        if (!Enabled || ctx is not ITableContext<Pawn> pawnCtx)
+        if (!_enabled || ctx is not ITableContext<Pawn> pawnCtx)
             return true;
 
         var pawn = pawnCtx.Value;
         return row.disallowedTraits.NullOrEmpty()
                || !pawn.story.traits.allTraits.Any(t =>
                    Enumerable.Any(row.disallowedTraits, dt => dt.def == t.def));
+    }
+
+    public void DrawFilter(TaffyBuilder builder, Table<BackstoryDef> table)
+    {
+        builder.Item(new Style(), draw: r =>
+        {
+            var wasEnabled = _enabled;
+            Verse.Widgets.CheckboxLabeled(r, "Compatible with pawn", ref _enabled);
+            if (_enabled != wasEnabled)
+                table.SetDirty();
+        });
     }
 }
