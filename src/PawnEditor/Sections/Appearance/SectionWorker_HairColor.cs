@@ -1,5 +1,4 @@
 using HotSwap;
-using PawnEditor.Extensions;
 using Verse;
 
 namespace PawnEditor;

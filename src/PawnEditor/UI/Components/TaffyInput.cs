@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using PawnEditor.Extensions;
-using PawnEditor.TaffySharp;
+using Taffy;
 using UnityEngine;
 using Verse;
 

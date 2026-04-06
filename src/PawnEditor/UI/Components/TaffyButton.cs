@@ -1,6 +1,6 @@
 using HotSwap;
 using PawnEditor.Extensions;
-using PawnEditor.TaffySharp;
+using Taffy;
 using UnityEngine;
 using Verse;
 

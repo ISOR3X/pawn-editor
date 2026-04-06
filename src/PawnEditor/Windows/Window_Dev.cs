@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using HotSwap;
-using PawnEditor.TaffySharp;
+using Taffy;
 using UnityEngine;
 using Verse;
-using Display = PawnEditor.TaffySharp.Display;
+using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -304,7 +303,7 @@ public class Window_Dev : Window
         // ── Container — carries the grid template ───────────────────────────────
         var root = tree.NewWithChildren(new Style
         {
-            display = TaffySharp.Display.Grid,
+            display = Display.Grid,
             size = new Size<Dimension>(Dimension.Length(inRect.width), Dimension.Length(inRect.height)),
             gridTemplateColumns =
             [

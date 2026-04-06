@@ -1,5 +1,5 @@
 using HotSwap;
-using PawnEditor.TaffySharp;
+using Taffy;
 using RimWorld;
 using Verse;
 

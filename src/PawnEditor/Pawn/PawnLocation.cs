@@ -1,5 +1,4 @@
-﻿using System;
-using HotSwap;
+﻿using HotSwap;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;

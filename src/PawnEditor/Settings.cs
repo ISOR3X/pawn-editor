@@ -1,6 +1,4 @@
-﻿using RimWorld;
-using UnityEngine;
-using Verse;
+﻿using Verse;
 
 namespace PawnEditor;
 

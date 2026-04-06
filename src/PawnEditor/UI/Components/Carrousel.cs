@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using PawnEditor.Extensions;
+﻿using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;

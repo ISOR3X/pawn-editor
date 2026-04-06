@@ -1,5 +1,4 @@
-﻿using System;
-using PawnEditor.Extensions;
+﻿using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;

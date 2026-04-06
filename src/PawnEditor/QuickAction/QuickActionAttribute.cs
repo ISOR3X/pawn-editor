@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PawnEditor;
+﻿namespace PawnEditor;
 
 /// <summary>
 ///     Used to define a Pawn action added to the quick action button for each tab.

@@ -1,6 +1,6 @@
-// TaffySharp integration layer for RimWorld.
+// Taffy integration layer for RimWorld.
 //
-// Provides a callback-style fluent API backed by TaffySharp's Taffy layout engine.
+// Provides a callback-style fluent API backed by Taffy's Taffy layout engine.
 //
 // Usage:
 //   Taffy.Column(inRect, gap: 4f, col =>
@@ -21,15 +21,18 @@
 //       grid.GridItem(colSpan: 2, draw: r => DrawFooter(r));
 //   });
 
-using PawnEditor.TaffySharp;
+using Taffy;
 using UnityEngine;
 using Verse;
-using Display = PawnEditor.TaffySharp.Display;
+using Color = UnityEngine.Color;
+using Display = Taffy.Display;
+using FlexDirection = Taffy.FlexDirection;
+using SizeF = Taffy.SizeF;
 
 namespace PawnEditor
 {
     /// <summary>
-    /// Fluent layout builder passed to <see cref="Taffy.Row"/> / <see cref="Taffy.Column"/> lambdas.
+    /// Fluent layout builder passed to <see cref="Taffy.Row"/> / <see cref="UnityEngine.UIElements.Column"/> lambdas.
     /// </summary>
     public sealed class TaffyBuilder
     {
@@ -68,7 +71,7 @@ namespace PawnEditor
             AddLeaf(style, draw);
         }
 
-        /// <summary>Adds a leaf node with a full TaffySharp <see cref="Style"/>.</summary>
+        /// <summary>Adds a leaf node with a full Taffy <see cref="Style"/>.</summary>
         public void Item(Style style, Action<Rect>? draw = null) => AddLeaf(style, draw);
 
         public void Item(Action<Rect>? draw = null) => AddLeaf(new Style(), draw);
@@ -186,7 +189,7 @@ namespace PawnEditor
     }
 
     /// <summary>
-    /// Static entry points for TaffySharp-backed layout in RimWorld.
+    /// Static entry points for Taffy-backed layout in RimWorld.
     /// Creates a fresh layout tree per call; the layout is computed and draws callbacks invoked before returning.
     /// </summary>
     public static class Taffy

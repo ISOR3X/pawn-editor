@@ -1,5 +1,4 @@
-﻿using System;
-using HotSwap;
+﻿using HotSwap;
 using UnityEngine;
 using Verse;
 

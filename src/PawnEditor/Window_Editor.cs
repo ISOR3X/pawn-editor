@@ -1,9 +1,10 @@
 ﻿using HotSwap;
 using PawnEditor.Extensions;
-using PawnEditor.TaffySharp;
+using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 

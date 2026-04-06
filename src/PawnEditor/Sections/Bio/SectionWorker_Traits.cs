@@ -1,10 +1,11 @@
 using HotSwap;
 using PawnEditor.Table;
-using PawnEditor.TaffySharp;
+using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
+using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 

@@ -1,5 +1,4 @@
-using PawnEditor.Extensions;
-using PawnEditor.TaffySharp;
+using Taffy;
 using UnityEngine;
 
 namespace PawnEditor;

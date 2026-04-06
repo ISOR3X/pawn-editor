@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using HotSwap;
+﻿using HotSwap;
 using RimWorld;
 using Verse;
 

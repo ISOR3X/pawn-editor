@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using HotSwap;
-using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;

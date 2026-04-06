@@ -1,4 +1,4 @@
-// XML-driven layout node backed by TaffySharp.
+// XML-driven layout node backed by Taffy.
 //
 // Defines a tree of layout nodes parsed from XML, using CSS-style attribute names
 // that mirror Taffy's own XML test format. Container nodes use <div>, leaf nodes
@@ -14,14 +14,13 @@
 //       <section>PawnEditor_Skills</section>
 //   </layout>
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 using HotSwap;
-using PawnEditor.TaffySharp;
+using Taffy;
 using UnityEngine;
 using Verse;
+using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -252,13 +251,13 @@ public class TaffyLayoutNode
         return LengthPercentageAuto.Length(ParsePx(s));
     }
 
-    private static TaffySharp.Display ParseDisplay(string s) => s switch
+    private static Display ParseDisplay(string s) => s switch
     {
-        "flex" => TaffySharp.Display.Flex,
-        "grid" => TaffySharp.Display.Grid,
-        "block" => TaffySharp.Display.Block,
-        "none" => TaffySharp.Display.None,
-        _ => TaffySharp.Display.Flex,
+        "flex" => Display.Flex,
+        "grid" => Display.Grid,
+        "block" => Display.Block,
+        "none" => Display.None,
+        _ => Display.Flex,
     };
 
     private static FlexDirection ParseFlexDirection(string s) => s switch

@@ -1,5 +1,5 @@
 using HotSwap;
-using PawnEditor.TaffySharp;
+using Taffy;
 using Verse;
 
 namespace PawnEditor;

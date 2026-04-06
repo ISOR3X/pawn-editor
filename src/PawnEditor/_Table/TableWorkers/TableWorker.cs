@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HotSwap;
+﻿using HotSwap;
 using PawnEditor.Extensions;
-using PawnEditor.TaffySharp;
+using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using Display = Taffy.Display;
+using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
@@ -212,7 +211,7 @@ public abstract class TableWorker<T> where T : class
         SoundDefOf.Click.PlayOneShotOnCamera();
         Selected = thing;
     }
-    
+
     public void SetDirty()
     {
         _dirty = true;
@@ -326,7 +325,8 @@ public abstract class TableWorker<T> where T : class
         {
             var col = _cachedColumns[i];
             var style = new Style { flexGrow = col.Def.flexGrow, flexShrink = 1f };
-            style.size = style.size.MapWidth(_ => Dimension.Length(Mathf.Max(col.Def.flexBasis, col.MeasureHeaderWidth())));
+            style.size =
+                style.size.MapWidth(_ => Dimension.Length(Mathf.Max(col.Def.flexBasis, col.MeasureHeaderWidth())));
             if (col.Def.maxWidth > 0)
                 style.maxSize = style.maxSize.MapWidth(_ => Dimension.Length(col.Def.maxWidth));
             childIds.Add(tree.NewLeaf(style));
@@ -334,7 +334,7 @@ public abstract class TableWorker<T> where T : class
 
         var rootStyle = new Style
         {
-            display = TaffySharp.Display.Flex,
+            display = Display.Flex,
             flexDirection = FlexDirection.Row,
             size = new Size<Dimension>(Dimension.Length(available), Dimension.AUTO),
         };

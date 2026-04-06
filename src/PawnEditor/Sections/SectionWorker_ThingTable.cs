@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using HotSwap;
 using PawnEditor.Extensions;
-using UnityEngine;
 using Verse;
 
 namespace PawnEditor;

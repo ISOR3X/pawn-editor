@@ -1,4 +1,4 @@
-![Preview](About/Preview.png)
+![Preview](data/PawnEditor/About/Preview.png)
 
 Complete rewrite of Pawn Editor. The original I was too unfamiliar with and had some core issues in my opinion that needed fixing. This current branch is not stable and/or intended to use in a playthrough. The rewrite has the following goals:
 
@@ -9,3 +9,6 @@ Complete rewrite of Pawn Editor. The original I was too unfamiliar with and had 
 
 2. Improved mod support. Since this time I have written all code myself it should be easier to add onto it.
 3. Layout engine. Easy layout for multiple sections, adapts to whether or not sections are rendered for a Pawn.
+
+## TODO
+1. Move tests to separate project
