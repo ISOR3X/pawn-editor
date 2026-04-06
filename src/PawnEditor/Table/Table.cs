@@ -52,7 +52,7 @@ public sealed class Table<TRow>(
 
         // --- Header ---
         var headerRect = r.TakeTopPart(HeaderHeight);
-        Taffy.Grid(headerRect, _columnTracks, GenUI.GapSmall, GenUI.GapTiny, HeaderHeight, grid =>
+        Taffy.Grid(headerRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
         {
             foreach (var col in columns)
                 grid.Item(draw: colRect => col.DrawHeader(colRect));
@@ -108,9 +108,9 @@ public sealed class Table<TRow>(
 
             // Cell content — one CSS Grid layout pass for all visible cells
             var gridRect = new Rect(0f, firstVisible * DefaultRowHeight,
-                viewRect.width, (lastVisible - firstVisible + 1) * DefaultRowHeight);
+                viewRect.width, (lastVisible - firstVisible + 1) * DefaultRowHeight );
 
-            Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, GenUI.GapTiny, DefaultRowHeight, grid =>
+            Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, 0f, DefaultRowHeight, grid =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {

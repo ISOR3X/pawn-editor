@@ -23,7 +23,10 @@ public abstract class ColumnWorker<TRow>
         where TContext : ITableContext
         => new DelegateContextColumn<TContext>(trackSize, drawCell, header);
 
-    private sealed class DelegateColumn(TrackSizingFunction trackSize, Action<TaffyBuilder, TRow> drawCell, string? header)
+    private sealed class DelegateColumn(
+        TrackSizingFunction trackSize,
+        Action<TaffyBuilder, TRow> drawCell,
+        string? header)
         : ColumnWorker<TRow>
     {
         public override TrackSizingFunction TrackSize => trackSize;
@@ -31,7 +34,7 @@ public abstract class ColumnWorker<TRow>
         public override void DrawHeader(Rect r)
         {
             if (header == null) return;
-            using (new TextBlock(TextAnchor.MiddleCenter))
+            using (new TextBlock(TextAnchor.MiddleLeft))
                 Verse.Widgets.Label(r, (TaggedString)header);
         }
 
@@ -50,7 +53,7 @@ public abstract class ColumnWorker<TRow>
         public override void DrawHeader(Rect r)
         {
             if (header == null) return;
-            using (new TextBlock(TextAnchor.MiddleCenter))
+            using (new TextBlock(TextAnchor.MiddleLeft))
                 Verse.Widgets.Label(r, (TaggedString)header);
         }
 
@@ -68,7 +71,9 @@ public abstract class ColumnWorker<TRow, TContext> : ColumnWorker<TRow>, IContex
 {
     protected abstract void DrawCell(TaffyBuilder grid, TRow row, TContext ctx);
 
-    public override void DrawCell(TaffyBuilder grid, TRow row) { }
+    public override void DrawCell(TaffyBuilder grid, TRow row)
+    {
+    }
 
     public void DrawCell(TaffyBuilder grid, TRow row, ITableContext ctx)
         => DrawCell(grid, row, (TContext)ctx);

@@ -44,4 +44,10 @@ public static class Utility
         var result = parts.Select(part => Regex.Replace(part, @"(?<=[a-z])(?=[A-Z])", " ").ToLower());
         return string.Join(", ", result).CapitalizeFirst();
     }
+
+    public static string ReadableCamelCase(this string text)
+    {
+        var result = Regex.Replace(text, "(?<!^)([A-Z])", " $1");
+        return result.ToLower().CapitalizeFirst();
+    }
 }

@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor.Table;
 
-public sealed class ContentSourceFilter<TDef> : IRowFilter<TDef> where TDef : Def
+public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TDef : Def
 {
     private ModContentPack? _selected;
 
@@ -13,7 +13,8 @@ public sealed class ContentSourceFilter<TDef> : IRowFilter<TDef> where TDef : De
 
     public void DrawFilter(TaffyBuilder builder, Table<TDef> table)
     {
-        builder.Button($"Source: {_selected?.Name ?? "Any"}",
+        builder.Text("Content source", font: GameFont.Tiny);
+        builder.Button(_selected?.Name ?? "Any",
             style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) }, onClick: (_) =>
             {
                 var opts = LoadedModManager.RunningMods

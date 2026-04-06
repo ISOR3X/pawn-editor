@@ -8,7 +8,7 @@ namespace PawnEditor;
 /// <summary>
 /// Fixes Rect serialization: Rect.ToString() emits "(x:N, y:N, width:N, height:N)" but
 /// ParseHelper.FromStringRect expects a different format and throws a FormatException.
-/// We replace it with a parser that handles Unity's labelled format.
+/// We replace it with a parser that handles Unity's labeled format.
 /// </summary>
 [HarmonyPatch(typeof(ParseHelper), nameof(ParseHelper.FromStringRect))]
 public static class Patch_ParseHelperRect

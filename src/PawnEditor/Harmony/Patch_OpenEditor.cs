@@ -21,11 +21,6 @@ public class Patch_OpenEditor
             {
                 PawnEditorMod.Settings.drawDebug = !PawnEditorMod.Settings.drawDebug;
             }
-            else
-            {
-                if (Find.WindowStack.IsOpen<Window_Dev>()) Find.WindowStack.TryRemove(typeof(Window_Dev));
-                else Find.WindowStack.Add(new Window_Dev());
-            }
         }
     }
 }

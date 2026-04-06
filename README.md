@@ -12,3 +12,4 @@ Complete rewrite of Pawn Editor. The original I was too unfamiliar with and had 
 
 ## TODO
 1. Move tests to separate project
+2. Add CI to build mod

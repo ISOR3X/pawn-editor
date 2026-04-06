@@ -53,7 +53,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                 TooltipHandler.TipRegion(rowRect, tip + desc);
             },
             context: new PawnContext(pawn),
-            filters: [new ContentSourceFilter<BackstoryDef>()]
+            filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_BackstoryDefSpawnCategory()]
         );
     }
 
@@ -77,7 +77,10 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         {
             row2.Text(label, style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
             row2.Button(buttonLabel,
-                onClick: _ => { Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot), pawn)); },
+                onClick: _ =>
+                {
+                    Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot), pawn));
+                },
                 onHover: onHover,
                 style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });
         });

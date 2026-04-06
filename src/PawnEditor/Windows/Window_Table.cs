@@ -4,7 +4,6 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Display = Taffy.Display;
 using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
@@ -29,8 +28,7 @@ public class Window_Table<T>(
                         builder2.Div(
                             new Style
                             {
-                                size = new Size<Dimension>(200f, Dimension.AUTO), display = Display.Grid,
-                                gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)],
+                                size = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
                                 gap = Taffy.Gap(GenUI.GapTiny)
                             }, build: builder3 =>
                             {
