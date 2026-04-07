@@ -1,18 +1,18 @@
-﻿using HotSwap;
+using HotSwap;
+using PawnEditor.Table;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public class ThingColumnWorker_Edit : ColumnWorker_Icon<Thing>
+public class ThingColumnWorker_Edit : ThingColumnWorker
 {
-    protected override void DrawIcon(Rect inRect, Thing thing, TableWorker<Thing> table)
+    protected override void DrawCellContent(Rect r, Thing row)
     {
-        var iconRect = new Rect(table.BoundRect.x, inRect.y, table.BoundRect.width, inRect.height);
-        if (Verse.Widgets.ButtonImage(inRect.ContractedBy(4f), TexButton.NewItem, tooltip: "Edit item"))
+        if (Widgets.ButtonImage(r.ContractedBy(4f), TexButton.NewItem, tooltip: "Edit item"))
         {
-            FloatWindow.ToggleState(iconRect, () => new FloatWindow_EditThing(iconRect, thing, Find.WindowStack.WindowOfType<Window_Editor>()));
+            FloatWindow.ToggleState(r, () => new FloatWindow_EditThing(r, row, Find.WindowStack.WindowOfType<Window_Editor>()));
         }
     }
 }

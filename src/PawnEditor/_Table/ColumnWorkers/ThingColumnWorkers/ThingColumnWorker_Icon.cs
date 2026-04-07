@@ -1,12 +1,13 @@
+using PawnEditor.Table;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-public class ThingColumnWorker_Icon : ColumnWorker_Icon<Thing>
+public class ThingColumnWorker_Icon : ThingColumnWorker
 {
-    protected override void DrawIcon(Rect inRect, Thing thing, TableWorker<Thing> table)
+    protected override void DrawCellContent(Rect r, Thing row)
     {
-        Verse.Widgets.ThingIcon(GetCellRect(inRect, table), thing);
+        Widgets.ThingIcon(r.ContractedBy(2f), row);
     }
 }

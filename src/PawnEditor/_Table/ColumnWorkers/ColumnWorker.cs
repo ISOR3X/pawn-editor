@@ -172,6 +172,3 @@ public abstract class ColumnWorker<T> where T : class
     }
 }
 
-public abstract class DefColumnWorker : ColumnWorker<Def>;
-
-public abstract class ThingColumnWorker : ColumnWorker<Thing>;
