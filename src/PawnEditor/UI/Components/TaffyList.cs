@@ -43,7 +43,7 @@ public static partial class TaffyExtensions
         {
             SScrollPositions.TryGetValue(key, out var sp);
 
-            var totalHeight = capturedItems.Count * itemHeight;
+            var totalHeight = Math.Max(capturedItems.Count, 1) * itemHeight;
             var viewRect = new Rect(0f, 0f, r.width - UIUtility.ScrollBarWidth, totalHeight);
 
             Verse.Widgets.BeginScrollView(r, ref sp, viewRect);
@@ -57,6 +57,12 @@ public static partial class TaffyExtensions
 
                 for (var i = first; i <= last; i++)
                     drawItem(new Rect(0f, i * itemHeight, viewRect.width, itemHeight), capturedItems[i]);
+            }
+            else
+            {
+                using (new GUIColor(ColoredText.SubtleGrayColor))
+                using (new TextBlock(TextAnchor.MiddleLeft))
+                    Verse.Widgets.Label(viewRect, "No results available.");
             }
 
             Verse.Widgets.EndScrollView();

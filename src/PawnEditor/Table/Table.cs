@@ -22,7 +22,6 @@ public sealed class Table<TRow>(
     private const float HeaderHeight = 30f;
 
     private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = columns.Select(c => c.TrackSize).ToList();
-    private readonly List<TRow> _rows = rows.ToList();
 
     private readonly List<TRow> _cachedFilteredRows = [];
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
@@ -33,6 +32,8 @@ public sealed class Table<TRow>(
     private bool _sortDescending;
 
     public TRow? Selected { get; private set; }
+    public List<TRow> Rows { get; } = rows.ToList();
+
     public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
 
     public void SetDirty() => _dirty = true;
@@ -194,7 +195,7 @@ public sealed class Table<TRow>(
         _cachedFilteredRows.Clear();
 
         var searchText = _searchWidget?.filter.Text;
-        foreach (var row in _rows)
+        foreach (var row in Rows)
         {
             if (filters != null && !filters.All(f => f.Passes(row, context)))
                 continue;

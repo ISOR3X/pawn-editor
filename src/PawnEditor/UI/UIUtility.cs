@@ -1,8 +1,10 @@
-﻿using HotSwap;
+﻿using System.Drawing;
+using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Color = UnityEngine.Color;
 
 namespace PawnEditor;
 
@@ -16,6 +18,13 @@ public static class UIUtility
     public const float LabelPadding = 10f;
     public const float LabelOffset = 24f; // How far a label should be from its widget
     public static readonly Vector2 BottomButtonSize = new(150f, 38f);
+
+    public enum ComponentSize
+    {
+        Small = -1,
+        Default = 0,
+        Large = 1
+    }
 
     public static void SplitHorizontallyEqual(this Rect rect, out Rect top, out Rect bottom, float padding = 0)
     {
