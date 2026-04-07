@@ -1,26 +1,23 @@
-﻿using HotSwap;
+using HotSwap;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public abstract class FloatWindow : Window
+public abstract class FloatWindow : OwnedWindow
 {
     protected virtual Vector2 InitialPositionShift => new(0, 8f);
     protected virtual bool UseWidgetWidth => false;
     private readonly Rect _boundWidgetRect;
-    private Window? _ownerInstance;
 
-    protected FloatWindow(Rect boundWidgetRect)
+    protected FloatWindow(Rect boundWidgetRect, Window? owner = null) : base(owner)
     {
         _boundWidgetRect = boundWidgetRect;
         onlyOneOfTypeAllowed = true;
         layer = WindowLayer.SubSuper;
         closeOnClickedOutside = true;
     }
-
-    protected virtual Window? Owner => null;
 
     protected virtual FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
 
@@ -80,19 +77,6 @@ public abstract class FloatWindow : Window
         position.y = Mathf.Clamp(position.y, 0 + margin, Screen.height - margin);
 
         return position;
-    }
-
-    public override void PostOpen()
-    {
-        base.PostOpen();
-        _ownerInstance = Owner;
-    }
-
-    public override void ExtraOnGUI()
-    {
-        base.ExtraOnGUI();
-        if (_ownerInstance != null && !Find.WindowStack.IsOpen(_ownerInstance))
-            Close(false);
     }
 
     public static void ToggleState<T>(Rect widgetRect, Func<T> factory) where T : FloatWindow

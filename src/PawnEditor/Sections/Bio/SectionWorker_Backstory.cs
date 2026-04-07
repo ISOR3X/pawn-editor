@@ -35,13 +35,17 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                 Col.Create<PawnContext>(
                     Taffy.Fr(),
                     (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
-                    "Title"
+                    "Title",
+                    compare: (a, b) => string.Compare(
+                        a.TitleCapFor(pawn.gender),
+                        b.TitleCapFor(pawn.gender),
+                        StringComparison.CurrentCultureIgnoreCase)
                 ),
-                Col.Create(
+                Col.CreateText(
                     Taffy.Px(150f),
-                    (grid, def) => grid.Text(def.modContentPack?.Name ?? "",
-                        color: ColoredText.SubtleGrayColor),
-                    "Source"
+                    def => def.modContentPack?.Name ?? "",
+                    "Source",
+                    color: ColoredText.SubtleGrayColor
                 ),
             ],
             onRowHover: (rowRect, rowBackstory, ctx) =>
@@ -53,7 +57,8 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                 TooltipHandler.TipRegion(rowRect, tip + desc);
             },
             context: new PawnContext(pawn),
-            filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_BackstoryDefSpawnCategory()]
+            filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_BackstoryDefSpawnCategory()],
+            searchProjection: def => def.TitleCapFor(pawn.gender)
         );
     }
 
@@ -79,7 +84,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             row2.Button(buttonLabel,
                 onClick: _ =>
                 {
-                    Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot), pawn));
+                    Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot), pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
                 },
                 onHover: onHover,
                 style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });

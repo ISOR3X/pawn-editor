@@ -11,7 +11,8 @@ namespace PawnEditor;
 [HotSwappable]
 public class Window_Table<T>(
     Table<T> table,
-    Pawn pawn) : Window
+    Pawn pawn,
+    Window? owner = null) : OwnedWindow(owner)
 {
     public override Vector2 InitialSize => Page.StandardSize - new Vector2(128f, 128f);
 

@@ -30,7 +30,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             });
 
         builder.Button("Add ability",
-            onClick: _ => Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), pawn))
+            onClick: _ => Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), pawn, Find.WindowStack.WindowOfType<Window_Editor>()))
         );
     }
 

@@ -48,8 +48,8 @@ public static partial class TaffyExtensions
         style = style.WithDefaults(block
             ? new Style
             {
-                size = new Size<Dimension>(Dimension.AUTO, Dimension.Length(UIUtility.ButtonHeight)),
-                minSize = new Size<Dimension>(Dimension.Length(totalW), Dimension.AUTO)
+                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.Length(UIUtility.ButtonHeight)),
+                minSize = new Size<Dimension>(Dimension.Length(unpaddedW), Dimension.AUTO)
             }
             : new Style
             {

@@ -1,4 +1,4 @@
-﻿using HotSwap;
+using HotSwap;
 using RimWorld;
 using Taffy;
 using Verse;
@@ -8,42 +8,52 @@ namespace PawnEditor.Table;
 [HotSwappable]
 public class RowFilter_BackstoryDefSpawnCategory : IRowFilter<BackstoryDef>
 {
-    private string? _selected;
+    private readonly HashSet<string> _selectedCategories = [];
+    private string _searchText = "";
+
+    private static readonly List<string> SpawnCategories =
+        DefDatabase<BackstoryDef>.AllDefs.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s).ToList();
 
     public bool Passes(BackstoryDef row, ITableContext? ctx) =>
-        _selected == null || row.spawnCategories.Contains(_selected);
-
-    private static List<string> _spawnCategories =>
-        DefDatabase<BackstoryDef>.AllDefs.SelectMany(bd => bd.spawnCategories).Distinct().ToList();
+        _selectedCategories.Count == 0 ||
+        _selectedCategories.All(c => row.spawnCategories.Contains(c));
 
     public void DrawFilter(TaffyBuilder builder, Table<BackstoryDef> table)
     {
-        builder.Text("Spawn category", font: GameFont.Tiny);
-
-        foreach (var b in _spawnCategories)
+        builder.Collapsible("Spawn category", col =>
         {
-            builder.Div(build =>
+            col.Input(ref _searchText,
+                style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) });
+
+            var filtered = SpawnCategories
+                .Where(c => _searchText.NullOrEmpty() ||
+                            c.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+
+            col.List(filtered, (rect, category) =>
             {
-                    
+                var selected = _selectedCategories.Contains(category);
+                var prev = selected;
+                Verse.Widgets.CheckboxLabeled(rect, category.ReadableCamelCase(), ref selected);
+                if (selected == prev) return;
+                if (selected) _selectedCategories.Add(category);
+                else _selectedCategories.Remove(category);
+                table.SetDirty();
             });
-        }
 
-
-        builder.Button($"Category: {_selected ?? "All"}",
-            style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) }, onClick: (_) =>
+            col.Row(new Style { gap = Taffy.Gap(GenUI.GapTiny) }, row =>
             {
-                var opts = DefDatabase<BackstoryDef>.AllDefs.SelectMany(bd => bd.spawnCategories).Distinct()
-                    .Select(b => new FloatMenuOption(b.ReadableCamelCase(), () =>
+                row.Button("Enable all", block: true, onClick: _ =>
                     {
-                        _selected = b;
+                        foreach (var c in SpawnCategories) _selectedCategories.Add(c);
                         table.SetDirty();
-                    })).Prepend(new FloatMenuOption("All", () =>
-                    {
-                        _selected = null;
-                        table.SetDirty();
-                    })).ToList();
-
-                Find.WindowStack.Add(new FloatMenu(opts));
+                    });
+                row.Button("Disable all", block: true, onClick: _ =>
+                {
+                    _selectedCategories.Clear();
+                    table.SetDirty();
+                });
             });
+        });
     }
 }

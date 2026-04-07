@@ -8,19 +8,14 @@ using Verse.Sound;
 
 namespace PawnEditor.Table;
 
-/// <summary>
-/// TODO:
-/// - Sortable headers
-/// - Offset in header last column (scrollbar)
-/// - Search widget
-/// </summary>
 [HotSwappable]
 public sealed class Table<TRow>(
     IEnumerable<TRow> rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,
     ITableContext? context = null,
     IReadOnlyList<IRowFilter<TRow>>? filters = null,
-    Action<Rect, TRow, ITableContext?>? onRowHover = null
+    Action<Rect, TRow, ITableContext?>? onRowHover = null,
+    Func<TRow, string>? searchProjection = null
 )
 {
     private const float DefaultRowHeight = 30f;
@@ -30,14 +25,24 @@ public sealed class Table<TRow>(
     private readonly List<TRow> _rows = rows.ToList();
 
     private readonly List<TRow> _cachedFilteredRows = [];
+    private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
 
     private bool _dirty = true;
     private Vector2 _scrollPosition;
+    private ColumnWorker<TRow>? _sortingBy;
+    private bool _sortDescending;
 
     public TRow? Selected { get; private set; }
     public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
 
     public void SetDirty() => _dirty = true;
+
+    public void SortBy(ColumnWorker<TRow>? column, bool descending)
+    {
+        _sortingBy = column;
+        _sortDescending = descending;
+        SetDirty();
+    }
 
     public void Draw(Rect r)
     {
@@ -50,12 +55,49 @@ public sealed class Table<TRow>(
             RecacheFilteredRows();
         }
 
+        // --- Search footer ---
+        if (_searchWidget != null)
+        {
+            var footerRect = r.TakeBottomPart(UIUtility.ButtonHeight);
+            r.yMax -= GenUI.GapTiny;
+            _searchWidget.OnGUI(footerRect.RightPartPixels(180f), SetDirty);
+        }
+
         // --- Header ---
+        // Use the same content width as the scroll view to keep columns aligned.
         var headerRect = r.TakeTopPart(HeaderHeight);
-        Taffy.Grid(headerRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
+        var headerContentRect = new Rect(headerRect.x, headerRect.y, headerRect.width - UIUtility.ScrollBarWidth,
+            headerRect.height);
+        Taffy.Grid(headerContentRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
         {
             foreach (var col in columns)
-                grid.Item(draw: colRect => col.DrawHeader(colRect));
+            {
+                grid.Item(draw: colRect =>
+                {
+                    col.DrawHeader(colRect);
+
+                    if (ReferenceEquals(col, _sortingBy))
+                    {
+                        var icon = _sortDescending ? PawnColumnWorker.SortingDescendingIcon : PawnColumnWorker.SortingIcon;
+                        GUI.DrawTexture(
+                            new Rect(colRect.xMax - icon.width - 1f, colRect.yMax - icon.height - 1f, icon.width,
+                                icon.height),
+                            icon);
+                    }
+
+                    if (col.Sortable)
+                    {
+                        if (Mouse.IsOver(colRect))
+                            Verse.Widgets.DrawHighlight(colRect);
+
+                        if (Event.current.type == EventType.MouseDown && colRect.Contains(Event.current.mousePosition))
+                        {
+                            HandleHeaderClick(col, Event.current.button);
+                            Event.current.Use();
+                        }
+                    }
+                });
+            }
         });
 
         using (new GUIColor(PawnTable.BorderColor))
@@ -108,7 +150,7 @@ public sealed class Table<TRow>(
 
             // Cell content — one CSS Grid layout pass for all visible cells
             var gridRect = new Rect(0f, firstVisible * DefaultRowHeight,
-                viewRect.width, (lastVisible - firstVisible + 1) * DefaultRowHeight );
+                viewRect.width, (lastVisible - firstVisible + 1) * DefaultRowHeight);
 
             Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, 0f, DefaultRowHeight, grid =>
             {
@@ -129,13 +171,47 @@ public sealed class Table<TRow>(
         Verse.Widgets.EndScrollView();
     }
 
+    private void HandleHeaderClick(ColumnWorker<TRow> col, int button)
+    {
+        if (button == 0) // LMB: off → asc, asc → desc, desc → off
+        {
+            if (!ReferenceEquals(_sortingBy, col)) SortBy(col, true);
+            else if (_sortDescending) SortBy(col, false);
+            else SortBy(null, false);
+            SoundDefOf.Tick_Low.PlayOneShotOnCamera();
+        }
+        else if (button == 1) // RMB: off → desc, desc → asc, asc → off
+        {
+            if (!ReferenceEquals(_sortingBy, col)) SortBy(col, false);
+            else if (_sortDescending) SortBy(col, true);
+            else SortBy(null, false);
+            SoundDefOf.Tick_High.PlayOneShotOnCamera();
+        }
+    }
+
     private void RecacheFilteredRows()
     {
         _cachedFilteredRows.Clear();
+
+        var searchText = _searchWidget?.filter.Text;
         foreach (var row in _rows)
         {
-            if (filters == null || filters.All(f => f.Passes(row, context)))
-                _cachedFilteredRows.Add(row);
+            if (filters != null && !filters.All(f => f.Passes(row, context)))
+                continue;
+            if (!searchText.NullOrEmpty() && searchProjection != null)
+            {
+                var text = searchProjection(row);
+                if (text == null || text.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+            }
+
+            _cachedFilteredRows.Add(row);
+        }
+
+        if (_sortingBy != null)
+        {
+            var dir = _sortDescending ? -1 : 1;
+            _cachedFilteredRows.SortStable((a, b) => _sortingBy.Compare(a, b) * dir);
         }
     }
 }

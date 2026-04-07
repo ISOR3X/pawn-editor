@@ -12,7 +12,7 @@ public class ThingColumnWorker_Edit : ColumnWorker_Icon<Thing>
         var iconRect = new Rect(table.BoundRect.x, inRect.y, table.BoundRect.width, inRect.height);
         if (Verse.Widgets.ButtonImage(inRect.ContractedBy(4f), TexButton.NewItem, tooltip: "Edit item"))
         {
-            FloatWindow.ToggleState(iconRect, () => new FloatWindow_EditThing(iconRect, thing));
+            FloatWindow.ToggleState(iconRect, () => new FloatWindow_EditThing(iconRect, thing, Find.WindowStack.WindowOfType<Window_Editor>()));
         }
     }
 }

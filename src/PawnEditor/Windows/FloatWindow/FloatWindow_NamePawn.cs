@@ -8,7 +8,7 @@ using Verse.Sound;
 namespace PawnEditor;
 
 [HotSwappable]
-public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn) : FloatWindow(boundWidgetRect)
+public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner = null) : FloatWindow(boundWidgetRect, owner)
 {
     private static bool _forceNoNick;
     private static bool _keepLastName;
@@ -16,8 +16,6 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn) : FloatWindow
     private CultureDef? _selectedCulture;
     private Gender _selectedGender = Gender.Male;
     private XenotypeDef? _selectedXenotype;
-
-    protected override Window? Owner => Find.WindowStack.WindowOfType<Window_Editor>();
 
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomCenter;
 

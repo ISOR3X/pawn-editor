@@ -65,7 +65,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
         builder.Button("Add trait",
             onClick: _ =>
             {
-                Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn), pawn));
+                Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn), pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
             }
         );
     }

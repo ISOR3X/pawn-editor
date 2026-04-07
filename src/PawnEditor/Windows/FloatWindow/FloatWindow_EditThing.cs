@@ -7,9 +7,8 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing) : FloatWindow(boundWidgetRect)
+public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? owner = null) : FloatWindow(boundWidgetRect, owner)
 {
-    protected override Window? Owner => Find.WindowStack.WindowOfType<Window_Editor>();
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
     protected override Vector2 InitialPositionShift => Vector2.zero;
     protected override bool UseWidgetWidth => true;
