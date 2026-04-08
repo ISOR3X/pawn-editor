@@ -127,7 +127,7 @@ public partial class Window_Editor : Window
         Taffy.Div(inRect, new Style { flexDirection = FlexDirection.Column }, builder =>
         {
             builder.Text("Selected faction", font: GameFont.Tiny);
-            builder.Button(label, icon: tex, iconColor: c, paddingInline: 0f,
+            builder.Button(label, icon: tex, iconColor: c, block: true,
                 style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) },
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
             builder.Item(new Style { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) },

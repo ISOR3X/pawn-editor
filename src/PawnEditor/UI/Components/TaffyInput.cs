@@ -19,7 +19,7 @@ public static partial class TaffyExtensions
 
     /// <summary>
     /// Adds a text-input leaf. Works like <c>CharacterCardUtility.DoNameInputRect</c>:
-    /// call with a local copy of the value, then check for changes afterwards.
+    /// call with a local copy of the value, then check for changes afterward.
     /// <code>
     /// var first = triple.First;
     /// row.Input(ref first, maxLength: 12);
@@ -29,6 +29,7 @@ public static partial class TaffyExtensions
     /// Requires <see cref="SectionWorker.BuildSection"/> to have set a <c>ContextKey</c> on
     /// the builder so that state is isolated per pawn.
     /// </summary>
+    /// TODO: FIXME - Why are inputs not unfocused when clicked outside?
     public static void Input(this TaffyBuilder b, ref string text, int? maxLength = null,
         Regex? pattern = null, Style? style = null, Color? color = null, Action<Rect>? onHover = null,
         [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
