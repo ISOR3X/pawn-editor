@@ -16,7 +16,8 @@ public static partial class TaffyExtensions
     /// </para>
     /// The default draw callback renders the text as a label.
     /// </summary>
-    public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small, TextAnchor anchor = TextAnchor.MiddleLeft, Color? color= null, Style? style = null)
+    public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small,
+        TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, Style? style = null, bool? wrap = null, Action<Rect>? onHover = null)
     {
         style ??= new Style();
 
@@ -24,11 +25,16 @@ public static partial class TaffyExtensions
         b.children.Add(node);
         b.callbacks.Add((node, (r =>
         {
-            using (new GUIColor(color ?? Color.white))
-            using (new TextBlock(font, anchor))
+            using (new TextBlock(font, anchor, color ?? Color.white))
             {
-                Verse.Text.WordWrap = r.width < Verse.Text.CalcSize(text).x;
+                Verse.Text.WordWrap = wrap ?? r.width < Verse.Text.CalcSize(text).x;
+                text = wrap == false ? text.Truncate(r.width - GenUI.GapLabel) : text;
                 Verse.Widgets.Label(r, text);
+            }
+            
+            if (onHover != null)
+            {
+                if (Mouse.IsOver(r)) onHover(r);
             }
         })));
         return;

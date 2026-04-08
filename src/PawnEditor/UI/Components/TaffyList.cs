@@ -35,7 +35,7 @@ public static partial class TaffyExtensions
         style ??= new Style();
         style = style.WithDefaults(new Style
         {
-            size = new Size<Dimension>(Dimension.Percent(1f), Dimension.Length(200f))
+            size = new Size<Dimension>(Dimension.Percent(1f), Mathf.Clamp(items.Count, 1, 6) * itemHeight),
         });
 
         var capturedItems = items;

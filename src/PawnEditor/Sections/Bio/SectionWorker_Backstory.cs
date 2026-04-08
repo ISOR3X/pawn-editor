@@ -47,11 +47,9 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                     "Source",
                     color: ColoredText.SubtleGrayColor
                 ),
-                // TODO: FIXME - Table widths are recalculated every width? When the column below becomes wider when scrolled down (on many rows), the columns are also resized.
-                // Headers do not seem to be influenced by this.
                 Col.CreateText(
                     Taffy.Fr(),
-                    def => string.Join(",", def.spawnCategories),
+                    def => string.Join(", ", def.spawnCategories),
                     "Spawn categories",
                     color: ColoredText.SubtleGrayColor
                 ),
