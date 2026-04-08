@@ -14,6 +14,6 @@ public class ThingColumnWorker_Label : ThingColumnWorker
     protected override void DrawCellContent(Rect r, Thing row)
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(r, row.LabelCap);
+            Verse.Widgets.Label(r, row.LabelCap);
     }
 }

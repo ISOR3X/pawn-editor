@@ -1,5 +1,6 @@
 ﻿using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.Table;
 using UnityEngine;
 using Verse;
 
@@ -8,40 +9,12 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class ColumnWorker_Icon<T> : ColumnWorker<T> where T : class
 {
-    protected virtual float MaxHeight => TableWorker<T>.DefaultRowHeight;
-
-    protected Rect GetCellRect(Rect inRect, TableWorker<T> table)
+    public override void DrawCell(TaffyBuilder grid, T row)
     {
-        var h = Mathf.Min(inRect.height, MaxHeight);
-        return inRect.CenteredVertically(h).CenteredHorizontally(h);
-    }
-
-    protected virtual void DrawIcon(Rect inRect, T thing, TableWorker<T> table)
-    {
-        var iconFor = GetIconFor(thing);
+        var iconFor = GetIconFor(row);
         if (!(iconFor != null))
             return;
-        using (new GUIColor(GetIconColor(thing)))
-        {
-            GUI.DrawTexture(inRect.ContractedBy(2f), iconFor);
-        }
-    }
-
-    public override void DoCell(Rect inRect, T thing, TableWorker<T> table)
-    {
-        var rect1 = GetCellRect(inRect, table);
-        DrawIcon(rect1, thing, table);
-
-        if (Mouse.IsOver(rect1))
-        {
-            var iconTip = GetIconTip(thing);
-            if (!iconTip.NullOrEmpty())
-                TooltipHandler.TipRegion(rect1, (TipSignal)iconTip);
-        }
-
-        // if (Verse.Widgets.ButtonInvisible(rect1, false))
-        //     ClickedIcon(thing);
-        // if (Mouse.IsOver(rect1) && Input.GetMouseButton(0)) PaintedIcon(thing);
+        grid.Icon(iconFor, GetIconColor(row));
     }
 
     public override int Compare(T a, T b)

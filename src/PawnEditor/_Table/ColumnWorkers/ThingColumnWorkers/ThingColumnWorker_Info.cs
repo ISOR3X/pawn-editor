@@ -10,6 +10,6 @@ public class ThingColumnWorker_Info : ThingColumnWorker
 {
     protected override void DrawCellContent(Rect r, Thing row)
     {
-        Widgets.InfoCardButton(r.x, r.y + 3f, row);
+        Verse.Widgets.InfoCardButton(r.x, r.y + 3f, row);
     }
 }

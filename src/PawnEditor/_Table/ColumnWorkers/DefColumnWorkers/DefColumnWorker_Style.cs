@@ -23,6 +23,6 @@ public class DefColumnWorker_Style : DefColumnWorker
         var text = GetText(row);
         if (text == null) return;
         using (new TextBlock(TextAnchor.MiddleCenter))
-            Widgets.Label(r, text);
+            Verse.Widgets.Label(r, text);
     }
 }

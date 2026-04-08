@@ -25,6 +25,6 @@ public class DefColumnWorker_ApparelLayer : DefColumnWorker
         var text = GetText(row);
         if (text == null) return;
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(r, text.Colorize(ColoredText.SubtleGrayColor));
+            Verse.Widgets.Label(r, text.Colorize(ColoredText.SubtleGrayColor));
     }
 }

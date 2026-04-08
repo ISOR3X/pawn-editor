@@ -8,6 +8,6 @@ public class ThingColumnWorker_Icon : ThingColumnWorker
 {
     protected override void DrawCellContent(Rect r, Thing row)
     {
-        Widgets.ThingIcon(r.ContractedBy(2f), row);
+        Verse.Widgets.ThingIcon(r.ContractedBy(2f), row);
     }
 }

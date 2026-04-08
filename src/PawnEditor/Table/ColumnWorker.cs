@@ -13,6 +13,7 @@ public abstract class ColumnWorker<TRow>
     public virtual bool Sortable => false;
     public virtual int Compare(TRow a, TRow b) => 0;
     public virtual string? HeaderTip => null;
+
     /// <summary>Returns the string used for search filtering, or null if this column is not searchable.</summary>
     public virtual string? GetSearchText(TRow row) => null;
 

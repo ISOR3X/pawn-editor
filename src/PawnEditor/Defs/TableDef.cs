@@ -19,7 +19,6 @@ public class DefTableDef : TableDef
 {
     public required List<DefColumnDef> columns;
     public DefColumnDef? searchColumn;
-    public Type workerClass = typeof(DefTableWorker);
 
     public override ColumnDef? SearchColumn => searchColumn;
 
@@ -48,7 +47,6 @@ public class ThingTableDef : TableDef
 {
     public required List<ThingColumnDef> columns;
     public ThingColumnDef? searchColumn;
-    public Type workerClass = typeof(ThingTableWorker);
 
     public override ColumnDef? SearchColumn => searchColumn;
 

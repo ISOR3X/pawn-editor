@@ -14,6 +14,6 @@ public class DefColumnWorker_ContentSource : DefColumnWorker
     protected override void DrawCellContent(Rect r, Def row)
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(r, (row.modContentPack?.Name ?? "").Colorize(ColoredText.SubtleGrayColor));
+            Verse.Widgets.Label(r, (row.modContentPack?.Name ?? "").Colorize(ColoredText.SubtleGrayColor));
     }
 }

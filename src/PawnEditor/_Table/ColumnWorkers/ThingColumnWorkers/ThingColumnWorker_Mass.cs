@@ -18,6 +18,6 @@ public class ThingColumnWorker_Mass : ThingColumnWorker
     protected override void DrawCellContent(Rect r, Thing row)
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(r, GetMass(row).ToStringMass().Colorize(ColoredText.SubtleGrayColor));
+            Verse.Widgets.Label(r, GetMass(row).ToStringMass().Colorize(ColoredText.SubtleGrayColor));
     }
 }

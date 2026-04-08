@@ -23,10 +23,10 @@ public class ThingColumnWorker_Stuff : ThingColumnWorker
         {
             if (!IsStuffable(row) || row.Stuff == null) return;
             var stuffDef = row.Stuff;
-            Widgets.DefIcon(r.TakeLeftPart(r.height).ContractedBy(4f), stuffDef, scale: 1f);
+            Verse.Widgets.DefIcon(r.TakeLeftPart(r.height).ContractedBy(4f), stuffDef, scale: 1f);
             r.Indent();
             using (new TextBlock(TextAnchor.MiddleLeft))
-                Widgets.Label(r, stuffDef.LabelCap.Colorize(ColoredText.SubtleGrayColor));
+                Verse.Widgets.Label(r, stuffDef.LabelCap.Colorize(ColoredText.SubtleGrayColor));
         });
     }
 }

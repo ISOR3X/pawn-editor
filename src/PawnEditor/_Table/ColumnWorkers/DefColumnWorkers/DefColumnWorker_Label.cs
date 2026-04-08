@@ -18,6 +18,6 @@ public class DefColumnWorker_Label : DefColumnWorker
     protected override void DrawCellContent(Rect r, Def row)
     {
         using (new TextBlock(TextAnchor.MiddleLeft))
-            Widgets.Label(r, GetText(row));
+            Verse.Widgets.Label(r, GetText(row));
     }
 }

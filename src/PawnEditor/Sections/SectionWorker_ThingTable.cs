@@ -46,36 +46,27 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        var table = GetOrCreateTable();
-
         if (_lastPawn != pawn)
         {
             _lastPawn = pawn;
-            table.SetDirty();
+            _table = null; // recreate so GetThings() is called with the new pawn
         }
+
+        var table = GetOrCreateTable();
 
         var rowCount = Math.Clamp(table.FilteredRowCount, 1, MaxVisibleRows);
         var tableHeight = Table<Thing>.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f;
-
-        builder.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
-        builder.Item(height: tableHeight, draw: r => table.Draw(r));
-        builder.Item(height: UIUtility.ButtonHeight, draw: DrawFooter);
+        
+        // builder.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
+        builder.Item(height: tableHeight, draw: table.Draw);
+        // builder.Item(height: UIUtility.ButtonHeight, draw: DrawFooter);
     }
 
     protected virtual void DrawFooter(Rect r)
     {
         if (Verse.Widgets.ButtonText(r.TakeLeftPart(100f), "Add item"))
         {
-            Find.WindowStack.Add(new Window_AddItem(
-                TableDefOf.PawnEditor_DefTable_ThingDef,
-                () => DefDatabase<ThingDef>.AllDefs
-                    .Where(td => td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
-                    .Cast<Def>(),
-                [
-                    ("Content source", () => new DefTableFilter_ContentSource()),
-                    ("Stuff category", () => new DefTableFilter_StuffCategory())
-                ]
-            ));
+            
         }
     }
 }

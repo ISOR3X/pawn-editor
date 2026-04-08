@@ -9,7 +9,7 @@ using Verse.Sound;
 namespace PawnEditor.Table;
 
 [HotSwappable]
-public sealed class Table<TRow>(
+public class Table<TRow>(
     IEnumerable<TRow> rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,
     ITableContext? context = null,
@@ -204,7 +204,7 @@ public sealed class Table<TRow>(
             if (!searchText.NullOrEmpty() && searchProjection != null)
             {
                 var text = searchProjection(row);
-                if (text == null || text.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) < 0)
+                if (text == null || text.IndexOf(searchText!, StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
             }
 

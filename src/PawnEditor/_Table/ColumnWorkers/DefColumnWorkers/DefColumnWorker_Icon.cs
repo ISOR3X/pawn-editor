@@ -18,7 +18,7 @@ public class DefColumnWorker_Icon : DefColumnWorker
             var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
             if (row is HairDef or BeardDef)
                 GUI.color = pawn != null ? pawn.story.HairColor : PawnHairColors.DarkReddish;
-            Widgets.DefIcon(cellRect, row, scale: 1f);
+            Verse.Widgets.DefIcon(cellRect, row, scale: 1f);
             GUI.color = Color.white;
         });
     }

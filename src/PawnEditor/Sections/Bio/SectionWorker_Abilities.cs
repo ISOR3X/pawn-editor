@@ -30,7 +30,8 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             });
 
         builder.Button("Add ability",
-            onClick: _ => Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), pawn, Find.WindowStack.WindowOfType<Window_Editor>()))
+            onClick: _ => Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), pawn,
+                Find.WindowStack.WindowOfType<Window_Editor>()))
         );
     }
 
@@ -44,10 +45,8 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                     Taffy.Px(20f),
                     (grid, def) => grid.Icon(def.uiIcon)
                 ),
-                Col.Create(
-                    Taffy.Fr(),
-                    (grid, def) => grid.Text(def.LabelCap),
-                    "Label"
+                Col.CreateText(
+                    Taffy.Fr(), def => def.LabelCap, "Label"
                 ),
                 Col.Create(
                     Taffy.Fr(),
