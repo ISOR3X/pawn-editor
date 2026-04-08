@@ -9,37 +9,50 @@ namespace PawnEditor;
 [HotSwappable]
 public static partial class TaffyExtensions
 {
-    private const float ButtonIconSize = GenUI.SmallIconSize - 4f;
-    private const float ButtonIconGap = GenUI.GapTiny + 2f;
-    private const float ButtonPadding = GenUI.GapLabel;
+    /// <returns>Button padding, button height, icon height, icon + label gap, font size</returns>
+    private static (float, float, float, float, GameFont) ResolveButtonSize(UIUtility.ComponentSize size)
+    {
+        return size switch
+        {
+            UIUtility.ComponentSize.Small => (12f, 20f, 12f, 4f, GameFont.Tiny),
+            UIUtility.ComponentSize.Default => (GenUI.GapLabel, UIUtility.ButtonHeight, 18f, 6f,
+                GameFont.Small),
+            UIUtility.ComponentSize.Large => (52f, Verse.Widgets.BackButtonHeight, 18f, 6f,
+                GameFont.Small),
+            _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
+        };
+    }
 
     /// <summary>
     /// Adds a button with auto-computed width.
     /// Both <paramref name="label"/> and <paramref name="icon"/> are optional.
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
-        Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
-        float paddingInline = ButtonPadding, Style? style = null, bool drawGraphic = true,
-        bool block = false)
+        Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null, Style? style = null,
+        bool drawGraphic = true,
+        bool block = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default)
     {
         style ??= new Style();
+
+        var (padding, height, iconSize, iconGap, fontSize) = ResolveButtonSize(size);
+
         // Override so there's no padding if we only have an icon.
-        paddingInline = label == null && icon != null ? ButtonIconGap : paddingInline;
+        var paddingInline = label == null && icon != null ? iconGap : padding;
 
         // Measure label width at build time (cached across frames).
         var labelW = 0f;
         if (label != null)
         {
-            using (new TextBlock(GameFont.Small))
+            using (new TextBlock(fontSize))
             {
-                var key = (label, GameFont.Small);
+                var key = (label, font: fontSize);
                 if (!TaffyBuilder.WordWidthCache.TryGetValue(key, out labelW))
                     TaffyBuilder.WordWidthCache[key] = labelW = Verse.Text.CalcSize(label).x;
             }
         }
 
-        var unpaddedW = labelW + (label != null && icon != null ? ButtonIconGap : 0f) +
-                        (icon != null ? ButtonIconSize : 0f);
+        var unpaddedW = labelW + (label != null && icon != null ? iconGap : 0f) +
+                        (icon != null ? iconSize : 0f);
         var totalW = unpaddedW + paddingInline * 2f;
 
         // fillWidth: AUTO lets the layout engine stretch the button to fill its cell/track.
@@ -48,12 +61,12 @@ public static partial class TaffyExtensions
         style = style.WithDefaults(block
             ? new Style
             {
-                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.Length(UIUtility.ButtonHeight)),
+                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.Length(height)),
                 minSize = new Size<Dimension>(Dimension.Length(unpaddedW), Dimension.AUTO)
             }
             : new Style
             {
-                size = new Size<Dimension>(Dimension.Length(totalW), Dimension.Length(UIUtility.ButtonHeight))
+                size = new Size<Dimension>(Dimension.Length(totalW), Dimension.Length(height))
             });
 
 
@@ -71,8 +84,8 @@ public static partial class TaffyExtensions
 
             if (capturedIcon != null || capturedLabel != null)
             {
-                var contentW = (capturedIcon != null ? ButtonIconSize : 0f)
-                               + (capturedIcon != null && capturedLabel != null ? ButtonIconGap : 0f)
+                var contentW = (capturedIcon != null ? iconSize : 0f)
+                               + (capturedIcon != null && capturedLabel != null ? iconGap : 0f)
                                + capturedLabelW;
                 var groupX = r.xMin + (r.width - contentW) / 2f;
 
@@ -80,14 +93,14 @@ public static partial class TaffyExtensions
                 {
                     using (new GUIColor(capturedColor ?? Color.white))
                         GUI.DrawTexture(
-                            r.CenteredVertically(ButtonIconSize) with { xMin = groupX, width = ButtonIconSize },
+                            r.CenteredVertically(iconSize) with { xMin = groupX, width = iconSize },
                             capturedIcon);
                 }
 
                 if (capturedLabel != null)
                 {
-                    var labelX = groupX + (capturedIcon != null ? ButtonIconSize + ButtonIconGap : 0f);
-                    using (new TextBlock(GameFont.Small, TextAnchor.MiddleLeft, false))
+                    var labelX = groupX + (capturedIcon != null ? iconSize + iconGap : 0f);
+                    using (new TextBlock(fontSize, TextAnchor.MiddleLeft, false))
                         Verse.Widgets.Label(r with { xMin = labelX, width = capturedLabelW },
                             capturedLabel.Truncate(capturedLabelW));
                 }

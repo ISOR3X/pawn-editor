@@ -9,8 +9,8 @@ public static partial class TaffyExtensions
     {
         return size switch
         {
-            UIUtility.ComponentSize.Small => 12f,
-            UIUtility.ComponentSize.Default => ButtonIconSize,
+            UIUtility.ComponentSize.Small => 8f,
+            UIUtility.ComponentSize.Default => 18f,
             UIUtility.ComponentSize.Large => 24f,
             _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
         };
