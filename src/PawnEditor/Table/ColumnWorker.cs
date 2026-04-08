@@ -124,9 +124,8 @@ public abstract class ColumnWorker<TRow>
         public override void DrawCell(TaffyBuilder grid, TRow row)
         {
             if (color.HasValue)
-                grid.Text(getText(row), color: color.Value);
-            else
-                grid.Text(getText(row));
+                grid.Text(getText(row), color: color.GetValueOrDefault(Color.white), wrap: false,
+                    onHover: r => TooltipHandler.TipRegion(r, getText(row)));
         }
     }
 }

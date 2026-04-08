@@ -22,7 +22,17 @@ public class Table<TRow>(
     private const float DefaultRowHeight = 30f;
     internal const float HeaderHeight = 30f;
 
-    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = columns.Select(c => c.TrackSize).ToList();
+    // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
+    // In a virtualized table only a subset of rows is rendered each frame, so the
+    // auto minimum causes columns to resize as different content scrolls into view.
+    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = columns
+        .Select(c => NormalizeTrack(c.TrackSize))
+        .ToList();
+
+    private static TrackSizingFunction NormalizeTrack(TrackSizingFunction t) =>
+        t.Max.IsFr() && t.Min.Equals(MinTrackSizingFunction.AUTO)
+            ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
+            : t;
 
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
 
@@ -32,11 +42,12 @@ public class Table<TRow>(
     private bool _sortDescending;
 
     public TRow? Selected { get; set; }
-    public List<TRow> Rows { get; } = [];
+    private readonly List<TRow> _cachedFilteredRows = [];
 
-    public int FilteredRowCount => Rows.Count;
+    public int FilteredRowCount => _cachedFilteredRows.Count;
+    public List<TRow> Rows => rows.ToList();
     public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
-    
+
 
     public void SetDirty() => _dirty = true;
 
@@ -81,7 +92,9 @@ public class Table<TRow>(
 
                     if (ReferenceEquals(col, _sortingBy))
                     {
-                        var icon = _sortDescending ? PawnColumnWorker.SortingDescendingIcon : PawnColumnWorker.SortingIcon;
+                        var icon = _sortDescending
+                            ? PawnColumnWorker.SortingDescendingIcon
+                            : PawnColumnWorker.SortingIcon;
                         GUI.DrawTexture(
                             new Rect(colRect.xMax - icon.width - 1f, colRect.yMax - icon.height - 1f, icon.width,
                                 icon.height),
@@ -107,14 +120,14 @@ public class Table<TRow>(
             Verse.Widgets.DrawLineHorizontal(r.x, r.y, r.width);
 
         // --- Scroll view ---
-        var contentHeight = Rows.Count > 0
-            ? Rows.Count * DefaultRowHeight
+        var contentHeight = _cachedFilteredRows.Count > 0
+            ? _cachedFilteredRows.Count * DefaultRowHeight
             : UIUtility.ButtonHeight;
         var viewRect = new Rect(0f, 0f, r.width - UIUtility.ScrollBarWidth, contentHeight);
 
         Verse.Widgets.BeginScrollView(r, ref _scrollPosition, viewRect);
 
-        if (Rows.Count == 0)
+        if (_cachedFilteredRows.Count == 0)
         {
             using (new GUIColor(ColoredText.SubtleGrayColor))
             using (new TextBlock(TextAnchor.MiddleLeft))
@@ -126,12 +139,12 @@ public class Table<TRow>(
             var visibleBottom = _scrollPosition.y + r.height;
 
             var firstVisible = Math.Max(0, (int)(visibleTop / DefaultRowHeight));
-            var lastVisible = Math.Min(Rows.Count - 1, (int)(visibleBottom / DefaultRowHeight));
+            var lastVisible = Math.Min(_cachedFilteredRows.Count - 1, (int)(visibleBottom / DefaultRowHeight));
 
             // Row backgrounds and interaction
             for (var i = firstVisible; i <= lastVisible; i++)
             {
-                var row = Rows[i];
+                var row = _cachedFilteredRows[i];
                 var rowRect = new Rect(0f, i * DefaultRowHeight, viewRect.width, DefaultRowHeight);
 
                 if (Selected != null && EqualityComparer<TRow>.Default.Equals(row, Selected))
@@ -159,7 +172,7 @@ public class Table<TRow>(
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {
-                    var row = Rows[i];
+                    var row = _cachedFilteredRows[i];
                     foreach (var col in columns)
                     {
                         if (col is IContextColumn<TRow> ctxCol && context != null)
@@ -194,7 +207,7 @@ public class Table<TRow>(
 
     private void RecacheFilteredRows()
     {
-        Rows.Clear();
+        _cachedFilteredRows.Clear();
 
         var searchText = _searchWidget?.filter.Text;
         foreach (var row in rows)
@@ -208,13 +221,13 @@ public class Table<TRow>(
                     continue;
             }
 
-            Rows.Add(row);
+            _cachedFilteredRows.Add(row);
         }
 
         if (_sortingBy != null)
         {
             var dir = _sortDescending ? -1 : 1;
-            Rows.SortStable((a, b) => _sortingBy.Compare(a, b) * dir);
+            _cachedFilteredRows.SortStable((a, b) => _sortingBy.Compare(a, b) * dir);
         }
     }
 }
