@@ -1,5 +1,6 @@
 using HotSwap;
 using PawnEditor.Table;
+using RimWorld;
 using UnityEngine;
 using Verse;
 

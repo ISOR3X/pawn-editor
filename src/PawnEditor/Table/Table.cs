@@ -148,7 +148,6 @@ public class Table<TRow>(
                     Selected = row;
                     onSelectChanged?.Invoke(row);
                     SoundDefOf.Click.PlayOneShotOnCamera();
-                    Event.current.Use(); // Use the event so other widgets don't get it.
                 }
             }
 

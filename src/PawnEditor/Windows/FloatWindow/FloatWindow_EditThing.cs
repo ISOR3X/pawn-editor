@@ -9,9 +9,9 @@ namespace PawnEditor;
 [HotSwappable]
 public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? owner = null) : FloatWindow(boundWidgetRect, owner)
 {
-    protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
+    protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomCenter;
     protected override Vector2 InitialPositionShift => Vector2.zero;
-    protected override bool UseWidgetWidth => true;
+    public override Vector2 InitialSize => new(500, 200);
 
     private static readonly string?[] TextfieldBuffers = new string[2];
 
