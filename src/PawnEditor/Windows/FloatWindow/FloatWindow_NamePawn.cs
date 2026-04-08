@@ -8,7 +8,8 @@ using Verse.Sound;
 namespace PawnEditor;
 
 [HotSwappable]
-public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner = null) : FloatWindow(boundWidgetRect, owner)
+public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner = null)
+    : FloatWindow(boundWidgetRect, owner)
 {
     private static bool _forceNoNick;
     private static bool _keepLastName;
@@ -20,6 +21,16 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomCenter;
 
     public override Vector2 InitialSize => new(500, 200);
+
+    private static void GridButton(TaffyBuilder grid, string label, Action<Rect>? onClick = null, Style? style = null)
+    {
+        style ??= new Style();
+        style = style.WithDefaults(new Style
+        {
+            size = new Size<Dimension>(Dimension.AUTO, Dimension.AUTO), justifySelf = AlignItems.Stretch
+        });
+        grid.Button(label, style: style, onClick: onClick);
+    }
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -38,35 +49,38 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                 if (_selectedCulture != null)
                 {
                     grid.Text("Culture");
-                    grid.Button(_selectedCulture.LabelCap, block: true, onClick: _ =>
-                    {
-                        Find.WindowStack.Add(new FloatMenu(cultures
-                            .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c))
-                            .ToList()));
-                    });
+                    GridButton(grid, _selectedCulture.LabelCap,
+                        onClick: _ =>
+                        {
+                            Find.WindowStack.Add(new FloatMenu(cultures
+                                .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c))
+                                .ToList()));
+                        });
                 }
 
                 if (ModsConfig.BiotechActive)
                 {
                     grid.Text("Xenotype");
-                    grid.Button(_selectedXenotype?.LabelCap ?? "None", block: true, onClick: r =>
-                    {
-                        Find.WindowStack.Add(new FloatMenu(xenotypes
-                            .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
-                            .Append(new FloatMenuOption("None", () => _selectedXenotype = null))
-                            .ToList()));
-                    });
+                    GridButton(grid, _selectedXenotype?.LabelCap ?? "None",
+                        onClick: r =>
+                        {
+                            Find.WindowStack.Add(new FloatMenu(xenotypes
+                                .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
+                                .Append(new FloatMenuOption("None", () => _selectedXenotype = null))
+                                .ToList()));
+                        });
                 }
 
                 grid.Text("Gender");
-                grid.Button(_selectedGender.GetLabel().CapitalizeFirst(), block: true, onClick: r =>
-                {
-                    Find.WindowStack.Add(new FloatMenu(
-                        new List<Gender> { Gender.Male, Gender.Female }
-                            .Select(g =>
-                                new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
-                            .ToList()));
-                });
+                GridButton(grid, _selectedGender.GetLabel().CapitalizeFirst(),
+                    onClick: r =>
+                    {
+                        Find.WindowStack.Add(new FloatMenu(
+                            new List<Gender> { Gender.Male, Gender.Female }
+                                .Select(g =>
+                                    new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
+                                .ToList()));
+                    });
                 grid.GridItem(colSpan: 2,
                     draw: r => Verse.Widgets.CheckboxLabeled(r, "Keep last name", ref _keepLastName));
                 grid.GridItem(colSpan: 2,
@@ -75,7 +89,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                 grid.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
                     style: new Style
                         { gridColumn = new Line<GridPlacement>(GridPlacement.Line(1), GridPlacement.Span(2)) });
-                grid.Button(label: "Generate", block: true, onClick: _ =>
+                GridButton(grid, label: "Generate", onClick: _ =>
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
                         string? lastName = null;
@@ -87,7 +101,9 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                             pawn.RaceProps.nameCategory, lastName, _forceNoNick);
                     },
                     style: new Style
-                        { gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2)) });
+                    {
+                        gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2)),
+                    });
             });
 
         if (!Mathf.Approximately(windowRect.height, contentHeight + Margin * 2))
