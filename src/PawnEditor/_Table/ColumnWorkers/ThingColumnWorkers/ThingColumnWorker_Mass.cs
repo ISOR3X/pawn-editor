@@ -1,4 +1,5 @@
-﻿using HotSwap;
+using HotSwap;
+using PawnEditor.Table;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -6,19 +7,17 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class ThingColumnWorker_Mass : ColumnWorker_Text<Thing>
+public class ThingColumnWorker_Mass : ThingColumnWorker
 {
-    protected override Color CellColor => ColoredText.SubtleGrayColor;
+    public override bool Sortable => true;
 
     private static float GetMass(Thing thing) => thing.GetStatValue(StatDefOf.Mass) * thing.stackCount;
 
-    public override int Compare(Thing a, Thing b)
-    {
-        return GetMass(a).CompareTo(GetMass(b));
-    }
+    public override int Compare(Thing a, Thing b) => GetMass(a).CompareTo(GetMass(b));
 
-    public override string? GetTextFor(Thing thing)
+    protected override void DrawCellContent(Rect r, Thing row)
     {
-        return GetMass(thing).ToStringMass();
+        using (new TextBlock(TextAnchor.MiddleLeft))
+            Verse.Widgets.Label(r, GetMass(row).ToStringMass().Colorize(ColoredText.SubtleGrayColor));
     }
 }

@@ -5,21 +5,19 @@
     <PawnEditor.DefColumnDef>
         <defName>PawnEditor_DefLabel</defName>
         <workerClass>PawnEditor.DefColumnWorker_Label</workerClass>
-        <flexBasis>100</flexBasis>
-        <flexGrow>1</flexGrow>
+        <trackSize>1fr</trackSize>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
         <defName>PawnEditor_DefIcon</defName>
         <workerClass>PawnEditor.DefColumnWorker_Icon</workerClass>
-        <flexBasis>24</flexBasis>
+        <trackSize>24px</trackSize>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
         <defName>PawnEditor_DefContentSource</defName>
         <workerClass>PawnEditor.DefColumnWorker_ContentSource</workerClass>
         <label>source</label>
         <sortable>true</sortable>
-        <flexBasis>100</flexBasis>
-        <flexGrow>1</flexGrow>
+        <trackSize>1fr</trackSize>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
         <defName>PawnEditor_DefGender</defName>
@@ -27,15 +25,14 @@
         <label>gender</label>
         <sortable>true</sortable>
         <headerTip>The gender preference for this hair.</headerTip>
-        <flexBasis>24</flexBasis>
+        <trackSize>24px</trackSize>
     </PawnEditor.DefColumnDef>
     <PawnEditor.DefColumnDef>
         <defName>PawnEditor_DefStyle</defName>
         <workerClass>PawnEditor.DefColumnWorker_Style</workerClass>
         <label>style</label>
         <sortable>true</sortable>
-        <flexBasis>50</flexBasis>
-        <flexGrow>1</flexGrow>
+        <trackSize>1fr</trackSize>
     </PawnEditor.DefColumnDef>
     <!-- ThingDefColumnDefs -->
     <PawnEditor.DefColumnDef>
@@ -43,46 +40,41 @@
         <workerClass>PawnEditor.DefColumnWorker_ApparelLayer</workerClass>
         <label>layer</label>
         <sortable>true</sortable>
-        <flexBasis>100</flexBasis>
-        <flexGrow>1</flexGrow>
+        <trackSize>1fr</trackSize>
     </PawnEditor.DefColumnDef>
     <!-- ThingColumnDefs -->
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingLabel</defName>
         <workerClass>PawnEditor.ThingColumnWorker_Label</workerClass>
-        <!-- <trackSize>1fr</trackSize> -->
-        <flexBasis>100</flexBasis>
-        <flexGrow>1</flexGrow>
+        <trackSize>1fr</trackSize>
     </PawnEditor.ThingColumnDef>
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingIcon</defName>
         <workerClass>PawnEditor.ThingColumnWorker_Icon</workerClass>
-        <flexBasis>24</flexBasis>
+        <trackSize>24px</trackSize>
     </PawnEditor.ThingColumnDef>
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingInfo</defName>
         <workerClass>PawnEditor.ThingColumnWorker_Info</workerClass>
-        <flexBasis>24</flexBasis>
+        <trackSize>24px</trackSize>
     </PawnEditor.ThingColumnDef>
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingEdit</defName>
         <workerClass>PawnEditor.ThingColumnWorker_Edit</workerClass>
-        <flexBasis>24</flexBasis>
+        <trackSize>24px</trackSize>
     </PawnEditor.ThingColumnDef>
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingMass</defName>
         <workerClass>PawnEditor.ThingColumnWorker_Mass</workerClass>
         <label>mass</label>
         <sortable>true</sortable>
-        <flexBasis>50</flexBasis>
-        <flexGrow>0.2</flexGrow>
+        <trackSize>0.2fr</trackSize>
     </PawnEditor.ThingColumnDef>
     <PawnEditor.ThingColumnDef>
         <defName>PawnEditor_ThingStuff</defName>
         <workerClass>PawnEditor.ThingColumnWorker_Stuff</workerClass>
         <label>stuff</label>
         <sortable>true</sortable>
-        <flexBasis>100</flexBasis>
-        <flexGrow>0.2</flexGrow>
+        <trackSize>0.2fr</trackSize>
     </PawnEditor.ThingColumnDef>
 </Defs>
