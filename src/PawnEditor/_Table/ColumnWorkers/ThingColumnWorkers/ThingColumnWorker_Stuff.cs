@@ -1,30 +1,32 @@
-﻿using HotSwap;
+using HotSwap;
 using PawnEditor.Extensions;
+using PawnEditor.Table;
+using Taffy;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public class ThingColumnWorker_Stuff : ColumnWorker_Text<Thing>
+public class ThingColumnWorker_Stuff : ThingColumnWorker
 {
-    protected override Color CellColor => ColoredText.SubtleGrayColor;
+    public override bool Sortable => true;
+
     private static bool IsStuffable(Thing thing) => thing.def.stuffCategories != null;
 
-    public override string? GetTextFor(Thing thing)
+    public override int Compare(Thing a, Thing b)
+        => string.Compare(a.Stuff?.LabelCap, b.Stuff?.LabelCap, StringComparison.CurrentCultureIgnoreCase);
+
+    public override void DrawCell(TaffyBuilder grid, Thing row)
     {
-        return !IsStuffable(thing) ? null : thing.Stuff?.LabelCap;
-    }
-
-
-    public override void DoCell(Rect inRect, Thing thing, TableWorker<Thing> table)
-    {
-        // TODO: Center content in cell.
-        if (!IsStuffable(thing) || thing.Stuff == null) return;
-        var stuffDef = thing.Stuff;
-        Verse.Widgets.DefIcon(inRect.TakeLeftPart(inRect.height).ContractedBy(4f), stuffDef, scale: 1f);
-
-        inRect.Indent();
-        base.DoCell(inRect, thing, table);
+        grid.Item(draw: r =>
+        {
+            if (!IsStuffable(row) || row.Stuff == null) return;
+            var stuffDef = row.Stuff;
+            Verse.Widgets.DefIcon(r.TakeLeftPart(r.height).ContractedBy(4f), stuffDef, scale: 1f);
+            r.Indent();
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Verse.Widgets.Label(r, stuffDef.LabelCap.Colorize(ColoredText.SubtleGrayColor));
+        });
     }
 }

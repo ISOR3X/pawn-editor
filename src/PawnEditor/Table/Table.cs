@@ -9,17 +9,18 @@ using Verse.Sound;
 namespace PawnEditor.Table;
 
 [HotSwappable]
-public sealed class Table<TRow>(
+public class Table<TRow>(
     IEnumerable<TRow> rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,
     ITableContext? context = null,
     IReadOnlyList<IRowFilter<TRow>>? filters = null,
     Action<Rect, TRow, ITableContext?>? onRowHover = null,
-    Func<TRow, string>? searchProjection = null
+    Func<TRow, string>? searchProjection = null,
+    Action<TRow?>? onSelectChanged = null
 )
 {
     private const float DefaultRowHeight = 30f;
-    private const float HeaderHeight = 30f;
+    internal const float HeaderHeight = 30f;
 
     private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = columns.Select(c => c.TrackSize).ToList();
 
@@ -31,9 +32,8 @@ public sealed class Table<TRow>(
     private ColumnWorker<TRow>? _sortingBy;
     private bool _sortDescending;
 
-    public TRow? Selected { get; private set; }
-    public List<TRow> Rows { get; } = rows.ToList();
-
+    public TRow? Selected { get; set; }
+    public int FilteredRowCount => _cachedFilteredRows.Count;
     public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
 
     public void SetDirty() => _dirty = true;
@@ -144,6 +144,7 @@ public sealed class Table<TRow>(
                 if (Event.current.type == EventType.MouseDown && rowRect.Contains(Event.current.mousePosition))
                 {
                     Selected = row;
+                    onSelectChanged?.Invoke(row);
                     SoundDefOf.Click.PlayOneShotOnCamera();
                     Event.current.Use(); // Use the event so other widgets don't get it.
                 }
@@ -202,7 +203,7 @@ public sealed class Table<TRow>(
             if (!searchText.NullOrEmpty() && searchProjection != null)
             {
                 var text = searchProjection(row);
-                if (text == null || text.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) < 0)
+                if (text == null || text.IndexOf(searchText!, StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
             }
 

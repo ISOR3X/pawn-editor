@@ -1,16 +1,28 @@
-﻿using RimWorld;
+using PawnEditor.Table;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-public class DefColumnWorker_Style : ColumnWorker_Text<Def>
+public class DefColumnWorker_Style : DefColumnWorker
 {
-    protected override TextAnchor RowLabelAlignment => TextAnchor.MiddleCenter;
+    public override bool Sortable => true;
 
-    public override string? GetTextFor(Def thing)
+    public override int Compare(Def a, Def b)
+        => string.Compare(GetText(a), GetText(b), StringComparison.CurrentCultureIgnoreCase);
+
+    private static string? GetText(Def def)
     {
-        if (thing is StyleItemDef styleItemDef) return styleItemDef.StyleItemCategory.label.CapitalizeFirst();
+        if (def is StyleItemDef styleItemDef) return styleItemDef.StyleItemCategory.label.CapitalizeFirst();
         return null;
+    }
+
+    protected override void DrawCellContent(Rect r, Def row)
+    {
+        var text = GetText(row);
+        if (text == null) return;
+        using (new TextBlock(TextAnchor.MiddleCenter))
+            Verse.Widgets.Label(r, text);
     }
 }

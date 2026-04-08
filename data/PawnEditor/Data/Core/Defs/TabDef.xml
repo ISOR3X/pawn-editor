@@ -56,14 +56,16 @@
     <!--            </div>-->
     <!--        </layout>-->
     <!--    </PawnEditor.TabDef>-->
-    <!--    <PawnEditor.TabDef>-->
-    <!--        <defName>PawnEditor_Gear</defName>-->
-    <!--        <label>Gear</label>-->
-    <!--        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>-->
-    <!--        <layout>-->
-    <!--            <section>PawnEditor_Equipment</section>-->
-    <!--            <section>PawnEditor_Apparel</section>-->
-    <!--            <section>PawnEditor_Inventory</section>-->
-    <!--        </layout>-->
-    <!--    </PawnEditor.TabDef>-->
+    <PawnEditor.TabDef>
+        <defName>PawnEditor_Gear</defName>
+        <label>Gear</label>
+        <priority>0</priority>
+        <tabCategory>All</tabCategory>
+        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
+        <layout>
+            <section flex-basis="100%"  flex-direction="column">PawnEditor_Equipment</section>
+            <section flex-basis="100%"  flex-direction="column">PawnEditor_Apparel</section>
+            <section flex-basis="100%"  flex-direction="column">PawnEditor_Inventory</section>
+        </layout>
+    </PawnEditor.TabDef>
 </Defs>

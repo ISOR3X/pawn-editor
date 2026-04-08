@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using PawnEditor.Table;
+using Taffy;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -15,9 +17,14 @@ public abstract class ColumnDef : Def
     public bool showIcon;
     public bool sortable;
 
-    public float flexBasis = 0;
-    public float flexGrow = 0;
-    public float maxWidth = float.MaxValue;
+    [NoTranslate] public string trackSize = "auto";
+    [Unsaved] public TrackSizingFunction ResolvedTrackSize;
+
+    public override void ResolveReferences()
+    {
+        base.ResolveReferences();
+        ResolvedTrackSize = TrackSizingParser.Parse(trackSize);
+    }
 
     public Texture2D? HeaderIcon
     {
@@ -45,15 +52,16 @@ public abstract class ColumnDef : Def
 public class DefColumnDef : ColumnDef
 {
     public Type workerClass = typeof(DefColumnWorker);
-    [Unsaved] private ColumnWorker<Def>? workerInt;
+    [Unsaved] private Table.ColumnWorker<Def>? workerInt;
 
-    public ColumnWorker<Def> Worker
+    public Table.ColumnWorker<Def> Worker
     {
         get
         {
             if (workerInt != null) return workerInt;
-            workerInt = (ColumnWorker<Def>)Activator.CreateInstance(workerClass);
-            workerInt.Def = this;
+            var w = (DefColumnWorker)Activator.CreateInstance(workerClass);
+            w.Def = this;
+            workerInt = w;
             return workerInt;
         }
     }
@@ -62,15 +70,16 @@ public class DefColumnDef : ColumnDef
 public class ThingColumnDef : ColumnDef
 {
     public Type workerClass = typeof(ThingColumnWorker);
-    [Unsaved] private ColumnWorker<Thing>? workerInt;
+    [Unsaved] private Table.ColumnWorker<Thing>? workerInt;
 
-    public ColumnWorker<Thing> Worker
+    public Table.ColumnWorker<Thing> Worker
     {
         get
         {
             if (workerInt != null) return workerInt;
-            workerInt = (ColumnWorker<Thing>)Activator.CreateInstance(workerClass);
-            workerInt.Def = this;
+            var w = (ThingColumnWorker)Activator.CreateInstance(workerClass);
+            w.Def = this;
+            workerInt = w;
             return workerInt;
         }
     }
