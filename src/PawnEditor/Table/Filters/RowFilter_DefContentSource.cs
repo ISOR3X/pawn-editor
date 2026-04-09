@@ -13,27 +13,28 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
 
     public void DrawFilter(TaffyBuilder builder, Table<TDef> table)
     {
-        builder.Div(new Style { display = Display.Block}, builder2 =>
-        {
-            builder2.Text("Content source", font: GameFont.Tiny);
-            builder2.Button(_selected?.Name ?? "Any",
-                style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) }, onClick: (_) =>
-                {
-                    var opts = LoadedModManager.RunningMods
-                        .Where(pack => pack.AllDefs.OfType<BackstoryDef>().Any())
-                        .Select(pack => new FloatMenuOption(pack.Name, () =>
-                        {
-                            _selected = pack;
-                            table.SetDirty();
-                        }))
-                        .Prepend(new FloatMenuOption("Any", () =>
-                        {
-                            _selected = null;
-                            table.SetDirty();
-                        }))
-                        .ToList();
-                    Find.WindowStack.Add(new FloatMenu(opts));
-                });
-        });
+        builder.Text("Content source", font: GameFont.Tiny);
+        builder.Button(_selected?.Name ?? "Any",
+            style: new Style
+            {
+                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO),
+                margin = new Rect<LengthPercentageAuto>(0f, 0f, 0f, GenUI.GapSmall)
+            }, onClick: _ =>
+            {
+                var opts = LoadedModManager.RunningMods
+                    .Where(pack => pack.AllDefs.OfType<BackstoryDef>().Any())
+                    .Select(pack => new FloatMenuOption(pack.Name, () =>
+                    {
+                        _selected = pack;
+                        table.SetDirty();
+                    }))
+                    .Prepend(new FloatMenuOption("Any", () =>
+                    {
+                        _selected = null;
+                        table.SetDirty();
+                    }))
+                    .ToList();
+                Find.WindowStack.Add(new FloatMenu(opts));
+            });
     }
 }

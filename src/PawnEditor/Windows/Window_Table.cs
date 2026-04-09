@@ -12,16 +12,20 @@ namespace PawnEditor;
 public class Window_Table<T> : OwnedWindow
 {
     private readonly Table<T> _table;
-    private readonly Pawn _pawn;
+    private readonly Action<T?>? _onAdd;
+    private readonly Action<TaffyBuilder, T?>? _selectedItemSlot;
 
-    public Window_Table(Table<T> table,
-        Pawn pawn,
-        Window? owner = null) : base(owner)
+    public Window_Table(Table<T> table, Window? owner = null,
+        Action<T?>? onAdd = null, Action<TaffyBuilder, T?>? selectedItemSlot = null
+    ) : base(owner)
     {
         _table = table;
-        _pawn = pawn;
+        _onAdd = onAdd;
+        _selectedItemSlot = selectedItemSlot;
+
         closeOnClickedOutside = true;
         absorbInputAroundWindow = true;
+        doCloseX = true;
     }
 
     public override Vector2 InitialSize => Page.StandardSize - new Vector2(128f, 128f);
@@ -31,7 +35,7 @@ public class Window_Table<T> : OwnedWindow
         Taffy.Div(inRect, new Style { flexDirection = FlexDirection.Column, gap = Taffy.Gap(GenUI.GapSmall) },
             builder =>
             {
-                builder.Div(new Style { flexGrow = 1f, gap = Taffy.Gap(GenUI.GapSmall) }, builder2 =>
+                builder.Div(new Style { flexGrow = 1f, gap = Taffy.Gap(GenUI.Gap) }, builder2 =>
                 {
                     if (_table.Filters.Count > 0)
                     {
@@ -39,7 +43,6 @@ public class Window_Table<T> : OwnedWindow
                             new Style
                             {
                                 size = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
-                                gap = Taffy.Gap(GenUI.GapSmall)
                             }, build: builder3 =>
                             {
                                 foreach (var filter in _table.Filters)
@@ -51,11 +54,12 @@ public class Window_Table<T> : OwnedWindow
 
                     builder2.Item(new Style { flexGrow = 1f }, draw: _table.Draw);
                 });
-                builder.Div(new Style { justifyContent = AlignContent.SpaceBetween }, builder4 =>
-                {
-                    // builder4.Text(table.Selected?.ToString() ?? "No item selected");
-                    builder4.Button("Add");
-                });
+                if (_selectedItemSlot != null || _onAdd != null)
+                    builder.Div(new Style { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center}, builder4 =>
+                    {
+                        _selectedItemSlot?.Invoke(builder4, _table.Selected);
+                        builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.Selected), size: UIUtility.ComponentSize.Large);
+                    });
             });
     }
 }

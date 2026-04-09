@@ -1,10 +1,12 @@
 using HotSwap;
 using PawnEditor.Table;
+using PawnEditor.Table.Filters.AbilityDef;
 using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
+using Display = Taffy.Display;
 using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
@@ -65,7 +67,10 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
         builder.Button("Add trait",
             onClick: _ =>
             {
-                Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn), pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
+                Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn),
+                    Find.WindowStack.WindowOfType<Window_Editor>(),
+                    selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.Trait.LabelCap ?? "None")); }
+                ));
             }
         );
     }
@@ -108,7 +113,16 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                         color: ColoredText.SubtleGrayColor),
                     "Source"
                 ),
-            ]);
+            ],
+            onRowHover: (rowRect, rowTrait, ctx) =>
+            {
+                if (ctx is not PawnContext pawnCtx) return;
+                var tip = rowTrait.Trait.TipString(pawnCtx.Value);
+                TooltipHandler.TipRegion(rowRect, tip);
+            },
+            context: new PawnContext(pawn),
+            searchProjection: record => record.Degree.LabelCap
+        );
     }
 
     private static void DoTraitsRect(Rect inRect, Pawn pawn)
@@ -132,7 +146,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                 Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), trait.LabelCap);
                 GUI.color = Color.white;
                 if (Mouse.IsOver(r))
-                    TooltipHandler.TipRegion(r, new TipSignal(() => trait.TipString(pawn), (int)r.y * 37));
+                    TooltipHandler.TipRegion(r, trait.TipString(pawn));
             },
             trait => trait.LabelCap.GetWidthCached() + 10f,
             emptyLabel: emptyLabel);

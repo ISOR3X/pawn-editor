@@ -24,8 +24,7 @@ public partial class Window_Editor : Window
     private static TabDef? _selectedTabDef;
     private static List<TabDef> _selectedTabDefsForPawn = [];
     private static List<TabRecord> _tabsList = [];
-
-    // TODO: Save on game close (right now settings window needs to be opened to save it).
+    
     public static Rect DefaultWindowRect = new(
         new Vector2((UI.screenWidth - Page.StandardSize.x) / 2, (UI.screenHeight - Page.StandardSize.y) / 2),
         Page.StandardSize);

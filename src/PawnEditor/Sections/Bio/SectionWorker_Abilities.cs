@@ -1,5 +1,6 @@
 using HotSwap;
 using PawnEditor.Table;
+using PawnEditor.Table.Filters.AbilityDef;
 using Taffy;
 using RimWorld;
 using UnityEngine;
@@ -30,8 +31,10 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             });
 
         builder.Button("Add ability",
-            onClick: _ => Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), pawn,
-                Find.WindowStack.WindowOfType<Window_Editor>()))
+            onClick: _ =>
+                Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn),
+                    Find.WindowStack.WindowOfType<Window_Editor>(),
+                    selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }))
         );
     }
 
@@ -48,13 +51,23 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 Col.CreateText(
                     Taffy.Fr(), def => def.LabelCap, "Label"
                 ),
-                Col.Create(
+                Col.CreateText(
                     Taffy.Fr(),
-                    (grid, def) => grid.Text(def.modContentPack?.Name ?? "",
-                        color: ColoredText.SubtleGrayColor),
-                    "Source"
+                    def => def.modContentPack.Name,
+                    "Source",
+                    color: ColoredText.SubtleGrayColor
                 ),
-            ]);
+            ],
+            onRowHover: (rowRect, abilityDef, ctx) =>
+            {
+                if (ctx is not PawnContext pawnContext) return;
+                var tip = abilityDef.GetTooltip(pawnContext.Value);
+                TooltipHandler.TipRegion(rowRect, tip);
+            },
+            context: new PawnContext(pawn),
+            filters: [new RowFilter_DefContentSource<AbilityDef>(), new RowFilter_Level()],
+            searchProjection: def => def.LabelCap
+        );
     }
 
     private static float GetAbilitiesHeight(Pawn pawn, float width)
