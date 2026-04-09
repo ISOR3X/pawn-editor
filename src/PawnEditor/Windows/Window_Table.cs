@@ -20,8 +20,8 @@ public class Window_Table<T> : OwnedWindow
     {
         _table = table;
         _pawn = pawn;
-        // TODO: FIXME - Why does close on click outside not work?
         closeOnClickedOutside = true;
+        absorbInputAroundWindow = true;
     }
 
     public override Vector2 InitialSize => Page.StandardSize - new Vector2(128f, 128f);
