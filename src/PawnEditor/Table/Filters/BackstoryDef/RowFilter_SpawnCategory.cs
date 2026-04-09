@@ -1,23 +1,22 @@
 using HotSwap;
-using RimWorld;
 using Taffy;
 using Verse;
 
-namespace PawnEditor.Table;
+namespace PawnEditor.Table.Filters.BackstoryDef;
 
 [HotSwappable]
-public class RowFilter_BackstoryDefSpawnCategory : IRowFilter<BackstoryDef>
+public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 {
     private readonly HashSet<string> _disabledCategories = [];
     private string _searchText = "";
 
     private List<string>? SpawnCategories;
 
-    public bool Passes(BackstoryDef row, ITableContext? ctx) =>
+    public bool Passes(RimWorld.BackstoryDef row, ITableContext? ctx) =>
         _disabledCategories.Count == 0 ||
         _disabledCategories.All(c => !row.spawnCategories.Contains(c));
 
-    public void DrawFilter(TaffyBuilder builder, Table<BackstoryDef> table)
+    public void DrawFilter(TaffyBuilder builder, Table<RimWorld.BackstoryDef> table)
     {
         // TODO: This should probably be done in the constructor?
         SpawnCategories ??= table.Rows.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s).ToList();

@@ -43,8 +43,9 @@ public abstract class ColumnWorker<TRow>
         Func<TRow, string> getText,
         string? header = null,
         Color? color = null,
-        string? headerTip = null)
-        => new TextColumn(trackSize, getText, header, color, headerTip);
+        string? headerTip = null,
+        bool showTextAsTooltip = false)
+        => new TextColumn(trackSize, getText, header, color, headerTip, showTextAsTooltip);
 
     private sealed class DelegateColumn(
         TrackSizingFunction trackSize,
@@ -102,7 +103,8 @@ public abstract class ColumnWorker<TRow>
         Func<TRow, string> getText,
         string? header,
         Color? color,
-        string? headerTip)
+        string? headerTip,
+        bool doTooltip = false)
         : ColumnWorker<TRow>
     {
         public override TrackSizingFunction TrackSize => trackSize;
@@ -123,10 +125,13 @@ public abstract class ColumnWorker<TRow>
 
         public override void DrawCell(TaffyBuilder grid, TRow row)
         {
-            if (color.HasValue)
-                grid.Text(getText(row), color: color.GetValueOrDefault(Color.white), wrap: false,
-                    onHover: r => TooltipHandler.TipRegion(r,
-                        header.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + getText(row)));
+            grid.Text(getText(row), color: color.GetValueOrDefault(Color.white), wrap: false,
+                onHover: r =>
+                {
+                    if (doTooltip)
+                        TooltipHandler.TipRegion(r,
+                            header.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + getText(row));
+                });
         }
     }
 }
