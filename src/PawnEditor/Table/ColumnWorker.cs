@@ -125,7 +125,8 @@ public abstract class ColumnWorker<TRow>
         {
             if (color.HasValue)
                 grid.Text(getText(row), color: color.GetValueOrDefault(Color.white), wrap: false,
-                    onHover: r => TooltipHandler.TipRegion(r, getText(row)));
+                    onHover: r => TooltipHandler.TipRegion(r,
+                        header.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + getText(row)));
         }
     }
 }
