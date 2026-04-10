@@ -30,7 +30,7 @@ public static partial class TaffyExtensions
     /// the builder so that state is isolated per pawn.
     /// </summary>
     public static void Input(this TaffyBuilder b, ref string text, int? maxLength = null,
-        Regex? pattern = null, Style? style = null, Color? color = null, Action<Rect>? onHover = null,
+        Regex? pattern = null, Color? color = null, Action<Rect>? onHover = null, StyleOverride? style = null,
         [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
     {
         var key = $"{b.ContextKey}:{file}:{line}";
@@ -41,14 +41,14 @@ public static partial class TaffyExtensions
         if (SInputState.TryGetValue(key, out var stored) && stored.Source == text)
             text = stored.Typed;
 
-        style ??= new Style();
-        style = style.WithDefaults(new Style
+        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            size = new Size<Dimension>(Dimension.Length(DefaultInputWidth), Dimension.Length(UIUtility.ButtonHeight))
-        });
+            width = DefaultInputWidth,
+            height = UIUtility.ButtonHeight
+        }).Resolve();
 
         var displayValue = text;
-        b.AddLeaf(style, r =>
+        b.AddLeaf(resolvedStyle, r =>
         {
             string input;
 
@@ -75,7 +75,7 @@ public static partial class TaffyExtensions
     /// (multiple callers would otherwise share the same file:line key).
     /// </summary>
     public static void InputNumber(this TaffyBuilder b, ref int value, int min = 0, int max = 9999,
-        Style? style = null, string? id = null,
+        StyleOverride? style = null, string? id = null,
         [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
     {
         var key = id != null ? $"{b.ContextKey}:{id}" : $"{b.ContextKey}:{file}:{line}";
@@ -85,16 +85,16 @@ public static partial class TaffyExtensions
         if (hasState)
             value = stored.value;
 
-        style ??= new Style();
-        style = style.WithDefaults(new Style
+        var resolvedStyle = (style ??= new StyleOverride()).Merge(new StyleOverride
         {
-            size = new Size<Dimension>(Dimension.Length(DefaultInputWidth), Dimension.Length(UIUtility.ButtonHeight))
-        });
+            width = Dimension.Length(DefaultInputWidth),
+            height = UIUtility.ButtonHeight
+        }).Resolve();
 
         var capturedValue = value;
         var capturedBuffer = hasState ? stored.buffer : value.ToString();
 
-        b.AddLeaf(style, r =>
+        b.AddLeaf(resolvedStyle, r =>
         {
             var r2 = r.TakeRightPart(r.height / 2f);
             var upRect = r2.TopHalf();

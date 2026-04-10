@@ -26,20 +26,20 @@ public static partial class TaffyExtensions
         IReadOnlyList<T> items,
         Action<Rect, T> drawItem,
         float itemHeight = UIUtility.ButtonHeight,
-        Style? style = null,
+        StyleOverride? style = null,
         [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        style ??= new Style();
-        style = style.WithDefaults(new Style
+        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            size = new Size<Dimension>(Dimension.Percent(1f), Mathf.Clamp(items.Count, 1, 6) * itemHeight),
-        });
+            width = Dimension.Percent(1f),
+            height = Mathf.Clamp(items.Count, 1, 6) * itemHeight,
+        }).Resolve();
 
         var capturedItems = items;
-        b.AddLeaf(style, r =>
+        b.AddLeaf(resolvedStyle, r =>
         {
             SScrollPositions.TryGetValue(key, out var sp);
 

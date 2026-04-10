@@ -15,7 +15,7 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
         var (label, icon, color) = FactionUtility.GetFactionMeta(pawn.Faction);
         
         builder.Text("Faction",
-            style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
+            style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
         builder.Button(label, icon, color, onClick: _ =>
             {
                 Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsInViewOrder.Select(f =>

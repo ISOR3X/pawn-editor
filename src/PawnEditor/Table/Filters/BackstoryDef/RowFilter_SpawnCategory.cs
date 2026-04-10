@@ -20,13 +20,13 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
     {
         // TODO: This should probably be done in the constructor?
         SpawnCategories ??= table.Rows.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s).ToList();
-        
+
         builder.Collapsible("Spawn category", col =>
         {
             col.Div(new Style { gap = Taffy.Gap(GenUI.GapTiny) }, row2 =>
             {
                 row2.Icon(TexButton.Search);
-                row2.Input(ref _searchText, style: new Style { flexGrow = 1f });
+                row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
             });
 
             var filtered = SpawnCategories
@@ -58,6 +58,6 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                     table.SetDirty();
                 });
             });
-        }, style: new Style { gap = Taffy.Gap(0f, GenUI.GapTiny) });
+        }, style: new StyleOverride { gap = Taffy.Gap(0f, GenUI.GapTiny) });
     }
 }

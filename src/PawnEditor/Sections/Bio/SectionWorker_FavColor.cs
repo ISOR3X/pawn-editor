@@ -11,7 +11,7 @@ public class SectionWorker_FavColor(SectionDef def) : SectionWorker(def)
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         var currentColor = pawn.story.favoriteColor?.color ?? Color.white;
-        builder.Text("Favorite color", style: new Style { margin = new Rect<LengthPercentageAuto>(0, GenUI.GapLabel, 0, 0) });
+        builder.Text("Favorite color", style: new StyleOverride{ margin = new Rect<LengthPercentageAuto>(0, GenUI.GapLabel, 0, 0) });
         builder.Button("Choose color...",
             onClick: _ =>
             {
