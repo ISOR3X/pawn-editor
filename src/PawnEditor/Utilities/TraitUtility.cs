@@ -18,9 +18,8 @@ public static class TraitUtility
     /// TraitDefs hold multiple trait definitions
     /// Class instead of struct to make it nullable.
     /// </summary>
-    public record class TraitRecord(TraitDef TraitDef, TraitDegreeData Degree)
+    public record TraitRecord(TraitDef TraitDef, TraitDegreeData Degree)
     {
         public Trait Trait => new(TraitDef, Degree.degree);
-        public TraitDegreeData TraitDegreeData => Degree;
     }
 }

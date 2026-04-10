@@ -26,13 +26,6 @@ public static class UIUtility
         Large = 1
     }
 
-    public static void SplitHorizontallyEqual(this Rect rect, out Rect top, out Rect bottom, float padding = 0)
-    {
-        var half = rect.height / 2;
-        top = rect.TopPartPixels(half - padding);
-        bottom = rect.BottomPartPixels(half - padding);
-    }
-
     public static string TruncateWithTooltip(this string label, Rect inRect, float padding = 16f)
     {
         var lineRect = inRect.TopPartPixels(Text.LineHeight);
@@ -44,97 +37,6 @@ public static class UIUtility
         }
 
         return label;
-    }
-
-    public static Gradient GradientFromColorComponent(Verse.Widgets.ColorComponents component, Color color)
-    {
-        var gradient = new Gradient();
-
-        if (component == Verse.Widgets.ColorComponents.Hue)
-        {
-            // Create color keys for the gradient
-            var colorKeys = new GradientColorKey[7];
-            for (var i = 0; i < colorKeys.Length; i++)
-            {
-                var value = i / 6f;
-                if (i == 6) value -= 0.001f; // Prevent wraparound
-                colorKeys[i] = new GradientColorKey(color.SetComponent(component, value), i / 6f);
-            }
-
-            // Create alpha keys for the gradient
-            var alphaKeys = new GradientAlphaKey[2];
-            alphaKeys[0] = new GradientAlphaKey(1.0f, 0.0f);
-            alphaKeys[1] = new GradientAlphaKey(1.0f, 1.0f);
-
-            // Set the color and alpha keys
-            gradient.SetKeys(colorKeys, alphaKeys);
-
-            return gradient;
-        }
-
-        var colors = new GradientColorKey[2];
-        colors[0] = new GradientColorKey(color.SetComponent(component, 0), 0f);
-        colors[0] = new GradientColorKey(color.SetComponent(component, 1), 1f);
-
-        gradient.SetKeys(colors, [new GradientAlphaKey(1, 0), new GradientAlphaKey(1, 1)]);
-        return gradient;
-    }
-
-    public static float GetComponent(this Color color, Verse.Widgets.ColorComponents component)
-    {
-        Color.RGBToHSV(color, out var h, out var s, out var v);
-        switch (component)
-        {
-            case Verse.Widgets.ColorComponents.Red:
-                return color.r;
-            case Verse.Widgets.ColorComponents.Green:
-                return color.g;
-            case Verse.Widgets.ColorComponents.Blue:
-                return color.b;
-            case Verse.Widgets.ColorComponents.Hue:
-                return h;
-            case Verse.Widgets.ColorComponents.Sat:
-                return s;
-            case Verse.Widgets.ColorComponents.Value:
-                return v;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(component), component,
-                    "Invalid color component, only RGB/HSV are supported.");
-        }
-    }
-
-    public static Color SetComponent(this Color color, Verse.Widgets.ColorComponents component, float value)
-    {
-        Color.RGBToHSV(color, out var h, out var s, out var v);
-        switch (component)
-        {
-            case Verse.Widgets.ColorComponents.Red:
-                color.r = value;
-                break;
-            case Verse.Widgets.ColorComponents.Green:
-                color.g = value;
-                break;
-            case Verse.Widgets.ColorComponents.Blue:
-                color.b = value;
-                break;
-            case Verse.Widgets.ColorComponents.Hue:
-                h = value;
-                color = Color.HSVToRGB(h, s, v);
-                break;
-            case Verse.Widgets.ColorComponents.Sat:
-                s = value;
-                color = Color.HSVToRGB(h, s, v);
-                break;
-            case Verse.Widgets.ColorComponents.Value:
-                v = value;
-                color = Color.HSVToRGB(h, s, v);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(component), component,
-                    "Invalid color component, only RGB/HSV are supported.");
-        }
-
-        return color;
     }
 
     public static void DefIconPreview(Rect inRect, Def? def, Color? color = null, float scale = 1.1f)
@@ -161,42 +63,21 @@ public static class UIUtility
         });
     }
 
-    public static int IncrementWithScroll(Rect inRect, int value, int shiftIncrement = -1)
+    public static int IncrementWithScroll(Rect inRect, int value, int? shiftIncrement = null)
     {
-        // Increment/ decrement value with mouse scroll. Uses a scrollview to prevent scrolling of other scrollviews due to mouse scroll.
-        var v = Vector2.zero;
-        Verse.Widgets.BeginScrollView(inRect, ref v, inRect);
-        if (Mouse.IsOver(inRect))
+        if (!Mouse.IsOver(inRect)) return value;
+
+        if (Event.current.type == EventType.ScrollWheel)
         {
-            var tooltip = "Scroll to change value";
-            if (shiftIncrement != -1)
-                tooltip += $", hold shift to increment by {shiftIncrement}";
-            TooltipHandler.TipRegion(inRect, tooltip);
-
-            var scroll = Input.mouseScrollDelta.y;
-            if (Mathf.Approximately(scroll, 1) && !Utility.HasDoneOnce)
-            {
-                if (Event.current.shift && shiftIncrement != -1)
-                    value += shiftIncrement;
-                else
-                    value++;
-                Utility.HasDoneOnce = true;
-            }
-            else if (Mathf.Approximately(scroll, -1) && !Utility.HasDoneOnce)
-            {
-                if (Event.current.shift && shiftIncrement != -1)
-                    value -= shiftIncrement;
-                else
-                    value--;
-                Utility.HasDoneOnce = true;
-            }
-            else if (scroll == 0)
-            {
-                Utility.HasDoneOnce = false;
-            }
+            var delta = Event.current.delta.y != 0
+                ? Event.current.delta.y
+                : Event.current.delta.x; // Windows detects shift + scroll as horizontal scroll.
+            if (delta < 0)
+                value += Event.current.shift && shiftIncrement != null ? shiftIncrement.Value : 1;
+            else if (delta > 0)
+                value -= Event.current.shift && shiftIncrement != null ? shiftIncrement.Value : 1;
+            Event.current.Use();
         }
-
-        Verse.Widgets.EndScrollView();
 
         return value;
     }

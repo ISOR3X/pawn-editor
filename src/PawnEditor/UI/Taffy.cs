@@ -57,24 +57,10 @@ namespace PawnEditor
         }
 
         // ── Leaf items ──────────────────────────────────────────────────────────
-
-        /// <summary>Adds a leaf node with per-axis size/grow convenience parameters.</summary>
-        public void Item(float? width = null, float? height = null,
-            float grow = 0f, float shrink = 1f,
-            Action<Rect>? draw = null)
-        {
-            var style = new Style { flexGrow = grow, flexShrink = shrink };
-            if (width.HasValue)
-                style.size = style.size.MapWidth(_ => Dimension.Length(width.Value));
-            if (height.HasValue)
-                style.size = style.size.MapHeight(_ => Dimension.Length(height.Value));
-            AddLeaf(style, draw);
-        }
-
+        
         /// <summary>Adds a leaf node with a full Taffy <see cref="Style"/>.</summary>
-        public void Item(Style style, Action<Rect>? draw = null) => AddLeaf(style, draw);
-
-        public void Item(Action<Rect>? draw = null) => AddLeaf(new Style(), draw);
+        public void Item(Action<Rect>? draw = null, StyleOverride? style = null) =>
+            AddLeaf((style ?? new StyleOverride()).Resolve(), draw);
 
         // ── Nested row containers ───────────────────────────────────────────────
 
@@ -95,6 +81,9 @@ namespace PawnEditor
 
         public void Div(Action<TaffyBuilder>? build = null)
             => AddContainer(new Style(), null, build);
+
+        public void Div(Action<TaffyBuilder>? build = null, StyleOverride? style = null)
+            => AddContainer((style ?? new StyleOverride()).Resolve(), null, build);
 
         /// <summary>Adds a container that runs <paramref name="draw"/> on its own rect (e.g. highlight/tooltip) before drawing children.</summary>
         public void Div(Style style, Action<Rect>? draw, Action<TaffyBuilder>? build = null)
@@ -194,26 +183,18 @@ namespace PawnEditor
     /// </summary>
     public static class Taffy
     {
-        // ── Entry points ────────────────────────────────────────────────────────
+        #region ENTRY POINTS
 
-        /// <summary>Lays out children in a row inside <paramref name="rect"/>.</summary>
-        public static void Row(Rect rect, Action<TaffyBuilder> build)
-            => Execute(rect, new Style { flexDirection = FlexDirection.Row }, build);
+        /// <summary>
+        /// RimWorld entry point for the Taffy layout engine.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="build"></param>
+        /// <param name="style"></param>
+        public static void Div(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+            => Execute(rect, (style ?? new StyleOverride()).Resolve(), build);
 
-        /// <summary>Lays out children in a row with the given gap inside <paramref name="rect"/>.</summary>
-        public static void Row(Rect rect, float gap, Action<TaffyBuilder> build)
-            => Execute(rect, new Style { flexDirection = FlexDirection.Row, gap = UniformGap(gap) }, build);
-
-        /// <summary>Lays out children in a column inside <paramref name="rect"/>.</summary>
-        public static void Column(Rect rect, Action<TaffyBuilder> build)
-            => Execute(rect, new Style { flexDirection = FlexDirection.Column }, build);
-
-        /// <summary>Lays out children in a column with the given gap inside <paramref name="rect"/>.</summary>
-        public static void Column(Rect rect, float gap, Action<TaffyBuilder> build)
-            => Execute(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);
-
-        public static void Div(Rect rect, Style style, Action<TaffyBuilder> build)
-            => Execute(rect, style, build);
+        #endregion
 
         // ── Grid entry points ───────────────────────────────────────────────────
         //

@@ -43,5 +43,5 @@ public abstract class ThingColumnWorker : ColumnWorker<Thing>
     protected virtual void DrawCellContent(Rect r, Thing row) { }
 
     public override void DrawCell(TaffyBuilder grid, Thing row)
-        => grid.Item(draw: r => DrawCellContent(r, row));
+        => grid.Item(r => DrawCellContent(r, row));
 }

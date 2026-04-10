@@ -69,7 +69,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                     style: new StyleOverride { width = LevelLabelWidth });
                 row.Button(icon: GetTextureForPassion(pawn.skills.GetSkill(skillDef).passion), drawGraphic: false,
                     style: new StyleOverride { width = 24f, height = 24f }, onClick: (_) => { newPassionLevel++; });
-                row.Item(new Style { flexGrow = 1f }, r =>
+                row.Item(r =>
                 {
                     var r2 = r.TakeRightPart(r.height / 2f);
                     r2.SplitHorizontallyEqual(out var upRect, out var downRect);
@@ -90,7 +90,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 
                     DrawSkillLevelLabel(r with { xMin = r.xMin + GenUI.GapTiny }, skill);
                     TrySetSkill(skill, newSkillLevel, newPassionLevel);
-                });
+                }, new StyleOverride { flexGrow = 1f });
             });
     }
 

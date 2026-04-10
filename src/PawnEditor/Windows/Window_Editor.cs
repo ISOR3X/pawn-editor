@@ -123,18 +123,17 @@ public partial class Window_Editor : Window
     {
         var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
 
-        Taffy.Div(inRect, new Style { flexDirection = FlexDirection.Column }, builder =>
+        Taffy.Div(inRect, builder =>
         {
             builder.Text("Selected faction", font: GameFont.Tiny);
             builder.Button(label, icon: tex, iconColor: c, block: true,
                 style: new StyleOverride { width = Dimension.Percent(1f) },
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
-            builder.Item(new Style { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) },
-                draw: rect =>
-                {
-                    Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
-                    if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
-                });
-        });
+            builder.Item(rect =>
+            {
+                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
+            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
+        }, new StyleOverride { flexDirection = FlexDirection.Column });
     }
 }

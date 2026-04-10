@@ -27,15 +27,14 @@ namespace PawnEditor;
 [HotSwappable]
 public class TaffyLayoutNode
 {
-    private Style _style = new();
+    private readonly Style _style = new();
 
-    // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
-    public SectionDef? section;
+    public SectionDef? section; // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
     private readonly List<TaffyLayoutNode> _children = [];
     private Func<bool> _isActive = static () => true;
 
 
-    // ── XML loading ────────────────────────────────────────────────────────────
+    #region XML LOADING
 
     public void LoadDataFromXmlCustom(XmlNode xmlNode)
     {
@@ -214,7 +213,9 @@ public class TaffyLayoutNode
         }
     }
 
-    // ── Parser helpers ─────────────────────────────────────────────────────────
+    #endregion
+
+    #region PARSER HELPERS
 
     private static float ParseFloat(string s) =>
         float.Parse(s, CultureInfo.InvariantCulture);
@@ -331,7 +332,9 @@ public class TaffyLayoutNode
         return GridPlacement.Line(int.Parse(s, CultureInfo.InvariantCulture));
     }
 
-    // ── Draw / BuildInto ───────────────────────────────────────────────────────
+    #endregion
+
+    #region DRAW/ BUILDINTO
 
     /// <summary>
     /// Adds this layout tree's nodes into an existing <paramref name="col"/> builder.
@@ -372,6 +375,8 @@ public class TaffyLayoutNode
                 return true;
         return false;
     }
+
+    #endregion
 
     /// <summary>
     /// Standalone entry point: computes layout with unconstrained height, draws all visible

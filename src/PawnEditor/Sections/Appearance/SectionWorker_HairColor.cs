@@ -10,7 +10,7 @@ public class SectionWorker_HairColor(SectionDef def) : SectionWorker(def)
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Item(height: Text.LineHeight + _hairColorHeight, draw: r =>
+        builder.Item(r =>
         {
             var listing = new Listing_Standard { maxOneColumn = true };
             listing.Begin(r);
@@ -20,6 +20,6 @@ public class SectionWorker_HairColor(SectionDef def) : SectionWorker(def)
                 c => AppearanceUtility.TrySetHairColor(c, pawn), out _hairColorHeight);
             AppearanceUtility.TrySetHairColor(color, pawn);
             listing.End();
-        });
+        }, new StyleOverride { height =  Text.LineHeight + _hairColorHeight,});
     }
 }

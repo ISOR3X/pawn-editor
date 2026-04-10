@@ -38,8 +38,7 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
 
     private static void DrawInspectPaneWidget(TaffyBuilder builder, Action<WidgetRow, Pawn> draw, Pawn pawn)
     {
-        builder.Item(new Style { size = new Size<Dimension>(93f, 16f) },
-            draw: r => draw(new WidgetRow(r.x, r.y), pawn));
+        builder.Item(r => draw(new WidgetRow(r.x, r.y), pawn), new StyleOverride { width = 93f, height = 16f });
     }
 
     private static string MakeInspectStringFor(Pawn pawn)

@@ -14,11 +14,11 @@ public class TabWorker_FactionOverview(TabDef def) : TabWorker_Faction(def)
 
     protected override void DoInnerTabContents(TaffyBuilder col, Faction faction)
     {
-        col.Item(grow: 1f, draw: r =>
+        col.Item(r =>
         {
             if (!_pawnTable.hasFixedSize) _pawnTable.SetFixedSize(r.size);
             if (_pawnTable.PawnsListForReading.First().Faction != faction) _pawnTable.SetDirty();
             _pawnTable.PawnTableOnGUI(r.position);
-        });
+        }, new StyleOverride { flexGrow = 1f });
     }
 }

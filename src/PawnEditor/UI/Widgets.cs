@@ -174,7 +174,7 @@ public static partial class Widgets
 
         int.TryParse(output, out var result);
 
-        result = UIUtility.IncrementWithScroll(inRect, result);
+        result = UIUtility.IncrementWithScroll(inRect, result, 5);
 
         return Mathf.Clamp(result, (int)min, (int)max);
     }
@@ -219,104 +219,6 @@ public static partial class Widgets
 
         buffer = inputDrawer.Invoke(inRect, text);
         return buffer;
-    }
-
-    public static Color DelayedHexField(Rect inRect,
-        Color currentColor,
-        ref string? buffer,
-        string? previousFocusedControlName,
-        string? controlName = null)
-    {
-        const int maxLength = 7; // #RRGGBB
-        var colorAsText = ColorUtility.ToHtmlStringRGB(currentColor);
-        var output = DelayedTextField(inRect, colorAsText, ref buffer, maxLength - 1, previousFocusedControlName,
-            controlName);
-        if (output != colorAsText)
-        {
-            // Add the hash since this is needed for parsing.
-            if (!output.StartsWith("#")) output = output.Insert(0, "#");
-
-            // Add leading zeros if needed.
-            var length = output.Length;
-            if (length < maxLength)
-                for (var i = 0; i < maxLength - length; i++)
-                    output = output.Insert(1, "0");
-
-            if (ColorUtility.TryParseHtmlString(output, out var color))
-                return color;
-        }
-
-        return currentColor;
-    }
-
-    public static void DrawGradient(Rect inRect, Gradient gradient)
-    {
-        // TODO: Keep an eye on performance of this function.
-        var texture = new Texture2D((int)inRect.width, (int)inRect.height, TextureFormat.RGBA32, false);
-
-        for (var i = 0; i < texture.width; i++)
-        {
-            var t = i / (texture.width - 1f);
-            for (var j = 0; j < texture.height; j++) texture.SetPixel(i, j, gradient.Evaluate(t));
-        }
-
-        texture.Apply();
-        GUI.DrawTexture(inRect, texture);
-    }
-
-    public static void GradientSlider(Rect inRect, Verse.Widgets.ColorComponents colorComponent, ref Color color,
-        ref string? lastFocusedSlider)
-    {
-        var originalRect = inRect;
-        var hashCode = inRect.GetHashCode().ToString();
-        inRect = inRect.ContractedBy(6f); // Contract to arrow is inside of the rect.
-        var gradient = UIUtility.GradientFromColorComponent(colorComponent, color);
-        var range = inRect.xMax - inRect.xMin;
-        var xPosition = inRect.xMin + range * color.GetComponent(colorComponent);
-
-        if (Event.current.button == 0 && Input.GetKey(KeyCode.Mouse0))
-        {
-            if (Verse.Widgets.ClickedInsideRect(originalRect) || (MouseDrag() && lastFocusedSlider == hashCode))
-            {
-                lastFocusedSlider = hashCode;
-                if (Event.current.type == EventType.MouseDrag)
-                    Event.current.Use();
-                var mousePosition = Mathf.Clamp(Event.current.mousePosition.x, inRect.xMin, inRect.xMax);
-                var fraction = (mousePosition - inRect.xMin) / range;
-                var value = Mathf.Lerp(0, 1, fraction);
-                color = color.SetComponent(colorComponent, value);
-                xPosition = mousePosition;
-            }
-        }
-        else
-        {
-            lastFocusedSlider = null;
-        }
-
-        DrawGradient(inRect, gradient);
-
-        var position = new Rect(xPosition - 6f, inRect.yMax - 6f, 12f, 12f);
-        GUI.DrawTextureWithTexCoords(position, Verse.Widgets.SelectionArrow, new Rect(0f, 0, 1f, 1f), true);
-    }
-
-    public static void GradientSlider_LabeledWithField(Rect inRect, Verse.Widgets.ColorComponents colorComponent,
-        ref Color color, ref string? buffer, ref string? lastFocusedSlider,
-        string? previousFocusedControlName)
-    {
-        var nameWidth = "X".GetWidthCached() + UIUtility.LabelPadding;
-        var valueWidth = "XXX".GetWidthCached() + UIUtility.LabelPadding;
-        Verse.Widgets.Label(inRect.TakeLeftPart(nameWidth), colorComponent.ToString()[0].ToString());
-        var value = Mathf.RoundToInt(color.GetComponent(colorComponent) * 255);
-        var output = DelayedTextFieldNumeric(inRect.TakeRightPart(valueWidth), value, ref buffer, 0, 255,
-            previousFocusedControlName);
-
-        if (!Mathf.Approximately(output, value))
-        {
-            var test = (float)output / 255;
-            color = color.SetComponent(colorComponent, test);
-        }
-
-        GradientSlider(inRect, colorComponent, ref color, ref lastFocusedSlider);
     }
 
     /// <summary>

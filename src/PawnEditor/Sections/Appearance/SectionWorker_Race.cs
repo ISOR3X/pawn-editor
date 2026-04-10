@@ -13,12 +13,12 @@ public class SectionWorker_Race(SectionDef def) : SectionWorker(def)
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Item(height: UIUtility.ButtonHeight, draw: r =>
+        builder.Item(draw: r =>
         {
             if (UIUtility.ButtonTextLabeled(r, "Race", pawn.kindDef.race.LabelCap))
             {
             }
-        });
+        }, new StyleOverride { height = UIUtility.ButtonHeight });
     }
 
     private static List<ThingDef> GetRacesForPawn(Pawn pawn)

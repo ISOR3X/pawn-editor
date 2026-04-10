@@ -21,10 +21,14 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
     protected abstract IEnumerable<Thing> GetThings();
 
     /// <summary>Called when a row is selected.</summary>
-    protected virtual void OnSelectChanged(Thing? thing) { }
+    protected virtual void OnSelectChanged(Thing? thing)
+    {
+    }
 
     /// <summary>Called on row hover in addition to the default tooltip.</summary>
-    protected virtual void OnRowHover(Rect rect, Thing thing) { }
+    protected virtual void OnRowHover(Rect rect, Thing thing)
+    {
+    }
 
     private Table<Thing> GetOrCreateTable()
     {
@@ -56,9 +60,9 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
 
         var rowCount = Math.Clamp(table.FilteredRowCount, 1, MaxVisibleRows);
         var tableHeight = Table<Thing>.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f;
-        
+
         // builder.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
-        builder.Item(height: tableHeight, draw: table.Draw);
+        builder.Item(table.Draw, new StyleOverride { height = tableHeight });
         // builder.Item(height: UIUtility.ButtonHeight, draw: DrawFooter);
     }
 
@@ -66,7 +70,6 @@ public abstract class SectionWorker_ThingTable(SectionDef def) : SectionWorker(d
     {
         if (Verse.Widgets.ButtonText(r.TakeLeftPart(100f), "Add item"))
         {
-            
         }
     }
 }
