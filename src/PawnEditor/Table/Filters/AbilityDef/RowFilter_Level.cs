@@ -22,16 +22,18 @@ public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
     {
         builder.Text("Level range", GameFont.Tiny);
         builder.Item(
-            new Style
-            {
-                size = new Size<Dimension>(Dimension.Percent(1f), UIUtility.ButtonHeight),
-                margin = new Rect<LengthPercentageAuto>(0f, 0f, 0f, GenUI.GapSmall)
-            },
             r =>
             {
                 var prev = _range;
                 Verse.Widgets.IntRange(r, 5174, ref _range, MinMaxRange.min, MinMaxRange.max);
                 if (_range != prev) table.SetDirty();
-            });
+            },
+            new StyleOverride
+            {
+                width = Dimension.Percent(1f),
+                height = UIUtility.ButtonHeight,
+                margin = new Rect<LengthPercentageAuto>(0f, 0f, 0f, GenUI.GapSmall)
+            }
+        );
     }
 }

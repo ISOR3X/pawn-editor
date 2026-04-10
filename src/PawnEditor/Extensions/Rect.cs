@@ -45,6 +45,7 @@ public static class Rect_Extension
         {
             rect.yMin += height;
         }
+        
     }
 
     extension(Rect rect)
@@ -70,5 +71,13 @@ public static class Rect_Extension
             rect.xMin += remove;
             return rect;
         }
+        
+        public void SplitHorizontallyEqual(out Rect top, out Rect bottom, float padding = 0)
+        {
+            var half = rect.height / 2;
+            top = rect.TopPartPixels(half - padding);
+            bottom = rect.BottomPartPixels(half - padding);
+        }
+
     }
 }

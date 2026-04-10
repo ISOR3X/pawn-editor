@@ -20,14 +20,15 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
         builder.Text("Abilities", color: ColoredText.TipSectionTitleColor);
 
         builder.Item(
-            new Style
-            {
-                size = new Size<Dimension>(Dimension.Percent(1f), _abilitiesHeight ?? AbilitiesHeight), flexGrow = 1f
-            },
-            draw: r =>
+            r =>
             {
                 DoAbilitiesRect(r, pawn);
                 _abilitiesHeight = GetAbilitiesHeight(pawn, r.width);
+            }, new StyleOverride
+            {
+                width = Dimension.Percent(1f),
+                height = _abilitiesHeight ?? AbilitiesHeight,
+                flexGrow = 1f
             });
 
         builder.Button("Add ability",

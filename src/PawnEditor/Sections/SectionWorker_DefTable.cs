@@ -22,14 +22,19 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
 
     protected virtual Def GetDefaultSelectedDef(Pawn p) => DefaultDef;
     protected virtual bool ShowTableForPawn(Pawn pawn) => true;
+
     protected virtual string GetUnavailableLabel(Pawn pawn) =>
         $"No {Label.ToLower()}s available for {pawn.Name.ToStringShort}";
 
     /// <summary>Called when a row is selected. Override to apply the def to the pawn.</summary>
-    protected virtual void OnSelectChanged(Def? def) { }
+    protected virtual void OnSelectChanged(Def? def)
+    {
+    }
 
     /// <summary>Called on row hover in addition to the default tooltip. Override to add custom visuals.</summary>
-    protected virtual void OnRowHover(Rect rect, Def def) { }
+    protected virtual void OnRowHover(Rect rect, Def def)
+    {
+    }
 
     /// <summary>Returns the tooltip text shown when hovering a row.</summary>
     protected virtual string GetTooltipFor(Def def)
@@ -72,14 +77,14 @@ public abstract class SectionWorker_DefTable(SectionDef def) : SectionWorker(def
         var rowCount = Math.Clamp(table.FilteredRowCount, 1, MaxVisibleRows);
         var tableHeight = Table<Def>.HeaderHeight + rowCount * RowHeight + UIUtility.ButtonHeight + 4f;
 
-        builder.Item(height: Text.LineHeight, draw: r => r.LabelH2(Label));
-        builder.Item(height: tableHeight, draw: r =>
+        builder.Item(r => r.LabelH2(Label), new StyleOverride { height = Text.LineHeight });
+        builder.Item(r =>
         {
             if (ShowTableForPawn(pawn))
                 table.Draw(r);
             else
                 using (new TextBlock(TextAnchor.MiddleCenter))
                     Verse.Widgets.Label(r, GetUnavailableLabel(pawn).Colorize(ColoredText.SubtleGrayColor));
-        });
+        }, new StyleOverride { height = tableHeight });
     }
 }

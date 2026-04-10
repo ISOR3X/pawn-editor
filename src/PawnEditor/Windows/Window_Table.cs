@@ -32,7 +32,7 @@ public class Window_Table<T> : OwnedWindow
 
     public override void DoWindowContents(Rect inRect)
     {
-        Taffy.Div(inRect, new Style { flexDirection = FlexDirection.Column, gap = Taffy.Gap(GenUI.GapSmall) },
+        Taffy.Div(inRect,
             builder =>
             {
                 builder.Div(new Style { flexGrow = 1f, gap = Taffy.Gap(GenUI.Gap) }, builder2 =>
@@ -52,14 +52,17 @@ public class Window_Table<T> : OwnedWindow
                             });
                     }
 
-                    builder2.Item(new Style { flexGrow = 1f }, draw: _table.Draw);
+                    builder2.Item(_table.Draw, new StyleOverride { flexGrow = 1f });
                 });
                 if (_selectedItemSlot != null || _onAdd != null)
-                    builder.Div(new Style { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center}, builder4 =>
-                    {
-                        _selectedItemSlot?.Invoke(builder4, _table.Selected);
-                        builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.Selected), size: UIUtility.ComponentSize.Large);
-                    });
-            });
+                    builder.Div(
+                        new Style { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center },
+                        builder4 =>
+                        {
+                            _selectedItemSlot?.Invoke(builder4, _table.Selected);
+                            builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.Selected),
+                                size: UIUtility.ComponentSize.Large);
+                        });
+            }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Taffy.Gap(GenUI.GapSmall) });
     }
 }

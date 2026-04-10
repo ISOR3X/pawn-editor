@@ -12,7 +12,7 @@ public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Item(height: Text.LineHeight + _skinColorHeight, draw: r =>
+        builder.Item(r =>
         {
             var listing = new Listing_Standard { maxOneColumn = true };
             listing.Begin(r);
@@ -27,7 +27,7 @@ public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
                 c => TrySetSkinColor(c, ref p), out _skinColorHeight);
             TrySetSkinColor(skinColor, ref p);
             listing.End();
-        });
+        }, new StyleOverride { height = Text.LineHeight + _skinColorHeight });
     }
 
     // We use a reference, so when this method is used inside an action, it will still update the pawn.

@@ -36,16 +36,16 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                     }, build: left =>
                     {
                         left.Text("Traits", color: ColoredText.TipSectionTitleColor);
-                        left.Item(
-                            new Style
-                            {
-                                size = new Size<Dimension>(Dimension.Percent(1f), traitsHeight), flexGrow = 1f
-                            },
-                            draw: r =>
-                            {
-                                DoTraitsRect(r, pawn);
-                                _traitsHeight = GetTraitsHeight(pawn, r.width);
-                            });
+                        left.Item(r =>
+                        {
+                            DoTraitsRect(r, pawn);
+                            _traitsHeight = GetTraitsHeight(pawn, r.width);
+                        }, new StyleOverride
+                        {
+                            width = Dimension.Percent(1f),
+                            height = traitsHeight,
+                            flexGrow = 1f
+                        });
                     });
                 row.Div(
                     new Style
@@ -55,12 +55,14 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                     }, build: right =>
                     {
                         right.Text("Incapable of", color: ColoredText.TipSectionTitleColor);
-                        right.Item(
-                            new Style
+                        right.Item(r => DoIncapableOfRect(r, pawn),
+                            new StyleOverride
                             {
-                                size = new Size<Dimension>(Dimension.Percent(1f), traitsHeight), flexGrow = 1f
-                            },
-                            draw: r => DoIncapableOfRect(r, pawn));
+                                width = Dimension.Percent(1f),
+                                height = traitsHeight,
+                                flexGrow = 1f
+                            }
+                        );
                     });
             });
 
