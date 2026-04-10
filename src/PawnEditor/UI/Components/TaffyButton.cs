@@ -28,12 +28,11 @@ public static partial class TaffyExtensions
     /// Both <paramref name="label"/> and <paramref name="icon"/> are optional.
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
-        Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null, Style? style = null,
+        Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
+        StyleOverride? style = null,
         bool drawGraphic = true,
         bool block = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default)
     {
-        style ??= new Style();
-
         var (padding, height, iconSize, iconGap, fontSize) = ResolveButtonSize(size);
 
         // Override so there's no padding if we only have an icon.
@@ -55,20 +54,20 @@ public static partial class TaffyExtensions
                         (icon != null ? iconSize : 0f);
         var totalW = unpaddedW + paddingInline * 2f;
 
-        // fillWidth: AUTO lets the layout engine stretch the button to fill its cell/track.
-        //            minSize guards against collapsing below content width.
-        // default:   fixed content width — no stretch in either grid or flex contexts.
-        style = style.WithDefaults(block
-            ? new Style
+        // By default, the button is fixed size. Setting it to block makes it width: 100%.
+        // This is inspired by the API for https://ui.nuxt.com/docs/components/button
+        var resolvedStyle = (style ?? new StyleOverride()).Merge(block
+            ? new StyleOverride
             {
-                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.Length(height)),
-                minSize = new Size<Dimension>(Dimension.Length(unpaddedW), Dimension.AUTO)
+                width = Dimension.Percent(1f),
+                height = Dimension.Length(height),
+                minWidth = Dimension.Length(unpaddedW)
             }
-            : new Style
+            : new StyleOverride
             {
-                size = new Size<Dimension>(Dimension.Length(totalW), Dimension.Length(height))
-            });
-
+                width = Dimension.Length(totalW),
+                height = Dimension.Length(height)
+            }).ResolveStyle();
 
         // Capture for closure.
         var capturedLabel = label;
@@ -76,7 +75,7 @@ public static partial class TaffyExtensions
         var capturedColor = iconColor;
         var capturedLabelW = labelW;
 
-        b.AddLeaf(style, r =>
+        b.AddLeaf(resolvedStyle, r =>
         {
             var clicked = Verse.Widgets.ButtonInvisible(r);
             if (drawGraphic) Verse.Widgets.DrawButtonGraphic(r);

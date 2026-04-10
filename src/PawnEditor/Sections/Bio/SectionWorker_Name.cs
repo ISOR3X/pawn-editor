@@ -56,7 +56,7 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
             row.Button(icon: TexButton.Rename,
                 onClick: r => { FloatWindow.ToggleState(r, () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>())); },
                 drawGraphic: false,
-                style: new Style { margin = new Rect<LengthPercentageAuto>(4f, 0f, 0f, 0f) });
+                style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(4f, 0f, 0f, 0f) });
         });
     }
 }

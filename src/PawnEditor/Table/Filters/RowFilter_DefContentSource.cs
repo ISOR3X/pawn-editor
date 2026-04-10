@@ -15,9 +15,9 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
     {
         builder.Text("Content source", font: GameFont.Tiny);
         builder.Button(_selected?.Name ?? "Any",
-            style: new Style
+            style: new StyleOverride
             {
-                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO),
+                width = Dimension.Percent(1f),
                 margin = new Rect<LengthPercentageAuto>(0f, 0f, 0f, GenUI.GapSmall)
             }, onClick: _ =>
             {

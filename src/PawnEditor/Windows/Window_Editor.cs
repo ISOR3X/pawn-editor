@@ -24,7 +24,7 @@ public partial class Window_Editor : Window
     private static TabDef? _selectedTabDef;
     private static List<TabDef> _selectedTabDefsForPawn = [];
     private static List<TabRecord> _tabsList = [];
-    
+
     public static Rect DefaultWindowRect = new(
         new Vector2((UI.screenWidth - Page.StandardSize.x) / 2, (UI.screenHeight - Page.StandardSize.y) / 2),
         Page.StandardSize);
@@ -127,7 +127,7 @@ public partial class Window_Editor : Window
         {
             builder.Text("Selected faction", font: GameFont.Tiny);
             builder.Button(label, icon: tex, iconColor: c, block: true,
-                style: new Style { size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO) },
+                style: new StyleOverride { width = Dimension.Percent(1f) },
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
             builder.Item(new Style { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) },
                 draw: rect =>

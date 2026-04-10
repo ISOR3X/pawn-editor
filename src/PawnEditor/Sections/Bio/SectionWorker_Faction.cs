@@ -24,6 +24,6 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
                     return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c);
                 }).ToList()));
             }, onHover: r => { TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction)); }
-            , style: new Style { size = new Size<Dimension>(200f, Dimension.AUTO) });
+            , style: new StyleOverride { width = 200f });
     }
 }
