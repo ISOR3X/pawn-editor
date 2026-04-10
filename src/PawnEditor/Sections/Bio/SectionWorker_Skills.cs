@@ -68,7 +68,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                 row.Text(skillDef.LabelCap,
                     style: new Style { size = new Size<Dimension>(LevelLabelWidth, Dimension.AUTO) });
                 row.Button(icon: GetTextureForPassion(pawn.skills.GetSkill(skillDef).passion), drawGraphic: false,
-                    style: new Style { size = new Size<Dimension>(24f, 24f) }, onClick: (_) => { newPassionLevel++; });
+                    style: new StyleOverride { width = 24f, height = 24f }, onClick: (_) => { newPassionLevel++; });
                 row.Item(new Style { flexGrow = 1f }, r =>
                 {
                     var r2 = r.TakeRightPart(r.height / 2f);

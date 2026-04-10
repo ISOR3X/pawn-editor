@@ -116,7 +116,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                     else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
                 },
                 onHover: onHover,
-                style: new Style { size = new Size<Dimension>(Dimension.Length(MaxButtonWidth), Dimension.AUTO) });
+                style: new StyleOverride { width = Dimension.Length(MaxButtonWidth) });
         });
     }
 }

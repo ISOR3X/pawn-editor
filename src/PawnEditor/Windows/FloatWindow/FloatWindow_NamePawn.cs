@@ -22,12 +22,13 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
     public override Vector2 InitialSize => new(500, 200);
 
-    private static void GridButton(TaffyBuilder grid, string label, Action<Rect>? onClick = null, Style? style = null)
+    private static void GridButton(TaffyBuilder grid, string label, Action<Rect>? onClick = null,
+        StyleOverride? style = null)
     {
-        style ??= new Style();
-        style = style.WithDefaults(new Style
+        style ??= new StyleOverride();
+        style = style.Merge(new StyleOverride
         {
-            size = new Size<Dimension>(Dimension.AUTO, Dimension.AUTO), justifySelf = AlignItems.Stretch
+            width = Dimension.AUTO, justifySelf = AlignItems.Stretch
         });
         grid.Button(label, style: style, onClick: onClick);
     }
@@ -100,7 +101,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                             _selectedCulture, pawn.IsCreepJoiner, _selectedGender,
                             pawn.RaceProps.nameCategory, lastName, _forceNoNick);
                     },
-                    style: new Style
+                    style: new StyleOverride
                     {
                         gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2)),
                     });
