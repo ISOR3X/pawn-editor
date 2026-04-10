@@ -24,14 +24,13 @@ public static partial class TaffyExtensions
     }
 
     /// <summary>
-    /// Adds a button with auto-computed width.
-    /// Both <paramref name="label"/> and <paramref name="icon"/> are optional.
+    ///     Adds a button with auto-computed width.
+    ///     Both <paramref name="label" /> and <paramref name="icon" /> are optional.
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
         Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
-        StyleOverride? style = null,
         bool drawGraphic = true,
-        bool block = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default)
+        bool block = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default, StyleOverride? style = null)
     {
         var (padding, height, iconSize, iconGap, fontSize) = ResolveButtonSize(size);
 
@@ -41,14 +40,12 @@ public static partial class TaffyExtensions
         // Measure label width at build time (cached across frames).
         var labelW = 0f;
         if (label != null)
-        {
             using (new TextBlock(fontSize))
             {
                 var key = (label, font: fontSize);
                 if (!TaffyBuilder.WordWidthCache.TryGetValue(key, out labelW))
                     TaffyBuilder.WordWidthCache[key] = labelW = Verse.Text.CalcSize(label).x;
             }
-        }
 
         var unpaddedW = labelW + (label != null && icon != null ? iconGap : 0f) +
                         (icon != null ? iconSize : 0f);
@@ -60,14 +57,14 @@ public static partial class TaffyExtensions
             ? new StyleOverride
             {
                 width = Dimension.Percent(1f),
-                height = Dimension.Length(height),
-                minWidth = Dimension.Length(unpaddedW)
+                height = height,
+                minWidth = unpaddedW
             }
             : new StyleOverride
             {
-                width = Dimension.Length(totalW),
-                height = Dimension.Length(height)
-            }).ResolveStyle();
+                width = totalW,
+                height = height
+            }).Resolve();
 
         // Capture for closure.
         var capturedLabel = label;
@@ -89,27 +86,28 @@ public static partial class TaffyExtensions
                 var groupX = r.xMin + (r.width - contentW) / 2f;
 
                 if (capturedIcon != null)
-                {
                     using (new GUIColor(capturedColor ?? Color.white))
+                    {
                         GUI.DrawTexture(
                             r.CenteredVertically(iconSize) with { xMin = groupX, width = iconSize },
                             capturedIcon);
-                }
+                    }
 
                 if (capturedLabel != null)
                 {
                     var labelX = groupX + (capturedIcon != null ? iconSize + iconGap : 0f);
                     using (new TextBlock(fontSize, TextAnchor.MiddleLeft, false))
+                    {
                         Verse.Widgets.Label(r with { xMin = labelX, width = capturedLabelW },
                             capturedLabel.Truncate(capturedLabelW));
+                    }
                 }
             }
 
 
             if (onHover != null)
-            {
-                if (Mouse.IsOver(r)) onHover(r);
-            }
+                if (Mouse.IsOver(r))
+                    onHover(r);
 
             if (clicked) onClick?.Invoke(r);
         });

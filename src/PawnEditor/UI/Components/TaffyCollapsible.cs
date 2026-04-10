@@ -26,20 +26,19 @@ public static partial class TaffyExtensions
         string title,
         Action<TaffyBuilder> content,
         bool defaultOpen = true,
-        Style? style = null,
+        StyleOverride? style = null,
         [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
     {
         var key = $"{b.ContextKey}:{file}:{line}";
         var isOpen = SCollapsibleState.GetValueOrDefault(key, defaultOpen);
-        style ??= new Style();
 
-        style = style.WithDefaults(new Style
+        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            flexDirection = FlexDirection.Column,
-        });
+            flexDirection = FlexDirection.Column
+        }).Resolve();
 
-        b.Div(style, build: col =>
+        b.Div(resolvedStyle, build: col =>
         {
             col.Div(
                 new Style { flexDirection = FlexDirection.Row, alignItems = AlignItems.Center },
@@ -51,7 +50,7 @@ public static partial class TaffyExtensions
                 },
                 build: row =>
                 {
-                    row.Text(title, font: GameFont.Tiny, style: new Style { flexGrow = 1f });
+                    row.Text(title, font: GameFont.Tiny, style: new StyleOverride { flexGrow = 1f });
                     row.Icon(isOpen ? PawnColumnWorker.SortingIcon : PawnColumnWorker.SortingDescendingIcon,
                         size: UIUtility.ComponentSize.Small);
                 });

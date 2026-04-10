@@ -17,11 +17,11 @@ public static partial class TaffyExtensions
     /// The default draw callback renders the text as a label.
     /// </summary>
     public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small,
-        TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, Style? style = null, bool? wrap = null, Action<Rect>? onHover = null)
+        TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, bool? wrap = null, Action<Rect>? onHover = null, StyleOverride? style = null)
     {
-        style ??= new Style();
+        var resolvedStyle = (style ?? new StyleOverride()).Resolve();
 
-        var node = b.tree.NewLeafWithContext(style, (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
+        var node = b.tree.NewLeafWithContext(resolvedStyle, (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
         b.children.Add(node);
         b.callbacks.Add((node, (r =>
         {

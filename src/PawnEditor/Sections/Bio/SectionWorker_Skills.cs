@@ -66,7 +66,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             row =>
             {
                 row.Text(skillDef.LabelCap,
-                    style: new Style { size = new Size<Dimension>(LevelLabelWidth, Dimension.AUTO) });
+                    style: new StyleOverride { width = LevelLabelWidth });
                 row.Button(icon: GetTextureForPassion(pawn.skills.GetSkill(skillDef).passion), drawGraphic: false,
                     style: new StyleOverride { width = 24f, height = 24f }, onClick: (_) => { newPassionLevel++; });
                 row.Item(new Style { flexGrow = 1f }, r =>
@@ -74,8 +74,10 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                     var r2 = r.TakeRightPart(r.height / 2f);
                     r2.SplitHorizontallyEqual(out var upRect, out var downRect);
 
-                    if (Widgets.ButtonImageWithHold(upRect, TexPawnEditor.Up, $"{builder.ContextKey}:{skillDef.defName}:up")) newSkillLevel++;
-                    if (Widgets.ButtonImageWithHold(downRect, TexPawnEditor.Down, $"{builder.ContextKey}:{skillDef.defName}:down")) newSkillLevel--;
+                    if (Widgets.ButtonImageWithHold(upRect, TexPawnEditor.Up,
+                            $"{builder.ContextKey}:{skillDef.defName}:up")) newSkillLevel++;
+                    if (Widgets.ButtonImageWithHold(downRect, TexPawnEditor.Down,
+                            $"{builder.ContextKey}:{skillDef.defName}:down")) newSkillLevel--;
 
                     var skillProgressPct = Mathf.Max(0.0f, skill.GetLevel() / (float)SkillRecord.MaxLevel);
                     var texture2D = SkillUI.SkillBarFillTex;

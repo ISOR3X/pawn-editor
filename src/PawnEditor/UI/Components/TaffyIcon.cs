@@ -15,27 +15,28 @@ public static partial class TaffyExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
         };
     }
-    
+
     /// <summary>
     /// Adds a button with auto-computed width.
     /// </summary>
     public static void Icon(this TaffyBuilder b, Texture2D icon,
-        Color? iconColor = null, Style? style = null, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default)
+        Color? iconColor = null, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default,
+        StyleOverride? style = null)
     {
-        style ??= new Style();
         var iconSize = ResolveIconSize(size);
 
-        style = style.WithDefaults(new Style
+        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            size = new Size<Dimension>(Dimension.Length(iconSize), Dimension.Length(iconSize)),
+            width = iconSize,
+            height = iconSize,
             alignSelf = AlignItems.Center
-        });
+        }).Resolve();
 
         // Capture for closure.
         var capturedIcon = icon;
         var capturedColor = iconColor;
 
-        b.AddLeaf(style, r =>
+        b.AddLeaf(resolvedStyle, r =>
         {
             using (new GUIColor(capturedColor ?? Color.white))
                 GUI.DrawTexture(r, capturedIcon);

@@ -88,7 +88,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                     draw: r => Verse.Widgets.CheckboxLabeled(r, "Force no nickname", ref _forceNoNick));
 
                 grid.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
-                    style: new Style
+                    style: new StyleOverride
                         { gridColumn = new Line<GridPlacement>(GridPlacement.Line(1), GridPlacement.Span(2)) });
                 GridButton(grid, label: "Generate", onClick: _ =>
                     {

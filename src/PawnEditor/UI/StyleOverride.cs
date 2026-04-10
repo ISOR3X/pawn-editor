@@ -74,7 +74,7 @@ public class StyleOverride
         gridRow = gridRow ?? fallback.gridRow,
     };
 
-    public Style ResolveStyle()
+    public Style Resolve()
     {
         var def = new Style(); // Defaults
         return new Style

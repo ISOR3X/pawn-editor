@@ -89,7 +89,8 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 
         row.Div(row2 =>
         {
-            row2.Text(label, style: new Style { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
+            row2.Text(label,
+                style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
             row2.Button(buttonLabel,
                 onClick: _ =>
                 {
