@@ -271,6 +271,19 @@ namespace PawnEditor
             return new Rect<LengthPercentage>(h, h, v, v);
         }
 
+        public static Rect<LengthPercentageAuto> Margin(float all)
+        {
+            var v = LengthPercentageAuto.Length(all);
+            return new Rect<LengthPercentageAuto>(v, v, v, v);
+        }
+
+        public static Rect<LengthPercentageAuto> Margin(float lr, float tb)
+        {
+            var h = LengthPercentageAuto.Length(lr);
+            var v = LengthPercentageAuto.Length(tb);
+            return new Rect<LengthPercentageAuto>(h, h, v, v);
+        }
+
         /// <summary>Creates uniform gap on both axes.</summary>
         public static Size<LengthPercentage> Gap(float all) => UniformGap(all);
 

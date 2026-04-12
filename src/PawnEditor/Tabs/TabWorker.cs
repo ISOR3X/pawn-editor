@@ -23,7 +23,7 @@ public abstract class TabWorker(TabDef def)
         var r = inRect.ContractedBy(16f);
         Verse.Widgets.BeginGroup(r);
         var contentRect = r.AtZero();
-        var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth_WithMargin : 0;
+        var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0;
         var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
         Verse.Widgets.BeginScrollView(contentRect, ref tabScrollPosition, viewRect);
         _viewRectHeight = Taffy.MeasuredColumn(viewRect, col => DoInnerTabContents(col));

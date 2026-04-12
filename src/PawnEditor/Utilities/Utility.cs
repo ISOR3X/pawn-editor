@@ -18,26 +18,6 @@ public static class Utility
             dict[key] = [value];
     }
 
-    public static List<T2> ToFlatList<T1, T2>(this SortedDictionary<T1, List<T2>> dict)
-    {
-        var list = new List<T2>();
-        foreach (var kvp in dict) list.AddRange(kvp.Value);
-
-        return list;
-    }
-
-    /// <summary>
-    ///     Returns the total number of values in a SortedDictionary where the value is a List.
-    /// </summary>
-    /// <param name="dict">The dictionary to count the values of.</param>
-    /// <typeparam name="T1">The key type of the dictionary.</typeparam>
-    /// <typeparam name="T2">The type of the items in the value list dictionary.</typeparam>
-    /// <returns></returns>
-    public static int ValueCount<T1, T2>(this SortedDictionary<T1, List<T2>> dict)
-    {
-        return dict.Sum(kvp => kvp.Value.Count);
-    }
-
     public static string ReadableDefName(this Def def)
     {
         var parts = def.defName.Split('_');

@@ -12,12 +12,7 @@ namespace PawnEditor;
 public static class UIUtility
 {
     public const float ScrollBarWidth = 16f;
-    public const float ScrollBarWidth_WithMargin = ScrollBarWidth + 4f;
     public const float ButtonHeight = 30f;
-    public const float ButtonPadding = 40f;
-    public const float LabelPadding = 10f;
-    public const float LabelOffset = 24f; // How far a label should be from its widget
-    public static readonly Vector2 BottomButtonSize = new(150f, 38f);
 
     public enum ComponentSize
     {
@@ -111,112 +106,5 @@ public static class UIUtility
                     // Find.WindowStack.Add(new Dialog_ColorPicker(onApply, oldColor, colors, specialColors));
                 }
             });
-    }
-
-    public static void DrawElementStackSection<T>(
-        Rect inRect,
-        List<T> elements, GenUI.StackElementDrawer<T> drawer, GenUI.StackElementWidthGetter<T> widthGetter,
-        float rowHeight = 22f,
-        string? emptyLabel = null,
-        bool allowOrderOptimization = false)
-    {
-        GUI.DrawTexture(inRect, InspectPaneFiller.HealthTex);
-        var innerRect = inRect.ContractedBy(4f);
-
-        if (elements.NullOrEmpty())
-        {
-            using (new TextBlock(TextAnchor.MiddleLeft))
-            {
-                Verse.Widgets.Label(innerRect,
-                    (emptyLabel ?? "None".Translate()).Colorize(ColoredText.SubtleGrayColor));
-            }
-
-            return;
-        }
-
-        GenUI.DrawElementStack(
-            innerRect,
-            rowHeight, elements, drawer, widthGetter,
-            allowOrderOptimization: allowOrderOptimization);
-    }
-
-    public static float DrawElementStackSectionHeight<T>(
-        List<T> elements, GenUI.StackElementWidthGetter<T> widthGetter,
-        float width,
-        float rowHeight = 22f)
-    {
-        if (elements.NullOrEmpty()) return rowHeight;
-        var stackRect = GenUI.DrawElementStack(
-            new Rect(0, 0, width, 99999f),
-            rowHeight, elements, null, widthGetter);
-        return
-            stackRect.height + 8f; // 8f is the extra padding added by ContractedBy(4f) in DrawElementStackSection<T>.
-    }
-
-    public static Rect RectLabeled(Rect rect, string label, float? labelWidth = null)
-    {
-        var w = labelWidth ?? label.GetWidthCached() + LabelOffset;
-        rect.SplitVertically(w, out var left, out var right);
-        using (new TextBlock(TextAnchor.MiddleLeft))
-        {
-            Verse.Widgets.Label(left, label);
-        }
-
-        return right;
-    }
-
-    public static bool ButtonTextLabeled(Rect rect, string label, string buttonLabel, float? labelWidth = null)
-    {
-        var right = RectLabeled(rect, label, labelWidth);
-        return Verse.Widgets.ButtonText(right, buttonLabel);
-    }
-
-    public static bool ButtonTextLabeled_WithIcon(Rect rect, string label, string buttonLabel, Texture2D icon,
-        Color? color = null)
-    {
-        var right = RectLabeled(rect, label);
-
-        return ButtonText_WithIcon(right, buttonLabel, icon, color);
-    }
-
-    public static bool ButtonText_WithIcon(Rect rect, string label, Texture2D icon, Color? color = null)
-    {
-        const float iconSize = 20f;
-        const float gap = 4f;
-
-        var l = label.Truncate(rect.width - (iconSize + gap + LabelPadding * 2));
-        var width = iconSize + gap + l.GetWidthCached();
-        var remaining = rect.width - width;
-
-        var clicked = Verse.Widgets.ButtonInvisible(rect);
-        Verse.Widgets.DrawButtonGraphic(rect);
-
-        var contentRect = rect.ContractedBy(remaining / 2, 0f);
-
-        using (new TextBlock(TextAnchor.MiddleLeft))
-        {
-            Text.WordWrap = false;
-            Verse.Widgets.Label(contentRect.TakeLeftPart(l.GetWidthCached()), l);
-            Text.WordWrap = true;
-        }
-
-        contentRect.xMin += gap;
-
-        var iconRect = new Rect(contentRect.x, rect.y + (rect.height - iconSize) / 2f, iconSize, iconSize);
-
-        using (new GUIColor(color ?? Color.white))
-        {
-            GUI.DrawTexture(iconRect, icon);
-        }
-
-        return clicked;
-    }
-
-    public static void Rotated(this Texture2D texture, Rect rect, float angleDegrees)
-    {
-        Matrix4x4 old = GUI.matrix;
-        GUIUtility.RotateAroundPivot(angleDegrees, rect.center);
-        GUI.DrawTexture(rect, texture);
-        GUI.matrix = old;
     }
 }
