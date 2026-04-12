@@ -7,7 +7,7 @@ namespace PawnEditor.Table.Filters.AbilityDef;
 public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
 {
     private IntRange _range = new(MinMaxRange.min, MinMaxRange.max);
-    private static readonly IntRange MinMaxRange;
+    public static readonly IntRange MinMaxRange;
 
     static RowFilter_Level()
     {

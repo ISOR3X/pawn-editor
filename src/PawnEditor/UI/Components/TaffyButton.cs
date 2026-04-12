@@ -58,7 +58,6 @@ public static partial class TaffyExtensions
             {
                 width = Dimension.Percent(1f),
                 height = height,
-                minWidth = unpaddedW
             }
             : new StyleOverride
             {
@@ -71,6 +70,7 @@ public static partial class TaffyExtensions
         var capturedIcon = icon;
         var capturedColor = iconColor;
         var capturedLabelW = labelW;
+        var capturedPaddingInline = paddingInline;
 
         b.AddLeaf(resolvedStyle, r =>
         {
@@ -80,26 +80,30 @@ public static partial class TaffyExtensions
 
             if (capturedIcon != null || capturedLabel != null)
             {
+                var availableLabelW = r.width - capturedPaddingInline * 2f
+                    - (capturedIcon != null ? iconSize + iconGap : 0f);
+                var effectiveLabelW = Mathf.Min(capturedLabelW, Mathf.Max(0f, availableLabelW));
+
                 var contentW = (capturedIcon != null ? iconSize : 0f)
                                + (capturedIcon != null && capturedLabel != null ? iconGap : 0f)
-                               + capturedLabelW;
-                var groupX = r.xMin + (r.width - contentW) / 2f;
+                               + effectiveLabelW;
+                var groupXMin = r.xMin + (r.width - contentW) / 2f;
 
                 if (capturedIcon != null)
                     using (new GUIColor(capturedColor ?? Color.white))
                     {
                         GUI.DrawTexture(
-                            r.CenteredVertically(iconSize) with { xMin = groupX, width = iconSize },
+                            r.CenteredVertically(iconSize) with { xMin = groupXMin, width = iconSize },
                             capturedIcon);
                     }
 
                 if (capturedLabel != null)
                 {
-                    var labelX = groupX + (capturedIcon != null ? iconSize + iconGap : 0f);
+                    var labelX = groupXMin + (capturedIcon != null ? iconSize + iconGap : 0f);
                     using (new TextBlock(fontSize, TextAnchor.MiddleLeft, false))
                     {
-                        Verse.Widgets.Label(r with { xMin = labelX, width = capturedLabelW },
-                            capturedLabel.Truncate(capturedLabelW));
+                        Verse.Widgets.Label(r with { xMin = labelX, width = effectiveLabelW },
+                            capturedLabel.Truncate(effectiveLabelW));
                     }
                 }
             }

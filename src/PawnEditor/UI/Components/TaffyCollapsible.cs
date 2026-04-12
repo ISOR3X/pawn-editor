@@ -41,19 +41,19 @@ public static partial class TaffyExtensions
         b.Div(resolvedStyle, build: col =>
         {
             col.Div(
-                new Style { flexDirection = FlexDirection.Row, alignItems = AlignItems.Center },
-                draw: r =>
+                r =>
                 {
                     Verse.Widgets.DrawHighlightIfMouseover(r);
                     if (Verse.Widgets.ButtonInvisible(r))
                         SCollapsibleState[key] = !isOpen;
                 },
-                build: row =>
+                row =>
                 {
                     row.Text(title, font: GameFont.Tiny, style: new StyleOverride { flexGrow = 1f });
                     row.Icon(isOpen ? PawnColumnWorker.SortingIcon : PawnColumnWorker.SortingDescendingIcon,
                         size: UIUtility.ComponentSize.Small);
-                });
+                },
+                new StyleOverride { flexDirection = FlexDirection.Row, alignItems = AlignItems.Center });
 
             if (isOpen)
                 content(col);

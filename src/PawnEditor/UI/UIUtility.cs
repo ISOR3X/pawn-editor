@@ -107,7 +107,9 @@ public static class UIUtility
             {
                 if (currentColor.a != 0) return;
                 if (Verse.Widgets.ButtonImage(r.ExpandedBy(2f), Designator_Eyedropper.EyeDropperTex))
-                    Find.WindowStack.Add(new Dialog_ColorPicker(onApply, oldColor, colors, specialColors));
+                {
+                    // Find.WindowStack.Add(new Dialog_ColorPicker(onApply, oldColor, colors, specialColors));
+                }
             });
     }
 

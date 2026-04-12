@@ -17,13 +17,16 @@ public static partial class TaffyExtensions
     /// The default draw callback renders the text as a label.
     /// </summary>
     public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small,
-        TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, bool? wrap = null, Action<Rect>? onHover = null, StyleOverride? style = null)
+        TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, bool? wrap = null, Action<Rect>? onHover = null,
+        StyleOverride? style = null)
     {
         var resolvedStyle = (style ?? new StyleOverride()).Resolve();
 
-        var node = b.tree.NewLeafWithContext(resolvedStyle, (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
+        var node = b.tree.NewLeafWithContext(resolvedStyle,
+            (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
+        
         b.children.Add(node);
-        b.callbacks.Add((node, (r =>
+        b.callbacks.Add((node, r =>
         {
             using (new TextBlock(font, anchor, color ?? Color.white))
             {
@@ -31,12 +34,12 @@ public static partial class TaffyExtensions
                 text = wrap == false ? text.Truncate(r.width - GenUI.GapLabel) : text;
                 Verse.Widgets.Label(r, text);
             }
-            
+
             if (onHover != null)
             {
                 if (Mouse.IsOver(r)) onHover(r);
             }
-        })));
+        }));
         return;
 
         // Store a per-node measure closure as the node's context object.

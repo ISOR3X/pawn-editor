@@ -57,7 +57,7 @@ namespace PawnEditor
         }
 
         // ── Leaf items ──────────────────────────────────────────────────────────
-        
+
         /// <summary>Adds a leaf node with a full Taffy <see cref="Style"/>.</summary>
         public void Item(Action<Rect>? draw = null, StyleOverride? style = null) =>
             AddLeaf((style ?? new StyleOverride()).Resolve(), draw);
@@ -79,15 +79,12 @@ namespace PawnEditor
         public void Div(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, null, build);
 
-        public void Div(Action<TaffyBuilder>? build = null)
-            => AddContainer(new Style(), null, build);
-
-        public void Div(Action<TaffyBuilder>? build = null, StyleOverride? style = null)
-            => AddContainer((style ?? new StyleOverride()).Resolve(), null, build);
+        public void Div(Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
+            => AddContainer((style ?? new StyleOverride()).Resolve(), null, builder);
 
         /// <summary>Adds a container that runs <paramref name="draw"/> on its own rect (e.g. highlight/tooltip) before drawing children.</summary>
-        public void Div(Style style, Action<Rect>? draw, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, draw, build);
+        public void Div( Action<Rect>? draw = null, Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
+            => AddContainer((style ?? new StyleOverride()).Resolve(), draw, builder);
 
         // ── Nested column containers ────────────────────────────────────────────
 

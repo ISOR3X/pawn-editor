@@ -16,8 +16,7 @@ public class Dialog_ColorPicker : Window
 
     private Color _selectedColor;
     
-    public Dialog_ColorPicker(Action<Color> onSelect, Color oldColor, List<Color>? colors = null,
-        Dictionary<string, Color>? specialColors = null)
+    public Dialog_ColorPicker(Action<Color> onSelect, Color oldColor, List<Color>? colors = null)
     {
         _onSelect = onSelect;
         _oldColor = oldColor;
@@ -27,19 +26,9 @@ public class Dialog_ColorPicker : Window
         absorbInputAroundWindow = true;
         closeOnClickedOutside = true;
 
-        if (specialColors != null && !specialColors.TryGetValue("Old", out _)) specialColors["Old"] = oldColor;
-
-        if (colors == null)
-        {
-            _colors = [];
-            DefDatabase<ColorDef>.AllDefsListForReading.ForEach(c => _colors.Add(c.color));
-        }
-        else
-        {
-            _colors = colors;
-        }
-
         layer = WindowLayer.Super;
+        
+        _colors = colors ?? [.. DefDatabase<ColorDef>.AllDefsListForReading.Select(def => def.color)];
     }
 
 
@@ -59,9 +48,8 @@ public class Dialog_ColorPicker : Window
                         widgetBuilder.Item(r => ColorUtility.ColorRect(r, ref _selectedColor),
                             new StyleOverride { flexGrow = 1f });
                         widgetBuilder.Item(r => ColorUtility.HueSlider(r, ref _selectedColor),
-                            new StyleOverride { width = UIUtility.ButtonHeight });
+                            new StyleOverride { width = 16f });
                     }, new StyleOverride { width = 200f, height = 200f, gap = Taffy.Gap(GenUI.GapSmall)});
-                    // 2D color rect (saturation × value, fixed hue)
 
                     // HSL inputs row
                     ColorUtility.ColorToHSL(_selectedColor, out var fh, out var fs, out var fl);
