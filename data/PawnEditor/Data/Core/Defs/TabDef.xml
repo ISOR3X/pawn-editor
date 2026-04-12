@@ -19,8 +19,8 @@
             <!--            </div>-->
             <section flex-direction="column" min-width="400px">PawnEditor_Skills</section>
             <div display="flex" flex-basis="100%" flex-wrap="wrap" flex-direction="row" gap="10px">
-                <section flex-direction="column" flex-grow="1" gap="4px">PawnEditor_Traits</section>
-                <section flex-direction="column" flex-grow="1" gap="4px">PawnEditor_Abilities</section>
+                <section flex-direction="column" justify-content="space-between" flex-grow="1" gap="4px">PawnEditor_Traits</section>
+                <section flex-direction="column" justify-content="space-between" max-width="400px" flex-grow="1" gap="4px">PawnEditor_Abilities</section>
             </div>
             <!--            <div display="flex" flex-direction="row">-->
             <section align-items="center">PawnEditor_Faction</section>

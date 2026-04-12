@@ -14,58 +14,25 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
-    private float? _traitsHeight;
-
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        var traitsHeight = _traitsHeight ?? 50f;
+        var traits = pawn.story.traits.TraitsSorted;
+        var incapableOf = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
 
         builder.Div(
-            new Style
-            {
-                flexDirection = FlexDirection.Row, gap = Taffy.Gap(GenUI.GapSmall), flexGrow = 1f,
-                size = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO)
-            },
             row =>
             {
-                row.Div(
-                    new Style
-                    {
-                        minSize = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
-                        flexBasis = Dimension.Percent(0.5f)
-                    }, build: left =>
-                    {
-                        left.Text("Traits", color: ColoredText.TipSectionTitleColor);
-                        left.Item(r =>
-                        {
-                            DoTraitsRect(r, pawn);
-                            _traitsHeight = GetTraitsHeight(pawn, r.width);
-                        }, new StyleOverride
-                        {
-                            width = Dimension.Percent(1f),
-                            height = traitsHeight,
-                            flexGrow = 1f
-                        });
-                    });
-                row.Div(
-                    new Style
-                    {
-                        minSize = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
-                        flexBasis = Dimension.Percent(0.5f)
-                    }, build: right =>
-                    {
-                        right.Text("Incapable of", color: ColoredText.TipSectionTitleColor);
-                        right.Item(r => DoIncapableOfRect(r, pawn),
-                            new StyleOverride
-                            {
-                                width = Dimension.Percent(1f),
-                                height = traitsHeight,
-                                flexGrow = 1f
-                            }
-                        );
-                    });
-            });
-
+                DoTraits(row, traits, pawn);
+                DoIncapableOf(row, incapableOf, pawn);
+            },
+            new StyleOverride
+            {
+                width = Dimension.Percent(1f),
+                flexWrap = FlexWrap.Wrap,
+                flexDirection = FlexDirection.Row,
+                gap = Taffy.Gap(GenUI.GapTiny),
+            }
+        );
         builder.Button("Add trait",
             onClick: _ =>
             {
@@ -77,25 +44,96 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
         );
     }
 
-    private static float GetTraitsHeight(Pawn pawn, float width)
+    private static void DoElementRect(TaffyBuilder builder, (Color?, string, string?) metaData,
+        Action<Rect>? onClick = null)
     {
-        var traits = pawn.story.traits.TraitsSorted;
-        var incapableOf = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
+        var (textColor, label, tooltip) = metaData;
+        builder.Div(r =>
+            {
+                Verse.Widgets.DrawRectFast(r, CharacterCardUtility.StackElementBackground);
+                if (Mouse.IsOver(r))
+                {
+                    Verse.Widgets.DrawHighlight(r);
+                    if (tooltip != null) TooltipHandler.TipRegion(r, tooltip);
+                }
 
-        // Match the width reductions applied in DrawElementStackSection (ContractedBy(4f) removes 8f total)
-        var effectiveWidth = width - 8f;
+                if (Verse.Widgets.ButtonInvisible(r) && onClick != null) onClick(r);
+            },
+            inner => { inner.Text(label, color: textColor ?? Color.white, anchor: TextAnchor.MiddleCenter); },
+            new StyleOverride
+            {
+                padding = new Rect<LengthPercentage>(5f, 5f, 0f, 0f),
+                height = Dimension.AUTO
+            });
+    }
 
-        var traitsHeight = UIUtility.DrawElementStackSectionHeight(
-            traits,
-            trait => trait.LabelCap.GetWidthCached() + 10f,
-            effectiveWidth);
 
-        var incapableHeight = UIUtility.DrawElementStackSectionHeight(
-            incapableOf,
-            workTag => workTag.LabelTranslated().CapitalizeFirst().GetWidthCached() + 10f,
-            effectiveWidth);
+    private static void DoElementsRect<T>(TaffyBuilder builder, string headerLabel, List<T>? items,
+        Func<T, (Color, string, string)> itemMetaGetter, string emptyLabel = "None", Action<T>? onClick = null)
+    {
+        builder.Div(
+            left =>
+            {
+                left.Text(headerLabel, color: ColoredText.TipSectionTitleColor);
+                left.Div(r => { GUI.DrawTexture(r, InspectPaneFiller.HealthTex); }, traitsBuilder =>
+                    {
+                        if (items is { Count: > 0 })
+                            foreach (var item in items)
+                                DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
+                        else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor);
+                    },
+                    new StyleOverride
+                    {
+                        flexWrap = FlexWrap.Wrap,
+                        gap = Taffy.Gap(GenUI.GapTiny),
+                        flexGrow = 1f,
+                        alignContent = AlignContent.FlexStart,
+                        padding = Taffy.Padding(GenUI.GapTiny),
+                        width = Dimension.Percent(1f)
+                    });
+            },
+            new StyleOverride
+            {
+                flexDirection = FlexDirection.Column,
+                flexGrow = 1f,
+                flexBasis = 400f,
+                flexShrink = 0f,
+            });
+    }
 
-        return Mathf.Max(traitsHeight, incapableHeight);
+    private static void DoTraits(TaffyBuilder builder, List<Trait>? traits, Pawn pawn)
+    {
+        var emptyLabel = pawn.DevelopmentalStage.Baby()
+            ? "TraitsDevelopLaterBaby".Translate()
+            : "None".Translate();
+        DoElementsRect(builder, "Traits", traits,
+            t => (GetTraitTextColor(t), t.LabelCap, t.TipString(pawn)), emptyLabel, t => OnClick(t, pawn));
+        return;
+
+        static Color GetTraitTextColor(Trait trait)
+        {
+            if (trait.Suppressed) return ColoredText.SubtleGrayColor;
+            if (trait.sourceGene != null) return ColoredText.GeneColor;
+            return Color.white;
+        }
+
+        static void OnClick(Trait trait, Pawn pawn)
+        {
+            if (Event.current.shift)
+                Messages.Message("Deletion is not implemented yet for traits", MessageTypeDefOf.RejectInput);
+        }
+    }
+
+    private static void DoIncapableOf(TaffyBuilder builder, List<WorkTags>? workTags, Pawn pawn)
+    {
+        DoElementsRect(builder, "Incapable of", workTags,
+            t => (CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, t), t.LabelTranslated().CapitalizeFirst(),
+                GetTooltip(t, pawn)));
+        return;
+
+        static string GetTooltip(WorkTags t, Pawn pawn) =>
+            CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, t) + "\n" +
+            CharacterCardUtility.GetWorkTypesDisabledByWorkTag(t);
     }
 
     private static Table<TraitUtility.TraitRecord> GetTraitsTable(Pawn pawn)
@@ -125,60 +163,5 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             context: new PawnContext(pawn),
             searchProjection: record => record.Degree.LabelCap
         );
-    }
-
-    private static void DoTraitsRect(Rect inRect, Pawn pawn)
-    {
-        var traits = pawn.story.traits.TraitsSorted;
-        var emptyLabel = pawn.DevelopmentalStage.Baby()
-            ? "TraitsDevelopLaterBaby".Translate()
-            : "None".Translate();
-
-        UIUtility.DrawElementStackSection(inRect, traits,
-            (r, trait) =>
-            {
-                using (new GUIColor(CharacterCardUtility.StackElementBackground))
-                {
-                    GUI.DrawTexture(r, BaseContent.WhiteTex);
-                }
-
-                if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
-                if (trait.Suppressed) GUI.color = ColoredText.SubtleGrayColor;
-                else if (trait.sourceGene != null) GUI.color = ColoredText.GeneColor;
-                Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), trait.LabelCap);
-                GUI.color = Color.white;
-                if (Mouse.IsOver(r))
-                    TooltipHandler.TipRegion(r, trait.TipString(pawn));
-            },
-            trait => trait.LabelCap.GetWidthCached() + 10f,
-            emptyLabel: emptyLabel);
-    }
-
-    private static void DoIncapableOfRect(Rect inRect, Pawn pawn)
-    {
-        var incapableOf = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
-
-        UIUtility.DrawElementStackSection(inRect, incapableOf,
-            (r, workTag) =>
-            {
-                using (new GUIColor(CharacterCardUtility.StackElementBackground))
-                {
-                    GUI.DrawTexture(r, BaseContent.WhiteTex);
-                }
-
-                if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
-                using (new GUIColor(CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, workTag)))
-                {
-                    Verse.Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height),
-                        workTag.LabelTranslated().CapitalizeFirst());
-                }
-
-                if (Mouse.IsOver(r))
-                    TooltipHandler.TipRegion(r, new TipSignal(
-                        () => CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, workTag) + "\n" +
-                              CharacterCardUtility.GetWorkTypesDisabledByWorkTag(workTag),
-                        (int)r.y * 32));
-            },
-            workTag => workTag.LabelTranslated().CapitalizeFirst().GetWidthCached() + 10f);
     }
 }

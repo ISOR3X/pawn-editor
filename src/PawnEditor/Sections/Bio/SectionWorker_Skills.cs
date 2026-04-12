@@ -53,10 +53,6 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
         var newSkillLevel = skill.GetLevel();
         var newPassionLevel = (int)skill.passion;
         builder.Div(
-            new Style
-            {
-                size = new Size<Dimension>(SkillRectSize.x, SkillRectSize.y), gap = Taffy.Gap(GenUI.GapTiny)
-            },
             r =>
             {
                 Verse.Widgets.DrawHighlightIfMouseover(r);
@@ -91,6 +87,12 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                     DrawSkillLevelLabel(r with { xMin = r.xMin + GenUI.GapTiny }, skill);
                     TrySetSkill(skill, newSkillLevel, newPassionLevel);
                 }, new StyleOverride { flexGrow = 1f });
+            },
+            new StyleOverride
+            {
+                width = SkillRectSize.x,
+                height = SkillRectSize.y,
+                gap = Taffy.Gap(GenUI.GapTiny)
             });
     }
 

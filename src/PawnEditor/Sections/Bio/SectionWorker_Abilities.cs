@@ -12,23 +12,25 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 {
-    private const float AbilitiesHeight = 36f;
-    private float? _abilitiesHeight;
+    private static List<Ability> GetAbilitiesForPawn(Pawn pawn)
+    {
+        return pawn.abilities.AllAbilitiesForReading
+            .Where(a => a.def.showOnCharacterCard)
+            .OrderBy(a => a.def.level)
+            .ThenBy(a => a.def.EntropyGain)
+            .ToList();
+    }
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Text("Abilities", color: ColoredText.TipSectionTitleColor);
-
-        builder.Item(
-            r =>
-            {
-                DoAbilitiesRect(r, pawn);
-                _abilitiesHeight = GetAbilitiesHeight(pawn, r.width);
-            }, new StyleOverride
+        builder.Div(
+            inner => { DoAbilities(inner, GetAbilitiesForPawn(pawn), pawn); },
+            new StyleOverride
             {
                 width = Dimension.Percent(1f),
-                height = _abilitiesHeight ?? AbilitiesHeight,
-                flexGrow = 1f
+                flexWrap = FlexWrap.Wrap,
+                flexDirection = FlexDirection.Row,
+                gap = Taffy.Gap(GenUI.GapSmall),
             });
 
         builder.Button("Add ability",
@@ -39,8 +41,98 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
         );
     }
 
+    private static void DoElementRect(TaffyBuilder builder, (Texture2D, string) metaData, Action<Rect>? onClick = null)
+    {
+        var (texture, tooltip) = metaData;
+        builder.Div(r =>
+            {
+                Verse.Widgets.DrawRectFast(r, CharacterCardUtility.StackElementBackground);
+                if (Mouse.IsOver(r))
+                {
+                    Verse.Widgets.DrawHighlight(r);
+                    if (tooltip != null) TooltipHandler.TipRegion(r, tooltip);
+                }
+
+                if (Verse.Widgets.ButtonInvisible(r) && onClick != null) onClick(r);
+            },
+            inner => inner.Icon(texture, size: UIUtility.ComponentSize.Large),
+            new StyleOverride
+            {
+                padding = Taffy.Padding(5f),
+                height = Dimension.AUTO
+            });
+    }
+
+
+    private static void DoElementsRect(TaffyBuilder builder, string headerLabel, List<Ability>? items,
+        Func<Ability, (Texture2D, string)> itemMetaGetter, string emptyLabel = "None", Action<Ability>? onClick = null)
+    {
+        builder.Div(
+            left =>
+            {
+                left.Text(headerLabel, color: ColoredText.TipSectionTitleColor);
+                left.Div(r => { GUI.DrawTexture(r, InspectPaneFiller.HealthTex); }, traitsBuilder =>
+                    {
+                        if (items is { Count: > 0 })
+                            foreach (var item in items)
+                                DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
+                        else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor);
+                    },
+                    new StyleOverride
+                    {
+                        flexWrap = FlexWrap.Wrap,
+                        gap = Taffy.Gap(GenUI.GapTiny),
+                        flexGrow = 1f,
+                        alignContent = AlignContent.FlexStart,
+                        padding = Taffy.Padding(GenUI.GapTiny),
+                        width = Dimension.Percent(1f)
+                    });
+            },
+            new StyleOverride
+            {
+                flexDirection = FlexDirection.Column,
+                flexGrow = 1f,
+                flexBasis = 200f,
+                flexShrink = 0f,
+            });
+    }
+
+    private static void DoAbilities(TaffyBuilder builder, List<Ability>? abilities, Pawn pawn)
+    {
+        DoElementsRect(builder, "Abilities", abilities, a => (a.def.uiIcon, TooltipGetter(a)),
+            onClick: a => OnClick(a, pawn));
+        return;
+
+        static string TooltipGetter(Ability a) =>
+            a.Tooltip + "\n\n" + "ClickToLearnMore".Translate()
+                .Colorize(ColoredText.SubtleGrayColor) + "\n" +
+            "Shift + left click to delete.".Colorize(ColoredText.SubtleGrayColor);
+
+        static void OnClick(Ability ability, Pawn pawn)
+        {
+            if (Event.current.shift) TryDeleteAbility(ability.def, pawn);
+            else Find.WindowStack.Add(new Dialog_InfoCard(ability.def));
+        }
+    }
+
+    private static void TryDeleteAbility(AbilityDef abilityDef, Pawn pawn)
+    {
+        var ability = pawn.abilities.abilities.FirstOrDefault(x => x.def == abilityDef);
+        if (ability == null)
+        {
+            Messages.Message($"Failed to delete ability {abilityDef.defName} (it was not related to a def)",
+                MessageTypeDefOf.RejectInput);
+            return;
+        }
+
+        pawn.abilities.RemoveAbility(abilityDef);
+    }
+
     private static Table<AbilityDef> GetTraitsTable(Pawn pawn)
     {
+        List<IRowFilter<AbilityDef>> filters = [new RowFilter_DefContentSource<AbilityDef>()];
+        if (RowFilter_Level.MinMaxRange.max - RowFilter_Level.MinMaxRange.min != 0) filters.Add(new RowFilter_Level());
+
         return new Table<AbilityDef>(
             rows: DefDatabase<AbilityDef>.AllDefsListForReading,
             columns:
@@ -66,60 +158,8 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 TooltipHandler.TipRegion(rowRect, tip);
             },
             context: new PawnContext(pawn),
-            filters: [new RowFilter_DefContentSource<AbilityDef>(), new RowFilter_Level()],
+            filters: filters,
             searchProjection: def => def.LabelCap
         );
-    }
-
-    private static float GetAbilitiesHeight(Pawn pawn, float width)
-    {
-        var abilities = GetAbilities(pawn);
-        return UIUtility.DrawElementStackSectionHeight(abilities, _ => AbilitiesHeight, width, AbilitiesHeight);
-    }
-
-    private static void DoAbilitiesRect(Rect inRect, Pawn pawn)
-    {
-        UIUtility.DrawElementStackSection(inRect, GetAbilities(pawn),
-            (r, ability) =>
-            {
-                GUI.DrawTexture(r, BaseContent.ClearTex);
-                if (Mouse.IsOver(r)) Verse.Widgets.DrawHighlight(r);
-                if (Verse.Widgets.ButtonImage(r, ability.def.uiIcon, false))
-                {
-                    if (Event.current.shift) TryDeleteAbility(ability.def, pawn);
-                    else Find.WindowStack.Add(new Dialog_InfoCard(ability.def));
-                }
-
-                if (Mouse.IsOver(r))
-                    TooltipHandler.TipRegion(r, new TipSignal(() =>
-                            ability.Tooltip + "\n\n" +
-                            "ClickToLearnMore".Translate().Colorize(ColoredText.SubtleGrayColor) +
-                            "\n" + "Shift + left click to delete.".Colorize(ColoredText.SubtleGrayColor),
-                        (int)r.y * 37));
-            },
-            _ => AbilitiesHeight,
-            AbilitiesHeight);
-    }
-
-    private static List<Ability> GetAbilities(Pawn pawn)
-    {
-        return pawn.abilities.AllAbilitiesForReading
-            .Where(a => a.def.showOnCharacterCard)
-            .OrderBy(a => a.def.level)
-            .ThenBy(a => a.def.EntropyGain)
-            .ToList();
-    }
-
-    private static void TryDeleteAbility(AbilityDef abilityDef, Pawn pawn)
-    {
-        var ability = pawn.abilities.abilities.FirstOrDefault(x => x.def == abilityDef);
-        if (ability == null)
-        {
-            Messages.Message($"Failed to delete ability {abilityDef.defName} (it was not related to a def)",
-                MessageTypeDefOf.RejectInput);
-            return;
-        }
-
-        pawn.abilities.RemoveAbility(abilityDef);
     }
 }

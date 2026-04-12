@@ -19,6 +19,7 @@ public class StyleOverride
     public Dimension? maxWidth;
     public Dimension? maxHeight;
     public Rect<LengthPercentageAuto>? margin;
+    public Rect<LengthPercentage>? padding;
     public AlignItems? alignItems;
     public AlignItems? alignSelf;
     public AlignItems? justifyItems;
@@ -53,6 +54,7 @@ public class StyleOverride
         maxWidth = maxWidth ?? fallback.maxWidth,
         maxHeight = maxHeight ?? fallback.maxHeight,
         margin = margin ?? fallback.margin,
+        padding = padding ?? fallback.padding,
         alignItems = alignItems ?? fallback.alignItems,
         alignSelf = alignSelf ?? fallback.alignSelf,
         justifyItems = justifyItems ?? fallback.justifyItems,
@@ -84,6 +86,7 @@ public class StyleOverride
             minSize = new Size<Dimension>(minWidth ?? def.minSize.Width, minHeight ?? def.minSize.Height),
             maxSize = new Size<Dimension>(maxWidth ?? def.maxSize.Width, maxHeight ?? def.maxSize.Height),
             margin = margin ?? def.margin,
+            padding = padding ?? def.padding,
             alignItems = alignItems,
             alignSelf = alignSelf,
             justifyItems = justifyItems,

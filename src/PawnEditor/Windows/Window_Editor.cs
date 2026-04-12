@@ -127,7 +127,6 @@ public partial class Window_Editor : Window
         {
             builder.Text("Selected faction", font: GameFont.Tiny);
             builder.Button(label, icon: tex, iconColor: c, block: true,
-                style: new StyleOverride { width = Dimension.Percent(1f) },
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
             builder.Item(rect =>
             {
