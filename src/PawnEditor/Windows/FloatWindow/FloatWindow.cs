@@ -14,9 +14,11 @@ public abstract class FloatWindow : OwnedWindow
     protected FloatWindow(Rect boundWidgetRect, Window? owner = null) : base(owner)
     {
         _boundWidgetRect = boundWidgetRect;
+        
         onlyOneOfTypeAllowed = true;
         layer = WindowLayer.SubSuper;
         closeOnClickedOutside = true;
+        absorbInputAroundWindow = true;
     }
 
     protected virtual FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;

@@ -1,5 +1,6 @@
 using Taffy;
 using UnityEngine;
+using Verse;
 
 namespace PawnEditor;
 
@@ -11,7 +12,7 @@ public static partial class TaffyExtensions
         {
             UIUtility.ComponentSize.Small => 8f,
             UIUtility.ComponentSize.Default => 18f,
-            UIUtility.ComponentSize.Large => 24f,
+            UIUtility.ComponentSize.Large => GenUI.SmallIconSize,
             _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
         };
     }

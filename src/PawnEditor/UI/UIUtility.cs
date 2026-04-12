@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using HotSwap;
-using PawnEditor.Extensions;
+﻿using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -18,7 +16,7 @@ public static class UIUtility
     {
         Small = -1,
         Default = 0,
-        Large = 1
+        Large = 1,
     }
 
     public static string TruncateWithTooltip(this string label, Rect inRect, float padding = 16f)

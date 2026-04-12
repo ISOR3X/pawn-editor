@@ -4,14 +4,8 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_Inventory(SectionDef def) : SectionWorker_ThingTable(def)
+public class SectionWorker_Inventory(SectionDef def) : SectionWorker_Apparel<Thing>(def)
 {
-    protected override ThingTableDef TableDef => TableDefOf.PawnEditor_ThingTable_Inventory;
-    protected override string Label => "Inventory";
-
-    protected override IEnumerable<Thing> GetThings()
-    {
-        var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
-        return pawn?.inventory.innerContainer ?? [];
-    }
+    protected override Func<Pawn, List<Thing>> TableItems => p => p.inventory.innerContainer.innerList ?? [];
+    protected override string TableTitle => "Apparel";
 }

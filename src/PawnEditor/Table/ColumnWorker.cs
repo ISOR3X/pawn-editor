@@ -1,3 +1,4 @@
+using PawnEditor.Table.ColumnWorkers;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -6,16 +7,25 @@ namespace PawnEditor.Table;
 
 public abstract class ColumnWorker<TRow>
 {
-    public abstract TrackSizingFunction TrackSize { get; }
-    public abstract void DrawHeader(Rect r);
-    public abstract void DrawCell(TaffyBuilder grid, TRow row);
+    protected virtual string? HeaderLabel => null;
+    protected virtual string? HeaderTip => null;
+    public virtual TrackSizingFunction TrackSize => TrackSizingFunction.Auto();
 
     public virtual bool Sortable => false;
     public virtual int Compare(TRow a, TRow b) => 0;
-    public virtual string? HeaderTip => null;
 
-    /// <summary>Returns the string used for search filtering, or null if this column is not searchable.</summary>
-    public virtual string? GetSearchText(TRow row) => null;
+
+    public virtual void DrawHeader(Rect r)
+    {
+        if (HeaderLabel != null)
+            using (new TextBlock(TextAnchor.MiddleLeft))
+                Verse.Widgets.Label(r, HeaderLabel);
+        if (HeaderTip != null) TooltipHandler.TipRegion(r, (TipSignal)HeaderTip);
+    }
+
+    public abstract void DrawCell(TaffyBuilder grid, TRow row);
+
+    #region ENTRY POINTS
 
     public static ColumnWorker<TRow> Create(
         TrackSizingFunction trackSize,
@@ -43,9 +53,12 @@ public abstract class ColumnWorker<TRow>
         Func<TRow, string> getText,
         string? header = null,
         Color? color = null,
-        string? headerTip = null,
-        bool showTextAsTooltip = false)
-        => new TextColumn(trackSize, getText, header, color, headerTip, showTextAsTooltip);
+        string? headerTip = null)
+        => new TextColumnWorker<TRow>(trackSize, getText, header, color, headerTip);
+
+    #endregion
+
+    #region FACTORIES
 
     private sealed class DelegateColumn(
         TrackSizingFunction trackSize,
@@ -58,16 +71,8 @@ public abstract class ColumnWorker<TRow>
         public override TrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
         public override int Compare(TRow a, TRow b) => compare?.Invoke(a, b) ?? 0;
-        public override string? HeaderTip => headerTip;
-
-        public override void DrawHeader(Rect r)
-        {
-            if (header != null)
-                using (new TextBlock(TextAnchor.MiddleLeft))
-                    Verse.Widgets.Label(r, (TaggedString)header);
-            if (headerTip != null)
-                TooltipHandler.TipRegion(r, (TipSignal)headerTip);
-        }
+        protected override string? HeaderLabel => header;
+        protected override string? HeaderTip => headerTip;
 
         public override void DrawCell(TaffyBuilder grid, TRow row) => drawCell(grid, row);
     }
@@ -84,56 +89,13 @@ public abstract class ColumnWorker<TRow>
         public override TrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
         public override int Compare(TRow a, TRow b) => compare?.Invoke(a, b) ?? 0;
-        public override string? HeaderTip => headerTip;
 
-        public override void DrawHeader(Rect r)
-        {
-            if (header != null)
-                using (new TextBlock(TextAnchor.MiddleLeft))
-                    Verse.Widgets.Label(r, (TaggedString)header);
-            if (headerTip != null)
-                TooltipHandler.TipRegion(r, (TipSignal)headerTip);
-        }
-
+        protected override string? HeaderLabel => header;
+        protected override string? HeaderTip => headerTip;
         protected override void DrawCell(TaffyBuilder grid, TRow row, TContext ctx) => drawCell(grid, row, ctx);
     }
 
-    private sealed class TextColumn(
-        TrackSizingFunction trackSize,
-        Func<TRow, string> getText,
-        string? header,
-        Color? color,
-        string? headerTip,
-        bool doTooltip = false)
-        : ColumnWorker<TRow>
-    {
-        public override TrackSizingFunction TrackSize => trackSize;
-        public override bool Sortable => true;
-        public override string? HeaderTip => headerTip;
-
-        public override int Compare(TRow a, TRow b)
-            => string.Compare(getText(a), getText(b), StringComparison.CurrentCultureIgnoreCase);
-
-        public override void DrawHeader(Rect r)
-        {
-            if (header != null)
-                using (new TextBlock(TextAnchor.MiddleLeft))
-                    Verse.Widgets.Label(r, (TaggedString)header);
-            if (headerTip != null)
-                TooltipHandler.TipRegion(r, (TipSignal)headerTip);
-        }
-
-        public override void DrawCell(TaffyBuilder grid, TRow row)
-        {
-            grid.Text(getText(row), color: color.GetValueOrDefault(Color.white), wrap: false,
-                onHover: r =>
-                {
-                    if (doTooltip)
-                        TooltipHandler.TipRegion(r,
-                            header.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + getText(row));
-                });
-        }
-    }
+    #endregion
 }
 
 internal interface IContextColumn<in TRow>

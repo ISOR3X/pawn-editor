@@ -53,8 +53,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                     Taffy.Fr(),
                     def => string.Join(", ", def.spawnCategories),
                     "Spawn categories",
-                    color: ColoredText.SubtleGrayColor,
-                    showTextAsTooltip: true
+                    color: ColoredText.SubtleGrayColor
                 ),
             ],
             onRowHover: (rowRect, rowBackstory, ctx) =>
