@@ -1,6 +1,7 @@
 using HotSwap;
 using PawnEditor.Extensions;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 
@@ -14,7 +15,16 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
     protected override Vector2 InitialPositionShift => Vector2.zero;
     public override Vector2 InitialSize => new(500, 200);
 
-    private static readonly string?[] TextfieldBuffers = new string[2];
+    private static void GridButton(TaffyBuilder grid, string label, Texture2D? icon = null, Color? iconColor = null, Action<Rect>? onClick = null,
+        StyleOverride? style = null)
+    {
+        style ??= new StyleOverride();
+        style = style.Merge(new StyleOverride
+        {
+            width = Dimension.AUTO, justifySelf = AlignItems.Stretch
+        });
+        grid.Button(label, icon, iconColor, style: style, onClick: onClick);
+    }
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -30,7 +40,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 if (thing.def.MadeFromStuff)
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Stuff"));
-                    grid.Button(thing.Stuff.LabelCap,
+                    GridButton(grid, thing.Stuff.LabelCap,
                         Verse.Widgets.GetIconFor(thing.Stuff), thing.Stuff.stuffProps.color, onClick: _ =>
                         {
                             {
@@ -52,7 +62,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 {
                     var compQuality = thing.TryGetComp<CompQuality>();
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Quality"));
-                    grid.Button(compQuality.Quality.GetLabel().CapitalizeFirst(), onClick: _ =>
+                    GridButton(grid,compQuality.Quality.GetLabel().CapitalizeFirst(), onClick: _ =>
                     {
                         Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories
                             .Select(quality => new FloatMenuOption(quality.GetLabel().CapitalizeFirst(),
@@ -88,7 +98,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         .styleDefs;
                     var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Style"));
-                    grid.Button(currentStyle.Value?.LabelCap ?? "None",
+                    GridButton(grid,currentStyle.Value?.LabelCap ?? "None",
                         currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex, onClick: _ =>
                         {
                             Find.WindowStack.Add(new FloatMenu(styleOptions

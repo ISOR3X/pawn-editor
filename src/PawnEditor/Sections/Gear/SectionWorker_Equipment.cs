@@ -5,18 +5,22 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class SectionWorker_Equipment(SectionDef def) : SectionWorker_ThingTable(def)
+public class SectionWorker_Equipment(SectionDef def) : SectionWorker_Apparel<Thing>(def)
 {
-    protected override ThingTableDef TableDef => TableDefOf.PawnEditor_ThingTable_Equipment;
-    protected override string Label => "Equipment";
+    protected override Func<Pawn, List<Thing>> TableItems => GetEquipment;
+    protected override string TableTitle => "Equipment";
 
-    protected override IEnumerable<Thing> GetThings()
+    private static List<Thing> GetEquipment(Pawn pawn)
     {
-        var pawn = Find.WindowStack.WindowOfType<Window_Editor>().GetSelectedPawn();
         List<Thing> gear = [];
-        gear.AddRange(pawn?.equipment?.AllEquipmentListForReading ?? []);
-        gear.AddRange(pawn?.apparel.WornApparel.Where<Apparel>((Func<Apparel, bool>)(x =>
-            x.def.apparel.layers.Contains(ApparelLayerDefOf.Belt))) ?? []);
+        gear.AddRange(pawn.equipment?.AllEquipmentListForReading ?? []);
+        gear.AddRange(pawn.apparel?.WornApparel.Where<Apparel>(IsBelt) ?? []);
+
         return gear;
+
+        static bool IsBelt(Apparel apparel)
+        {
+            return apparel.def.apparel.layers.Contains(ApparelLayerDefOf.Belt);
+        }
     }
 }

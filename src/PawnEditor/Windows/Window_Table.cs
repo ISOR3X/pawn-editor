@@ -59,8 +59,8 @@ public class Window_Table<T> : OwnedWindow
                         new Style { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center },
                         builder4 =>
                         {
-                            _selectedItemSlot?.Invoke(builder4, _table.Selected);
-                            builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.Selected),
+                            _selectedItemSlot?.Invoke(builder4, _table.SelectedItem);
+                            builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.SelectedItem),
                                 size: UIUtility.ComponentSize.Large);
                         });
             }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Taffy.Gap(GenUI.GapSmall) });

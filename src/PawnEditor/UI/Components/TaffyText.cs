@@ -24,14 +24,14 @@ public static partial class TaffyExtensions
 
         var node = b.tree.NewLeafWithContext(resolvedStyle,
             (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
-        
+
         b.children.Add(node);
         b.callbacks.Add((node, r =>
         {
             using (new TextBlock(font, anchor, color ?? Color.white))
             {
                 Verse.Text.WordWrap = wrap ?? r.width < Verse.Text.CalcSize(text).x;
-                text = wrap == false ? text.Truncate(r.width - GenUI.GapLabel) : text;
+                text = wrap == false ? text.Truncate(r.width) : text;
                 Verse.Widgets.Label(r, text);
             }
 

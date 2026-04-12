@@ -1,22 +1,27 @@
-using PawnEditor.Table;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 
-namespace PawnEditor;
+namespace PawnEditor.Table.ColumnWorkers;
 
 [StaticConstructorOnStartup]
-public class DefColumnWorker_Gender : DefColumnWorker
+public class ColumnWorker_Gender<T> : ColumnWorker<T> where T : StyleItemDef
 {
-    private static readonly Texture2D MaleUsually = ContentFinder<Texture2D>.Get("UI/Icons/Gender/MaleUsually");
     private static readonly Texture2D FemaleUsually = ContentFinder<Texture2D>.Get("UI/Icons/Gender/FemaleUsually");
+    private static readonly Texture2D MaleUsually = ContentFinder<Texture2D>.Get("UI/Icons/Gender/MaleUsually");
 
+    protected override string HeaderLabel => "Gender";
+
+    public override TrackSizingFunction TrackSize => Taffy.Px(CalcHeaderWidth(HeaderLabel));
     public override bool Sortable => true;
 
-    public override int Compare(Def a, Def b)
+    public override void DrawCell(TaffyBuilder grid, T row) => grid.Icon(GetIcon(row));
+
+    public override int Compare(T a, T b)
         => GetOrder(a).CompareTo(GetOrder(b));
 
-    private static int GetOrder(Def def)
+    private static int GetOrder(T def)
     {
         if (def is not HairDef hair) return -1;
         return hair.styleGender switch
@@ -30,10 +35,9 @@ public class DefColumnWorker_Gender : DefColumnWorker
         };
     }
 
-    private static Texture2D? GetIcon(Def def)
+    private static Texture2D GetIcon(T def)
     {
-        if (def is not HairDef hair) return Gender.None.GetIcon();
-        return hair.styleGender switch
+        return def.styleGender switch
         {
             StyleGender.MaleUsually => MaleUsually,
             StyleGender.Male => Gender.Male.GetIcon(),
@@ -43,13 +47,11 @@ public class DefColumnWorker_Gender : DefColumnWorker
         };
     }
 
-    protected override void DrawCellContent(Rect r, Def row)
+    private static float CalcHeaderWidth(string header)
     {
-        var icon = GetIcon(row);
-        if (icon == null) return;
-        var cell = r.ContractedBy(2f);
-        var size = Mathf.Min(cell.width, cell.height);
-        var centeredRect = new Rect(cell.x + (cell.width - size) / 2f, cell.y + (cell.height - size) / 2f, size, size);
-        GUI.DrawTexture(centeredRect, icon);
+        var w = 0f;
+        using (new TextBlock(GameFont.Small))
+            w += Text.CalcSize(header).x;
+        return w + GenUI.Gap;
     }
 }
