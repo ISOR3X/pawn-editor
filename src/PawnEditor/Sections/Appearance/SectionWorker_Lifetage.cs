@@ -1,4 +1,5 @@
 using HotSwap;
+using Taffy;
 using Verse;
 
 namespace PawnEditor;
@@ -8,12 +9,9 @@ public class SectionWorker_Lifestage(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Item(r =>
-        {
-            if (UIUtility.ButtonTextLabeled_WithIcon(r, "Lifestage", pawn.DevelopmentalStage.ToString(),
-                    pawn.DevelopmentalStage.Icon().Texture))
-            {
-            }
-        }, new StyleOverride { height = UIUtility.ButtonHeight });
+        builder.Text("Lifestage",
+            style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
+        builder.Button(pawn.DevelopmentalStage.ToString(), pawn.DevelopmentalStage.Icon().Texture, onClick: _ => { },
+            style: new StyleOverride { width = 200f });
     }
 }

@@ -7,7 +7,8 @@ using Verse;
 namespace PawnEditor;
 
 [HotSwappable]
-public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? owner = null) : FloatWindow(boundWidgetRect, owner)
+public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? owner = null)
+    : FloatWindow(boundWidgetRect, owner)
 {
     protected override FloatWindowAlignment Alignment => FloatWindowAlignment.BottomCenter;
     protected override Vector2 InitialPositionShift => Vector2.zero;
@@ -19,6 +20,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
     {
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
+
+        // TODO: Convert to clean taffy components/ layout.
         var contentHeight = Taffy.MeasuredGrid(inRect,
             columns: [Taffy.Fr(), Taffy.Fr(2), Taffy.Fr(), Taffy.Fr(2)],
             gapX: GenUI.GapLabel, gapY: GenUI.GapTiny, autoRowHeight: UIUtility.ButtonHeight,
@@ -27,38 +30,34 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 if (thing.def.MadeFromStuff)
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Stuff"));
-                    grid.GridItem(draw: r =>
-                    {
-                        if (UIUtility.ButtonText_WithIcon(r, thing.Stuff.LabelCap,
-                                Verse.Widgets.GetIconFor(thing.Stuff), thing.Stuff.stuffProps.color))
+                    grid.Button(thing.Stuff.LabelCap,
+                        Verse.Widgets.GetIconFor(thing.Stuff), thing.Stuff.stuffProps.color, onClick: _ =>
                         {
-                            Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(thing.def)
-                                .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
-                                    {
-                                        thing.SetStuffDirect(stuff);
-                                        thing.SetColor(stuff.stuffProps.color);
-                                        thing.Notify_ColorChanged();
-                                    },
-                                    Verse.Widgets.GetIconFor(stuff),
-                                    stuff.stuffProps.color))
-                                .ToList()));
-                        }
-                    });
+                            {
+                                Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(thing.def)
+                                    .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
+                                        {
+                                            thing.SetStuffDirect(stuff);
+                                            thing.SetColor(stuff.stuffProps.color);
+                                            thing.Notify_ColorChanged();
+                                        },
+                                        Verse.Widgets.GetIconFor(stuff),
+                                        stuff.stuffProps.color))
+                                    .ToList()));
+                            }
+                        });
                 }
 
                 if (thing.HasComp<CompQuality>())
                 {
+                    var compQuality = thing.TryGetComp<CompQuality>();
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Quality"));
-                    grid.GridItem(draw: r =>
+                    grid.Button(compQuality.Quality.GetLabel().CapitalizeFirst(), onClick: _ =>
                     {
-                        var compQuality = thing.TryGetComp<CompQuality>();
-                        if (Verse.Widgets.ButtonText(r, compQuality.Quality.GetLabel().CapitalizeFirst()))
-                        {
-                            Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories
-                                .Select(quality => new FloatMenuOption(quality.GetLabel().CapitalizeFirst(),
-                                    () => compQuality.SetQuality(quality, ArtGenerationContext.Outsider)))
-                                .ToList()));
-                        }
+                        Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories
+                            .Select(quality => new FloatMenuOption(quality.GetLabel().CapitalizeFirst(),
+                                () => compQuality.SetQuality(quality, ArtGenerationContext.Outsider)))
+                            .ToList()));
                     });
                 }
 
@@ -85,14 +84,12 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
 
                 if (ThingUtility.ThingStyles.Select(ts => ts.thingDef).Contains(thing.def))
                 {
+                    var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def)
+                        .styleDefs;
+                    var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Style"));
-                    grid.GridItem(draw: r =>
-                    {
-                        var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def)
-                            .styleDefs;
-                        var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
-                        if (UIUtility.ButtonText_WithIcon(r, currentStyle.Value?.LabelCap ?? "None",
-                                currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex))
+                    grid.Button(currentStyle.Value?.LabelCap ?? "None",
+                        currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex, onClick: _ =>
                         {
                             Find.WindowStack.Add(new FloatMenu(styleOptions
                                 .Select(style => new FloatMenuOption(style.Value.LabelCap, () =>
@@ -106,11 +103,10 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                                     thing.Notify_ColorChanged();
                                 }))
                                 .ToList()));
-                        }
-                    });
+                        });
                 }
 
-                grid.GridItem(draw: r => Verse.Widgets.Label(r, "Hitpoints"));
+                grid.GridItem(draw: r => Verse.Widgets.Label(r, "Hit points"));
                 grid.GridItem(draw: r =>
                 {
                     float hitPoints = thing.HitPoints;
@@ -134,9 +130,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 if (thing.def.stackLimit > 1)
                 {
                     grid.GridItem(draw: r => Verse.Widgets.Label(r, "Count"));
-                    grid.GridItem(draw: r =>
-                        Widgets.DelayedTextFieldNumeric(r, thing.stackCount, ref TextfieldBuffers[0],
-                            1, thing.def.stackLimit, null, true));
+                    grid.InputNumber(ref thing.stackCount, 1, thing.def.stackLimit);
                 }
 
                 if (thing.HasComp<CompGeneratedNames>())
