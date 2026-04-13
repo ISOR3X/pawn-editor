@@ -10,14 +10,12 @@ public interface IEditorContext<T> : IEditorContext
     T Value { get; }
 }
 
-public sealed class PawnContext : IEditorContext<Pawn>
+public sealed class PawnContext(Pawn pawn) : IEditorContext<Pawn>
 {
-    public Pawn Value { get; }
-    public PawnContext(Pawn pawn) => Value = pawn;
+    public Pawn Value { get; } = pawn;
 }
 
-public sealed class FactionContext : IEditorContext<Faction>
+public sealed class FactionContext(Faction faction) : IEditorContext<Faction>
 {
-    public Faction Value { get; }
-    public FactionContext(Faction faction) => Value = faction;
+    public Faction Value { get; } = faction;
 }

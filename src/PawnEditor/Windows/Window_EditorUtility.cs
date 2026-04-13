@@ -45,9 +45,9 @@ public partial class Window_Editor
 
     private void RecacheTabs()
     {
-        _selectedTabDefsForPawn.Clear();
-        _selectedTabDefsForPawn = TabUtility.GetTabDefsFor(_currentContext);
-        _selectedTabDef = _selectedTabDefsForPawn.FirstOrDefault();
+        _selectedTabDefsFor.Clear();
+        _selectedTabDefsFor = TabUtility.GetTabDefsFor(_currentContext);
+        _selectedTabDef = _selectedTabDefsFor.FirstOrDefault();
         _selectedTabDef?.Worker.Notify_ContentChanged();
     }
 
