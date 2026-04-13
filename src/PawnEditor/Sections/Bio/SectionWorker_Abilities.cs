@@ -21,24 +21,15 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             .ToList();
     }
 
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(UILayout layout, Pawn pawn)
     {
-        builder.Div(
-            inner => { DoAbilities(inner, GetAbilitiesForPawn(pawn), pawn); },
-            new StyleOverride
-            {
-                width = Dimension.Percent(1f),
-                flexWrap = FlexWrap.Wrap,
-                flexDirection = FlexDirection.Row,
-                gap = Taffy.Gap(GenUI.GapSmall),
-            });
+        layout.ComponentById<DivElement>("abilityIcons").Children = inner =>
+            DoAbilities(inner, GetAbilitiesForPawn(pawn), pawn);
 
-        builder.Button("Add ability",
-            onClick: _ =>
-                Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn),
-                    Find.WindowStack.WindowOfType<Window_Editor>(),
-                    selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }))
-        );
+        layout.ComponentById<ButtonElement>("addAbility").OnClick = _ =>
+            Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn),
+                Find.WindowStack.WindowOfType<Window_Editor>(),
+                selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
     }
 
     private static void DoElementRect(TaffyBuilder builder, (Texture2D, string) metaData, Action<Rect>? onClick = null)

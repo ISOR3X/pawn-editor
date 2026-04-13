@@ -1,197 +1,424 @@
-# Table System Implementation Plan
+# XML Layout System
 
 ## Overview
 
-Replace the existing Def-driven `TableWorker<T>` / `ColumnWorker<T>` system with a new, code-first table architecture. The existing classes should be considered deprecated — new tables are constructed directly via `Table<TRow>`. An XML connector can be layered on top later without changing the core.
+This feature adds XML-driven layout and styling to `SectionWorker`, separating visual
+structure (XML) from runtime behaviour (C#). It is intentionally scoped to the new
+infrastructure only — no existing sections are migrated in this phase.
 
 ---
 
-## 1. Context System (`ITableContext`)
+## Core Concepts
 
-Some columns require runtime state (e.g. a `Pawn`) to render their cells. Context is optional and per-table — at most one context object per table instance.
+### What XML owns
+- Element hierarchy (`<div>`, `<button>`, `<text>`, etc.)
+- Static props: `label`, `icon`, `class`, `style`
+- Text content via inner text: `<text>Hello world</text>`
+- Layout and style via inline `style="..."` and `class="..."`
 
-```csharp
-// Marker interface — allows storing context without generics at the table level
-public interface ITableContext { }
+### What C# owns
+- Event handlers (`OnClick`, etc.)
+- Dynamic content (foreach loops, conditionals)
+- Runtime prop overrides (e.g. replacing a label with a pawn value)
 
-// Typed accessor used by context-aware column workers
-public interface ITableContext<T> : ITableContext {
-    T Value { get; }
-}
-```
+### Named elements (`id`)
+Elements with an `id` attribute are **configuration points** — XML declares their
+appearance, C# configures their behaviour via `layout.ComponentById<T>(id)` in
+`OnLayout`.
 
-**Concrete implementations** are plain sealed classes, one per context type needed:
+Elements without `id` are purely XML-owned and rendered as-is.
 
-```csharp
-public sealed class PawnContext : ITableContext<Pawn> {
-    public Pawn Value { get; }
-    public PawnContext(Pawn pawn) => Value = pawn;
-}
-```
-
-Context is passed into `Table<TRow>` at construction time. It is stored as `ITableContext?` — nullable, so context-free tables are equally first-class.
+If `ComponentById` is never called for a given `id`, the element renders with its
+XML props as a static, inert fallback. This is intentional — partial wiring is valid.
 
 ---
 
-## 2. Column Workers
+## Frame Flow
 
-Column workers are the rendering unit for a single column. The hierarchy has three levels:
-
-### 2a. `ColumnWorker<TRow>` — base, no context
-
-Handles header drawing, width hints, and cell rendering for rows that need no runtime context.
-
-```csharp
-public abstract class ColumnWorker<TRow> {
-    public abstract float Width { get; }           // flexBasis hint passed to layout engine
-    public abstract void DrawHeader(Rect r);
-    public abstract void DrawCell(Rect r, TRow row);
-}
-```
-
-### 2b. `IContextColumn` — internal marker interface
-
-Allows the table renderer to check for context-awareness without reflection and without exposing `ITableContext` in the base class signature.
-
-```csharp
-internal interface IContextColumn {
-    void DrawCell(Rect r, object row, ITableContext ctx);
-}
-```
-
-### 2c. `ColumnWorker<TRow, TContext>` — context-aware
-
-Subclasses override `DrawCell(Rect, TRow, TContext)`. The base plumbs the untyped `IContextColumn` implementation internally.
-
-```csharp
-public abstract class ColumnWorker<TRow, TContext> : ColumnWorker<TRow>, IContextColumn
-    where TContext : ITableContext {
-
-    // Context-aware entry point for subclasses
-    protected abstract void DrawCell(Rect r, TRow row, TContext ctx);
-
-    // Fallback — called when table has no context; subclasses may override
-    public override void DrawCell(Rect r, TRow row) { }
-
-    // IContextColumn — casts and dispatches
-    void IContextColumn.DrawCell(Rect r, object row, ITableContext ctx)
-        => DrawCell(r, (TRow)row, (TContext)ctx);
-}
-```
-
-### 2d. `ColumnWorker<TRow>.Create` — delegate factory for one-offs
-
-A pair of static factory methods on `ColumnWorker<TRow>` covers simple columns without requiring a new class:
-
-```csharp
-// No context
-ColumnWorker<TRow>.Create(
-    header: "Def Name",
-    width: 120f,
-    drawCell: (rect, row) => Widgets.Label(rect, row.defName)
-);
-
-// Context-aware
-ColumnWorker<TRow>.Create<PawnContext>(
-    header: "Title",
-    width: 120f,
-    drawCell: (rect, row, ctx) => Widgets.Label(rect, row.GetTitleFor(ctx.Value))
-);
-```
-
-Both return a `ColumnWorker<TRow>` (or `ColumnWorker<TRow, TContext>`) backed by a private delegate-holding subclass. Use a full subclass for anything non-trivial.
-
-Context-free and context-aware columns coexist in the same column list. The renderer pattern:
-
-```csharp
-foreach (var col in _columns) {
-    if (col is IContextColumn ctxCol && _context != null)
-        ctxCol.DrawCell(cellRect, row, _context);
-    else
-        col.DrawCell(cellRect, row);
-}
-```
+Each frame:
+1. `SectionWorker` base calls `OnLayout(layout, pawn)` with a **fresh `UILayout`
+   instance** (cloned from the immutable `SectionDef.Layout` template)
+2. C# code calls `ComponentById` to register overrides and event handlers on the
+   mutable copy — this is cheap (dictionary lookups + field sets)
+3. Base class calls `layout.Render(builder)` — walks the node tree, calling
+   `element.Render(builder)` on each node, merging XML props with registered overrides
+4. The `UILayout` instance is discarded — `SectionDef.Layout` is never mutated
 
 ---
 
-## 3. Filter Layer (`IRowFilter<TRow>`)
+## New Types
 
-Filters are a separate concern from context but may share it (e.g. a filter that checks backstory applicability still needs the pawn). Filters are applied before rendering to cull the visible row set.
+### `UIElement` (and subclasses)
+Per-element objects. XML props are cloned in as defaults; C# can
+override any field. Each subclass also owns its own rendering logic via `Render`.
 
 ```csharp
-public interface IRowFilter<TRow> {
-    bool Passes(TRow row, ITableContext? ctx);
+public abstract class UIElement
+{
+    public StyleOverride Style;
+    // Raw untyped attributes from XML, for extensibility by other mods
+    public Dictionary<string, string> Attrs;
+
+    public string? Get(string key) => Attrs.GetValueOrDefault(key);
+    public T? Get<T>(string key, Func<string, T> parse) =>
+        Attrs.TryGetValue(key, out var v) ? parse(v) : default;
+
+    public abstract UIElement Clone();
+
+    // Emits this component into the builder. Children are passed in already-rendered
+    // form for container types (div), or null for leaf types (button, text).
+    public abstract void Render(TaffyBuilder builder, Action<TaffyBuilder>? children);
+}
+
+public class ButtonElement : UIElement
+{
+    public string? Label;
+    public Texture2D? Icon;
+    public Action<Rect>? OnClick;
+    public Action<Rect>? OnHover;
+
+    public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
+        => builder.Button(Label, Icon, onClick: OnClick, onHover: OnHover, style: Style);
+
+    public override UIElement Clone() => (ButtonElement)MemberwiseClone();
+}
+
+public class DivElement : UIElement
+{
+    // If set, C# fully owns children. If null, XML children are rendered via the
+    // default tree walk.
+    public Action<TaffyBuilder>? Children;
+
+    public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
+        => builder.Div(Children ?? children ?? (_ => { }), Style);
+
+    public override UIElement Clone() => (DivElement)MemberwiseClone();
+}
+
+public class TextElement : UIElement
+{
+    public string? Content;
+    public Color? Color;
+
+    public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
+        => builder.Text(Content, color: Color, style: Style);
+
+    public override UIElement Clone() => (TextElement)MemberwiseClone();
 }
 ```
 
-The table holds an `IReadOnlyList<IRowFilter<TRow>>` (empty by default). Filtered rows are computed once per frame before the render loop, not inside the per-cell draw call.
-
-Multiple filters are AND-composed — a row must pass all active filters to be visible.
-
----
-
-## 4. `Table<TRow>` — runtime table instance
-
-Constructed directly — context and filters are both optional.
+### `UILayout`
+Frame-scoped mutable wrapper around the immutable `UILayoutNode` template tree.
 
 ```csharp
-public sealed class Table<TRow> {
-    public Table(
-        IEnumerable<TRow> rows,
-        IReadOnlyList<ColumnWorker<TRow>> columns,
-        ITableContext? context = null,
-        IReadOnlyList<IRowFilter<TRow>>? filters = null);
+public class UILayout
+{
+    private readonly UILayoutNode _template;
+    private readonly Dictionary<string, UIElement> _overrides = new();
 
-    public void Draw(Rect r);
-}
-```
+    public T ComponentById<T>(string id) where T : UIElement
+    {
+        if (!_overrides.TryGetValue(id, out var config))
+        {
+            var node = _template.FindById(id)
+                ?? throw new Exception($"[PawnEditor] No element with id '{id}' in layout");
+            config = node.Props.Clone();
+            _overrides[id] = config;
+        }
 
-**Example — backstory table mixing subclassed and delegate columns:**
-
-```csharp
-var table = new Table<BackstoryDef>(
-    rows: DefDatabase<BackstoryDef>.AllDefs,
-    columns: new ColumnWorker<BackstoryDef>[] {
-        ColumnWorker<BackstoryDef>.Create(            // delegate, no context
-            header: "Def Name",
-            width: 120f,
-            drawCell: (r, row) => Widgets.Label(r, row.defName)
-        ),
-        ColumnWorker<BackstoryDef>.Create<PawnContext>( // delegate, context-aware
-            header: "Title",
-            width: 200f,
-            drawCell: (r, row, ctx) => Widgets.Label(r, row.GetTitleFor(ctx.Value))
-        ),
-        new ApplicabilityIconColumn(),               // subclass, for anything non-trivial
-    },
-    context: new PawnContext(pawn),
-    filters: new IRowFilter<BackstoryDef>[] {
-        new ApplicableBackstoryFilter(),
+        return config as T
+            ?? throw new Exception($"[PawnEditor] Element '{id}' is not a {typeof(T).Name}");
     }
-);
+
+    internal void Render(TaffyBuilder builder) => RenderNode(builder, _template);
+
+    private void RenderNode(TaffyBuilder builder, UILayoutNode node)
+    {
+        var config = node.Id != null && _overrides.TryGetValue(node.Id, out var ov)
+            ? ov
+            : node.Props;
+
+        // For container nodes whose Children wasn't overridden in C#,
+        // fall back to rendering XML children recursively.
+        Action<TaffyBuilder>? xmlChildren = node.Children.Count > 0
+            ? inner => { foreach (var child in node.Children) RenderNode(inner, child); }
+            : null;
+
+        config.Render(builder, xmlChildren);
+    }
+}
 ```
 
-Key responsibilities:
-- Apply filters to produce the visible row list (cached per frame, invalidated when filter set or row source changes). Filters receive the same `ITableContext?` instance the columns do — a filter checking backstory applicability gets the pawn the same way `TitleCapColumn` does.
-- Drive the layout engine for column widths using each column's `Width` property as `flexBasis`
-- Handle scrolling and early culling (row height caching, same pattern as the existing `TableWorker`)
-- Dispatch to `IContextColumn.DrawCell` or `ColumnWorker.DrawCell` per column per visible row
+### `UILayoutNode`
+Immutable parsed representation of one XML element. Never mutated after load.
+
+```csharp
+public class UILayoutNode
+{
+    public string Tag;                  // "div", "button", "text", etc.
+    public string? Id;                  // from id="..."
+    public UIElement Props;     // resolved style + typed props, read-only template
+    public List<UILayoutNode> Children;
+
+    public UILayoutNode? FindById(string id)
+    {
+        if (Id == id) return this;
+        foreach (var child in Children)
+            if (child.FindById(id) is { } found) return found;
+        return null;
+    }
+}
+```
+
+### `UILayoutParser`
+Parses the `<layout>` XmlNode into a `UILayoutNode` tree.
+
+Tag → element type mapping:
+- `div` → `DivElement`
+- `button` → `ButtonElement` — reads `label`, `icon` attributes
+- `text` → `TextElement` — reads `XmlNode.InnerText` as `Content`, `color` attribute
+
+Text content: `<text>Hello world</text>` sets `TextElement.Content = "Hello world"`.
+Translate attribute: `<text translate="true">SomeTranslationKey</text>` calls
+`Content.Translate()` at parse time.
+
+All unknown attributes go into `Attrs` dict — no warning, just stored for C# access.
+Unknown tags: log warning, skip node and its children.
+
+Style resolution per node:
+```
+ResolveClasses(class="...").Merge(ParseInlineStyle(style="..."))
+// inline wins over class
+```
+
+### `TaffyStyleDef`
+A RimWorld `Def` that maps CSS class names to inline style strings. Any mod can
+define one.
+
+```xml
+<PawnEditor.TaffyStyleDef>
+    <defName>PawnEditorStyles</defName>
+    <styles>
+        <li name="row" value="flex-direction: row" />
+        <li name="wrap" value="flex-wrap: wrap" />
+        <li name="w-full" value="width: 100%" />
+        <li name="grow" value="flex-grow: 1" />
+        <li name="gap-sm" value="gap: 4px" />
+    </styles>
+</PawnEditor.TaffyStyleDef>
+```
+
+`ResolveReferences` parses each value string into a `StyleOverride` and stores it
+in a `Dictionary<string, StyleOverride>` for fast lookup at layout parse time.
+
+### `UIIcons`
+Resolves icon names to `Texture2D`. Tries short-name registry first, then reflection.
+
+```csharp
+public static class UIIcons
+{
+    public static void Register(string name, Texture2D icon);
+
+    // "delete"                    -> registry lookup
+    // "RimWorld.TexButton.Delete" -> reflection, cached
+    public static Texture2D? Resolve(string name);
+}
+```
+
+Resolution order:
+1. Registry lookup (short names, e.g. `"delete"`)
+2. Reflection: split on last `.`, resolve type via `AppDomain.CurrentDomain.GetAssemblies()`,
+   get static field. Cache results.
+
+Built-in short names are registered in a `[StaticConstructorOnStartup]` class.
 
 ---
 
-## 6. XML Connector (future)
+## Inline Style Parser
 
-When XML-defined tables are needed, a thin `TableDef` → `Table<TRow>` bridge is added. The non-generic `ColumnDefBase` / `TableDefBase` hierarchy remains (to avoid open-generic issues with RimWorld's `PlayDataLoader`), but during `ResolveReferences` they construct and cache a `Table<TRow>` directly. No changes to the core system are required.
+Parses `"flex-direction: row; gap: 4px; width: 100%"` into a `StyleOverride`.
+
+**Before implementing from scratch**, check:
+1. `TaffyLayoutNode.ParseStyleAttributes` in the existing codebase — this already
+   handles style attribute parsing and should be used as the basis or extended rather
+   than duplicated.
+2. The local Taffy Rust source at `C:\Users\Joram Hoogerwerf\Projects\rust\taffy` may
+   have CSS parsing logic worth referencing for property name coverage and value formats.
+
+Supported properties (minimum viable set — expand as needed):
+- `flex-direction`: `row` | `column`
+- `flex-wrap`: `wrap` | `nowrap`
+- `flex-grow`: float
+- `flex-shrink`: float
+- `flex-basis`: `auto` | `Npx` | `N%`
+- `width`, `height`, `min-width`, `max-width`: `auto` | `Npx` | `N%`
+- `gap`: `Npx`
+- `padding`: `Npx` (uniform) — expand to per-side later
+- `align-content`: `flex-start` | `flex-end` | `center` | `stretch`
+
+Unknown properties: log warning, skip.
+
+---
+
+## `SectionDef` and `SectionWorker` Changes
+
+**This is a non-breaking change.** The `<layout>` field is optional. Workers without
+it continue to work exactly as before via their existing `DoSectionContents` override.
+`OnLayout` has a default no-op implementation so workers that don't need it don't have
+to override it.
+
+### `SectionDef`
+Add an optional `<layout>` field, stored as a parsed `UILayoutNode` tree after
+`ResolveReferences`:
+
+```xml
+<PawnEditor.SectionDef>
+    <defName>PawnEditor_Abilities</defName>
+    <workerClass>PawnEditor.SectionWorker_Abilities</workerClass>
+    <layout>
+        <div style="flex-direction: row; flex-wrap: wrap; width: 100%">
+            <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1" />
+            <button id="addAbility" label="Add ability" icon="plus" />
+        </div>
+    </layout>
+</PawnEditor.SectionDef>
+```
+
+### `SectionWorker` base class
+
+```csharp
+protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+{
+    if (SectionDef.Layout != null)
+    {
+        var layout = new UILayout(SectionDef.Layout);
+        OnLayout(layout, pawn);
+        layout.Render(builder);
+    }
+}
+
+// Override this in workers that have a <layout>
+protected virtual void OnLayout(UILayout layout, Pawn pawn) { }
+```
+
+---
+
+## Usage Example (`SectionWorker_Abilities`)
+
+```csharp
+protected override void OnLayout(UILayout layout, Pawn pawn)
+{
+    layout.ComponentById<ButtonElement>("addAbility").OnClick = _ =>
+        Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn), ...));
+
+    layout.ComponentById<DivElement>("abilityIcons").Children = inner =>
+    {
+        foreach (var ability in GetAbilitiesForPawn(pawn))
+            inner.Div(r => DrawAbilityIcon(r, ability, pawn),
+                style: new StyleOverride { padding = Taffy.Padding(5f) });
+    };
+}
+```
 
 ---
 
 ## Implementation Order
 
-1. `ITableContext` / `ITableContext<T>` + first concrete context (`PawnContext`)
-2. `ColumnWorker<TRow>` base + `IContextColumn` marker
-3. `ColumnWorker<TRow, TContext>` with internal dispatch
-4. `ColumnWorker<TRow>.Create` delegate factories (context-free and context-aware)
-5. `IRowFilter<TRow>`
-6. `Table<TRow>` with constructor + rendering loop
-7. Migrate one real table (backstory table is a good candidate — exercises both column types, delegate columns, and a context-aware filter)
-8. XML connector (deferred)
+1. `UIElement` subclasses (`ButtonElement`, `DivElement`, `TextElement`) with
+   `Render` and `Clone`
+2. `UILayoutNode` — immutable parsed tree + `FindById`
+3. Inline style parser — extend `TaffyLayoutNode.ParseStyleAttributes` as needed
+4. `TaffyStyleDef` — def type + class registry
+5. `UILayoutParser` — XML → `UILayoutNode` tree, resolving classes + inline style +
+   text content
+6. `UILayout` — frame-scoped wrapper + `ComponentById` + `Render`
+7. `SectionDef` — add optional `<layout>` field, parse in `ResolveReferences`
+8. `SectionWorker` — add `OnLayout` virtual + wire into `DoSectionContents`
+9. Demo: migrate `SectionWorker_Abilities` to `OnLayout`
+10. `UIIcons` — registry + reflection resolver + cache (polish, do last)
+
+---
+
+## Out of Scope (this phase)
+
+- `<foreach>` or any template logic in XML
+- Stateful components (inputs, dropdowns) via XML
+- Hot reload of XML layout
+- Migration of any section other than `SectionWorker_Abilities`
+
+---
+
+## [NEW] Tab–Section Style Composition
+
+`TabDef.Layout` arranges sections within a tab and can apply styles to them via
+`<section>` tags. Those styles (flex-grow, min-width, etc.) need to be merged onto
+the section's own layout at render time.
+
+### How `<section>` tags work in `TabDef.Layout`
+
+A `<section>` tag in a tab layout references a `SectionDef` by inner text and
+optionally carries styles that control how that section sits within the tab:
+
+```xml
+<div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px">
+    <section style="flex-direction: column; flex-grow: 1; max-width: 400px">
+        PawnEditor_Abilities
+    </section>
+</div>
+```
+
+The `UILayoutParser` maps `<section>` to a new `SectionElement`:
+
+```csharp
+public class SectionElement : UIElement
+{
+    public string SectionDefName;   // inner text of the <section> tag
+    public SectionDef? ResolvedDef; // resolved at parse time
+
+    public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
+    {
+        // Delegates to the section worker, passing this element's Style
+        // as the tab-provided style to merge onto the section root
+        ResolvedDef?.Worker.DoSection(builder, tabStyle: Style);
+    }
+}
+```
+
+### Style merging rules
+
+When a section has a `<layout>` with a **single root node**, the tab's `<section style="...">` style
+is merged onto that root node. **Tab wins on conflict** — tab styles take precedence over section
+root styles for the same property. The merge uses a per-frame clone of the root's effective config
+so the immutable template is never mutated:
+
+```csharp
+// Tab is "this" → tab wins. config is cloned so the template stays immutable.
+var config = uiLayout.GetConfigForNode(rootNode).Clone();
+config.Style = tabStyle.Merge(config.Style);
+config.Render(builder, xmlChildren);
+```
+
+When a section has **multiple root nodes**, tab styles are **not applied** — no wrapper div is
+inserted. A dev-mode warning is logged to make this visible during development. **To receive tab
+styles, always wrap a section's contents in a single root `<div>`.**
+
+For sections **without a `<layout>`** (legacy `DoSectionContents` workers), tab styles are applied
+via a wrapper div since there is no root node to merge onto:
+
+```csharp
+builder.Div(inner => worker.BuildSection(inner, pawn), style: tabSectionStyle);
+```
+
+### Attribute format
+
+Both `<section>` and `<div>` elements use `style="..."` for all CSS properties.
+`mayRequire` is the only attribute that lives outside `style="..."`:
+
+```xml
+<!-- correct -->
+<section style="flex-direction: column; flex-grow: 1">PawnEditor_Traits</section>
+<section style="align-items: center" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
+
+<!-- wrong — individual attributes are supported for backward compat but not recommended -->
+<section flex-direction="column" flex-grow="1">PawnEditor_Traits</section>
+```
