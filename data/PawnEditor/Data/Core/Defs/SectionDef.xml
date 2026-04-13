@@ -24,6 +24,13 @@
     <PawnEditor.SectionDef ParentName="HumanSectionBase">
         <defName>PawnEditor_Abilities</defName>
         <workerClass>PawnEditor.SectionWorker_Abilities</workerClass>
+        <layout>
+            <div style="flex-direction: column; flex-wrap: wrap; width: 100%; justify-content: space-between; max-width: 400px; flex-grow: 1; gap: 4px">
+                <text color="ColoredText.TipSectionTitleColor">hello</text>
+                <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1" />
+                <button id="addAbility" label="Add ability" icon="TexButton.Plus" />
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef ParentName="HumanSectionBase">
         <defName>PawnEditor_Skills</defName>

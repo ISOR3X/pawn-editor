@@ -1,0 +1,101 @@
+using Verse;
+
+namespace PawnEditor;
+
+/// <summary>
+/// Frame-scoped mutable wrapper around an immutable <see cref="UILayoutNode"/> template tree.
+/// A fresh instance is created each frame; C# registers per-element overrides via
+/// <see cref="ComponentById{T}"/>, then <see cref="Render"/> walks the tree and emits
+/// everything into the <see cref="TaffyBuilder"/>. Discarded after the frame.
+/// </summary>
+public class UILayout(UILayoutNode template, Pawn pawn)
+{
+    private readonly Dictionary<string, UIElement> _overrides = [];
+
+    /// <summary>
+    /// Returns a cloned, mutable copy of the element with the given <paramref name="id"/>.
+    /// The returned instance is registered as this frame's override — mutate it freely.
+    /// </summary>
+    public T ComponentById<T>(string id) where T : UIElement
+    {
+        if (!_overrides.TryGetValue(id, out var config))
+        {
+            var node = template.FindById(id)
+                       ?? throw new Exception($"[PawnEditor] No element with id '{id}' in layout");
+            config = node.Props.Clone();
+            _overrides[id] = config;
+        }
+
+        return config as T
+               ?? throw new Exception($"[PawnEditor] Element '{id}' is not a {typeof(T).Name}");
+    }
+
+    /// <summary>
+    /// Renders the layout into <paramref name="builder"/>.
+    /// When <paramref name="parentSuppliedStyle"/> is supplied and the layout has exactly one root node,
+    /// the tab style is merged onto that root (tab wins on conflict) so no extra wrapper div is
+    /// needed. When there are multiple root nodes the tab style cannot be applied; a dev-mode
+    /// warning is logged.
+    /// </summary>
+    internal void Render(TaffyBuilder builder, StyleOverride? parentSuppliedStyle = null)
+    {
+        var roots = template.Children;
+
+        if (parentSuppliedStyle != null)
+        {
+            if (roots.Count == 1)
+            {
+                var rootNode = roots[0];
+                var config = GetConfigForNode(rootNode).Clone();
+                config.Style = parentSuppliedStyle.Merge(config.Style); // tab wins
+                Action<TaffyBuilder>? xmlChildren = rootNode.Children.Count > 0
+                    ? inner =>
+                    {
+                        foreach (var child in rootNode.Children) RenderNode(inner, child);
+                    }
+                    : null;
+                if (config is SectionElement se) se.Pawn = pawn;
+                config.Render(builder, xmlChildren);
+            }
+            else
+            {
+                if (Prefs.DevMode)
+                    Log.Warning(
+                        $"[{PawnEditorMod.ModName}] Section has multiple root nodes: " +
+                        "tab styles cannot be applied. Wrap contents in a single root <div>.");
+                foreach (var child in roots) RenderNode(builder, child);
+            }
+
+            return;
+        }
+
+        // No tab style — render children directly into builder (no _template wrapper div).
+        foreach (var child in roots) RenderNode(builder, child);
+    }
+
+    /// <summary>Returns the effective config for a node — the C# override if one was registered, otherwise the XML props.</summary>
+    private UIElement GetConfigForNode(UILayoutNode node) =>
+        node.Id != null && _overrides.TryGetValue(node.Id, out var ov) ? ov : node.Props;
+
+    internal void RenderNode(TaffyBuilder builder, UILayoutNode node)
+    {
+        var config = node.Id != null && _overrides.TryGetValue(node.Id, out var ov)
+            ? ov
+            : node.Props;
+
+        // Thread pawn into SectionElement before it renders.
+        if (config is SectionElement se)
+            se.Pawn = pawn;
+
+        // For container nodes whose Children wasn't overridden in C#, fall back to rendering
+        // XML children recursively.
+        Action<TaffyBuilder>? xmlChildren = node.Children.Count > 0
+            ? inner =>
+            {
+                foreach (var child in node.Children) RenderNode(inner, child);
+            }
+            : null;
+
+        config.Render(builder, xmlChildren);
+    }
+}
