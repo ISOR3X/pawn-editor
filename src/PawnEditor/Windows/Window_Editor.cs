@@ -46,8 +46,8 @@ public partial class Window_Editor : Window
         layer = Playing ? WindowLayer.Dialog : WindowLayer.Super;
         forcePause = true;
         closeOnClickedOutside = true;
-        resizeable = true;
-        draggable = true;
+        resizeable = PawnEditorMod.Settings.allowResize;
+        draggable = PawnEditorMod.Settings.allowResize;
     }
 
     public override void SetInitialSizeAndPosition()

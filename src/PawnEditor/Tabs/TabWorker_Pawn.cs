@@ -9,13 +9,13 @@ public class TabWorker_Pawn(TabDef def) : TabWorker(def)
 {
     private static Pawn? SelectedPawn => Find.WindowStack.WindowOfType<Window_Editor>()?.GetSelectedPawn();
 
-    protected override void DoInnerTabContents(TaffyBuilder col)
-        => DoInnerTabContents(col, SelectedPawn);
+    protected override StyleOverride? LayoutStyle => Def.layout.RootStyle;
 
-    protected virtual void DoInnerTabContents(TaffyBuilder col, Pawn? pawn)
+    protected override void DoInnerTabContents(TaffyBuilder col)
     {
+        var pawn = SelectedPawn;
         if (pawn == null) return;
-        Def.layout.BuildInto(col, pawn, s => s.Worker.ShowSection(pawn));
+        Def.layout.BuildChildrenInto(col, pawn, s => s.Worker.ShowSection(pawn));
     }
 
     #region EVENTS

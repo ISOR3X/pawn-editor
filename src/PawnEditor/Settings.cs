@@ -20,6 +20,8 @@ public class Settings : ModSettings
     public bool spawnNear = true;
 
     public bool drawDebug;
+    
+    public bool allowResize =  true;
 
 
     public override void ExposeData()
@@ -29,6 +31,7 @@ public class Settings : ModSettings
         Scribe_Values.Look(ref spawnNear, nameof(spawnNear), true);
         Scribe_Values.Look(ref drawDebug, nameof(drawDebug), defaultValue: false);
         Scribe_Values.Look(ref hideDeadWorldPawns, nameof(hideDeadWorldPawns), true);
+        Scribe_Values.Look(ref allowResize, nameof(allowResize), true);
         Scribe_Values.Look(ref Window_Editor.SavedWindowRect, nameof(Window_Editor.SavedWindowRect), Window_Editor.DefaultWindowRect);
     }
 }

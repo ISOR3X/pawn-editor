@@ -27,11 +27,14 @@ namespace PawnEditor;
 [HotSwappable]
 public class TaffyLayoutNode
 {
-    private readonly Style _style = new();
+    private readonly StyleOverride _style = new();
 
     public SectionDef? section; // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
     private readonly List<TaffyLayoutNode> _children = [];
     private Func<bool> _isActive = static () => true;
+
+    /// <summary>The style of this node, used as the Taffy root style when this is the root layout node.</summary>
+    public StyleOverride RootStyle => _style;
 
 
     #region XML LOADING
@@ -45,7 +48,7 @@ public class TaffyLayoutNode
             return;
         }
 
-        // Root <layout> defaults to a flex column (matching the old FlexLayoutEngine default).
+        // Root <layout> defaults to a wrapping flex row with small gap.
         if (xmlNode.Name == "layout")
         {
             _style.gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall);
@@ -56,7 +59,7 @@ public class TaffyLayoutNode
 
         if (xmlNode.Name == "section")
         {
-            var defName = xmlNode.InnerText?.Trim();
+            var defName = xmlNode.InnerText.Trim();
             if (!defName.NullOrEmpty())
                 DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "section", defName);
         }
@@ -107,22 +110,22 @@ public class TaffyLayoutNode
                     _style.flexBasis = ParseDimension(attr.Value);
                     break;
                 case "width":
-                    _style.size = _style.size.MapWidth(_ => ParseDimension(attr.Value));
+                    _style.width = ParseDimension(attr.Value);
                     break;
                 case "height":
-                    _style.size = _style.size.MapHeight(_ => ParseDimension(attr.Value));
+                    _style.height = ParseDimension(attr.Value);
                     break;
                 case "min-width":
-                    _style.minSize = _style.minSize.MapWidth(_ => ParseDimension(attr.Value));
+                    _style.minWidth = ParseDimension(attr.Value);
                     break;
                 case "min-height":
-                    _style.minSize = _style.minSize.MapHeight(_ => ParseDimension(attr.Value));
+                    _style.minHeight = ParseDimension(attr.Value);
                     break;
                 case "max-width":
-                    _style.maxSize = _style.maxSize.MapWidth(_ => ParseMaxDimension(attr.Value));
+                    _style.maxWidth = ParseMaxDimension(attr.Value);
                     break;
                 case "max-height":
-                    _style.maxSize = _style.maxSize.MapHeight(_ => ParseMaxDimension(attr.Value));
+                    _style.maxHeight = ParseMaxDimension(attr.Value);
                     break;
                 case "gap":
                 {
@@ -131,11 +134,19 @@ public class TaffyLayoutNode
                     break;
                 }
                 case "column-gap":
-                    _style.gap.Width = LengthPercentage.Length(ParsePx(attr.Value));
+                {
+                    var g = _style.gap ?? default;
+                    g.Width = LengthPercentage.Length(ParsePx(attr.Value));
+                    _style.gap = g;
                     break;
+                }
                 case "row-gap":
-                    _style.gap.Height = LengthPercentage.Length(ParsePx(attr.Value));
+                {
+                    var g = _style.gap ?? default;
+                    g.Height = LengthPercentage.Length(ParsePx(attr.Value));
+                    _style.gap = g;
                     break;
+                }
                 case "padding":
                 {
                     var v = LengthPercentage.Length(ParsePx(attr.Value));
@@ -143,17 +154,33 @@ public class TaffyLayoutNode
                     break;
                 }
                 case "padding-top":
-                    _style.padding.Top = LengthPercentage.Length(ParsePx(attr.Value));
+                {
+                    var p = _style.padding ?? default;
+                    p.Top = LengthPercentage.Length(ParsePx(attr.Value));
+                    _style.padding = p;
                     break;
+                }
                 case "padding-right":
-                    _style.padding.Right = LengthPercentage.Length(ParsePx(attr.Value));
+                {
+                    var p = _style.padding ?? default;
+                    p.Right = LengthPercentage.Length(ParsePx(attr.Value));
+                    _style.padding = p;
                     break;
+                }
                 case "padding-bottom":
-                    _style.padding.Bottom = LengthPercentage.Length(ParsePx(attr.Value));
+                {
+                    var p = _style.padding ?? default;
+                    p.Bottom = LengthPercentage.Length(ParsePx(attr.Value));
+                    _style.padding = p;
                     break;
+                }
                 case "padding-left":
-                    _style.padding.Left = LengthPercentage.Length(ParsePx(attr.Value));
+                {
+                    var p = _style.padding ?? default;
+                    p.Left = LengthPercentage.Length(ParsePx(attr.Value));
+                    _style.padding = p;
                     break;
+                }
                 case "margin":
                 {
                     var v = LengthPercentageAuto.Length(ParsePx(attr.Value));
@@ -161,17 +188,33 @@ public class TaffyLayoutNode
                     break;
                 }
                 case "margin-top":
-                    _style.margin.Top = ParseLPA(attr.Value);
+                {
+                    var m = _style.margin ?? default;
+                    m.Top = ParseLPA(attr.Value);
+                    _style.margin = m;
                     break;
+                }
                 case "margin-right":
-                    _style.margin.Right = ParseLPA(attr.Value);
+                {
+                    var m = _style.margin ?? default;
+                    m.Right = ParseLPA(attr.Value);
+                    _style.margin = m;
                     break;
+                }
                 case "margin-bottom":
-                    _style.margin.Bottom = ParseLPA(attr.Value);
+                {
+                    var m = _style.margin ?? default;
+                    m.Bottom = ParseLPA(attr.Value);
+                    _style.margin = m;
                     break;
+                }
                 case "margin-left":
-                    _style.margin.Left = ParseLPA(attr.Value);
+                {
+                    var m = _style.margin ?? default;
+                    m.Left = ParseLPA(attr.Value);
+                    _style.margin = m;
                     break;
+                }
                 case "align-items":
                     _style.alignItems = ParseAlignItems(attr.Value);
                     break;
@@ -197,18 +240,34 @@ public class TaffyLayoutNode
                     _style.gridTemplateRows = ParseTrackList(attr.Value);
                     break;
                 case "grid-column-start":
-                    _style.gridColumn.Start = ParseGridPlacement(attr.Value);
+                {
+                    var gc = _style.gridColumn ?? default;
+                    gc.Start = ParseGridPlacement(attr.Value);
+                    _style.gridColumn = gc;
                     break;
+                }
                 case "grid-column-end":
-                    _style.gridColumn.End = ParseGridPlacement(attr.Value);
+                {
+                    var gc = _style.gridColumn ?? default;
+                    gc.End = ParseGridPlacement(attr.Value);
+                    _style.gridColumn = gc;
                     break;
+                }
                 case "grid-row-start":
-                    _style.gridRow.Start = ParseGridPlacement(attr.Value);
+                {
+                    var gr = _style.gridRow ?? default;
+                    gr.Start = ParseGridPlacement(attr.Value);
+                    _style.gridRow = gr;
                     break;
+                }
                 case "grid-row-end":
-                    _style.gridRow.End = ParseGridPlacement(attr.Value);
+                {
+                    var gr = _style.gridRow ?? default;
+                    gr.End = ParseGridPlacement(attr.Value);
+                    _style.gridRow = gr;
                     break;
-                // mayRequire is handled before this method is called
+                }
+                // mayRequire is handled before this method is called.
             }
         }
     }
@@ -334,15 +393,24 @@ public class TaffyLayoutNode
 
     #endregion
 
-    #region DRAW/ BUILDINTO
+    #region DRAW / BUILDINTO
 
     /// <summary>
-    /// Adds this layout tree's nodes into an existing <paramref name="col"/> builder.
+    /// Adds this layout tree's children directly into <paramref name="col"/>, without wrapping in a
+    /// root container. The root node's style should be passed as the root style of the enclosing
+    /// <see cref="Taffy.DivMeasured"/> call (via <see cref="RootStyle"/>).
     /// Section XML nodes become flex-column containers whose items are populated by
     /// <see cref="SectionWorker.DoSectionContents"/>.
     /// </summary>
-    public void BuildInto(TaffyBuilder col, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
-        => BuildNode(col, this, pawn, isVisible);
+    public void BuildChildrenInto(TaffyBuilder col, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
+    {
+        foreach (var child in _children)
+        {
+            if (!child._isActive()) continue;
+            if (!child.HasVisibleContent(isVisible)) continue;
+            BuildNode(col, child, pawn, isVisible);
+        }
+    }
 
     private static void BuildNode(TaffyBuilder col, TaffyLayoutNode node, Pawn pawn,
         Func<SectionDef, bool>? isVisible)
@@ -350,12 +418,12 @@ public class TaffyLayoutNode
         if (node.section != null)
         {
             // Section node → flex-column container populated by the section worker.
-            var sectionStyle = node._style;
+            var sectionStyle = node._style.Resolve();
             col.Container(sectionStyle, inner => node.section.Worker.BuildSection(inner, pawn));
             return;
         }
 
-        col.Container(node._style, inner =>
+        col.Container(node._style.Resolve(), inner =>
         {
             foreach (var child in node._children)
             {
@@ -383,5 +451,5 @@ public class TaffyLayoutNode
     /// sections inside <paramref name="rect"/>, and returns the total content height.
     /// </summary>
     public float Draw(Rect rect, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
-        => Taffy.MeasuredColumn(rect, col => BuildInto(col, pawn, isVisible));
+        => Taffy.DivMeasured(rect, col => BuildChildrenInto(col, pawn, isVisible), _style);
 }
