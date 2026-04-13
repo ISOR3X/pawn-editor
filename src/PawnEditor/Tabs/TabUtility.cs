@@ -1,4 +1,4 @@
-﻿using Verse;
+using Verse;
 
 namespace PawnEditor;
 
@@ -14,11 +14,19 @@ public static class TabUtility
         }
     } = [];
 
-    public static List<TabDef> GetTabDefsForPawn(Pawn? pawn)
-    {
-        if (pawn == null) return [];
-
-        return AllTabDefs.Where(tabDef => tabDef.tabCategory.HasFlag(PawnUtility.GetPawnCategory(pawn)))
-            .OrderBy(tabDef => tabDef.priority).ToList();
-    }
+    public static List<TabDef> GetTabDefsFor(IEditorContext? context) =>
+        AllTabDefs
+            .Where(def =>
+            {
+                var required = def.Worker.RequiredContextType;
+                // Context-free workers always show.
+                if (required == null) return true;
+                // Typed workers only show when the context matches their declared type.
+                return context != null && required.IsAssignableFrom(context.GetType());
+            })
+            // Pawn workers additionally filter by pawn category (Humanlike, Animal, etc.).
+            .Where(def => context is not PawnContext pc
+                || def.tabCategory.HasFlag(PawnUtility.GetPawnCategory(pc.Value)))
+            .OrderBy(def => def.priority)
+            .ToList();
 }
