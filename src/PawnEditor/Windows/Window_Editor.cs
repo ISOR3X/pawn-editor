@@ -21,8 +21,9 @@ public partial class Window_Editor : Window
     private static readonly List<Pawn> _selectedPawnGroup = []; // Pawns in the selected faction.
 
     // Tab related fields
+    private static IEditorContext? _currentContext;
     private static TabDef? _selectedTabDef;
-    private static List<TabDef> _selectedTabDefsForPawn = [];
+    private static List<TabDef> _selectedTabDefsFor = [];
     private static List<TabRecord> _tabsList = [];
 
     public static Rect DefaultWindowRect = new(
@@ -82,7 +83,7 @@ public partial class Window_Editor : Window
         SavedWindowRect = windowRect;
 
         _selectedTabDef = null;
-        _selectedTabDefsForPawn.Clear();
+        _selectedTabDefsFor.Clear();
         _tabsList.Clear();
     }
 
@@ -95,7 +96,7 @@ public partial class Window_Editor : Window
         inRect.yMin += TabDrawer.TabHeight;
         Verse.Widgets.DrawMenuSection(inRect);
 
-        _tabsList = _selectedTabDefsForPawn.Select(tabDef => new TabRecord(tabDef.LabelCap, delegate
+        _tabsList = _selectedTabDefsFor.Select(tabDef => new TabRecord(tabDef.LabelCap, delegate
         {
             _selectedTabDef = tabDef;
             _selectedTabDef.Worker.Notify_ContentChanged();
@@ -108,8 +109,8 @@ public partial class Window_Editor : Window
         };
         if (Mouse.IsOver(tabRect)) TooltipHandler.TipRegion(tabRect, "Click to select tab");
 
-        if (_selectedPawn != null && _selectedTabDef != null)
-            _selectedTabDef.Worker.DoTabContents(ref inRect);
+        if (_currentContext != null && _selectedTabDef != null)
+            _selectedTabDef.Worker.DoTabContents(ref inRect, _currentContext);
         else
             using (new TextBlock(TextAnchor.MiddleCenter))
             {

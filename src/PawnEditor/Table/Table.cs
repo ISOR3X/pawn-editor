@@ -5,6 +5,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using PawnEditor;
 
 namespace PawnEditor.Table;
 
@@ -12,9 +13,9 @@ namespace PawnEditor.Table;
 public class Table<TRow>(
     IEnumerable<TRow> rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,
-    ITableContext? context = null,
+    IEditorContext? context = null,
     IReadOnlyList<IRowFilter<TRow>>? filters = null,
-    Action<Rect, TRow, ITableContext?>? onRowHover = null,
+    Action<Rect, TRow, IEditorContext?>? onRowHover = null,
     Action<TRow?>? onRowClick = null,
     Func<TRow, string>? searchProjection = null,
     float rowHeight = 30f
