@@ -1,18 +1,2 @@
-using Verse;
-
+// Replaced by IEditorContext — see src/PawnEditor/IEditorContext.cs
 namespace PawnEditor.Table;
-
-public interface ITableContext
-{
-}
-
-public interface ITableContext<T> : ITableContext
-{
-    T Value { get; }
-}
-
-public sealed class PawnContext : ITableContext<Pawn>
-{
-    public Pawn Value { get; }
-    public PawnContext(Pawn pawn) => Value = pawn;
-}

@@ -8,7 +8,7 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
 {
     private ModContentPack? _selected;
 
-    public bool Passes(TDef row, ITableContext? ctx)
+    public bool Passes(TDef row, IEditorContext? ctx)
         => _selected == null || row.modContentPack == _selected;
 
     public void DrawFilter(TaffyBuilder builder, Table<TDef> table)

@@ -21,6 +21,7 @@ public partial class Window_Editor : Window
     private static readonly List<Pawn> _selectedPawnGroup = []; // Pawns in the selected faction.
 
     // Tab related fields
+    private static IEditorContext? _currentContext;
     private static TabDef? _selectedTabDef;
     private static List<TabDef> _selectedTabDefsForPawn = [];
     private static List<TabRecord> _tabsList = [];
@@ -108,8 +109,8 @@ public partial class Window_Editor : Window
         };
         if (Mouse.IsOver(tabRect)) TooltipHandler.TipRegion(tabRect, "Click to select tab");
 
-        if (_selectedPawn != null && _selectedTabDef != null)
-            _selectedTabDef.Worker.DoTabContents(ref inRect);
+        if (_currentContext != null && _selectedTabDef != null)
+            _selectedTabDef.Worker.DoTabContents(ref inRect, _currentContext);
         else
             using (new TextBlock(TextAnchor.MiddleCenter))
             {

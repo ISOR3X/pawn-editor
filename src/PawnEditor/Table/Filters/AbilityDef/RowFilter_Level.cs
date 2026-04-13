@@ -15,7 +15,7 @@ public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
         MinMaxRange = new IntRange(levels.Min(), levels.Max());
     }
 
-    public bool Passes(RimWorld.AbilityDef row, ITableContext? ctx) =>
+    public bool Passes(RimWorld.AbilityDef row, IEditorContext? ctx) =>
         row.level >= _range.min && row.level <= _range.max;
 
     public void DrawFilter(TaffyBuilder builder, Table<RimWorld.AbilityDef> table)
