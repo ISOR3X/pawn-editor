@@ -1,5 +1,6 @@
 using HotSwap;
 using Taffy;
+using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
@@ -12,6 +13,6 @@ public class SectionWorker_Sex(SectionDef def) : SectionWorker(def)
         builder.Text("Sex",
             style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
         builder.Button(pawn.gender.GetLabel().CapitalizeFirst(), pawn.gender.GetIcon(), onClick: _ => { },
-            style: new StyleOverride { width = 200f });
+            style: new StyleOverride { minWidth = 100f,  maxWidth = 300f, flexGrow = 1f, width = Dimension.AUTO });
     }
 }

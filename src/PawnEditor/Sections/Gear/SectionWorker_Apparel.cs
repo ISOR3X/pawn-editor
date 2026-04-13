@@ -39,10 +39,10 @@ public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(d
                         new StyleOverride { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize })
                 ),
                 ColumnWorker<T>.CreateText(
-                    Taffy.Fr(), thing => thing.LabelCap, "Label"
+                    Taffy.Fr(2), thing => thing.LabelCap, "Label"
                 ),
                 new ColumnWorker_ThingStuff<T>(Taffy.Fr()),
-                new ColumnWorker_ThingMass<T>(Taffy.Fr()),
+                new ColumnWorker_ThingMass<T>(Taffy.Px(100f)),
                 ColumnWorker<T>.Create(Taffy.Px(GenUI.SmallIconSize),
                     (builder, thing) =>
                     {
@@ -52,7 +52,7 @@ public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(d
                                 FloatWindow.ToggleState(r,
                                     () => new FloatWindow_EditThing(r, thing,
                                         Find.WindowStack.WindowOfType<Window_Editor>()));
-                            });
+                            }, drawGraphic: false);
                     }),
                 ColumnWorker<T>.Create(Taffy.Px(GenUI.SmallIconSize),
                     (builder, thing) => { builder.Item(r => Verse.Widgets.InfoCardButtonCentered(r, thing)); })

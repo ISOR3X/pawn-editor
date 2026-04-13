@@ -35,13 +35,16 @@
     <PawnEditor.TabDef>
         <defName>PawnEditor_Appearance</defName>
         <label>Appearance</label>
+        <priority>20</priority>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
             <section flex-basis="100%">PawnEditor_Portrait</section>
-            <section>PawnEditor_Sex</section>
-            <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
-            <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
-            <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
+            <div display="flex" flex-direction="row" flex-wrap="wrap" flex-basis="100%" width="100%" justify-content="start">
+                <section flex-grow="1">PawnEditor_Sex</section>
+                <section flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
+                <section flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
+                <section flex-grow="1" mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
+            </div>
             <!--            <div display="flex" flex-direction="row" flex-wrap="wrap">-->
             <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_ShapeHead</section>-->
             <!--                <section flex-basis="50%" flex-grow="1">PawnEditor_ShapeBody</section>-->
@@ -68,7 +71,7 @@
     <PawnEditor.TabDef>
         <defName>PawnEditor_Gear</defName>
         <label>Gear</label>
-        <priority>0</priority>
+        <priority>10</priority>
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>

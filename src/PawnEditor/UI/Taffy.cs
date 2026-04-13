@@ -141,7 +141,7 @@ namespace PawnEditor
 
         // ── Generic container ───────────────────────────────────────────────────
 
-        /// <summary>Adds a container node with an arbitrary <see cref="Style"/> (used by <c>TaffyLayoutNode.BuildInto</c>).</summary>
+        /// <summary>Adds a container node with an arbitrary <see cref="Style"/> (used by <c>TaffyLayoutNode.BuildChildrenInto</c>).</summary>
         public void Container(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, null, build);
 
@@ -299,10 +299,19 @@ namespace PawnEditor
         // axis to compute_layout, just as the Rust library does in its own test suite.
         // Used by TabWorker.DoTabContents to size the scroll view's viewRect each frame.
 
+        /// <summary>
+        /// Like <see cref="Div"/> but lays out with unconstrained height, draws all content,
+        /// and returns the computed content height. Used for scrollable containers where
+        /// the natural content height drives the scroll view size.
+        /// </summary>
+        public static float DivMeasured(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+            => ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
+
         /// <summary>Lays out a column with unconstrained height. Returns the computed content height.</summary>
         public static float MeasuredColumn(Rect rect, Action<TaffyBuilder> build)
             => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column }, build);
-
+        public static float MeasuredRow(Rect rect, Action<TaffyBuilder> build)
+            => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Row }, build);
         /// <summary>Lays out a column with gap and unconstrained height. Returns the computed content height.</summary>
         public static float MeasuredColumn(Rect rect, float gap, Action<TaffyBuilder> build)
             => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);

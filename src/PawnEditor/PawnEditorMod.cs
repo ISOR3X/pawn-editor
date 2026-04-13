@@ -31,10 +31,19 @@ public class PawnEditorMod : Mod
         var listing = new Listing_Standard();
         listing.Begin(inRect);
         listing.ButtonTextLabeled("Restriction Mode", Settings.restriction.ToString());
+        listing.CheckboxLabeled("Allow resize", ref Settings.allowResize);
         listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref Settings.drawDebug);
-        if (listing.ButtonText("Reset window size and position"))
+        if (listing.ButtonText("Window presets"))
         {
-            Window_Editor.SavedWindowRect = Window_Editor.DefaultWindowRect;
+            List<FloatMenuOption> opts =
+            [
+                new("Centered", () => Window_Editor.SavedWindowRect = Window_Editor.DefaultWindowRect),
+                new("Left half",
+                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth / 2f, UI.screenHeight)),
+                new("Full screen",
+                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth, UI.screenHeight))
+            ];
+            Find.WindowStack.Add(new FloatMenu(opts));
         }
 
         listing.End();
