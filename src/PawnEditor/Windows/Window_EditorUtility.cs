@@ -24,6 +24,7 @@ public partial class Window_Editor
         var prevCategory = PawnUtility.GetPawnCategory(_selectedPawn);
 
         _selectedPawn = pawn;
+        _currentContext = pawn != null ? new PawnContext(pawn) : null;
 
         _selectedTabDef?.Worker.Notify_ContentChanged();
 
@@ -45,7 +46,7 @@ public partial class Window_Editor
     private void RecacheTabs()
     {
         _selectedTabDefsForPawn.Clear();
-        _selectedTabDefsForPawn = TabUtility.GetTabDefsForPawn(_selectedPawn);
+        _selectedTabDefsForPawn = TabUtility.GetTabDefsFor(_currentContext);
         _selectedTabDef = _selectedTabDefsForPawn.FirstOrDefault();
         _selectedTabDef?.Worker.Notify_ContentChanged();
     }

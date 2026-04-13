@@ -12,7 +12,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 
     private List<string>? SpawnCategories;
 
-    public bool Passes(RimWorld.BackstoryDef row, ITableContext? ctx) =>
+    public bool Passes(RimWorld.BackstoryDef row, IEditorContext? ctx) =>
         _disabledCategories.Count == 0 ||
         _disabledCategories.All(c => !row.spawnCategories.Contains(c));
 
