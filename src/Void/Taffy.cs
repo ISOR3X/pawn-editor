@@ -29,7 +29,7 @@ using Display = Taffy.Display;
 using FlexDirection = Taffy.FlexDirection;
 using SizeF = Taffy.SizeF;
 
-namespace PawnEditor
+namespace Void
 {
     /// <summary>
     /// Fluent layout builder passed to <see cref="Taffy.Row"/> / <see cref="UnityEngine.UIElements.Column"/> lambdas.
@@ -37,20 +37,20 @@ namespace PawnEditor
     public sealed class TaffyBuilder
     {
         // Memoizes Text.CalcSize(word).x per (word, font) pair — populated once, reused every frame.
-        internal static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
+        public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
 
-        internal readonly TaffyTree tree;
-        internal readonly List<(NodeId id, Action<Rect>? draw)> callbacks;
-        internal readonly List<NodeId> children = [];
+        public readonly TaffyTree tree;
+        public readonly List<(NodeId id, Action<Rect>? draw)> callbacks;
+        public readonly List<NodeId> children = [];
 
         /// <summary>
         /// Stable identifier for the current pawn/context, used by stateful extensions like
         /// <c>TaffyExtensions.Input(ref string)</c> to key their per-widget persistent state.
         /// Set by <see cref="SectionWorker.BuildSection"/> before entering section content.
         /// </summary>
-        internal string? ContextKey { get; set; }
+        public string? ContextKey { get; set; }
 
-        internal TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
+        public TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
         {
             this.tree = tree;
             this.callbacks = callbacks;
@@ -145,9 +145,9 @@ namespace PawnEditor
         public void Container(Style style, Action<TaffyBuilder>? build = null)
             => AddContainer(style, null, build);
 
-        // ── Internals ───────────────────────────────────────────────────────────
+        // ── publics ───────────────────────────────────────────────────────────
 
-        internal void AddLeaf(Style style, Action<Rect>? draw)
+        public void AddLeaf(Style style, Action<Rect>? draw)
         {
             var node = tree.NewLeaf(style);
             children.Add(node);
@@ -394,7 +394,7 @@ namespace PawnEditor
             var absY = originY + layout.Location.Y;
             var r = new Rect(absX, absY, layout.Size.Width, layout.Size.Height);
 
-            if (PawnEditorMod.Settings.drawDebug)
+            if (VoidMod.Settings.drawDebug)
             {
                 var h = node.GetHashCode() * 0.618033988f % 1f;
                 Verse.Widgets.DrawBoxSolid(r, Color.HSVToRGB(h, 0.6f, 0.9f) with { a = 0.25f });

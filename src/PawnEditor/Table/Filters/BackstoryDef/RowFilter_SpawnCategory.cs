@@ -1,6 +1,8 @@
 using HotSwap;
 using Taffy;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor.Table.Filters.BackstoryDef;
 
@@ -12,7 +14,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 
     private List<string>? SpawnCategories;
 
-    public bool Passes(RimWorld.BackstoryDef row, IEditorContext? ctx) =>
+    public bool Passes(RimWorld.BackstoryDef row, IContext? ctx) =>
         _disabledCategories.Count == 0 ||
         _disabledCategories.All(c => !row.spawnCategories.Contains(c));
 
@@ -23,7 +25,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 
         builder.Collapsible("Spawn category", col =>
         {
-            col.Div(new Style { gap = Taffy.Gap(GenUI.GapTiny) }, row2 =>
+            col.Div(new Style { gap = Void.Taffy.Gap(GenUI.GapTiny) }, row2 =>
             {
                 row2.Icon(TexButton.Search);
                 row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
@@ -45,7 +47,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 table.SetDirty();
             });
 
-            col.Row(new Style { gap = Taffy.Gap(GenUI.GapTiny) }, row =>
+            col.Row(new Style { gap = Void.Taffy.Gap(GenUI.GapTiny) }, row =>
             {
                 row.Button("Enable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
                 {
@@ -58,6 +60,6 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                     table.SetDirty();
                 });
             });
-        }, style: new StyleOverride { gap = Taffy.Gap(0f, GenUI.GapTiny) });
+        }, style: new StyleOverride { gap = Void.Taffy.Gap(0f, GenUI.GapTiny) });
     }
 }

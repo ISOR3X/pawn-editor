@@ -1,9 +1,11 @@
 using HotSwap;
-using PawnEditor.Extensions;
 using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
+using Void.Extensions;
 
 namespace PawnEditor;
 
@@ -32,8 +34,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
         // which we use to auto-resize the window below.
 
         // TODO: Convert to clean taffy components/ layout.
-        var contentHeight = Taffy.MeasuredGrid(inRect,
-            columns: [Taffy.Fr(), Taffy.Fr(2), Taffy.Fr(), Taffy.Fr(2)],
+        var contentHeight = Void.Taffy.MeasuredGrid(inRect,
+            columns: [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
             gapX: GenUI.GapLabel, gapY: GenUI.GapTiny, autoRowHeight: UIUtility.ButtonHeight,
             build: grid =>
             {

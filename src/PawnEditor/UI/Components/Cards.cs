@@ -1,9 +1,10 @@
 ﻿using HotSwap;
-using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using Void;
+using Void.Extensions;
 
 namespace PawnEditor;
 

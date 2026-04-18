@@ -1,10 +1,10 @@
 using HotSwap;
-using PawnEditor.Extensions;
 using Taffy;
 using UnityEngine;
 using Verse;
+using Void.Extensions;
 
-namespace PawnEditor;
+namespace Void.Components;
 
 [HotSwappable]
 public static partial class TaffyExtensions

@@ -3,6 +3,8 @@ using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 using Display = Taffy.Display;
 
 namespace PawnEditor;
@@ -36,7 +38,7 @@ public class Dialog_ColorPicker : Window
 
     public override void DoWindowContents(Rect inRect)
     {
-        Taffy.Div(inRect, builder =>
+        Void.Taffy.Div(inRect, builder =>
         {
             builder.Text("Choose a color", GameFont.Medium);
             builder.Div(contentBuilder =>
@@ -49,7 +51,7 @@ public class Dialog_ColorPicker : Window
                             new StyleOverride { flexGrow = 1f });
                         widgetBuilder.Item(r => ColorUtility.HueSlider(r, ref _selectedColor),
                             new StyleOverride { width = 16f });
-                    }, new StyleOverride { width = 200f, height = 200f, gap = Taffy.Gap(GenUI.GapSmall)});
+                    }, new StyleOverride { width = 200f, height = 200f, gap = Void.Taffy.Gap(GenUI.GapSmall)});
 
                     // HSL inputs row
                     ColorUtility.ColorToHSL(_selectedColor, out var fh, out var fs, out var fl);
@@ -70,12 +72,12 @@ public class Dialog_ColorPicker : Window
                     }, new StyleOverride
                     {
                         display = Display.Grid,
-                        gridTemplateColumns = [Taffy.Fr(), Taffy.Fr(), Taffy.Fr()],
-                        gap = Taffy.Gap(4f, 0f),
+                        gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(), Void.Taffy.Fr()],
+                        gap = Void.Taffy.Gap(4f, 0f),
                         justifyItems = AlignItems.Stretch,
                     });
                     _selectedColor = ColorUtility.HSLToColor(hInt / 360f, sInt / 100f, lInt / 100f);
-                }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Taffy.Gap(0f, 4f), width = 200f });
+                }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(0f, 4f), width = 200f });
                 contentBuilder.Div(rightBuilder =>
                     {
                         rightBuilder.Div(paletteBuilder =>
@@ -96,7 +98,7 @@ public class Dialog_ColorPicker : Window
                             new StyleOverride
                             {
                                 flexWrap = FlexWrap.Wrap, alignContent = AlignContent.Start,
-                                gap = Taffy.Gap(GenUI.GapTiny)
+                                gap = Void.Taffy.Gap(GenUI.GapTiny)
                             });
                         rightBuilder.Div(colorReadoutBuilder =>
                             {
@@ -106,18 +108,18 @@ public class Dialog_ColorPicker : Window
                                     new StyleOverride { flexGrow = 1f });
                             },
                             new StyleOverride
-                                { height = Text.LineHeightOf(GameFont.Small), gap = Taffy.Gap(GenUI.GapTiny) });
+                                { height = Text.LineHeightOf(GameFont.Small), gap = Void.Taffy.Gap(GenUI.GapTiny) });
                     },
                     new StyleOverride
                         { flexDirection = FlexDirection.Column, justifyContent = AlignContent.SpaceBetween });
-            }, new StyleOverride { flexGrow = 1f, gap = Taffy.Gap(GenUI.Gap) });
+            }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });
 
             builder.Div(footerBuilder =>
             {
                 footerBuilder.Button("Cancel", onClick: _ => Close(), size: UIUtility.ComponentSize.Large);
                 footerBuilder.Button("Accept", onClick: _ => Accept(), size: UIUtility.ComponentSize.Large);
             }, new StyleOverride { justifyContent = AlignContent.SpaceBetween });
-        }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Taffy.Gap(0f, GenUI.GapSmall) });
+        }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(0f, GenUI.GapSmall) });
     }
 
     private void Accept()

@@ -2,6 +2,8 @@ using HotSwap;
 using Taffy;
 using RimWorld;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -11,7 +13,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         builder.Text("Age", color: ColoredText.TipSectionTitleColor);
-        builder.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap }, row =>
+        builder.Div(new Style { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap }, row =>
         {
             DoAgeItem(row, pawn, "Biological", isChrono: false);
             DoAgeItem(row, pawn, "Chronological", isChrono: true);
@@ -23,7 +25,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
         var value = isChrono ? pawn.ageTracker.AgeChronologicalYears : pawn.ageTracker.AgeBiologicalYears;
         var min = !isChrono && pawn.ageTracker.Adult ? (int)pawn.ageTracker.CurLifeStageRace.minAge : 0;
 
-        col.Row(new Style { gap = Taffy.Gap(GenUI.GapLabel) }, row =>
+        col.Row(new Style { gap = Void.Taffy.Gap(GenUI.GapLabel) }, row =>
         {
             row.Text(label);
             row.InputNumber(ref value, min: min, max: 9999, id: label);

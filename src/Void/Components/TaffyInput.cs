@@ -4,7 +4,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 
-namespace PawnEditor;
+namespace Void.Components;
 
 public static partial class TaffyExtensions
 {
@@ -146,12 +146,12 @@ public static partial class TaffyExtensions
             if (scrollFired) Commit(scrollVal);
 
             var buttonFired = false;
-            if (Widgets.ButtonImageWithHold(upRect, TexPawnEditor.Up, key + ":up"))
+            if (Widgets.ButtonImageWithHold(upRect, TexUI.ArrowUp, key + ":up"))
             {
                 Commit(capturedValue + 1);
                 buttonFired = true;
             }
-            else if (Widgets.ButtonImageWithHold(downRect, TexPawnEditor.Down, key + ":down"))
+            else if (Widgets.ButtonImageWithHold(downRect, TexUI.ArrowDown, key + ":down"))
             {
                 Commit(capturedValue - 1);
                 buttonFired = true;

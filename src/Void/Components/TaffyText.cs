@@ -2,7 +2,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 
-namespace PawnEditor;
+namespace Void.Components;
 
 public static partial class TaffyExtensions
 {

@@ -5,6 +5,9 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
+using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.AbilityDef>;
 
 namespace PawnEditor;
@@ -49,7 +52,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             inner => inner.Icon(texture, size: UIUtility.ComponentSize.Large),
             new StyleOverride
             {
-                padding = Taffy.Padding(5f),
+                padding = Void.Taffy.Padding(5f),
                 height = Dimension.AUTO
             });
     }
@@ -72,10 +75,10 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                     new StyleOverride
                     {
                         flexWrap = FlexWrap.Wrap,
-                        gap = Taffy.Gap(GenUI.GapTiny),
+                        gap = Void.Taffy.Gap(GenUI.GapTiny),
                         flexGrow = 1f,
                         alignContent = AlignContent.FlexStart,
-                        padding = Taffy.Padding(GenUI.GapTiny),
+                        padding = Void.Taffy.Padding(GenUI.GapTiny),
                         width = Dimension.Percent(1f)
                     });
             },
@@ -129,14 +132,14 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             columns:
             [
                 Col.Create(
-                    Taffy.Px(20f),
+                    Void.Taffy.Px(20f),
                     (grid, def) => grid.Icon(def.uiIcon)
                 ),
                 Col.CreateText(
-                    Taffy.Fr(), def => def.LabelCap, "Label"
+                    Void.Taffy.Fr(), def => def.LabelCap, "Label"
                 ),
                 Col.CreateText(
-                    Taffy.Fr(),
+                    Void.Taffy.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
                     color: ColoredText.SubtleGrayColor

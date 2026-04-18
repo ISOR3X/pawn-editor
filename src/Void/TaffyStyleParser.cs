@@ -1,9 +1,9 @@
 using System.Globalization;
 using Taffy;
 
-namespace PawnEditor;
+namespace Void;
 
-internal static class TaffyStyleParser
+public static class TaffyStyleParser
 {
     /// <summary>
     /// Parses a CSS inline style string (e.g. <c>"flex-direction: row; gap: 4px"</c>) into a
@@ -209,7 +209,7 @@ internal static class TaffyStyleParser
                 break;
             }
             default:
-                Verse.Log.Warning($"[{PawnEditorMod.ModName}] Unknown style property '{name}', skipping.");
+                Verse.Log.Warning($"[{VoidMod.ModName}] Unknown style property '{name}', skipping.");
                 break;
         }
     }

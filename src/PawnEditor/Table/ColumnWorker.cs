@@ -3,6 +3,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using PawnEditor;
+using Void;
 
 namespace PawnEditor.Table;
 
@@ -42,7 +43,7 @@ public abstract class ColumnWorker<TRow>
         string? header = null,
         Func<TRow, TRow, int>? compare = null,
         string? headerTip = null)
-        where TContext : IEditorContext
+        where TContext : IContext
         => new DelegateContextColumn<TContext>(trackSize, drawCell, header, compare, headerTip);
 
     /// <summary>
@@ -85,7 +86,7 @@ public abstract class ColumnWorker<TRow>
         Func<TRow, TRow, int>? compare,
         string? headerTip)
         : ColumnWorker<TRow, TContext>
-        where TContext : IEditorContext
+        where TContext : IContext
     {
         public override TrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
@@ -101,11 +102,11 @@ public abstract class ColumnWorker<TRow>
 
 internal interface IContextColumn<in TRow>
 {
-    void DrawCell(TaffyBuilder grid, TRow row, IEditorContext ctx);
+    void DrawCell(TaffyBuilder grid, TRow row, IContext ctx);
 }
 
 public abstract class ColumnWorker<TRow, TContext> : ColumnWorker<TRow>, IContextColumn<TRow>
-    where TContext : IEditorContext
+    where TContext : IContext
 {
     protected abstract void DrawCell(TaffyBuilder grid, TRow row, TContext ctx);
 
@@ -113,6 +114,6 @@ public abstract class ColumnWorker<TRow, TContext> : ColumnWorker<TRow>, IContex
     {
     }
 
-    public void DrawCell(TaffyBuilder grid, TRow row, IEditorContext ctx)
+    public void DrawCell(TaffyBuilder grid, TRow row, IContext ctx)
         => DrawCell(grid, row, (TContext)ctx);
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <RootNamespace>PawnEditor</RootNamespace>
-        <AssemblyName>PawnEditor</AssemblyName>
-        <ModName>PawnEditor</ModName>
+        <RootNamespace>Void</RootNamespace>
+        <AssemblyName>Void</AssemblyName>
+        <ModName>Void</ModName>
         <TargetFramework>net472</TargetFramework>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
@@ -31,10 +31,13 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Taffy\Taffy.csproj"/>
-        <ProjectReference Include="..\Void\Void.csproj"/>
     </ItemGroup>
     <ItemGroup>
         <Publicize Include="Assembly-CSharp"/>
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Embed small icons used in the components directly into the dll. -->
+        <EmbeddedResource Include="Textures\*.png"/>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
@@ -49,31 +52,4 @@
             <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\HotSwap (1.6)\Assemblies\HotSwap.dll</HintPath>
         </Reference>
     </ItemGroup>
-    <Target Name="Deploy" AfterTargets="Build">
-        <!-- TODO: Make listing of runtime dll's less verbose -->
-        <ItemGroup>
-            <ModFiles Include="$(MSBuildThisFileDirectory)..\..\data\$(ModName)\**\*.*"/>
-            <RuntimeDlls Include="$(OutputPath)PawnEditor.dll"/>
-            <RuntimeDlls Include="$(OutputPath)PawnEditor.pdb"/>
-            <RuntimeDlls Include="$(OutputPath)Taffy.dll"/>
-            <RuntimeDlls Include="$(OutputPath)Taffy.pdb"/>
-            <RuntimeDlls Include="$(OutputPath)Void.dll"/>
-            <RuntimeDlls Include="$(OutputPath)Void.pdb"/>
-            <RuntimeDlls Include="$(OutputPath)HotSwap.dll"/>
-            <RuntimeDlls Include="$(OutputPath)HotSwap.pdb"/>
-            <RuntimeDlls Include="$(OutputPath)0Harmony.dll"/>
-        </ItemGroup>
-        <!-- Delete existing mod directory -->
-        <RemoveDir Directories="$(RimWorldModsPath)\$(ModName)"/>
-        <!-- Copy static mod files -->
-        <Copy
-                SourceFiles="@(ModFiles)"
-                DestinationFiles="@(ModFiles->'$(RimWorldModsPath)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')"
-        />
-        <!-- Copy built DLL into versioned assemblies folder -->
-        <Copy
-                SourceFiles="@(RuntimeDlls)"
-                DestinationFolder="$(RimWorldModsPath)\$(ModName)\$(RimWorldVersion)\Assemblies"
-        />
-    </Target>
 </Project>

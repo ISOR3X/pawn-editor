@@ -3,6 +3,8 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -15,7 +17,7 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         builder.Text(AdjustedLabelFor(pawn), font: GameFont.Medium);
-        builder.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny) }, row =>
+        builder.Div(new Style { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny) }, row =>
         {
             DrawInspectPaneWidget(row, InspectPaneFiller.DrawHealth, pawn);
             if (pawn.IsGhoul && pawn.needs.food != null) DrawInspectPaneWidget(row, InspectPaneFiller.DrawHunger, pawn);

@@ -1,6 +1,8 @@
 using HotSwap;
 using Taffy;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor;
 

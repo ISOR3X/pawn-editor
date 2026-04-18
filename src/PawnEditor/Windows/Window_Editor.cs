@@ -1,9 +1,11 @@
 ﻿using HotSwap;
-using PawnEditor.Extensions;
 using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
+using Void.Extensions;
 using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
@@ -21,13 +23,13 @@ public partial class Window_Editor : Window
     private static readonly List<Pawn> _selectedPawnGroup = []; // Pawns in the selected faction.
 
     // Tab related fields
-    private static IEditorContext? _currentContext;
+    private static IContext? _currentContext;
     private static TabDef? _selectedTabDef;
     private static List<TabDef> _selectedTabDefsFor = [];
     private static List<TabRecord> _tabsList = [];
 
     public static Rect DefaultWindowRect = new(
-        new Vector2((UI.screenWidth - Page.StandardSize.x) / 2, (UI.screenHeight - Page.StandardSize.y) / 2),
+        new Vector2((Verse.UI.screenWidth - Page.StandardSize.x) / 2, (Verse.UI.screenHeight - Page.StandardSize.y) / 2),
         Page.StandardSize);
 
     public static Rect SavedWindowRect = DefaultWindowRect;
@@ -123,8 +125,7 @@ public partial class Window_Editor : Window
     private void DoLeftSection(Rect inRect)
     {
         var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-
-        Taffy.Div(inRect, builder =>
+        Void.Taffy.Div(inRect, builder =>
         {
             builder.Text("Selected faction", font: GameFont.Tiny);
             builder.Button(label, icon: tex, iconColor: c, block: true,

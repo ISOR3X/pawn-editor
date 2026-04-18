@@ -1,7 +1,7 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Verse;
 
-namespace PawnEditor;
+namespace Void;
 
 /// <summary>
 /// A RimWorld <see cref="Def"/> that maps CSS class names to inline style strings.
@@ -23,12 +23,11 @@ namespace PawnEditor;
 /// </code>
 /// </example>
 [UsedImplicitly]
-public class TaffyStyleDef : Def
+public class StyleMapDef : Def
 {
     public List<StyleEntry> styles = [];
 
-    [field: Unsaved]
-    public Dictionary<string, StyleOverride> Styles { get; private set; } = [];
+    [field: Unsaved] public Dictionary<string, StyleOverride> Styles { get; private set; } = [];
 
     public override void ResolveReferences()
     {

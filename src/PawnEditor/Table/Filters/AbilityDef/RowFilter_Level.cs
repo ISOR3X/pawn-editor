@@ -1,5 +1,7 @@
 ﻿using Taffy;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor.Table.Filters.AbilityDef;
 
@@ -15,7 +17,7 @@ public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
         MinMaxRange = new IntRange(levels.Min(), levels.Max());
     }
 
-    public bool Passes(RimWorld.AbilityDef row, IEditorContext? ctx) =>
+    public bool Passes(RimWorld.AbilityDef row, IContext? ctx) =>
         row.level >= _range.min && row.level <= _range.max;
 
     public void DrawFilter(TaffyBuilder builder, Table<RimWorld.AbilityDef> table)

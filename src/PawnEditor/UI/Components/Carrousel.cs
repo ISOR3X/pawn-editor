@@ -1,8 +1,10 @@
-﻿using PawnEditor.Extensions;
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using Void;
+using Void.Extensions;
+using TexUI = Void.TexUI;
 
 namespace PawnEditor;
 
@@ -63,13 +65,13 @@ public static partial class Widgets
         var nextIndex = items.IndexOf(selected);
         var leftClicked = false;
         var rightClicked = false;
-        if (Verse.Widgets.ButtonImage(buttonLeftRight, TexPawnEditor.ArrowLeft))
+        if (Verse.Widgets.ButtonImage(buttonLeftRight, TexUI.ArrowLeft))
         {
             SoundDefOf.Click.PlayOneShotOnCamera();
             nextIndex = items.IndexOf(selected) - 1;
             leftClicked = true;
         }
-        else if (Verse.Widgets.ButtonImage(buttonRightRect, TexPawnEditor.ArrowRight))
+        else if (Verse.Widgets.ButtonImage(buttonRightRect, TexUI.ArrowRight))
         {
             SoundDefOf.Click.PlayOneShotOnCamera();
             nextIndex = items.IndexOf(selected) + 1;

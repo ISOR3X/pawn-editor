@@ -4,6 +4,8 @@ using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
 using Taffy;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -34,16 +36,16 @@ public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(d
             columns:
             [
                 ColumnWorker<T>.Create(
-                    Taffy.Px(GenUI.SmallIconSize),
+                    Void.Taffy.Px(GenUI.SmallIconSize),
                     (grid, thing) => grid.Item(r => Verse.Widgets.ThingIcon(r, thing),
                         new StyleOverride { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize })
                 ),
                 ColumnWorker<T>.CreateText(
-                    Taffy.Fr(2), thing => thing.LabelCap, "Label"
+                    Void.Taffy.Fr(2), thing => thing.LabelCap, "Label"
                 ),
-                new ColumnWorker_ThingStuff<T>(Taffy.Fr()),
-                new ColumnWorker_ThingMass<T>(Taffy.Px(100f)),
-                ColumnWorker<T>.Create(Taffy.Px(GenUI.SmallIconSize),
+                new ColumnWorker_ThingStuff<T>(Void.Taffy.Fr()),
+                new ColumnWorker_ThingMass<T>(Void.Taffy.Px(100f)),
+                ColumnWorker<T>.Create(Void.Taffy.Px(GenUI.SmallIconSize),
                     (builder, thing) =>
                     {
                         builder.Button(icon: TexButton.NewItem,
@@ -54,7 +56,7 @@ public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(d
                                         Find.WindowStack.WindowOfType<Window_Editor>()));
                             }, drawGraphic: false);
                     }),
-                ColumnWorker<T>.Create(Taffy.Px(GenUI.SmallIconSize),
+                ColumnWorker<T>.Create(Void.Taffy.Px(GenUI.SmallIconSize),
                     (builder, thing) => { builder.Item(r => Verse.Widgets.InfoCardButtonCentered(r, thing)); })
             ],
             onRowClick: row => onRowClick?.Invoke(row),

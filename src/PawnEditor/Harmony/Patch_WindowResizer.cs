@@ -11,7 +11,7 @@ namespace PawnEditor;
 public class Patch_WindowResizer
 {
     private static readonly Vector2 MaxWindowSize =
-        new(UI.screenWidth, UI.screenHeight - MainTabWindow_Architect.ButHeight);
+        new(Verse.UI.screenWidth, Verse.UI.screenHeight - MainTabWindow_Architect.ButHeight);
 
     private static Rect Postfix(Rect winRect, ref Rect __result)
     {

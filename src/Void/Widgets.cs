@@ -1,10 +1,10 @@
-﻿using PawnEditor.Extensions;
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
+using Void.Extensions;
 using static Verse.UnityGUIBugsFixer;
 
-namespace PawnEditor;
+namespace Void;
 
 [StaticConstructorOnStartup]
 public static partial class Widgets
@@ -54,7 +54,7 @@ public static partial class Widgets
         if (buffer == null) intBuff = value;
 
         if (minMaxButtons)
-            if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftDouble))
+            if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexUI.ArrowLeftDouble))
             {
                 if (value >= min + 1)
                 {
@@ -69,7 +69,7 @@ public static partial class Widgets
                 return;
             }
 
-        if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeft))
+        if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexUI.ArrowLeft))
         {
             if (value >= min + 1)
             {
@@ -85,7 +85,7 @@ public static partial class Widgets
         }
 
         if (minMaxButtons)
-            if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightDouble))
+            if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexUI.ArrowRightDouble))
             {
                 if (value <= max - 1)
                 {
@@ -100,7 +100,7 @@ public static partial class Widgets
                 return;
             }
 
-        if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRight))
+        if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexUI.ArrowRight))
         {
             if (value <= max - 1)
             {
@@ -151,13 +151,13 @@ public static partial class Widgets
         // Increment/ decrement value with buttons.
         if (incrementButtons)
         {
-            if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeft))
+            if (Verse.Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexUI.ArrowLeft))
             {
                 value--;
                 buffer = null;
             }
 
-            if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRight))
+            if (Verse.Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexUI.ArrowRight))
             {
                 value++;
                 buffer = null;

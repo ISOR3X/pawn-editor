@@ -4,6 +4,8 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
@@ -32,10 +34,10 @@ public class Window_Table<T> : OwnedWindow
 
     public override void DoWindowContents(Rect inRect)
     {
-        Taffy.Div(inRect,
+        Void.Taffy.Div(inRect,
             builder =>
             {
-                builder.Div(new Style { flexGrow = 1f, gap = Taffy.Gap(GenUI.Gap) }, builder2 =>
+                builder.Div(new Style { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) }, builder2 =>
                 {
                     if (_table.Filters.Count > 0)
                     {
@@ -63,6 +65,6 @@ public class Window_Table<T> : OwnedWindow
                             builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.SelectedItem),
                                 size: UIUtility.ComponentSize.Large);
                         });
-            }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Taffy.Gap(GenUI.GapSmall) });
+            }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(GenUI.GapSmall) });
     }
 }

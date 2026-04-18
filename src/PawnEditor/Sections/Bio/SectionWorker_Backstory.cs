@@ -5,6 +5,8 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
 using Display = Taffy.Display;
 
@@ -21,7 +23,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         string adulthoodLabel = "Adulthood".Translate();
 
         builder.Text("Backstory", color: ColoredText.TipSectionTitleColor);
-        builder.Div(new Style { gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap }, row =>
+        builder.Div(new Style { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap }, row =>
         {
             DoBackstoryItem(row, pawn, BackstorySlot.Childhood, childhoodLabel);
             DoBackstoryItem(row, pawn, BackstorySlot.Adulthood, adulthoodLabel);
@@ -35,7 +37,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             columns:
             [
                 Col.Create<PawnContext>(
-                    Taffy.Fr(),
+                    Void.Taffy.Fr(),
                     (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
                     "Title",
                     compare: (a, b) => string.Compare(
@@ -44,13 +46,13 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                         StringComparison.CurrentCultureIgnoreCase)
                 ),
                 Col.CreateText(
-                    Taffy.Px(150f),
+                    Void.Taffy.Px(150f),
                     def => def.modContentPack?.Name ?? "",
                     "Source",
                     color: ColoredText.SubtleGrayColor
                 ),
                 Col.CreateText(
-                    Taffy.Fr(),
+                    Void.Taffy.Fr(),
                     def => string.Join(", ", def.spawnCategories),
                     "Spawn categories",
                     color: ColoredText.SubtleGrayColor
