@@ -7,14 +7,14 @@ namespace Void.Components;
 public static partial class TaffyExtensions
 {
     /// <summary>
-    /// Adds a leaf node that measures its own size using RimWorld's <see cref="Text.CalcSize"/>
-    /// and <see cref="Text.CalcHeight"/>.
-    /// <para>
-    /// When a fixed <paramref name="width"/> is set the node wraps at that width and the height
-    /// is computed via <see cref="Text.CalcHeight"/>. Otherwise, the natural (unwrapped) size from
-    /// <see cref="Text.CalcSize"/> is returned, capped at the available width if the axis is definite.
-    /// </para>
-    /// The default draw callback renders the text as a label.
+    ///     Adds a leaf node that measures its own size using RimWorld's <see cref="Text.CalcSize" />
+    ///     and <see cref="Text.CalcHeight" />.
+    ///     <para>
+    ///         When a fixed <paramref name="width" /> is set the node wraps at that width and the height
+    ///         is computed via <see cref="Text.CalcHeight" />. Otherwise, the natural (unwrapped) size from
+    ///         <see cref="Text.CalcSize" /> is returned, capped at the available width if the axis is definite.
+    ///     </para>
+    ///     The default draw callback renders the text as a label.
     /// </summary>
     public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small,
         TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, bool? wrap = null, Action<Rect>? onHover = null,
@@ -36,9 +36,8 @@ public static partial class TaffyExtensions
             }
 
             if (onHover != null)
-            {
-                if (Mouse.IsOver(r)) onHover(r);
-            }
+                if (Mouse.IsOver(r))
+                    onHover(r);
         }));
         return;
 

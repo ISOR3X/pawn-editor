@@ -1,8 +1,8 @@
 using HotSwap;
 using PawnEditor.Table;
 using PawnEditor.Table.Filters.BackstoryDef;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -33,14 +33,13 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
     private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
     {
         return new Table<BackstoryDef>(
-            rows: DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
-            columns:
+            DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
             [
                 Col.Create<PawnContext>(
                     Void.Taffy.Fr(),
                     (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
                     "Title",
-                    compare: (a, b) => string.Compare(
+                    (a, b) => string.Compare(
                         a.TitleCapFor(pawn.gender),
                         b.TitleCapFor(pawn.gender),
                         StringComparison.CurrentCultureIgnoreCase)
@@ -49,14 +48,14 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                     Void.Taffy.Px(150f),
                     def => def.modContentPack?.Name ?? "",
                     "Source",
-                    color: ColoredText.SubtleGrayColor
+                    ColoredText.SubtleGrayColor
                 ),
                 Col.CreateText(
                     Void.Taffy.Fr(),
                     def => string.Join(", ", def.spawnCategories),
                     "Spawn categories",
-                    color: ColoredText.SubtleGrayColor
-                ),
+                    ColoredText.SubtleGrayColor
+                )
             ],
             onRowHover: (rowRect, rowBackstory, ctx) =>
             {
@@ -79,14 +78,12 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 
         Action<Rect>? onHover = null;
         if (backstory != null)
-        {
             onHover = r =>
             {
                 var tip = buttonLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
                 var desc = backstory.FullDescriptionFor(pawn).Resolve();
                 TooltipHandler.TipRegion(r, tip + desc);
             };
-        }
 
         row.Div(row2 =>
         {
@@ -96,7 +93,6 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                 onClick: _ =>
                 {
                     if (backstory != null)
-                    {
                         Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot),
                             Find.WindowStack.WindowOfType<Window_Editor>(),
                             selectedItemSlot: (b, i) =>
@@ -114,7 +110,6 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                                     b2.Text($"New: {newBackstory}");
                                 }, new StyleOverride { display = Display.Block });
                             }));
-                    }
                     else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
                 },
                 onHover: onHover,

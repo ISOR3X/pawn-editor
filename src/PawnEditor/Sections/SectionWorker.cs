@@ -17,19 +17,28 @@ public abstract class SectionWorker(SectionDef def)
         return Def.sectionCategory.HasFlag(PawnUtility.GetPawnCategory(p));
     }
 
-    /// <summary>Override to build section contents. Not called for sections that have a <c>&lt;layout&gt;</c> — use <see cref="OnLayout"/> instead.</summary>
-    protected virtual void DoSectionContents(TaffyBuilder builder, Pawn pawn) { }
-
     /// <summary>
-    /// Override this to configure named elements in the section's XML layout per-frame.
-    /// Called by <see cref="BuildSection"/> when <see cref="SectionDef.layout"/> is set.
+    ///     Override to build section contents. Not called for sections that have a <c>&lt;layout&gt;</c> — use
+    ///     <see cref="OnLayout" /> instead.
     /// </summary>
-    public virtual void OnLayout(Layout layout, Pawn pawn) { }
+    protected virtual void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    {
+    }
 
     /// <summary>
-    /// Adds this section's content into <paramref name="builder"/>.
-    /// <para><paramref name="tabStyle"/> — when provided, is merged onto the section's single root
-    /// node (tab wins on conflict). For legacy sections it is applied as a wrapper div.</para>
+    ///     Override this to configure named elements in the section's XML layout per-frame.
+    ///     Called by <see cref="BuildSection" /> when <see cref="SectionDef.layout" /> is set.
+    /// </summary>
+    public virtual void OnLayout(Layout layout, Pawn pawn)
+    {
+    }
+
+    /// <summary>
+    ///     Adds this section's content into <paramref name="builder" />.
+    ///     <para>
+    ///         <paramref name="tabStyle" /> — when provided, is merged onto the section's single root
+    ///         node (tab wins on conflict). For legacy sections it is applied as a wrapper div.
+    ///     </para>
     /// </summary>
     public void BuildSection(TaffyBuilder builder, Pawn pawn, StyleOverride? tabStyle = null)
     {
@@ -53,7 +62,8 @@ public abstract class SectionWorker(SectionDef def)
     public float DoSection(Pawn pawn, Rect inRect)
     {
         if (!ShowSection(pawn)) return 0f;
-        return Void.Taffy.DivMeasured(inRect, col => BuildSection(col, pawn), new StyleOverride { flexDirection = FlexDirection.Column });
+        return Void.Taffy.DivMeasured(inRect, col => BuildSection(col, pawn),
+            new StyleOverride { flexDirection = FlexDirection.Column });
     }
 
 

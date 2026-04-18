@@ -1,10 +1,9 @@
 using HotSwap;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using PawnEditor;
 using Void;
 using Void.Extensions;
 
@@ -24,6 +23,7 @@ public class Table<TRow>(
 {
     public const float HeaderHeight = UIUtility.ButtonHeight;
     public const float FooterHeight = UIUtility.ButtonHeight;
+    private readonly List<TRow> _cachedFilteredRows = [];
 
     // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
     // In a virtualized table only a subset of rows is rendered each frame, so the
@@ -32,25 +32,29 @@ public class Table<TRow>(
         .Select(c => NormalizeTrack(c.TrackSize))
         .ToList();
 
-    private static TrackSizingFunction NormalizeTrack(TrackSizingFunction t) =>
-        t.Max.IsFr() && t.Min.Equals(MinTrackSizingFunction.AUTO)
-            ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
-            : t;
-
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
 
     private bool _dirty = true;
     private Vector2 _scrollPosition;
-    private ColumnWorker<TRow>? _sortingBy;
     private bool _sortDescending;
+    private ColumnWorker<TRow>? _sortingBy;
 
     public TRow? SelectedItem { get; private set; }
-    private readonly List<TRow> _cachedFilteredRows = [];
     public List<TRow> Rows => rows.ToList();
     public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
 
+    private static TrackSizingFunction NormalizeTrack(TrackSizingFunction t)
+    {
+        return t.Max.IsFr() && t.Min.Equals(MinTrackSizingFunction.AUTO)
+            ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
+            : t;
+    }
 
-    public void SetDirty() => _dirty = true;
+
+    public void SetDirty()
+    {
+        _dirty = true;
+    }
 
     public void SortBy(ColumnWorker<TRow>? column, bool descending)
     {
@@ -92,8 +96,7 @@ public class Table<TRow>(
         Void.Taffy.Grid(headerContentRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
         {
             foreach (var col in columns)
-            {
-                grid.Item(draw: colRect =>
+                grid.Item(colRect =>
                 {
                     col.DrawHeader(colRect);
 
@@ -120,11 +123,12 @@ public class Table<TRow>(
                         }
                     }
                 });
-            }
         });
 
         using (new GUIColor(PawnTable.BorderColor))
+        {
             Verse.Widgets.DrawLineHorizontal(r.x, r.y, r.width);
+        }
 
         #endregion
 
@@ -141,7 +145,9 @@ public class Table<TRow>(
         {
             using (new GUIColor(ColoredText.SubtleGrayColor))
             using (new TextBlock(TextAnchor.MiddleLeft))
+            {
                 Verse.Widgets.Label(viewRect, "No results available.");
+            }
         }
         else
         {
@@ -184,12 +190,10 @@ public class Table<TRow>(
                 {
                     var row = _cachedFilteredRows[i];
                     foreach (var col in columns)
-                    {
                         if (col is IContextColumn<TRow> ctxCol && context != null)
                             ctxCol.DrawCell(grid, row, context);
                         else
                             col.DrawCell(grid, row);
-                    }
                 }
             });
         }
@@ -207,7 +211,7 @@ public class Table<TRow>(
             minWidth = 400f,
             minHeight = chrome + rowHeight,
             height = chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * rowHeight,
-            width = Dimension.Percent(1),
+            width = Dimension.Percent(1)
         });
 
         builder.Item(Draw, resolvedStyle);

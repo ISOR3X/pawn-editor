@@ -1,17 +1,15 @@
-﻿using RimWorld;
-using UnityEngine;
+﻿using UnityEngine;
 using Verse;
-using Void.Extensions;
-using static Verse.UnityGUIBugsFixer;
 
 namespace Void;
 
 [StaticConstructorOnStartup]
 public static class Widgets
 {
-    
     private const float HoldInitialDelay = 0.4f;
+
     private const float HoldRepeatInterval = 0.07f;
+
     // Hold-repeat state: direction (+1/-1/0), time the hold started, time of the last repeat tick.
     private static readonly Dictionary<string, (int direction, float heldSince, float lastRepeat)> SHoldState = [];
 
@@ -65,8 +63,8 @@ public static class Widgets
     }
 
     /// <summary>
-    /// Like <see cref="Verse.Widgets.ButtonImage"/> but also fires on hold-repeat.
-    /// <paramref name="key"/> must be a globally unique stable string per button.
+    ///     Like <see cref="Verse.Widgets.ButtonImage" /> but also fires on hold-repeat.
+    ///     <paramref name="key" /> must be a globally unique stable string per button.
     /// </summary>
     public static bool ButtonImageWithHold(Rect rect, Texture2D tex, string key)
     {
@@ -82,7 +80,10 @@ public static class Widgets
         {
             if (hold.direction == 0) hold = (1, Time.realtimeSinceStartup, Time.realtimeSinceStartup);
         }
-        else hold = default;
+        else
+        {
+            hold = default;
+        }
 
         SHoldState[key] = hold;
 

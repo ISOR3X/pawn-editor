@@ -5,24 +5,25 @@ using Void.XMLComponents;
 
 namespace PawnEditor.XMLComponents;
 
-
 /// <summary>
-/// Represents a <c>&lt;section&gt;</c> element within a layout tree. Delegates rendering to the
-/// referenced <see cref="SectionDef"/>'s worker, applying tab-level style composition.
-/// The <see cref="Pawn"/> property is set via <see cref="SetContext"/> before
-/// <see cref="Render"/> is called.
+///     Represents a <c>&lt;section&gt;</c> element within a layout tree. Delegates rendering to the
+///     referenced <see cref="SectionDef" />'s worker, applying tab-level style composition.
+///     The <see cref="Pawn" /> property is set via <see cref="SetContext" /> before
+///     <see cref="Render" /> is called.
 /// </summary>
 public class SectionElement : XMLComponent
 {
-    public SectionDef? ResolvedDef;
-
     /// <summary>Set via SetContext before each call to Render.</summary>
     internal Pawn? Pawn;
+
+    public SectionDef? ResolvedDef;
 
     public override bool IsLeaf => true;
 
     public override void SetContext(IContext? context)
-        => Pawn = (context as IContext<Pawn>)?.Value;
+    {
+        Pawn = (context as IContext<Pawn>)?.Value;
+    }
 
     public override void ParseXmlAttrs(XmlNode node)
     {
@@ -38,5 +39,4 @@ public class SectionElement : XMLComponent
         // Delegate entirely to BuildSection — it handles both UILayout (merge) and legacy (wrap).
         worker.BuildSection(builder, Pawn, Style);
     }
-
 }

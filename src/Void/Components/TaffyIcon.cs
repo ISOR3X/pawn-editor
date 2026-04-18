@@ -18,7 +18,7 @@ public static partial class TaffyExtensions
     }
 
     /// <summary>
-    /// Adds a button with auto-computed width.
+    ///     Adds a button with auto-computed width.
     /// </summary>
     public static void Icon(this TaffyBuilder b, Texture2D icon,
         Color? iconColor = null, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default,
@@ -40,7 +40,9 @@ public static partial class TaffyExtensions
         b.Item(r =>
         {
             using (new GUIColor(capturedColor ?? Color.white))
+            {
                 GUI.DrawTexture(r, capturedIcon);
+            }
         }, mergedStyle);
     }
 }

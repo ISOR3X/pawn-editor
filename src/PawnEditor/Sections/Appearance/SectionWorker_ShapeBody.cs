@@ -24,6 +24,6 @@ public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
                 ref _scrollPositionBodyType,
                 pawn.story.bodyType, d => AppearanceUtility.TrySetBodyType(d, capturedPawn),
                 d => AppearanceUtility.BodyTypes[d], pawn.story.SkinColor, d => d.ReadableDefName());
-        }, new StyleOverride { height =  Widgets.CarrouselCellHeight + UIUtility.ButtonHeight});
+        }, new StyleOverride { height = Widgets.CarrouselCellHeight + UIUtility.ButtonHeight });
     }
 }

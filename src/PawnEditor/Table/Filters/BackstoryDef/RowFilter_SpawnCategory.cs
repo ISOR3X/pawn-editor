@@ -13,9 +13,11 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 
     private List<string>? SpawnCategories;
 
-    public bool Passes(RimWorld.BackstoryDef row, IContext? ctx) =>
-        _disabledCategories.Count == 0 ||
-        _disabledCategories.All(c => !row.spawnCategories.Contains(c));
+    public bool Passes(RimWorld.BackstoryDef row, IContext? ctx)
+    {
+        return _disabledCategories.Count == 0 ||
+               _disabledCategories.All(c => !row.spawnCategories.Contains(c));
+    }
 
     public void DrawFilter(TaffyBuilder builder, Table<RimWorld.BackstoryDef> table)
     {
@@ -24,11 +26,11 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 
         builder.Collapsible("Spawn category", col =>
         {
-            col.Div( row2 =>
+            col.Div(row2 =>
             {
                 row2.Icon(TexButton.Search);
                 row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
-            },new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
+            }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
 
             var filtered = SpawnCategories
                 .Where(c => _searchText.NullOrEmpty() ||

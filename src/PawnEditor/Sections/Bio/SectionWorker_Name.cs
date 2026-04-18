@@ -1,6 +1,6 @@
 using HotSwap;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -12,7 +12,10 @@ namespace PawnEditor;
 [HotSwappable]
 public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
-    public override bool ShowSection(Pawn p) => base.ShowSection(p) && p is { Faction: not null, Name: not null };
+    public override bool ShowSection(Pawn p)
+    {
+        return base.ShowSection(p) && p is { Faction: not null, Name: not null };
+    }
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
@@ -27,15 +30,15 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
                     var first = triple.First;
                     var nick = triple.Nick;
                     var last = triple.Last;
-                    row.Input(ref first, maxLength: 12, pattern: CharacterCardUtility.ValidNameRegex,
+                    row.Input(ref first, 12, CharacterCardUtility.ValidNameRegex,
                         onHover: r => TooltipHandler.TipRegionByKey(r, "FirstNameDesc"));
 
                     var c = triple.Nick == triple.First || triple.Nick == triple.Last
                         ? new Color(1f, 1f, 1f, 0.5f)
                         : Color.white;
-                    row.Input(ref nick, maxLength: 16, color: c, pattern: CharacterCardUtility.ValidNameRegex,
+                    row.Input(ref nick, 16, color: c, pattern: CharacterCardUtility.ValidNameRegex,
                         onHover: r => TooltipHandler.TipRegionByKey(r, "ShortIdentifierDesc"));
-                    row.Input(ref last, maxLength: 12, pattern: CharacterCardUtility.ValidNameRegex,
+                    row.Input(ref last, 12, CharacterCardUtility.ValidNameRegex,
                         onHover: r => TooltipHandler.TipRegionByKey(r, "LastNameDesc"));
 
                     if (first != triple.First || nick != triple.Nick || last != triple.Last)
@@ -45,7 +48,7 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
                 case NameSingle single:
                 {
                     var name = single.ToStringFull;
-                    row.Input(ref name, maxLength: 16);
+                    row.Input(ref name, 16);
                     if (name != single.ToStringFull)
                         pawn.Name = new NameSingle(name);
                     break;

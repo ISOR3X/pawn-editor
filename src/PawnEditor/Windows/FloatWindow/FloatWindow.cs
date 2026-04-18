@@ -7,19 +7,20 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class FloatWindow : OwnedWindow
 {
-    protected virtual Vector2 InitialPositionShift => new(0, 8f);
-    protected virtual bool UseWidgetWidth => false;
     private readonly Rect _boundWidgetRect;
 
     protected FloatWindow(Rect boundWidgetRect, Window? owner = null) : base(owner)
     {
         _boundWidgetRect = boundWidgetRect;
-        
+
         onlyOneOfTypeAllowed = true;
         layer = WindowLayer.SubSuper;
         closeOnClickedOutside = true;
         absorbInputAroundWindow = true;
     }
+
+    protected virtual Vector2 InitialPositionShift => new(0, 8f);
+    protected virtual bool UseWidgetWidth => false;
 
     protected virtual FloatWindowAlignment Alignment => FloatWindowAlignment.BottomRight;
 
@@ -85,12 +86,8 @@ public abstract class FloatWindow : OwnedWindow
     {
         var window = Find.WindowStack.WindowOfType<T>();
         if (window != null && window.CalculatePositionFromBoundWidget(widgetRect) == window.windowRect.position)
-        {
             window.Close();
-        }
         else
-        {
             Find.WindowStack.Add(factory());
-        }
     }
 }

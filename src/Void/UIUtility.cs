@@ -9,15 +9,15 @@ namespace Void;
 [HotSwappable]
 public static class UIUtility
 {
-    public const float ScrollBarWidth = 16f;
-    public const float ButtonHeight = 30f;
-
     public enum ComponentSize
     {
         Small = -1,
         Default = 0,
-        Large = 1,
+        Large = 1
     }
+
+    public const float ScrollBarWidth = 16f;
+    public const float ButtonHeight = 30f;
 
     public static string TruncateWithTooltip(this string label, Rect inRect, float padding = 16f)
     {

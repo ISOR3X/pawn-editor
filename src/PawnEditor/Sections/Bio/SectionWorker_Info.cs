@@ -1,5 +1,4 @@
 using HotSwap;
-using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -12,12 +11,12 @@ namespace PawnEditor;
 public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
 {
     /// <summary>
-    /// Shadows <see cref="InspectPaneFiller.DoPaneContentsFor"/>, without interactive elements.
+    ///     Shadows <see cref="InspectPaneFiller.DoPaneContentsFor" />, without interactive elements.
     /// </summary>
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Text(AdjustedLabelFor(pawn), font: GameFont.Medium);
-        builder.Div( row =>
+        builder.Text(AdjustedLabelFor(pawn), GameFont.Medium);
+        builder.Div(row =>
         {
             DrawInspectPaneWidget(row, InspectPaneFiller.DrawHealth, pawn);
             if (pawn.IsGhoul && pawn.needs.food != null) DrawInspectPaneWidget(row, InspectPaneFiller.DrawHunger, pawn);

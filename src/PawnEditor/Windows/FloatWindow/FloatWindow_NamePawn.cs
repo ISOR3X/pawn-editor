@@ -1,6 +1,6 @@
 using HotSwap;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -45,15 +45,15 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
         var contentHeight = Void.Taffy.MeasuredGrid(inRect,
-            columns: [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
-            gapX: GenUI.GapLabel, gapY: GenUI.GapTiny, autoRowHeight: UIUtility.ButtonHeight,
-            build: grid =>
+            [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
+            GenUI.GapLabel, GenUI.GapTiny, UIUtility.ButtonHeight,
+            grid =>
             {
                 if (_selectedCulture != null)
                 {
                     grid.Text("Culture");
                     GridButton(grid, _selectedCulture.LabelCap,
-                        onClick: _ =>
+                        _ =>
                         {
                             Find.WindowStack.Add(new FloatMenu(cultures
                                 .Select(c => new FloatMenuOption(c.LabelCap, () => _selectedCulture = c))
@@ -65,7 +65,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                 {
                     grid.Text("Xenotype");
                     GridButton(grid, _selectedXenotype?.LabelCap ?? "None",
-                        onClick: r =>
+                        r =>
                         {
                             Find.WindowStack.Add(new FloatMenu(xenotypes
                                 .Select(x => new FloatMenuOption(x.LabelCap, () => _selectedXenotype = x))
@@ -76,7 +76,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
                 grid.Text("Gender");
                 GridButton(grid, _selectedGender.GetLabel().CapitalizeFirst(),
-                    onClick: r =>
+                    r =>
                     {
                         Find.WindowStack.Add(new FloatMenu(
                             new List<Gender> { Gender.Male, Gender.Female }
@@ -92,7 +92,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                 grid.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
                     style: new StyleOverride
                         { gridColumn = new Line<GridPlacement>(GridPlacement.Line(1), GridPlacement.Span(2)) });
-                GridButton(grid, label: "Generate", onClick: _ =>
+                GridButton(grid, "Generate", _ =>
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
                         string? lastName = null;
@@ -103,9 +103,9 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                             _selectedCulture, pawn.IsCreepJoiner, _selectedGender,
                             pawn.RaceProps.nameCategory, lastName, _forceNoNick);
                     },
-                    style: new StyleOverride
+                    new StyleOverride
                     {
-                        gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2)),
+                        gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2))
                     });
             });
 

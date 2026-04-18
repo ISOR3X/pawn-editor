@@ -9,5 +9,6 @@ public class SectionWorker_TattooFace(SectionDef def) : SectionWorker_Hair<Tatto
 {
     protected override List<TattooDef> TableItems => DefDatabase<TattooDef>.AllDefsListForReading
         .Where(t => t.tattooType == TattooType.Face).ToList();
+
     protected override string TableTitle => "Tattoo, face";
 }

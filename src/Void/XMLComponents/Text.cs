@@ -8,10 +8,11 @@ namespace Void.XMLComponents;
 
 public class TextElement : XMLComponent
 {
-    public override bool IsLeaf => true;
+    private static readonly Dictionary<string, Color?> ColorCache = new();
+    public Color? Color;
 
     public string? Content;
-    public Color? Color;
+    public override bool IsLeaf => true;
 
     public override void ParseXmlAttrs(XmlNode node)
     {
@@ -22,9 +23,9 @@ public class TextElement : XMLComponent
     }
 
     public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
-        => builder.Text(Content ?? string.Empty, color: Color, style: Style);
-
-    private static readonly Dictionary<string, Color?> ColorCache = new();
+    {
+        builder.Text(Content ?? string.Empty, color: Color, style: Style);
+    }
 
     private static Color? ParseColor(string s)
     {

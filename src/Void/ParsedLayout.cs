@@ -5,21 +5,21 @@ using Void.XMLComponents;
 namespace Void;
 
 /// <summary>
-/// Immutable parsed representation of one XML element in a section layout tree.
-/// Never mutated after <see cref="ResolveClasses"/> completes.
+///     Immutable parsed representation of one XML element in a section layout tree.
+///     Never mutated after <see cref="ResolveClasses" /> completes.
 /// </summary>
 public class ParsedLayout
 {
-    public string Tag = string.Empty;
-    public string? Id;
-    public XMLComponent Props = new DivElement();
     public readonly List<ParsedLayout> Children = [];
-
-    // Stored during XML load; used by ResolveClasses then cleared.
-    internal string[]? UnresolvedClasses;
+    public string? Id;
 
     // Inline style parsed immediately at load time; merged during ResolveClasses.
     internal StyleOverride? InlineStyle;
+    public XMLComponent Props = new DivElement();
+    public string Tag = string.Empty;
+
+    // Stored during XML load; used by ResolveClasses then cleared.
+    internal string[]? UnresolvedClasses;
 
     public void LoadDataFromXmlCustom(XmlNode xmlNode)
     {
@@ -27,8 +27,8 @@ public class ParsedLayout
     }
 
     /// <summary>
-    /// Resolves CSS class names (from <c>class="..."</c>) against loaded <see cref="StyleMapDef"/>
-    /// defs and merges them with the inline style. Walks the tree recursively.
+    ///     Resolves CSS class names (from <c>class="..."</c>) against loaded <see cref="StyleMapDef" />
+    ///     defs and merges them with the inline style. Walks the tree recursively.
     /// </summary>
     public void ResolveClasses()
     {
@@ -39,14 +39,12 @@ public class ParsedLayout
             {
                 var found = false;
                 foreach (var styleDef in DefDatabase<StyleMapDef>.AllDefsListForReading)
-                {
                     if (styleDef.Styles.TryGetValue(className, out var s))
                     {
                         classStyle = s.Merge(classStyle);
                         found = true;
                         break;
                     }
-                }
 
                 if (!found)
                     Log.Warning(
@@ -63,7 +61,7 @@ public class ParsedLayout
             child.ResolveClasses();
     }
 
-    /// <summary>Searches the tree for a node with the given <paramref name="id"/>.</summary>
+    /// <summary>Searches the tree for a node with the given <paramref name="id" />.</summary>
     public ParsedLayout? FindById(string id)
     {
         if (Id == id) return this;

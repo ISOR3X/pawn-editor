@@ -1,14 +1,12 @@
 using HotSwap;
 using PawnEditor.Table;
-using PawnEditor.Table.Filters.AbilityDef;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
-using Display = Taffy.Display;
 using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
@@ -32,7 +30,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                 width = Dimension.Percent(1f),
                 flexWrap = FlexWrap.Wrap,
                 flexDirection = FlexDirection.Row,
-                gap = Void.Taffy.Gap(GenUI.GapTiny),
+                gap = Void.Taffy.Gap(GenUI.GapTiny)
             }
         );
         builder.Button("Add trait",
@@ -99,7 +97,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                 flexDirection = FlexDirection.Column,
                 flexGrow = 1f,
                 flexBasis = 400f,
-                flexShrink = 0f,
+                flexShrink = 0f
             });
     }
 
@@ -133,16 +131,17 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                 GetTooltip(t, pawn)));
         return;
 
-        static string GetTooltip(WorkTags t, Pawn pawn) =>
-            CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, t) + "\n" +
-            CharacterCardUtility.GetWorkTypesDisabledByWorkTag(t);
+        static string GetTooltip(WorkTags t, Pawn pawn)
+        {
+            return CharacterCardUtility.GetWorkTypeDisabledCausedBy(pawn, t) + "\n" +
+                   CharacterCardUtility.GetWorkTypesDisabledByWorkTag(t);
+        }
     }
 
     private static Table<TraitUtility.TraitRecord> GetTraitsTable(Pawn pawn)
     {
         return new Table<TraitUtility.TraitRecord>(
-            rows: TraitUtility.AllTraits,
-            columns:
+            TraitUtility.AllTraits,
             [
                 Col.Create(
                     Void.Taffy.Fr(),
@@ -154,7 +153,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                     (grid, record) => grid.Text(record.TraitDef.modContentPack?.Name ?? "",
                         color: ColoredText.SubtleGrayColor),
                     "Source"
-                ),
+                )
             ],
             onRowHover: (rowRect, rowTrait, ctx) =>
             {

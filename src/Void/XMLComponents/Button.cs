@@ -6,11 +6,12 @@ namespace Void.XMLComponents;
 
 public class ButtonElement : XMLComponent
 {
-    public string? Label;
     public Texture2D? Icon;
 
     /// <summary>Icon name from XML, resolved lazily on first render to avoid loading textures at parse time.</summary>
     public string? IconName;
+
+    public string? Label;
 
     public Action<Rect>? OnClick;
     public Action<Rect>? OnHover;

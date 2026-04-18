@@ -36,8 +36,9 @@ public static class ThingUtility
 
     public record struct ThingStyle
     {
-        public ThingDef thingDef; // The thing def that has styles
         public Dictionary<ThingStyleDef, StyleCategoryDef>
             styleDefs; // The graphic is the key, the style group is the value
+
+        public ThingDef thingDef; // The thing def that has styles
     }
 }

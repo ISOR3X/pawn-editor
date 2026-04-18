@@ -17,7 +17,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
     protected override Vector2 InitialPositionShift => Vector2.zero;
     public override Vector2 InitialSize => new(500, 200);
 
-    private static void GridButton(TaffyBuilder grid, string label, Texture2D? icon = null, Color? iconColor = null, Action<Rect>? onClick = null,
+    private static void GridButton(TaffyBuilder grid, string label, Texture2D? icon = null, Color? iconColor = null,
+        Action<Rect>? onClick = null,
         StyleOverride? style = null)
     {
         style ??= new StyleOverride();
@@ -35,15 +36,15 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
 
         // TODO: Convert to clean taffy components/ layout.
         var contentHeight = Void.Taffy.MeasuredGrid(inRect,
-            columns: [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
-            gapX: GenUI.GapLabel, gapY: GenUI.GapTiny, autoRowHeight: UIUtility.ButtonHeight,
-            build: grid =>
+            [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
+            GenUI.GapLabel, GenUI.GapTiny, UIUtility.ButtonHeight,
+            grid =>
             {
                 if (thing.def.MadeFromStuff)
                 {
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Stuff"));
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Stuff"));
                     GridButton(grid, thing.Stuff.LabelCap,
-                        Verse.Widgets.GetIconFor(thing.Stuff), thing.Stuff.stuffProps.color, onClick: _ =>
+                        Verse.Widgets.GetIconFor(thing.Stuff), thing.Stuff.stuffProps.color, _ =>
                         {
                             {
                                 Find.WindowStack.Add(new FloatMenu(GenStuff.AllowedStuffsFor(thing.def)
@@ -63,8 +64,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 if (thing.HasComp<CompQuality>())
                 {
                     var compQuality = thing.TryGetComp<CompQuality>();
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Quality"));
-                    GridButton(grid,compQuality.Quality.GetLabel().CapitalizeFirst(), onClick: _ =>
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Quality"));
+                    GridButton(grid, compQuality.Quality.GetLabel().CapitalizeFirst(), onClick: _ =>
                     {
                         Find.WindowStack.Add(new FloatMenu(QualityUtility.AllQualityCategories
                             .Select(quality => new FloatMenuOption(quality.GetLabel().CapitalizeFirst(),
@@ -75,8 +76,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
 
                 if (thing is Apparel && thing.HasComp<CompColorable>())
                 {
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Color"));
-                    grid.GridItem(draw: r =>
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Color"));
+                    grid.GridItem(r =>
                     {
                         var apparel = (Apparel)thing;
                         var colorRect = r.TakeRightPart(WidgetRow.IconSize).CenteredVertically(WidgetRow.IconSize);
@@ -87,10 +88,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         Verse.Widgets.DrawRectFast(colorRect, curColor);
                         r.xMax -= 2f;
                         if (Verse.Widgets.ButtonText(r, "Pick color"))
-                        {
                             Find.WindowStack.Add(new Dialog_ColorPicker(color => apparel.SetColor(color), curColor,
                                 DefDatabase<ColorDef>.AllDefs.Select(cd => cd.color).ToList()));
-                        }
                     });
                 }
 
@@ -99,8 +98,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                     var styleOptions = ThingUtility.ThingStyles.FirstOrDefault(ts => ts.thingDef == thing.def)
                         .styleDefs;
                     var currentStyle = styleOptions.FirstOrDefault(so => so.Key == thing.GetStyleDef());
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Style"));
-                    GridButton(grid,currentStyle.Value?.LabelCap ?? "None",
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Style"));
+                    GridButton(grid, currentStyle.Value?.LabelCap ?? "None",
                         currentStyle.Value?.Icon ?? Verse.Widgets.PlaceholderIconTex, onClick: _ =>
                         {
                             Find.WindowStack.Add(new FloatMenu(styleOptions
@@ -118,8 +117,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         });
                 }
 
-                grid.GridItem(draw: r => Verse.Widgets.Label(r, "Hit points"));
-                grid.GridItem(draw: r =>
+                grid.GridItem(r => Verse.Widgets.Label(r, "Hit points"));
+                grid.GridItem(r =>
                 {
                     float hitPoints = thing.HitPoints;
                     float maxHitPoints = thing.MaxHitPoints;
@@ -129,7 +128,6 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 });
 
                 if (thing is Apparel)
-                {
                     grid.GridItem(colSpan: 2, draw: r =>
                     {
                         var apparel = (Apparel)thing;
@@ -137,19 +135,18 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         Verse.Widgets.CheckboxLabeled(r, "Tainted", ref isTainted);
                         if (isTainted != apparel.WornByCorpse) apparel.WornByCorpse = isTainted;
                     });
-                }
 
                 if (thing.def.stackLimit > 1)
                 {
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Count"));
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Count"));
                     grid.InputNumber(ref thing.stackCount, 1, thing.def.stackLimit);
                 }
 
                 if (thing.HasComp<CompGeneratedNames>())
                 {
                     var name = thing.TryGetComp<CompGeneratedNames>();
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Name"));
-                    grid.GridItem(draw: r =>
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Name"));
+                    grid.GridItem(r =>
                     {
                         if (Verse.Widgets.ButtonImage(r.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
                             name.Initialize(name.Props);
@@ -162,7 +159,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                     var bladelink = thing.TryGetComp<CompBladelinkWeapon>();
                     WeaponTraitDef? toRemove = null;
 
-                    grid.GridItem(draw: r => Verse.Widgets.Label(r, "Persona traits"));
+                    grid.GridItem(r => Verse.Widgets.Label(r, "Persona traits"));
                     grid.GridItem(colSpan: 3, draw: r =>
                     {
                         var traitOptions = DefDatabase<WeaponTraitDef>.AllDefs

@@ -4,12 +4,12 @@ using Verse;
 namespace Void;
 
 /// <summary>
-/// A RimWorld <see cref="Def"/> that maps CSS class names to inline style strings.
-/// Any mod can define one; classes are available to all <c>&lt;layout&gt;</c> elements
-/// via the <c>class="..."</c> attribute.
+///     A RimWorld <see cref="Def" /> that maps CSS class names to inline style strings.
+///     Any mod can define one; classes are available to all <c>&lt;layout&gt;</c> elements
+///     via the <c>class="..."</c> attribute.
 /// </summary>
 /// <example>
-/// <code>
+///     <code>
 /// &lt;PawnEditor.TaffyStyleDef&gt;
 ///     &lt;defName&gt;PawnEditorStyles&lt;/defName&gt;
 ///     &lt;styles&gt;

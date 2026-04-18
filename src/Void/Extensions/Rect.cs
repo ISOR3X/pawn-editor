@@ -45,7 +45,6 @@ public static class Rect_Extension
         {
             rect.yMin += height;
         }
-        
     }
 
     extension(Rect rect)
@@ -53,7 +52,9 @@ public static class Rect_Extension
         public void LabelH2(string label)
         {
             using (new TextBlock(TextAnchor.MiddleLeft))
+            {
                 Verse.Widgets.Label(rect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
+            }
         }
 
         public Rect CenteredVertically(float height)
@@ -71,13 +72,12 @@ public static class Rect_Extension
             rect.xMin += remove;
             return rect;
         }
-        
+
         public void SplitHorizontallyEqual(out Rect top, out Rect bottom, float padding = 0)
         {
             var half = rect.height / 2;
             top = rect.TopPartPixels(half - padding);
             bottom = rect.BottomPartPixels(half - padding);
         }
-
     }
 }

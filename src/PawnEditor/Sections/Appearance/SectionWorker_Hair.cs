@@ -12,11 +12,11 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class SectionWorker_Hair<T>(SectionDef def) : SectionWorker(def) where T : StyleItemDef
 {
-    protected abstract List<T> TableItems { get; }
-    protected abstract string TableTitle { get; }
+    private Pawn? _cachedPawn;
 
     private Table<T>? _cachedTable;
-    private Pawn? _cachedPawn;
+    protected abstract List<T> TableItems { get; }
+    protected abstract string TableTitle { get; }
 
     private Table<T> GetCachedTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
     {
@@ -32,8 +32,7 @@ public abstract class SectionWorker_Hair<T>(SectionDef def) : SectionWorker(def)
     private static Table<T> ConstructStyleItemTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
     {
         return new Table<T>(
-            rows: defs,
-            columns:
+            defs,
             [
                 ColumnWorker<T>.Create<PawnContext>(
                     Void.Taffy.Px(36f),
@@ -48,8 +47,8 @@ public abstract class SectionWorker_Hair<T>(SectionDef def) : SectionWorker(def)
                     Void.Taffy.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
-                    color: ColoredText.SubtleGrayColor
-                ),
+                    ColoredText.SubtleGrayColor
+                )
             ],
             onRowClick: row => onRowClick?.Invoke(row),
             onRowHover: (rowRect, styleItemDef, ctx) =>
@@ -66,7 +65,7 @@ public abstract class SectionWorker_Hair<T>(SectionDef def) : SectionWorker(def)
     private void DrawTable(TaffyBuilder builder, List<T> items, Pawn pawn, Action<T?>? onRowClick = null)
     {
         builder.Item(GetCachedTable(pawn, items, onRowClick).Draw,
-            new StyleOverride { minWidth = 400, minHeight = 400 , width = Dimension.Percent(1)});
+            new StyleOverride { minWidth = 400, minHeight = 400, width = Dimension.Percent(1) });
     }
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)

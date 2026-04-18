@@ -17,7 +17,7 @@ public class Dialog_ColorPicker : Window
     private readonly Action<Color> _onSelect;
 
     private Color _selectedColor;
-    
+
     public Dialog_ColorPicker(Action<Color> onSelect, Color oldColor, List<Color>? colors = null)
     {
         _onSelect = onSelect;
@@ -29,7 +29,7 @@ public class Dialog_ColorPicker : Window
         closeOnClickedOutside = true;
 
         layer = WindowLayer.Super;
-        
+
         _colors = colors ?? [.. DefDatabase<ColorDef>.AllDefsListForReading.Select(def => def.color)];
     }
 
@@ -44,56 +44,57 @@ public class Dialog_ColorPicker : Window
             builder.Div(contentBuilder =>
             {
                 contentBuilder.Div(leftBuilder =>
-                {
-                    leftBuilder.Div(widgetBuilder =>
                     {
-                        widgetBuilder.Item(r => ColorUtility.ColorRect(r, ref _selectedColor),
-                            new StyleOverride { flexGrow = 1f });
-                        widgetBuilder.Item(r => ColorUtility.HueSlider(r, ref _selectedColor),
-                            new StyleOverride { width = 16f });
-                    }, new StyleOverride { width = 200f, height = 200f, gap = Void.Taffy.Gap(GenUI.GapSmall)});
+                        leftBuilder.Div(widgetBuilder =>
+                        {
+                            widgetBuilder.Item(r => ColorUtility.ColorRect(r, ref _selectedColor),
+                                new StyleOverride { flexGrow = 1f });
+                            widgetBuilder.Item(r => ColorUtility.HueSlider(r, ref _selectedColor),
+                                new StyleOverride { width = 16f });
+                        }, new StyleOverride { width = 200f, height = 200f, gap = Void.Taffy.Gap(GenUI.GapSmall) });
 
-                    // HSL inputs row
-                    ColorUtility.ColorToHSL(_selectedColor, out var fh, out var fs, out var fl);
-                    var hInt = Mathf.RoundToInt(fh * 360f);
-                    var sInt = Mathf.RoundToInt(fs * 100f);
-                    var lInt = Mathf.RoundToInt(fl * 100f);
-                    leftBuilder.Div(hslBuilder =>
-                    {
-                        hslBuilder.Text("H", GameFont.Tiny, TextAnchor.MiddleCenter);
-                        hslBuilder.Text("S", GameFont.Tiny, TextAnchor.MiddleCenter);
-                        hslBuilder.Text("L", GameFont.Tiny, TextAnchor.MiddleCenter);
-                        hslBuilder.InputNumber(ref hInt, 0, 360, id: "color_h",
-                            style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
-                        hslBuilder.InputNumber(ref sInt, 0, 100, id: "color_s",
-                            style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
-                        hslBuilder.InputNumber(ref lInt, 0, 100, id: "color_l",
-                            style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
-                    }, new StyleOverride
-                    {
-                        display = Display.Grid,
-                        gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(), Void.Taffy.Fr()],
-                        gap = Void.Taffy.Gap(4f, 0f),
-                        justifyItems = AlignItems.Stretch,
-                    });
-                    _selectedColor = ColorUtility.HSLToColor(hInt / 360f, sInt / 100f, lInt / 100f);
-                }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(0f, 4f), width = 200f });
+                        // HSL inputs row
+                        ColorUtility.ColorToHSL(_selectedColor, out var fh, out var fs, out var fl);
+                        var hInt = Mathf.RoundToInt(fh * 360f);
+                        var sInt = Mathf.RoundToInt(fs * 100f);
+                        var lInt = Mathf.RoundToInt(fl * 100f);
+                        leftBuilder.Div(hslBuilder =>
+                        {
+                            hslBuilder.Text("H", GameFont.Tiny, TextAnchor.MiddleCenter);
+                            hslBuilder.Text("S", GameFont.Tiny, TextAnchor.MiddleCenter);
+                            hslBuilder.Text("L", GameFont.Tiny, TextAnchor.MiddleCenter);
+                            hslBuilder.InputNumber(ref hInt, 0, 360, id: "color_h",
+                                style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
+                            hslBuilder.InputNumber(ref sInt, 0, 100, id: "color_s",
+                                style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
+                            hslBuilder.InputNumber(ref lInt, 0, 100, id: "color_l",
+                                style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
+                        }, new StyleOverride
+                        {
+                            display = Display.Grid,
+                            gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(), Void.Taffy.Fr()],
+                            gap = Void.Taffy.Gap(4f, 0f),
+                            justifyItems = AlignItems.Stretch
+                        });
+                        _selectedColor = ColorUtility.HSLToColor(hInt / 360f, sInt / 100f, lInt / 100f);
+                    },
+                    new StyleOverride
+                        { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(0f, 4f), width = 200f });
                 contentBuilder.Div(rightBuilder =>
                     {
                         rightBuilder.Div(paletteBuilder =>
                             {
                                 foreach (var c in _colors)
-                                {
                                     paletteBuilder.Item(r =>
                                         {
                                             if (Verse.Widgets.ButtonInvisible(r)) _selectedColor = c;
-                                            if (!ColorUtility.ApproximatelyEqual(_selectedColor, c)) Verse.Widgets.DrawLightHighlight(r);
+                                            if (!ColorUtility.ApproximatelyEqual(_selectedColor, c))
+                                                Verse.Widgets.DrawLightHighlight(r);
                                             else Verse.Widgets.DrawRectFast(r, Color.white);
                                             Verse.Widgets.DrawRectFast(r.ContractedBy(GenUI.GapTiny), c);
                                         },
                                         new StyleOverride
                                             { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize });
-                                }
                             },
                             new StyleOverride
                             {

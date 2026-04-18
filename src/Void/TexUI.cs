@@ -17,7 +17,8 @@ public static class TexUI
     private static Texture2D LoadResource(string resourceName)
     {
         var asm = Assembly.GetExecutingAssembly();
-        using var stream = asm.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException("Could not find embedded resource: " + resourceName);
+        using var stream = asm.GetManifestResourceStream(resourceName) ??
+                           throw new FileNotFoundException("Could not find embedded resource: " + resourceName);
         var bytes = new byte[stream.Length];
         stream.Read(bytes, 0, bytes.Length);
         var tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);

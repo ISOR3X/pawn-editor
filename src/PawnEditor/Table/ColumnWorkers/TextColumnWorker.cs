@@ -20,8 +20,10 @@ public class TextColumnWorker<T>(
     protected override string? HeaderTip => headerTip;
 
     public override int Compare(T a, T b)
-        => string.Compare(getText(a), getText(b), StringComparison.CurrentCultureIgnoreCase);
-    
+    {
+        return string.Compare(getText(a), getText(b), StringComparison.CurrentCultureIgnoreCase);
+    }
+
     public override void DrawCell(TaffyBuilder grid, T row)
     {
         grid.Text(getText(row), color: color.GetValueOrDefault(Color.white), wrap: false,
