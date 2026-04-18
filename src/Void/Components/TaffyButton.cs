@@ -53,7 +53,7 @@ public static partial class TaffyExtensions
 
         // By default, the button is fixed size. Setting it to block makes it width: 100%.
         // This is inspired by the API for https://ui.nuxt.com/docs/components/button
-        var resolvedStyle = (style ?? new StyleOverride()).Merge(block
+        var mergedStyle = (style ?? new StyleOverride()).Merge(block
             ? new StyleOverride
             {
                 width = Dimension.Percent(1f),
@@ -63,7 +63,7 @@ public static partial class TaffyExtensions
             {
                 width = totalW,
                 height = height
-            }).Resolve();
+            });
 
         // Capture for closure.
         var capturedLabel = label;
@@ -72,7 +72,7 @@ public static partial class TaffyExtensions
         var capturedLabelW = labelW;
         var capturedPaddingInline = paddingInline;
 
-        b.AddLeaf(resolvedStyle, r =>
+        b.Item(r =>
         {
             var clicked = Verse.Widgets.ButtonInvisible(r);
             if (drawGraphic) Verse.Widgets.DrawButtonGraphic(r);
@@ -114,6 +114,6 @@ public static partial class TaffyExtensions
                     onHover(r);
 
             if (clicked) onClick?.Invoke(r);
-        });
+        }, mergedStyle);
     }
 }

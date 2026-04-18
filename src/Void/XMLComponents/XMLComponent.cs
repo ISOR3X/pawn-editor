@@ -5,7 +5,7 @@ namespace Void.XMLComponents;
 
 /// <summary>
 /// Base class for all XML-driven UI elements. XML props are set at parse time; C# overrides
-/// any field per-frame via <see cref="UILayout.ComponentById{T}"/>. Each subclass owns its
+/// any field per-frame via <see cref="Layout.ComponentById{T}"/>. Each subclass owns its
 /// rendering logic via <see cref="Render"/>.
 /// </summary>
 public abstract class XMLComponent
@@ -28,7 +28,7 @@ public abstract class XMLComponent
     public virtual bool IsLeaf => false;
 
     /// <summary>
-    /// Called by <see cref="UILayout"/> before each <see cref="Render"/>. Override to extract
+    /// Called by <see cref="Layout"/> before each <see cref="Render"/>. Override to extract
     /// the frame-scoped context (e.g. <c>(context as IContext&lt;Pawn&gt;)?.Value</c>).
     /// No-op by default.
     /// </summary>

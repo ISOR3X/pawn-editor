@@ -23,11 +23,11 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         string adulthoodLabel = "Adulthood".Translate();
 
         builder.Text("Backstory", color: ColoredText.TipSectionTitleColor);
-        builder.Div(new Style { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap }, row =>
+        builder.Div(row =>
         {
             DoBackstoryItem(row, pawn, BackstorySlot.Childhood, childhoodLabel);
             DoBackstoryItem(row, pawn, BackstorySlot.Adulthood, adulthoodLabel);
-        });
+        }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap });
     }
 
     private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
@@ -101,7 +101,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                             Find.WindowStack.WindowOfType<Window_Editor>(),
                             selectedItemSlot: (b, i) =>
                             {
-                                b.Div(style: new Style { display = Display.Block }, b2 =>
+                                b.Div(b2 =>
                                 {
                                     var newBackstory = i != null
                                         ? i.TitleCapFor(pawn.gender)
@@ -112,7 +112,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                                     b2.Text($"Current: {currentBackstory.TitleCapFor(pawn.gender)}".Colorize(ColoredText
                                         .SubtleGrayColor));
                                     b2.Text($"New: {newBackstory}");
-                                });
+                                }, new StyleOverride { display = Display.Block });
                             }));
                     }
                     else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);

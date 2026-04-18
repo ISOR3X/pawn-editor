@@ -12,7 +12,7 @@ namespace Taffy
     /// All dimension types (<see cref="LengthPercentage"/>, <see cref="LengthPercentageAuto"/>,
     /// <see cref="Dimension"/>) are thin wrappers around this type.
     /// </summary>
-    public readonly struct CompactLength : System.IEquatable<CompactLength>
+    public readonly struct CompactLength : IEquatable<CompactLength>
     {
         // Tag constants mirror the Rust source exactly (for cross-reference ease).
         public const byte LENGTH_TAG = 0b0000_0001; // 1
@@ -126,7 +126,7 @@ namespace Taffy
 
         public bool Equals(CompactLength other) => _tag == other._tag && _value == other._value;
         public override bool Equals(object? obj) => obj is CompactLength other && Equals(other);
-        public override int GetHashCode() => System.HashCode.Combine(_tag, _value);
+        public override int GetHashCode() => HashCode.Combine(_tag, _value);
         public static bool operator ==(CompactLength a, CompactLength b) => a.Equals(b);
         public static bool operator !=(CompactLength a, CompactLength b) => !a.Equals(b);
 

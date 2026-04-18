@@ -26,21 +26,21 @@ public static partial class TaffyExtensions
     {
         var iconSize = ResolveIconSize(size);
 
-        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
+        var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = iconSize,
             height = iconSize,
             alignSelf = AlignItems.Center
-        }).Resolve();
+        });
 
         // Capture for closure.
         var capturedIcon = icon;
         var capturedColor = iconColor;
 
-        b.AddLeaf(resolvedStyle, r =>
+        b.Item(r =>
         {
             using (new GUIColor(capturedColor ?? Color.white))
                 GUI.DrawTexture(r, capturedIcon);
-        });
+        }, mergedStyle);
     }
 }

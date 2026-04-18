@@ -1,7 +1,9 @@
 ﻿using HotSwap;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
@@ -22,7 +24,7 @@ public abstract class SectionWorker(SectionDef def)
     /// Override this to configure named elements in the section's XML layout per-frame.
     /// Called by <see cref="BuildSection"/> when <see cref="SectionDef.layout"/> is set.
     /// </summary>
-    public virtual void OnLayout(UILayout layout, Pawn pawn) { }
+    public virtual void OnLayout(Layout layout, Pawn pawn) { }
 
     /// <summary>
     /// Adds this section's content into <paramref name="builder"/>.
@@ -34,7 +36,7 @@ public abstract class SectionWorker(SectionDef def)
         builder.ContextKey = pawn.thingIDNumber.ToString();
         if (Def.layout != null)
         {
-            var layout = new UILayout(Def.layout, new PawnContext(pawn));
+            var layout = new Layout(Def.layout, new PawnContext(pawn));
             OnLayout(layout, pawn);
             layout.Render(builder, tabStyle);
         }
@@ -51,7 +53,7 @@ public abstract class SectionWorker(SectionDef def)
     public float DoSection(Pawn pawn, Rect inRect)
     {
         if (!ShowSection(pawn)) return 0f;
-        return Void.Taffy.MeasuredColumn(inRect, col => BuildSection(col, pawn));
+        return Void.Taffy.DivMeasured(inRect, col => BuildSection(col, pawn), new StyleOverride { flexDirection = FlexDirection.Column });
     }
 
 

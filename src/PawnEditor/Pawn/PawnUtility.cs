@@ -67,7 +67,7 @@ public static class PawnUtility
     public static void TeleportTo(Pawn fromPawn, Pawn toPawn)
     {
         var location = toPawn.GetLocation();
-        if (PawnEditorMod.Settings.spawnNear)
+        if (PawnEditorMod.PawnEditorSettings.spawnNear)
         {
             TeleportTo(fromPawn, location, toPawn.Position);
             return;

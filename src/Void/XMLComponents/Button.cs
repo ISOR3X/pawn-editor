@@ -25,7 +25,7 @@ public class ButtonElement : XMLComponent
     {
         // Resolve icon name lazily — UIIcons accesses textures which aren't loaded at def-load time.
         if (Icon == null && IconName != null)
-            Icon = UIIcons.Resolve(IconName);
+            Icon = IconRegistry.Resolve(IconName);
         builder.Button(Label, Icon, onClick: OnClick, onHover: OnHover, style: Style);
     }
 }

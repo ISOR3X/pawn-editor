@@ -28,17 +28,13 @@ namespace PawnEditor;
 [HotSwappable]
 public class Tab
 {
-    private StyleOverride _style = new();
-
+    /// <summary>The style of this node, used as the Taffy root style when this is the root layout node.</summary>
+    public StyleOverride Style { get; private set; } = new();
+    
     public SectionDef? section; // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
     private readonly List<Tab> _children = [];
     private Func<bool> _isActive = static () => true;
 
-    /// <summary>The style of this node, used as the Taffy root style when this is the root layout node.</summary>
-    public StyleOverride RootStyle => _style;
-
-    /// <summary>The style of this node as a tab-section style to pass into <see cref="SectionWorker.BuildSection"/>.</summary>
-    internal StyleOverride NodeStyle => _style;
 
 
     #region XML LOADING
@@ -55,8 +51,8 @@ public class Tab
         // Root <layout> defaults to a wrapping flex row with small gap.
         if (xmlNode.Name == "layout")
         {
-            _style.gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall);
-            _style.flexWrap = FlexWrap.Wrap;
+            Style.gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall);
+            Style.flexWrap = FlexWrap.Wrap;
         }
 
         ParseStyleAttributes(xmlNode);
@@ -98,11 +94,11 @@ public class Tab
             if (attr.Name is "style")
             {
                 var parsed = TaffyStyleParser.ParseInlineStyle(attr.Value);
-                _style = parsed.Merge(_style); // inline wins over any previously set values
+                Style = parsed.Merge(Style); // inline wins over any previously set values
                 continue;
             }
 
-            TaffyStyleParser.ApplyProperty(attr.Name, attr.Value, _style);
+            TaffyStyleParser.ApplyProperty(attr.Name, attr.Value, Style);
         }
     }
 
@@ -113,7 +109,7 @@ public class Tab
     /// <summary>
     /// Adds this layout tree's children directly into <paramref name="col"/>, without wrapping in a
     /// root container. The root node's style should be passed as the root style of the enclosing
-    /// <see cref="Taffy.DivMeasured"/> call (via <see cref="RootStyle"/>).
+    /// <see cref="Taffy.DivMeasured"/> call (via <see cref="Style"/>).
     /// Section XML nodes become flex-column containers whose items are populated by
     /// <see cref="SectionWorker.DoSectionContents"/>.
     /// </summary>
@@ -134,11 +130,11 @@ public class Tab
         {
             // Thread the tab-provided style into BuildSection so it can be merged onto the
             // section's root node (UILayout sections) or used as a wrapper (legacy sections).
-            node.section.Worker.BuildSection(col, pawn, node.NodeStyle);
+            node.section.Worker.BuildSection(col, pawn, node.Style);
             return;
         }
 
-        col.Container(node._style.Resolve(), inner =>
+        col.Div(inner =>
         {
             foreach (var child in node._children)
             {
@@ -146,7 +142,7 @@ public class Tab
                 if (!child.HasVisibleContent(isVisible)) continue;
                 BuildNode(inner, child, pawn, isVisible);
             }
-        });
+        }, node.Style );
     }
 
     private bool HasVisibleContent(Func<SectionDef, bool>? isVisible)

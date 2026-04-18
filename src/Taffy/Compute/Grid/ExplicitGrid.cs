@@ -29,7 +29,7 @@ namespace Taffy
             TrackCounts counts,
             Style style,
             AbsoluteAxis axis,
-            System.Func<int, bool> trackHasItems)
+            Func<int, bool> trackHasItems)
         {
             var template = axis == AbsoluteAxis.Horizontal
                 ? style.gridTemplateColumns

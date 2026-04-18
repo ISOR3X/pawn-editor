@@ -33,7 +33,7 @@ public static class PawnLister
 
             var availablePawns = PawnsFinder.All_AliveOrDead
                 .Where(p => !(p.IsWorldPawn() && Find.WorldPawns.GetSituation(p) == WorldPawnSituation.Dead) ||
-                            !PawnEditorMod.Settings.hideDeadWorldPawns);
+                            !PawnEditorMod.PawnEditorSettings.hideDeadWorldPawns);
 
             PawnsByFactionTemporary.Clear();
 

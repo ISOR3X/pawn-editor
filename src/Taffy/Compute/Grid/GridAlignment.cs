@@ -276,7 +276,7 @@ namespace Taffy
                 overflow.Y == Overflow.Scroll ? scrollbarWidth : 0f,
                 overflow.X == Overflow.Scroll ? scrollbarWidth : 0f);
 
-            var finalLayout = Taffy.Layout.New();
+            var finalLayout = Layout.New();
             finalLayout.Order         = order;
             finalLayout.Location      = new Point<float>(x, y);
             finalLayout.Size          = new Size<float>(finalWidth, finalHeight);

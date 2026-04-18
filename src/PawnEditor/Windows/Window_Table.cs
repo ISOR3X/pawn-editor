@@ -1,7 +1,7 @@
 using HotSwap;
 using PawnEditor.Table;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -37,34 +37,35 @@ public class Window_Table<T> : OwnedWindow
         Void.Taffy.Div(inRect,
             builder =>
             {
-                builder.Div(new Style { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) }, builder2 =>
+                builder.Div(builder2 =>
                 {
                     if (_table.Filters.Count > 0)
                     {
                         builder2.Div(
-                            new Style
-                            {
-                                size = new Size<Dimension>(200f, Dimension.AUTO), flexDirection = FlexDirection.Column,
-                            }, build: builder3 =>
+                            builder3 =>
                             {
                                 foreach (var filter in _table.Filters)
                                 {
                                     filter.DrawFilter(builder3, _table);
                                 }
+                            }, new StyleOverride
+                            {
+                                width = 200f, flexDirection = FlexDirection.Column,
                             });
                     }
 
                     builder2.Item(_table.Draw, new StyleOverride { flexGrow = 1f });
-                });
+                }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });
                 if (_selectedItemSlot != null || _onAdd != null)
                     builder.Div(
-                        new Style { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center },
                         builder4 =>
                         {
                             _selectedItemSlot?.Invoke(builder4, _table.SelectedItem);
                             builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.SelectedItem),
                                 size: UIUtility.ComponentSize.Large);
-                        });
+                        },
+                        new StyleOverride
+                            { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center });
             }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(GenUI.GapSmall) });
     }
 }

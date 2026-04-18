@@ -5,8 +5,8 @@ using Void.XMLComponents;
 namespace Void;
 
 /// <summary>
-/// Parses a layout XML tag (<see cref="XmlNode"/>) into a <see cref="UILayoutNode"/> tree.
-/// Called from <see cref="UILayoutNode.LoadDataFromXmlCustom"/>.
+/// Parses a layout XML tag (<see cref="XmlNode"/>) into a <see cref="ParsedLayout"/> tree.
+/// Called from <see cref="ParsedLayout.LoadDataFromXmlCustom"/>.
 /// <para>
 /// Custom tags can be registered via <see cref="RegisterTag"/> before def loading begins
 /// (e.g. from a <c>Mod</c> constructor). Unknown tags log a warning and are skipped.
@@ -18,7 +18,7 @@ public static class XMLLayoutParser
     // element creation and would be meaningless there.
     private static readonly HashSet<string> StructuralAttrs = ["id", "style", "class"];
 
-    private static readonly Dictionary<string, Func<XMLComponent>> _registry = new()
+    private static readonly Dictionary<string, Func<XMLComponent>> Registry = new()
     {
         ["button"] = () => new ButtonElement(),
         ["text"]   = () => new TextElement(),
@@ -31,20 +31,20 @@ public static class XMLLayoutParser
     /// Call during mod startup (e.g. from a <c>Mod</c> constructor) before any layouts are parsed.
     /// </summary>
     public static void RegisterTag(string tagName, Func<XMLComponent> factory)
-        => _registry[tagName] = factory;
+        => Registry[tagName] = factory;
 
-    public static void Parse(XmlNode xmlNode, UILayoutNode target)
+    public static void Parse(XmlNode xmlNode, ParsedLayout target)
     {
         target.Tag = xmlNode.Name;
         target.Id = xmlNode.Attributes?["id"]?.Value;
 
-        if (!_registry.TryGetValue(xmlNode.Name, out var factory))
+        if (!Registry.TryGetValue(xmlNode.Name, out var factory))
         {
             Log.Warning($"[{VoidMod.ModName}] Unknown layout tag <{xmlNode.Name}>, skipping.");
             return;
         }
 
-        XMLComponent element = factory();
+        var element = factory();
 
         // Each element reads its own typed attributes (label, icon, color, etc.).
         element.ParseXmlAttrs(xmlNode);
@@ -85,7 +85,7 @@ public static class XMLLayoutParser
                 if (child is XmlComment) continue;
                 if (child is XmlText txt && txt.Value?.Trim().Length == 0) continue;
 
-                var childNode = new UILayoutNode();
+                var childNode = new ParsedLayout();
                 childNode.LoadDataFromXmlCustom(child);
                 // If Parse returned early (unknown tag), Props is default DivElement — skip.
                 if (childNode.Tag == child.Name)

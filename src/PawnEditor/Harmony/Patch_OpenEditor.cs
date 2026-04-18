@@ -19,7 +19,7 @@ public class Patch_OpenEditor
         {
             if (Current.ProgramState == ProgramState.Playing)
             {
-                PawnEditorMod.Settings.drawDebug = !PawnEditorMod.Settings.drawDebug;
+                PawnEditorMod.PawnEditorSettings.drawDebug = !PawnEditorMod.PawnEditorSettings.drawDebug;
             }
         }
     }

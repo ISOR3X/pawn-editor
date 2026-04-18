@@ -405,7 +405,7 @@ namespace Taffy
                     // Process the hidden subtree first (sets all descendants to zero layout),
                     // then override this node's order with the correct value.
                     tree.PerformLayout(child, LayoutInput.Hidden);
-                    tree.SetNodeLayout(child, Taffy.Layout.WithOrder(order));
+                    tree.SetNodeLayout(child, Layout.WithOrder(order));
                     order++;
                     continue;
                 }
