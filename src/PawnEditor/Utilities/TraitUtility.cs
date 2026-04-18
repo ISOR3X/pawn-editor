@@ -15,8 +15,8 @@ public static class TraitUtility
     }
 
     /// <summary>
-    /// TraitDefs hold multiple trait definitions
-    /// Class instead of struct to make it nullable.
+    ///     TraitDefs hold multiple trait definitions
+    ///     Class instead of struct to make it nullable.
     /// </summary>
     public record TraitRecord(TraitDef TraitDef, TraitDegreeData Degree)
     {

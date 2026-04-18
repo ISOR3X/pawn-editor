@@ -21,6 +21,6 @@ public class SectionWorker_HairColor(SectionDef def) : SectionWorker(def)
                 c => AppearanceUtility.TrySetHairColor(c, pawn), out _hairColorHeight);
             AppearanceUtility.TrySetHairColor(color, pawn);
             listing.End();
-        }, new StyleOverride { height =  Text.LineHeight + _hairColorHeight,});
+        }, new StyleOverride { height = Text.LineHeight + _hairColorHeight });
     }
 }

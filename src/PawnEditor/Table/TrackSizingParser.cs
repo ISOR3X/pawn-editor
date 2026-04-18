@@ -6,13 +6,13 @@ namespace PawnEditor.Table;
 public static class TrackSizingParser
 {
     /// <summary>
-    /// Parses a CSS Grid track-sizing string into a <see cref="TrackSizingFunction"/>.
-    /// Supported forms:
-    /// <list type="bullet">
-    ///   <item><c>Nfr</c> — fractional unit, e.g. <c>1fr</c>, <c>0.5fr</c></item>
-    ///   <item><c>Npx</c> — fixed pixels, e.g. <c>24px</c></item>
-    ///   <item><c>auto</c> — automatic sizing</item>
-    /// </list>
+    ///     Parses a CSS Grid track-sizing string into a <see cref="TrackSizingFunction" />.
+    ///     Supported forms:
+    ///     <list type="bullet">
+    ///         <item><c>Nfr</c> — fractional unit, e.g. <c>1fr</c>, <c>0.5fr</c></item>
+    ///         <item><c>Npx</c> — fixed pixels, e.g. <c>24px</c></item>
+    ///         <item><c>auto</c> — automatic sizing</item>
+    ///     </list>
     /// </summary>
     public static TrackSizingFunction Parse(string value)
     {

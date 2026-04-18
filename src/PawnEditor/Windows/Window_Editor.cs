@@ -1,6 +1,6 @@
 ﻿using HotSwap;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -13,6 +13,22 @@ namespace PawnEditor;
 [HotSwappable]
 public partial class Window_Editor : Window
 {
+    private void DoLeftSection(Rect inRect)
+    {
+        var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
+        Void.Taffy.Div(inRect, builder =>
+        {
+            builder.Text("Selected faction", GameFont.Tiny);
+            builder.Button(label, tex, c, block: true,
+                onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
+            builder.Item(rect =>
+            {
+                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
+            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
+        }, new StyleOverride { flexDirection = FlexDirection.Column });
+    }
+
     #region Fields
 
     // Pawn-related fields
@@ -121,20 +137,4 @@ public partial class Window_Editor : Window
     }
 
     #endregion
-
-    private void DoLeftSection(Rect inRect)
-    {
-        var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-        Void.Taffy.Div(inRect, builder =>
-        {
-            builder.Text("Selected faction", font: GameFont.Tiny);
-            builder.Button(label, icon: tex, iconColor: c, block: true,
-                onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
-            builder.Item(rect =>
-            {
-                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
-                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
-            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
-        }, new StyleOverride { flexDirection = FlexDirection.Column });
-    }
 }

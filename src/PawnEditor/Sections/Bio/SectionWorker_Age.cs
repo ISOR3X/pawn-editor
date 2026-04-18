@@ -1,6 +1,6 @@
 using HotSwap;
-using Taffy;
 using RimWorld;
+using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -15,8 +15,8 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
         builder.Text("Age", color: ColoredText.TipSectionTitleColor);
         builder.Div(row =>
         {
-            DoAgeItem(row, pawn, "Biological", isChrono: false);
-            DoAgeItem(row, pawn, "Chronological", isChrono: true);
+            DoAgeItem(row, pawn, "Biological", false);
+            DoAgeItem(row, pawn, "Chronological", true);
         }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap });
     }
 
@@ -28,7 +28,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
         col.Div(row =>
         {
             row.Text(label);
-            row.InputNumber(ref value, min: min, max: 9999, id: label);
+            row.InputNumber(ref value, min, 9999, id: label);
         }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapLabel) });
 
         if (isChrono)

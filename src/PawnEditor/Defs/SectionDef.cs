@@ -8,14 +8,15 @@ namespace PawnEditor;
 public class SectionDef : Def
 {
     private readonly Type workerClass = typeof(SectionWorker);
-    public PawnUtility.PawnCategory sectionCategory = PawnUtility.PawnCategory.All;
 
     /// <summary>
-    /// Optional XML-driven layout for this section. When set, <see cref="SectionWorker.DoSectionContents"/>
-    /// in the base class will build the UI from this tree via <see cref="Layout"/>.
-    /// Workers that provide their own <see cref="SectionWorker.DoSectionContents"/> override ignore this field.
+    ///     Optional XML-driven layout for this section. When set, <see cref="SectionWorker.DoSectionContents" />
+    ///     in the base class will build the UI from this tree via <see cref="Layout" />.
+    ///     Workers that provide their own <see cref="SectionWorker.DoSectionContents" /> override ignore this field.
     /// </summary>
     public ParsedLayout? layout;
+
+    public PawnUtility.PawnCategory sectionCategory = PawnUtility.PawnCategory.All;
 
     [field: Unsaved]
     public SectionWorker Worker

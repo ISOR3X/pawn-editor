@@ -28,13 +28,13 @@ namespace PawnEditor;
 [HotSwappable]
 public class Tab
 {
-    /// <summary>The style of this node, used as the Taffy root style when this is the root layout node.</summary>
-    public StyleOverride Style { get; private set; } = new();
-    
-    public SectionDef? section; // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
     private readonly List<Tab> _children = [];
     private Func<bool> _isActive = static () => true;
 
+    public SectionDef? section; // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
+
+    /// <summary>The style of this node, used as the Taffy root style when this is the root layout node.</summary>
+    public StyleOverride Style { get; private set; } = new();
 
 
     #region XML LOADING
@@ -107,11 +107,11 @@ public class Tab
     #region DRAW / BUILDINTO
 
     /// <summary>
-    /// Adds this layout tree's children directly into <paramref name="col"/>, without wrapping in a
-    /// root container. The root node's style should be passed as the root style of the enclosing
-    /// <see cref="Taffy.DivMeasured"/> call (via <see cref="Style"/>).
-    /// Section XML nodes become flex-column containers whose items are populated by
-    /// <see cref="SectionWorker.DoSectionContents"/>.
+    ///     Adds this layout tree's children directly into <paramref name="col" />, without wrapping in a
+    ///     root container. The root node's style should be passed as the root style of the enclosing
+    ///     <see cref="Taffy.DivMeasured" /> call (via <see cref="Style" />).
+    ///     Section XML nodes become flex-column containers whose items are populated by
+    ///     <see cref="SectionWorker.DoSectionContents" />.
     /// </summary>
     public void BuildChildrenInto(TaffyBuilder col, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
     {
@@ -142,7 +142,7 @@ public class Tab
                 if (!child.HasVisibleContent(isVisible)) continue;
                 BuildNode(inner, child, pawn, isVisible);
             }
-        }, node.Style );
+        }, node.Style);
     }
 
     private bool HasVisibleContent(Func<SectionDef, bool>? isVisible)

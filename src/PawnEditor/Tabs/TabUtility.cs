@@ -15,8 +15,9 @@ public static class TabUtility
         }
     } = [];
 
-    public static List<TabDef> GetTabDefsFor(IContext? context) =>
-        AllTabDefs
+    public static List<TabDef> GetTabDefsFor(IContext? context)
+    {
+        return AllTabDefs
             .Where(def =>
             {
                 var required = def.Worker.RequiredContextType;
@@ -27,7 +28,8 @@ public static class TabUtility
             })
             // Pawn workers additionally filter by pawn category (Humanlike, Animal, etc.).
             .Where(def => context is not PawnContext pc
-                || def.tabCategory.HasFlag(PawnUtility.GetPawnCategory(pc.Value)))
+                          || def.tabCategory.HasFlag(PawnUtility.GetPawnCategory(pc.Value)))
             .OrderBy(def => def.priority)
             .ToList();
+    }
 }

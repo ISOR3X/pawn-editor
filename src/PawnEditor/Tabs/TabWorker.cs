@@ -7,9 +7,9 @@ namespace PawnEditor;
 public abstract class TabWorker(TabDef def)
 {
     public readonly List<FloatMenuOption> quickActions = [];
-    public TabDef Def = def;
     private Vector2 _tabScrollPosition = Vector2.zero;
     private float _viewRectHeight = 5000f;
+    public TabDef Def = def;
 
     /// <summary>The context type this worker requires, or null for context-free workers.</summary>
     public virtual Type? RequiredContextType => null;
@@ -43,8 +43,8 @@ public abstract class TabWorker(TabDef def)
 }
 
 /// <summary>
-/// Typed TabWorker that receives a strongly-typed context. Only renders when the context
-/// matches <typeparamref name="TContext"/>; silently no-ops otherwise.
+///     Typed TabWorker that receives a strongly-typed context. Only renders when the context
+///     matches <typeparamref name="TContext" />; silently no-ops otherwise.
 /// </summary>
 public abstract class TabWorker<TContext>(TabDef def) : TabWorker(def)
     where TContext : class, IContext

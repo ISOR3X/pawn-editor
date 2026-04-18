@@ -13,9 +13,9 @@ namespace PawnEditor;
 [HotSwappable]
 public class Window_Table<T> : OwnedWindow
 {
-    private readonly Table<T> _table;
     private readonly Action<T?>? _onAdd;
     private readonly Action<TaffyBuilder, T?>? _selectedItemSlot;
+    private readonly Table<T> _table;
 
     public Window_Table(Table<T> table, Window? owner = null,
         Action<T?>? onAdd = null, Action<TaffyBuilder, T?>? selectedItemSlot = null
@@ -40,19 +40,14 @@ public class Window_Table<T> : OwnedWindow
                 builder.Div(builder2 =>
                 {
                     if (_table.Filters.Count > 0)
-                    {
                         builder2.Div(
                             builder3 =>
                             {
-                                foreach (var filter in _table.Filters)
-                                {
-                                    filter.DrawFilter(builder3, _table);
-                                }
+                                foreach (var filter in _table.Filters) filter.DrawFilter(builder3, _table);
                             }, new StyleOverride
                             {
-                                width = 200f, flexDirection = FlexDirection.Column,
+                                width = 200f, flexDirection = FlexDirection.Column
                             });
-                    }
 
                     builder2.Item(_table.Draw, new StyleOverride { flexGrow = 1f });
                 }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });

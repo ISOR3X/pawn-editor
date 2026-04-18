@@ -26,6 +26,6 @@ public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
                 pawn.story.headType, d => AppearanceUtility.SetHeadType(d, capturedPawn),
                 d => d.GetGraphic(capturedPawn, capturedPawn.story.SkinColor).MatSouth.mainTexture,
                 pawn.story.SkinColor, d => d.ReadableDefName());
-        }, new StyleOverride { height =  Widgets.CarrouselCellHeight + UIUtility.ButtonHeight});
+        }, new StyleOverride { height = Widgets.CarrouselCellHeight + UIUtility.ButtonHeight });
     }
 }

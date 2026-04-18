@@ -1,7 +1,8 @@
-namespace System.Runtime.CompilerServices
+namespace System.Runtime.CompilerServices;
+
+/// <summary>
+///     Used to initialize readonly fields.
+/// </summary>
+public sealed class IsExternalInit
 {
-    /// <summary>
-    /// Used to initialize readonly fields.
-    /// </summary>
-    public sealed class IsExternalInit { }
 }

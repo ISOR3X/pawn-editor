@@ -2,7 +2,6 @@
 using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
-using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -12,11 +11,11 @@ namespace PawnEditor;
 [HotSwappable]
 public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(def) where T : Thing
 {
-    protected abstract Func<Pawn, List<T>> TableItems { get; }
-    protected abstract string TableTitle { get; }
+    private Pawn? _cachedPawn;
 
     private Table<T>? _cachedTable;
-    private Pawn? _cachedPawn;
+    protected abstract Func<Pawn, List<T>> TableItems { get; }
+    protected abstract string TableTitle { get; }
 
     private Table<T> GetCachedTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
     {
@@ -32,8 +31,7 @@ public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(d
     private static Table<T> ConstructStyleItemTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
     {
         return new Table<T>(
-            rows: defs,
-            columns:
+            defs,
             [
                 ColumnWorker<T>.Create(
                     Void.Taffy.Px(GenUI.SmallIconSize),

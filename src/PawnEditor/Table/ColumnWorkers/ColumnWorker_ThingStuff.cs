@@ -10,19 +10,18 @@ public class ColumnWorker_ThingStuff<T>(TrackSizingFunction trackSize) : ColumnW
     protected override string HeaderLabel => "Stuff";
     public override TrackSizingFunction TrackSize => trackSize;
 
-    public override int Compare(T a, T b) =>
-        string.Compare(a.Stuff?.LabelCap, b.Stuff?.LabelCap, StringComparison.CurrentCultureIgnoreCase);
-
     public override bool Sortable => true;
+
+    public override int Compare(T a, T b)
+    {
+        return string.Compare(a.Stuff?.LabelCap, b.Stuff?.LabelCap, StringComparison.CurrentCultureIgnoreCase);
+    }
 
     public override void DrawCell(TaffyBuilder grid, T thing)
     {
         if (thing.def.stuffCategories == null || thing.Stuff == null)
-        {
             grid.Text("No stuff", color: ColoredText.SubtleGrayColor);
-        }
         else
-        {
             // Only a single child allowed per column.
             grid.Div(inner =>
             {
@@ -34,6 +33,5 @@ public class ColumnWorker_ThingStuff<T>(TrackSizingFunction trackSize) : ColumnW
                     });
                 inner.Text(thing.Stuff.LabelCap);
             });
-        }
     }
 }

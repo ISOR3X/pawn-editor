@@ -17,17 +17,17 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
     private static readonly int PassionMin;
     private static readonly int PassionMax;
 
+    private static readonly Vector2 SkillRectSize = new(230f, 24f); // REF: GenUI.DrawSkill(... Vector2)
+
+    private static readonly float LevelLabelWidth =
+        DefDatabase<SkillDef>.AllDefsListForReading.Max(s => s.skillLabel.GetWidthCached()) + GenUI.GapLabel;
+
     static SectionWorker_Skills()
     {
         var passions = (Passion[])Enum.GetValues(typeof(Passion));
         PassionMin = passions.Min(p => (int)p);
         PassionMax = passions.Max(p => (int)p);
     }
-
-    private static readonly Vector2 SkillRectSize = new(230f, 24f); // REF: GenUI.DrawSkill(... Vector2)
-
-    private static readonly float LevelLabelWidth =
-        DefDatabase<SkillDef>.AllDefsListForReading.Max(s => s.skillLabel.GetWidthCached()) + GenUI.GapLabel;
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
@@ -36,10 +36,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             col =>
             {
                 var skills = SkillUI.skillDefsInListOrderCached;
-                foreach (var skillDef in skills)
-                {
-                    DrawSkill(col, pawn, skillDef);
-                }
+                foreach (var skillDef in skills) DrawSkill(col, pawn, skillDef);
             },
             new StyleOverride
             {
@@ -67,7 +64,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                 row.Text(skillDef.LabelCap,
                     style: new StyleOverride { width = LevelLabelWidth });
                 row.Button(icon: GetTextureForPassion(pawn.skills.GetSkill(skillDef).passion), drawGraphic: false,
-                    style: new StyleOverride { width = 24f, height = 24f }, onClick: (_) => { newPassionLevel++; });
+                    style: new StyleOverride { width = 24f, height = 24f }, onClick: _ => { newPassionLevel++; });
                 row.Item(r =>
                 {
                     var r2 = r.TakeRightPart(r.height / 2f);
@@ -118,7 +115,9 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 
         using (new TextBlock(TextAnchor.MiddleLeft))
         using (new GUIColor(color))
+        {
             Verse.Widgets.Label(inRect, label);
+        }
     }
 
     private static Texture2D GetTextureForPassion(Passion passion)

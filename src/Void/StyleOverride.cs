@@ -3,78 +3,80 @@
 namespace Void;
 
 /// <summary>
-/// A near 1:1 copy of <see cref="Style"/>, but with each field nullable.
-/// This allows use to override each field when we want to, but resolve back to the default value in Style when unset.
-/// Fields irrelevant to the usage of Taffy in RimWorld are removed.
-///
-/// Documentation for each field can be read in <see cref="Style"/>
+///     A near 1:1 copy of <see cref="Style" />, but with each field nullable.
+///     This allows use to override each field when we want to, but resolve back to the default value in Style when unset.
+///     Fields irrelevant to the usage of Taffy in RimWorld are removed.
+///     Documentation for each field can be read in <see cref="Style" />
 /// </summary>
 public class StyleOverride
 {
-    public Display? display;
-    public Dimension? width;
-    public Dimension? height;
-    public Dimension? minWidth;
-    public Dimension? minHeight;
-    public Dimension? maxWidth;
-    public Dimension? maxHeight;
-    public Rect<LengthPercentageAuto>? margin;
-    public Rect<LengthPercentage>? padding;
+    public AlignContent? alignContent;
     public AlignItems? alignItems;
     public AlignItems? alignSelf;
-    public AlignItems? justifyItems;
-    public AlignItems? justifySelf;
-    public AlignContent? alignContent;
-    public AlignContent? justifyContent;
-    public Size<LengthPercentage>? gap;
-    public FlexDirection? flexDirection;
-    public FlexWrap? flexWrap;
+    public Display? display;
     public Dimension? flexBasis;
+    public FlexDirection? flexDirection;
     public float? flexGrow;
     public float? flexShrink;
-    public List<TrackSizingFunction>? gridTemplateColumns;
-    public List<TrackSizingFunction>? gridTemplateRows;
+    public FlexWrap? flexWrap;
+    public Size<LengthPercentage>? gap;
     public List<TrackSizingFunction>? gridAutoColumns;
-    public List<TrackSizingFunction>? gridAutoRows;
     public GridAutoFlow? gridAutoFlow;
+    public List<TrackSizingFunction>? gridAutoRows;
     public Line<GridPlacement>? gridColumn;
     public Line<GridPlacement>? gridRow;
+    public List<TrackSizingFunction>? gridTemplateColumns;
+    public List<TrackSizingFunction>? gridTemplateRows;
+    public Dimension? height;
+    public AlignContent? justifyContent;
+    public AlignItems? justifyItems;
+    public AlignItems? justifySelf;
+    public Rect<LengthPercentageAuto>? margin;
+    public Dimension? maxHeight;
+    public Dimension? maxWidth;
+    public Dimension? minHeight;
+    public Dimension? minWidth;
+    public Rect<LengthPercentage>? padding;
+    public Dimension? width;
 
     /// <summary>
-    /// Returns a new <see cref="StyleOverride"/> where each field is taken from this instance
-    /// when explicitly set (non-null), or from <paramref name="fallback"/> otherwise.
+    ///     Returns a new <see cref="StyleOverride" /> where each field is taken from this instance
+    ///     when explicitly set (non-null), or from <paramref name="fallback" /> otherwise.
     /// </summary>
-    public StyleOverride Merge(StyleOverride fallback) => new()
+    public StyleOverride Merge(StyleOverride fallback)
     {
-        display = display ?? fallback.display,
-        width = width ?? fallback.width,
-        height = height ?? fallback.height,
-        minWidth = minWidth ?? fallback.minWidth,
-        minHeight = minHeight ?? fallback.minHeight,
-        maxWidth = maxWidth ?? fallback.maxWidth,
-        maxHeight = maxHeight ?? fallback.maxHeight,
-        margin = margin ?? fallback.margin,
-        padding = padding ?? fallback.padding,
-        alignItems = alignItems ?? fallback.alignItems,
-        alignSelf = alignSelf ?? fallback.alignSelf,
-        justifyItems = justifyItems ?? fallback.justifyItems,
-        justifySelf = justifySelf ?? fallback.justifySelf,
-        alignContent = alignContent ?? fallback.alignContent,
-        justifyContent = justifyContent ?? fallback.justifyContent,
-        gap = gap ?? fallback.gap,
-        flexDirection = flexDirection ?? fallback.flexDirection,
-        flexWrap = flexWrap ?? fallback.flexWrap,
-        flexBasis = flexBasis ?? fallback.flexBasis,
-        flexGrow = flexGrow ?? fallback.flexGrow,
-        flexShrink = flexShrink ?? fallback.flexShrink,
-        gridTemplateColumns = gridTemplateColumns ?? fallback.gridTemplateColumns,
-        gridTemplateRows = gridTemplateRows ?? fallback.gridTemplateRows,
-        gridAutoColumns = gridAutoColumns ?? fallback.gridAutoColumns,
-        gridAutoRows = gridAutoRows ?? fallback.gridAutoRows,
-        gridAutoFlow = gridAutoFlow ?? fallback.gridAutoFlow,
-        gridColumn = gridColumn ?? fallback.gridColumn,
-        gridRow = gridRow ?? fallback.gridRow,
-    };
+        return new StyleOverride
+        {
+            display = display ?? fallback.display,
+            width = width ?? fallback.width,
+            height = height ?? fallback.height,
+            minWidth = minWidth ?? fallback.minWidth,
+            minHeight = minHeight ?? fallback.minHeight,
+            maxWidth = maxWidth ?? fallback.maxWidth,
+            maxHeight = maxHeight ?? fallback.maxHeight,
+            margin = margin ?? fallback.margin,
+            padding = padding ?? fallback.padding,
+            alignItems = alignItems ?? fallback.alignItems,
+            alignSelf = alignSelf ?? fallback.alignSelf,
+            justifyItems = justifyItems ?? fallback.justifyItems,
+            justifySelf = justifySelf ?? fallback.justifySelf,
+            alignContent = alignContent ?? fallback.alignContent,
+            justifyContent = justifyContent ?? fallback.justifyContent,
+            gap = gap ?? fallback.gap,
+            flexDirection = flexDirection ?? fallback.flexDirection,
+            flexWrap = flexWrap ?? fallback.flexWrap,
+            flexBasis = flexBasis ?? fallback.flexBasis,
+            flexGrow = flexGrow ?? fallback.flexGrow,
+            flexShrink = flexShrink ?? fallback.flexShrink,
+            gridTemplateColumns = gridTemplateColumns ?? fallback.gridTemplateColumns,
+            gridTemplateRows = gridTemplateRows ?? fallback.gridTemplateRows,
+            gridAutoColumns = gridAutoColumns ?? fallback.gridAutoColumns,
+            gridAutoRows = gridAutoRows ?? fallback.gridAutoRows,
+            gridAutoFlow = gridAutoFlow ?? fallback.gridAutoFlow,
+            gridColumn = gridColumn ?? fallback.gridColumn,
+            gridRow = gridRow ?? fallback.gridRow
+        };
+    }
 
     public Style Resolve()
     {
@@ -105,7 +107,7 @@ public class StyleOverride
             gridAutoRows = gridAutoRows ?? def.gridAutoRows,
             gridAutoFlow = gridAutoFlow ?? def.gridAutoFlow,
             gridColumn = gridColumn ?? def.gridColumn,
-            gridRow = gridRow ?? def.gridRow,
+            gridRow = gridRow ?? def.gridRow
         };
     }
 }

@@ -2,7 +2,6 @@ using PawnEditor.Table.ColumnWorkers;
 using Taffy;
 using UnityEngine;
 using Verse;
-using PawnEditor;
 using Void;
 
 namespace PawnEditor.Table;
@@ -14,14 +13,21 @@ public abstract class ColumnWorker<TRow>
     public virtual TrackSizingFunction TrackSize => TrackSizingFunction.Auto();
 
     public virtual bool Sortable => false;
-    public virtual int Compare(TRow a, TRow b) => 0;
+
+    public virtual int Compare(TRow a, TRow b)
+    {
+        return 0;
+    }
 
 
     public virtual void DrawHeader(Rect r)
     {
         if (HeaderLabel != null)
             using (new TextBlock(TextAnchor.MiddleLeft))
+            {
                 Verse.Widgets.Label(r, HeaderLabel);
+            }
+
         if (HeaderTip != null) TooltipHandler.TipRegion(r, (TipSignal)HeaderTip);
     }
 
@@ -35,7 +41,9 @@ public abstract class ColumnWorker<TRow>
         string? header = null,
         Func<TRow, TRow, int>? compare = null,
         string? headerTip = null)
-        => new DelegateColumn(trackSize, drawCell, header, compare, headerTip);
+    {
+        return new DelegateColumn(trackSize, drawCell, header, compare, headerTip);
+    }
 
     public static ColumnWorker<TRow> Create<TContext>(
         TrackSizingFunction trackSize,
@@ -44,11 +52,13 @@ public abstract class ColumnWorker<TRow>
         Func<TRow, TRow, int>? compare = null,
         string? headerTip = null)
         where TContext : IContext
-        => new DelegateContextColumn<TContext>(trackSize, drawCell, header, compare, headerTip);
+    {
+        return new DelegateContextColumn<TContext>(trackSize, drawCell, header, compare, headerTip);
+    }
 
     /// <summary>
-    /// Creates a sortable string column. The text projection is used both for rendering and
-    /// for case-insensitive alphabetical sorting.
+    ///     Creates a sortable string column. The text projection is used both for rendering and
+    ///     for case-insensitive alphabetical sorting.
     /// </summary>
     public static ColumnWorker<TRow> CreateText(
         TrackSizingFunction trackSize,
@@ -56,7 +66,9 @@ public abstract class ColumnWorker<TRow>
         string? header = null,
         Color? color = null,
         string? headerTip = null)
-        => new TextColumnWorker<TRow>(trackSize, getText, header, color, headerTip);
+    {
+        return new TextColumnWorker<TRow>(trackSize, getText, header, color, headerTip);
+    }
 
     #endregion
 
@@ -72,11 +84,19 @@ public abstract class ColumnWorker<TRow>
     {
         public override TrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
-        public override int Compare(TRow a, TRow b) => compare?.Invoke(a, b) ?? 0;
+
         protected override string? HeaderLabel => header;
         protected override string? HeaderTip => headerTip;
 
-        public override void DrawCell(TaffyBuilder grid, TRow row) => drawCell(grid, row);
+        public override int Compare(TRow a, TRow b)
+        {
+            return compare?.Invoke(a, b) ?? 0;
+        }
+
+        public override void DrawCell(TaffyBuilder grid, TRow row)
+        {
+            drawCell(grid, row);
+        }
     }
 
     private sealed class DelegateContextColumn<TContext>(
@@ -90,11 +110,19 @@ public abstract class ColumnWorker<TRow>
     {
         public override TrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
-        public override int Compare(TRow a, TRow b) => compare?.Invoke(a, b) ?? 0;
 
         protected override string? HeaderLabel => header;
         protected override string? HeaderTip => headerTip;
-        protected override void DrawCell(TaffyBuilder grid, TRow row, TContext ctx) => drawCell(grid, row, ctx);
+
+        public override int Compare(TRow a, TRow b)
+        {
+            return compare?.Invoke(a, b) ?? 0;
+        }
+
+        protected override void DrawCell(TaffyBuilder grid, TRow row, TContext ctx)
+        {
+            drawCell(grid, row, ctx);
+        }
     }
 
     #endregion
@@ -108,12 +136,14 @@ internal interface IContextColumn<in TRow>
 public abstract class ColumnWorker<TRow, TContext> : ColumnWorker<TRow>, IContextColumn<TRow>
     where TContext : IContext
 {
+    public void DrawCell(TaffyBuilder grid, TRow row, IContext ctx)
+    {
+        DrawCell(grid, row, (TContext)ctx);
+    }
+
     protected abstract void DrawCell(TaffyBuilder grid, TRow row, TContext ctx);
 
     public override void DrawCell(TaffyBuilder grid, TRow row)
     {
     }
-
-    public void DrawCell(TaffyBuilder grid, TRow row, IContext ctx)
-        => DrawCell(grid, row, (TContext)ctx);
 }

@@ -10,9 +10,9 @@ public static partial class TaffyExtensions
     private static readonly Dictionary<string, Vector2> SScrollPositions = new();
 
     /// <summary>
-    /// Adds a fixed-height scrollable list with virtualized rendering.
-    /// All items must share the same <paramref name="itemHeight"/>.
-    /// <code>
+    ///     Adds a fixed-height scrollable list with virtualized rendering.
+    ///     All items must share the same <paramref name="itemHeight" />.
+    ///     <code>
     /// col.List(categories, (rect, cat) =>
     /// {
     ///     var selected = _set.Contains(cat);
@@ -35,7 +35,7 @@ public static partial class TaffyExtensions
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = Dimension.Percent(1f),
-            height = Mathf.Clamp(items.Count, 1, 6) * itemHeight,
+            height = Mathf.Clamp(items.Count, 1, 6) * itemHeight
         });
 
         var capturedItems = items;
@@ -62,7 +62,9 @@ public static partial class TaffyExtensions
             {
                 using (new GUIColor(ColoredText.SubtleGrayColor))
                 using (new TextBlock(TextAnchor.MiddleLeft))
+                {
                     Verse.Widgets.Label(viewRect, "No results available.");
+                }
             }
 
             Verse.Widgets.EndScrollView();

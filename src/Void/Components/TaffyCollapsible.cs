@@ -10,10 +10,10 @@ public static partial class TaffyExtensions
     private static readonly Dictionary<string, bool> SCollapsibleState = new();
 
     /// <summary>
-    /// Adds a collapsible section with a clickable header row and toggleable content.
-    /// The header shows <paramref name="title"/> (GameFont.Tiny) with a collapse/reveal icon on the right.
-    /// Clicking anywhere on the header toggles the content.
-    /// <code>
+    ///     Adds a collapsible section with a clickable header row and toggleable content.
+    ///     The header shows <paramref name="title" /> (GameFont.Tiny) with a collapse/reveal icon on the right.
+    ///     Clicking anywhere on the header toggles the content.
+    ///     <code>
     /// col.Collapsible("Filters", inner =>
     /// {
     ///     inner.Input(ref search);
@@ -49,7 +49,7 @@ public static partial class TaffyExtensions
                 },
                 row =>
                 {
-                    row.Text(title, font: GameFont.Tiny, style: new StyleOverride { flexGrow = 1f });
+                    row.Text(title, GameFont.Tiny, style: new StyleOverride { flexGrow = 1f });
                     row.Icon(isOpen ? PawnColumnWorker.SortingIcon : PawnColumnWorker.SortingDescendingIcon,
                         size: UIUtility.ComponentSize.Small);
                 },

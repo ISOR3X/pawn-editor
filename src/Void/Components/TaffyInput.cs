@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Taffy;
 using UnityEngine;
@@ -14,6 +15,18 @@ public static partial class TaffyExtensions
     // spurious focus transfers (e.g. button clicks inside the field rect) produce no visual
     // change. Used when the field is not genuinely focused.
     private static (GUIStyle? style, GameFont font) _sLockedTextField;
+
+    // Persistent per-widget state: keyed by "{contextKey}:{file}:{line}".
+    // Stores (Source, Typed): Source is the caller's value last frame; Typed is what the user
+    // has typed. The cache is only applied when Source matches the current caller value,
+    // so external changes (e.g. Generate button) are never overwritten by stale cache.
+    private static readonly Dictionary<string, (string Source, string Typed)> SInputState = new();
+
+    // Persistent per-widget state for numeric inputs: keyed by "{contextKey}:{id}" or "{contextKey}:{file}:{line}".
+    // Stores (buffer, value, externalValue): externalValue is the caller's value last frame.
+    // The stored value is only applied when externalValue matches the current caller value,
+    // so external changes (e.g. dragging a color rect) are never overwritten by stale input state.
+    private static readonly Dictionary<string, (string buffer, int value, int externalValue)> SNumericState = [];
 
     private static GUIStyle GetLockedTextFieldStyle()
     {
@@ -34,25 +47,22 @@ public static partial class TaffyExtensions
     }
 
     // Clears keyboard focus. Can be called from any draw callback.
-    private static void Unfocus() => GUIUtility.keyboardControl = 0;
-
-    // Persistent per-widget state: keyed by "{contextKey}:{file}:{line}".
-    // Stores (Source, Typed): Source is the caller's value last frame; Typed is what the user
-    // has typed. The cache is only applied when Source matches the current caller value,
-    // so external changes (e.g. Generate button) are never overwritten by stale cache.
-    private static readonly Dictionary<string, (string Source, string Typed)> SInputState = new();
+    private static void Unfocus()
+    {
+        GUIUtility.keyboardControl = 0;
+    }
 
     /// <summary>
-    /// Adds a text-input leaf. Works like <c>CharacterCardUtility.DoNameInputRect</c>:
-    /// call with a local copy of the value, then check for changes afterward.
-    /// <code>
+    ///     Adds a text-input leaf. Works like <c>CharacterCardUtility.DoNameInputRect</c>:
+    ///     call with a local copy of the value, then check for changes afterward.
+    ///     <code>
     /// var first = triple.First;
     /// row.Input(ref first, maxLength: 12);
     /// if (first != triple.First) pawn.Name = new NameTriple(first, ...);
     /// </code>
-    /// The update reflects the value typed on the PREVIOUS frame (standard IMGUI pattern).
-    /// Requires <see cref="SectionWorker.BuildSection"/> to have set a <c>ContextKey</c> on
-    /// the builder so that state is isolated per pawn.
+    ///     The update reflects the value typed on the PREVIOUS frame (standard IMGUI pattern).
+    ///     Requires <see cref="SectionWorker.BuildSection" /> to have set a <c>ContextKey</c> on
+    ///     the builder so that state is isolated per pawn.
     /// </summary>
     public static void Input(this TaffyBuilder b, ref string text, int? maxLength = null,
         Regex? pattern = null, Color? color = null, Action<Rect>? onHover = null, StyleOverride? style = null,
@@ -71,7 +81,7 @@ public static partial class TaffyExtensions
         });
 
         var displayValue = text;
-        b.Item( r =>
+        b.Item(r =>
         {
             if (onHover != null && Mouse.IsOver(r)) onHover(r);
 
@@ -93,17 +103,11 @@ public static partial class TaffyExtensions
         }, mergedStyle);
     }
 
-    // Persistent per-widget state for numeric inputs: keyed by "{contextKey}:{id}" or "{contextKey}:{file}:{line}".
-    // Stores (buffer, value, externalValue): externalValue is the caller's value last frame.
-    // The stored value is only applied when externalValue matches the current caller value,
-    // so external changes (e.g. dragging a color rect) are never overwritten by stale input state.
-    private static readonly Dictionary<string, (string buffer, int value, int externalValue)> SNumericState = [];
-
     /// <summary>
-    /// Adds a numeric text-input leaf that only accepts digit characters while typing,
-    /// and applies min/max clamping only when the field loses focus.
-    /// Pass an explicit <paramref name="id"/> when the call site is a shared helper method
-    /// (multiple callers would otherwise share the same file:line key).
+    ///     Adds a numeric text-input leaf that only accepts digit characters while typing,
+    ///     and applies min/max clamping only when the field loses focus.
+    ///     Pass an explicit <paramref name="id" /> when the call site is a shared helper method
+    ///     (multiple callers would otherwise share the same file:line key).
     /// </summary>
     public static void InputNumber(this TaffyBuilder b, ref int value, int min = 0, int max = 9999,
         StyleOverride? style = null, string? id = null,
@@ -128,7 +132,7 @@ public static partial class TaffyExtensions
         var capturedValue = value;
         var capturedBuffer = restoreState ? stored.buffer : value.ToString();
 
-        b.Item( r =>
+        b.Item(r =>
         {
             var r2 = r.RightPartPixels(r.height / 2f);
             r2.x -= GenUI.GapTiny;
@@ -195,11 +199,11 @@ public static partial class TaffyExtensions
         static string FilterNumeric(string input, bool allowNegative)
         {
             if (string.IsNullOrEmpty(input)) return input;
-            var sb = new System.Text.StringBuilder(input.Length);
+            var sb = new StringBuilder(input.Length);
             for (var i = 0; i < input.Length; i++)
             {
                 var ch = input[i];
-                if (char.IsDigit(ch) || allowNegative && ch == '-' && i == 0) sb.Append(ch);
+                if (char.IsDigit(ch) || (allowNegative && ch == '-' && i == 0)) sb.Append(ch);
             }
 
             return sb.ToString();

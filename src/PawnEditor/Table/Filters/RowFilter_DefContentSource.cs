@@ -1,5 +1,5 @@
-using Taffy;
 using RimWorld;
+using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -11,11 +11,13 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
     private ModContentPack? _selected;
 
     public bool Passes(TDef row, IContext? ctx)
-        => _selected == null || row.modContentPack == _selected;
+    {
+        return _selected == null || row.modContentPack == _selected;
+    }
 
     public void DrawFilter(TaffyBuilder builder, Table<TDef> table)
     {
-        builder.Text("Content source", font: GameFont.Tiny);
+        builder.Text("Content source", GameFont.Tiny);
         builder.Button(_selected?.Name ?? "Any",
             style: new StyleOverride
             {

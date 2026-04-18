@@ -6,7 +6,6 @@ namespace PawnEditor;
 [StaticConstructorOnStartup]
 public static class ColorUtility
 {
-    
     private static Texture2D? _hueTexture;
     private static bool _hueSliderDragging;
     private static (float hue, Texture2D tex) _colorRectCache;
@@ -53,7 +52,6 @@ public static class ColorUtility
     }
 
 
-
     public static void ColorRect(Rect inRect, ref Color color)
     {
         Color.RGBToHSV(color, out var h, out var s, out var v);
@@ -73,6 +71,7 @@ public static class ColorUtility
                     tex.SetPixel(x, y, Color.HSVToRGB(h, sat, val));
                 }
             }
+
             tex.Apply();
             _colorRectCache = (h, tex);
         }
@@ -106,15 +105,17 @@ public static class ColorUtility
             if (ev.type == EventType.MouseDrag) ev.Use();
         }
     }
-    
+
     public static bool ApproximatelyEqual(Color a, Color b, float epsilon = 4f / 255f)
-        => Mathf.Abs(a.r - b.r) < epsilon && Mathf.Abs(a.g - b.g) < epsilon && Mathf.Abs(a.b - b.b) < epsilon;
+    {
+        return Mathf.Abs(a.r - b.r) < epsilon && Mathf.Abs(a.g - b.g) < epsilon && Mathf.Abs(a.b - b.b) < epsilon;
+    }
 
     public static void ColorToHSL(Color color, out float h, out float s, out float l)
     {
         Color.RGBToHSV(color, out h, out var sv, out var v);
         l = v * (1f - sv / 2f);
-        s = (l == 0f || l == 1f) ? 0f : (v - l) / Mathf.Min(l, 1f - l);
+        s = l == 0f || l == 1f ? 0f : (v - l) / Mathf.Min(l, 1f - l);
     }
 
     public static Color HSLToColor(float h, float s, float l)

@@ -15,12 +15,9 @@ public class Patch_OpenEditor
             if (Find.WindowStack.IsOpen<Window_Editor>()) Find.WindowStack.TryRemove(typeof(Window_Editor));
             else Find.WindowStack.Add(new Window_Editor());
         }
+
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
-        {
             if (Current.ProgramState == ProgramState.Playing)
-            {
                 PawnEditorMod.PawnEditorSettings.drawDebug = !PawnEditorMod.PawnEditorSettings.drawDebug;
-            }
-        }
     }
 }

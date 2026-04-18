@@ -5,12 +5,12 @@ using Void.XMLComponents;
 namespace Void;
 
 /// <summary>
-/// Parses a layout XML tag (<see cref="XmlNode"/>) into a <see cref="ParsedLayout"/> tree.
-/// Called from <see cref="ParsedLayout.LoadDataFromXmlCustom"/>.
-/// <para>
-/// Custom tags can be registered via <see cref="RegisterTag"/> before def loading begins
-/// (e.g. from a <c>Mod</c> constructor). Unknown tags log a warning and are skipped.
-/// </para>
+///     Parses a layout XML tag (<see cref="XmlNode" />) into a <see cref="ParsedLayout" /> tree.
+///     Called from <see cref="ParsedLayout.LoadDataFromXmlCustom" />.
+///     <para>
+///         Custom tags can be registered via <see cref="RegisterTag" /> before def loading begins
+///         (e.g. from a <c>Mod</c> constructor). Unknown tags log a warning and are skipped.
+///     </para>
 /// </summary>
 public static class XMLLayoutParser
 {
@@ -21,17 +21,19 @@ public static class XMLLayoutParser
     private static readonly Dictionary<string, Func<XMLComponent>> Registry = new()
     {
         ["button"] = () => new ButtonElement(),
-        ["text"]   = () => new TextElement(),
-        ["div"]    = () => new DivElement(),
-        ["layout"] = () => new DivElement(),
+        ["text"] = () => new TextElement(),
+        ["div"] = () => new DivElement(),
+        ["layout"] = () => new DivElement()
     };
 
     /// <summary>
-    /// Registers a custom XML tag with a factory that produces its component.
-    /// Call during mod startup (e.g. from a <c>Mod</c> constructor) before any layouts are parsed.
+    ///     Registers a custom XML tag with a factory that produces its component.
+    ///     Call during mod startup (e.g. from a <c>Mod</c> constructor) before any layouts are parsed.
     /// </summary>
     public static void RegisterTag(string tagName, Func<XMLComponent> factory)
-        => Registry[tagName] = factory;
+    {
+        Registry[tagName] = factory;
+    }
 
     public static void Parse(XmlNode xmlNode, ParsedLayout target)
     {
@@ -67,19 +69,14 @@ public static class XMLLayoutParser
         // Element-specific attributes (label, icon, etc.) are also included — duplicating
         // them in Attrs is harmless and lets mod code read them uniformly via element.Get().
         if (xmlNode.Attributes != null)
-        {
             foreach (XmlAttribute attr in xmlNode.Attributes)
-            {
                 if (!StructuralAttrs.Contains(attr.Name))
                     element.Attrs[attr.Name] = attr.Value;
-            }
-        }
 
         target.Props = element;
 
         // Parse children — skipped for leaf elements (section, text, etc.).
         if (!element.IsLeaf)
-        {
             foreach (XmlNode child in xmlNode.ChildNodes)
             {
                 if (child is XmlComment) continue;
@@ -91,6 +88,5 @@ public static class XMLLayoutParser
                 if (childNode.Tag == child.Name)
                     target.Children.Add(childNode);
             }
-        }
     }
 }

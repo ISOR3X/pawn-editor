@@ -57,7 +57,7 @@ public static partial class TaffyExtensions
             ? new StyleOverride
             {
                 width = Dimension.Percent(1f),
-                height = height,
+                height = height
             }
             : new StyleOverride
             {
@@ -81,7 +81,7 @@ public static partial class TaffyExtensions
             if (capturedIcon != null || capturedLabel != null)
             {
                 var availableLabelW = r.width - capturedPaddingInline * 2f
-                    - (capturedIcon != null ? iconSize + iconGap : 0f);
+                                              - (capturedIcon != null ? iconSize + iconGap : 0f);
                 var effectiveLabelW = Mathf.Min(capturedLabelW, Mathf.Max(0f, availableLabelW));
 
                 var contentW = (capturedIcon != null ? iconSize : 0f)

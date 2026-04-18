@@ -8,8 +8,8 @@ namespace PawnEditor.Table.Filters.AbilityDef;
 [StaticConstructorOnStartup]
 public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
 {
-    private IntRange _range = new(MinMaxRange.min, MinMaxRange.max);
     public static readonly IntRange MinMaxRange;
+    private IntRange _range = new(MinMaxRange.min, MinMaxRange.max);
 
     static RowFilter_Level()
     {
@@ -17,8 +17,10 @@ public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
         MinMaxRange = new IntRange(levels.Min(), levels.Max());
     }
 
-    public bool Passes(RimWorld.AbilityDef row, IContext? ctx) =>
-        row.level >= _range.min && row.level <= _range.max;
+    public bool Passes(RimWorld.AbilityDef row, IContext? ctx)
+    {
+        return row.level >= _range.min && row.level <= _range.max;
+    }
 
     public void DrawFilter(TaffyBuilder builder, Table<RimWorld.AbilityDef> table)
     {

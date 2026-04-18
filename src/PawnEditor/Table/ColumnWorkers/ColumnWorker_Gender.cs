@@ -18,10 +18,15 @@ public class ColumnWorker_Gender<T> : ColumnWorker<T> where T : StyleItemDef
     public override TrackSizingFunction TrackSize => Void.Taffy.Px(CalcHeaderWidth(HeaderLabel));
     public override bool Sortable => true;
 
-    public override void DrawCell(TaffyBuilder grid, T row) => grid.Icon(GetIcon(row));
+    public override void DrawCell(TaffyBuilder grid, T row)
+    {
+        grid.Icon(GetIcon(row));
+    }
 
     public override int Compare(T a, T b)
-        => GetOrder(a).CompareTo(GetOrder(b));
+    {
+        return GetOrder(a).CompareTo(GetOrder(b));
+    }
 
     private static int GetOrder(T def)
     {
@@ -53,7 +58,10 @@ public class ColumnWorker_Gender<T> : ColumnWorker<T> where T : StyleItemDef
     {
         var w = 0f;
         using (new TextBlock(GameFont.Small))
+        {
             w += Text.CalcSize(header).x;
+        }
+
         return w + GenUI.Gap;
     }
 }

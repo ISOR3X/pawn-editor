@@ -1,8 +1,8 @@
 using HotSwap;
 using PawnEditor.Table;
 using PawnEditor.Table.Filters.AbilityDef;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -88,7 +88,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 flexDirection = FlexDirection.Column,
                 flexGrow = 1f,
                 flexBasis = 200f,
-                flexShrink = 0f,
+                flexShrink = 0f
             });
     }
 
@@ -98,10 +98,12 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             onClick: a => OnClick(a, pawn));
         return;
 
-        static string TooltipGetter(Ability a) =>
-            a.Tooltip + "\n\n" + "ClickToLearnMore".Translate()
-                .Colorize(ColoredText.SubtleGrayColor) + "\n" +
-            "Shift + left click to delete.".Colorize(ColoredText.SubtleGrayColor);
+        static string TooltipGetter(Ability a)
+        {
+            return a.Tooltip + "\n\n" + "ClickToLearnMore".Translate()
+                       .Colorize(ColoredText.SubtleGrayColor) + "\n" +
+                   "Shift + left click to delete.".Colorize(ColoredText.SubtleGrayColor);
+        }
 
         static void OnClick(Ability ability, Pawn pawn)
         {
@@ -129,8 +131,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
         if (RowFilter_Level.MinMaxRange.max - RowFilter_Level.MinMaxRange.min != 0) filters.Add(new RowFilter_Level());
 
         return new Table<AbilityDef>(
-            rows: DefDatabase<AbilityDef>.AllDefsListForReading,
-            columns:
+            DefDatabase<AbilityDef>.AllDefsListForReading,
             [
                 Col.Create(
                     Void.Taffy.Px(20f),
@@ -143,8 +144,8 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                     Void.Taffy.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
-                    color: ColoredText.SubtleGrayColor
-                ),
+                    ColoredText.SubtleGrayColor
+                )
             ],
             onRowHover: (rowRect, abilityDef, ctx) =>
             {

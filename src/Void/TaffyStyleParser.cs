@@ -1,13 +1,14 @@
 using System.Globalization;
 using Taffy;
+using Verse;
 
 namespace Void;
 
 public static class TaffyStyleParser
 {
     /// <summary>
-    /// Parses a CSS inline style string (e.g. <c>"flex-direction: row; gap: 4px"</c>) into a
-    /// <see cref="StyleOverride"/>. Unknown properties are logged as warnings and skipped.
+    ///     Parses a CSS inline style string (e.g. <c>"flex-direction: row; gap: 4px"</c>) into a
+    ///     <see cref="StyleOverride" />. Unknown properties are logged as warnings and skipped.
     /// </summary>
     public static StyleOverride ParseInlineStyle(string css)
     {
@@ -21,12 +22,13 @@ public static class TaffyStyleParser
             if (name.Length > 0 && value.Length > 0)
                 ApplyProperty(name, value, style);
         }
+
         return style;
     }
 
     /// <summary>
-    /// Applies a single CSS property name/value pair to <paramref name="target"/>.
-    /// Unknown properties are logged as warnings and skipped.
+    ///     Applies a single CSS property name/value pair to <paramref name="target" />.
+    ///     Unknown properties are logged as warnings and skipped.
     /// </summary>
     public static void ApplyProperty(string name, string value, StyleOverride target)
     {
@@ -209,13 +211,15 @@ public static class TaffyStyleParser
                 break;
             }
             default:
-                Verse.Log.Warning($"[{VoidMod.ModName}] Unknown style property '{name}', skipping.");
+                Log.Warning($"[{VoidMod.ModName}] Unknown style property '{name}', skipping.");
                 break;
         }
     }
 
-    private static float ParseFloat(string s) =>
-        float.Parse(s, CultureInfo.InvariantCulture);
+    private static float ParseFloat(string s)
+    {
+        return float.Parse(s, CultureInfo.InvariantCulture);
+    }
 
     private static float ParsePx(string s)
     {
@@ -249,57 +253,72 @@ public static class TaffyStyleParser
         return LengthPercentageAuto.Length(ParsePx(s));
     }
 
-    private static Display ParseDisplay(string s) => s switch
+    private static Display ParseDisplay(string s)
     {
-        "flex" => Display.Flex,
-        "grid" => Display.Grid,
-        "block" => Display.Block,
-        "none" => Display.None,
-        _ => Display.Flex,
-    };
+        return s switch
+        {
+            "flex" => Display.Flex,
+            "grid" => Display.Grid,
+            "block" => Display.Block,
+            "none" => Display.None,
+            _ => Display.Flex
+        };
+    }
 
-    private static FlexDirection ParseFlexDirection(string s) => s switch
+    private static FlexDirection ParseFlexDirection(string s)
     {
-        "row" => FlexDirection.Row,
-        "column" => FlexDirection.Column,
-        "row-reverse" => FlexDirection.RowReverse,
-        "column-reverse" => FlexDirection.ColumnReverse,
-        _ => FlexDirection.Row,
-    };
+        return s switch
+        {
+            "row" => FlexDirection.Row,
+            "column" => FlexDirection.Column,
+            "row-reverse" => FlexDirection.RowReverse,
+            "column-reverse" => FlexDirection.ColumnReverse,
+            _ => FlexDirection.Row
+        };
+    }
 
-    private static FlexWrap ParseFlexWrap(string s) => s switch
+    private static FlexWrap ParseFlexWrap(string s)
     {
-        "nowrap" => FlexWrap.NoWrap,
-        "wrap" => FlexWrap.Wrap,
-        "wrap-reverse" => FlexWrap.WrapReverse,
-        _ => FlexWrap.NoWrap,
-    };
+        return s switch
+        {
+            "nowrap" => FlexWrap.NoWrap,
+            "wrap" => FlexWrap.Wrap,
+            "wrap-reverse" => FlexWrap.WrapReverse,
+            _ => FlexWrap.NoWrap
+        };
+    }
 
-    private static AlignItems? ParseAlignItems(string s) => s switch
+    private static AlignItems? ParseAlignItems(string s)
     {
-        "start" => AlignItems.Start,
-        "end" => AlignItems.End,
-        "flex-start" => AlignItems.FlexStart,
-        "flex-end" => AlignItems.FlexEnd,
-        "center" => AlignItems.Center,
-        "baseline" => AlignItems.Baseline,
-        "stretch" => AlignItems.Stretch,
-        _ => null,
-    };
+        return s switch
+        {
+            "start" => AlignItems.Start,
+            "end" => AlignItems.End,
+            "flex-start" => AlignItems.FlexStart,
+            "flex-end" => AlignItems.FlexEnd,
+            "center" => AlignItems.Center,
+            "baseline" => AlignItems.Baseline,
+            "stretch" => AlignItems.Stretch,
+            _ => null
+        };
+    }
 
-    private static AlignContent? ParseAlignContent(string s) => s switch
+    private static AlignContent? ParseAlignContent(string s)
     {
-        "start" => AlignContent.Start,
-        "end" => AlignContent.End,
-        "flex-start" => AlignContent.FlexStart,
-        "flex-end" => AlignContent.FlexEnd,
-        "center" => AlignContent.Center,
-        "stretch" => AlignContent.Stretch,
-        "space-between" => AlignContent.SpaceBetween,
-        "space-evenly" => AlignContent.SpaceEvenly,
-        "space-around" => AlignContent.SpaceAround,
-        _ => null,
-    };
+        return s switch
+        {
+            "start" => AlignContent.Start,
+            "end" => AlignContent.End,
+            "flex-start" => AlignContent.FlexStart,
+            "flex-end" => AlignContent.FlexEnd,
+            "center" => AlignContent.Center,
+            "stretch" => AlignContent.Stretch,
+            "space-between" => AlignContent.SpaceBetween,
+            "space-evenly" => AlignContent.SpaceEvenly,
+            "space-around" => AlignContent.SpaceAround,
+            _ => null
+        };
+    }
 
     private static List<TrackSizingFunction> ParseTrackList(string s)
     {

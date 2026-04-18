@@ -12,7 +12,7 @@ namespace PawnEditor;
 public static partial class Widgets
 {
     // TODO: Convert to TaffyPawnCard?
-    
+
     private const float CardGap = 8f;
     private const float SectionGap = 8f;
     public static readonly Vector2 CardSize = new(132f, 52f);
