@@ -64,14 +64,14 @@ public static partial class TaffyExtensions
         if (SInputState.TryGetValue(key, out var stored) && stored.Source == text)
             text = stored.Typed;
 
-        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
+        var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = DefaultInputWidth,
             height = UIUtility.ButtonHeight
-        }).Resolve();
+        });
 
         var displayValue = text;
-        b.AddLeaf(resolvedStyle, r =>
+        b.Item( r =>
         {
             if (onHover != null && Mouse.IsOver(r)) onHover(r);
 
@@ -90,7 +90,7 @@ public static partial class TaffyExtensions
             if (maxLength.HasValue && input.Length > maxLength.Value) return;
             if (pattern != null && !pattern.IsMatch(input)) return;
             SInputState[key] = (displayValue, input);
-        });
+        }, mergedStyle);
     }
 
     // Persistent per-widget state for numeric inputs: keyed by "{contextKey}:{id}" or "{contextKey}:{file}:{line}".
@@ -119,16 +119,16 @@ public static partial class TaffyExtensions
         // frame. If it changed (e.g. ColorRect dragged), use the new value and reset the buffer.
         if (restoreState) value = stored.value;
 
-        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
+        var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = Dimension.Length(DefaultInputWidth),
             height = UIUtility.ButtonHeight
-        }).Resolve();
+        });
 
         var capturedValue = value;
         var capturedBuffer = restoreState ? stored.buffer : value.ToString();
 
-        b.AddLeaf(resolvedStyle, r =>
+        b.Item( r =>
         {
             var r2 = r.RightPartPixels(r.height / 2f);
             r2.x -= GenUI.GapTiny;
@@ -183,7 +183,7 @@ public static partial class TaffyExtensions
                 var v = int.TryParse(buf, out var p) ? Mathf.Clamp(p, min, max) : capturedValue;
                 SNumericState[key] = (v.ToString(), v, incomingValue);
             }
-        });
+        }, mergedStyle);
         return;
 
         void Commit(int newVal)

@@ -33,12 +33,6 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
     {
         builder.Text("Skills", color: ColoredText.TipSectionTitleColor);
         builder.Div(
-            new Style
-            {
-                flexGrow = 1f, flexDirection = FlexDirection.Row, flexWrap = FlexWrap.Wrap,
-                minSize = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO),
-                gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny)
-            },
             col =>
             {
                 var skills = SkillUI.skillDefsInListOrderCached;
@@ -46,6 +40,12 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                 {
                     DrawSkill(col, pawn, skillDef);
                 }
+            },
+            new StyleOverride
+            {
+                flexGrow = 1f, flexDirection = FlexDirection.Row, flexWrap = FlexWrap.Wrap,
+                minWidth = Dimension.Percent(1f),
+                gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny)
             });
     }
 

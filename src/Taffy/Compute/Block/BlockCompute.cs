@@ -524,7 +524,7 @@ namespace Taffy
                 {
                     // Recurse through block algorithm with a sub-context.
                     var subCtx = new BlockContext(isRoot: false);
-                    itemLayout = BlockCompute.Compute(tree, item.nodeId, inputs, subCtx);
+                    itemLayout = Compute(tree, item.nodeId, inputs, subCtx);
                 }
                 else
                 {

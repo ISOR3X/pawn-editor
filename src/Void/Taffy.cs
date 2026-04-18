@@ -34,50 +34,26 @@ namespace Void
     /// <summary>
     /// Fluent layout builder passed to <see cref="Taffy.Row"/> / <see cref="UnityEngine.UIElements.Column"/> lambdas.
     /// </summary>
-    public sealed class TaffyBuilder
+    public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
     {
         // Memoizes Text.CalcSize(word).x per (word, font) pair — populated once, reused every frame.
         public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
 
-        public readonly TaffyTree tree;
-        public readonly List<(NodeId id, Action<Rect>? draw)> callbacks;
+        public readonly TaffyTree tree = tree;
+        public readonly List<(NodeId id, Action<Rect>? draw)> callbacks = callbacks;
         public readonly List<NodeId> children = [];
 
         /// <summary>
-        /// Stable identifier for the current pawn/context, used by stateful extensions like
+        /// Stable identifier for the current context, used by stateful extensions like
         /// <c>TaffyExtensions.Input(ref string)</c> to key their per-widget persistent state.
         /// Set by <see cref="SectionWorker.BuildSection"/> before entering section content.
         /// </summary>
         public string? ContextKey { get; set; }
 
-        public TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
-        {
-            this.tree = tree;
-            this.callbacks = callbacks;
-        }
-
-        // ── Leaf items ──────────────────────────────────────────────────────────
-
-        /// <summary>Adds a leaf node with a full Taffy <see cref="Style"/>.</summary>
+       #region LEAF ITEMS
+       
         public void Item(Action<Rect>? draw = null, StyleOverride? style = null) =>
             AddLeaf((style ?? new StyleOverride()).Resolve(), draw);
-
-        // ── Nested row containers ───────────────────────────────────────────────
-
-        /// <summary>Adds a nested row container (grow + optional build).</summary>
-        public void Row(float grow = 0f, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Row, grow, null, FlexWrap.NoWrap), null, build);
-
-        /// <summary>Adds a nested row container with gap and grow.</summary>
-        public void Row(float gap, float grow, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Row, grow, gap, FlexWrap.NoWrap), null, build);
-
-        /// <summary>Adds a nested row container with a full <see cref="Style"/>.</summary>
-        public void Row(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, null, build);
-
-        public void Div(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, null, build);
 
         public void Div(Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
             => AddContainer((style ?? new StyleOverride()).Resolve(), null, builder);
@@ -85,26 +61,15 @@ namespace Void
         /// <summary>Adds a container that runs <paramref name="draw"/> on its own rect (e.g. highlight/tooltip) before drawing children.</summary>
         public void Div( Action<Rect>? draw = null, Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
             => AddContainer((style ?? new StyleOverride()).Resolve(), draw, builder);
-
-        // ── Nested column containers ────────────────────────────────────────────
-
-        /// <summary>Adds a nested column container (grow + optional build).</summary>
-        public void Column(float grow = 0f, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Column, grow, null, FlexWrap.NoWrap), null, build);
-
-        /// <summary>Adds a nested column container with gap and grow.</summary>
-        public void Column(float gap, float grow, Action<TaffyBuilder>? build = null)
-            => AddContainer(MakeContainerStyle(FlexDirection.Column, grow, gap, FlexWrap.NoWrap), null, build);
-
-        /// <summary>Adds a nested column container with a full <see cref="Style"/>.</summary>
-        public void Column(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, null, build);
+        
+        #endregion
 
         // ── Grid items ──────────────────────────────────────────────────────────
 
         /// <summary>
         /// Adds a grid item with optional column/row placement.
         /// All parameters use CSS Grid 1-based line indices.
+        /// TODO: deprecate and remove
         /// </summary>
         /// <param name="draw">Draw callback invoked with the item's computed rect.</param>
         /// <param name="colSpan">Number of columns to span (default 1).</param>
@@ -133,21 +98,9 @@ namespace Void
 
             AddLeaf(style, draw);
         }
-
-        public void GridItem(Style style, Action<Rect>? draw = null)
-        {
-            AddLeaf(style, draw);
-        }
-
-        // ── Generic container ───────────────────────────────────────────────────
-
-        /// <summary>Adds a container node with an arbitrary <see cref="Style"/> (used by <c>TaffyLayoutNode.BuildChildrenInto</c>).</summary>
-        public void Container(Style style, Action<TaffyBuilder>? build = null)
-            => AddContainer(style, null, build);
-
-        // ── publics ───────────────────────────────────────────────────────────
-
-        public void AddLeaf(Style style, Action<Rect>? draw)
+        
+        #region HELPERS
+        private void AddLeaf(Style style, Action<Rect>? draw)
         {
             var node = tree.NewLeaf(style);
             children.Add(node);
@@ -162,16 +115,8 @@ namespace Void
             children.Add(node);
             callbacks.Add((node, draw));
         }
-
-        private static Style MakeContainerStyle(FlexDirection dir, float grow, float? gap, FlexWrap wrap)
-        {
-            var s = new Style { flexDirection = dir, flexGrow = grow, flexWrap = wrap };
-            if (gap.HasValue)
-                s.gap = new Size<LengthPercentage>(
-                    LengthPercentage.Length(gap.Value),
-                    LengthPercentage.Length(gap.Value));
-            return s;
-        }
+        #endregion
+        
     }
 
     /// <summary>
@@ -185,59 +130,17 @@ namespace Void
         /// <summary>
         /// RimWorld entry point for the Taffy layout engine.
         /// </summary>
-        /// <param name="rect"></param>
-        /// <param name="build"></param>
-        /// <param name="style"></param>
         public static void Div(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
             => Execute(rect, (style ?? new StyleOverride()).Resolve(), build);
 
         #endregion
-
-        // ── Grid entry points ───────────────────────────────────────────────────
-        //
-        // The autoRowHeight parameter sets gridAutoRows so that implicitly created rows
-        // have a fixed pixel height. This is required when grid items are leaf nodes with
-        // no intrinsic size (i.e. draw callbacks) — without it CSS auto rows collapse to 0.
-        // Pass 0 only when you supply explicit gridTemplateRows or items with a set size.
-
-        /// <summary>
-        /// Lays out children in a CSS Grid with the given column template inside <paramref name="rect"/>.
-        /// <paramref name="autoRowHeight"/> sets the height of each auto row in pixels (required when
-        /// items have no intrinsic size; otherwise auto rows collapse to 0).
-        /// </summary>
-        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            float autoRowHeight, Action<TaffyBuilder> build)
-            => Execute(rect, MakeGridStyle(columns, null, 0f, 0f, autoRowHeight), build);
-
-        /// <summary>Grid layout with uniform gap and fixed auto-row height.</summary>
-        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            float gap, float autoRowHeight, Action<TaffyBuilder> build)
-            => Execute(rect, MakeGridStyle(columns, null, gap, gap, autoRowHeight), build);
-
+        
         /// <summary>Grid layout with separate column/row gaps and fixed auto-row height.</summary>
         public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
             float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
             => Execute(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
 
-        /// <summary>Grid layout with explicit column and row templates (no auto-row height needed).</summary>
-        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            IReadOnlyList<TrackSizingFunction> rows,
-            Action<TaffyBuilder> build)
-            => Execute(rect, MakeGridStyle(columns, rows, 0f, 0f, 0f), build);
-
-        /// <summary>Grid layout with explicit templates and uniform gap.</summary>
-        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            IReadOnlyList<TrackSizingFunction> rows, float gap,
-            Action<TaffyBuilder> build)
-            => Execute(rect, MakeGridStyle(columns, rows, gap, gap, 0f), build);
-
-        /// <summary>Grid layout with explicit templates and separate column/row gaps.</summary>
-        public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            IReadOnlyList<TrackSizingFunction> rows, float gapX, float gapY,
-            Action<TaffyBuilder> build)
-            => Execute(rect, MakeGridStyle(columns, rows, gapX, gapY, 0f), build);
-
-        // ── Track sizing shorthands ─────────────────────────────────────────────
+        #region  TRACK SIZING SHORTHANDS
 
         /// <summary>A flexible track that takes the given fraction of remaining space (default 1fr).</summary>
         public static TrackSizingFunction Fr(float fr = 1f) => TrackSizingFunction.Fr(fr);
@@ -254,7 +157,8 @@ namespace Void
         /// <summary>A fit-content track capped at <paramref name="px"/> pixels.</summary>
         public static TrackSizingFunction FitContent(float px) => TrackSizingFunction.FitContentPx(px);
 
-        // ── Style helpers ───────────────────────────────────────────────────────
+        #endregion
+        #region STYLE HELPERS
 
         /// <summary>Creates uniform padding on all four sides.</summary>
         public static Rect<LengthPercentage> Padding(float all)
@@ -285,11 +189,12 @@ namespace Void
         }
 
         /// <summary>Creates uniform gap on both axes.</summary>
-        public static Size<LengthPercentage> Gap(float all) => UniformGap(all);
+        public static Size<LengthPercentage> Gap(float all) =>  new(LengthPercentage.Length(all), LengthPercentage.Length(all));
 
         /// <summary>Creates asymmetric gap: <paramref name="column"/> between columns, <paramref name="row"/> between rows.</summary>
         public static Size<LengthPercentage> Gap(float column, float row) =>
             new(LengthPercentage.Length(column), LengthPercentage.Length(row));
+        #endregion
 
         // ── Content-measured entry points ───────────────────────────────────────
         //
@@ -307,26 +212,10 @@ namespace Void
         public static float DivMeasured(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
             => ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
 
-        /// <summary>Lays out a column with unconstrained height. Returns the computed content height.</summary>
-        public static float MeasuredColumn(Rect rect, Action<TaffyBuilder> build)
-            => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column }, build);
-        public static float MeasuredRow(Rect rect, Action<TaffyBuilder> build)
-            => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Row }, build);
-        /// <summary>Lays out a column with gap and unconstrained height. Returns the computed content height.</summary>
-        public static float MeasuredColumn(Rect rect, float gap, Action<TaffyBuilder> build)
-            => ExecuteMeasured(rect, new Style { flexDirection = FlexDirection.Column, gap = UniformGap(gap) }, build);
-
-        /// <summary>Grid layout with unconstrained height. Draws items and returns the computed content height.</summary>
-        public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            float autoRowHeight, Action<TaffyBuilder> build)
-            => ExecuteMeasured(rect, MakeGridStyle(columns, null, 0f, 0f, autoRowHeight), build);
-
-        /// <summary>Grid layout with uniform gap and unconstrained height. Returns the computed content height.</summary>
-        public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-            float gap, float autoRowHeight, Action<TaffyBuilder> build)
-            => ExecuteMeasured(rect, MakeGridStyle(columns, null, gap, gap, autoRowHeight), build);
-
-        /// <summary>Grid layout with separate column/row gaps and unconstrained height. Returns the computed content height.</summary>
+        /// <summary>
+        /// Grid layout with separate column/row gaps and unconstrained height. Returns the computed content height.
+        /// TODO: deprecate and remove.
+        /// </summary>
         public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
             float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
             => ExecuteMeasured(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
@@ -354,7 +243,7 @@ namespace Void
             return tree.Layout(root).Size.Height;
         }
 
-        // ── Core ────────────────────────────────────────────────────────────────
+        #region CORE
 
         private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
         {
@@ -411,75 +300,9 @@ namespace Void
                 DrawTree(tree, child, absX, absY, lookup);
         }
 
-        private static Size<LengthPercentage> UniformGap(float v) =>
-            new(LengthPercentage.Length(v), LengthPercentage.Length(v));
 
-        // ── Style merge ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Returns a new <see cref="Style"/> where each field is taken from <paramref name="primary"/>
-        /// when it has been explicitly set (i.e. differs from the default), or from
-        /// <paramref name="fallback"/> otherwise.  Analogous to <c>defu</c> in JavaScript.
-        /// <list type="bullet">
-        ///   <item>Nullable fields use <c>??</c> — <c>null</c> means "not set".</item>
-        ///   <item><see cref="Dimension"/> / <see cref="LengthPercentageAuto"/> fields use <c>IsAuto()</c>.</item>
-        ///   <item>Non-nullable enum / float fields are compared to a fresh <c>new Style()</c> to detect unset values.</item>
-        /// </list>
-        /// </summary>
-        public static Style WithDefaults(this Style primary, Style fallback)
-        {
-            var s = primary.Clone();
-            var def = new Style();
-
-            // ── Size (per-axis) ──────────────────────────────────────────────────
-            s.size = new Size<Dimension>(
-                s.size.Width.IsAuto() ? fallback.size.Width : s.size.Width,
-                s.size.Height.IsAuto() ? fallback.size.Height : s.size.Height);
-            s.minSize = new Size<Dimension>(
-                s.minSize.Width.IsAuto() ? fallback.minSize.Width : s.minSize.Width,
-                s.minSize.Height.IsAuto() ? fallback.minSize.Height : s.minSize.Height);
-            s.maxSize = new Size<Dimension>(
-                s.maxSize.Width.IsAuto() ? fallback.maxSize.Width : s.maxSize.Width,
-                s.maxSize.Height.IsAuto() ? fallback.maxSize.Height : s.maxSize.Height);
-
-            // ── Nullable fields ──────────────────────────────────────────────────
-            s.aspectRatio ??= fallback.aspectRatio;
-            s.alignItems ??= fallback.alignItems;
-            s.alignSelf ??= fallback.alignSelf;
-            s.justifyItems ??= fallback.justifyItems;
-            s.justifySelf ??= fallback.justifySelf;
-            s.alignContent ??= fallback.alignContent;
-            s.justifyContent ??= fallback.justifyContent;
-            s.gridTemplateColumns ??= fallback.gridTemplateColumns;
-            s.gridTemplateRows ??= fallback.gridTemplateRows;
-
-            // ── Margin (per-component, default is ZERO) ──────────────────────────
-            s.margin = new Rect<LengthPercentageAuto>(
-                s.margin.Left == LengthPercentageAuto.ZERO ? fallback.margin.Left : s.margin.Left,
-                s.margin.Right == LengthPercentageAuto.ZERO ? fallback.margin.Right : s.margin.Right,
-                s.margin.Top == LengthPercentageAuto.ZERO ? fallback.margin.Top : s.margin.Top,
-                s.margin.Bottom == LengthPercentageAuto.ZERO ? fallback.margin.Bottom : s.margin.Bottom);
-
-            // ── Padding (per-component, default is ZERO) ─────────────────────────
-            s.padding = new Rect<LengthPercentage>(
-                s.padding.Left == LengthPercentage.ZERO ? fallback.padding.Left : s.padding.Left,
-                s.padding.Right == LengthPercentage.ZERO ? fallback.padding.Right : s.padding.Right,
-                s.padding.Top == LengthPercentage.ZERO ? fallback.padding.Top : s.padding.Top,
-                s.padding.Bottom == LengthPercentage.ZERO ? fallback.padding.Bottom : s.padding.Bottom);
-
-            // ── Enum fields (compare to factory default) ─────────────────────────
-            if (s.display == def.display) s.display = fallback.display;
-            if (s.flexDirection == def.flexDirection) s.flexDirection = fallback.flexDirection;
-            if (s.flexWrap == def.flexWrap) s.flexWrap = fallback.flexWrap;
-            if (s.position == def.position) s.position = fallback.position;
-
-            // ── float fields ─────────────────────────────────────────────────────
-            if (Mathf.Approximately(s.flexGrow, def.flexGrow)) s.flexGrow = fallback.flexGrow;
-            if (Mathf.Approximately(s.flexShrink, def.flexShrink)) s.flexShrink = fallback.flexShrink;
-            if (s.flexBasis.IsAuto()) s.flexBasis = fallback.flexBasis;
-
-            return s;
-        }
+        
+        #endregion
 
         private static Style MakeGridStyle(IReadOnlyList<TrackSizingFunction> columns,
             IReadOnlyList<TrackSizingFunction>? rows,

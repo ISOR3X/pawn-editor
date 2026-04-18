@@ -12,13 +12,9 @@ namespace Void;
 ///   <item>Reflection: <c>"RimWorld.TexButton.Delete"</c> — split on last dot, look up static field.</item>
 /// </list>
 /// </summary>
-public static class UIIcons
+public static class IconRegistry
 {
-    private static readonly Dictionary<string, Texture2D> Registry = new();
     private static readonly Dictionary<string, Texture2D?> ReflectionCache = new();
-
-    /// <summary>Registers a short name for use in <c>icon="..."</c> attributes.</summary>
-    public static void Register(string name, Texture2D icon) => Registry[name] = icon;
 
     /// <summary>
     /// Resolves an icon name to a <see cref="Texture2D"/>. Returns null if not found.
@@ -28,16 +24,12 @@ public static class UIIcons
     /// </summary>
     public static Texture2D? Resolve(string name)
     {
-        if (Registry.TryGetValue(name, out var tex))
-            return tex;
-
         if (ReflectionCache.TryGetValue(name, out var cached))
             return cached;
 
         var result = ResolveViaReflection(name);
         ReflectionCache[name] = result;
-        if (result == null)
-            Log.Warning($"[{VoidMod.ModName}] Could not resolve icon '{name}'.");
+        if (result == null) Log.Warning($"[{VoidMod.ModName}] Could not resolve icon '{name}'.");
         return result;
     }
 

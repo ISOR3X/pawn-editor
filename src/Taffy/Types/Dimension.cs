@@ -15,7 +15,7 @@ namespace Taffy
     /// A CSS length that is either a fixed value or a percentage.
     /// Valid variants: <c>Length</c>, <c>Percent</c>.
     /// </summary>
-    public readonly struct LengthPercentage : System.IEquatable<LengthPercentage>
+    public readonly struct LengthPercentage : IEquatable<LengthPercentage>
     {
         internal readonly CompactLength Inner;
 
@@ -54,7 +54,7 @@ namespace Taffy
     /// A CSS length that can be a fixed value, a percentage, or <c>auto</c>.
     /// Valid variants: <c>Length</c>, <c>Percent</c>, <c>Auto</c>.
     /// </summary>
-    public readonly struct LengthPercentageAuto : System.IEquatable<LengthPercentageAuto>
+    public readonly struct LengthPercentageAuto : IEquatable<LengthPercentageAuto>
     {
         internal readonly CompactLength Inner;
 
@@ -113,7 +113,7 @@ namespace Taffy
     /// A CSS size dimension: Length, Percent, or Auto.
     /// Used for width, height, min/max sizing, flex-basis, etc.
     /// </summary>
-    public readonly struct Dimension : System.IEquatable<Dimension>
+    public readonly struct Dimension : IEquatable<Dimension>
     {
         internal readonly CompactLength Inner;
 

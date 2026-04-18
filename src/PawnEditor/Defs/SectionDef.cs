@@ -12,10 +12,10 @@ public class SectionDef : Def
 
     /// <summary>
     /// Optional XML-driven layout for this section. When set, <see cref="SectionWorker.DoSectionContents"/>
-    /// in the base class will build the UI from this tree via <see cref="UILayout"/>.
+    /// in the base class will build the UI from this tree via <see cref="Layout"/>.
     /// Workers that provide their own <see cref="SectionWorker.DoSectionContents"/> override ignore this field.
     /// </summary>
-    public UILayoutNode? layout;
+    public ParsedLayout? layout;
 
     [field: Unsaved]
     public SectionWorker Worker

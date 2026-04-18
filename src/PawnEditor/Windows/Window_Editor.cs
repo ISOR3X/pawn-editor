@@ -29,7 +29,7 @@ public partial class Window_Editor : Window
     private static List<TabRecord> _tabsList = [];
 
     public static Rect DefaultWindowRect = new(
-        new Vector2((Verse.UI.screenWidth - Page.StandardSize.x) / 2, (Verse.UI.screenHeight - Page.StandardSize.y) / 2),
+        new Vector2((UI.screenWidth - Page.StandardSize.x) / 2, (UI.screenHeight - Page.StandardSize.y) / 2),
         Page.StandardSize);
 
     public static Rect SavedWindowRect = DefaultWindowRect;
@@ -49,8 +49,8 @@ public partial class Window_Editor : Window
         layer = Playing ? WindowLayer.Dialog : WindowLayer.Super;
         forcePause = true;
         closeOnClickedOutside = true;
-        resizeable = PawnEditorMod.Settings.allowResize;
-        draggable = PawnEditorMod.Settings.allowResize;
+        resizeable = PawnEditorMod.PawnEditorSettings.allowResize;
+        draggable = PawnEditorMod.PawnEditorSettings.allowResize;
     }
 
     public override void SetInitialSizeAndPosition()

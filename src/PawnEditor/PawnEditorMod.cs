@@ -10,19 +10,20 @@ namespace PawnEditor;
 public class PawnEditorMod : Mod
 {
     public static string ModName = "PawnEditor";
-    public static Settings Settings = new();
+    public static PawnEditorSettings PawnEditorSettings = new();
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
+        ModName = content.Name;
+        PawnEditorSettings = GetSettings<PawnEditorSettings>();
+        
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
+        
         XMLLayoutParser.RegisterTag("section", () => new XMLComponents.SectionElement());
-
-        ModName = content.Name;
-        Settings = GetSettings<Settings>();
-
+        
         // Save settings when the game quits.
-        Application.quitting += () => Settings.Write();
+        Application.quitting += () => PawnEditorSettings.Write();
     }
 
     public override string SettingsCategory() => "Pawn Editor";
@@ -32,18 +33,18 @@ public class PawnEditorMod : Mod
     {
         var listing = new Listing_Standard();
         listing.Begin(inRect);
-        listing.ButtonTextLabeled("Restriction Mode", Settings.restriction.ToString());
-        listing.CheckboxLabeled("Allow resize", ref Settings.allowResize);
-        listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref Settings.drawDebug);
+        listing.ButtonTextLabeled("Restriction Mode", PawnEditorSettings.restriction.ToString());
+        listing.CheckboxLabeled("Allow resize", ref PawnEditorSettings.allowResize);
+        listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref PawnEditorSettings.drawDebug);
         if (listing.ButtonText("Window presets"))
         {
             List<FloatMenuOption> opts =
             [
                 new("Centered", () => Window_Editor.SavedWindowRect = Window_Editor.DefaultWindowRect),
                 new("Left half",
-                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, Verse.UI.screenWidth / 2f, Verse.UI.screenHeight)),
+                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth / 2f, UI.screenHeight)),
                 new("Full screen",
-                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, Verse.UI.screenWidth, Verse.UI.screenHeight))
+                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth, UI.screenHeight))
             ];
             Find.WindowStack.Add(new FloatMenu(opts));
         }

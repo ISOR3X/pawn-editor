@@ -33,12 +33,12 @@ public static partial class TaffyExtensions
         var key = $"{b.ContextKey}:{file}:{line}";
         var isOpen = SCollapsibleState.GetValueOrDefault(key, defaultOpen);
 
-        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
+        var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             flexDirection = FlexDirection.Column
-        }).Resolve();
+        });
 
-        b.Div(resolvedStyle, build: col =>
+        b.Div(col =>
         {
             col.Div(
                 r =>
@@ -57,6 +57,6 @@ public static partial class TaffyExtensions
 
             if (isOpen)
                 content(col);
-        });
+        }, mergedStyle);
     }
 }

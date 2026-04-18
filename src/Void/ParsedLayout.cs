@@ -8,12 +8,12 @@ namespace Void;
 /// Immutable parsed representation of one XML element in a section layout tree.
 /// Never mutated after <see cref="ResolveClasses"/> completes.
 /// </summary>
-public class UILayoutNode
+public class ParsedLayout
 {
     public string Tag = string.Empty;
     public string? Id;
     public XMLComponent Props = new DivElement();
-    public List<UILayoutNode> Children = [];
+    public readonly List<ParsedLayout> Children = [];
 
     // Stored during XML load; used by ResolveClasses then cleared.
     internal string[]? UnresolvedClasses;
@@ -27,9 +27,8 @@ public class UILayoutNode
     }
 
     /// <summary>
-    /// Resolves CSS class names (from <c>class="..."</c>) against loaded <see cref="TaffyStyleDef"/>
+    /// Resolves CSS class names (from <c>class="..."</c>) against loaded <see cref="StyleMapDef"/>
     /// defs and merges them with the inline style. Walks the tree recursively.
-    /// Must be called from <see cref="SectionDef.ResolveReferences"/> after all defs are loaded.
     /// </summary>
     public void ResolveClasses()
     {
@@ -65,7 +64,7 @@ public class UILayoutNode
     }
 
     /// <summary>Searches the tree for a node with the given <paramref name="id"/>.</summary>
-    public UILayoutNode? FindById(string id)
+    public ParsedLayout? FindById(string id)
     {
         if (Id == id) return this;
         foreach (var child in Children)

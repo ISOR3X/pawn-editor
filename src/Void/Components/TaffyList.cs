@@ -32,14 +32,14 @@ public static partial class TaffyExtensions
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
+        var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = Dimension.Percent(1f),
             height = Mathf.Clamp(items.Count, 1, 6) * itemHeight,
-        }).Resolve();
+        });
 
         var capturedItems = items;
-        b.AddLeaf(resolvedStyle, r =>
+        b.Item(r =>
         {
             SScrollPositions.TryGetValue(key, out var sp);
 
@@ -67,6 +67,6 @@ public static partial class TaffyExtensions
 
             Verse.Widgets.EndScrollView();
             SScrollPositions[key] = sp;
-        });
+        }, mergedStyle);
     }
 }

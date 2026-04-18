@@ -2,7 +2,7 @@
 
 namespace PawnEditor;
 
-public class Settings : ModSettings
+public class PawnEditorSettings : ModSettings
 {
     public enum RestrictionMode
     {

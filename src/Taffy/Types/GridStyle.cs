@@ -331,7 +331,7 @@ namespace Taffy
             PositiveImplicit == other.PositiveImplicit;
 
         public override bool Equals(object? obj) => obj is TrackCounts o && Equals(o);
-        public override int GetHashCode() => System.HashCode.Combine(NegativeImplicit, Explicit, PositiveImplicit);
+        public override int GetHashCode() => HashCode.Combine(NegativeImplicit, Explicit, PositiveImplicit);
 
         public override string ToString() =>
             $"TrackCounts(-{NegativeImplicit} explicit={Explicit} +{PositiveImplicit})";
@@ -392,7 +392,7 @@ namespace Taffy
 
         public bool Equals(GridPlacement other) => _kind == other._kind && _value == other._value;
         public override bool Equals(object? obj) => obj is GridPlacement o && Equals(o);
-        public override int GetHashCode() => System.HashCode.Combine((byte)_kind, _value);
+        public override int GetHashCode() => HashCode.Combine((byte)_kind, _value);
 
         public override string ToString() => _kind switch
         {
@@ -440,7 +440,7 @@ namespace Taffy
 
         public bool Equals(OriginZeroGridPlacement other) => _kind == other._kind && _value == other._value;
         public override bool Equals(object? obj) => obj is OriginZeroGridPlacement o && Equals(o);
-        public override int GetHashCode() => System.HashCode.Combine((byte)_kind, _value);
+        public override int GetHashCode() => HashCode.Combine((byte)_kind, _value);
     }
 
     // ── GridAutoFlow ──────────────────────────────────────────────────────────

@@ -18,7 +18,7 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
     {
         // TODO: Add title renaming
         builder.Text("Name", color: ColoredText.TipSectionTitleColor);
-        builder.Div(new Style { flexDirection = FlexDirection.Row }, row =>
+        builder.Div(row =>
         {
             switch (pawn.Name)
             {
@@ -56,9 +56,13 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
             }
 
             row.Button(icon: TexButton.Rename,
-                onClick: r => { FloatWindow.ToggleState(r, () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>())); },
+                onClick: r =>
+                {
+                    FloatWindow.ToggleState(r,
+                        () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
+                },
                 drawGraphic: false,
                 style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(4f, 0f, 0f, 0f) });
-        });
+        }, new StyleOverride { flexDirection = FlexDirection.Row });
     }
 }

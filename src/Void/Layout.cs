@@ -4,12 +4,12 @@ using Void.XMLComponents;
 namespace Void;
 
 /// <summary>
-/// Frame-scoped mutable wrapper around an immutable <see cref="UILayoutNode"/> template tree.
+/// Frame-scoped mutable wrapper around an immutable <see cref="ParsedLayout"/> template tree.
 /// A fresh instance is created each frame; C# registers per-element overrides via
 /// <see cref="ComponentById{T}"/>, then <see cref="Render"/> walks the tree and emits
 /// everything into the <see cref="TaffyBuilder"/>. Discarded after the frame.
 /// </summary>
-public class UILayout(UILayoutNode template, IContext? context = null)
+public class Layout(ParsedLayout template, IContext? context = null)
 {
     private readonly Dictionary<string, XMLComponent> _overrides = [];
 
@@ -75,10 +75,10 @@ public class UILayout(UILayoutNode template, IContext? context = null)
     }
 
     /// <summary>Returns the effective config for a node — the C# override if one was registered, otherwise the XML props.</summary>
-    private XMLComponent GetConfigForNode(UILayoutNode node) =>
+    private XMLComponent GetConfigForNode(ParsedLayout node) =>
         node.Id != null && _overrides.TryGetValue(node.Id, out var ov) ? ov : node.Props;
 
-    internal void RenderNode(TaffyBuilder builder, UILayoutNode node)
+    private void RenderNode(TaffyBuilder builder, ParsedLayout node)
     {
         var config = node.Id != null && _overrides.TryGetValue(node.Id, out var ov)
             ? ov

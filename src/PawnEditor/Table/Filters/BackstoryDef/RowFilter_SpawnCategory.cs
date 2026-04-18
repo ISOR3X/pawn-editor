@@ -1,5 +1,4 @@
 using HotSwap;
-using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -25,11 +24,11 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 
         builder.Collapsible("Spawn category", col =>
         {
-            col.Div(new Style { gap = Void.Taffy.Gap(GenUI.GapTiny) }, row2 =>
+            col.Div( row2 =>
             {
                 row2.Icon(TexButton.Search);
                 row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
-            });
+            },new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
 
             var filtered = SpawnCategories
                 .Where(c => _searchText.NullOrEmpty() ||
@@ -47,7 +46,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 table.SetDirty();
             });
 
-            col.Row(new Style { gap = Void.Taffy.Gap(GenUI.GapTiny) }, row =>
+            col.Div(row =>
             {
                 row.Button("Enable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
                 {
@@ -59,7 +58,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                     foreach (var c in SpawnCategories) _disabledCategories.Add(c);
                     table.SetDirty();
                 });
-            });
+            }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
         }, style: new StyleOverride { gap = Void.Taffy.Gap(0f, GenUI.GapTiny) });
     }
 }

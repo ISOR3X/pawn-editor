@@ -9,6 +9,7 @@ using Void;
 using Void.Components;
 using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.AbilityDef>;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
@@ -24,7 +25,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             .ToList();
     }
 
-    public override void OnLayout(UILayout layout, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
         layout.ComponentById<DivElement>("abilityIcons").Children = inner =>
             DoAbilities(inner, GetAbilitiesForPawn(pawn), pawn);
