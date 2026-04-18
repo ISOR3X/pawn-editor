@@ -13,7 +13,7 @@ public static class QuickActions
         if (pawn == null) return;
         DebugTools.curTool = new DebugTool("Teleport here", () =>
         {
-            var cell = UI.MouseCell();
+            var cell = Verse.UI.MouseCell();
             var map = Find.CurrentMap;
             if (!cell.Standable(map) || cell.Fogged(map)) return;
             PawnUtility.TeleportTo(pawn, new PawnLocation(map), cell);

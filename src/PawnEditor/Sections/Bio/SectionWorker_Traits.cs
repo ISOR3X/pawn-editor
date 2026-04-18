@@ -5,6 +5,8 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
 using Display = Taffy.Display;
 using FlexDirection = Taffy.FlexDirection;
@@ -30,7 +32,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                 width = Dimension.Percent(1f),
                 flexWrap = FlexWrap.Wrap,
                 flexDirection = FlexDirection.Row,
-                gap = Taffy.Gap(GenUI.GapTiny),
+                gap = Void.Taffy.Gap(GenUI.GapTiny),
             }
         );
         builder.Button("Add trait",
@@ -85,10 +87,10 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                     new StyleOverride
                     {
                         flexWrap = FlexWrap.Wrap,
-                        gap = Taffy.Gap(GenUI.GapTiny),
+                        gap = Void.Taffy.Gap(GenUI.GapTiny),
                         flexGrow = 1f,
                         alignContent = AlignContent.FlexStart,
-                        padding = Taffy.Padding(GenUI.GapTiny),
+                        padding = Void.Taffy.Padding(GenUI.GapTiny),
                         width = Dimension.Percent(1f)
                     });
             },
@@ -143,12 +145,12 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             columns:
             [
                 Col.Create(
-                    Taffy.Fr(),
+                    Void.Taffy.Fr(),
                     (grid, record) => grid.Text(record.Degree.LabelCap),
                     "Label"
                 ),
                 Col.Create(
-                    Taffy.Fr(),
+                    Void.Taffy.Fr(),
                     (grid, record) => grid.Text(record.TraitDef.modContentPack?.Name ?? "",
                         color: ColoredText.SubtleGrayColor),
                     "Source"

@@ -1,6 +1,8 @@
 using Taffy;
 using RimWorld;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor.Table;
 
@@ -8,7 +10,7 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
 {
     private ModContentPack? _selected;
 
-    public bool Passes(TDef row, IEditorContext? ctx)
+    public bool Passes(TDef row, IContext? ctx)
         => _selected == null || row.modContentPack == _selected;
 
     public void DrawFilter(TaffyBuilder builder, Table<TDef> table)

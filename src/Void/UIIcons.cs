@@ -2,7 +2,7 @@ using System.Reflection;
 using UnityEngine;
 using Verse;
 
-namespace PawnEditor;
+namespace Void;
 
 /// <summary>
 /// Resolves icon names from XML (<c>icon="plus"</c>) to <see cref="Texture2D"/> instances.
@@ -16,14 +16,6 @@ public static class UIIcons
 {
     private static readonly Dictionary<string, Texture2D> Registry = new();
     private static readonly Dictionary<string, Texture2D?> ReflectionCache = new();
-
-    static UIIcons()
-    {
-        Register("plus", TexButton.Add);
-        Register("delete", TexButton.Delete);
-        Register("info", TexButton.Info);
-        Register("reroll", TexPawnEditor.Reroll);
-    }
 
     /// <summary>Registers a short name for use in <c>icon="..."</c> attributes.</summary>
     public static void Register(string name, Texture2D icon) => Registry[name] = icon;
@@ -45,7 +37,7 @@ public static class UIIcons
         var result = ResolveViaReflection(name);
         ReflectionCache[name] = result;
         if (result == null)
-            Log.Warning($"[{PawnEditorMod.ModName}] Could not resolve icon '{name}'.");
+            Log.Warning($"[{VoidMod.ModName}] Could not resolve icon '{name}'.");
         return result;
     }
 

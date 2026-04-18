@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <!--
+        Tailwind-inspired utility classes for PawnEditor XML layouts.
+        Scale: 1 unit = 4px (matches Tailwind's default spacing scale).
+        Usage: class="flex flex-col gap-2 p-3 items-center"
+    -->
+    <Void.StyleMapDef>
+        <defName>PawnEditorStyles</defName>
+        <styles>
+            <!-- DISPLAY -->
+            <li>
+                <name>flex</name>
+                <value>display: flex</value>
+            </li>
+            <li>
+                <name>grid</name>
+                <value>display: grid</value>
+            </li>
+            <li>
+                <name>block</name>
+                <value>display: block</value>
+            </li>
+            <li>
+                <name>hidden</name>
+                <value>display: none</value>
+            </li>
+            <!-- FLEX DIRECTION -->
+            <li>
+                <name>flex-row</name>
+                <value>flex-direction: row</value>
+            </li>
+            <li>
+                <name>flex-col</name>
+                <value>flex-direction: column</value>
+            </li>
+            <li>
+                <name>flex-row-reverse</name>
+                <value>flex-direction: row-reverse</value>
+            </li>
+            <li>
+                <name>flex-col-reverse</name>
+                <value>flex-direction: column-reverse</value>
+            </li>
+            <!-- FLEX WRAP -->
+            <li>
+                <name>flex-wrap</name>
+                <value>flex-wrap: wrap</value>
+            </li>
+            <li>
+                <name>flex-nowrap</name>
+                <value>flex-wrap: nowrap</value>
+            </li>
+            <li>
+                <name>flex-wrap-reverse</name>
+                <value>flex-wrap: wrap-reverse</value>
+            </li>
+            <!-- FLEX GROW / SHRINK -->
+            <li>
+                <name>grow</name>
+                <value>flex-grow: 1</value>
+            </li>
+            <li>
+                <name>grow-0</name>
+                <value>flex-grow: 0</value>
+            </li>
+            <li>
+                <name>shrink</name>
+                <value>flex-shrink: 1</value>
+            </li>
+            <li>
+                <name>shrink-0</name>
+                <value>flex-shrink: 0</value>
+            </li>
+            <!-- WIDTH -->
+            <li>
+                <name>w-auto</name>
+                <value>width: auto</value>
+            </li>
+            <li>
+                <name>w-full</name>
+                <value>width: 100%</value>
+            </li>
+            <li>
+                <name>w-1/2</name>
+                <value>width: 50%</value>
+            </li>
+            <li>
+                <name>w-1/3</name>
+                <value>width: 33%</value>
+            </li>
+            <li>
+                <name>w-2/3</name>
+                <value>width: 67%</value>
+            </li>
+            <li>
+                <name>w-1/4</name>
+                <value>width: 25%</value>
+            </li>
+            <li>
+                <name>w-3/4</name>
+                <value>width: 75%</value>
+            </li>
+            <!-- HEIGHT -->
+            <li>
+                <name>h-auto</name>
+                <value>height: auto</value>
+            </li>
+            <li>
+                <name>h-full</name>
+                <value>height: 100%</value>
+            </li>
+            <!-- MIN / MAX SIZE -->
+            <li>
+                <name>min-w-0</name>
+                <value>min-width: 0px</value>
+            </li>
+            <li>
+                <name>min-h-0</name>
+                <value>min-height: 0px</value>
+            </li>
+            <li>
+                <name>max-w-none</name>
+                <value>max-width: none</value>
+            </li>
+            <li>
+                <name>max-h-none</name>
+                <value>max-height: none</value>
+            </li>
+            <!-- GAP  (1 unit = 4px) -->
+            <li>
+                <name>gap-0</name>
+                <value>gap: 0px</value>
+            </li>
+            <li>
+                <name>gap-1</name>
+                <value>gap: 4px</value>
+            </li>
+            <li>
+                <name>gap-2</name>
+                <value>gap: 8px</value>
+            </li>
+            <li>
+                <name>gap-3</name>
+                <value>gap: 12px</value>
+            </li>
+            <li>
+                <name>gap-4</name>
+                <value>gap: 16px</value>
+            </li>
+            <li>
+                <name>gap-6</name>
+                <value>gap: 24px</value>
+            </li>
+            <li>
+                <name>gap-8</name>
+                <value>gap: 32px</value>
+            </li>
+            <!-- PADDING  (1 unit = 4px) -->
+            <li>
+                <name>p-0</name>
+                <value>padding: 0px</value>
+            </li>
+            <li>
+                <name>p-1</name>
+                <value>padding: 4px</value>
+            </li>
+            <li>
+                <name>p-2</name>
+                <value>padding: 8px</value>
+            </li>
+            <li>
+                <name>p-3</name>
+                <value>padding: 12px</value>
+            </li>
+            <li>
+                <name>p-4</name>
+                <value>padding: 16px</value>
+            </li>
+            <li>
+                <name>p-6</name>
+                <value>padding: 24px</value>
+            </li>
+            <li>
+                <name>p-8</name>
+                <value>padding: 32px</value>
+            </li>
+            <li>
+                <name>px-1</name>
+                <value>padding-left: 4px; padding-right: 4px</value>
+            </li>
+            <li>
+                <name>px-2</name>
+                <value>padding-left: 8px; padding-right: 8px</value>
+            </li>
+            <li>
+                <name>px-3</name>
+                <value>padding-left: 12px; padding-right: 12px</value>
+            </li>
+            <li>
+                <name>px-4</name>
+                <value>padding-left: 16px; padding-right: 16px</value>
+            </li>
+            <li>
+                <name>py-1</name>
+                <value>padding-top: 4px; padding-bottom: 4px</value>
+            </li>
+            <li>
+                <name>py-2</name>
+                <value>padding-top: 8px; padding-bottom: 8px</value>
+            </li>
+            <li>
+                <name>py-3</name>
+                <value>padding-top: 12px; padding-bottom: 12px</value>
+            </li>
+            <li>
+                <name>py-4</name>
+                <value>padding-top: 16px; padding-bottom: 16px</value>
+            </li>
+            <!-- ALIGN ITEMS -->
+            <li>
+                <name>items-start</name>
+                <value>align-items: flex-start</value>
+            </li>
+            <li>
+                <name>items-end</name>
+                <value>align-items: flex-end</value>
+            </li>
+            <li>
+                <name>items-center</name>
+                <value>align-items: center</value>
+            </li>
+            <li>
+                <name>items-stretch</name>
+                <value>align-items: stretch</value>
+            </li>
+            <li>
+                <name>items-baseline</name>
+                <value>align-items: baseline</value>
+            </li>
+            <!-- JUSTIFY CONTENT -->
+            <li>
+                <name>justify-start</name>
+                <value>justify-content: flex-start</value>
+            </li>
+            <li>
+                <name>justify-end</name>
+                <value>justify-content: flex-end</value>
+            </li>
+            <li>
+                <name>justify-center</name>
+                <value>justify-content: center</value>
+            </li>
+            <li>
+                <name>justify-between</name>
+                <value>justify-content: space-between</value>
+            </li>
+            <li>
+                <name>justify-around</name>
+                <value>justify-content: space-around</value>
+            </li>
+            <li>
+                <name>justify-evenly</name>
+                <value>justify-content: space-evenly</value>
+            </li>
+            <li>
+                <name>justify-stretch</name>
+                <value>justify-content: stretch</value>
+            </li>
+            <!-- ALIGN CONTENT -->
+            <li>
+                <name>content-start</name>
+                <value>align-content: flex-start</value>
+            </li>
+            <li>
+                <name>content-end</name>
+                <value>align-content: flex-end</value>
+            </li>
+            <li>
+                <name>content-center</name>
+                <value>align-content: center</value>
+            </li>
+            <li>
+                <name>content-stretch</name>
+                <value>align-content: stretch</value>
+            </li>
+            <li>
+                <name>content-between</name>
+                <value>align-content: space-between</value>
+            </li>
+            <li>
+                <name>content-around</name>
+                <value>align-content: space-around</value>
+            </li>
+            <li>
+                <name>content-evenly</name>
+                <value>align-content: space-evenly</value>
+            </li>
+            <!-- ALIGN SELF -->
+            <li>
+                <name>self-start</name>
+                <value>align-self: flex-start</value>
+            </li>
+            <li>
+                <name>self-end</name>
+                <value>align-self: flex-end</value>
+            </li>
+            <li>
+                <name>self-center</name>
+                <value>align-self: center</value>
+            </li>
+            <li>
+                <name>self-stretch</name>
+                <value>align-self: stretch</value>
+            </li>
+        </styles>
+    </Void.StyleMapDef>
+</Defs>

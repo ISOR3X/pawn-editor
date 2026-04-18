@@ -4,6 +4,8 @@ using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
 using Taffy;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -34,16 +36,16 @@ public abstract class SectionWorker_Hair<T>(SectionDef def) : SectionWorker(def)
             columns:
             [
                 ColumnWorker<T>.Create<PawnContext>(
-                    Taffy.Px(36f),
+                    Void.Taffy.Px(36f),
                     (grid, def, ctx) => grid.Icon(def.Icon, ctx.Value.story.HairColor, UIUtility.ComponentSize.Large)
                 ),
                 ColumnWorker<T>.CreateText(
-                    Taffy.Fr(3), def => def.LabelCap, "Label"
+                    Void.Taffy.Fr(3), def => def.LabelCap, "Label"
                 ),
                 new ColumnWorker_Gender<T>(),
-                ColumnWorker<T>.CreateText(Taffy.Fr(), def => def.StyleItemCategory.LabelCap, "Style"),
+                ColumnWorker<T>.CreateText(Void.Taffy.Fr(), def => def.StyleItemCategory.LabelCap, "Style"),
                 ColumnWorker<T>.CreateText(
-                    Taffy.Fr(),
+                    Void.Taffy.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
                     color: ColoredText.SubtleGrayColor

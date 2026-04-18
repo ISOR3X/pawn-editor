@@ -1,10 +1,13 @@
 using HotSwap;
-using PawnEditor.Extensions;
-using Taffy;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
+using Void.Extensions;
 using FlexDirection = Taffy.FlexDirection;
+using TexUI = Void.TexUI;
 
 namespace PawnEditor;
 
@@ -34,7 +37,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             {
                 flexGrow = 1f, flexDirection = FlexDirection.Row, flexWrap = FlexWrap.Wrap,
                 minSize = new Size<Dimension>(Dimension.Percent(1f), Dimension.AUTO),
-                gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny)
+                gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny)
             },
             col =>
             {
@@ -70,9 +73,9 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                     var r2 = r.TakeRightPart(r.height / 2f);
                     r2.SplitHorizontallyEqual(out var upRect, out var downRect);
 
-                    if (Widgets.ButtonImageWithHold(upRect, TexPawnEditor.Up,
+                    if (Void.Widgets.ButtonImageWithHold(upRect, TexUI.ArrowUp,
                             $"{builder.ContextKey}:{skillDef.defName}:up")) newSkillLevel++;
-                    if (Widgets.ButtonImageWithHold(downRect, TexPawnEditor.Down,
+                    if (Void.Widgets.ButtonImageWithHold(downRect, TexUI.ArrowDown,
                             $"{builder.ContextKey}:{skillDef.defName}:down")) newSkillLevel--;
 
                     var skillProgressPct = Mathf.Max(0.0f, skill.GetLevel() / (float)SkillRecord.MaxLevel);
@@ -92,7 +95,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             {
                 width = SkillRectSize.x,
                 height = SkillRectSize.y,
-                gap = Taffy.Gap(GenUI.GapTiny)
+                gap = Void.Taffy.Gap(GenUI.GapTiny)
             });
     }
 

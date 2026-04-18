@@ -31,6 +31,7 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Taffy\Taffy.csproj"/>
+        <ProjectReference Include="..\Void\Void.csproj"/>
     </ItemGroup>
     <ItemGroup>
         <Publicize Include="Assembly-CSharp"/>
@@ -56,6 +57,8 @@
             <RuntimeDlls Include="$(OutputPath)PawnEditor.pdb"/>
             <RuntimeDlls Include="$(OutputPath)Taffy.dll"/>
             <RuntimeDlls Include="$(OutputPath)Taffy.pdb"/>
+            <RuntimeDlls Include="$(OutputPath)Void.dll"/>
+            <RuntimeDlls Include="$(OutputPath)Void.pdb"/>
             <RuntimeDlls Include="$(OutputPath)HotSwap.dll"/>
             <RuntimeDlls Include="$(OutputPath)HotSwap.pdb"/>
             <RuntimeDlls Include="$(OutputPath)0Harmony.dll"/>

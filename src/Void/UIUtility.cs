@@ -4,7 +4,7 @@ using UnityEngine;
 using Verse;
 using Color = UnityEngine.Color;
 
-namespace PawnEditor;
+namespace Void;
 
 [HotSwappable]
 public static class UIUtility
@@ -38,7 +38,8 @@ public static class UIUtility
 
         if (!Mouse.IsOver(inRect)) return;
 
-        var r = new Rect(UI.MousePositionOnUI.x + 10f, UI.MousePositionOnUIInverted.y, 100f, 100f + Text.LineHeight);
+        var r = new Rect(Verse.UI.MousePositionOnUI.x + 10f, Verse.UI.MousePositionOnUIInverted.y, 100f,
+            100f + Text.LineHeight);
         Find.WindowStack.ImmediateWindow(12918217, r, WindowLayer.Super, () =>
         {
             var rect2 = r.AtZero();

@@ -1,5 +1,6 @@
 using HotSwap;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 

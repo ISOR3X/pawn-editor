@@ -2,6 +2,8 @@ using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor.Table.ColumnWorkers;
 
@@ -13,7 +15,7 @@ public class ColumnWorker_Gender<T> : ColumnWorker<T> where T : StyleItemDef
 
     protected override string HeaderLabel => "Gender";
 
-    public override TrackSizingFunction TrackSize => Taffy.Px(CalcHeaderWidth(HeaderLabel));
+    public override TrackSizingFunction TrackSize => Void.Taffy.Px(CalcHeaderWidth(HeaderLabel));
     public override bool Sortable => true;
 
     public override void DrawCell(TaffyBuilder grid, T row) => grid.Icon(GetIcon(row));

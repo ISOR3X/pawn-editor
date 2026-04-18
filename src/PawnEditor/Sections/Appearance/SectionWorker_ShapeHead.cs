@@ -1,8 +1,9 @@
 using HotSwap;
 using JetBrains.Annotations;
-using PawnEditor.Extensions;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Extensions;
 
 namespace PawnEditor;
 
@@ -17,7 +18,7 @@ public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
         var capturedPawn = pawn;
         builder.Item(r =>
         {
-            Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Head");
+            Void.Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Head");
             Widgets.Carrousel(r,
                 DefDatabase<HeadTypeDef>.AllDefsListForReading
                     .Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList(),

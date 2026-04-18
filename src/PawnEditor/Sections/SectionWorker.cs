@@ -1,6 +1,7 @@
 ﻿using HotSwap;
 using UnityEngine;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -33,7 +34,7 @@ public abstract class SectionWorker(SectionDef def)
         builder.ContextKey = pawn.thingIDNumber.ToString();
         if (Def.layout != null)
         {
-            var layout = new UILayout(Def.layout, pawn);
+            var layout = new UILayout(Def.layout, new PawnContext(pawn));
             OnLayout(layout, pawn);
             layout.Render(builder, tabStyle);
         }
@@ -50,7 +51,7 @@ public abstract class SectionWorker(SectionDef def)
     public float DoSection(Pawn pawn, Rect inRect)
     {
         if (!ShowSection(pawn)) return 0f;
-        return Taffy.MeasuredColumn(inRect, col => BuildSection(col, pawn));
+        return Void.Taffy.MeasuredColumn(inRect, col => BuildSection(col, pawn));
     }
 
 

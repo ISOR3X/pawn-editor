@@ -1,5 +1,6 @@
 using UnityEngine;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -15,7 +16,7 @@ public abstract class TabWorker(TabDef def)
 
     protected virtual StyleOverride? LayoutStyle => null;
 
-    public virtual void DoTabContents(ref Rect inRect, IEditorContext? context)
+    public virtual void DoTabContents(ref Rect inRect, IContext? context)
     {
         var r = inRect.ContractedBy(16f);
         Verse.Widgets.BeginGroup(r);
@@ -23,12 +24,12 @@ public abstract class TabWorker(TabDef def)
         var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0;
         var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
         Verse.Widgets.BeginScrollView(contentRect, ref _tabScrollPosition, viewRect);
-        _viewRectHeight = Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), Def.layout.RootStyle);
+        _viewRectHeight = Void.Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), Def.layout.RootStyle);
         Verse.Widgets.EndScrollView();
         Verse.Widgets.EndGroup();
     }
 
-    protected abstract void DoInnerTabContents(TaffyBuilder col, IEditorContext? context);
+    protected abstract void DoInnerTabContents(TaffyBuilder col, IContext? context);
 
     public virtual void Notify_ContentChanged()
     {
@@ -46,11 +47,11 @@ public abstract class TabWorker(TabDef def)
 /// matches <typeparamref name="TContext"/>; silently no-ops otherwise.
 /// </summary>
 public abstract class TabWorker<TContext>(TabDef def) : TabWorker(def)
-    where TContext : class, IEditorContext
+    where TContext : class, IContext
 {
     public override Type RequiredContextType => typeof(TContext);
 
-    protected sealed override void DoInnerTabContents(TaffyBuilder col, IEditorContext? context)
+    protected sealed override void DoInnerTabContents(TaffyBuilder col, IContext? context)
     {
         if (context is TContext typed)
             DoInnerTabContents(col, typed);

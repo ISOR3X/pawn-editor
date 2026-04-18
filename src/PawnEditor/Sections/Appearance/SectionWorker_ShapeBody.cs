@@ -1,8 +1,9 @@
 using HotSwap;
-using PawnEditor.Extensions;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Extensions;
 
 namespace PawnEditor;
 
@@ -16,7 +17,7 @@ public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
         var capturedPawn = pawn;
         builder.Item(r =>
         {
-            Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Body");
+            Void.Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Body");
             Widgets.Carrousel(r,
                 DefDatabase<BodyTypeDef>.AllDefsListForReading
                     .Where(d => AppearanceUtility.CanUseBodyType(d, pawn)).ToList(),

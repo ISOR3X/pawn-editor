@@ -1,21 +1,15 @@
 using RimWorld;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
-public interface IEditorContext { }
-
-public interface IEditorContext<T> : IEditorContext
-{
-    T Value { get; }
-}
-
-public sealed class PawnContext(Pawn pawn) : IEditorContext<Pawn>
+public sealed class PawnContext(Pawn pawn) : IContext<Pawn>
 {
     public Pawn Value { get; } = pawn;
 }
 
-public sealed class FactionContext(Faction faction) : IEditorContext<Faction>
+public sealed class FactionContext(Faction faction) : IContext<Faction>
 {
     public Faction Value { get; } = faction;
 }

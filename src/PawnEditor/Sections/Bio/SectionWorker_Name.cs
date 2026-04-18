@@ -3,6 +3,8 @@ using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;

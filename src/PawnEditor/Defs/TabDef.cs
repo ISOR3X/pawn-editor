@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -8,7 +9,7 @@ public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
 
-    public TaffyLayoutNode layout = new();
+    public Tab layout = new();
     public int priority = 10;
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 

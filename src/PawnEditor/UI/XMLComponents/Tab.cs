@@ -17,19 +17,21 @@
 using System.Xml;
 using HotSwap;
 using Taffy;
-using UnityEngine;
 using Verse;
-using Display = Taffy.Display;
+using StyleOverride = Void.StyleOverride;
+using TaffyBuilder = Void.TaffyBuilder;
+using TaffyStyleParser = Void.TaffyStyleParser;
+using VoidMod = Void.VoidMod;
 
 namespace PawnEditor;
 
 [HotSwappable]
-public class TaffyLayoutNode
+public class Tab
 {
     private StyleOverride _style = new();
 
     public SectionDef? section; // Public so DirectXmlCrossRefLoader can resolve it by field name after all defs load.
-    private readonly List<TaffyLayoutNode> _children = [];
+    private readonly List<Tab> _children = [];
     private Func<bool> _isActive = static () => true;
 
     /// <summary>The style of this node, used as the Taffy root style when this is the root layout node.</summary>
@@ -53,7 +55,7 @@ public class TaffyLayoutNode
         // Root <layout> defaults to a wrapping flex row with small gap.
         if (xmlNode.Name == "layout")
         {
-            _style.gap = Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall);
+            _style.gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall);
             _style.flexWrap = FlexWrap.Wrap;
         }
 
@@ -74,11 +76,11 @@ public class TaffyLayoutNode
                 if (child.Name != "div" && child.Name != "section")
                 {
                     Log.Error(
-                        $"[{PawnEditorMod.ModName}] Unknown layout element <{child.Name}>. Expected <div> or <section>.");
+                        $"[{VoidMod.ModName}] Unknown layout element <{child.Name}>. Expected <div> or <section>.");
                     continue;
                 }
 
-                var childNode = new TaffyLayoutNode();
+                var childNode = new Tab();
                 childNode.LoadDataFromXmlCustom(child);
                 _children.Add(childNode);
             }
@@ -96,9 +98,10 @@ public class TaffyLayoutNode
             if (attr.Name is "style")
             {
                 var parsed = TaffyStyleParser.ParseInlineStyle(attr.Value);
-                _style = parsed.Merge(_style);  // inline wins over any previously set values
+                _style = parsed.Merge(_style); // inline wins over any previously set values
                 continue;
             }
+
             TaffyStyleParser.ApplyProperty(attr.Name, attr.Value, _style);
         }
     }
@@ -124,7 +127,7 @@ public class TaffyLayoutNode
         }
     }
 
-    private static void BuildNode(TaffyBuilder col, TaffyLayoutNode node, Pawn pawn,
+    private static void BuildNode(TaffyBuilder col, Tab node, Pawn pawn,
         Func<SectionDef, bool>? isVisible)
     {
         if (node.section != null)
@@ -157,11 +160,4 @@ public class TaffyLayoutNode
     }
 
     #endregion
-
-    /// <summary>
-    /// Standalone entry point: computes layout with unconstrained height, draws all visible
-    /// sections inside <paramref name="rect"/>, and returns the total content height.
-    /// </summary>
-    public float Draw(Rect rect, Pawn pawn, Func<SectionDef, bool>? isVisible = null)
-        => Taffy.DivMeasured(rect, col => BuildChildrenInto(col, pawn, isVisible), _style);
 }

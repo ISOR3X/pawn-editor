@@ -2,6 +2,7 @@
 using HotSwap;
 using UnityEngine;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -15,6 +16,7 @@ public class PawnEditorMod : Mod
     {
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
+        XMLLayoutParser.RegisterTag("section", () => new XMLComponents.SectionElement());
 
         ModName = content.Name;
         Settings = GetSettings<Settings>();
@@ -39,9 +41,9 @@ public class PawnEditorMod : Mod
             [
                 new("Centered", () => Window_Editor.SavedWindowRect = Window_Editor.DefaultWindowRect),
                 new("Left half",
-                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth / 2f, UI.screenHeight)),
+                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, Verse.UI.screenWidth / 2f, Verse.UI.screenHeight)),
                 new("Full screen",
-                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth, UI.screenHeight))
+                    () => Window_Editor.SavedWindowRect = new Rect(0, 0, Verse.UI.screenWidth, Verse.UI.screenHeight))
             ];
             Find.WindowStack.Add(new FloatMenu(opts));
         }

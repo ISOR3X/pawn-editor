@@ -1,11 +1,12 @@
 using HotSwap;
-using PawnEditor.Extensions;
 using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 using PawnEditor;
+using Void;
+using Void.Extensions;
 
 namespace PawnEditor.Table;
 
@@ -13,9 +14,9 @@ namespace PawnEditor.Table;
 public class Table<TRow>(
     IEnumerable<TRow> rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,
-    IEditorContext? context = null,
+    IContext? context = null,
     IReadOnlyList<IRowFilter<TRow>>? filters = null,
-    Action<Rect, TRow, IEditorContext?>? onRowHover = null,
+    Action<Rect, TRow, IContext?>? onRowHover = null,
     Action<TRow?>? onRowClick = null,
     Func<TRow, string>? searchProjection = null,
     float rowHeight = 30f
@@ -88,7 +89,7 @@ public class Table<TRow>(
             headerRect.height);
 
 
-        Taffy.Grid(headerContentRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
+        Void.Taffy.Grid(headerContentRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
         {
             foreach (var col in columns)
             {
@@ -177,7 +178,7 @@ public class Table<TRow>(
             var gridRect = new Rect(0f, firstVisible * rowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
 
-            Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, 0f, rowHeight, grid =>
+            Void.Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, 0f, rowHeight, grid =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {

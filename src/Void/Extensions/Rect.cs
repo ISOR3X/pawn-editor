@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Verse;
 
-namespace PawnEditor.Extensions;
+namespace Void.Extensions;
 
 public static class Rect_Extension
 {

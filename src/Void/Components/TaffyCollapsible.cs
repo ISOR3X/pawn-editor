@@ -3,7 +3,7 @@ using RimWorld;
 using Taffy;
 using Verse;
 
-namespace PawnEditor;
+namespace Void.Components;
 
 public static partial class TaffyExtensions
 {

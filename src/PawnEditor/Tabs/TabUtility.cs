@@ -1,4 +1,5 @@
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -14,7 +15,7 @@ public static class TabUtility
         }
     } = [];
 
-    public static List<TabDef> GetTabDefsFor(IEditorContext? context) =>
+    public static List<TabDef> GetTabDefsFor(IContext? context) =>
         AllTabDefs
             .Where(def =>
             {

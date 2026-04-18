@@ -1,6 +1,6 @@
 ﻿using Taffy;
 
-namespace PawnEditor;
+namespace Void;
 
 /// <summary>
 /// A near 1:1 copy of <see cref="Style"/>, but with each field nullable.

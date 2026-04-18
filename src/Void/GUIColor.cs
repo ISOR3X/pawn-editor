@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PawnEditor;
+namespace Void;
 
 public class GUIColor : IDisposable
 {

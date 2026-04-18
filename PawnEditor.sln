@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PawnEditor", "src\PawnEdito
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Taffy", "src\Taffy\Taffy.csproj", "{7C83875D-3249-4AA4-A9CB-B8975896467B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Void", "src\Void\Void.csproj", "{9845C79D-47F6-4337-9076-3890D610A718}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,18 @@ Global
 		{7C83875D-3249-4AA4-A9CB-B8975896467B}.Release|x64.Build.0 = Release|Any CPU
 		{7C83875D-3249-4AA4-A9CB-B8975896467B}.Release|x86.ActiveCfg = Release|Any CPU
 		{7C83875D-3249-4AA4-A9CB-B8975896467B}.Release|x86.Build.0 = Release|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Debug|x64.Build.0 = Debug|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Debug|x86.Build.0 = Debug|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Release|x64.ActiveCfg = Release|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Release|x64.Build.0 = Release|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Release|x86.ActiveCfg = Release|Any CPU
+		{9845C79D-47F6-4337-9076-3890D610A718}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{844D4ADE-182D-4AA7-B16D-CD8AF62F369B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{7C83875D-3249-4AA4-A9CB-B8975896467B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{9845C79D-47F6-4337-9076-3890D610A718} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
