@@ -9,5 +9,7 @@ public class VoidMod : Mod
 
     public VoidMod(ModContentPack content) : base(content)
     {
+        ModName = content.Name;
+        Settings = GetSettings<VoidSettings>();
     }
 }

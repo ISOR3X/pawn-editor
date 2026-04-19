@@ -17,7 +17,7 @@ public abstract class SectionWorker(SectionDef def)
     }
 
     /// <summary>
-    ///     Override to build section contents. Not called for sections that have a <c>&lt;layout&gt;</c> — use
+    ///     Override to build section contents. Not called for sections that have a <c><layout></c> — use
     ///     <see cref="OnLayout" /> instead.
     /// </summary>
     protected virtual void DoSectionContents(TaffyBuilder builder, Pawn pawn)

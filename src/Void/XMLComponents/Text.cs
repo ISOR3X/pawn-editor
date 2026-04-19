@@ -8,7 +8,8 @@ namespace Void.XMLComponents;
 
 public class TextElement : XMLComponent
 {
-    private static readonly Dictionary<string, Color?> ColorCache = new();
+    private static readonly Dictionary<string, Color?> ColorCache = [];
+    
     public Color? Color;
 
     public string? Content;

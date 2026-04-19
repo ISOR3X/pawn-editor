@@ -760,7 +760,7 @@ public static class GridAutoFlowExt
 
 public static class LineGridPlacementExt
 {
-    /// <summary>Convert both ends of a Line&lt;GridPlacement&gt; to OriginZero coordinates.</summary>
+    /// <summary>Convert both ends of a Line<GridPlacement> to OriginZero coordinates.</summary>
     public static Line<OriginZeroGridPlacement> IntoOriginZeroIgnoringNamed(
         this Line<GridPlacement> self, ushort explicitTrackCount)
     {
@@ -802,7 +802,7 @@ public static class LineOriginZeroExt
     }
 
     /// <summary>
-    ///     Resolves a definite-axis placement to a concrete Line&lt;OriginZeroLine&gt;.
+    ///     Resolves a definite-axis placement to a concrete Line<OriginZeroLine>.
     ///     Applies CSS Grid conflict rules: swaps if start ≥ end; expands single auto/span end to span 1.
     /// </summary>
     public static Line<OriginZeroLine> ResolveDefiniteGridLines(this Line<OriginZeroGridPlacement> self)
