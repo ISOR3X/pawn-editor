@@ -1,4 +1,3 @@
-using HotSwap;
 using PawnEditor.Table;
 using PawnEditor.Table.Filters.AbilityDef;
 using RimWorld;
@@ -13,7 +12,6 @@ using Layout = Void.Layout;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 {
     private static List<Ability> GetAbilitiesForPawn(Pawn pawn)

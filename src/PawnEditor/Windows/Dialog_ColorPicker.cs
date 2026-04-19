@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -9,7 +9,6 @@ using Display = Taffy.Display;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class Dialog_ColorPicker : Window
 {
     private readonly List<Color> _colors;

@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using HotSwap;
 using PawnEditor.XMLComponents;
 using UnityEngine;
 using Verse;
@@ -7,7 +6,6 @@ using Void;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class PawnEditorMod : Mod
 {
     public static string ModName = "PawnEditor";
@@ -20,7 +18,7 @@ public class PawnEditorMod : Mod
 
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
-
+        
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
 
         // Save settings when the game quits.

@@ -1,4 +1,3 @@
-using HotSwap;
 using Taffy;
 using Verse;
 using Void;
@@ -6,7 +5,6 @@ using Void.Components;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Race(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p)

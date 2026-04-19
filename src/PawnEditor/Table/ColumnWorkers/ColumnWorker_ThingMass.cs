@@ -1,4 +1,3 @@
-using HotSwap;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
 using Taffy;
@@ -6,7 +5,6 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class ColumnWorker_ThingMass<T>(TrackSizingFunction trackSize)
     : TextColumnWorker<T>(trackSize, t => GetMass(t).ToStringMass(), "Mass", null, null) where T : Thing
 {

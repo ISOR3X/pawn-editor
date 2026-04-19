@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -6,7 +6,6 @@ using Color = UnityEngine.Color;
 
 namespace Void;
 
-[HotSwappable]
 public static class UIUtility
 {
     public enum ComponentSize

@@ -1,10 +1,9 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Equipment(SectionDef def) : SectionWorker_Apparel<Thing>(def)
 {
     protected override Func<Pawn, List<Thing>> TableItems => GetEquipment;
