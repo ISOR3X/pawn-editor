@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -10,7 +10,6 @@ using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public partial class Window_Editor : Window
 {
     private void DoLeftSection(Rect inRect)

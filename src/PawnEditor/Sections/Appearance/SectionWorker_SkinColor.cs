@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -6,7 +5,6 @@ using Void;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
 {
     private float _skinColorHeight = 30f;

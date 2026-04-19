@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
@@ -8,7 +8,6 @@ using Void.Components;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public abstract class SectionWorker_Apparel<T>(SectionDef def) : SectionWorker(def) where T : Thing
 {
     private Pawn? _cachedPawn;

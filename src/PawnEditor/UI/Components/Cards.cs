@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -8,7 +8,6 @@ using Void.Extensions;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public static partial class Widgets
 {
     // TODO: Convert to TaffyPawnCard?

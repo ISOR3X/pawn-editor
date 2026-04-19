@@ -44,11 +44,6 @@
         <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta"/>
         <PackageReference Include="Lib.Harmony" Version="2.4.2"/>
     </ItemGroup>
-    <ItemGroup>
-        <Reference Include="HotSwap">
-            <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\HotSwap (1.6)\Assemblies\HotSwap.dll</HintPath>
-        </Reference>
-    </ItemGroup>
     <Target Name="Deploy" AfterTargets="Build">
         <!-- TODO: Make listing of runtime dll's less verbose -->
         <ItemGroup>
@@ -59,8 +54,6 @@
             <RuntimeDlls Include="$(OutputPath)Taffy.pdb"/>
             <RuntimeDlls Include="$(OutputPath)Void.dll"/>
             <RuntimeDlls Include="$(OutputPath)Void.pdb"/>
-            <RuntimeDlls Include="$(OutputPath)HotSwap.dll"/>
-            <RuntimeDlls Include="$(OutputPath)HotSwap.pdb"/>
             <RuntimeDlls Include="$(OutputPath)0Harmony.dll"/>
         </ItemGroup>
         <!-- Delete existing mod directory -->

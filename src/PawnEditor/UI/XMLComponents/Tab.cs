@@ -15,7 +15,6 @@
 //   </layout>
 
 using System.Xml;
-using HotSwap;
 using Taffy;
 using Verse;
 using StyleOverride = Void.StyleOverride;
@@ -25,7 +24,6 @@ using VoidMod = Void.VoidMod;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class Tab
 {
     private readonly List<Tab> _children = [];

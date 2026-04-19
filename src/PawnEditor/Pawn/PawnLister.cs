@@ -1,11 +1,10 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public static class PawnLister
 {
     private static readonly Dictionary<FactionKey, List<Pawn>> PawnsByFactionTemporary = new();

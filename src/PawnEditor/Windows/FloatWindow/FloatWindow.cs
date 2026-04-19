@@ -1,10 +1,8 @@
-using HotSwap;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public abstract class FloatWindow : OwnedWindow
 {
     private readonly Rect _boundWidgetRect;

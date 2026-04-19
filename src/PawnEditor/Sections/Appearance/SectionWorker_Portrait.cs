@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -6,7 +5,6 @@ using Void;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Portrait(SectionDef def) : SectionWorker(def)
 {
     private const float PortraitWidth = 200f;

@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
@@ -6,7 +6,6 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public static class PawnUtility
 {
     [Flags]

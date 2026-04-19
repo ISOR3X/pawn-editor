@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -9,7 +8,6 @@ using Void.Extensions;
 
 namespace PawnEditor.Table;
 
-[HotSwappable]
 public class Table<TRow>(
     IEnumerable<TRow> rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,

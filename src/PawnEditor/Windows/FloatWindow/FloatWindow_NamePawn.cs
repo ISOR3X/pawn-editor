@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -9,7 +8,6 @@ using Void.Components;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner = null)
     : FloatWindow(boundWidgetRect, owner)
 {

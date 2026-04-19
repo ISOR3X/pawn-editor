@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -7,7 +7,6 @@ using Layout = Void.Layout;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public abstract class SectionWorker(SectionDef def)
 {
     public SectionDef Def = def;

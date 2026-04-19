@@ -1,4 +1,3 @@
-using HotSwap;
 using Taffy;
 using Verse;
 using Void;
@@ -6,7 +5,6 @@ using Void.Components;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Sex(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)

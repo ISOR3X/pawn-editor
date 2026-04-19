@@ -1,11 +1,10 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class PawnLocation : IEquatable<PawnLocation>, IComparable<PawnLocation>
 {
     public PawnLocation(object location)

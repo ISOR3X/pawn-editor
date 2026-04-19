@@ -1,11 +1,9 @@
-using HotSwap;
 using Verse;
 using Void;
 using Void.Components;
 
 namespace PawnEditor.Table.Filters.BackstoryDef;
 
-[HotSwappable]
 public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 {
     private readonly HashSet<string> _disabledCategories = [];

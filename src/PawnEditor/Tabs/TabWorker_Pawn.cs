@@ -1,10 +1,8 @@
-using HotSwap;
 using Verse;
 using Void;
 
 namespace PawnEditor;
 
-[HotSwappable]
 [StaticConstructorOnStartup]
 public class TabWorker_Pawn(TabDef def) : TabWorker<PawnContext>(def)
 {
