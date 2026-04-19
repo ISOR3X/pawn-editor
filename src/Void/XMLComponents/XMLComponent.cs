@@ -36,7 +36,7 @@ public abstract class XMLComponent
 
     /// <summary>
     ///     Called by <see cref="Layout" /> before each <see cref="Render" />. Override to extract
-    ///     the frame-scoped context (e.g. <c>(context as IContext&lt;Pawn&gt;)?.Value</c>).
+    ///     the frame-scoped context (e.g. <c>(context as IContext<Pawn>)?.Value</c>).
     ///     No-op by default.
     /// </summary>
     public virtual void SetContext(IContext? context)

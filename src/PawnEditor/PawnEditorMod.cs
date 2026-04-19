@@ -9,12 +9,12 @@ namespace PawnEditor;
 public class PawnEditorMod : Mod
 {
     public static string ModName = "PawnEditor";
-    public static PawnEditorSettings PawnEditorSettings = new();
+    public static PawnEditorSettings Settings = new();
 
     public PawnEditorMod(ModContentPack content) : base(content)
     {
         ModName = content.Name;
-        PawnEditorSettings = GetSettings<PawnEditorSettings>();
+        Settings = GetSettings<PawnEditorSettings>();
 
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
@@ -22,7 +22,7 @@ public class PawnEditorMod : Mod
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
 
         // Save settings when the game quits.
-        Application.quitting += () => PawnEditorSettings.Write();
+        Application.quitting += () => Settings.Write();
     }
 
     public override string SettingsCategory()
@@ -35,9 +35,9 @@ public class PawnEditorMod : Mod
     {
         var listing = new Listing_Standard();
         listing.Begin(inRect);
-        listing.ButtonTextLabeled("Restriction Mode", PawnEditorSettings.restriction.ToString());
-        listing.CheckboxLabeled("Allow resize", ref PawnEditorSettings.allowResize);
-        listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref PawnEditorSettings.drawDebug);
+        listing.ButtonTextLabeled("Restriction Mode", Settings.restriction.ToString());
+        listing.CheckboxLabeled("Allow resize", ref Settings.allowResize);
+        listing.CheckboxLabeled("DEBUG: Draw leaf boxes", ref VoidMod.Settings.drawDebug);
         if (listing.ButtonText("Window presets"))
         {
             List<FloatMenuOption> opts =

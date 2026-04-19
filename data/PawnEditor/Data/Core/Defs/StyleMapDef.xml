@@ -6,7 +6,7 @@
         Usage: class="flex flex-col gap-2 p-3 items-center"
     -->
     <Void.StyleMapDef>
-        <defName>PawnEditorStyles</defName>
+        <defName>PawnEditorStyles_Tailwind</defName>
         <styles>
             <!-- DISPLAY -->
             <li>
@@ -312,6 +312,15 @@
             <li>
                 <name>self-stretch</name>
                 <value>align-self: stretch</value>
+            </li>
+        </styles>
+    </Void.StyleMapDef>
+    <Void.StyleMapDef>
+        <defName>PawnEditorStyles_Components</defName>
+        <styles>
+            <li>
+                <name>btn-stretch</name>
+                <value>min-width: 100px; max-width: 300px; flex-grow: 1; width: auto</value>
             </li>
         </styles>
     </Void.StyleMapDef>

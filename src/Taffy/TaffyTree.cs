@@ -65,7 +65,7 @@ internal sealed class NodeData
 /// var root = tree.NewLeaf(new Style { ... });
 /// var child = tree.NewLeaf(new Style { ... });
 /// tree.AppendChild(root, child);
-/// tree.ComputeLayout(root, new Size&lt;AvailableSpace&gt;(
+/// tree.ComputeLayout(root, new Size<AvailableSpace>(
 ///     AvailableSpace.Definite(800), AvailableSpace.Definite(600)));
 /// var layout = tree.Layout(root);
 /// </code>
