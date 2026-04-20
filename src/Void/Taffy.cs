@@ -347,15 +347,13 @@ public static class Taffy
             var h = node.GetHashCode() * 0.618033988f % 1f;
             var c = Color.HSVToRGB(h, 0.6f, 0.9f);
             Verse.Widgets.DrawBoxSolid(r, c with { a = 0.25f });
-            using (new TextBlock(GameFont.Tiny))
-                Verse.Widgets.Label(r, $"#{ColorUtility.ToHtmlStringRGB(c)}");
 
             if (Mouse.IsOver(r))
             {
                 Verse.Widgets.DrawBox(r, 6, SolidColorMaterials.NewSolidColorTexture(c));
                 var s = tree.GetStyle(node);
                 var tip =
-                    "color:" + $"#{ColorUtility.ToHtmlStringRGB(c)}".Colorize(c) + "\n" +
+                    "color:" + $" #{ColorUtility.ToHtmlStringRGB(c)}".Colorize(c) + "\n" +
                     $"rect: {r.width:F0}×{r.height:F0} @ ({r.x:F0},{r.y:F0})\n" +
                     $"display: {s.display}  dir: {s.flexDirection}  wrap: {s.flexWrap}\n" +
                     $"size: {s.size.Width}×{s.size.Height}" +
