@@ -14,10 +14,12 @@ public class PawnEditorMod : Mod
     public PawnEditorMod(ModContentPack content) : base(content)
     {
         ModName = content.Name;
-        Settings = GetSettings<PawnEditorSettings>();
 
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
+
+        // After Harmony patches are applied, since GetSettings uses Patch_ParseHelperRect.
+        Settings = GetSettings<PawnEditorSettings>();
         
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
 
