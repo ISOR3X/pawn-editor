@@ -1,3 +1,4 @@
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -6,6 +7,12 @@ namespace PawnEditor;
 
 public abstract class TabWorker(TabDef def)
 {
+    private static readonly StyleOverride DefaultRootStyle = new()
+    {
+        flexWrap = FlexWrap.Wrap,
+        gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall)
+    };
+
     public readonly List<FloatMenuOption> quickActions = [];
     private Vector2 _tabScrollPosition = Vector2.zero;
     private float _viewRectHeight = 5000f;
@@ -13,8 +20,6 @@ public abstract class TabWorker(TabDef def)
 
     /// <summary>The context type this worker requires, or null for context-free workers.</summary>
     public virtual Type? RequiredContextType => null;
-
-    protected virtual StyleOverride? LayoutStyle => null;
 
     public virtual void DoTabContents(ref Rect inRect, IContext? context)
     {
@@ -24,7 +29,8 @@ public abstract class TabWorker(TabDef def)
         var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0;
         var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
         Verse.Widgets.BeginScrollView(contentRect, ref _tabScrollPosition, viewRect);
-        _viewRectHeight = Void.Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), Def.layout.Style);
+        var rootStyle = Def.layout?.Props.Style.Merge(DefaultRootStyle) ?? DefaultRootStyle;
+        _viewRectHeight = Void.Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), rootStyle);
         Verse.Widgets.EndScrollView();
         Verse.Widgets.EndGroup();
     }
@@ -43,7 +49,7 @@ public abstract class TabWorker(TabDef def)
 }
 
 /// <summary>
-///     Typed TabWorker that receives a strongly-typed context. Only renders when the context
+///     Typed TabWorker that receives a strongly typed context. Only renders when the context
 ///     matches <typeparamref name="TContext" />; silently no-ops otherwise.
 /// </summary>
 public abstract class TabWorker<TContext>(TabDef def) : TabWorker(def)

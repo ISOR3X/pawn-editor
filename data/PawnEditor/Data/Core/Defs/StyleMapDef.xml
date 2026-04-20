@@ -133,7 +133,7 @@
                 <value>gap: 0px</value>
             </li>
             <li>
-                <name>gap-1</name>
+                <name>gap</name>
                 <value>gap: 4px</value>
             </li>
             <li>
