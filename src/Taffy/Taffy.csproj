@@ -31,9 +31,5 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta"/>
-        <PackageReference Include="xunit.v3.extensibility.core" Version="3.2.2"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Remove="tests\**\*.cs"/>
     </ItemGroup>
 </Project>

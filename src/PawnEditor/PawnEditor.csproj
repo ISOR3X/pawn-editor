@@ -49,6 +49,10 @@
             <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\HotSwap (1.6)\Assemblies\HotSwap.dll</HintPath>
         </Reference>
     </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        <PackageReference Include="EditCompileReload" Version="1.0.2"/>
+        <PackageReference Include="EditCompileReload.CompilerPlugin" Version="1.0.2"/>
+    </ItemGroup>
     <Target Name="Deploy" AfterTargets="Build">
         <!-- TODO: Make listing of runtime dll's less verbose -->
         <ItemGroup>
