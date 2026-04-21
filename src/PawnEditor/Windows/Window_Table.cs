@@ -1,4 +1,3 @@
-using HotSwap;
 using PawnEditor.Table;
 using RimWorld;
 using Taffy;
@@ -10,7 +9,6 @@ using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class Window_Table<T> : OwnedWindow
 {
     private readonly Action<T?>? _onAdd;

@@ -1,4 +1,3 @@
-using HotSwap;
 using PawnEditor.Table;
 using PawnEditor.Table.Filters.BackstoryDef;
 using RimWorld;
@@ -12,7 +11,6 @@ using Display = Taffy.Display;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 {
     private const float MaxButtonWidth = 160f;

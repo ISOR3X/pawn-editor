@@ -345,7 +345,28 @@ public static class Taffy
         if (VoidMod.Settings.drawDebug)
         {
             var h = node.GetHashCode() * 0.618033988f % 1f;
-            Verse.Widgets.DrawBoxSolid(r, Color.HSVToRGB(h, 0.6f, 0.9f) with { a = 0.25f });
+            var c = Color.HSVToRGB(h, 0.6f, 0.9f);
+            Verse.Widgets.DrawBoxSolid(r, c with { a = 0.25f });
+
+            if (Mouse.IsOver(r))
+            {
+                Verse.Widgets.DrawBox(r, 6, SolidColorMaterials.NewSolidColorTexture(c));
+                var s = tree.GetStyle(node);
+                var tip =
+                    "color:" + $" #{ColorUtility.ToHtmlStringRGB(c)}".Colorize(c) + "\n" +
+                    $"rect: {r.width:F0}×{r.height:F0} @ ({r.x:F0},{r.y:F0})\n" +
+                    $"display: {s.display}  dir: {s.flexDirection}  wrap: {s.flexWrap}\n" +
+                    $"size: {s.size.Width}×{s.size.Height}" +
+                    $"  min: {s.minSize.Width}×{s.minSize.Height}" +
+                    $"  max: {s.maxSize.Width}×{s.maxSize.Height}" +
+                    $"  basis: {s.flexBasis}\n" +
+                    $"grow: {s.flexGrow}  shrink: {s.flexShrink}" +
+                    $"  gap: {s.gap.Width}×{s.gap.Height}";
+                if (s.alignItems.HasValue || s.justifyContent.HasValue)
+                    tip +=
+                        $"\nalign-items: {s.alignItems?.ToString() ?? "-"}  justify: {s.justifyContent?.ToString() ?? "-"}";
+                TooltipHandler.TipRegion(r, tip);
+            }
         }
 
         if (lookup.TryGetValue(node, out var draw) && draw != null)

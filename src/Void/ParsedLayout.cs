@@ -48,7 +48,7 @@ public class ParsedLayout
 
                 if (!found)
                     Log.Warning(
-                        $"[{VoidMod.ModName}] Unknown CSS class '{className}' (not found in any TaffyStyleDef).");
+                        $"[{VoidMod.ModName}] Unknown CSS class '{className}' (not found in any StyleMapDef).");
             }
 
             // Inline wins over class

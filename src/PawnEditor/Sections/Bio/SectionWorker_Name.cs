@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -9,7 +8,6 @@ using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p)

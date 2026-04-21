@@ -1,0 +1,14 @@
+<Project>
+    <!-- Each project deploys its own assembly — runs regardless of which project triggered the build -->
+    <Target Name="DeployAssembly" AfterTargets="Build">
+        <MakeDir Directories="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"/>
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+              DestinationFolder="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(OutputPath)$(AssemblyName).dll')"/>
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb"
+              DestinationFolder="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(OutputPath)$(AssemblyName).pdb')"/>
+    </Target>
+</Project>

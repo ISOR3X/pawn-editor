@@ -47,9 +47,4 @@
         <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4752-beta"/>
         <PackageReference Include="Lib.Harmony" Version="2.4.2"/>
     </ItemGroup>
-    <ItemGroup>
-        <Reference Include="HotSwap">
-            <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\HotSwap (1.6)\Assemblies\HotSwap.dll</HintPath>
-        </Reference>
-    </ItemGroup>
 </Project>

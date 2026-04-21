@@ -1,11 +1,9 @@
-using HotSwap;
 using RimWorld;
 using Verse;
 using Void;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class TabWorker_FactionOverview(TabDef def) : TabWorker<FactionContext>(def)
 {
     private readonly PawnTable _pawnTable = (PawnTable)Activator.CreateInstance(

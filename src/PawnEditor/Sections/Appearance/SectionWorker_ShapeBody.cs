@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,7 +6,6 @@ using Void.Extensions;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
 {
     private Vector2 _scrollPositionBodyType = Vector2.zero;

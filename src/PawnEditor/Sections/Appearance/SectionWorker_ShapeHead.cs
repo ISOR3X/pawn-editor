@@ -1,4 +1,3 @@
-using HotSwap;
 using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
@@ -8,7 +7,6 @@ using Void.Extensions;
 namespace PawnEditor;
 
 [UsedImplicitly]
-[HotSwappable]
 public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
 {
     private Vector2 _scrollPositionHeadType = Vector2.zero;

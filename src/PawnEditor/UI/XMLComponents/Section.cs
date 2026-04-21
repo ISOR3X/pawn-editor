@@ -6,7 +6,7 @@ using Void.XMLComponents;
 namespace PawnEditor.XMLComponents;
 
 /// <summary>
-///     Represents a <c>&lt;section&gt;</c> element within a layout tree. Delegates rendering to the
+///     Represents a <c><section></c> element within a layout tree. Delegates rendering to the
 ///     referenced <see cref="SectionDef" />'s worker, applying tab-level style composition.
 ///     The <see cref="Pawn" /> property is set via <see cref="SetContext" /> before
 ///     <see cref="Render" /> is called.
@@ -36,6 +36,7 @@ public class SectionElement : XMLComponent
     {
         var worker = ResolvedDef?.Worker;
         if (worker == null || Pawn == null) return;
+        if (!worker.ShowSection(Pawn)) return;
         // Delegate entirely to BuildSection — it handles both UILayout (merge) and legacy (wrap).
         worker.BuildSection(builder, Pawn, Style);
     }
