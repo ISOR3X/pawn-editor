@@ -1,14 +1,16 @@
 <Project>
-    <!-- Each project deploys its own assembly — runs regardless of which project triggered the build -->
+    <!-- Each project deploys its own assemblies, runs regardless of which project triggered the build -->
     <Target Name="DeployAssembly" AfterTargets="Build">
+        <ItemGroup>
+            <AssemblyFiles Include="$(OutputPath)*.dll"/>
+            <!--<PdbFiles Include="$(OutputPath)*.pdb"/>-->
+        </ItemGroup>
         <MakeDir Directories="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"/>
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+        <Copy SourceFiles="@(AssemblyFiles)"
               DestinationFolder="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"
-              SkipUnchangedFiles="true"
-              Condition="Exists('$(OutputPath)$(AssemblyName).dll')"/>
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb"
+              SkipUnchangedFiles="true"/>
+        <!--<Copy SourceFiles="@(PdbFiles)"
               DestinationFolder="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"
-              SkipUnchangedFiles="true"
-              Condition="Exists('$(OutputPath)$(AssemblyName).pdb')"/>
+              SkipUnchangedFiles="true"/>-->
     </Target>
 </Project>

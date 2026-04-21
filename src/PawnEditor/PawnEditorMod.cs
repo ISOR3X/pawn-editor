@@ -1,9 +1,9 @@
-﻿using HarmonyLib;
+﻿using EditCompileReload;
+using HarmonyLib;
 using PawnEditor.XMLComponents;
 using UnityEngine;
 using Verse;
 using Void;
-
 namespace PawnEditor;
 
 public class PawnEditorMod : Mod
@@ -22,6 +22,12 @@ public class PawnEditorMod : Mod
         Settings = GetSettings<PawnEditorSettings>();
         
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
+
+
+        #if DEBUG
+                EcrLog.messageCallback = Log.Message;
+                EcrLog.errorCallback = Log.Error;
+        #endif
 
         // Save settings when the game quits.
         Application.quitting += () => Settings.Write();
