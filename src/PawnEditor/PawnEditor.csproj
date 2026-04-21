@@ -54,9 +54,5 @@
         </ItemGroup>
         <Copy SourceFiles="@(ModFiles)"
               DestinationFiles="@(ModFiles->'$(RimWorldModsPath)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')"/>
-        <Copy SourceFiles="$(OutputPath)0Harmony.dll"
-              DestinationFolder="$(RimWorldModsPath)\$(ModName)\$(RimWorldVersion)\Assemblies"
-              SkipUnchangedFiles="true"
-              Condition="Exists('$(OutputPath)0Harmony.dll')"/>
     </Target>
 </Project>
