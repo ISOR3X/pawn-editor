@@ -1,4 +1,3 @@
-using HotSwap;
 using PawnEditor.Table;
 using RimWorld;
 using Taffy;
@@ -11,7 +10,6 @@ using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)

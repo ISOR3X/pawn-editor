@@ -11,5 +11,4 @@ Complete rewrite of Pawn Editor. The original I was too unfamiliar with and had 
 3. Layout engine. Easy layout for multiple sections, adapts to whether or not sections are rendered for a Pawn.
 
 ## TODO
-1. Move tests to separate project
-2. Add CI to build mod
+1. Add CI to build mod

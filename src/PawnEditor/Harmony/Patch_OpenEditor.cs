@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -18,6 +19,6 @@ public class Patch_OpenEditor
 
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
             if (Current.ProgramState == ProgramState.Playing)
-                PawnEditorMod.PawnEditorSettings.drawDebug = !PawnEditorMod.PawnEditorSettings.drawDebug;
+                VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
     }
 }

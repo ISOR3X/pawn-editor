@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -7,7 +6,6 @@ using Void.Components;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
 {
     /// <summary>

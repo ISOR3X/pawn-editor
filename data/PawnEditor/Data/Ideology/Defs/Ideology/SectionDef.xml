@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_FavColor</defName>
         <workerClass>PawnEditor.SectionWorker_FavColor</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_TattooFace</defName>
         <workerClass>PawnEditor.SectionWorker_TattooFace</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_TattooBody</defName>
         <workerClass>PawnEditor.SectionWorker_TattooBody</workerClass>
     </PawnEditor.SectionDef>

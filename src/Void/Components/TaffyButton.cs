@@ -1,4 +1,3 @@
-using HotSwap;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -6,7 +5,6 @@ using Void.Extensions;
 
 namespace Void.Components;
 
-[HotSwappable]
 public static partial class TaffyExtensions
 {
     /// <returns>Button padding, button height, icon height, icon + label gap, font size</returns>

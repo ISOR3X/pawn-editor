@@ -1,11 +1,10 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public static class PawnLister
 {
     private static readonly Dictionary<FactionKey, List<Pawn>> PawnsByFactionTemporary = new();
@@ -33,7 +32,7 @@ public static class PawnLister
 
             var availablePawns = PawnsFinder.All_AliveOrDead
                 .Where(p => !(p.IsWorldPawn() && Find.WorldPawns.GetSituation(p) == WorldPawnSituation.Dead) ||
-                            !PawnEditorMod.PawnEditorSettings.hideDeadWorldPawns);
+                            !PawnEditorMod.Settings.hideDeadWorldPawns);
 
             PawnsByFactionTemporary.Clear();
 

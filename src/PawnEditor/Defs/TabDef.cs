@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -8,9 +9,15 @@ public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
 
-    public Tab layout = new();
+    public ParsedLayout? layout;
     public int priority = 10;
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
+
+    public override void ResolveReferences()
+    {
+        base.ResolveReferences();
+        layout?.ResolveClasses();
+    }
 
     [field: Unsaved]
     public TabWorker Worker

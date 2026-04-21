@@ -1,4 +1,3 @@
-using HotSwap;
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -11,7 +10,6 @@ using TexUI = Void.TexUI;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
     private static readonly int PassionMin;

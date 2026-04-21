@@ -1,4 +1,4 @@
-﻿using HotSwap;
+﻿
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
@@ -6,7 +6,6 @@ using Verse;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public static class PawnUtility
 {
     [Flags]
@@ -67,7 +66,7 @@ public static class PawnUtility
     public static void TeleportTo(Pawn fromPawn, Pawn toPawn)
     {
         var location = toPawn.GetLocation();
-        if (PawnEditorMod.PawnEditorSettings.spawnNear)
+        if (PawnEditorMod.Settings.spawnNear)
         {
             TeleportTo(fromPawn, location, toPawn.Position);
             return;

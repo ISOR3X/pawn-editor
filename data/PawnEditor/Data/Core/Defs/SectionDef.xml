@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-    <PawnEditor.SectionDef Name="HumanSectionBase" Abstract="True">
+    <!-- Base -->
+    <PawnEditor.SectionDef Name="SectionBase_Humanlike" Abstract="True">
         <sectionCategory>Humanlike</sectionCategory>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef Name="SectionBase_LabelledButton" ParentName="SectionBase_Humanlike" Abstract="True">
+        <layout>
+            <div class="flex flex-row gap-4 ">
+                <text id="text" color="Verse.ColoredText.TipSectionTitleColor">placeholder</text>
+                <button id="button" class="btn-stretch"/>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
     <!-- Bio -->
     <PawnEditor.SectionDef>
@@ -17,26 +26,26 @@
         <defName>PawnEditor_Age</defName>
         <workerClass>PawnEditor.SectionWorker_Age</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Backstory</defName>
         <workerClass>PawnEditor.SectionWorker_Backstory</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Abilities</defName>
         <workerClass>PawnEditor.SectionWorker_Abilities</workerClass>
         <layout>
             <div style="flex-direction: column; flex-wrap: wrap; width: 100%; justify-content: space-between; max-width: 400px; flex-grow: 1; gap: 4px">
                 <text color="ColoredText.TipSectionTitleColor">hello</text>
-                <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1" />
-                <button id="addAbility" label="Add ability" icon="TexButton.Plus" />
+                <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1"/>
+                <button id="addAbility" label="Add ability" icon="TexButton.Plus"/>
             </div>
         </layout>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Skills</defName>
         <workerClass>PawnEditor.SectionWorker_Skills</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Traits</defName>
         <workerClass>PawnEditor.SectionWorker_Traits</workerClass>
     </PawnEditor.SectionDef>
@@ -50,50 +59,50 @@
         <workerClass>PawnEditor.SectionWorker_Portrait</workerClass>
     </PawnEditor.SectionDef>
     <!-- Appearance.Hair -->
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Hair</defName>
         <workerClass>PawnEditor.SectionWorker_Hair</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Beard</defName>
         <workerClass>PawnEditor.SectionWorker_Beard</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_HairColor</defName>
         <workerClass>PawnEditor.SectionWorker_HairColor</workerClass>
     </PawnEditor.SectionDef>
     <!-- Appearance.Shape-->
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_ShapeHead</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeHead</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_ShapeBody</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeBody</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_SkinColor</defName>
         <workerClass>PawnEditor.SectionWorker_SkinColor</workerClass>
     </PawnEditor.SectionDef>
     <!-- Appearance.Misc -->
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_LabelledButton">
         <defName>PawnEditor_Sex</defName>
         <workerClass>PawnEditor.SectionWorker_Sex</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Lifestage</defName>
         <workerClass>PawnEditor.SectionWorker_Lifestage</workerClass>
     </PawnEditor.SectionDef>
     <!-- Gear -->
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Equipment</defName>
         <workerClass>PawnEditor.SectionWorker_Equipment</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Apparel</defName>
         <workerClass>PawnEditor.SectionWorker_Apparel</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="HumanSectionBase">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Inventory</defName>
         <workerClass>PawnEditor.SectionWorker_Inventory</workerClass>
     </PawnEditor.SectionDef>

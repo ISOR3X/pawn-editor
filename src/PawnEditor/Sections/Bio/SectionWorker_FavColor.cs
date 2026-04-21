@@ -1,4 +1,3 @@
-using HotSwap;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -7,7 +6,6 @@ using Void.Components;
 
 namespace PawnEditor;
 
-[HotSwappable]
 public class SectionWorker_FavColor(SectionDef def) : SectionWorker(def)
 {
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
