@@ -133,7 +133,7 @@
                 <value>gap: 0px</value>
             </li>
             <li>
-                <name>gap</name>
+                <name>gap-1</name>
                 <value>gap: 4px</value>
             </li>
             <li>
@@ -216,6 +216,103 @@
             <li>
                 <name>py-4</name>
                 <value>padding-top: 16px; padding-bottom: 16px</value>
+            </li>
+            <!-- MARGIN  (1 unit = 4px) -->
+            <li>
+                <name>m-0</name>
+                <value>margin: 0px</value>
+            </li>
+            <li>
+                <name>m-1</name>
+                <value>margin: 4px</value>
+            </li>
+            <li>
+                <name>m-2</name>
+                <value>margin: 8px</value>
+            </li>
+            <li>
+                <name>m-3</name>
+                <value>margin: 12px</value>
+            </li>
+            <li>
+                <name>m-4</name>
+                <value>margin: 16px</value>
+            </li>
+            <li>
+                <name>m-6</name>
+                <value>margin: 24px</value>
+            </li>
+            <li>
+                <name>m-8</name>
+                <value>margin: 32px</value>
+            </li>
+            <li>
+                <name>ml-1</name>
+                <value>margin-left: 4px</value>
+            </li>
+            <li>
+                <name>ml-2</name>
+                <value>margin-left: 8px</value>
+            </li>
+            <li>
+                <name>ml-3</name>
+                <value>margin-left: 12px</value>
+            </li>
+            <li>
+                <name>ml-4</name>
+                <value>margin-left: 16px</value>
+            </li>
+            <li>
+                <name>mr-1</name>
+                <value>margin-right: 4px</value>
+            </li>
+            <li>
+                <name>mr-2</name>
+                <value>margin-right: 8px</value>
+            </li>
+            <li>
+                <name>mr-3</name>
+                <value>margin-right: 12px</value>
+            </li>
+            <li>
+                <name>mr-4</name>
+                <value>margin-right: 16px</value>
+            </li>
+            <li>
+                <name>mx-auto</name>
+                <value>margin-left: auto; margin-right: auto</value>
+            </li>
+            <li>
+                <name>mx-1</name>
+                <value>margin-left: 4px; margin-right: 4px</value>
+            </li>
+            <li>
+                <name>mx-2</name>
+                <value>margin-left: 8px; margin-right: 8px</value>
+            </li>
+            <li>
+                <name>mx-3</name>
+                <value>margin-left: 12px; margin-right: 12px</value>
+            </li>
+            <li>
+                <name>mx-4</name>
+                <value>margin-left: 16px; margin-right: 16px</value>
+            </li>
+            <li>
+                <name>my-1</name>
+                <value>margin-top: 4px; margin-bottom: 4px</value>
+            </li>
+            <li>
+                <name>my-2</name>
+                <value>margin-top: 8px; margin-bottom: 8px</value>
+            </li>
+            <li>
+                <name>my-3</name>
+                <value>margin-top: 12px; margin-bottom: 12px</value>
+            </li>
+            <li>
+                <name>my-4</name>
+                <value>margin-top: 16px; margin-bottom: 16px</value>
             </li>
             <!-- ALIGN ITEMS -->
             <li>
@@ -319,8 +416,16 @@
         <defName>PawnEditorStyles_Components</defName>
         <styles>
             <li>
+                <name>btn</name>
+                <value>width: 180px</value>
+            </li>
+            <li>
                 <name>btn-stretch</name>
-                <value>min-width: 100px; max-width: 300px; flex-grow: 1; width: auto</value>
+                <value>min-width: 180px; max-width: 300px; width: 100%;</value>
+            </li>
+            <li>
+                <name>gap-section</name>
+                <value>row-gap: 8px; column-gap: 16px;</value>
             </li>
         </styles>
     </Void.StyleMapDef>

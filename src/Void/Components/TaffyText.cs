@@ -31,8 +31,9 @@ public static partial class TaffyExtensions
             using (new TextBlock(font, anchor, color ?? Color.white))
             {
                 Verse.Text.WordWrap = wrap ?? r.width < Verse.Text.CalcSize(text).x;
-                text = wrap == false ? text.Truncate(r.width) : text;
-                Verse.Widgets.Label(r, text);
+                var displayText = wrap == false ? text.Truncate(r.width) : text;
+                Verse.Widgets.Label(r, displayText);
+                Verse.Text.WordWrap = true; // WordWrap is true by default
             }
 
             if (onHover != null)
@@ -49,7 +50,7 @@ public static partial class TaffyExtensions
             {
                 if (known.Width.HasValue)
                     // Width fully constrained by parent algorithm — wrap and measure height.
-                    return new Size<float>(known.Width.Value, Verse.Text.CalcHeight(text, known.Width.Value));
+                    return new Size<float>(known.Width.Value, MinWidth(text, known.Width.Value, wrap));
 
                 if (available.Width.IsMinContent)
                 {
@@ -68,17 +69,25 @@ public static partial class TaffyExtensions
                         if (w > minW) minW = w;
                     }
 
-                    var minH = Verse.Text.CalcHeight(text, minW);
-                    return new Size<float>(minW, minH);
+
+                    return new Size<float>(minW, MinWidth(text, minW, wrap));
                 }
 
+                // Definite available width — wrap at that width.
                 if (available.Width.IntoOption() is { } aw)
-                    // Definite available width — wrap at that width.
-                    return new Size<float>(aw, Verse.Text.CalcHeight(text, aw));
+                {
+                    return new Size<float>(aw, MinWidth(text, aw, wrap));
+                }
 
                 // MaxContent / unconstrained — return natural (unwrapped) size.
                 var sz = Verse.Text.CalcSize(text);
                 return new Size<float>(sz.x, sz.y);
+            }
+
+            // Returns height at natural width if wrap is false.
+            static float MinWidth(string text, float width, bool? wrap)
+            {
+                return wrap == false ? Verse.Text.CalcSize(text).y : Verse.Text.CalcHeight(text, width);
             }
         }
     }

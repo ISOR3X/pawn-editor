@@ -4,6 +4,7 @@ using PawnEditor.XMLComponents;
 using UnityEngine;
 using Verse;
 using Void;
+
 namespace PawnEditor;
 
 public class PawnEditorMod : Mod
@@ -20,14 +21,14 @@ public class PawnEditorMod : Mod
 
         // After Harmony patches are applied, since GetSettings uses Patch_ParseHelperRect.
         Settings = GetSettings<PawnEditorSettings>();
-        
+
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
 
 
-        #if DEBUG
-                EcrLog.messageCallback = Log.Message;
-                EcrLog.errorCallback = Log.Error;
-        #endif
+#if DEBUG
+        // EcrLog.messageCallback = Log.Message;
+        EcrLog.errorCallback = Log.Error;
+#endif
 
         // Save settings when the game quits.
         Application.quitting += () => Settings.Write();

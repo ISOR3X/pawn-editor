@@ -361,10 +361,9 @@ public static class Taffy
                     $"  max: {s.maxSize.Width}×{s.maxSize.Height}" +
                     $"  basis: {s.flexBasis}\n" +
                     $"grow: {s.flexGrow}  shrink: {s.flexShrink}" +
-                    $"  gap: {s.gap.Width}×{s.gap.Height}";
-                if (s.alignItems.HasValue || s.justifyContent.HasValue)
-                    tip +=
-                        $"\nalign-items: {s.alignItems?.ToString() ?? "-"}  justify: {s.justifyContent?.ToString() ?? "-"}";
+                    $"  gap: {s.gap.Width}×{s.gap.Height}" +
+                    $"  padding: {s.padding.ToStringSimple()}, margin: {s.margin.ToStringSimple()}" +
+                    $"\nalign-items: {s.alignItems?.ToString() ?? "-"},  justify: {s.justifyContent?.ToString() ?? "-"}";
                 TooltipHandler.TipRegion(r, tip);
             }
         }
@@ -378,6 +377,11 @@ public static class Taffy
 
         foreach (var child in tree.Children(node))
             DrawTree(tree, child, absX, absY, lookup);
+    }
+
+    private static string ToStringSimple<T>(this Rect<T> rect)
+    {
+        return $"({rect.Left}, {rect.Right}, {rect.Top}, {rect.Bottom})";
     }
 
     #endregion

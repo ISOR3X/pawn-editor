@@ -6,26 +6,65 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
+using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
 using Display = Taffy.Display;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
 public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 {
-    private const float MaxButtonWidth = 160f;
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        string childhoodLabel = "Childhood".Translate();
-        string adulthoodLabel = "Adulthood".Translate();
-
-        builder.Text("Backstory", color: ColoredText.TipSectionTitleColor);
-        builder.Div(row =>
+        foreach (var slot in (List<string>)["childhood", "adulthood"])
         {
-            DoBackstoryItem(row, pawn, BackstorySlot.Childhood, childhoodLabel);
-            DoBackstoryItem(row, pawn, BackstorySlot.Adulthood, adulthoodLabel);
-        }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap });
+            var backstorySlot = slot == "childhood" ? BackstorySlot.Childhood : BackstorySlot.Adulthood;
+            var btn = layout.ComponentById<ButtonElement>($"button_{slot}");
+
+            DoBackstoryItem(btn, pawn, backstorySlot);
+        }
+    }
+
+    private static void DoBackstoryItem(ButtonElement button, Pawn pawn, BackstorySlot slot)
+    {
+        var backstory = pawn.story.GetBackstory(slot);
+        var buttonLabel = backstory != null ? backstory.TitleCapFor(pawn.gender) : "None".Translate().ToString();
+
+        Action<Rect>? onHover = null;
+        if (backstory != null)
+            onHover = r =>
+            {
+                var tip = buttonLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
+                var desc = backstory.FullDescriptionFor(pawn).Resolve();
+                TooltipHandler.TipRegion(r, tip + desc);
+            };
+
+        button.Label = buttonLabel;
+        button.OnClick = _ =>
+        {
+            if (backstory != null)
+                Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot),
+                    Find.WindowStack.WindowOfType<Window_Editor>(),
+                    selectedItemSlot: (b, i) =>
+                    {
+                        b.Div(b2 =>
+                        {
+                            var newBackstory = i != null
+                                ? i.TitleCapFor(pawn.gender)
+                                : "None".Colorize(ColoredText.SubtleGrayColor);
+                            var currentBackstory = slot == BackstorySlot.Adulthood
+                                ? pawn.story.adulthood
+                                : pawn.story.Childhood;
+                            b2.Text($"Current: {currentBackstory.TitleCapFor(pawn.gender)}".Colorize(ColoredText
+                                .SubtleGrayColor));
+                            b2.Text($"New: {newBackstory}");
+                        }, new StyleOverride { display = Display.Block });
+                    }));
+            else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
+        };
+        button.OnHover = onHover;
+        button.Disabled = backstory == null;
     }
 
     private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
@@ -67,51 +106,5 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()],
             searchProjection: def => def.TitleCapFor(pawn.gender)
         );
-    }
-
-    private static void DoBackstoryItem(TaffyBuilder row, Pawn pawn, BackstorySlot slot, string label)
-    {
-        var backstory = pawn.story.GetBackstory(slot);
-        var buttonLabel = backstory != null ? backstory.TitleCapFor(pawn.gender) : "None".Translate().ToString();
-
-        Action<Rect>? onHover = null;
-        if (backstory != null)
-            onHover = r =>
-            {
-                var tip = buttonLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
-                var desc = backstory.FullDescriptionFor(pawn).Resolve();
-                TooltipHandler.TipRegion(r, tip + desc);
-            };
-
-        row.Div(row2 =>
-        {
-            row2.Text(label,
-                style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
-            row2.Button(buttonLabel,
-                onClick: _ =>
-                {
-                    if (backstory != null)
-                        Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot),
-                            Find.WindowStack.WindowOfType<Window_Editor>(),
-                            selectedItemSlot: (b, i) =>
-                            {
-                                b.Div(b2 =>
-                                {
-                                    var newBackstory = i != null
-                                        ? i.TitleCapFor(pawn.gender)
-                                        : "None".Colorize(ColoredText.SubtleGrayColor);
-                                    var currentBackstory = slot == BackstorySlot.Adulthood
-                                        ? pawn.story.adulthood
-                                        : pawn.story.Childhood;
-                                    b2.Text($"Current: {currentBackstory.TitleCapFor(pawn.gender)}".Colorize(ColoredText
-                                        .SubtleGrayColor));
-                                    b2.Text($"New: {newBackstory}");
-                                }, new StyleOverride { display = Display.Block });
-                            }));
-                    else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
-                },
-                onHover: onHover,
-                style: new StyleOverride { width = Dimension.Length(MaxButtonWidth) });
-        });
     }
 }

@@ -28,7 +28,7 @@ public partial class Window_Editor
 
         _selectedTabDef?.Worker.Notify_ContentChanged();
 
-        if (pawn?.Faction != prevFaction && pawn != null) TrySelect(pawn?.Faction);
+        if (pawn?.Faction != prevFaction && pawn != null) TrySelect(pawn.Faction);
 
         if (PawnUtility.GetPawnCategory(pawn) != prevCategory) RecacheTabs();
     }
