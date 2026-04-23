@@ -28,7 +28,8 @@ public static partial class TaffyExtensions
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
         Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
         bool drawGraphic = true,
-        bool block = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default, StyleOverride? style = null)
+        bool block = false, bool disabled = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default,
+        StyleOverride? style = null)
     {
         var (padding, height, iconSize, iconGap, fontSize) = ResolveButtonSize(size);
 
@@ -68,17 +69,17 @@ public static partial class TaffyExtensions
         var capturedIcon = icon;
         var capturedColor = iconColor;
         var capturedLabelW = labelW;
-        var capturedPaddingInline = paddingInline;
 
         b.Item(r =>
         {
             var clicked = Verse.Widgets.ButtonInvisible(r);
-            if (drawGraphic) Verse.Widgets.DrawButtonGraphic(r);
+            
+            if (drawGraphic) DrawButtonGraphic(r, disabled);
             else Verse.Widgets.DrawHighlightIfMouseover(r);
-
+            
             if (capturedIcon != null || capturedLabel != null)
             {
-                var availableLabelW = r.width - capturedPaddingInline * 2f
+                var availableLabelW = r.width - paddingInline * 2f
                                               - (capturedIcon != null ? iconSize + iconGap : 0f);
                 var effectiveLabelW = Mathf.Min(capturedLabelW, Mathf.Max(0f, availableLabelW));
 
@@ -112,6 +113,25 @@ public static partial class TaffyExtensions
                     onHover(r);
 
             if (clicked) onClick?.Invoke(r);
+            
+            if (disabled) Verse.Widgets.DrawBoxSolid(r, Color.black with { a = 0.25f });
         }, mergedStyle);
+    }
+
+    /// <summary>
+    /// Copy of <see cref="Verse.Widgets.DrawButtonGraphic"/> , but with a disabled flag to disable interaction states.
+    /// </summary>
+    private static void DrawButtonGraphic(Rect rect, bool disabled)
+    {
+        var atlas = Verse.Widgets.ButtonBGAtlas;
+
+        if (Mouse.IsOver(rect) && !disabled)
+        {
+            atlas = Verse.Widgets.ButtonBGAtlasMouseover;
+            if (UnityEngine.Input.GetMouseButton(0))
+                atlas = Verse.Widgets.ButtonBGAtlasClick;
+        }
+          
+        Verse.Widgets.DrawAtlas(rect, atlas);
     }
 }

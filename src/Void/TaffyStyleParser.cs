@@ -78,14 +78,14 @@ public static class TaffyStyleParser
             }
             case "column-gap":
             {
-                var g = target.gap ?? default;
+                var g = target.gap ?? SLP_Zero();
                 g.Width = LengthPercentage.Length(ParsePx(value));
                 target.gap = g;
                 break;
             }
             case "row-gap":
             {
-                var g = target.gap ?? default;
+                var g = target.gap ?? SLP_Zero();
                 g.Height = LengthPercentage.Length(ParsePx(value));
                 target.gap = g;
                 break;
@@ -98,28 +98,28 @@ public static class TaffyStyleParser
             }
             case "padding-top":
             {
-                var p = target.padding ?? default;
+                var p = target.padding ?? LP_Zero();
                 p.Top = LengthPercentage.Length(ParsePx(value));
                 target.padding = p;
                 break;
             }
             case "padding-right":
             {
-                var p = target.padding ?? default;
+                var p = target.padding ?? LP_Zero();
                 p.Right = LengthPercentage.Length(ParsePx(value));
                 target.padding = p;
                 break;
             }
             case "padding-bottom":
             {
-                var p = target.padding ?? default;
+                var p = target.padding ?? LP_Zero();
                 p.Bottom = LengthPercentage.Length(ParsePx(value));
                 target.padding = p;
                 break;
             }
             case "padding-left":
             {
-                var p = target.padding ?? default;
+                var p = target.padding ?? LP_Zero();
                 p.Left = LengthPercentage.Length(ParsePx(value));
                 target.padding = p;
                 break;
@@ -132,28 +132,28 @@ public static class TaffyStyleParser
             }
             case "margin-top":
             {
-                var m = target.margin ?? default;
+                var m = target.margin ?? LPA_Zero();
                 m.Top = ParseLPA(value);
                 target.margin = m;
                 break;
             }
             case "margin-right":
             {
-                var m = target.margin ?? default;
+                var m = target.margin ?? LPA_Zero();
                 m.Right = ParseLPA(value);
                 target.margin = m;
                 break;
             }
             case "margin-bottom":
             {
-                var m = target.margin ?? default;
+                var m = target.margin ?? LPA_Zero();
                 m.Bottom = ParseLPA(value);
                 target.margin = m;
                 break;
             }
             case "margin-left":
             {
-                var m = target.margin ?? default;
+                var m = target.margin ?? LPA_Zero();
                 m.Left = ParseLPA(value);
                 target.margin = m;
                 break;
@@ -213,6 +213,25 @@ public static class TaffyStyleParser
             default:
                 Log.Warning($"[{VoidMod.ModName}] Unknown style property '{name}', skipping.");
                 break;
+        }
+
+        return;
+
+        Rect<LengthPercentageAuto> LPA_Zero()
+        {
+            return new Rect<LengthPercentageAuto>(LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO,
+                LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO);
+        }
+
+        Rect<LengthPercentage> LP_Zero()
+        {
+            return new Rect<LengthPercentage>(LengthPercentage.ZERO, LengthPercentage.ZERO,
+                LengthPercentage.ZERO, LengthPercentage.ZERO);
+        }
+
+        Size<LengthPercentage> SLP_Zero()
+        {
+            return new Size<LengthPercentage>(LengthPercentage.ZERO, LengthPercentage.ZERO);
         }
     }
 

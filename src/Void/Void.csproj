@@ -32,6 +32,10 @@
     <ItemGroup>
         <ProjectReference Include="..\Taffy\Taffy.csproj"/>
     </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        <PackageReference Include="EditCompileReload" Version="1.0.2"/>
+        <PackageReference Include="EditCompileReload.CompilerPlugin" Version="1.0.2"/>
+    </ItemGroup>
     <ItemGroup>
         <Publicize Include="Assembly-CSharp"/>
     </ItemGroup>

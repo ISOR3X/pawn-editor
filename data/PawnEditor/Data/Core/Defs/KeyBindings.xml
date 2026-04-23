@@ -12,4 +12,10 @@
         <category>Development</category>
         <defaultKeyCodeA>KeypadPlus</defaultKeyCodeA>
     </KeyBindingDef>
+    <KeyBindingDef>
+        <defName>PawnEditor_HotReloadDefs</defName>
+        <label>Hot reload defs</label>
+        <category>Development</category>
+        <defaultKeyCodeA>KeypadMinus</defaultKeyCodeA>
+    </KeyBindingDef>
 </Defs>

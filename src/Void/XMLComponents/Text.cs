@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Xml;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Verse;
 using Void.Components;
 
@@ -11,6 +12,7 @@ public class TextElement : XMLComponent
     private static readonly Dictionary<string, Color?> ColorCache = [];
     
     public Color? Color;
+    public bool Wrap;
 
     public string? Content;
     public override bool IsLeaf => true;
@@ -25,7 +27,7 @@ public class TextElement : XMLComponent
 
     public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
     {
-        builder.Text(Content ?? string.Empty, color: Color, style: Style);
+        builder.Text(Content ?? string.Empty, color: Color, wrap: Wrap, style: Style);
     }
 
     private static Color? ParseColor(string s)

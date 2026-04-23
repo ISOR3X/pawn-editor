@@ -1,7 +1,8 @@
-using Taffy;
+using RimWorld;
+using UnityEngine;
 using Verse;
-using Void;
-using Void.Components;
+using Void.XMLComponents;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
@@ -12,21 +13,38 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && p.def.CanHaveFaction;
     }
 
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
         var (label, icon, color) = FactionUtility.GetFactionMeta(pawn.Faction);
 
-        builder.Text("Faction",
-            style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
-        builder.Button(label, icon, color, _ =>
-            {
-                Find.WindowStack.Add(new FloatMenu(Find.FactionManager.AllFactionsInViewOrder.Select(f =>
+        layout.ComponentById<TextElement>("text").Content = "Faction";
+        layout.ComponentById<ButtonElement>("button").Label = label;
+        layout.ComponentById<ButtonElement>("button").Icon = icon;
+        layout.ComponentById<ButtonElement>("button").IconColor = color;
+        layout.ComponentById<ButtonElement>("button").OnClick = _ =>
+        {
+            List<FloatMenuOption> opts =
+            [
+                ..Find.FactionManager.AllFactionsInViewOrder.Select(f =>
                 {
                     var (l, i, c) = FactionUtility.GetFactionMeta(f);
                     return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c);
-                }).ToList()));
-            }, r => { TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction)); }
-            , style: new StyleOverride { width = 200f });
+                }),
+
+                // TODO: Randomize icon?
+                new("Randomize".Colorize(ColoredText.SubtleGrayColor), () =>
+                {
+                    Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out var f, false);
+                    // TODO(FIXME): Currently raises error when humanlike pawn is added to mechanoid faction.
+                    if (f != null) FactionUtility.SetFaction(pawn, f);
+                    else Messages.Message("No valid faction found", MessageTypeDefOf.RejectInput);
+                }, Verse.Widgets.PlaceholderIconTex, Color.white)
+            ];
+            Find.WindowStack.Add(new FloatMenu(opts));
+        };
+        layout.ComponentById<ButtonElement>("button").OnHover = r =>
+        {
+            TooltipHandler.TipRegion(r, FactionUtility.GetFactionTooltip(pawn.Faction));
+        };
     }
 }

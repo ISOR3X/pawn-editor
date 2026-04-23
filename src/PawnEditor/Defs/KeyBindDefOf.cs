@@ -10,6 +10,7 @@ public static class KeyBindingDefOf
 {
     public static readonly KeyBindingDef PawnEditor_OpenEditor = null!;
     public static readonly KeyBindingDef PawnEditor_OpenDev = null!;
+    public static readonly KeyBindingDef PawnEditor_HotReloadDefs = null!;
 
     static KeyBindingDefOf()
     {

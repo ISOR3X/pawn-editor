@@ -25,14 +25,11 @@ public static class FactionUtility
     public static TipSignal GetFactionTooltip(Faction? faction)
     {
         var name = faction?.Name ?? "Wildlife";
-        var loadId = faction?.loadID ?? 0;
         var description = faction?.def?.Description ?? "";
         var label = faction?.def?.LabelCap.Resolve();
 
         // REF: FactionUIUtility.DrawFactionRow
-        return new TipSignal(
-            (Func<string>)(() => $"{name.Colorize(ColoredText.TipSectionTitleColor)}\n{label}\n\n{description}"),
-            loadId ^ 1938473043);
+        return new TipSignal($"{name.Colorize(ColoredText.TipSectionTitleColor)}\n{label}\n\n{description}");
     }
 
     public static void SetFaction(Pawn pawn, Faction faction)
@@ -41,6 +38,10 @@ public static class FactionUtility
         pawn.SetFaction(faction);
 
         var editorWindow = Find.WindowStack.Windows.OfType<Window_Editor>().FirstOrDefault();
-        editorWindow?.TrySelect(pawn);
+        if (editorWindow == null) return;
+        
+        // Explicitly select faction. Just selecting the pawn again fails since it returns when the pawn is already selected.
+        editorWindow.TrySelect(faction);
+        editorWindow.TrySelect(pawn);
     }
 }
