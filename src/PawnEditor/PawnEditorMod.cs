@@ -1,6 +1,7 @@
 ﻿using EditCompileReload;
 using HarmonyLib;
 using PawnEditor.XMLComponents;
+using RimWorld;
 using UnityEngine;
 using Verse;
 using Void;
@@ -51,7 +52,13 @@ public class PawnEditorMod : Mod
         {
             List<FloatMenuOption> opts =
             [
-                new("Centered", () => Window_Editor.SavedWindowRect = Window_Editor.DefaultWindowRect),
+                new("Centered", () =>
+                {
+                    var r = new Rect(
+                        new Vector2((UI.screenWidth - Page.StandardSize.x) / 2,
+                            (UI.screenHeight - Page.StandardSize.y) / 2), Page.StandardSize);
+                    Window_Editor.SavedWindowRect = r;
+                }),
                 new("Left half",
                     () => Window_Editor.SavedWindowRect = new Rect(0, 0, UI.screenWidth / 2f, UI.screenHeight)),
                 new("Full screen",

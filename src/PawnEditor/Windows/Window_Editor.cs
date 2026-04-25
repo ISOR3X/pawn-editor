@@ -12,22 +12,6 @@ namespace PawnEditor;
 
 public partial class Window_Editor : Window
 {
-    private void DoLeftSection(Rect inRect)
-    {
-        var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-        Void.Taffy.Div(inRect, builder =>
-        {
-            builder.Text("Selected faction", GameFont.Tiny);
-            builder.Button(label, tex, c, block: true,
-                onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
-            builder.Item(rect =>
-            {
-                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
-                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
-            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
-        }, new StyleOverride { flexDirection = FlexDirection.Column });
-    }
-
     #region Fields
 
     // Pawn-related fields
@@ -43,9 +27,7 @@ public partial class Window_Editor : Window
     private static List<TabDef> _selectedTabDefsFor = [];
     private static List<TabRecord> _tabsList = [];
 
-    public static Rect DefaultWindowRect = new(
-        new Vector2((UI.screenWidth - Page.StandardSize.x) / 2, (UI.screenHeight - Page.StandardSize.y) / 2),
-        Page.StandardSize);
+    public static Rect DefaultWindowRect = new (0, 0, UI.screenWidth / 2f, UI.screenHeight);
 
     public static Rect SavedWindowRect = DefaultWindowRect;
 
@@ -103,6 +85,8 @@ public partial class Window_Editor : Window
         _selectedTabDefsFor.Clear();
         _tabsList.Clear();
     }
+    #endregion
+    
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -134,6 +118,21 @@ public partial class Window_Editor : Window
                 Verse.Widgets.Label(inRect, "No pawn selected.".Colorize(ColoredText.SubtleGrayColor));
             }
     }
+    
+    private void DoLeftSection(Rect inRect)
+    {
+        var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
+        Void.Taffy.Div(inRect, builder =>
+        {
+            builder.Text("Selected faction", GameFont.Tiny);
+            builder.Button(label, tex, c, block: true,
+                onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
+            builder.Item(rect =>
+            {
+                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
+                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
+            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
+        }, new StyleOverride { flexDirection = FlexDirection.Column });
+    }
 
-    #endregion
 }
