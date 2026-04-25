@@ -1,5 +1,4 @@
-﻿
-using RimWorld;
+﻿using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -87,13 +86,22 @@ public class Dialog_ColorPicker : Window
                                     paletteBuilder.Item(r =>
                                         {
                                             if (Verse.Widgets.ButtonInvisible(r)) _selectedColor = c;
-                                            if (!ColorUtility.ApproximatelyEqual(_selectedColor, c))
-                                                Verse.Widgets.DrawLightHighlight(r);
-                                            else Verse.Widgets.DrawRectFast(r, Color.white);
+                                            if (ColorUtility.ApproximatelyEqual(_selectedColor, c))
+                                                Verse.Widgets.DrawRectFast(r, Color.white);
+                                            else Verse.Widgets.DrawLightHighlight(r);
+                                            Verse.Widgets.DrawHighlightIfMouseover(r);
                                             Verse.Widgets.DrawRectFast(r.ContractedBy(GenUI.GapTiny), c);
                                         },
                                         new StyleOverride
                                             { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize });
+                                paletteBuilder.Item(r =>
+                                {
+                                    if (Verse.Widgets.ButtonInvisible(r)) _selectedColor = GenColor.RandomColorOpaque();
+                                    Verse.Widgets.DrawHighlightIfMouseover(r);
+                                    Verse.Widgets.DrawLightHighlight(r);
+                                    GUI.DrawTexture(r.ContractedBy(GenUI.GapTiny), TexPawnEditor.Randomize);
+                                }, new StyleOverride
+                                    { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize });
                             },
                             new StyleOverride
                             {

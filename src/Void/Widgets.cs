@@ -66,9 +66,10 @@ public static class Widgets
     ///     Like <see cref="Verse.Widgets.ButtonImage" /> but also fires on hold-repeat.
     ///     <paramref name="key" /> must be a globally unique stable string per button.
     /// </summary>
-    public static bool ButtonImageWithHold(Rect rect, Texture2D tex, string key)
+    public static bool ButtonImageWithHold(Rect rect, Texture2D tex, string key, bool disabled = false)
     {
-        if (Verse.Widgets.ButtonImage(rect, tex))
+        var mouseOverColor = disabled ? Color.white : GenUI.MouseoverColor;
+        if (Verse.Widgets.ButtonImage(rect, tex, Color.white, mouseOverColor))
         {
             SHoldState.Remove(key);
             return true;

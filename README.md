@@ -1,14 +1,12 @@
 ![Preview](data/PawnEditor/About/Preview.png)
 
-Complete rewrite of Pawn Editor. The original I was too unfamiliar with and had some core issues in my opinion that needed fixing. This current branch is not stable and/or intended to use in a playthrough. The rewrite has the following goals:
+Complete rewrite of Pawn Editor. The original I was too unfamiliar with and had some core issues in my opinion that needed fixing. This current branch is not stable and/or intended to be used in a playthrough. 
 
-1. Split different editing categories into sections, exposed to xml. This introduces to following advantages:
-
-- We can use `IfModActive` in xml for mod support.
-- Sections can be patched in or out.
-
-2. Improved mod support. Since this time I have written all code myself it should be easier to add onto it.
-3. Layout engine. Easy layout for multiple sections, adapts to whether or not sections are rendered for a Pawn.
+## Features
+1. Complete rewrite from the ground up, with a project structure that is more accessible.
+2. `Taffy` layout engine that allows the creation of responsive UI's.
+3. Component library `Void` with a focus on UX; increase number inputs on scroll, disabled states, buttons with icons etc.
+4. Sections and tab layouts are defined through XML, allowing sections to be patched in or out
 
 ## TODO
-1. Add CI to build mod
+1. Do a sound pass on all widgets.

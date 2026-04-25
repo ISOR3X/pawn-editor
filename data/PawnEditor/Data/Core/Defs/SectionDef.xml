@@ -61,8 +61,8 @@
         <layout>
             <div class="block w-full">
                 <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Skills</text>
-                <div id="skills_grid" class="grid gap-1 mb-1" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))"/>
-                <button id="presets" label="Presets"/>
+                <div id="skills_grid" class="grid gap-section mb-1 justify-stretch" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))"/>
+                <button id="presets" class="ml-auto" label="Presets"/>
             </div>
         </layout>
     </PawnEditor.SectionDef>
@@ -81,7 +81,7 @@
                         <div id="incapableOf_block" class="flex flex-wrap grow content-start p-1 w-full gap-1"/>
                     </div>
                 </div>
-                <button id="add" label="Add trait"/>
+                <button id="add" class="ml-auto" label="Add trait"/>
             </div>
         </layout>
     </PawnEditor.SectionDef>

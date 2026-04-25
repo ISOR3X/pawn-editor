@@ -146,7 +146,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                     grid.GridItem(r => Verse.Widgets.Label(r, "Name"));
                     grid.GridItem(r =>
                     {
-                        if (Verse.Widgets.ButtonImage(r.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Reroll))
+                        if (Verse.Widgets.ButtonImage(r.TakeRightPart(30f).ContractedBy(4f), TexPawnEditor.Randomize))
                             name.Initialize(name.Props);
                         name.name = Verse.Widgets.TextField(r, name.name);
                     });
