@@ -96,8 +96,14 @@ internal static class GridCompute
                 new Size<float>(outerNodeSize.Width.Value, outerNodeSize.Height.Value));
 
         // 2. Resolve explicit grid sizes
-        var explicitColCount = ExplicitGrid.ComputeExplicitGridSizeInAxis(style, AbsoluteAxis.Horizontal);
-        var explicitRowCount = ExplicitGrid.ComputeExplicitGridSizeInAxis(style, AbsoluteAxis.Vertical);
+        var explicitColCount = ExplicitGrid.ComputeExplicitGridSizeInAxis(
+            style, innerNodeSize.Width,
+            outerNodeSize.Width.HasValue || maxSize.Width.HasValue,
+            AbsoluteAxis.Horizontal);
+        var explicitRowCount = ExplicitGrid.ComputeExplicitGridSizeInAxis(
+            style, innerNodeSize.Height,
+            outerNodeSize.Height.HasValue || maxSize.Height.HasValue,
+            AbsoluteAxis.Vertical);
 
         // 3. Estimate implicit track counts
         var (estColCounts, estRowCounts) = ImplicitGrid.ComputeGridSizeEstimate(

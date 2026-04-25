@@ -5,7 +5,7 @@
         <workerClass>PawnEditor.SectionWorker_FavColor</workerClass>
         <layout>
             <div class="flex flex-row">
-                <text id="text" class="mr-4" color="Verse.ColoredText.TipSectionTitleColor">Favorite color</text>
+                <text id="text" class="w-label mr-4" color="Verse.ColoredText.TipSectionTitleColor">Favorite color</text>
                 <button id="button" class="btn" style="max-width: 144px" label="Choose color..."/>
                 <div id="container" style="width: 32px" class="p-1 h-full ml-1">
                     <div id="color_preview" class="w-full h-full"/>

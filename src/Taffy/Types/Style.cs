@@ -82,10 +82,10 @@ public class Style
     // ── Grid container ────────────────────────────────────────────────────
 
     /// <summary>Explicit grid template for columns. Null means no explicit column template.</summary>
-    public List<TrackSizingFunction>? gridTemplateColumns = null;
+    public List<GridTemplateComponent>? gridTemplateColumns = null;
 
     /// <summary>Explicit grid template for rows. Null means no explicit row template.</summary>
-    public List<TrackSizingFunction>? gridTemplateRows = null;
+    public List<GridTemplateComponent>? gridTemplateRows = null;
 
     /// <summary>Inset offsets (top/right/bottom/left). Default: auto on all sides.</summary>
     public Rect<LengthPercentageAuto> inset = RectLPA.Auto();

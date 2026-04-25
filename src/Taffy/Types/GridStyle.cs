@@ -320,6 +320,9 @@ public readonly struct TrackSizingFunction
     {
         return new TrackSizingFunction(MinTrackSizingFunction.AUTO, MaxTrackSizingFunction.FitContentPercent(pct));
     }
+
+    /// <summary>True if either the min or max component is a definite length or percentage.</summary>
+    public bool HasFixedComponent() => Min._cl.IsLengthOrPercent() || Max._cl.IsLengthOrPercent();
 }
 
 // ── GridLine / OriginZeroLine ─────────────────────────────────────────────
