@@ -28,17 +28,16 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
                 ..Find.FactionManager.AllFactionsInViewOrder.Select(f =>
                 {
                     var (l, i, c) = FactionUtility.GetFactionMeta(f);
-                    return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c);
+                    return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c, f.IsPlayer ? MenuOptionPriority.High : MenuOptionPriority.Default);
                 }),
-
-                // TODO: Randomize icon?
-                new("Randomize".Colorize(ColoredText.SubtleGrayColor), () =>
+                
+                new("Randomize", () =>
                 {
                     Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out var f, false);
                     // TODO(FIXME): Currently raises error when humanlike pawn is added to mechanoid faction.
                     if (f != null) FactionUtility.SetFaction(pawn, f);
                     else Messages.Message("No valid faction found", MessageTypeDefOf.RejectInput);
-                }, Verse.Widgets.PlaceholderIconTex, Color.white)
+                }, TexPawnEditor.Randomize, Color.white, MenuOptionPriority.VeryLow)
             ];
             Find.WindowStack.Add(new FloatMenu(opts));
         };

@@ -1,4 +1,6 @@
 ﻿using Taffy;
+using UnityEngine;
+using Display = Taffy.Display;
 
 namespace Void;
 
@@ -38,6 +40,10 @@ public class StyleOverride
     public Dimension? minWidth;
     public Rect<LengthPercentage>? padding;
     public Dimension? width;
+    
+    // Not used by Taffy, but internally so we can easily apply background and text colors.
+    public Color? color;
+    public Color? backgroundColor;
 
     /// <summary>
     ///     Returns a new <see cref="StyleOverride" /> where each field is taken from this instance
@@ -74,7 +80,10 @@ public class StyleOverride
             gridAutoRows = gridAutoRows ?? fallback.gridAutoRows,
             gridAutoFlow = gridAutoFlow ?? fallback.gridAutoFlow,
             gridColumn = gridColumn ?? fallback.gridColumn,
-            gridRow = gridRow ?? fallback.gridRow
+            gridRow = gridRow ?? fallback.gridRow,
+            
+            color = color ?? fallback.color,
+            backgroundColor = backgroundColor ?? fallback.backgroundColor,
         };
     }
 

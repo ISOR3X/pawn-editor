@@ -7,6 +7,12 @@ namespace Void.Components;
 
 public static partial class TaffyExtensions
 {
+    public enum ButtonVariant
+    {
+        Solid = 0,
+        Ghost = 1,
+    }
+
     /// <returns>Button padding, button height, icon height, icon + label gap, font size</returns>
     private static (float, float, float, float, GameFont) ResolveButtonSize(UIUtility.ComponentSize size)
     {
@@ -27,8 +33,8 @@ public static partial class TaffyExtensions
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
         Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
-        bool drawGraphic = true,
         bool block = false, bool disabled = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default,
+        ButtonVariant variant = ButtonVariant.Solid,
         StyleOverride? style = null)
     {
         var (padding, height, iconSize, iconGap, fontSize) = ResolveButtonSize(size);
@@ -73,10 +79,10 @@ public static partial class TaffyExtensions
         b.Item(r =>
         {
             var clicked = Verse.Widgets.ButtonInvisible(r);
-            
-            if (drawGraphic) DrawButtonGraphic(r, disabled);
+
+            if (variant == ButtonVariant.Solid) DrawButtonGraphic(r, disabled);
             else Verse.Widgets.DrawHighlightIfMouseover(r);
-            
+
             if (capturedIcon != null || capturedLabel != null)
             {
                 var availableLabelW = r.width - paddingInline * 2f
@@ -113,7 +119,7 @@ public static partial class TaffyExtensions
                     onHover(r);
 
             if (clicked) onClick?.Invoke(r);
-            
+
             if (disabled) Verse.Widgets.DrawBoxSolid(r, Color.black with { a = 0.25f });
         }, mergedStyle);
     }
@@ -131,7 +137,7 @@ public static partial class TaffyExtensions
             if (UnityEngine.Input.GetMouseButton(0))
                 atlas = Verse.Widgets.ButtonBGAtlasClick;
         }
-          
+
         Verse.Widgets.DrawAtlas(rect, atlas);
     }
 }

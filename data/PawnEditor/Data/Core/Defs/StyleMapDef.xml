@@ -263,6 +263,10 @@
                 <value>margin-left: 16px</value>
             </li>
             <li>
+                <name>ml-auto</name>
+                <value>margin-left: auto</value>
+            </li>
+            <li>
                 <name>mr-1</name>
                 <value>margin-right: 4px</value>
             </li>

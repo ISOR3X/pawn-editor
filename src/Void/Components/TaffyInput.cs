@@ -16,6 +16,9 @@ public static partial class TaffyExtensions
     // change. Used when the field is not genuinely focused.
     private static (GUIStyle? style, GameFont font) _sLockedTextField;
 
+    // Ghost GUIStyle: no background or border in any state. Rebuilt when the active font changes.
+    private static (GUIStyle? style, GameFont font) _sGhostTextField;
+
     // Persistent per-widget state: keyed by "{contextKey}:{file}:{line}".
     // Stores (Source, Typed): Source is the caller's value last frame; Typed is what the user
     // has typed. The cache is only applied when Source matches the current caller value,
@@ -28,28 +31,64 @@ public static partial class TaffyExtensions
     // so external changes (e.g. dragging a color rect) are never overwritten by stale input state.
     private static readonly Dictionary<string, (string buffer, int value, int externalValue)> SNumericState = [];
 
-    private static GUIStyle GetLockedTextFieldStyle()
+    public enum InputVariant
     {
-        var font = Verse.Text.Font;
-        if (_sLockedTextField.style == null || _sLockedTextField.font != font)
+        Solid = 0,
+        Ghost = 1,
+    }
+
+    private static GUIStyle ResolveTextFieldStyle(InputVariant variant, bool focused, bool disabled)
+    {
+        if (variant == InputVariant.Ghost)
         {
-            var s = new GUIStyle(Verse.Text.CurTextFieldStyle);
-            s.focused.background = s.normal.background;
-            s.focused.textColor = s.normal.textColor;
-            s.hover.background = s.normal.background;
-            s.hover.textColor = s.normal.textColor;
-            s.active.background = s.normal.background;
-            s.active.textColor = s.normal.textColor;
-            _sLockedTextField = (s, font);
+            {
+                var font = Verse.Text.Font;
+                if (_sGhostTextField.style == null || _sGhostTextField.font != font)
+                {
+                    var s = new GUIStyle(Verse.Text.CurTextFieldStyle);
+                    s.normal.background = null;
+                    s.focused.background = null;
+                    s.hover.background = null;
+                    s.active.background = null;
+                    s.border = new RectOffset(0, 0, 0, 0);
+                    _sGhostTextField = (s, font);
+                }
+
+                return _sGhostTextField.style!;
+            }
         }
 
-        return _sLockedTextField.style!;
+        if (focused) return Verse.Text.CurTextFieldStyle;
+
+        {
+            var font = Verse.Text.Font;
+            if (_sLockedTextField.style == null || _sLockedTextField.font != font)
+            {
+                var s = new GUIStyle(Verse.Text.CurTextFieldStyle);
+                s.focused.background = s.normal.background;
+                s.focused.textColor = s.normal.textColor;
+                s.hover.background = s.normal.background;
+                s.hover.textColor = s.normal.textColor;
+                s.active.background = s.normal.background;
+                s.active.textColor = s.normal.textColor;
+                _sLockedTextField = (s, font);
+            }
+
+            return _sLockedTextField.style!;
+        }
     }
 
     // Clears keyboard focus. Can be called from any draw callback.
-    private static void Unfocus()
+    private static void Unfocus() => GUIUtility.keyboardControl = 0;
+    
+    private static string MakeKey(TaffyBuilder b, string? id, string? file, int line)
+        => id != null ? $"{b.ContextKey}:{id}" : $"{b.ContextKey}:{file}:{line}";
+
+    private static (bool isFocused, bool effectivelyFocused) GetFocusState(string controlName, Rect r)
     {
-        GUIUtility.keyboardControl = 0;
+        var isFocused = GUI.GetNameOfFocusedControl() == controlName;
+        var clickedOutside = Event.current.type == EventType.MouseDown && !r.Contains(Event.current.mousePosition);
+        return (isFocused, isFocused && !clickedOutside);
     }
 
     /// <summary>
@@ -65,10 +104,12 @@ public static partial class TaffyExtensions
     ///     the builder so that state is isolated per pawn.
     /// </summary>
     public static void Input(this TaffyBuilder b, ref string text, int? maxLength = null,
-        Regex? pattern = null, Color? color = null, Action<Rect>? onHover = null, StyleOverride? style = null,
+        Regex? pattern = null, Color? color = null, Action<Rect>? onHover = null, Action<Rect>? draw = null,
+        bool disabled = false,
+        InputVariant variant = InputVariant.Solid, StyleOverride? style = null, string? id = null,
         [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
     {
-        var key = $"{b.ContextKey}:{file}:{line}";
+        var key = MakeKey(b, id, file, line);
         var controlName = $"Input_{key}";
 
         if (SInputState.TryGetValue(key, out var stored) && stored.Source == text)
@@ -83,19 +124,22 @@ public static partial class TaffyExtensions
         var displayValue = text;
         b.Item(r =>
         {
+            draw?.Invoke(r);
             if (onHover != null && Mouse.IsOver(r)) onHover(r);
 
-            var isFocused = GUI.GetNameOfFocusedControl() == controlName;
-            var clickedOutside = Event.current.type == EventType.MouseDown && !r.Contains(Event.current.mousePosition);
+            var (isFocused, effectivelyFocused) = GetFocusState(controlName, r);
 
-            string input;
-            using (new GUIColor(color ?? Color.white))
+            string input = displayValue;
+            GUI.SetNextControlName(controlName);
+            using (new GUIColor(disabled ? new Color(1f, 1f, 1f, 0.5f) : color ?? Color.white))
             {
-                GUI.SetNextControlName(controlName);
-                input = Verse.Widgets.TextField(r, displayValue);
+                var inputStyle = ResolveTextFieldStyle(variant, effectivelyFocused, disabled);
+                if (disabled) GUI.Label(r, displayValue, inputStyle);
+                else input = GUI.TextField(r, displayValue, inputStyle);
             }
 
-            if (isFocused && clickedOutside) Unfocus();
+            if (disabled) return;
+            if (isFocused && !effectivelyFocused) Unfocus();
 
             if (maxLength.HasValue && input.Length > maxLength.Value) return;
             if (pattern != null && !pattern.IsMatch(input)) return;
@@ -110,10 +154,12 @@ public static partial class TaffyExtensions
     ///     (multiple callers would otherwise share the same file:line key).
     /// </summary>
     public static void InputNumber(this TaffyBuilder b, ref int value, int min = 0, int max = 9999,
+        Action<Rect>? draw = null, Action<Rect>? onHover = null, bool disabled = false,
+        InputVariant variant = InputVariant.Solid,
         StyleOverride? style = null, string? id = null,
         [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
     {
-        var key = id != null ? $"{b.ContextKey}:{id}" : $"{b.ContextKey}:{file}:{line}";
+        var key = MakeKey(b, id, file, line);
         var controlName = $"InputNumber_{key}";
 
         var incomingValue = value;
@@ -134,6 +180,9 @@ public static partial class TaffyExtensions
 
         b.Item(r =>
         {
+            draw?.Invoke(r);
+            if (onHover != null && Mouse.IsOver(r)) onHover(r);
+
             var r2 = r.RightPartPixels(r.height / 2f);
             r2.x -= GenUI.GapTiny;
             var upRect = r2.TopHalf();
@@ -141,21 +190,19 @@ public static partial class TaffyExtensions
 
             // Pre-compute focus/click state before any controls process events so the blur
             // path can fire on the same frame as the click-outside.
-            var isFocused = GUI.GetNameOfFocusedControl() == controlName;
-            var clickedOutside = Event.current.type == EventType.MouseDown && !r.Contains(Event.current.mousePosition);
-            var effectivelyFocused = isFocused && !clickedOutside;
+            var (isFocused, effectivelyFocused) = GetFocusState(controlName, r);
 
             var scrollVal = UIUtility.IncrementWithScroll(r, capturedValue, 5);
             var scrollFired = scrollVal != capturedValue;
             if (scrollFired) Commit(scrollVal);
 
             var buttonFired = false;
-            if (Widgets.ButtonImageWithHold(upRect, TexUI.ArrowUp, key + ":up"))
+            if (Widgets.ButtonImageWithHold(upRect, TexUI.ArrowUp, key + ":up", disabled))
             {
                 Commit(capturedValue + 1);
                 buttonFired = true;
             }
-            else if (Widgets.ButtonImageWithHold(downRect, TexUI.ArrowDown, key + ":down"))
+            else if (Widgets.ButtonImageWithHold(downRect, TexUI.ArrowDown, key + ":down", disabled))
             {
                 Commit(capturedValue - 1);
                 buttonFired = true;
@@ -165,12 +212,17 @@ public static partial class TaffyExtensions
             // When genuinely focused use the original style so its focused.background (white
             // border) renders naturally. When not focused use the locked style so spurious
             // focus transfers from button clicks produce no visual change.
-            var fieldStyle = effectivelyFocused ? Verse.Text.CurTextFieldStyle : GetLockedTextFieldStyle();
-            var raw = GUI.TextField(r, capturedBuffer, fieldStyle);
+            var raw = capturedBuffer;
+            using (new GUIColor(disabled ? new Color(1f, 1f, 1f, 0.5f) : mergedStyle.color ?? Color.white))
+            {
+                var inputStyle = ResolveTextFieldStyle(variant, effectivelyFocused, disabled);
+                if (disabled) GUI.Label(r, capturedBuffer, inputStyle);
+                else raw = GUI.TextField(r, capturedBuffer, inputStyle);
+            }
 
             // Skip state update when a button just committed, otherwise the old buffer
             // would overwrite the new value on the same frame.
-            if (buttonFired || scrollFired) return;
+            if (buttonFired || scrollFired || disabled) return;
 
             if (isFocused && !effectivelyFocused) Unfocus();
 
@@ -192,6 +244,7 @@ public static partial class TaffyExtensions
 
         void Commit(int newVal)
         {
+            if (disabled) return;
             var clamped = Mathf.Clamp(newVal, min, max);
             SNumericState[key] = (clamped.ToString(), clamped, incomingValue);
         }

@@ -7,7 +7,7 @@
         <priority>0</priority>
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
-        <layout>
+        <layout class="flex flex-col">
             <div class="flex w-full justify-between">
                 <div class="flex flex-col flex-wrap gap-section grow" style="max-width: 640px; min-width: 400px">
                     <section class="flex-col">PawnEditor_Info</section>
@@ -17,10 +17,10 @@
                 <section style="min-width: 80px; max-width: 160px">PawnEditor_Portrait</section>
             </div>
             <div class="items-end gap-section flex flex-wrap w-full">
-                <section>PawnEditor_Backstory</section>
-                <section class="items-center">PawnEditor_Faction</section>
-                <section class="items-center" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
             </div>
+            <section>PawnEditor_Backstory</section>
+            <section>PawnEditor_Faction</section>
+            <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
             <section>PawnEditor_Traits</section>
             <section>PawnEditor_Skills</section>
             <!--            </div>-->

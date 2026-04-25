@@ -1,22 +1,17 @@
 using RimWorld;
-using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
-using Void.Extensions;
 using Void.XMLComponents;
-using FlexDirection = Taffy.FlexDirection;
+using Display = Taffy.Display;
 using Layout = Void.Layout;
-using TexUI = Void.TexUI;
 
 namespace PawnEditor;
 
+[StaticConstructorOnStartup]
 public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
-    private static readonly int PassionMin;
-    private static readonly int PassionMax;
-    
     /// <summary>
     /// Based on <see cref="GenUI.DrawSkill"/>
     /// </summary>
@@ -25,53 +20,63 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
     private static readonly float LevelLabelWidth =
         DefDatabase<SkillDef>.AllDefsListForReading.Max(s => s.skillLabel.GetWidthCached()) + GenUI.GapLabel;
 
+    private static readonly IntRange PassionRange;
+
+    /// <summary>
+    /// List of preset options for skills. Made public so any mod can add onto it.
+    /// </summary>
+    public static Func<Pawn, List<FloatMenuOption>> Presets;
+
     static SectionWorker_Skills()
     {
         var passions = (Passion[])Enum.GetValues(typeof(Passion));
-        PassionMin = passions.Min(p => (int)p);
-        PassionMax = passions.Max(p => (int)p);
+        PassionRange = new IntRange(passions.Min(p => (int)p), passions.Max(p => (int)p));
+
+        Presets = p =>
+        {
+            var skills = SkillUI.skillDefsInListOrderCached;
+            return
+            [
+                new FloatMenuOption("Minimize skill levels",
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, level: s => GetMinMaxForSkill(s).min))),
+                new FloatMenuOption("Maximize skill levels",
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, level: s => GetMinMaxForSkill(s).max))),
+                new FloatMenuOption("Randomize skill levels",
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, level: s => GetMinMaxForSkill(s).RandomInRange)), TexPawnEditor.Randomize, Color.white,
+                    MenuOptionPriority.VeryLow),
+                new FloatMenuOption("Minimize passion levels",
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.min))),
+                new FloatMenuOption("Maximize passion levels",
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.max))),
+                new FloatMenuOption("Randomize passion levels",
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.RandomInRange)), TexPawnEditor.Randomize, Color.white,
+                    MenuOptionPriority.VeryLow),
+            ];
+        };
+        return;
+
+        static void UpdateSkill(SkillDef skillDef, Pawn pawn, Func<SkillRecord, int>? level = null, int? passion = null)
+        {
+            var s = pawn.skills.GetSkill(skillDef);
+            if (level != null) SetSkill(s, level(s));
+            if (passion != null) SetPassion(s, passion.Value);
+        }
     }
 
     public override void OnLayout(Layout layout, Pawn pawn)
     {
-        layout.ComponentById<DivElement>("skills_grid").Children = b =>
-        {
-            var skills = SkillUI.skillDefsInListOrderCached;
-            foreach (var skillDef in skills) DrawSkill(b, pawn, skillDef);
-        };
-        layout.ComponentById<ButtonElement>("presets").OnClick = _ =>
-        {
-            List<FloatMenuOption> opts =
-            [
-                new("Minimize", () => { })
-            ];
-            Find.WindowStack.Add(new FloatMenu(opts));
-        };
-    }
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
-    {
-        builder.Text("Skills", color: ColoredText.TipSectionTitleColor);
-        builder.Div(
-            col =>
-            {
-                var skills = SkillUI.skillDefsInListOrderCached;
-                foreach (var skillDef in skills) DrawSkill(col, pawn, skillDef);
-            },
-            new StyleOverride
-            {
-                flexGrow = 1f, flexDirection = FlexDirection.Row, flexWrap = FlexWrap.Wrap,
-                minWidth = Dimension.Percent(1f),
-                gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny)
-            });
+        var skills = SkillUI.skillDefsInListOrderCached;
+        
+        layout.ComponentById<DivElement>("skills_grid").Children = b => skills.ForEach(sd => DrawSkill(b, pawn, sd));
+        layout.ComponentById<ButtonElement>("presets").OnClick =
+            _ => Find.WindowStack.Add(new FloatMenu(Presets(pawn)));
     }
 
     // REF: SkillUI.DrawSkill
     private static void DrawSkill(TaffyBuilder builder, Pawn pawn, SkillDef skillDef)
     {
         var skill = pawn.skills.GetSkill(skillDef);
-        var newSkillLevel = skill.GetLevel();
-        var newPassionLevel = (int)skill.passion;
+
         builder.Div(
             r =>
             {
@@ -83,64 +88,83 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             {
                 row.Text(skillDef.LabelCap,
                     style: new StyleOverride { width = LevelLabelWidth });
-                row.Button(icon: GetTextureForPassion(pawn.skills.GetSkill(skillDef).passion), drawGraphic: false,
-                    style: new StyleOverride { width = 24f, height = 24f }, onClick: _ => { newPassionLevel++; });
-                row.Item(r =>
+                row.Button(icon: GetTexForPassion(skill.passion),
+                    variant: TaffyExtensions.ButtonVariant.Ghost,
+                    style: new StyleOverride { width = 24f, height = 24f },
+                    onClick: _ =>
+                    {
+                        {
+                            var passion = (int)skill.passion;
+                            passion += Event.current.shift ? -1 : 1;
+                            SetPassion(skill, passion);
+                        }
+                    });
+                if (skill.TotallyDisabled)
+                    row.Text("-", color: SkillUI.DisabledSkillColor);
+                else
                 {
-                    var r2 = r.TakeRightPart(r.height / 2f);
-                    r2.SplitHorizontallyEqual(out var upRect, out var downRect);
+                    var level = skill.GetLevel();
+                    var minMax = GetMinMaxForSkill(skill);
+                    row.InputNumber(ref level, minMax.min, minMax.max,
+                        variant: TaffyExtensions.InputVariant.Ghost, id: skill.def.defName, draw:
+                        r =>
+                        {
+                            var skillProgressPct = Mathf.Max(0, skill.GetLevel() / (float)SkillRecord.MaxLevel);
 
-                    if (Void.Widgets.ButtonImageWithHold(upRect, TexUI.ArrowUp,
-                            $"{builder.ContextKey}:{skillDef.defName}:up")) newSkillLevel++;
-                    if (Void.Widgets.ButtonImageWithHold(downRect, TexUI.ArrowDown,
-                            $"{builder.ContextKey}:{skillDef.defName}:down")) newSkillLevel--;
-
-                    var skillProgressPct = Mathf.Max(0.0f, skill.GetLevel() / (float)SkillRecord.MaxLevel);
-                    var texture2D = SkillUI.SkillBarFillTex;
-                    if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && skill.Aptitude != 0)
-                        texture2D = skill.Aptitude > 0
-                            ? SkillUI.SkillBarAptitudePositiveTex
-                            : SkillUI.SkillBarAptitudeNegativeTex;
-                    var fillTex = texture2D;
-                    Verse.Widgets.FillableBar(r, skillProgressPct, fillTex, InspectPaneFiller.HealthTex, false);
-
-                    DrawSkillLevelLabel(r with { xMin = r.xMin + GenUI.GapTiny }, skill);
-                    TrySetSkill(skill, newSkillLevel, newPassionLevel);
-                }, new StyleOverride { flexGrow = 1f });
+                            Verse.Widgets.FillableBar(r, skillProgressPct, GetTexForSkill(skill),
+                                InspectPaneFiller.HealthTex, false);
+                        },
+                        style: new StyleOverride
+                            { height = SkillRectSize.y, flexGrow = 1f, color = GetColorTextForSkill(skill) });
+                    SetSkill(skill, level);
+                }
             },
             new StyleOverride
             {
-                width = SkillRectSize.x,
+                display = Display.Flex,
+                minWidth = SkillRectSize.x,
                 height = SkillRectSize.y,
                 gap = Void.Taffy.Gap(GenUI.GapTiny)
             });
     }
 
-    private static void DrawSkillLevelLabel(Rect inRect, SkillRecord skill)
+    private static Color GetColorTextForSkill(SkillRecord skill)
     {
-        string label;
         var color = Color.white;
-        var level = skill.GetLevel();
+
         if (skill.TotallyDisabled)
         {
             color = SkillUI.DisabledSkillColor;
-            label = "-";
         }
         else
         {
-            if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && level == 0 && skill.Aptitude != 0)
+            if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && skill.GetLevel() == 0 && skill.Aptitude != 0)
                 color = skill.Aptitude > 0 ? ColorLibrary.BrightGreen : ColorLibrary.RedReadable;
-            label = level.ToStringCached();
         }
 
-        using (new TextBlock(TextAnchor.MiddleLeft))
-        using (new GUIColor(color))
-        {
-            Verse.Widgets.Label(inRect, label);
-        }
+        return color;
     }
 
-    private static Texture2D GetTextureForPassion(Passion passion)
+    private static IntRange GetMinMaxForSkill(SkillRecord skill)
+    {
+        var min = Math.Max(SkillRecord.MinLevel, SkillRecord.MinLevel + skill.Aptitude);
+        var max = Math.Min(SkillRecord.MaxLevel, SkillRecord.MaxLevel + skill.Aptitude);
+
+        return new IntRange(min, max);
+    }
+
+    private static Texture2D GetTexForSkill(SkillRecord skill)
+    {
+        var tex = SkillUI.SkillBarFillTex;
+        if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && skill.Aptitude != 0)
+            tex = skill.Aptitude > 0
+                ? SkillUI.SkillBarAptitudePositiveTex
+                : SkillUI.SkillBarAptitudeNegativeTex;
+        return tex;
+    }
+
+
+    private static Texture2D GetTexForPassion(Passion passion)
     {
         return passion switch
         {
@@ -151,27 +175,29 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
         };
     }
 
-
-    private static void TrySetSkill(SkillRecord skill, int level, int passion)
+    private static void SetPassion(SkillRecord skill, int passion)
     {
         if (skill.TotallyDisabled)
         {
-            if (skill.GetLevel() != level)
-                Messages.Message("Can't change the passion level of disabled skill", MessageTypeDefOf.RejectInput);
-            if ((int)skill.passion != passion)
-                Messages.Message("Can't change skill level of disabled skill", MessageTypeDefOf.RejectInput);
+            Messages.Message("Can't change skill level of disabled skill", MessageTypeDefOf.RejectInput);
+            return;
         }
-        else
-        {
-            if (passion != (int)skill.passion)
-            {
-                var range = PassionMax - PassionMin + 1;
-                var wrappedPassion = ((passion - PassionMin) % range + range) % range + PassionMin;
-                skill.passion = (Passion)wrappedPassion;
-            }
 
-            if (level != skill.GetLevel())
-                skill.levelInt = Mathf.Clamp(level, SkillRecord.MinLevel, SkillRecord.MaxLevel);
+        var range = PassionRange.max - PassionRange.min + 1;
+        var wrappedPassion = ((passion - PassionRange.min) % range + range) % range + PassionRange.min;
+        skill.passion = (Passion)wrappedPassion;
+    }
+
+    private static void SetSkill(SkillRecord skill, int level)
+    {
+        if (level == skill.GetLevel()) return;
+
+        if (skill.TotallyDisabled)
+        {
+            Messages.Message("Can't change the passion level of disabled skill", MessageTypeDefOf.RejectInput);
+            return;
         }
+
+        skill.Level = Mathf.Clamp(level - skill.Aptitude, SkillRecord.MinLevel, SkillRecord.MaxLevel);
     }
 }
