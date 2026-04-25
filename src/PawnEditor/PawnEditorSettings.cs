@@ -10,7 +10,7 @@ public class PawnEditorSettings : ModSettings
         Severe
     }
 
-    public bool allowResize = true;
+    public bool allowResize;
 
     /// <summary>
     ///     When enabled, dead pawns in the world are hidden from the left panel. (Destroyed pawns are moved to the world
@@ -31,7 +31,7 @@ public class PawnEditorSettings : ModSettings
         Scribe_Values.Look(ref restriction, nameof(restriction), RestrictionMode.Severe);
         Scribe_Values.Look(ref spawnNear, nameof(spawnNear), true);
         Scribe_Values.Look(ref hideDeadWorldPawns, nameof(hideDeadWorldPawns), true);
-        Scribe_Values.Look(ref allowResize, nameof(allowResize), true);
+        Scribe_Values.Look(ref allowResize, nameof(allowResize), false);
         Scribe_Values.Look(ref Window_Editor.SavedWindowRect, nameof(Window_Editor.SavedWindowRect),
             Window_Editor.DefaultWindowRect);
     }
