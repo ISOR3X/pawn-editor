@@ -9,10 +9,21 @@
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout class="flex flex-col">
             <div class="flex w-full justify-between">
-                <div class="flex flex-col flex-wrap gap-section grow" style="max-width: 640px; min-width: 200px">
+                <div class="flex flex-col gap-section grow" style="max-width: 640px; min-width: 200px">
                     <section class="flex-col">PawnEditor_Info</section>
                     <section>PawnEditor_Name</section>
                     <section class="flex-col">PawnEditor_Age</section>
+                    
+                    <div class="flex flex-wrap">
+                        <text class="w-label">label</text>
+                        <div class="flex flex-wrap">
+                            <div style="width: 100px; height: 30px"/>
+                            <div style="width: 100px; height: 30px"/>
+                            <div style="width: 100px; height: 30px"/>
+                            <div style="width: 100px; height: 30px"/>
+                        </div>
+                        <button icon="Verse.TexButton.Rename"/>
+                    </div>
                 </div>
                 <section style="min-width: 80px; max-width: 160px">PawnEditor_Portrait</section>
             </div>

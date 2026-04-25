@@ -9,8 +9,7 @@ public abstract class TabWorker(TabDef def)
 {
     private static readonly StyleOverride DefaultRootStyle = new()
     {
-        flexWrap = FlexWrap.Wrap,
-        gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall)
+        gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall),
     };
 
     public readonly List<FloatMenuOption> quickActions = [];
