@@ -1,6 +1,6 @@
 <Project>
     <!-- Each project deploys its own assemblies, runs regardless of which project triggered the build -->
-    <Target Name="DeployAssembly" AfterTargets="Build">
+    <Target Name="DeployAssembly" AfterTargets="Build" Condition="'$(EnableRimWorldAssemblyDeploy)' != 'false'">
         <ItemGroup>
             <AssemblyFiles Include="$(OutputPath)*.dll"/>
             <!--<PdbFiles Include="$(OutputPath)*.pdb"/>-->

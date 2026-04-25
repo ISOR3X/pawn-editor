@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -30,6 +31,8 @@ public static partial class TaffyExtensions
     // The stored value is only applied when externalValue matches the current caller value,
     // so external changes (e.g. dragging a color rect) are never overwritten by stale input state.
     private static readonly Dictionary<string, (string buffer, int value, int externalValue)> SNumericState = [];
+
+    private static readonly Dictionary<string, (float value, float externalValue)> SRangeState = [];
 
     public enum InputVariant
     {
@@ -80,7 +83,7 @@ public static partial class TaffyExtensions
 
     // Clears keyboard focus. Can be called from any draw callback.
     private static void Unfocus() => GUIUtility.keyboardControl = 0;
-    
+
     private static string MakeKey(TaffyBuilder b, string? id, string? file, int line)
         => id != null ? $"{b.ContextKey}:{id}" : $"{b.ContextKey}:{file}:{line}";
 
@@ -261,5 +264,37 @@ public static partial class TaffyExtensions
 
             return sb.ToString();
         }
+    }
+
+    public static void InputRange(this TaffyBuilder b, ref float value, float min = 0f, float max = 9999f,
+        float step = 1f,
+        Action<Rect>? draw = null, Action<Rect>? onHover = null, bool disabled = false,
+        InputVariant variant = InputVariant.Solid,
+        StyleOverride? style = null, string? id = null,
+        [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
+    {
+        var key = MakeKey(b, id, file, line);
+        var incomingValue = value;
+        var hasState = SRangeState.TryGetValue(key, out var stored);
+        if (hasState && Mathf.Approximately(stored.externalValue, incomingValue))
+            value = stored.value;
+
+        var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
+        {
+            width = DefaultInputWidth,
+            height = UIUtility.ButtonHeight
+        });
+
+        var capturedValue = Mathf.Clamp(value, min, max);
+
+        b.Item(r =>
+        {
+            draw?.Invoke(r);
+            if (onHover != null && Mouse.IsOver(r)) onHover(r);
+
+            var nextValue = Verse.Widgets.HorizontalSlider(r, capturedValue, min, max, true, roundTo: step);
+
+            SRangeState[key] = (nextValue, incomingValue);
+        }, mergedStyle);
     }
 }

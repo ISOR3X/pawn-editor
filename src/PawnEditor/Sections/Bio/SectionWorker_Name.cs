@@ -4,22 +4,29 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
+using Void.XMLComponents;
 using FlexDirection = Taffy.FlexDirection;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
 public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
-    public override bool ShowSection(Pawn p)
+    public override bool ShowSection(Pawn p) => base.ShowSection(p) && p is { Faction: not null, Name: not null };
+
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        return base.ShowSection(p) && p is { Faction: not null, Name: not null };
+        DoNameInputs(layout.ComponentById<DivElement>("name_block"), pawn);
+
+        layout.ComponentById<ButtonElement>("generator").OnClick = r =>
+            FloatWindow.ToggleState(r,
+                () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
     }
 
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    private static void DoNameInputs(DivElement div, Pawn pawn)
     {
         // TODO: Add title renaming
-        builder.Text("Name", color: ColoredText.TipSectionTitleColor);
-        builder.Div(row =>
+        div.Children = b =>
         {
             switch (pawn.Name)
             {
@@ -28,16 +35,13 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
                     var first = triple.First;
                     var nick = triple.Nick;
                     var last = triple.Last;
-                    row.Input(ref first, 12, CharacterCardUtility.ValidNameRegex,
-                        onHover: r => TooltipHandler.TipRegionByKey(r, "FirstNameDesc"));
-
-                    var c = triple.Nick == triple.First || triple.Nick == triple.Last
-                        ? new Color(1f, 1f, 1f, 0.5f)
-                        : Color.white;
-                    row.Input(ref nick, 16, color: c, pattern: CharacterCardUtility.ValidNameRegex,
-                        onHover: r => TooltipHandler.TipRegionByKey(r, "ShortIdentifierDesc"));
-                    row.Input(ref last, 12, CharacterCardUtility.ValidNameRegex,
-                        onHover: r => TooltipHandler.TipRegionByKey(r, "LastNameDesc"));
+                    b.Input(ref first, 12, CharacterCardUtility.ValidNameRegex,
+                        onHover: r => TooltipHandler.TipRegionByKey(r, "FirstNameDesc"), style: new StyleOverride {minWidth = 0});
+                    b.Input(ref nick, 16, pattern: CharacterCardUtility.ValidNameRegex,
+                        onHover: r => TooltipHandler.TipRegionByKey(r, "ShortIdentifierDesc"),
+                        disabled: triple.Nick == triple.First || triple.Nick == triple.Last, style: new StyleOverride {minWidth = 0});
+                    b.Input(ref last, 12, CharacterCardUtility.ValidNameRegex,
+                        onHover: r => TooltipHandler.TipRegionByKey(r, "LastNameDesc"), style: new StyleOverride {minWidth = 0});
 
                     if (first != triple.First || nick != triple.Nick || last != triple.Last)
                         pawn.Name = new NameTriple(first, string.IsNullOrEmpty(nick) ? first : nick, last);
@@ -46,24 +50,15 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
                 case NameSingle single:
                 {
                     var name = single.ToStringFull;
-                    row.Input(ref name, 16);
+                    b.Input(ref name, 16);
                     if (name != single.ToStringFull)
                         pawn.Name = new NameSingle(name);
                     break;
                 }
                 default:
-                    row.Text(pawn.Name.ToStringFull);
+                    b.Text(pawn.Name.ToStringFull);
                     break;
             }
-
-            row.Button(icon: TexButton.Rename,
-                onClick: r =>
-                {
-                    FloatWindow.ToggleState(r,
-                        () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
-                },
-                variant: TaffyExtensions.ButtonVariant.Ghost,
-                style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(4f, 0f, 0f, 0f) });
-        }, new StyleOverride { flexDirection = FlexDirection.Row });
+        };
     }
 }
