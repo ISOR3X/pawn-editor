@@ -14,21 +14,12 @@ namespace PawnEditor;
 
 public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 {
-    private static List<Ability> GetAbilitiesForPawn(Pawn pawn)
-    {
-        return pawn.abilities.AllAbilitiesForReading
-            .Where(a => a.def.showOnCharacterCard)
-            .OrderBy(a => a.def.level)
-            .ThenBy(a => a.def.EntropyGain)
-            .ToList();
-    }
-
     public override void OnLayout(Layout layout, Pawn pawn)
     {
-        layout.ComponentById<DivElement>("abilityIcons").Children = inner =>
-            DoAbilities(inner, GetAbilitiesForPawn(pawn), pawn);
+        var abilitiesDiv = layout.ComponentById<DivElement>("abilities_block");
+        DoAbilities(abilitiesDiv, GetAbilitiesForPawn(pawn), pawn);
 
-        layout.ComponentById<ButtonElement>("addAbility").OnClick = _ =>
+        layout.ComponentById<ButtonElement>("add").OnClick = _ =>
             Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn),
                 Find.WindowStack.WindowOfType<Window_Editor>(),
                 selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
@@ -56,43 +47,23 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             });
     }
 
-
-    private static void DoElementsRect(TaffyBuilder builder, string headerLabel, List<Ability>? items,
+    private static void DoElementsRect(DivElement div, List<Ability>? items,
         Func<Ability, (Texture2D, string)> itemMetaGetter, string emptyLabel = "None", Action<Ability>? onClick = null)
     {
-        builder.Div(
-            left =>
+        div.Draw = r => GUI.DrawTexture(r, InspectPaneFiller.HealthTex);
+        div.Children =
+            traitsBuilder =>
             {
-                left.Text(headerLabel, color: ColoredText.TipSectionTitleColor);
-                left.Div(r => { GUI.DrawTexture(r, InspectPaneFiller.HealthTex); }, traitsBuilder =>
-                    {
-                        if (items is { Count: > 0 })
-                            foreach (var item in items)
-                                DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
-                        else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor);
-                    },
-                    new StyleOverride
-                    {
-                        flexWrap = FlexWrap.Wrap,
-                        gap = Void.Taffy.Gap(GenUI.GapTiny),
-                        flexGrow = 1f,
-                        alignContent = AlignContent.FlexStart,
-                        padding = Void.Taffy.Padding(GenUI.GapTiny),
-                        width = Dimension.Percent(1f)
-                    });
-            },
-            new StyleOverride
-            {
-                flexDirection = FlexDirection.Column,
-                flexGrow = 1f,
-                flexBasis = 200f,
-                flexShrink = 0f
-            });
+                if (items is { Count: > 0 })
+                    foreach (var item in items)
+                        DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
+                else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor, style: new StyleOverride {height = 34f});
+            };
     }
 
-    private static void DoAbilities(TaffyBuilder builder, List<Ability>? abilities, Pawn pawn)
+    private static void DoAbilities(DivElement div, List<Ability>? abilities, Pawn pawn)
     {
-        DoElementsRect(builder, "Abilities", abilities, a => (a.def.uiIcon, TooltipGetter(a)),
+        DoElementsRect(div, abilities, a => (a.def.uiIcon, TooltipGetter(a)),
             onClick: a => OnClick(a, pawn));
         return;
 
@@ -121,6 +92,17 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
         }
 
         pawn.abilities.RemoveAbility(abilityDef);
+    }
+
+    private static List<Ability> GetAbilitiesForPawn(Pawn pawn)
+    {
+        return
+        [
+            .. pawn.abilities.AllAbilitiesForReading
+                .Where(a => a.def.showOnCharacterCard)
+                .OrderBy(a => a.def.level)
+                .ThenBy(a => a.def.EntropyGain)
+        ];
     }
 
     private static Table<AbilityDef> GetTraitsTable(Pawn pawn)

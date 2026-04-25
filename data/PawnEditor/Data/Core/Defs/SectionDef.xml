@@ -21,6 +21,13 @@
     <PawnEditor.SectionDef>
         <defName>PawnEditor_Name</defName>
         <workerClass>PawnEditor.SectionWorker_Name</workerClass>
+        <layout>
+            <div class="flex flex-row">
+                <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Name</text>
+                <div id="name_block" class="flex flex-wrap gap-1"/>
+                <button id="generator" icon="Verse.TexButton.Rename" variant="ghost"/>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef>
         <defName>PawnEditor_Age</defName>
@@ -49,10 +56,15 @@
         <defName>PawnEditor_Abilities</defName>
         <workerClass>PawnEditor.SectionWorker_Abilities</workerClass>
         <layout>
-            <div style="flex-direction: column; flex-wrap: wrap; width: 100%; justify-content: space-between; max-width: 400px; flex-grow: 1; gap: 4px">
-                <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1"/>
-                <button id="addAbility" label="Add ability" icon="TexButton.Plus"/>
+            <div class="flex flex-col grow">
+                <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Abilities</text>
+                <div id="abilities_block" class="mb-1 flex flex-wrap grow content-start p-1 w-full gap-1"/>
+                <button id="add" class="ml-auto" label="Add ability"/>
             </div>
+            <!--            <div style="flex-direction: column; flex-wrap: wrap; width: 100%; justify-content: space-between; max-width: 400px; flex-grow: 1; gap: 4px">-->
+            <!--                <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1"/>-->
+            <!--                <button id="addAbility" label="Add ability" icon="TexButton.Plus"/>-->
+            <!--            </div>-->
         </layout>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
@@ -61,7 +73,8 @@
         <layout>
             <div class="block w-full">
                 <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Skills</text>
-                <div id="skills_grid" class="grid gap-section mb-1 justify-stretch" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))"/>
+                <div id="skills_grid" class="grid gap-section mb-1 justify-stretch"
+                     style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))"/>
                 <button id="presets" class="ml-auto" label="Presets"/>
             </div>
         </layout>
@@ -141,5 +154,10 @@
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Inventory</defName>
         <workerClass>PawnEditor.SectionWorker_Inventory</workerClass>
+    </PawnEditor.SectionDef>
+
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+        <defName>PawnEditor_Debug</defName>
+        <workerClass>PawnEditor.SectionWorker_Debug</workerClass>
     </PawnEditor.SectionDef>
 </Defs>

@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+        <defName>PawnEditor_Ideology</defName>
+        <workerClass>PawnEditor.SectionWorker_Ideology</workerClass>
+        <layout>
+            <div class="block">
+                <text color="Verse.ColoredText.TipSectionTitleColor">Ideology</text>
+                <div class="flex flex-wrap">
+                    <div>
+                        <text class="w-label">Ideology</text>
+                        <button id="ideology" class="btn"/>
+                    </div>
+                    <div>
+                        <text class="w-label">Certainty</text>
+                        <div id="certainty" class="btn"/>
+                    </div>
+                    <div>
+                        <text class="w-label">Role</text>
+                        <button id="role" class="btn"/>
+                    </div>
+                </div>
+            </div>
+        </layout>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_FavColor</defName>
         <workerClass>PawnEditor.SectionWorker_FavColor</workerClass>
         <layout>

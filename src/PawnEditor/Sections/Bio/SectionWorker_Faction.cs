@@ -8,10 +8,8 @@ namespace PawnEditor;
 
 public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
 {
-    public override bool ShowSection(Pawn p)
-    {
-        return base.ShowSection(p) && p.def.CanHaveFaction;
-    }
+    public override bool ShowSection(Pawn p) => base.ShowSection(p) && p.def.CanHaveFaction;
+
 
     public override void OnLayout(Layout layout, Pawn pawn)
     {
@@ -25,12 +23,13 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
         {
             List<FloatMenuOption> opts =
             [
-                ..Find.FactionManager.AllFactionsInViewOrder.Select(f =>
+                ..Find.FactionManager.AllFactionsInViewOrder.Prepend(null).Select(f =>
                 {
                     var (l, i, c) = FactionUtility.GetFactionMeta(f);
-                    return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c, f.IsPlayer ? MenuOptionPriority.High : MenuOptionPriority.Default);
+                    return new FloatMenuOption(l, () => { FactionUtility.SetFaction(pawn, f); }, i, c,
+                        f == null ? MenuOptionPriority.Low :
+                        f.IsPlayer ? MenuOptionPriority.High : MenuOptionPriority.Default);
                 }),
-                
                 new("Randomize", () =>
                 {
                     Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out var f, false);

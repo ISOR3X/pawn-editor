@@ -19,7 +19,7 @@ public class TextElement : XMLComponent
 
     public override void ParseXmlAttrs(XmlNode node)
     {
-        var content = node.InnerText;
+        var content = node.InnerText.Trim();
         var translate = node.Attributes?["translate"]?.Value;
         Content = translate == "true" ? content.Translate() : content;
         if (node.Attributes?["color"]?.Value is { } colorStr) Color = ParseColor(colorStr);

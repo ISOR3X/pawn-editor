@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+        <defName>PawnEditor_Empire</defName>
+        <workerClass>PawnEditor.SectionWorker_Empire</workerClass>
+        <layout>
+            <div class="flex flex-col">
+                <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Empire</text>
+                <div class="flex flex-wrap gap-section">
+                    <div class="flex flex-row">
+                        <text class="w-label mr-4">Role</text>
+                        <button id="role" class="btn"/>
+                    </div>
+                    <div class="flex flex-row">
+                        <text class="w-label mr-4">Honor</text>
+                        <div id="honor"/>
+                    </div>
+                </div>
+            </div>
+        </layout>
+    </PawnEditor.SectionDef>
+</Defs>

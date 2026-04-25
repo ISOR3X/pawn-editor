@@ -32,9 +32,9 @@ public static class FactionUtility
         return new TipSignal($"{name.Colorize(ColoredText.TipSectionTitleColor)}\n{label}\n\n{description}");
     }
 
-    public static void SetFaction(Pawn pawn, Faction faction)
+    public static void SetFaction(Pawn pawn, Faction? faction)
     {
-        if (pawn.Faction == faction) return;
+        if (faction != null && pawn.Faction == faction) return;
         pawn.SetFaction(faction);
 
         var editorWindow = Find.WindowStack.Windows.OfType<Window_Editor>().FirstOrDefault();
