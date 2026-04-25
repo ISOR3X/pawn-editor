@@ -5,7 +5,9 @@ using Verse;
 using Void;
 using Void.Components;
 using Void.Extensions;
+using Void.XMLComponents;
 using FlexDirection = Taffy.FlexDirection;
+using Layout = Void.Layout;
 using TexUI = Void.TexUI;
 
 namespace PawnEditor;
@@ -14,8 +16,11 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
     private static readonly int PassionMin;
     private static readonly int PassionMax;
-
-    private static readonly Vector2 SkillRectSize = new(230f, 24f); // REF: GenUI.DrawSkill(... Vector2)
+    
+    /// <summary>
+    /// Based on <see cref="GenUI.DrawSkill"/>
+    /// </summary>
+    private static readonly Vector2 SkillRectSize = new(230f, 24f);
 
     private static readonly float LevelLabelWidth =
         DefDatabase<SkillDef>.AllDefsListForReading.Max(s => s.skillLabel.GetWidthCached()) + GenUI.GapLabel;
@@ -25,6 +30,23 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
         var passions = (Passion[])Enum.GetValues(typeof(Passion));
         PassionMin = passions.Min(p => (int)p);
         PassionMax = passions.Max(p => (int)p);
+    }
+
+    public override void OnLayout(Layout layout, Pawn pawn)
+    {
+        layout.ComponentById<DivElement>("skills_grid").Children = b =>
+        {
+            var skills = SkillUI.skillDefsInListOrderCached;
+            foreach (var skillDef in skills) DrawSkill(b, pawn, skillDef);
+        };
+        layout.ComponentById<ButtonElement>("presets").OnClick = _ =>
+        {
+            List<FloatMenuOption> opts =
+            [
+                new("Minimize", () => { })
+            ];
+            Find.WindowStack.Add(new FloatMenu(opts));
+        };
     }
 
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)

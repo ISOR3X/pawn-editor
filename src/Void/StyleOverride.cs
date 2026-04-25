@@ -25,8 +25,8 @@ public class StyleOverride
     public List<TrackSizingFunction>? gridAutoRows;
     public Line<GridPlacement>? gridColumn;
     public Line<GridPlacement>? gridRow;
-    public List<TrackSizingFunction>? gridTemplateColumns;
-    public List<TrackSizingFunction>? gridTemplateRows;
+    public List<GridTemplateComponent>? gridTemplateColumns;
+    public List<GridTemplateComponent>? gridTemplateRows;
     public Dimension? height;
     public AlignContent? justifyContent;
     public AlignItems? justifyItems;

@@ -314,6 +314,14 @@
                 <name>my-4</name>
                 <value>margin-top: 16px; margin-bottom: 16px</value>
             </li>
+            <li>
+                <name>mb-1</name>
+                <value>margin-bottom: 4px</value>
+            </li>
+            <li>
+                <name>mb-2</name>
+                <value>margin-bottom: 8px</value>
+            </li>
             <!-- ALIGN ITEMS -->
             <li>
                 <name>items-start</name>
@@ -426,6 +434,10 @@
             <li>
                 <name>gap-section</name>
                 <value>row-gap: 8px; column-gap: 16px;</value>
+            </li>
+            <li>
+                <name>w-label</name>
+                <value>width: 100px</value>
             </li>
         </styles>
     </Void.StyleMapDef>

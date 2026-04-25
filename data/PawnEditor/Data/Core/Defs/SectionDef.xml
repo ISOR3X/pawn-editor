@@ -8,7 +8,7 @@
     <PawnEditor.SectionDef Name="SectionBase_LabelledButton" ParentName="SectionBase_Humanlike" Abstract="True">
         <layout>
             <div class="flex flex-row">
-                <text id="text" class="mr-4" color="Verse.ColoredText.TipSectionTitleColor">placeholder</text>
+                <text id="text" class="w-label mr-4" color="Verse.ColoredText.TipSectionTitleColor">placeholder</text>
                 <button id="button" class="btn"/>
             </div>
         </layout>
@@ -31,14 +31,14 @@
         <workerClass>PawnEditor.SectionWorker_Backstory</workerClass>
         <layout>
             <div class="flex flex-col">
-                <text color="Verse.ColoredText.TipSectionTitleColor">Backstory</text>
+                <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Backstory</text>
                 <div class="flex flex-wrap gap-section">
                     <div class="flex flex-row">
-                        <text class="mr-4">Childhood</text>
+                        <text class="w-label mr-4">Childhood</text>
                         <button id="button_childhood" class="btn"/>
                     </div>
                     <div class="flex flex-row">
-                        <text class="mr-4">Adulthood</text>
+                        <text class="w-label mr-4">Adulthood</text>
                         <button id="button_adulthood" class="btn"/>
                     </div>
                 </div>
@@ -58,10 +58,32 @@
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Skills</defName>
         <workerClass>PawnEditor.SectionWorker_Skills</workerClass>
+        <layout>
+            <div class="block w-full">
+                <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Skills</text>
+                <div id="skills_grid" class="grid gap-1 mb-1" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))"/>
+                <button id="presets" label="Presets"/>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Traits</defName>
         <workerClass>PawnEditor.SectionWorker_Traits</workerClass>
+        <layout>
+            <div class="block grow">
+                <div class="flex flex-wrap gap-section mb-1">
+                    <div class="flex flex-col grow" style="min-width: 256px; max-width: 512px">
+                        <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Traits</text>
+                        <div id="traits_block" class="flex flex-wrap grow content-start p-1 w-full gap-1"/>
+                    </div>
+                    <div class="flex flex-col grow" style="min-width: 256px; max-width: 512px">
+                        <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Incapable of</text>
+                        <div id="incapableOf_block" class="flex flex-wrap grow content-start p-1 w-full gap-1"/>
+                    </div>
+                </div>
+                <button id="add" label="Add trait"/>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef ParentName="SectionBase_LabelledButton">
         <defName>PawnEditor_Faction</defName>

@@ -339,17 +339,88 @@ public static class TaffyStyleParser
         };
     }
 
-    private static List<TrackSizingFunction> ParseTrackList(string s)
+    private static List<GridTemplateComponent> ParseTrackList(string s)
     {
-        var result = new List<TrackSizingFunction>();
-        foreach (var token in s.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-            result.Add(ParseTrack(token));
+        var result = new List<GridTemplateComponent>();
+        foreach (var token in TokenizeTrackList(s))
+            result.Add(ParseTrackComponent(token));
         return result;
     }
 
-    private static TrackSizingFunction ParseTrack(string s)
+    // Splits a track list on spaces while respecting balanced parentheses,
+    // so "repeat(auto-fill, minmax(250px, 1fr)) 200px" produces two tokens.
+    private static IEnumerable<string> TokenizeTrackList(string s)
+    {
+        var depth = 0;
+        var start = 0;
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (s[i] == '(') depth++;
+            else if (s[i] == ')') depth--;
+            else if (s[i] == ' ' && depth == 0)
+            {
+                if (i > start) yield return s[start..i];
+                start = i + 1;
+            }
+        }
+
+        if (start < s.Length) yield return s[start..];
+    }
+
+    // Finds the index of the first top-level comma (not inside parens).
+    private static int FindTopLevelComma(string s)
+    {
+        var depth = 0;
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (s[i] == '(') depth++;
+            else if (s[i] == ')') depth--;
+            else if (s[i] == ',' && depth == 0) return i;
+        }
+
+        return -1;
+    }
+
+    private static GridTemplateComponent ParseTrackComponent(string s)
+    {
+        if (s.StartsWith("repeat(", StringComparison.Ordinal) && s.EndsWith(')'))
+        {
+            var inner = s[7..^1];
+            var commaIdx = FindTopLevelComma(inner);
+            if (commaIdx < 0) goto fallback;
+
+            var countStr = inner[..commaIdx].Trim();
+            var tracksStr = inner[(commaIdx + 1)..].Trim();
+
+            GridTrackRepetition rep;
+            if (countStr == "auto-fill") rep = GridTrackRepetition.AutoFill;
+            else if (countStr == "auto-fit") rep = GridTrackRepetition.AutoFit;
+            else goto fallback;
+
+            var tracks = TokenizeTrackList(tracksStr).Select(ParsePlainTrack).ToList();
+            return GridTemplateComponent.Repeat(rep, tracks);
+        }
+
+        fallback:
+        return GridTemplateComponent.Single(ParsePlainTrack(s));
+    }
+
+    private static TrackSizingFunction ParsePlainTrack(string s)
     {
         if (s == "auto") return TrackSizingFunction.Auto();
+
+        if (s.StartsWith("minmax(", StringComparison.Ordinal) && s.EndsWith(')'))
+        {
+            var inner = s[7..^1];
+            var commaIdx = FindTopLevelComma(inner);
+            if (commaIdx >= 0)
+            {
+                var minStr = inner[..commaIdx].Trim();
+                var maxStr = inner[(commaIdx + 1)..].Trim();
+                return TrackSizingFunction.MinMax(ParseMinTrack(minStr), ParseMaxTrack(maxStr));
+            }
+        }
+
         if (s.EndsWith("fr", StringComparison.Ordinal))
             return TrackSizingFunction.Fr(float.Parse(s[..^2], CultureInfo.InvariantCulture));
         if (s.EndsWith("%", StringComparison.Ordinal))
@@ -357,6 +428,32 @@ public static class TaffyStyleParser
         if (s.EndsWith("px", StringComparison.Ordinal))
             return TrackSizingFunction.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture));
         return TrackSizingFunction.Px(float.Parse(s, CultureInfo.InvariantCulture));
+    }
+
+    private static MinTrackSizingFunction ParseMinTrack(string s)
+    {
+        if (s == "auto") return MinTrackSizingFunction.AUTO;
+        if (s == "min-content") return MinTrackSizingFunction.MIN_CONTENT;
+        if (s == "max-content") return MinTrackSizingFunction.MAX_CONTENT;
+        if (s.EndsWith("%", StringComparison.Ordinal))
+            return MinTrackSizingFunction.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
+        if (s.EndsWith("px", StringComparison.Ordinal))
+            return MinTrackSizingFunction.Length(float.Parse(s[..^2], CultureInfo.InvariantCulture));
+        return MinTrackSizingFunction.Length(float.Parse(s, CultureInfo.InvariantCulture));
+    }
+
+    private static MaxTrackSizingFunction ParseMaxTrack(string s)
+    {
+        if (s == "auto") return MaxTrackSizingFunction.AUTO;
+        if (s == "min-content") return MaxTrackSizingFunction.MIN_CONTENT;
+        if (s == "max-content") return MaxTrackSizingFunction.MAX_CONTENT;
+        if (s.EndsWith("fr", StringComparison.Ordinal))
+            return MaxTrackSizingFunction.Fr(float.Parse(s[..^2], CultureInfo.InvariantCulture));
+        if (s.EndsWith("%", StringComparison.Ordinal))
+            return MaxTrackSizingFunction.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
+        if (s.EndsWith("px", StringComparison.Ordinal))
+            return MaxTrackSizingFunction.Length(float.Parse(s[..^2], CultureInfo.InvariantCulture));
+        return MaxTrackSizingFunction.Length(float.Parse(s, CultureInfo.InvariantCulture));
     }
 
     private static GridPlacement ParseGridPlacement(string s)

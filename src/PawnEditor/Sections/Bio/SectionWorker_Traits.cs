@@ -5,41 +5,30 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
+using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
-using FlexDirection = Taffy.FlexDirection;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
 public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        var traits = pawn.story.traits.TraitsSorted;
-        var incapableOf = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
+        var traitsDiv = layout.ComponentById<DivElement>("traits_block");
+        var incapableOfDiv = layout.ComponentById<DivElement>("incapableOf_block");
+        
+        DoTraits(traitsDiv, pawn);
+        DoIncapableOf(incapableOfDiv, pawn);
 
-        builder.Div(
-            row =>
-            {
-                DoTraits(row, traits, pawn);
-                DoIncapableOf(row, incapableOf, pawn);
-            },
-            new StyleOverride
-            {
-                width = Dimension.Percent(1f),
-                flexWrap = FlexWrap.Wrap,
-                flexDirection = FlexDirection.Row,
-                gap = Void.Taffy.Gap(GenUI.GapTiny)
-            }
-        );
-        builder.Button("Add trait",
-            onClick: _ =>
-            {
-                Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn),
-                    Find.WindowStack.WindowOfType<Window_Editor>(),
-                    selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.Trait.LabelCap ?? "None")); }
-                ));
-            }
-        );
+        layout.ComponentById<ButtonElement>("add").OnClick = _ =>
+        {
+            Find.WindowStack.Add(new Window_Table<TraitUtility.TraitRecord>(GetTraitsTable(pawn),
+                Find.WindowStack.WindowOfType<Window_Editor>(),
+                selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.Trait.LabelCap ?? "None")); }
+            ));
+        };
+
     }
 
     private static void DoElementRect(TaffyBuilder builder, (Color?, string, string?) metaData,
@@ -65,47 +54,29 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             });
     }
 
-
-    private static void DoElementsRect<T>(TaffyBuilder builder, string headerLabel, List<T>? items,
+    private static void DoElementsRect<T>(DivElement div, List<T>? items,
         Func<T, (Color, string, string)> itemMetaGetter, string emptyLabel = "None", Action<T>? onClick = null)
     {
-        builder.Div(
-            left =>
+        div.Draw = r => GUI.DrawTexture(r, InspectPaneFiller.HealthTex);
+        div.Children =
+            traitsBuilder =>
             {
-                left.Text(headerLabel, color: ColoredText.TipSectionTitleColor);
-                left.Div(r => { GUI.DrawTexture(r, InspectPaneFiller.HealthTex); }, traitsBuilder =>
-                    {
-                        if (items is { Count: > 0 })
-                            foreach (var item in items)
-                                DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
-                        else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor);
-                    },
-                    new StyleOverride
-                    {
-                        flexWrap = FlexWrap.Wrap,
-                        gap = Void.Taffy.Gap(GenUI.GapTiny),
-                        flexGrow = 1f,
-                        alignContent = AlignContent.FlexStart,
-                        padding = Void.Taffy.Padding(GenUI.GapTiny),
-                        width = Dimension.Percent(1f)
-                    });
-            },
-            new StyleOverride
-            {
-                flexDirection = FlexDirection.Column,
-                flexGrow = 1f,
-                flexBasis = 400f,
-                flexShrink = 0f
-            });
+                if (items is { Count: > 0 })
+                    foreach (var item in items)
+                        DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
+                else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor);
+            };
     }
 
-    private static void DoTraits(TaffyBuilder builder, List<Trait>? traits, Pawn pawn)
+    private static void DoTraits(DivElement div, Pawn pawn)
     {
+        var traits = pawn.story.traits.TraitsSorted;
+        
         var emptyLabel = pawn.DevelopmentalStage.Baby()
             ? "TraitsDevelopLaterBaby".Translate()
             : "None".Translate();
-        DoElementsRect(builder, "Traits", traits,
-            t => (GetTraitTextColor(t), t.LabelCap, t.TipString(pawn)), emptyLabel, t => OnClick(t, pawn));
+        DoElementsRect(div, traits, t => (GetTraitTextColor(t), t.LabelCap, t.TipString(pawn)), emptyLabel,
+            t => OnClick(t, pawn));
         return;
 
         static Color GetTraitTextColor(Trait trait)
@@ -122,9 +93,11 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
         }
     }
 
-    private static void DoIncapableOf(TaffyBuilder builder, List<WorkTags>? workTags, Pawn pawn)
+    private static void DoIncapableOf(DivElement div, Pawn pawn)
     {
-        DoElementsRect(builder, "Incapable of", workTags,
+        var workTags = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
+        
+        DoElementsRect(div, workTags,
             t => (CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, t), t.LabelTranslated().CapitalizeFirst(),
                 GetTooltip(t, pawn)));
         return;

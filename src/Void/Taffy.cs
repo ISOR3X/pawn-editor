@@ -147,10 +147,17 @@ public static class Taffy
     #endregion
 
     /// <summary>Grid layout with separate column/row gaps and fixed auto-row height.</summary>
-    public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+    public static void Grid(Rect rect, IReadOnlyList<GridTemplateComponent> columns,
         float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
     {
         Execute(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
+    }
+
+    /// <inheritdoc cref="Grid(Rect,IReadOnlyList{GridTemplateComponent},float,float,float,Action{TaffyBuilder})" />
+    public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
+        float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
+    {
+        Execute(rect, MakeGridStyle(ToComponents(columns), null, gapX, gapY, autoRowHeight), build);
     }
 
     // ── Content-measured entry points ───────────────────────────────────────
@@ -178,7 +185,14 @@ public static class Taffy
     public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
         float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
     {
-        return ExecuteMeasured(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
+        return ExecuteMeasured(rect, MakeGridStyle(ToComponents(columns), null, gapX, gapY, autoRowHeight), build);
+    }
+
+    private static List<GridTemplateComponent> ToComponents(IReadOnlyList<TrackSizingFunction> tracks)
+    {
+        var list = new List<GridTemplateComponent>(tracks.Count);
+        foreach (var t in tracks) list.Add(t);
+        return list;
     }
 
     private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
@@ -204,8 +218,8 @@ public static class Taffy
         return tree.Layout(root).Size.Height;
     }
 
-    private static Style MakeGridStyle(IReadOnlyList<TrackSizingFunction> columns,
-        IReadOnlyList<TrackSizingFunction>? rows,
+    private static Style MakeGridStyle(IReadOnlyList<GridTemplateComponent> columns,
+        IReadOnlyList<GridTemplateComponent>? rows,
         float gapX, float gapY, float autoRowHeight)
     {
         var s = new Style
@@ -231,6 +245,14 @@ public static class Taffy
     {
         return TrackSizingFunction.Fr(fr);
     }
+
+    /// <summary>
+    ///     <c>repeat(auto-fill, track)</c> — fills the container with as many copies of
+    ///     <paramref name="track" /> as fit. Use <see cref="TrackSizingFunction.MinMax" /> for
+    ///     responsive columns: <c>AutoFill(TrackSizingFunction.MinMax(Min.Length(250), Max.Fr(1)))</c>.
+    /// </summary>
+    public static GridTemplateComponent AutoFill(TrackSizingFunction track)
+        => GridTemplateComponent.Repeat(GridTrackRepetition.AutoFill, [track]);
 
     /// <summary>A fixed-size track of <paramref name="px" /> pixels.</summary>
     public static TrackSizingFunction Px(float px)

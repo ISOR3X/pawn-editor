@@ -19,8 +19,10 @@
             <div class="items-end gap-section flex flex-wrap w-full">
                 <section>PawnEditor_Backstory</section>
                 <section class="items-center">PawnEditor_Faction</section>
-                <section class="items-center gap" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
+                <section class="items-center" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
             </div>
+            <section>PawnEditor_Traits</section>
+            <section>PawnEditor_Skills</section>
             <!--            </div>-->
             <!--            <section style="flex-direction: column; min-width: 400px">PawnEditor_Skills</section>-->
             <!--            <div style="flex-basis: 100%; flex-wrap: wrap; flex-direction: row; gap: 10px">-->
