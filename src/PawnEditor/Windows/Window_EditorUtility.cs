@@ -43,7 +43,7 @@ public partial class Window_Editor
         return _selectedFaction;
     }
 
-    private void RecacheTabs()
+    private static void RecacheTabs()
     {
         _selectedTabDefsFor.Clear();
         _selectedTabDefsFor = TabUtility.GetTabDefsFor(_currentContext);
@@ -51,10 +51,14 @@ public partial class Window_Editor
         _selectedTabDef?.Worker.Notify_ContentChanged();
     }
 
-    private void TryRecachePawnGroup()
+    private static void TryRecachePawnGroup()
     {
         _selectedPawnGroup.Clear();
-        _selectedPawnGroup.AddRange(PawnLister.Pawns_ByFaction[_selectedFaction]);
+        var byFaction = PawnLister.Pawns_ByFaction;
+        // _selectedFaction is static and can therefore be a stale reference on game change.
+        if (!byFaction.ContainsKey(_selectedFaction))
+            _selectedFaction = null;
+        _selectedPawnGroup.AddRange(byFaction[_selectedFaction]);
     }
 
 

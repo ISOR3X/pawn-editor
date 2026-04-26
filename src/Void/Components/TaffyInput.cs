@@ -282,8 +282,15 @@ public static partial class TaffyExtensions
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = DefaultInputWidth,
-            height = UIUtility.ButtonHeight
+            // This height makes it fit in a button height (30f) container when stacked with GameFont.Tiny text.
+            height = 12f
         });
+
+        // Smaller step when shift is held.
+        if (Event.current.shift)
+        {
+            step = Mathf.Max(step / 10, 0.01f);
+        }
 
         var capturedValue = Mathf.Clamp(value, min, max);
 

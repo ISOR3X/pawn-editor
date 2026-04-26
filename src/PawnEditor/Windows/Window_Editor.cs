@@ -1,5 +1,4 @@
-﻿
-using RimWorld;
+﻿using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -27,7 +26,7 @@ public partial class Window_Editor : Window
     private static List<TabDef> _selectedTabDefsFor = [];
     private static List<TabRecord> _tabsList = [];
 
-    public static Rect DefaultWindowRect = new (0, 0, UI.screenWidth / 2f, UI.screenHeight);
+    public static Rect DefaultWindowRect = new(0, 0, UI.screenWidth / 2f, UI.screenHeight);
 
     public static Rect SavedWindowRect = DefaultWindowRect;
 
@@ -85,8 +84,9 @@ public partial class Window_Editor : Window
         _selectedTabDefsFor.Clear();
         _tabsList.Clear();
     }
+
     #endregion
-    
+
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -118,13 +118,13 @@ public partial class Window_Editor : Window
                 Verse.Widgets.Label(inRect, "No pawn selected.".Colorize(ColoredText.SubtleGrayColor));
             }
     }
-    
+
     private void DoLeftSection(Rect inRect)
     {
         var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
         Void.Taffy.Div(inRect, builder =>
         {
-            builder.Text("Selected faction", GameFont.Tiny);
+            builder.Text("Selected faction", style: new StyleOverride { fontSize = GameFont.Tiny });
             builder.Button(label, tex, c, block: true,
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
             builder.Item(rect =>
@@ -134,5 +134,4 @@ public partial class Window_Editor : Window
             }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
         }, new StyleOverride { flexDirection = FlexDirection.Column });
     }
-
 }

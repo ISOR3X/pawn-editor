@@ -13,13 +13,13 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
     /// </summary>
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
-        builder.Text(AdjustedLabelFor(pawn), GameFont.Medium);
+        builder.Text(AdjustedLabelFor(pawn), style: new StyleOverride { fontSize = GameFont.Medium });
         builder.Div(row =>
         {
             DrawInspectPaneWidget(row, InspectPaneFiller.DrawHealth, pawn);
             if (pawn.IsGhoul && pawn.needs.food != null) DrawInspectPaneWidget(row, InspectPaneFiller.DrawHunger, pawn);
             else DrawInspectPaneWidget(row, InspectPaneFiller.DrawMood, pawn);
-            if (pawn.timetable != null && !pawn.IsPrisonerOfColony)
+            if (pawn is { timetable: not null, IsPrisonerOfColony: false })
                 DrawInspectPaneWidget(row, InspectPaneFiller.DrawTimetableSetting, pawn);
             if (pawn.needs?.energy != null)
                 DrawInspectPaneWidget(row, InspectPaneFiller.DrawMechEnergy, pawn);

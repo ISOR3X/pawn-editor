@@ -1,20 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
-        <defName>PawnEditor_Empire</defName>
-        <workerClass>PawnEditor.SectionWorker_Empire</workerClass>
+        <defName>PawnEditor_EmpireTitle</defName>
+        <workerClass>PawnEditor.SectionWorker_EmpireTitle</workerClass>
         <layout>
             <div class="flex flex-col">
                 <text class="w-label" color="Verse.ColoredText.TipSectionTitleColor">Empire</text>
-                <div class="flex flex-wrap gap-section">
-                    <div class="flex flex-row">
-                        <text class="w-label mr-4">Role</text>
-                        <button id="role" class="btn"/>
+                <div class="flex flex-row">
+                    <text class="w-label mr-4">Role</text>
+                    <button id="role" class="w-btn"/>
+                </div>
+            </div>
+        </layout>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+        <defName>PawnEditor_EmpireHonor</defName>
+        <workerClass>PawnEditor.SectionWorker_EmpireHonor</workerClass>
+        <layout>
+            <div class="flex flex-row">
+                <text class="w-label mr-4">Honor</text>
+                <div class="block w-btn h-btn">
+                    <div class="flex justify-between">
+                        <text id="min" class="text-xs" color="Verse.ColoredText.SubtleGrayColor">1</text>
+                        <text id="value" class="text-xs">2</text>
+                        <text id="max" class="text-xs" color="Verse.ColoredText.SubtleGrayColor">3</text>
                     </div>
-                    <div class="flex flex-row">
-                        <text class="w-label mr-4">Honor</text>
-                        <div id="honor"/>
-                    </div>
+                    <div id="honor"/>
                 </div>
             </div>
         </layout>

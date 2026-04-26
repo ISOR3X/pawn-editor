@@ -17,7 +17,7 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
 
     public void DrawFilter(TaffyBuilder builder, Table<TDef> table)
     {
-        builder.Text("Content source", GameFont.Tiny);
+        builder.Text("Content source", style: new  StyleOverride { fontSize = GameFont.Tiny });
         builder.Button(_selected?.Name ?? "Any",
             style: new StyleOverride
             {

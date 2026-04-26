@@ -9,7 +9,7 @@
         <layout>
             <div class="flex flex-row">
                 <text id="text" class="w-label mr-4" color="Verse.ColoredText.TipSectionTitleColor">placeholder</text>
-                <button id="button" class="btn"/>
+                <button id="button" class="w-btn"/>
             </div>
         </layout>
     </PawnEditor.SectionDef>
@@ -42,11 +42,11 @@
                 <div class="flex flex-wrap gap-section">
                     <div class="flex flex-row">
                         <text class="w-label mr-4">Childhood</text>
-                        <button id="button_childhood" class="btn"/>
+                        <button id="button_childhood" class="w-btn"/>
                     </div>
                     <div class="flex flex-row">
                         <text class="w-label mr-4">Adulthood</text>
-                        <button id="button_adulthood" class="btn"/>
+                        <button id="button_adulthood" class="w-btn"/>
                     </div>
                 </div>
             </div>

@@ -16,19 +16,19 @@ public static partial class TaffyExtensions
     ///     </para>
     ///     The default draw callback renders the text as a label.
     /// </summary>
-    public static void Text(this TaffyBuilder b, string text, GameFont font = GameFont.Small,
+    public static void Text(this TaffyBuilder b, string text,
         TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, bool? wrap = null, Action<Rect>? onHover = null,
         StyleOverride? style = null)
     {
-        var resolvedStyle = (style ?? new StyleOverride()).Resolve();
-
-        var node = b.tree.NewLeafWithContext(resolvedStyle,
+        var mergedStyle = (style ?? new StyleOverride());
+        
+        var node = b.tree.NewLeafWithContext(mergedStyle.Resolve(),
             (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
 
         b.children.Add(node);
         b.callbacks.Add((node, r =>
         {
-            using (new TextBlock(font, anchor, color ?? Color.white))
+            using (new TextBlock(mergedStyle.fontSize, anchor, color ?? Color.white))
             {
                 Verse.Text.WordWrap = wrap ?? r.width < Verse.Text.CalcSize(text).x;
                 var displayText = wrap == false ? text.Truncate(r.width) : text;
@@ -46,7 +46,7 @@ public static partial class TaffyExtensions
         // The tree-level dispatch in Execute will cast it and call it.
         Size<float> Measure(Size<float?> known, Size<AvailableSpace> available)
         {
-            using (new TextBlock(font))
+            using (new TextBlock(mergedStyle.fontSize ?? GameFont.Small))
             {
                 if (known.Width.HasValue)
                     // Width fully constrained by parent algorithm — wrap and measure height.
@@ -63,7 +63,7 @@ public static partial class TaffyExtensions
                     var minW = 0f;
                     foreach (var word in text.Split(' '))
                     {
-                        var key = (word, font);
+                        var key = (word, mergedStyle.fontSize ?? GameFont.Small);
                         if (!TaffyBuilder.WordWidthCache.TryGetValue(key, out var w))
                             TaffyBuilder.WordWidthCache[key] = w = Verse.Text.CalcSize(word).x;
                         if (w > minW) minW = w;
