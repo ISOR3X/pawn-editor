@@ -10,21 +10,22 @@ public partial class Window_Editor
     {
         if (_selectedFaction == faction) return;
         _selectedFaction = faction;
-        TryRecachePawnGroup();
+        SelectedFactionWeak.SetTarget(faction);
 
-        if (_selectedPawn?.Faction != _selectedFaction && PawnLister.Pawns_ByFaction[faction].Count > 0)
-            TrySelect(_selectedPawnGroup.FirstOrDefault());
+
+        if (SelectedPawn?.Faction != _selectedFaction && PawnLister.Pawns_ByFaction[faction].Count > 0)
+            TrySelect(PawnLister.Pawns_ByFaction[faction].FirstOrDefault());
     }
 
     public void TrySelect(Pawn? pawn)
     {
-        if (_selectedPawn == pawn) return;
+        if (SelectedPawn == pawn) return;
 
-        var prevFaction = _selectedPawn?.Faction;
-        var prevCategory = PawnUtility.GetPawnCategory(_selectedPawn);
+        var prevFaction = SelectedPawn?.Faction;
+        var prevCategory = PawnUtility.GetPawnCategory(SelectedPawn);
 
-        _selectedPawn = pawn;
         _currentContext = pawn != null ? new PawnContext(pawn) : null;
+        SelectedContextWeak.SetTarget(_currentContext);
 
         _selectedTabDef?.Worker.Notify_ContentChanged();
 
@@ -33,34 +34,18 @@ public partial class Window_Editor
         if (PawnUtility.GetPawnCategory(pawn) != prevCategory) RecacheTabs();
     }
 
-    public Pawn? GetSelectedPawn()
-    {
-        return _selectedPawn;
-    }
-
     public Faction? GetSelectedFaction()
     {
         return _selectedFaction;
     }
 
-    private static void RecacheTabs()
+    private void RecacheTabs()
     {
         _selectedTabDefsFor.Clear();
         _selectedTabDefsFor = TabUtility.GetTabDefsFor(_currentContext);
         _selectedTabDef = _selectedTabDefsFor.FirstOrDefault();
         _selectedTabDef?.Worker.Notify_ContentChanged();
     }
-
-    private static void TryRecachePawnGroup()
-    {
-        _selectedPawnGroup.Clear();
-        var byFaction = PawnLister.Pawns_ByFaction;
-        // _selectedFaction is static and can therefore be a stale reference on game change.
-        if (!byFaction.ContainsKey(_selectedFaction))
-            _selectedFaction = null;
-        _selectedPawnGroup.AddRange(byFaction[_selectedFaction]);
-    }
-
 
     private FloatMenu FactionFloatMenu()
     {
