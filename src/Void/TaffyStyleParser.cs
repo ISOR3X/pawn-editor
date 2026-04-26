@@ -210,6 +210,9 @@ public static class TaffyStyleParser
                 target.gridRow = gr;
                 break;
             }
+            case "font-size":
+                target.fontSize = ParseGameFont(value);
+                break;
             default:
                 Log.Warning($"[{VoidMod.ModName}] Unknown style property '{name}', skipping.");
                 break;
@@ -233,6 +236,17 @@ public static class TaffyStyleParser
         {
             return new Size<LengthPercentage>(LengthPercentage.ZERO, LengthPercentage.ZERO);
         }
+    }
+
+    private static GameFont? ParseGameFont(string s)
+    {
+        return s switch
+        {
+            "tiny" => GameFont.Tiny,
+            "small" => GameFont.Small,
+            "medium" => GameFont.Medium,
+            _ => GameFont.Small
+        };
     }
 
     private static float ParseFloat(string s)

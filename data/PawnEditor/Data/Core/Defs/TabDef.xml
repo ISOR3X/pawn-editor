@@ -13,17 +13,6 @@
                     <section class="flex-col">PawnEditor_Info</section>
                     <section>PawnEditor_Name</section>
                     <section class="flex-col">PawnEditor_Age</section>
-                    
-                    <div class="flex flex-wrap">
-                        <text class="w-label">label</text>
-                        <div class="flex flex-wrap">
-                            <div style="width: 100px; height: 30px"/>
-                            <div style="width: 100px; height: 30px"/>
-                            <div style="width: 100px; height: 30px"/>
-                            <div style="width: 100px; height: 30px"/>
-                        </div>
-                        <button icon="Verse.TexButton.Rename"/>
-                    </div>
                 </div>
                 <section style="min-width: 80px; max-width: 160px">PawnEditor_Portrait</section>
             </div>
@@ -32,8 +21,15 @@
             <section>PawnEditor_Backstory</section>
             <section>PawnEditor_Faction</section>
             <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_FavColor</section>
-            <section mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_Ideology</section>
-            <section mayRequire="Ludeon.Rimworld.Royalty">PawnEditor_Empire</section>
+            <div mayRequire="Ludeon.Rimworld.Ideology" class="flex flex-wrap gap-section items-end">
+                <section>PawnEditor_Ideology</section>
+                <section>PawnEditor_IdeologyCertainty</section>
+                <section>PawnEditor_IdeologyRole</section>
+            </div>
+            <div mayRequire="Ludeon.Rimworld.Royalty" class="flex flex-wrap gap-section items-end">
+                <section>PawnEditor_EmpireTitle</section>
+                <section>PawnEditor_EmpireHonor</section>
+            </div>
             <section>PawnEditor_Traits</section>
             <section>PawnEditor_Skills</section>
             <section>PawnEditor_Abilities</section>

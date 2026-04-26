@@ -405,6 +405,19 @@
                 <name>content-evenly</name>
                 <value>align-content: space-evenly</value>
             </li>
+            <!-- FONT SIZE -->
+            <li>
+                <name>text-xs</name>
+                <value>font-size: tiny</value>
+            </li>
+            <li>
+                <name>text-base</name>
+                <value>font-size: small</value>
+            </li>
+            <li>
+                <name>text-lg</name>
+                <value>font-size: medium</value>
+            </li>
             <!-- ALIGN SELF -->
             <li>
                 <name>self-start</name>
@@ -428,8 +441,12 @@
         <defName>PawnEditorStyles_Components</defName>
         <styles>
             <li>
-                <name>btn</name>
+                <name>w-btn</name>
                 <value>width: 180px</value>
+            </li>
+            <li>
+                <name>h-btn</name>
+                <value>height: 30px</value>
             </li>
             <li>
                 <name>btn-stretch</name>

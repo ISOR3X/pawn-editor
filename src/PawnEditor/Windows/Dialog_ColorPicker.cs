@@ -38,7 +38,7 @@ public class Dialog_ColorPicker : Window
     {
         Void.Taffy.Div(inRect, builder =>
         {
-            builder.Text("Choose a color", GameFont.Medium);
+            builder.Text("Choose a color", style: new StyleOverride { fontSize = GameFont.Medium });
             builder.Div(contentBuilder =>
             {
                 contentBuilder.Div(leftBuilder =>
@@ -58,9 +58,12 @@ public class Dialog_ColorPicker : Window
                         var lInt = Mathf.RoundToInt(fl * 100f);
                         leftBuilder.Div(hslBuilder =>
                         {
-                            hslBuilder.Text("H", GameFont.Tiny, TextAnchor.MiddleCenter);
-                            hslBuilder.Text("S", GameFont.Tiny, TextAnchor.MiddleCenter);
-                            hslBuilder.Text("L", GameFont.Tiny, TextAnchor.MiddleCenter);
+                            hslBuilder.Text("H", TextAnchor.MiddleCenter,
+                                style: new StyleOverride { fontSize = GameFont.Tiny });
+                            hslBuilder.Text("S", TextAnchor.MiddleCenter,
+                                style: new StyleOverride { fontSize = GameFont.Tiny });
+                            hslBuilder.Text("L", TextAnchor.MiddleCenter,
+                                style: new StyleOverride { fontSize = GameFont.Tiny });
                             hslBuilder.InputNumber(ref hInt, 0, 360, id: "color_h",
                                 style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
                             hslBuilder.InputNumber(ref sInt, 0, 100, id: "color_s",

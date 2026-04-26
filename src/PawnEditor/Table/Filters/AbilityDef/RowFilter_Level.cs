@@ -24,7 +24,7 @@ public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
 
     public void DrawFilter(TaffyBuilder builder, Table<RimWorld.AbilityDef> table)
     {
-        builder.Text("Level range", GameFont.Tiny);
+        builder.Text("Level range", style: new  StyleOverride { fontSize = GameFont.Tiny });
         builder.Item(
             r =>
             {
