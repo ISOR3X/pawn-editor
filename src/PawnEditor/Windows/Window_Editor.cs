@@ -15,26 +15,24 @@ public partial class Window_Editor : Window
 
     // Pawn-related fields
     // These are private, so they are only set through the TrySelect methods.
-    // Static so their selection persists once a window is closed.
-    private static Faction? _selectedFaction;
-    private static Pawn? _selectedPawn;
-    private static readonly List<Pawn> _selectedPawnGroup = []; // Pawns in the selected faction.
+    // WeakRefs are static so the selection persists once a window is closed; strong refs are instance-scoped.
+    private static readonly System.WeakReference<Faction?> SelectedFactionWeak = new(null);
+    private static readonly System.WeakReference<IContext?> SelectedContextWeak = new(null);
+    private Faction? _selectedFaction;
+    private IContext? _currentContext;
+    private Pawn? SelectedPawn => (_currentContext as IContext<Pawn>)?.Value;
 
     // Tab related fields
-    private static IContext? _currentContext;
-    private static TabDef? _selectedTabDef;
-    private static List<TabDef> _selectedTabDefsFor = [];
-    private static List<TabRecord> _tabsList = [];
+    private TabDef? _selectedTabDef;
+    private List<TabDef> _selectedTabDefsFor = [];
+    private List<TabRecord> _tabsList = [];
 
     public static Rect DefaultWindowRect = new(0, 0, UI.screenWidth / 2f, UI.screenHeight);
-
     public static Rect SavedWindowRect = DefaultWindowRect;
 
     // Options
     public static bool ShowHeadgear = true;
     public static bool ShowClothes = true;
-
-    public static bool Playing => Current.ProgramState == ProgramState.Playing;
 
     #endregion
 
@@ -42,7 +40,7 @@ public partial class Window_Editor : Window
 
     public Window_Editor()
     {
-        layer = Playing ? WindowLayer.Dialog : WindowLayer.Super;
+        layer = Current.ProgramState == ProgramState.Playing ? WindowLayer.Dialog : WindowLayer.Super;
         forcePause = true;
         closeOnClickedOutside = true;
         resizeable = PawnEditorMod.Settings.allowResize;
@@ -58,18 +56,10 @@ public partial class Window_Editor : Window
     public override void PreOpen()
     {
         base.PreOpen();
-        TryRecachePawnGroup();
-
-        switch (_selectedPawn)
-        {
-            // Update selected pawn and faction if needed.
-            case null when _selectedFaction != null:
-                TrySelect(_selectedFaction);
-                break;
-            case null when _selectedFaction == null:
-                TrySelect(Find.FactionManager.OfPlayer);
-                break;
-        }
+        // When the reference is lost, of context is null, select the player faction as default. This also selects a player faction pawn.
+        if (!SelectedContextWeak.TryGetTarget(out _currentContext)) TrySelect(Find.FactionManager.OfPlayer);
+        // Set the _selectedFaction back to what is stored in the weak ref.
+        SelectedFactionWeak.TryGetTarget(out _selectedFaction);
 
         // Update tabs
         RecacheTabs();
@@ -79,6 +69,10 @@ public partial class Window_Editor : Window
     {
         base.PostClose();
         SavedWindowRect = windowRect;
+
+        // Clear the direct refs.
+        _selectedFaction = null;
+        _currentContext = null;
 
         _selectedTabDef = null;
         _selectedTabDefsFor.Clear();
@@ -103,13 +97,7 @@ public partial class Window_Editor : Window
             _selectedTabDef.Worker.Notify_ContentChanged();
         }, _selectedTabDef == tabDef)).ToList();
         TabDrawer.DrawTabs(inRect, _tabsList);
-
-        var tabRect = inRect.TopPartPixels(TabDrawer.TabHeight) with
-        {
-            y = inRect.y - TabDrawer.TabHeight, width = _tabsList.Count * 200f
-        };
-        if (Mouse.IsOver(tabRect)) TooltipHandler.TipRegion(tabRect, "Click to select tab");
-
+        
         if (_currentContext != null && _selectedTabDef != null)
             _selectedTabDef.Worker.DoTabContents(ref inRect, _currentContext);
         else
@@ -129,8 +117,9 @@ public partial class Window_Editor : Window
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
             builder.Item(rect =>
             {
-                Widgets.DrawReorderablePawnList(rect, _selectedPawnGroup, _selectedPawn, out var newSelectedPawn);
-                if (newSelectedPawn != _selectedPawn) TrySelect(newSelectedPawn);
+                Widgets.DrawReorderablePawnList(rect, PawnLister.Pawns_ByFaction[_selectedFaction], SelectedPawn,
+                    out var newSelectedPawn);
+                if (newSelectedPawn != SelectedPawn) TrySelect(newSelectedPawn);
             }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
         }, new StyleOverride { flexDirection = FlexDirection.Column });
     }

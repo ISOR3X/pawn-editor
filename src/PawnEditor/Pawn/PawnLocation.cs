@@ -49,7 +49,7 @@ public class PawnLocation : IEquatable<PawnLocation>, IComparable<PawnLocation>
 
     public static string GetLocationLabel(Pawn pawn)
     {
-        if (Window_Editor.Playing || pawn.Faction != Faction.OfPlayer) return GetLocationLabel(GetDirectLocation(pawn));
+        if (Current.ProgramState == ProgramState.Playing || pawn.Faction != Faction.OfPlayer) return GetLocationLabel(GetDirectLocation(pawn));
         return Find.GameInitData.startingPawnCount >= StartingPawnUtility.PawnIndex(pawn)
             ? "StartingPawnsSelected".Translate()
             : "StartingPawnsLeftBehind".Translate();
