@@ -2,26 +2,37 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.Components;
 using Void.Extensions;
+using Void.XMLComponents;
 
 namespace PawnEditor;
 
 public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
 {
-    private Vector2 _scrollPositionBodyType = Vector2.zero;
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        var capturedPawn = pawn;
-        builder.Item(r =>
+        layout.ComponentById<TextElement>("text").Content = "Body";
+        layout.ComponentById<DivElement>("carrousel").Children = b =>
         {
-            Void.Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Body");
-            Widgets.Carrousel(r,
-                DefDatabase<BodyTypeDef>.AllDefsListForReading
-                    .Where(d => AppearanceUtility.CanUseBodyType(d, pawn)).ToList(),
-                ref _scrollPositionBodyType,
-                pawn.story.bodyType, d => AppearanceUtility.TrySetBodyType(d, capturedPawn),
-                d => AppearanceUtility.BodyTypes[d], pawn.story.SkinColor, d => d.ReadableDefName());
-        }, new StyleOverride { height = Widgets.CarrouselCellHeight + UIUtility.ButtonHeight });
+            var currentHead = pawn.story.bodyType;
+            var heads = DefDatabase<BodyTypeDef>.AllDefsListForReading
+                .Where(d => AppearanceUtility.CanUseBodyType(d, pawn)).ToList();
+            b.HorizontalList(heads,
+                (r, td) =>
+                {
+                    Verse.Widgets.DrawHighlight(r);
+                    Verse.Widgets.DrawHighlightIfMouseover(r);
+                    if (Equals(td, currentHead)) Verse.Widgets.DrawHighlightSelected(r);
+
+                    if (Mouse.IsOver(r)) TooltipHandler.TipRegion(r, td.ReadableDefName());
+
+                    if (Verse.Widgets.ButtonInvisible(r)) AppearanceUtility.TrySetBodyType(td, pawn);
+                    
+                    // -10f to compensate for the off-centered body textures.
+                    using (new GUIColor(pawn.story.SkinColor))
+                        Verse.Widgets.DrawTextureFitted(r with {y = r.y - 8f}, AppearanceUtility.BodyTypes[td], 1.6f);
+                }, 64f, style: new StyleOverride { gap = Void.Taffy.Gap(4f) });
+        };
     }
 }

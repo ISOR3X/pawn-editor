@@ -39,12 +39,13 @@ public abstract class SectionWorker(SectionDef def)
     ///         node (tab wins on conflict). For legacy sections it is applied as a wrapper div.
     ///     </para>
     /// </summary>
-    public void BuildSection(TaffyBuilder builder, Pawn pawn, StyleOverride? tabStyle = null)
+    public void BuildSection(TaffyBuilder builder, Pawn pawn, StyleOverride? tabStyle = null,
+        Dictionary<string, string>? attrs = null)
     {
         builder.ContextKey = pawn.thingIDNumber.ToString();
         if (Def.layout != null)
         {
-            var layout = new Layout(Def.layout, new PawnContext(pawn));
+            var layout = new Layout(Def.layout, new PawnContext(pawn)) { Attrs = attrs ?? [] };
             OnLayout(layout, pawn);
             layout.Render(builder, tabStyle);
         }

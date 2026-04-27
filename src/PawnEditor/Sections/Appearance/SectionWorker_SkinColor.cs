@@ -2,35 +2,27 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.XMLComponents;
 
 namespace PawnEditor;
 
 public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
 {
-    private float _skinColorHeight = 30f;
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        builder.Item(r =>
-        {
-            var listing = new Listing_Standard { maxOneColumn = true };
-            listing.Begin(r);
-            var p = pawn;
-            var skinColor = pawn.story.SkinColor;
-            var availableColors = AppearanceUtility.GetSkinColorsFor(pawn);
-            var specialColors = new Dictionary<string, Color> { { "Old", pawn.story.SkinColor } };
-            if (pawn.story.favoriteColor != null) specialColors["Favorite"] = pawn.story.favoriteColor.color;
-            if (pawn.story.SkinColorOverriden && pawn.story.skinColorBase != null)
-                specialColors["Base"] = pawn.story.skinColorBase.Value;
-            listing.ColorPickerLabeled("Skin Color", _skinColorHeight, ref skinColor, specialColors, availableColors,
-                c => TrySetSkinColor(c, ref p), out _skinColorHeight);
-            TrySetSkinColor(skinColor, ref p);
-            listing.End();
-        }, new StyleOverride { height = Text.LineHeight + _skinColorHeight });
-    }
+        var currentColor = pawn.story.SkinColor;
+        layout.ComponentById<TextElement>("text").Wrap = false;
+        layout.ComponentById<TextElement>("text").Content = "Skin color";
+        layout.ComponentById<DivElement>("container").Draw = Verse.Widgets.DrawLightHighlight;
+        layout.ComponentById<DivElement>("color_preview").Draw = r =>
+            Verse.Widgets.DrawRectFast(r, currentColor);
 
-    // We use a reference, so when this method is used inside an action, it will still update the pawn.
-    private static void TrySetSkinColor(Color color, ref Pawn pawn, bool silent = true)
+        layout.ComponentById<ButtonElement>("button").OnClick = _ =>
+            Find.WindowStack.Add(new Dialog_ColorPicker(c => TrySetSkinColor(c, pawn), currentColor,
+                AppearanceUtility.GetSkinColorsFor(pawn)));
+    }
+    
+    private static void TrySetSkinColor(Color color, Pawn pawn, bool silent = true)
     {
         if (pawn.story.SkinColor == color) return;
         if (AppearanceUtility.ColorsFromGenes.Keys.Contains(color))

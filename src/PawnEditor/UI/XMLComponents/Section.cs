@@ -38,6 +38,6 @@ public class SectionElement : XMLComponent
         if (worker == null || Pawn == null) return;
         if (!worker.ShowSection(Pawn)) return;
         // Delegate entirely to BuildSection - it handles both UILayout (merge) and legacy (wrap).
-        worker.BuildSection(builder, Pawn, Style);
+        worker.BuildSection(builder, Pawn, Style, Attrs);
     }
 }

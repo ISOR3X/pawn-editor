@@ -13,6 +13,8 @@ public class Layout(ParsedLayout template, IContext? context = null)
 {
     private readonly Dictionary<string, XMLComponent> _overrides = [];
 
+    public Dictionary<string, string> Attrs = [];
+
     /// <summary>
     ///     Returns a cloned, mutable copy of the element with the given <paramref name="id" />.
     ///     The returned instance is registered as this frame's override - mutate it freely.
