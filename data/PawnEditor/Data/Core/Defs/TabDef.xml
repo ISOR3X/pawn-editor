@@ -87,7 +87,7 @@
     <PawnEditor.TabDef>
         <defName>PawnEditor_TabDebug</defName>
         <label>Debug</label>
-        <priority>-1</priority>
+        <priority>999</priority>
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout>
