@@ -1,7 +1,6 @@
 using PawnEditor.Table;
 using PawnEditor.Table.Filters.BackstoryDef;
 using RimWorld;
-using Taffy;
 using UnityEngine;
 using Verse;
 using Void;

@@ -165,15 +165,25 @@
         <workerClass>PawnEditor.SectionWorker_Sex</workerClass>
     </PawnEditor.SectionDef>
     <!-- Gear -->
-    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
+    <PawnEditor.SectionDef Name="SectionBase_HumanlikeGearTable">
         <defName>PawnEditor_Equipment</defName>
         <workerClass>PawnEditor.SectionWorker_Equipment</workerClass>
+        <layout>
+            <div class="flex flex-col grow" style="min-width: 400px; min-height:300px">
+                <text id="text" color="Verse.ColoredText.TipSectionTitleColor"/>
+                <div id="table" class="grow"/>
+                <div style="height: 30px" class="flex justify-between">
+                    <button id="add" label="Add item"/>
+                    <div id="search"/>
+                </div>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeGearTable">
         <defName>PawnEditor_Apparel</defName>
         <workerClass>PawnEditor.SectionWorker_Apparel</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeGearTable">
         <defName>PawnEditor_Inventory</defName>
         <workerClass>PawnEditor.SectionWorker_Inventory</workerClass>
     </PawnEditor.SectionDef>

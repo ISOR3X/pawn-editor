@@ -26,7 +26,7 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
             }, onClick: _ =>
             {
                 var opts = LoadedModManager.RunningMods
-                    .Where(pack => pack.AllDefs.OfType<BackstoryDef>().Any())
+                    .Where(pack => pack.AllDefs.OfType<TDef>().Any())
                     .Select(pack => new FloatMenuOption(pack.Name, () =>
                     {
                         _selected = pack;

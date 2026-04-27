@@ -63,7 +63,17 @@ public class Table<TRow>(
         SetDirty();
     }
 
-    public void Draw(Rect r)
+    public void DrawSearchWidget(Rect r)
+    {
+        if (_searchWidget != null)
+        {
+            var footerRect = r.TakeBottomPart(FooterHeight);
+            r.yMax -= GenUI.GapTiny;
+            _searchWidget.OnGUI(footerRect.RightPartPixels(180f), SetDirty);
+        }
+    }
+
+    public void Draw(Rect r, bool drawFooter = true)
     {
         if (Event.current.type == EventType.Layout)
             return;
@@ -76,7 +86,7 @@ public class Table<TRow>(
 
         #region FOOTER
 
-        if (_searchWidget != null)
+        if (_searchWidget != null && drawFooter)
         {
             var footerRect = r.TakeBottomPart(FooterHeight);
             r.yMax -= GenUI.GapTiny;
@@ -227,7 +237,7 @@ public class Table<TRow>(
             width = Dimension.Percent(1)
         });
 
-        builder.Item(Draw, resolvedStyle);
+        builder.Item(r => Draw(r), resolvedStyle);
     }
 
     private void HandleHeaderClick(ColumnWorker<TRow> col, int button)
