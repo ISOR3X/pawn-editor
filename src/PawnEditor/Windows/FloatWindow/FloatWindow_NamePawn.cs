@@ -5,6 +5,7 @@ using Verse;
 using Verse.Sound;
 using Void;
 using Void.Components;
+using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -42,15 +43,13 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
-        var contentHeight = Void.Taffy.MeasuredGrid(inRect,
-            [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
-            GenUI.GapLabel, GenUI.GapTiny, UIUtility.ButtonHeight,
-            grid =>
+        var contentHeight = Void.Taffy.DivMeasured(inRect,
+            b =>
             {
                 if (_selectedCulture != null)
                 {
-                    grid.Text("Culture");
-                    GridButton(grid, _selectedCulture.LabelCap,
+                    b.Text("Culture");
+                    GridButton(b, _selectedCulture.LabelCap,
                         _ =>
                         {
                             Find.WindowStack.Add(new FloatMenu(cultures
@@ -61,8 +60,8 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
                 if (ModsConfig.BiotechActive)
                 {
-                    grid.Text("Xenotype");
-                    GridButton(grid, _selectedXenotype?.LabelCap ?? "None",
+                    b.Text("Xenotype");
+                    GridButton(b, _selectedXenotype?.LabelCap ?? "None",
                         r =>
                         {
                             Find.WindowStack.Add(new FloatMenu(xenotypes
@@ -72,8 +71,8 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                         });
                 }
 
-                grid.Text("Gender");
-                GridButton(grid, _selectedGender.GetLabel().CapitalizeFirst(),
+                b.Text("Gender");
+                GridButton(b, _selectedGender.GetLabel().CapitalizeFirst(),
                     r =>
                     {
                         Find.WindowStack.Add(new FloatMenu(
@@ -82,15 +81,15 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                                     new FloatMenuOption(g.GetLabel().CapitalizeFirst(), () => _selectedGender = g))
                                 .ToList()));
                     });
-                grid.GridItem(colSpan: 2,
+                b.GridItem(colSpan: 2,
                     draw: r => Verse.Widgets.CheckboxLabeled(r, "Keep last name", ref _keepLastName));
-                grid.GridItem(colSpan: 2,
+                b.GridItem(colSpan: 2,
                     draw: r => Verse.Widgets.CheckboxLabeled(r, "Force no nickname", ref _forceNoNick));
 
-                grid.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
+                b.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
                     style: new StyleOverride
                         { gridColumn = new Line<GridPlacement>(GridPlacement.Line(1), GridPlacement.Span(2)) });
-                GridButton(grid, "Generate", _ =>
+                GridButton(b, "Generate", _ =>
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
                         string? lastName = null;
@@ -105,7 +104,15 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                     {
                         gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2))
                     });
-            });
+            },
+            new StyleOverride
+            {
+                gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
+                display = Display.Grid,
+                gap = Void.Taffy.Gap(GenUI.GapLabel, GenUI.GapTiny),
+                gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]
+            }
+        );
 
         if (!Mathf.Approximately(windowRect.height, contentHeight + Margin * 2))
             windowRect.height = contentHeight + Margin * 2;

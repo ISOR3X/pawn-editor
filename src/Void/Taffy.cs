@@ -146,28 +146,6 @@ public static class Taffy
 
     #endregion
 
-    /// <summary>Grid layout with separate column/row gaps and fixed auto-row height.</summary>
-    public static void Grid(Rect rect, IReadOnlyList<GridTemplateComponent> columns,
-        float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
-    {
-        Execute(rect, MakeGridStyle(columns, null, gapX, gapY, autoRowHeight), build);
-    }
-
-    /// <inheritdoc cref="Grid(Rect,IReadOnlyList{GridTemplateComponent},float,float,float,Action{TaffyBuilder})" />
-    public static void Grid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-        float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
-    {
-        Execute(rect, MakeGridStyle(ToComponents(columns), null, gapX, gapY, autoRowHeight), build);
-    }
-
-    // ── Content-measured entry points ───────────────────────────────────────
-    //
-    // These lay out children with width=rect.width and height=MaxContent (unconstrained),
-    // draw the result, and return the computed root height.  This is the idiomatic Taffy
-    // way to measure natural content height: pass AvailableSpace::MaxContent on the height
-    // axis to compute_layout, just as the Rust library does in its own test suite.
-    // Used by TabWorker.DoTabContents to size the scroll view's viewRect each frame.
-
     /// <summary>
     ///     Like <see cref="Div" /> but lays out with unconstrained height, draws all content,
     ///     and returns the computed content height. Used for scrollable containers where
@@ -176,23 +154,6 @@ public static class Taffy
     public static float DivMeasured(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
     {
         return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
-    }
-
-    /// <summary>
-    ///     Grid layout with separate column/row gaps and unconstrained height. Returns the computed content height.
-    ///     TODO: deprecate and remove.
-    /// </summary>
-    public static float MeasuredGrid(Rect rect, IReadOnlyList<TrackSizingFunction> columns,
-        float gapX, float gapY, float autoRowHeight, Action<TaffyBuilder> build)
-    {
-        return ExecuteMeasured(rect, MakeGridStyle(ToComponents(columns), null, gapX, gapY, autoRowHeight), build);
-    }
-
-    private static List<GridTemplateComponent> ToComponents(IReadOnlyList<TrackSizingFunction> tracks)
-    {
-        var list = new List<GridTemplateComponent>(tracks.Count);
-        foreach (var t in tracks) list.Add(t);
-        return list;
     }
 
     private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
@@ -212,33 +173,12 @@ public static class Taffy
                     ? measure(known, available)
                     : SizeF.ZERO);
         var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var entry in callbacks)
-            lookup[entry.id] = entry.draw;
+        foreach (var (id, draw) in callbacks) lookup[id] = draw;
         DrawTree(tree, root, rect.x, rect.y, lookup);
         return tree.Layout(root).Size.Height;
     }
 
-    private static Style MakeGridStyle(IReadOnlyList<GridTemplateComponent> columns,
-        IReadOnlyList<GridTemplateComponent>? rows,
-        float gapX, float gapY, float autoRowHeight)
-    {
-        var s = new Style
-        {
-            display = Display.Grid,
-            gridTemplateColumns = [..columns],
-            gridTemplateRows = rows != null ? [..rows] : null,
-            gap = new Size<LengthPercentage>(
-                LengthPercentage.Length(gapX),
-                LengthPercentage.Length(gapY))
-        };
-        // When items are leaf nodes with no intrinsic size, CSS auto rows collapse to 0.
-        // An explicit autoRowHeight overrides gridAutoRows to give each row a fixed height.
-        if (autoRowHeight > 0f)
-            s.gridAutoRows = [TrackSizingFunction.Px(autoRowHeight)];
-        return s;
-    }
-
-    #region TRACK SIZING SHORTHANDS
+    #region STYLE HELPERS
 
     /// <summary>A flexible track that takes the given fraction of remaining space (default 1fr).</summary>
     public static TrackSizingFunction Fr(float fr = 1f)
@@ -246,41 +186,11 @@ public static class Taffy
         return TrackSizingFunction.Fr(fr);
     }
 
-    /// <summary>
-    ///     <c>repeat(auto-fill, track)</c> — fills the container with as many copies of
-    ///     <paramref name="track" /> as fit. Use <see cref="TrackSizingFunction.MinMax" /> for
-    ///     responsive columns: <c>AutoFill(TrackSizingFunction.MinMax(Min.Length(250), Max.Fr(1)))</c>.
-    /// </summary>
-    public static GridTemplateComponent AutoFill(TrackSizingFunction track)
-        => GridTemplateComponent.Repeat(GridTrackRepetition.AutoFill, [track]);
-
     /// <summary>A fixed-size track of <paramref name="px" /> pixels.</summary>
     public static TrackSizingFunction Px(float px)
     {
         return TrackSizingFunction.Px(px);
     }
-
-    /// <summary>An auto-sized track (sized to content, then stretched to fill).</summary>
-    public static TrackSizingFunction AutoTrack()
-    {
-        return TrackSizingFunction.Auto();
-    }
-
-    /// <summary>A percent-sized track relative to the grid container.</summary>
-    public static TrackSizingFunction PercentTrack(float pct)
-    {
-        return TrackSizingFunction.Percent(pct);
-    }
-
-    /// <summary>A fit-content track capped at <paramref name="px" /> pixels.</summary>
-    public static TrackSizingFunction FitContent(float px)
-    {
-        return TrackSizingFunction.FitContentPx(px);
-    }
-
-    #endregion
-
-    #region STYLE HELPERS
 
     /// <summary>Creates uniform padding on all four sides.</summary>
     public static Rect<LengthPercentage> Padding(float all)

@@ -5,6 +5,7 @@ using Verse;
 using Verse.Sound;
 using Void;
 using Void.Extensions;
+using Display = Taffy.Display;
 
 namespace PawnEditor.Table;
 
@@ -92,10 +93,10 @@ public class Table<TRow>(
             headerRect.height);
 
 
-        Void.Taffy.Grid(headerContentRect, _columnTracks, GenUI.GapSmall, 0f, HeaderHeight, grid =>
+        Void.Taffy.Div(headerContentRect, b =>
         {
             foreach (var col in columns)
-                grid.Item(colRect =>
+                b.Item(colRect =>
                 {
                     col.DrawHeader(colRect);
 
@@ -122,6 +123,12 @@ public class Table<TRow>(
                         }
                     }
                 });
+        }, new StyleOverride
+        {
+            display = Display.Grid,
+            gridTemplateColumns = [.._columnTracks],
+            gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
+            gridAutoRows = [TrackSizingFunction.Px(HeaderHeight)]
         });
 
         using (new GUIColor(PawnTable.BorderColor))
@@ -183,18 +190,24 @@ public class Table<TRow>(
             var gridRect = new Rect(0f, firstVisible * rowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
 
-            // TODO: Set alignItems = AlignItems.Center
-            Void.Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, 0f, rowHeight, grid =>
+            Void.Taffy.Div(gridRect, b =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {
                     var row = _cachedFilteredRows[i];
                     foreach (var col in columns)
                         if (col is IContextColumn<TRow> ctxCol && context != null)
-                            ctxCol.DrawCell(grid, row, context);
+                            ctxCol.DrawCell(b, row, context);
                         else
-                            col.DrawCell(grid, row);
+                            col.DrawCell(b, row);
                 }
+            }, style: new StyleOverride
+            {
+                display = Display.Grid,
+                gridTemplateColumns = [.._columnTracks],
+                gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
+                alignItems = AlignItems.Center,
+                gridAutoRows = [TrackSizingFunction.Px(rowHeight)]
             });
         }
 
