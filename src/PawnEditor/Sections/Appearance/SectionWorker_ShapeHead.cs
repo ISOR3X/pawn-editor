@@ -2,28 +2,37 @@ using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.Components;
 using Void.Extensions;
+using Void.XMLComponents;
 
 namespace PawnEditor;
 
 [UsedImplicitly]
 public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
 {
-    private Vector2 _scrollPositionHeadType = Vector2.zero;
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        var capturedPawn = pawn;
-        builder.Item(r =>
+        layout.ComponentById<TextElement>("text").Content = "Head";
+        layout.ComponentById<DivElement>("carrousel").Children = b =>
         {
-            Void.Widgets.WidgetLabel(r.TakeTopPart(UIUtility.ButtonHeight), "Head");
-            Widgets.Carrousel(r,
-                DefDatabase<HeadTypeDef>.AllDefsListForReading
-                    .Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList(),
-                ref _scrollPositionHeadType,
-                pawn.story.headType, d => AppearanceUtility.SetHeadType(d, capturedPawn),
-                d => d.GetGraphic(capturedPawn, capturedPawn.story.SkinColor).MatSouth.mainTexture,
-                pawn.story.SkinColor, d => d.ReadableDefName());
-        }, new StyleOverride { height = Widgets.CarrouselCellHeight + UIUtility.ButtonHeight });
+            var currentHead = pawn.story.headType;
+            var heads = DefDatabase<HeadTypeDef>.AllDefsListForReading
+                .Where(d => AppearanceUtility.CanUseHeadType(d, pawn)).ToList();
+            b.HorizontalList(heads,
+                (r, td) =>
+                {
+                    Verse.Widgets.DrawHighlight(r);
+                    Verse.Widgets.DrawHighlightIfMouseover(r);
+                    if (Equals(td, currentHead)) Verse.Widgets.DrawHighlightSelected(r);
+                    
+                    if (Mouse.IsOver(r)) TooltipHandler.TipRegion(r, td.ReadableDefName());
+
+                    if (Verse.Widgets.ButtonInvisible(r)) AppearanceUtility.TrySetHeadType(td, pawn);
+                    
+                    using (new GUIColor(pawn.story.SkinColor))
+                        Verse.Widgets.DrawTextureFitted(r, td.GetGraphic(pawn, pawn.story.SkinColor).MatSouth.mainTexture ,1.6f);
+                }, 64f, style: new StyleOverride { gap = Void.Taffy.Gap(4f)});
+        };
     }
 }

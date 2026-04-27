@@ -8,8 +8,19 @@
     <PawnEditor.SectionDef Name="SectionBase_LabelledButton" ParentName="SectionBase_Humanlike" Abstract="True">
         <layout>
             <div class="flex flex-row">
-                <text id="text" class="w-label mr-4" color="Verse.ColoredText.TipSectionTitleColor">placeholder</text>
+                <text id="text" class="w-label mr-4" color="Verse.ColoredText.TipSectionTitleColor"/>
                 <button id="button" class="w-btn"/>
+            </div>
+        </layout>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef Name="SectionBase_LabelledButtonColor" ParentName="SectionBase_Humanlike" Abstract="True">
+        <layout>
+            <div class="flex flex-row">
+                <text id="text" class="w-label mr-4" color="Verse.ColoredText.TipSectionTitleColor"/>
+                <button id="button" class="w-btn" style="max-width: 144px" label="Choose color..."/>
+                <div id="container" style="width: 32px" class="p-1 h-full ml-1">
+                    <div id="color_preview" class="w-full h-full"/>
+                </div>
             </div>
         </layout>
     </PawnEditor.SectionDef>
@@ -102,6 +113,9 @@
     <PawnEditor.SectionDef>
         <defName>PawnEditor_Portrait</defName>
         <workerClass>PawnEditor.SectionWorker_Portrait</workerClass>
+        <layout>
+            <div id="portrait" style="width: 200px; height: 200px;"/>
+        </layout>
     </PawnEditor.SectionDef>
     <!-- Appearance.Hair -->
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
@@ -117,15 +131,25 @@
         <workerClass>PawnEditor.SectionWorker_HairColor</workerClass>
     </PawnEditor.SectionDef>
     <!-- Appearance.Shape-->
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeCarrousel">
         <defName>PawnEditor_ShapeHead</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeHead</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike" Name="SectionBase_HumanlikeCarrousel">
         <defName>PawnEditor_ShapeBody</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeBody</workerClass>
+        <layout>
+            <div class="block grow" style="min-width: 200px">
+                <text id="text"/>
+                <div class="flex gap-1 items-center">
+                    <button icon="Void.TexUI.ArrowLeft" variant="ghost"/>
+                    <div id="carrousel" style="height: 84px" class="min-w-0"/>
+                    <button icon="Void.TexUI.ArrowRight" variant="ghost"/>
+                </div>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_LabelledButtonColor">
         <defName>PawnEditor_SkinColor</defName>
         <workerClass>PawnEditor.SectionWorker_SkinColor</workerClass>
     </PawnEditor.SectionDef>
@@ -133,10 +157,6 @@
     <PawnEditor.SectionDef ParentName="SectionBase_LabelledButton">
         <defName>PawnEditor_Sex</defName>
         <workerClass>PawnEditor.SectionWorker_Sex</workerClass>
-    </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
-        <defName>PawnEditor_Lifestage</defName>
-        <workerClass>PawnEditor.SectionWorker_Lifestage</workerClass>
     </PawnEditor.SectionDef>
     <!-- Gear -->
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">

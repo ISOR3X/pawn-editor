@@ -1,7 +1,6 @@
-using Taffy;
 using Verse;
-using Void;
-using Void.Components;
+using Void.XMLComponents;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
@@ -12,13 +11,10 @@ public class SectionWorker_Race(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && GetRacesForPawn(p).Any();
     }
 
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        builder.Text("Race",
-            style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
-        builder.Button(pawn.kindDef.race.LabelCap, onClick: _ => { },
-            style: new StyleOverride { width = 200f });
+        layout.ComponentById<TextElement>("text").Content = "Race";
+        layout.ComponentById<ButtonElement>("button").Label = pawn.kindDef.race.LabelCap;
     }
 
     private static List<ThingDef> GetRacesForPawn(Pawn pawn)

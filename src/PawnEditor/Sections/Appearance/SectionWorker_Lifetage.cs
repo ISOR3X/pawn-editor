@@ -1,17 +1,15 @@
-using Taffy;
 using Verse;
-using Void;
-using Void.Components;
+using Void.XMLComponents;
+using Layout = Void.Layout;
 
 namespace PawnEditor;
 
 public class SectionWorker_Lifestage(SectionDef def) : SectionWorker(def)
 {
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        builder.Text("Lifestage",
-            style: new StyleOverride { margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapLabel, 0f, 0f) });
-        builder.Button(pawn.DevelopmentalStage.ToString(), pawn.DevelopmentalStage.Icon().Texture, onClick: _ => { },
-            style: new StyleOverride { minWidth = 100f, maxWidth = 300f, flexGrow = 1f, width = Dimension.AUTO });
+        layout.ComponentById<TextElement>("text").Content = "Lifestage";
+        layout.ComponentById<ButtonElement>("button").Label = pawn.DevelopmentalStage.ToString();
+        layout.ComponentById<ButtonElement>("button").Icon = pawn.DevelopmentalStage.Icon().Texture;
     }
 }

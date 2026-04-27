@@ -11,6 +11,7 @@ public class SectionWorker_FavColor(SectionDef def) : SectionWorker(def)
     {
         var currentColor = pawn.story.favoriteColor?.color ?? Color.white;
         layout.ComponentById<TextElement>("text").Wrap = false;
+        layout.ComponentById<TextElement>("text").Content = "Favorite color";
         layout.ComponentById<DivElement>("container").Draw = Verse.Widgets.DrawLightHighlight;
         layout.ComponentById<DivElement>("color_preview").Draw = r =>
             Verse.Widgets.DrawRectFast(r, currentColor);

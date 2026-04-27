@@ -64,7 +64,7 @@ public static class AppearanceUtility
         return bodyTypeDefList;
     }
 
-    public static void SetHeadType(HeadTypeDef headTypeDef, Pawn pawn)
+    public static void TrySetHeadType(HeadTypeDef headTypeDef, Pawn pawn)
     {
         if (pawn.story.headType == headTypeDef) return;
         pawn.story.headType = headTypeDef;

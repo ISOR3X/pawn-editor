@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_LabelledButton">
         <defName>PawnEditor_Xenotype</defName>
         <workerClass>PawnEditor.SectionWorker_Xenotype</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_LabelledButton">
         <defName>PawnEditor_Race</defName>
         <workerClass>PawnEditor.SectionWorker_Race</workerClass>
+    </PawnEditor.SectionDef>
+    <PawnEditor.SectionDef ParentName="SectionBase_LabelledButton">
+        <defName>PawnEditor_Lifestage</defName>
+        <workerClass>PawnEditor.SectionWorker_Lifestage</workerClass>
     </PawnEditor.SectionDef>
 </Defs>

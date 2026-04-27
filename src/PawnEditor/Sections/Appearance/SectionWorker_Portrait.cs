@@ -2,23 +2,35 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.XMLComponents;
 
 namespace PawnEditor;
 
 public class SectionWorker_Portrait(SectionDef def) : SectionWorker(def)
 {
-    private const float PortraitWidth = 200f;
-    private readonly int idx = 0;
-
-    protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
+    public override void OnLayout(Layout layout, Pawn pawn)
     {
-        builder.Item(r =>
+        var div = layout.ComponentById<DivElement>("portrait");
+        var rot = ParseRot(layout.Attrs.GetValueOrDefault("dir"));
+
+        div.Draw = r =>
         {
-            var image = PortraitsCache.Get(pawn, new Vector2(r.width, r.height), new Rot4(2 - idx),
+            var image = PortraitsCache.Get(pawn, new Vector2(r.width, r.height), rot,
                 Dialog_StylingStation.PortraitOffset, 1.1f,
                 renderHeadgear: Window_Editor.ShowHeadgear,
                 renderClothes: Window_Editor.ShowClothes);
             GUI.DrawTexture(r, image);
-        }, new StyleOverride { width = PortraitWidth, height = PortraitWidth });
+        };
+    }
+
+    private static Rot4 ParseRot(string dir)
+    {
+        return dir switch
+        {
+            "north" => Rot4.North,
+            "east" => Rot4.East,
+            "west" => Rot4.West,
+            _ => Rot4.South
+        };
     }
 }
