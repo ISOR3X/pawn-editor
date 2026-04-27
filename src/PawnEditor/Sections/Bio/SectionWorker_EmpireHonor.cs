@@ -1,10 +1,7 @@
 ﻿using System.Globalization;
 using RimWorld;
-using Taffy;
-using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
 using Void.XMLComponents;
 using Layout = Void.Layout;
 
@@ -28,12 +25,10 @@ public class SectionWorker_EmpireHonor(SectionDef def) : SectionWorker_EmpireTit
         layout.ComponentById<TextElement>("min").Content = minMaxHonor.min.ToString();
         layout.ComponentById<TextElement>("max").Content = minMaxHonor.max.ToString();
         layout.ComponentById<TextElement>("value").Content = favor.ToString(CultureInfo.InvariantCulture);
-        layout.ComponentById<DivElement>("honor").Children = b =>
-        {
-            b.InputRange(ref favor, minMaxHonor.min, minMaxHonor.max,
-                style: new StyleOverride { width = Dimension.Percent(1f) });
-            if (!Mathf.Approximately(favor, pawn.royalty.GetFavor(empire)))
-                pawn.royalty.SetFavor(empire, (int)favor, false);
-        };
+        
+        var slider = layout.ComponentById<InputElement>("honor");
+        slider.Value = new Reactive<int>(() => pawn.royalty.GetFavor(empire),
+            v => pawn.royalty.SetFavor(empire, v, false));
+        slider.MinMax = new FloatRange(minMaxHonor.min, minMaxHonor.max);
     }
 }

@@ -107,7 +107,7 @@ public static class OverflowExt
 }
 
 /// <summary>
-///     Text direction — affects column ordering and horizontal overflow.
+///     Text direction - affects column ordering and horizontal overflow.
 ///     CSS: <c>direction</c>.
 /// </summary>
 public enum Direction : byte

@@ -15,7 +15,7 @@ public enum RunMode : byte
     /// </summary>
     ComputeSize,
 
-    /// <summary>Set a null layout — the node is hidden (<c>Display::None</c>).</summary>
+    /// <summary>Set a null layout - the node is hidden (<c>Display::None</c>).</summary>
     PerformHiddenLayout
 }
 

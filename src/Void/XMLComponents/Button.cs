@@ -36,7 +36,7 @@ public class ButtonElement : XMLComponent
 
     public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
     {
-        // Resolve icon name lazily — UIIcons accesses textures which aren't loaded at def-load time.
+        // Resolve icon name lazily - UIIcons accesses textures which aren't loaded at def-load time.
         if (Icon == null && _iconName != null)
             Icon = IconRegistry.Resolve(_iconName);
         builder.Button(Label, Icon, IconColor, onClick: OnClick, onHover: OnHover, disabled: Disabled, variant: Variant, style: Style);

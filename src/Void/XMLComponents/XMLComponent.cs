@@ -15,24 +15,12 @@ public abstract class XMLComponent
     public StyleOverride Style = new();
 
     /// <summary>
-    ///     True if this element is a leaf node — the parser will not recurse into its XML children.
+    ///     True if this element is a leaf node - the parser will not recurse into its XML children.
     /// </summary>
     public virtual bool IsLeaf => false;
 
-    public string? Get(string key)
-    {
-        return Attrs.GetValueOrDefault(key);
-    }
+    public XMLComponent Clone() => (XMLComponent)MemberwiseClone();
 
-    public T? Get<T>(string key, Func<string, T> parse)
-    {
-        return Attrs.TryGetValue(key, out var v) ? parse(v) : default;
-    }
-
-    public virtual XMLComponent Clone()
-    {
-        return (XMLComponent)MemberwiseClone();
-    }
 
     /// <summary>
     ///     Called by <see cref="Layout" /> before each <see cref="Render" />. Override to extract

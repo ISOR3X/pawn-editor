@@ -10,12 +10,12 @@ Note that this library does not implement a direct RimWorld interface. For that,
 
 ```
 Taffy/
-  Types/       — Core geometry and style types (Rect, Style, Dimension, …)
-  Tree/        — Layout tree, node IDs, and cached results
+  Types/       - Core geometry and style types (Rect, Style, Dimension, …)
+  Tree/        - Layout tree, node IDs, and cached results
   Compute/
-    Block/     — Block layout algorithm
-    Flexbox/   — Flexbox layout algorithm
-    Grid/      — CSS Grid layout algorithm
-  TaffyTree.cs — Public API: build a node tree and compute layout
-  tests/       — xUnit tests targeting net9.0 (no RimWorld dependency)
+    Block/     - Block layout algorithm
+    Flexbox/   - Flexbox layout algorithm
+    Grid/      - CSS Grid layout algorithm
+  TaffyTree.cs - Public API: build a node tree and compute layout
+  tests/       - xUnit tests targeting net9.0 (no RimWorld dependency)
 ```

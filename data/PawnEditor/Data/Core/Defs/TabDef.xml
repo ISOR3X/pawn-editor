@@ -84,4 +84,14 @@
             <section style="flex-basis: 100%; flex-direction: column">PawnEditor_Inventory</section>
         </layout>
     </PawnEditor.TabDef>
+    <PawnEditor.TabDef>
+        <defName>PawnEditor_TabDebug</defName>
+        <label>Debug</label>
+        <priority>-1</priority>
+        <tabCategory>All</tabCategory>
+        <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
+        <layout>
+            <section>PawnEditor_Debug</section>
+        </layout>
+    </PawnEditor.TabDef>
 </Defs>

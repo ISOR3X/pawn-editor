@@ -1,7 +1,7 @@
 // Port of taffy/src/style/compact_length.rs
 //
 // Rust's CompactLength uses tagged-pointer tricks for a 64-bit representation.
-// In C# we use a plain struct with an explicit tag enum + float value — same
+// In C# we use a plain struct with an explicit tag enum + float value - same
 // semantics, no unsafe code required.
 
 namespace Taffy;
@@ -146,7 +146,7 @@ public readonly struct CompactLength : IEquatable<CompactLength>
 
     /// <summary>
     ///     True for Auto, MaxContent, FitContentPx, FitContentPercent.
-    ///     "In all cases, treat auto and fit-content() as max-content…" — CSS Grid spec.
+    ///     "In all cases, treat auto and fit-content() as max-content…" - CSS Grid spec.
     /// </summary>
     public bool IsMaxContentAlike()
     {

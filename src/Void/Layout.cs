@@ -15,7 +15,7 @@ public class Layout(ParsedLayout template, IContext? context = null)
 
     /// <summary>
     ///     Returns a cloned, mutable copy of the element with the given <paramref name="id" />.
-    ///     The returned instance is registered as this frame's override — mutate it freely.
+    ///     The returned instance is registered as this frame's override - mutate it freely.
     /// </summary>
     public T ComponentById<T>(string id) where T : XMLComponent
     {
@@ -70,11 +70,11 @@ public class Layout(ParsedLayout template, IContext? context = null)
             return;
         }
 
-        // No tab style — render children directly into builder (no _template wrapper div).
+        // No tab style - render children directly into builder (no _template wrapper div).
         foreach (var child in roots) RenderNode(builder, child);
     }
 
-    /// <summary>Returns the effective config for a node — the C# override if one was registered, otherwise the XML props.</summary>
+    /// <summary>Returns the effective config for a node - the C# override if one was registered, otherwise the XML props.</summary>
     private XMLComponent GetConfigForNode(ParsedLayout node)
     {
         return node.Id != null && _overrides.TryGetValue(node.Id, out var ov) ? ov : node.Props;

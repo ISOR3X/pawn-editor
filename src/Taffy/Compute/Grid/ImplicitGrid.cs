@@ -1,7 +1,7 @@
 // Port of taffy/src/compute/grid/implicit_grid.rs
 //
 // Estimates the number of rows and columns in the grid by scanning child placements.
-// This is a performance optimisation — reduces allocations by pre-sizing vectors.
+// This is a performance optimisation - reduces allocations by pre-sizing vectors.
 // The explicit and negative-implicit estimates are exact; positive-implicit is a lower bound
 // (auto-placement may expand it further).
 
@@ -73,7 +73,7 @@ internal static class ImplicitGrid
     private static (OriginZeroLine min, OriginZeroLine max, ushort span) ChildMinLineMaxLineSpan(
         Line<GridPlacement> line, ushort explicitTrackCount)
     {
-        // Convert to OriginZero coordinates (ignoring named lines — not supported)
+        // Convert to OriginZero coordinates (ignoring named lines - not supported)
         var oz = line.IntoOriginZeroIgnoringNamed(explicitTrackCount);
         var s = oz.Start;
         var e = oz.End;
@@ -112,7 +112,7 @@ internal static class ImplicitGrid
         }
         else
         {
-            // Both Auto/Span — don't affect min/max estimates
+            // Both Auto/Span - don't affect min/max estimates
             min = new OriginZeroLine(0);
             max = new OriginZeroLine(0);
         }

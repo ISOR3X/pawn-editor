@@ -178,7 +178,7 @@ public class Table<TRow>(
                 }
             }
 
-            // Cell content — one CSS Grid layout pass for all visible cells
+            // Cell content - one CSS Grid layout pass for all visible cells
             var gridRect = new Rect(0f, firstVisible * rowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
 

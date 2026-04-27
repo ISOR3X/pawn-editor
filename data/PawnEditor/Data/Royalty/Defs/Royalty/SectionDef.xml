@@ -25,7 +25,7 @@
                         <text id="value" class="text-xs">2</text>
                         <text id="max" class="text-xs" color="Verse.ColoredText.SubtleGrayColor">3</text>
                     </div>
-                    <div id="honor"/>
+                    <input id="honor" class="w-full" type="range"/>
                 </div>
             </div>
         </layout>

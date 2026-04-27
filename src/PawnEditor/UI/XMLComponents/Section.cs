@@ -37,7 +37,7 @@ public class SectionElement : XMLComponent
         var worker = ResolvedDef?.Worker;
         if (worker == null || Pawn == null) return;
         if (!worker.ShowSection(Pawn)) return;
-        // Delegate entirely to BuildSection — it handles both UILayout (merge) and legacy (wrap).
+        // Delegate entirely to BuildSection - it handles both UILayout (merge) and legacy (wrap).
         worker.BuildSection(builder, Pawn, Style);
     }
 }

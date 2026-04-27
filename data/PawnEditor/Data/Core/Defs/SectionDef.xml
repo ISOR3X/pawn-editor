@@ -61,10 +61,6 @@
                 <div id="abilities_block" class="mb-1 flex flex-wrap grow content-start p-1 w-full gap-1"/>
                 <button id="add" class="ml-auto" label="Add ability"/>
             </div>
-            <!--            <div style="flex-direction: column; flex-wrap: wrap; width: 100%; justify-content: space-between; max-width: 400px; flex-grow: 1; gap: 4px">-->
-            <!--                <div id="abilityIcons" style="flex-wrap: wrap; gap: 4px; flex-grow: 1"/>-->
-            <!--                <button id="addAbility" label="Add ability" icon="TexButton.Plus"/>-->
-            <!--            </div>-->
         </layout>
     </PawnEditor.SectionDef>
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
@@ -155,9 +151,16 @@
         <defName>PawnEditor_Inventory</defName>
         <workerClass>PawnEditor.SectionWorker_Inventory</workerClass>
     </PawnEditor.SectionDef>
-
+    <!-- Debug -->
     <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
         <defName>PawnEditor_Debug</defName>
         <workerClass>PawnEditor.SectionWorker_Debug</workerClass>
+        <layout>
+            <div>
+                <input id="input"/>
+                <input id="input2" type="number"/>
+                <text id="text">placeholder</text>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
 </Defs>
