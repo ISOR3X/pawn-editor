@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RimWorld.Planet;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -121,6 +122,50 @@ public partial class Window_Editor : Window
                     out var newSelectedPawn);
                 if (newSelectedPawn != SelectedPawn) TrySelect(newSelectedPawn);
             }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
+            builder.Button("Save Preset", block: true, disabled: SelectedPawn == null,
+                onClick: _ => SaveSelectedPawn());
+            builder.Button("Load Preset", block: true,
+                onClick: _ => ShowLoadPawnMenu());
         }, new StyleOverride { flexDirection = FlexDirection.Column });
+    }
+
+    private void SaveSelectedPawn()
+    {
+        if (SelectedPawn is not { } pawn) return;
+        var name = pawn.LabelShort;
+        foreach (var ch in Path.GetInvalidFileNameChars()) name = name.Replace(ch.ToString(), "");
+        if (name.NullOrEmpty()) name = "pawn";
+        PersistenceUtility.SavePawn(pawn, name);
+        Messages.Message($"Saved preset: {name}", MessageTypeDefOf.SilentInput);
+    }
+
+    private void ShowLoadPawnMenu()
+    {
+        var files = PersistenceUtility.GetPresetFiles();
+        if (files.Length == 0)
+        {
+            Messages.Message("No pawn presets found.", MessageTypeDefOf.RejectInput);
+            return;
+        }
+        var options = files
+            .Select(path => new FloatMenuOption(Path.GetFileNameWithoutExtension(path), () => LoadAndAddPawn(path)))
+            .ToList();
+        Find.WindowStack.Add(new FloatMenu(options));
+    }
+
+    private static void LoadAndAddPawn(string path)
+    {
+        var pawn = PersistenceUtility.LoadPawn(path);
+        if (pawn == null)
+        {
+            Messages.Message("Failed to load pawn preset.", MessageTypeDefOf.RejectInput);
+            return;
+        }
+        pawn.SetFactionDirect(Faction.OfPlayer);
+        var map = Find.AnyPlayerHomeMap;
+        if (map != null)
+            GenPlace.TryPlaceThing(pawn, CellFinder.RandomEdgeCell(map), map, ThingPlaceMode.Near);
+        else
+            Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
     }
 }
