@@ -8,6 +8,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
 {
+    // TODO: Convert to XML Components
     protected override void DoSectionContents(TaffyBuilder builder, Pawn pawn)
     {
         builder.Text("Age", color: ColoredText.TipSectionTitleColor);

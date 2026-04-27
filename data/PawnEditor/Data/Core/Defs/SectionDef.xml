@@ -118,15 +118,21 @@
         </layout>
     </PawnEditor.SectionDef>
     <!-- Appearance.Hair -->
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike" Name="SectionBase_HumanlikeTable">
         <defName>PawnEditor_Hair</defName>
         <workerClass>PawnEditor.SectionWorker_Hair</workerClass>
+        <layout>
+            <div class="flex flex-col grow" style="min-width: 400px; min-height:300px">
+                <text id="text"/>
+                <div id="table" class="grow"/>
+            </div>
+        </layout>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
         <defName>PawnEditor_Beard</defName>
         <workerClass>PawnEditor.SectionWorker_Beard</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_LabelledButtonColor">
         <defName>PawnEditor_HairColor</defName>
         <workerClass>PawnEditor.SectionWorker_HairColor</workerClass>
     </PawnEditor.SectionDef>
@@ -143,7 +149,7 @@
                 <text id="text"/>
                 <div class="flex gap-1 items-center">
                     <button id="prev" icon="Void.TexUI.ArrowLeft" variant="ghost"/>
-                    <div id="carrousel" style="height: 64px" class="min-w-0"/>
+                    <div id="carrousel" style="height: 64px" class="min-w-0 grow"/>
                     <button id="next" icon="Void.TexUI.ArrowRight" variant="ghost"/>
                 </div>
             </div>
@@ -159,15 +165,15 @@
         <workerClass>PawnEditor.SectionWorker_Sex</workerClass>
     </PawnEditor.SectionDef>
     <!-- Gear -->
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
         <defName>PawnEditor_Equipment</defName>
         <workerClass>PawnEditor.SectionWorker_Equipment</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
         <defName>PawnEditor_Apparel</defName>
         <workerClass>PawnEditor.SectionWorker_Apparel</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
         <defName>PawnEditor_Inventory</defName>
         <workerClass>PawnEditor.SectionWorker_Inventory</workerClass>
     </PawnEditor.SectionDef>

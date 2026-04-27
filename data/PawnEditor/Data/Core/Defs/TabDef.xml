@@ -38,23 +38,20 @@
     <PawnEditor.TabDef>
         <defName>PawnEditor_Appearance</defName>
         <label>Appearance</label>
-        <priority>-10</priority>
+        <priority>10</priority>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
         <layout class="flex flex-col">
-            <div class="flex">
+            <div class="flex justify-between">
                 <section dir="south">PawnEditor_Portrait</section>
                 <section dir="east">PawnEditor_Portrait</section>
                 <section dir="north">PawnEditor_Portrait</section>
                 <section dir="west">PawnEditor_Portrait</section>
             </div>
-
             <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Xenotype</section>
             <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Race</section>
             <section>PawnEditor_Sex</section>
             <section mayRequire="Ludeon.Rimworld.Biotech">PawnEditor_Lifestage</section>
-
             <section>PawnEditor_SkinColor</section>
-            
             <div class="block">
                 <text color="Verse.ColoredText.TipSectionTitleColor">Shape</text>
                 <div class="flex flex-row flex-wrap gap-section justify-start">
@@ -62,23 +59,21 @@
                     <section>PawnEditor_ShapeBody</section>
                 </div>
             </div>
-            <!--            <div style="flex-direction: row; flex-wrap: wrap; width: 100%; gap: 10px">-->
-            <!--                <section style="flex-direction: column; flex-basis: 40%; flex-grow: 1">PawnEditor_Hair</section>-->
-            <!--                <section style="flex-direction: column; flex-basis: 40%; flex-grow: 1">PawnEditor_Beard</section>-->
-            <!--                &lt;!&ndash;                <section style="flex-basis: 50%; flex-grow: 1">PawnEditor_HairColor</section>&ndash;&gt;-->
-            <!--            </div>-->
-            <!--            <div style="flex-direction: row; flex-wrap: wrap; width: 100%; gap: 10px"-->
-            <!--                 mayRequire="Ludeon.Rimworld.Ideology">-->
-            <!--                <section style="flex-direction: column; flex-basis: 40%; flex-grow: 1">PawnEditor_TattooBody</section>-->
-            <!--                <section style="flex-direction: column; flex-basis: 40%; flex-grow: 1">PawnEditor_TattooFace</section>-->
-            <!--                &lt;!&ndash;                <section style="flex-basis: 50%; flex-grow: 1">PawnEditor_HairColor</section>&ndash;&gt;-->
-            <!--            </div>-->
-            <!--            &lt;!&ndash;            <div style="display: flex; flex-direction: row; flex-wrap: wrap" mayRequire="Ludeon.Rimworld.Ideology">&ndash;&gt;-->
-            <!--            &lt;!&ndash;                <section style="flex-basis: 50%; flex-grow: 1" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooBody&ndash;&gt;-->
-            <!--            &lt;!&ndash;                </section>&ndash;&gt;-->
-            <!--            &lt;!&ndash;                <section style="flex-basis: 50%; flex-grow: 1" mayRequire="Ludeon.Rimworld.Ideology">PawnEditor_TattooFace&ndash;&gt;-->
-            <!--            &lt;!&ndash;                </section>&ndash;&gt;-->
-            <!--            &lt;!&ndash;            </div>&ndash;&gt;-->
+            <section>PawnEditor_HairColor</section>
+            <div class="block">
+                <text color="Verse.ColoredText.TipSectionTitleColor">Hair</text>
+                <div class="flex flex-row flex-wrap gap-section justify-start">
+                    <section>PawnEditor_Hair</section>
+                    <section>PawnEditor_Beard</section>
+                </div>
+            </div>
+            <div mayRequire="Ludeon.Rimworld.Ideology" class="block">
+                <text color="Verse.ColoredText.TipSectionTitleColor">Tattoo</text>
+                <div class="flex flex-row flex-wrap gap-section justify-start">
+                    <section>PawnEditor_TattooBody</section>
+                    <section>PawnEditor_TattooFace</section>
+                </div>
+            </div>
         </layout>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
@@ -87,10 +82,10 @@
         <priority>20</priority>
         <tabCategory>All</tabCategory>
         <workerClass>PawnEditor.TabWorker_Pawn</workerClass>
-        <layout>
-            <section style="flex-basis: 100%; flex-direction: column">PawnEditor_Equipment</section>
-            <section style="flex-basis: 100%; flex-direction: column">PawnEditor_Apparel</section>
-            <section style="flex-basis: 100%; flex-direction: column">PawnEditor_Inventory</section>
+        <layout class="flex flex-row flex-wrap">
+            <section style="min-width: 512px">PawnEditor_Equipment</section>
+            <section style="min-width: 512px">PawnEditor_Apparel</section>
+            <section style="min-width: 512px">PawnEditor_Inventory</section>
         </layout>
     </PawnEditor.TabDef>
     <PawnEditor.TabDef>
