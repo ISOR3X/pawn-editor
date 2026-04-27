@@ -8,6 +8,8 @@ public class InputElement : XMLComponent
 {
     public Ref? Value;
     public FloatRange? MinMax;
+    public float? Step;
+
     private string _inputType = "text";
 
     public override void ParseXmlAttrs(XmlNode node)
@@ -25,8 +27,8 @@ public class InputElement : XMLComponent
 
     public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
     {
-        // Resolved min max.
-        var resMm =  MinMax ?? new FloatRange(0, 9999);
+        var resMinMax = MinMax ?? new FloatRange(0, 9999);
+        var resStep = Step ?? 1f;
         switch (_inputType)
         {
             case "text" when Value is Ref<string> s:
@@ -38,17 +40,20 @@ public class InputElement : XMLComponent
                 break;
 
             case "range" when Value is Ref<float> f:
-                builder.InputRange(ref f.Inner, min: resMm.min, max: resMm.max, style: Style);
+                builder.InputRange(ref f.Inner, min: resMinMax.min, max: resMinMax.max, step: resStep, style: Style);
                 break;
             case "range" when Value is Ref<int> i:
-                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, min: resMm.min, max: resMm.max, style: Style);
+                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, min: resMinMax.min, max: resMinMax.max,
+                    step: resStep, style: Style);
                 break;
 
             case "range" when Value is Reactive<float> f:
-                builder.InputRange(() => f.Inner, v => f.Inner = v, min: resMm.min, max: resMm.max, style: Style);
+                builder.InputRange(() => f.Inner, v => f.Inner = v, min: resMinMax.min, max: resMinMax.max,
+                    step: resStep, style: Style);
                 break;
             case "range" when Value is Reactive<int> i:
-                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, min: resMm.min, max: resMm.max, style: Style);
+                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, min: resMinMax.min, max: resMinMax.max,
+                    step: resStep, style: Style);
                 break;
         }
     }
