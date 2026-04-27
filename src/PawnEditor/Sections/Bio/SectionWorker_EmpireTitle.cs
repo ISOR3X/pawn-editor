@@ -25,7 +25,7 @@ public class SectionWorker_EmpireTitle(SectionDef def) : SectionWorker(def)
                             pawn.royalty.SetTitle(empire, royalTitle, true, false, false);
                             pawn.royalty.ResetPermitsAndPoints(empire, royalTitle);
                         })),
-                new("None".Translate(), () => { pawn.royalty.SetTitle(empire, null, false, false, false); })
+                new("None".Colorize(ColoredText.SubtleGrayColor), () => { pawn.royalty.SetTitle(empire, null, false, false, false); })
             ];
             Find.WindowStack.Add(new FloatMenu(opts));
         };
