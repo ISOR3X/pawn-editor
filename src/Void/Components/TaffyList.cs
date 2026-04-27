@@ -26,6 +26,7 @@ public static partial class TaffyExtensions
         IReadOnlyList<T> items,
         Action<Rect, T> drawItem,
         float itemHeight = UIUtility.ButtonHeight,
+        int? maxItemsVisibleAtOnce = null,
         StyleOverride? style = null,
         [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
@@ -33,7 +34,7 @@ public static partial class TaffyExtensions
         var key = $"{b.ContextKey}:{file}:{line}";
 
         var gapY = style?.gap?.Height.Value ?? 0f;
-        var clampedCount = Mathf.Clamp(items.Count, 1, 6);
+        var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = Dimension.Percent(1f),
@@ -83,6 +84,7 @@ public static partial class TaffyExtensions
         IReadOnlyList<T> items,
         Action<Rect, T> drawItem,
         float itemWidth = UIUtility.ButtonHeight,
+        int? maxItemsVisibleAtOnce = null,
         StyleOverride? style = null,
         [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
@@ -90,7 +92,7 @@ public static partial class TaffyExtensions
         var key = $"{b.ContextKey}:{file}:{line}";
 
         var gapX = style?.gap?.Width.Value ?? 0f;
-        var clampedCount = Mathf.Clamp(items.Count, 1, 6);
+        var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             height = Dimension.Percent(1f),

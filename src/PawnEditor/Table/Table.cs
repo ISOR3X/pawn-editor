@@ -15,6 +15,7 @@ public class Table<TRow>(
     IReadOnlyList<IRowFilter<TRow>>? filters = null,
     Action<Rect, TRow, IContext?>? onRowHover = null,
     Action<TRow?>? onRowClick = null,
+    Func<TRow, bool>? highlightRow = null,
     Func<TRow, string>? searchProjection = null,
     float rowHeight = 30f
 )
@@ -161,7 +162,7 @@ public class Table<TRow>(
                 var row = _cachedFilteredRows[i];
                 var rowRect = new Rect(0f, i * rowHeight, viewRect.width, rowHeight);
 
-                if (SelectedItem != null && EqualityComparer<TRow>.Default.Equals(row, SelectedItem))
+                if (highlightRow?.Invoke(row) ?? false)
                     Verse.Widgets.DrawHighlightSelected(rowRect);
                 else if (i % 2 == 1)
                     Verse.Widgets.DrawLightHighlight(rowRect);
@@ -182,6 +183,7 @@ public class Table<TRow>(
             var gridRect = new Rect(0f, firstVisible * rowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
 
+            // TODO: Set alignItems = AlignItems.Center
             Void.Taffy.Grid(gridRect, _columnTracks, GenUI.GapSmall, 0f, rowHeight, grid =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)

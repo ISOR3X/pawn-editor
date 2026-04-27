@@ -44,7 +44,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 if (selected) _disabledCategories.Remove(category);
                 else _disabledCategories.Add(category);
                 table.SetDirty();
-            });
+            }, maxItemsVisibleAtOnce: 6);
 
             col.Div(row =>
             {

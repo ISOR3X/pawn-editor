@@ -4,7 +4,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class SectionWorker_Equipment(SectionDef def) : SectionWorker_Apparel<Thing>(def)
+public class SectionWorker_Equipment(SectionDef def) : SectionWorker_ThingTable<Thing>(def)
 {
     protected override Func<Pawn, List<Thing>> TableItems => GetEquipment;
     protected override string TableTitle => "Equipment";

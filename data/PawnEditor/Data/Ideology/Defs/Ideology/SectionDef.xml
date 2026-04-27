@@ -44,11 +44,11 @@
         <defName>PawnEditor_FavColor</defName>
         <workerClass>PawnEditor.SectionWorker_FavColor</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
         <defName>PawnEditor_TattooFace</defName>
         <workerClass>PawnEditor.SectionWorker_TattooFace</workerClass>
     </PawnEditor.SectionDef>
-    <PawnEditor.SectionDef ParentName="SectionBase_Humanlike">
+    <PawnEditor.SectionDef ParentName="SectionBase_HumanlikeTable">
         <defName>PawnEditor_TattooBody</defName>
         <workerClass>PawnEditor.SectionWorker_TattooBody</workerClass>
     </PawnEditor.SectionDef>
