@@ -45,7 +45,7 @@ internal struct BlockItem
     public Size<float> computedSize;
 
     /// <summary>
-    ///     "Static position" — where this item would be placed in normal flow
+    ///     "Static position" - where this item would be placed in normal flow
     ///     (used to anchor absolutely positioned children).
     /// </summary>
     public Point<float> staticPosition;

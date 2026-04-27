@@ -12,13 +12,13 @@ namespace Taffy;
 ///     <c>TaffyTree::compute_layout_with_measure</c> exactly.
 ///     Called once per leaf node during layout.
 ///     <para>
-///         <paramref name="knownDimensions" /> — dimensions already fixed by the parent algorithm (null = unconstrained).
+///         <paramref name="knownDimensions" /> - dimensions already fixed by the parent algorithm (null = unconstrained).
 ///         <br />
-///         <paramref name="availableSpace" /> — space available on each axis.<br />
-///         <paramref name="nodeId" /> — identity of the leaf node being measured.<br />
-///         <paramref name="nodeContext" /> — per-node context data attached via
+///         <paramref name="availableSpace" /> - space available on each axis.<br />
+///         <paramref name="nodeId" /> - identity of the leaf node being measured.<br />
+///         <paramref name="nodeContext" /> - per-node context data attached via
 ///         <see cref="TaffyTree.NewLeafWithContext" />.<br />
-///         <paramref name="style" /> — the node's style.
+///         <paramref name="style" /> - the node's style.
 ///     </para>
 ///     Returns the node's natural (content) size in pixels.
 /// </summary>
@@ -277,7 +277,7 @@ public sealed class TaffyTree
     public void MarkDirty(NodeId node)
     {
         var data = _nodes[(int)node.Value];
-        if (data.IsDirty) return; // already dirty — ancestors are also dirty
+        if (data.IsDirty) return; // already dirty - ancestors are also dirty
         data.IsDirty = true;
         data.Cache.Clear();
         if (_parents[(int)node.Value] is NodeId parent)
@@ -302,7 +302,7 @@ public sealed class TaffyTree
     }
 
     /// <summary>
-    ///     Computes layout with a tree-level measure function for leaf nodes — mirrors Rust's
+    ///     Computes layout with a tree-level measure function for leaf nodes - mirrors Rust's
     ///     <c>TaffyTree::compute_layout_with_measure</c> exactly.
     ///     <para>
     ///         <paramref name="measureFunction" /> receives

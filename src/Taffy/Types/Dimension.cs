@@ -3,9 +3,9 @@
 // Three thin-wrapper types around CompactLength, each allowing a different
 // subset of variants:
 //
-//   LengthPercentage     — Length | Percent
-//   LengthPercentageAuto — Length | Percent | Auto
-//   Dimension            — Length | Percent | Auto  (same variants; wider usage)
+//   LengthPercentage     - Length | Percent
+//   LengthPercentageAuto - Length | Percent | Auto
+//   Dimension            - Length | Percent | Auto  (same variants; wider usage)
 
 namespace Taffy;
 // ── LengthPercentage ─────────────────────────────────────────────────────

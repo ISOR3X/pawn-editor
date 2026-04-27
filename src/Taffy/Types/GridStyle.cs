@@ -59,7 +59,7 @@ public readonly struct MinTrackSizingFunction : IEquatable<MinTrackSizingFunctio
 
     public static MinTrackSizingFunction From(MaxTrackSizingFunction max)
     {
-        // Fr and FitContent are not valid for min — collapse to auto.
+        // Fr and FitContent are not valid for min - collapse to auto.
         if (max._cl.IsFr() || max._cl.IsFitContent())
             return AUTO;
         return new MinTrackSizingFunction(max._cl);
@@ -256,7 +256,7 @@ public readonly struct MaxTrackSizingFunction : IEquatable<MaxTrackSizingFunctio
 
 // ── TrackSizingFunction ───────────────────────────────────────────────────
 //
-// A min/max pair — CSS minmax() or a single value (same for both).
+// A min/max pair - CSS minmax() or a single value (same for both).
 
 /// <summary>
 ///     Defines the size of a grid track: a min/max pair.
@@ -847,7 +847,7 @@ public static class LineOriginZeroExt
         this Line<OriginZeroGridPlacement> self,
         TrackCounts counts)
     {
-        // Both lines defined — trivial
+        // Both lines defined - trivial
         if (self.Start.IsLine && self.End.IsLine)
             return new Line<OriginZeroLine>(self.Start.AsLine(), self.End.AsLine());
 
@@ -871,7 +871,7 @@ public static class LineOriginZeroExt
             return new Line<OriginZeroLine>(start, end);
         }
 
-        // Neither line is definite — use implicit placement (placeholder, handled by placement algorithm)
+        // Neither line is definite - use implicit placement (placeholder, handled by placement algorithm)
         return new Line<OriginZeroLine>(counts.ImplicitStartLine(), counts.ImplicitStartLine() + 1);
     }
 }

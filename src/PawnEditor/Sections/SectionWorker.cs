@@ -17,7 +17,7 @@ public abstract class SectionWorker(SectionDef def)
     }
 
     /// <summary>
-    ///     Override to build section contents. Not called for sections that have a <c><layout></c> — use
+    ///     Override to build section contents. Not called for sections that have a <c><layout></c> - use
     ///     <see cref="OnLayout" /> instead.
     /// </summary>
     protected virtual void DoSectionContents(TaffyBuilder builder, Pawn pawn)
@@ -35,7 +35,7 @@ public abstract class SectionWorker(SectionDef def)
     /// <summary>
     ///     Adds this section's content into <paramref name="builder" />.
     ///     <para>
-    ///         <paramref name="tabStyle" /> — when provided, is merged onto the section's single root
+    ///         <paramref name="tabStyle" /> - when provided, is merged onto the section's single root
     ///         node (tab wins on conflict). For legacy sections it is applied as a wrapper div.
     ///     </para>
     /// </summary>

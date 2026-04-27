@@ -2,7 +2,7 @@
 //
 // Extension methods for resolving CSS dimension types to concrete float values
 // given a parent-size context.  We omit the `calc()` callback since CSS calc()
-// is not supported in this port — percentages are resolved directly.
+// is not supported in this port - percentages are resolved directly.
 
 namespace Taffy;
 

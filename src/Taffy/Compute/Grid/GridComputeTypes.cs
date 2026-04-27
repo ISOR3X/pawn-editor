@@ -1,9 +1,9 @@
 // Port of taffy/src/compute/grid/types/
 //
 // Internal types used by the grid layout algorithm:
-//   GridTrack    — per-track sizing state
-//   GridItem     — per-item state (placement + sizing caches)
-//   CellOccupancyMatrix — 2D placement occupancy grid
+//   GridTrack    - per-track sizing state
+//   GridItem     - per-item state (placement + sizing caches)
+//   CellOccupancyMatrix - 2D placement occupancy grid
 
 namespace Taffy;
 // ── GridTrackKind ─────────────────────────────────────────────────────────

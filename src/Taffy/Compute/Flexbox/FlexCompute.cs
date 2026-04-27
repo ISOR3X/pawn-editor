@@ -61,7 +61,7 @@ internal struct AlgoConstants
 
 // ── FlexCompute ───────────────────────────────────────────────────────────
 
-/// <summary>CSS Flexbox layout algorithm — port of <c>taffy/src/compute/flexbox.rs</c>.</summary>
+/// <summary>CSS Flexbox layout algorithm - port of <c>taffy/src/compute/flexbox.rs</c>.</summary>
 internal static class FlexCompute
 {
     // ── Public entry point ────────────────────────────────────────────────
@@ -262,7 +262,7 @@ internal static class FlexCompute
         var pbSum = SizeF.Add(RectF.SumAxes(padding), RectF.SumAxes(border));
         var boxSizingAdj = style.boxSizing == BoxSizing.ContentBox ? pbSum : SizeF.ZERO;
 
-        // Scrollbar gutters — transposed (vertical scroll → horizontal space, etc.)
+        // Scrollbar gutters - transposed (vertical scroll → horizontal space, etc.)
         var scrollbarW = style.scrollbarWidth;
         var scrollbarGutter = new Point<float>(
             style.overflow.Y.IsScrollContainer() ? scrollbarW : 0f, // x-gutter from y-overflow

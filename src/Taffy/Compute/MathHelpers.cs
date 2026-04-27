@@ -192,7 +192,7 @@ public static class MaybeMathAS
 }
 
 /// <summary>
-///     "Maybe" arithmetic lifted over <see cref="Size{T}" /> — applies the operation component-wise.
+///     "Maybe" arithmetic lifted over <see cref="Size{T}" /> - applies the operation component-wise.
 /// </summary>
 public static class MaybeMathSize
 {

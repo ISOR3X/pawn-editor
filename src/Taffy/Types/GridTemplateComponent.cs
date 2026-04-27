@@ -1,4 +1,4 @@
-// Port of taffy/src/style/grid.rs — RepetitionCount, GridTemplateRepeat, GridTemplateComponent.
+// Port of taffy/src/style/grid.rs - RepetitionCount, GridTemplateRepeat, GridTemplateComponent.
 //
 // GridTemplateComponent is the element type for gridTemplateColumns/gridTemplateRows.
 // It is either a plain TrackSizingFunction (Single) or a repeat() group (Repeat).

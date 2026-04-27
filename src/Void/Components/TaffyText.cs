@@ -49,13 +49,13 @@ public static partial class TaffyExtensions
             using (new TextBlock(mergedStyle.fontSize ?? GameFont.Small))
             {
                 if (known.Width.HasValue)
-                    // Width fully constrained by parent algorithm — wrap and measure height.
+                    // Width fully constrained by parent algorithm - wrap and measure height.
                     return new Size<float>(known.Width.Value, MinWidth(text, known.Width.Value, wrap));
 
                 if (available.Width.IsMinContent)
                 {
                     // Min-content query: return the widest unbreakable word.
-                    // This mirrors CSS min-width:auto — text can shrink and wrap, but never
+                    // This mirrors CSS min-width:auto - text can shrink and wrap, but never
                     // below the width of its longest word (which for single-word labels equals
                     // the full text width, preventing unwanted shrinkage).
                     // Results are cached in _wordWidthCache so Text.CalcSize is called at most
@@ -73,13 +73,13 @@ public static partial class TaffyExtensions
                     return new Size<float>(minW, MinWidth(text, minW, wrap));
                 }
 
-                // Definite available width — wrap at that width.
+                // Definite available width - wrap at that width.
                 if (available.Width.IntoOption() is { } aw)
                 {
                     return new Size<float>(aw, MinWidth(text, aw, wrap));
                 }
 
-                // MaxContent / unconstrained — return natural (unwrapped) size.
+                // MaxContent / unconstrained - return natural (unwrapped) size.
                 var sz = Verse.Text.CalcSize(text);
                 return new Size<float>(sz.x, sz.y);
             }

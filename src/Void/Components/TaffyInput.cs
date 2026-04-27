@@ -266,6 +266,19 @@ public static partial class TaffyExtensions
         }
     }
 
+    public static void InputRange(this TaffyBuilder b, Func<float> get, Action<float> set, float min = 0f,
+        float max = 9999f,
+        float step = 1f,
+        Action<Rect>? draw = null, Action<Rect>? onHover = null, bool disabled = false,
+        InputVariant variant = InputVariant.Solid,
+        StyleOverride? style = null, string? id = null,
+        [CallerFilePath] string? file = null, [CallerLineNumber] int line = 0)
+    {
+        var v = get();
+        b.InputRange(ref v, min, max, step, draw, onHover, disabled, variant, style, id, file, line);
+        if (!Mathf.Approximately(v, get())) set(v);
+    }
+
     public static void InputRange(this TaffyBuilder b, ref float value, float min = 0f, float max = 9999f,
         float step = 1f,
         Action<Rect>? draw = null, Action<Rect>? onHover = null, bool disabled = false,

@@ -1,6 +1,6 @@
 // Port of taffy/src/compute/grid/mod.rs
 //
-// CSS Grid layout algorithm — main orchestrator.
+// CSS Grid layout algorithm - main orchestrator.
 // Phases: resolve grid → place items → size tracks → align tracks → position items.
 
 namespace Taffy;

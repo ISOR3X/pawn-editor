@@ -14,7 +14,7 @@ namespace Void;
 /// </summary>
 public static class XMLLayoutParser
 {
-    // Only globally-structural attributes are excluded from Attrs — they are parsed before
+    // Only globally-structural attributes are excluded from Attrs - they are parsed before
     // element creation and would be meaningless there.
     private static readonly HashSet<string> StructuralAttrs = ["id", "style", "class"];
 
@@ -23,7 +23,8 @@ public static class XMLLayoutParser
         ["button"] = () => new ButtonElement(),
         ["text"] = () => new TextElement(),
         ["div"] = () => new DivElement(),
-        ["layout"] = () => new DivElement()
+        ["layout"] = () => new DivElement(),
+        ["input"] = () => new InputElement()
     };
 
     /// <summary>
@@ -51,7 +52,7 @@ public static class XMLLayoutParser
         // Each element reads its own typed attributes (label, icon, color, etc.).
         element.ParseXmlAttrs(xmlNode);
 
-        // Parse style and classes — applied in ResolveClasses after all defs load.
+        // Parse style and classes - applied in ResolveClasses after all defs load.
         if (xmlNode.Attributes?["style"]?.Value is { } inlineStyle)
             target.InlineStyle = TaffyStyleParser.ParseInlineStyle(inlineStyle);
 
@@ -66,8 +67,8 @@ public static class XMLLayoutParser
         }
 
         // Collect non-structural attributes into Attrs for C# extensibility.
-        // Element-specific attributes (label, icon, etc.) are also included — duplicating
-        // them in Attrs is harmless and lets mod code read them uniformly via element.Get().
+        // Element-specific attributes (label, icon, etc.) are also included - duplicating
+        // them in Attrs is harmless and let's mod code read them uniformly via element.Get().
         if (xmlNode.Attributes != null)
             foreach (XmlAttribute attr in xmlNode.Attributes)
                 if (!StructuralAttrs.Contains(attr.Name))
@@ -75,7 +76,7 @@ public static class XMLLayoutParser
 
         target.Props = element;
 
-        // Parse children — skipped for leaf elements (section, text, etc.).
+        // Parse children - skipped for leaf elements (section, text, etc.).
         if (!element.IsLeaf)
             foreach (XmlNode child in xmlNode.ChildNodes)
             {
@@ -84,7 +85,7 @@ public static class XMLLayoutParser
 
                 var childNode = new ParsedLayout();
                 childNode.LoadDataFromXmlCustom(child);
-                // If Parse returned early (unknown tag), Props is default DivElement — skip.
+                // If Parse returned early (unknown tag), Props is default DivElement - skip.
                 if (childNode.Tag == child.Name)
                     target.Children.Add(childNode);
             }

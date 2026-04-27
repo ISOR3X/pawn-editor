@@ -35,7 +35,7 @@ namespace Void;
 /// </summary>
 public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
 {
-    // Memoizes Text.CalcSize(word).x per (word, font) pair — populated once, reused every frame.
+    // Memoizes Text.CalcSize(word).x per (word, font) pair - populated once, reused every frame.
     public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
     public readonly List<(NodeId id, Action<Rect>? draw)> callbacks = callbacks;
     public readonly List<NodeId> children = [];
