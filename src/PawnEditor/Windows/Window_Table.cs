@@ -47,7 +47,7 @@ public class Window_Table<T> : OwnedWindow
                                 width = 200f, flexDirection = FlexDirection.Column
                             });
 
-                    builder2.Item(_table.Draw, new StyleOverride { flexGrow = 1f });
+                    builder2.Item(r => _table.Draw(r), new StyleOverride { flexGrow = 1f });
                 }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });
                 if (_selectedItemSlot != null || _onAdd != null)
                     builder.Div(

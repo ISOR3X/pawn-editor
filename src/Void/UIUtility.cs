@@ -31,7 +31,7 @@ public static class UIUtility
         return label;
     }
 
-    public static void DefIconPreview(Rect inRect, Def? def, Color? color = null, float scale = 1.1f)
+    public static void DefIconPreview(Rect inRect, Def def, Color? color = null, float scale = 1.1f)
     {
         color ??= Color.white;
 
@@ -44,8 +44,6 @@ public static class UIUtility
             var rect2 = r.AtZero();
             rect2.height -= Text.LineHeight;
             Verse.Widgets.DrawHighlight(rect2);
-            if (def == null)
-                return;
             Text.Anchor = TextAnchor.UpperCenter;
             Verse.Widgets.LabelFit(new Rect(0.0f, rect2.yMax, rect2.width, Text.LineHeight), def.LabelCap);
             Text.Anchor = TextAnchor.UpperLeft;

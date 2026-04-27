@@ -1,9 +1,12 @@
 ﻿using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
+using RimWorld;
+using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
 using Void.XMLComponents;
+using Col = PawnEditor.Table.ColumnWorker<Verse.ThingDef>;
 
 namespace PawnEditor;
 
@@ -18,9 +21,15 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
 
     public override void OnLayout(Layout layout, Pawn pawn)
     {
+        var table = GetCachedTable(pawn, TableItems(pawn));
         layout.ComponentById<TextElement>("text").Content = TableTitle;
-        layout.ComponentById<TextElement>("text").Color = ColoredText.TipSectionTitleColor;
-        layout.ComponentById<DivElement>("table").Draw = GetCachedTable(pawn, TableItems(pawn)).Draw;
+        layout.ComponentById<DivElement>("table").Draw = r => table.Draw(r, false);
+        layout.ComponentById<DivElement>("search").Draw = table.DrawSearchWidget;
+        var btn = layout.ComponentById<ButtonElement>("add");
+        btn.Label = $"Add {TableTitle.ToLower()}";
+        btn.OnClick = _ => Find.WindowStack.Add(new Window_Table<ThingDef>(GetThingDefTable(),
+            Find.WindowStack.WindowOfType<Window_Editor>(),
+            selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
     }
 
     private Table<T> GetCachedTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
@@ -68,5 +77,45 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
             filters: [],
             searchProjection: def => def.LabelCap
         );
+    }
+
+
+    private static Table<ThingDef> GetThingDefTable()
+    {
+        return new Table<ThingDef>(
+            [
+                .. DefDatabase<ThingDef>.AllDefs.Where(td =>
+                    td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
+            ],
+            [
+                Col.Create(
+                    Void.Taffy.Px(20f),
+                    (grid, def) => { grid.Icon(def.uiIcon, iconColor: GetShowColorForDef(def)); }
+                ),
+                Col.CreateText(
+                    Void.Taffy.Fr(),
+                    def => def.LabelCap,
+                    "Label"
+                ),
+                Col.CreateText(
+                    Void.Taffy.Fr(),
+                    def => def.modContentPack?.Name ?? "",
+                    "Source",
+                    ColoredText.SubtleGrayColor
+                )
+            ],
+            filters: [new RowFilter_DefContentSource<ThingDef>()],
+            onRowHover: (rowRect, def, _) => { UIUtility.DefIconPreview(rowRect, def, GetShowColorForDef(def), 0.6f); },
+            searchProjection: def => def.label
+        );
+    }
+
+    private static Color GetShowColorForDef(ThingDef def)
+    {
+        var color = Color.white;
+        color = GenStuff.AllowedStuffsFor(def).FirstOrDefault()?.stuffProps.color ?? color;
+        if (def.colorGenerator != null)
+            color = def.colorGenerator.ExemplaryColor;
+        return color;
     }
 }
