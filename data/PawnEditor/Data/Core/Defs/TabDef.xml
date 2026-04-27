@@ -57,7 +57,7 @@
             
             <div class="block">
                 <text color="Verse.ColoredText.TipSectionTitleColor">Shape</text>
-                <div class="flex flex-row flex-wrap gap-section">
+                <div class="flex flex-row flex-wrap gap-section justify-start">
                     <section>PawnEditor_ShapeHead</section>
                     <section>PawnEditor_ShapeBody</section>
                 </div>

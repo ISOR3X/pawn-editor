@@ -139,12 +139,12 @@
         <defName>PawnEditor_ShapeBody</defName>
         <workerClass>PawnEditor.SectionWorker_ShapeBody</workerClass>
         <layout>
-            <div class="block grow" style="min-width: 200px">
+            <div class="block" style="min-width: 200px">
                 <text id="text"/>
                 <div class="flex gap-1 items-center">
-                    <button icon="Void.TexUI.ArrowLeft" variant="ghost"/>
-                    <div id="carrousel" style="height: 84px" class="min-w-0"/>
-                    <button icon="Void.TexUI.ArrowRight" variant="ghost"/>
+                    <button id="prev" icon="Void.TexUI.ArrowLeft" variant="ghost"/>
+                    <div id="carrousel" style="height: 64px" class="min-w-0"/>
+                    <button id="next" icon="Void.TexUI.ArrowRight" variant="ghost"/>
                 </div>
             </div>
         </layout>
