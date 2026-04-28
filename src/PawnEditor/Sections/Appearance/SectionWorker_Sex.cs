@@ -6,7 +6,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Sex(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         layout.ComponentById<TextElement>("text").Content = "Sex";
         layout.ComponentById<ButtonElement>("button").Label = pawn.gender.GetLabel().CapitalizeFirst();

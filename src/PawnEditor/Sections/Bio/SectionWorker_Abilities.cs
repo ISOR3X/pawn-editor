@@ -1,5 +1,4 @@
 using PawnEditor.Table;
-using PawnEditor.Table.Filters.AbilityDef;
 using RimWorld;
 using Taffy;
 using UnityEngine;
@@ -14,7 +13,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var abilitiesDiv = layout.ComponentById<DivElement>("abilities_block");
         DoAbilities(abilitiesDiv, GetAbilitiesForPawn(pawn), pawn);

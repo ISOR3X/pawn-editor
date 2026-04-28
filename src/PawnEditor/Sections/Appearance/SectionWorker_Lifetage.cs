@@ -6,7 +6,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Lifestage(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         layout.ComponentById<TextElement>("text").Content = "Lifestage";
         layout.ComponentById<ButtonElement>("button").Label = pawn.DevelopmentalStage.ToString();

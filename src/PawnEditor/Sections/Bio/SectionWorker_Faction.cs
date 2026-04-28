@@ -11,7 +11,7 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
     public override bool ShowSection(Pawn p) => base.ShowSection(p) && p.def.CanHaveFaction;
 
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var (label, icon, color) = FactionUtility.GetFactionMeta(pawn.Faction);
 

@@ -13,7 +13,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var traitsDiv = layout.ComponentById<DivElement>("traits_block");
         var incapableOfDiv = layout.ComponentById<DivElement>("incapableOf_block");

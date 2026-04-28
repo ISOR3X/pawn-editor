@@ -9,7 +9,7 @@ public class SectionWorker_EmpireTitle(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p) => base.ShowSection(p) && Faction.OfEmpire != null;
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var empire = Faction.OfEmpire;
         var curTitle = pawn.royalty.GetCurrentTitle(empire);

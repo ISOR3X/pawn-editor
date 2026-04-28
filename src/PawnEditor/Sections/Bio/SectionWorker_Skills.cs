@@ -63,7 +63,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
         }
     }
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var skills = SkillUI.skillDefsInListOrderCached;
         

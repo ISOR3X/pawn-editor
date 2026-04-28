@@ -8,7 +8,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Portrait(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var div = layout.ComponentById<DivElement>("portrait");
         var rot = ParseRot(layout.Attrs.GetValueOrDefault("dir"));

@@ -10,7 +10,7 @@ namespace PawnEditor;
 
 public class SectionWorker_IdeologyCertainty(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var minMaxCert = new FloatRange(0, 1);
         layout.ComponentById<TextElement>("min").Content = minMaxCert.min.ToStringPercent();

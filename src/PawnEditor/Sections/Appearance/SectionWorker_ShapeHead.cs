@@ -9,7 +9,7 @@ namespace PawnEditor;
 [UsedImplicitly]
 public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var currentHead = pawn.story.headType;
         var heads = DefDatabase<HeadTypeDef>.AllDefsListForReading

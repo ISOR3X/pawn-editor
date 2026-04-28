@@ -14,7 +14,7 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
 {
     public override bool ShowSection(Pawn p) => base.ShowSection(p) && p is { Faction: not null, Name: not null };
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         DoNameInputs(layout.ComponentById<DivElement>("name_block"), pawn);
 

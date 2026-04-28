@@ -1,5 +1,4 @@
 using PawnEditor.Table;
-using PawnEditor.Table.Filters.BackstoryDef;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -14,7 +13,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         foreach (var slot in (List<string>)["childhood", "adulthood"])
         {

@@ -7,7 +7,7 @@ namespace PawnEditor;
 
 public class SectionWorker_IdeologyRole(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var btn = layout.ComponentById<ButtonElement>("button");
         var curRole = pawn.Ideo.GetRole(pawn);

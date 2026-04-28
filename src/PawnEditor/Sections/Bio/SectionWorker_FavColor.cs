@@ -7,7 +7,7 @@ namespace PawnEditor;
 
 public class SectionWorker_FavColor(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var currentColor = pawn.story.favoriteColor?.color ?? Color.white;
         layout.ComponentById<TextElement>("text").Wrap = false;

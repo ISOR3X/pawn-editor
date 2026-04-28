@@ -28,7 +28,7 @@ public abstract class SectionWorker(SectionDef def)
     ///     Override this to configure named elements in the section's XML layout per-frame.
     ///     Called by <see cref="BuildSection" /> when <see cref="SectionDef.layout" /> is set.
     /// </summary>
-    public virtual void OnLayout(Layout layout, Pawn pawn)
+    protected virtual void OnLayout(Layout layout, Pawn pawn)
     {
     }
 
@@ -59,15 +59,8 @@ public abstract class SectionWorker(SectionDef def)
         }
     }
 
-    public float DoSection(Pawn pawn, Rect inRect)
-    {
-        if (!ShowSection(pawn)) return 0f;
-        return Void.Taffy.DivMeasured(inRect, col => BuildSection(col, pawn),
-            new StyleOverride { flexDirection = FlexDirection.Column });
-    }
 
-
-    // TODO: Call this
+    // TODO: Call this?
     public virtual void OnThingChanged(Pawn pawn)
     {
     }
