@@ -8,7 +8,7 @@ namespace PawnEditor;
 
 public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var currentBody = pawn.story.bodyType;
         var bodies = DefDatabase<BodyTypeDef>.AllDefsListForReading

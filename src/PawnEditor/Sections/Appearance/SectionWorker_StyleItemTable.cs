@@ -20,7 +20,7 @@ public abstract class SectionWorker_StyleItemTable<T>(SectionDef def) : SectionW
     protected virtual Func<Pawn, bool> ShowTableForPawn => _ => true;
     protected virtual Func<Pawn, T, bool> HighlightRow => (_, _) => false;
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         layout.ComponentById<TextElement>("text").Content = TableTitle;
         layout.ComponentById<DivElement>("table").Draw = r =>

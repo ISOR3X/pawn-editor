@@ -6,7 +6,7 @@ namespace PawnEditor;
 
 public class SectionWorker_HairColor(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var currentColor = pawn.story.HairColor;
         layout.ComponentById<TextElement>("text").Wrap = false;

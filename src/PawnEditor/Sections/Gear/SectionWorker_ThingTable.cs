@@ -19,7 +19,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
     protected abstract string TableTitle { get; }
 
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var table = GetCachedTable(pawn, TableItems(pawn));
         layout.ComponentById<TextElement>("text").Content = TableTitle;
@@ -36,14 +36,14 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
     {
         if (_cachedTable == null || !ReferenceEquals(_cachedPawn, pawn))
         {
-            _cachedTable = ConstructStyleItemTable(pawn, defs, onRowClick);
+            _cachedTable = ConstructThingTable(pawn, defs, onRowClick);
             _cachedPawn = pawn;
         }
 
         return _cachedTable;
     }
 
-    private static Table<T> ConstructStyleItemTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
+    private static Table<T> ConstructThingTable(Pawn pawn, List<T> defs, Action<T?>? onRowClick = null)
     {
         return new Table<T>(
             defs,
@@ -104,7 +104,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                     ColoredText.SubtleGrayColor
                 )
             ],
-            filters: [new RowFilter_DefContentSource<ThingDef>()],
+            filters: [new RowFilter_DefContentSource<ThingDef>(), new RowFilter_Style()],
             onRowHover: (rowRect, def, _) => { UIUtility.DefIconPreview(rowRect, def, GetShowColorForDef(def), 0.6f); },
             searchProjection: def => def.label
         );

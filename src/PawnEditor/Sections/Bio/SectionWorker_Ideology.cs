@@ -8,7 +8,7 @@ namespace PawnEditor;
 
 public class SectionWorker_Ideology(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var curIdeo = pawn.ideo.Ideo;
         var btn = layout.ComponentById<ButtonElement>("button");

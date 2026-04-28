@@ -16,7 +16,7 @@ public class SectionWorker_EmpireHonor(SectionDef def) : SectionWorker_EmpireTit
         return curTitle?.GetNextTitle(Faction.OfEmpire) != null;
     }
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var empire = Faction.OfEmpire;
         var curTitle = pawn.royalty.GetCurrentTitle(empire);

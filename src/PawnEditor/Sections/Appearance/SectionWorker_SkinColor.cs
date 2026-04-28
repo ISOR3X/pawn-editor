@@ -8,7 +8,7 @@ namespace PawnEditor;
 
 public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
 {
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var currentColor = pawn.story.SkinColor;
         layout.ComponentById<TextElement>("text").Wrap = false;

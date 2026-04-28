@@ -2,14 +2,14 @@ using Verse;
 using Void;
 using Void.Components;
 
-namespace PawnEditor.Table.Filters.BackstoryDef;
+namespace PawnEditor.Table;
 
 public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
 {
     private readonly HashSet<string> _disabledCategories = [];
     private string _searchText = "";
 
-    private List<string>? SpawnCategories;
+    private List<string>? _spawnCategories;
 
     public bool Passes(RimWorld.BackstoryDef row, IContext? ctx)
     {
@@ -20,7 +20,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
     public void DrawFilter(TaffyBuilder builder, Table<RimWorld.BackstoryDef> table)
     {
         // TODO: This should probably be done in the constructor?
-        SpawnCategories ??= table.Rows.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s).ToList();
+        _spawnCategories ??= [.. table.Rows.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s)];
 
         builder.Collapsible("Spawn category", col =>
         {
@@ -30,7 +30,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
             }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
 
-            var filtered = SpawnCategories
+            var filtered = _spawnCategories
                 .Where(c => _searchText.NullOrEmpty() ||
                             c.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0)
                 .ToList();
@@ -55,7 +55,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 });
                 row.Button("Disable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
                 {
-                    foreach (var c in SpawnCategories) _disabledCategories.Add(c);
+                    foreach (var c in _spawnCategories) _disabledCategories.Add(c);
                     table.SetDirty();
                 });
             }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });

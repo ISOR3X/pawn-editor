@@ -3,7 +3,7 @@ using Verse;
 using Void;
 using Void.Components;
 
-namespace PawnEditor.Table.Filters.AbilityDef;
+namespace PawnEditor.Table;
 
 [StaticConstructorOnStartup]
 public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>

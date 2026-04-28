@@ -11,7 +11,7 @@ public class SectionWorker_Race(SectionDef def) : SectionWorker(def)
         return base.ShowSection(p) && GetRacesForPawn(p).Any();
     }
 
-    public override void OnLayout(Layout layout, Pawn pawn)
+    protected override void OnLayout(Layout layout, Pawn pawn)
     {
         layout.ComponentById<TextElement>("text").Content = "Race";
         layout.ComponentById<ButtonElement>("button").Label = pawn.kindDef.race.LabelCap;
