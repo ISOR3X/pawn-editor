@@ -6,18 +6,18 @@ using Void.Components;
 
 namespace PawnEditor.Table;
 
-public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TDef : Def
+public sealed class RowFilter_DefContentSource<TDef> : RowFilter<TDef> where TDef : Def
 {
     private ModContentPack? _selected;
 
-    public bool Passes(TDef row, IContext? ctx)
+    public override bool Passes(TDef row)
     {
         return _selected == null || row.modContentPack == _selected;
     }
 
-    public void DrawFilter(TaffyBuilder builder, Table<TDef> table)
+    public override void DrawFilter(TaffyBuilder builder)
     {
-        builder.Text("Content source", style: new  StyleOverride { fontSize = GameFont.Tiny });
+        builder.Text("Content source", style: new StyleOverride { fontSize = GameFont.Tiny });
         builder.Button(_selected?.Name ?? "Any",
             style: new StyleOverride
             {
@@ -30,12 +30,12 @@ public sealed class RowFilter_DefContentSource<TDef> : IRowFilter<TDef> where TD
                     .Select(pack => new FloatMenuOption(pack.Name, () =>
                     {
                         _selected = pack;
-                        table.SetDirty();
+                        MarkDirty();
                     }))
                     .Prepend(new FloatMenuOption("Any", () =>
                     {
                         _selected = null;
-                        table.SetDirty();
+                        MarkDirty();
                     }))
                     .ToList();
                 Find.WindowStack.Add(new FloatMenu(opts));

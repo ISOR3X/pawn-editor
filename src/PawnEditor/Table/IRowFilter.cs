@@ -2,9 +2,21 @@ using Void;
 
 namespace PawnEditor.Table;
 
-public interface IRowFilter<TRow>
+public abstract class RowFilter<TRow>
 {
-    bool Passes(TRow row, IContext? ctx);
+    private Action? _onChanged;
 
-    void DrawFilter(TaffyBuilder builder, Table<TRow> table);
+    internal void Setup(IReadOnlyList<TRow> allRows, Action onChanged)
+    {
+        _onChanged = onChanged;
+        Initialize(allRows);
+    }
+
+    protected virtual void Initialize(IReadOnlyList<TRow> allRows) { }
+
+    public abstract bool Passes(TRow row);
+
+    public abstract void DrawFilter(TaffyBuilder builder);
+
+    protected void MarkDirty() => _onChanged?.Invoke();
 }

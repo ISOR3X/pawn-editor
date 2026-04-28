@@ -42,8 +42,11 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
         button.OnClick = _ =>
         {
             if (backstory != null)
-                Find.WindowStack.Add(new Window_Table<BackstoryDef>(GetBackstoryTable(pawn, slot),
-                    Find.WindowStack.WindowOfType<Window_Editor>(),
+                Find.WindowStack.Add(new Window_Table<BackstoryDef>(
+                    GetBackstoryTable(pawn, slot),
+                    allRows: [.. DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot)],
+                    filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()],
+                    owner: Find.WindowStack.WindowOfType<Window_Editor>(),
                     selectedItemSlot: (b, i) =>
                     {
                         b.Div(b2 =>
@@ -68,7 +71,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
     private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
     {
         return new Table<BackstoryDef>(
-            DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot),
+            rows: null,
             [
                 Col.Create<PawnContext>(
                     Void.Taffy.Fr(),
@@ -101,7 +104,6 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                 TooltipHandler.TipRegion(rowRect, tip + desc);
             },
             context: new PawnContext(pawn),
-            filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()],
             searchProjection: def => def.TitleCapFor(pawn.gender)
         );
     }

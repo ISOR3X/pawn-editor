@@ -10,10 +10,9 @@ using Display = Taffy.Display;
 namespace PawnEditor.Table;
 
 public class Table<TRow>(
-    IEnumerable<TRow> rows,
+    IEnumerable<TRow>? rows,
     IReadOnlyList<ColumnWorker<TRow>> columns,
     IContext? context = null,
-    IReadOnlyList<IRowFilter<TRow>>? filters = null,
     Action<Rect, TRow, IContext?>? onRowHover = null,
     Action<TRow?>? onRowClick = null,
     Func<TRow, bool>? highlightRow = null,
@@ -21,8 +20,8 @@ public class Table<TRow>(
     float rowHeight = 30f
 )
 {
-    public const float HeaderHeight = UIUtility.ButtonHeight;
-    public const float FooterHeight = UIUtility.ButtonHeight;
+    private const float HeaderHeight = UIUtility.ButtonHeight;
+    private const float FooterHeight = UIUtility.ButtonHeight;
     private readonly List<TRow> _cachedFilteredRows = [];
 
     // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
@@ -33,13 +32,12 @@ public class Table<TRow>(
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
 
     private bool _dirty = true;
+    private IEnumerable<TRow> _rows = rows ?? [];
     private Vector2 _scrollPosition;
     private bool _sortDescending;
     private ColumnWorker<TRow>? _sortingBy;
 
     public TRow? SelectedItem { get; private set; }
-    public List<TRow> Rows => [.. rows];
-    public IReadOnlyList<IRowFilter<TRow>> Filters => filters ?? [];
 
     private static TrackSizingFunction NormalizeTrack(TrackSizingFunction t)
     {
@@ -47,14 +45,19 @@ public class Table<TRow>(
             ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
             : t;
     }
-
-
-    public void SetDirty()
+    
+    private void SetDirty()
     {
         _dirty = true;
     }
 
-    public void SortBy(ColumnWorker<TRow>? column, bool descending)
+    public void UpdateRows(IEnumerable<TRow> newRows)
+    {
+        _rows = newRows;
+        SetDirty();
+    }
+
+    private void SortBy(ColumnWorker<TRow>? column, bool descending)
     {
         _sortingBy = column;
         _sortDescending = descending;
@@ -261,10 +264,8 @@ public class Table<TRow>(
         _cachedFilteredRows.Clear();
 
         var searchText = _searchWidget?.filter.Text;
-        foreach (var row in rows)
+        foreach (var row in _rows)
         {
-            if (filters != null && !filters.All(f => f.Passes(row, context)))
-                continue;
             if (!searchText.NullOrEmpty() && searchProjection != null)
             {
                 var text = searchProjection(row);

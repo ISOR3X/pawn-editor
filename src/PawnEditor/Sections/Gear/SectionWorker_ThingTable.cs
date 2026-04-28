@@ -27,8 +27,12 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
         layout.ComponentById<DivElement>("search").Draw = table.DrawSearchWidget;
         var btn = layout.ComponentById<ButtonElement>("add");
         btn.Label = $"Add {TableTitle.ToLower()}";
-        btn.OnClick = _ => Find.WindowStack.Add(new Window_Table<ThingDef>(GetThingDefTable(),
-            Find.WindowStack.WindowOfType<Window_Editor>(),
+        btn.OnClick = _ => Find.WindowStack.Add(new Window_Table<ThingDef>(
+            GetThingDefTable(),
+            allRows: [.. DefDatabase<ThingDef>.AllDefs.Where(td =>
+                td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))],
+            filters: [new RowFilter_DefContentSource<ThingDef>(), new RowFilter_Style()],
+            owner: Find.WindowStack.WindowOfType<Window_Editor>(),
             selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
     }
 
@@ -74,7 +78,6 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
             ],
             onRowClick: row => onRowClick?.Invoke(row),
             onRowHover: (rowRect, thing, _) => { TooltipHandler.TipRegion(rowRect, thing.GetTooltip()); },
-            filters: [],
             searchProjection: def => def.LabelCap
         );
     }
@@ -83,10 +86,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
     private static Table<ThingDef> GetThingDefTable()
     {
         return new Table<ThingDef>(
-            [
-                .. DefDatabase<ThingDef>.AllDefs.Where(td =>
-                    td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
-            ],
+            rows: null,
             [
                 Col.Create(
                     Void.Taffy.Px(20f),
@@ -104,7 +104,6 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                     ColoredText.SubtleGrayColor
                 )
             ],
-            filters: [new RowFilter_DefContentSource<ThingDef>(), new RowFilter_Style()],
             onRowHover: (rowRect, def, _) => { UIUtility.DefIconPreview(rowRect, def, GetShowColorForDef(def), 0.6f); },
             searchProjection: def => def.label
         );

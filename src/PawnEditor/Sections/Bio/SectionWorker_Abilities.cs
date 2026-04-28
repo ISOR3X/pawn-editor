@@ -19,9 +19,17 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
         DoAbilities(abilitiesDiv, GetAbilitiesForPawn(pawn), pawn);
 
         layout.ComponentById<ButtonElement>("add").OnClick = _ =>
-            Find.WindowStack.Add(new Window_Table<AbilityDef>(GetTraitsTable(pawn),
-                Find.WindowStack.WindowOfType<Window_Editor>(),
+        {
+            List<RowFilter<AbilityDef>> filters = [new RowFilter_DefContentSource<AbilityDef>()];
+            if (RowFilter_Level.MinMaxRange.max - RowFilter_Level.MinMaxRange.min != 0)
+                filters.Add(new RowFilter_Level());
+            Find.WindowStack.Add(new Window_Table<AbilityDef>(
+                GetTraitsTable(pawn),
+                allRows: DefDatabase<AbilityDef>.AllDefsListForReading,
+                filters: filters,
+                owner: Find.WindowStack.WindowOfType<Window_Editor>(),
                 selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
+        };
     }
 
     private static void DoElementRect(TaffyBuilder builder, (Texture2D, string) metaData, Action<Rect>? onClick = null)
@@ -106,11 +114,8 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 
     private static Table<AbilityDef> GetTraitsTable(Pawn pawn)
     {
-        List<IRowFilter<AbilityDef>> filters = [new RowFilter_DefContentSource<AbilityDef>()];
-        if (RowFilter_Level.MinMaxRange.max - RowFilter_Level.MinMaxRange.min != 0) filters.Add(new RowFilter_Level());
-
         return new Table<AbilityDef>(
-            DefDatabase<AbilityDef>.AllDefsListForReading,
+            rows: null,
             [
                 Col.Create(
                     Void.Taffy.Px(20f),
@@ -133,7 +138,6 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 TooltipHandler.TipRegion(rowRect, tip);
             },
             context: new PawnContext(pawn),
-            filters: filters,
             searchProjection: def => def.LabelCap
         );
     }
