@@ -1,4 +1,4 @@
-﻿using Taffy;
+using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -6,7 +6,7 @@ using Void.Components;
 namespace PawnEditor.Table;
 
 [StaticConstructorOnStartup]
-public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
+public class RowFilter_Level : RowFilter<RimWorld.AbilityDef>
 {
     public static readonly IntRange MinMaxRange;
     private IntRange _range = new(MinMaxRange.min, MinMaxRange.max);
@@ -17,20 +17,20 @@ public class RowFilter_Level : IRowFilter<RimWorld.AbilityDef>
         MinMaxRange = new IntRange(levels.Min(), levels.Max());
     }
 
-    public bool Passes(RimWorld.AbilityDef row, IContext? ctx)
+    public override bool Passes(RimWorld.AbilityDef row)
     {
         return row.level >= _range.min && row.level <= _range.max;
     }
 
-    public void DrawFilter(TaffyBuilder builder, Table<RimWorld.AbilityDef> table)
+    public override void DrawFilter(TaffyBuilder builder)
     {
-        builder.Text("Level range", style: new  StyleOverride { fontSize = GameFont.Tiny });
+        builder.Text("Level range", style: new StyleOverride { fontSize = GameFont.Tiny });
         builder.Item(
             r =>
             {
                 var prev = _range;
                 Verse.Widgets.IntRange(r, 5174, ref _range, MinMaxRange.min, MinMaxRange.max);
-                if (_range != prev) table.SetDirty();
+                if (_range != prev) MarkDirty();
             },
             new StyleOverride
             {

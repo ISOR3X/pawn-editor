@@ -1,27 +1,29 @@
+using RimWorld;
 using Verse;
 using Void;
 using Void.Components;
 
 namespace PawnEditor.Table;
 
-public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
+public class RowFilter_SpawnCategory : RowFilter<BackstoryDef>
 {
     private readonly HashSet<string> _disabledCategories = [];
     private string _searchText = "";
+    private List<string> _spawnCategories = [];
 
-    private List<string>? _spawnCategories;
+    protected override void Initialize(IReadOnlyList<RimWorld.BackstoryDef> allRows)
+    {
+        _spawnCategories = [.. allRows.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s)];
+    }
 
-    public bool Passes(RimWorld.BackstoryDef row, IContext? ctx)
+    public override bool Passes(RimWorld.BackstoryDef row)
     {
         return _disabledCategories.Count == 0 ||
                _disabledCategories.All(c => !row.spawnCategories.Contains(c));
     }
 
-    public void DrawFilter(TaffyBuilder builder, Table<RimWorld.BackstoryDef> table)
+    public override void DrawFilter(TaffyBuilder builder)
     {
-        // TODO: This should probably be done in the constructor?
-        _spawnCategories ??= [.. table.Rows.SelectMany(bd => bd.spawnCategories).Distinct().OrderBy(s => s)];
-
         builder.Collapsible("Spawn category", col =>
         {
             col.Div(row2 =>
@@ -43,7 +45,7 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 if (selected == prev) return;
                 if (selected) _disabledCategories.Remove(category);
                 else _disabledCategories.Add(category);
-                table.SetDirty();
+                MarkDirty();
             }, maxItemsVisibleAtOnce: 6);
 
             col.Div(row =>
@@ -51,12 +53,12 @@ public class RowFilter_SpawnCategory : IRowFilter<RimWorld.BackstoryDef>
                 row.Button("Enable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
                 {
                     _disabledCategories.Clear();
-                    table.SetDirty();
+                    MarkDirty();
                 });
                 row.Button("Disable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
                 {
                     foreach (var c in _spawnCategories) _disabledCategories.Add(c);
-                    table.SetDirty();
+                    MarkDirty();
                 });
             }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
         }, style: new StyleOverride { gap = Void.Taffy.Gap(0f, GenUI.GapTiny) });

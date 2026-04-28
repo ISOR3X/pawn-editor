@@ -76,9 +76,8 @@ public abstract class SectionWorker_StyleItemTable<T>(SectionDef def) : SectionW
                 if (ctx is not PawnContext pawnContext) return;
                 UIUtility.DefIconPreview(rowRect, styleItemDef, pawnContext.Value.story.HairColor);
             },
-            highlightRow: row => highlightRow?.Invoke(pawn, row) ?? false, 
+            highlightRow: row => highlightRow?.Invoke(pawn, row) ?? false,
             context: new PawnContext(pawn),
-            filters: [new RowFilter_DefContentSource<T>()],
             searchProjection: def => def.LabelCap
         );
     }

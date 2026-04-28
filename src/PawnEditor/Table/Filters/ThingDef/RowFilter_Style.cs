@@ -5,18 +5,19 @@ using Void.Components;
 namespace PawnEditor.Table;
 
 [StaticConstructorOnStartup]
-public class RowFilter_Style : IRowFilter<ThingDef>
+public class RowFilter_Style : RowFilter<ThingDef>
 {
     private readonly HashSet<StyleCategoryDef> _disabledStyleCategories = [];
-    private List<StyleCategoryDef>? _styleCategories;
+    private List<StyleCategoryDef> _styleCategories = [];
     private bool _noneDisabled;
 
     private string _searchText = "";
 
-    private static readonly Dictionary<ThingDef, List<StyleCategoryDef>> ThingDefByCategory = [];
+    private static readonly Dictionary<ThingDef, List<StyleCategoryDef>> ThingDefByCategory;
 
-    public RowFilter_Style()
+    static RowFilter_Style()
     {
+        ThingDefByCategory = [];
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
         foreach (var thingDefStyle in styleCategoryDef.thingDefStyles)
         {
@@ -27,7 +28,16 @@ public class RowFilter_Style : IRowFilter<ThingDef>
         }
     }
 
-    public bool Passes(ThingDef row, IContext? ctx)
+    protected override void Initialize(IReadOnlyList<ThingDef> allRows)
+    {
+        _styleCategories = [.. allRows
+            .Where(t => ThingDefByCategory.ContainsKey(t) && ThingDefByCategory[t].Count > 0)
+            .SelectMany(t => ThingDefByCategory[t])
+            .Distinct()
+            .OrderBy(c => c.label)];
+    }
+
+    public override bool Passes(ThingDef row)
     {
         if (!ThingDefByCategory.TryGetValue(row, out var categories))
             return !_noneDisabled;
@@ -35,17 +45,8 @@ public class RowFilter_Style : IRowFilter<ThingDef>
         return categories.Any(c => !_disabledStyleCategories.Contains(c));
     }
 
-    public void DrawFilter(TaffyBuilder builder, Table<ThingDef> table)
+    public override void DrawFilter(TaffyBuilder builder)
     {
-        _styleCategories ??=
-        [
-            .. table.Rows
-                .Where(t => ThingDefByCategory.ContainsKey(t) && ThingDefByCategory[t].Count > 0)
-                .SelectMany(t => ThingDefByCategory[t])
-                .Distinct()
-                .OrderBy(c => c.label)
-        ];
-
         builder.Collapsible("Style", col =>
         {
             col.Div(row2 =>
@@ -79,7 +80,7 @@ public class RowFilter_Style : IRowFilter<ThingDef>
                     if (selected) _disabledStyleCategories.Remove(category);
                     else _disabledStyleCategories.Add(category);
                 }
-                table.SetDirty();
+                MarkDirty();
             }, maxItemsVisibleAtOnce: 6);
 
             col.Div(row =>
@@ -88,15 +89,13 @@ public class RowFilter_Style : IRowFilter<ThingDef>
                 {
                     _disabledStyleCategories.Clear();
                     _noneDisabled = false;
-                    table.SetDirty();
+                    MarkDirty();
                 });
                 row.Button("Disable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
                 {
-                    if (_styleCategories != null)
-                        foreach (var c in _styleCategories)
-                            _disabledStyleCategories.Add(c);
+                    foreach (var c in _styleCategories) _disabledStyleCategories.Add(c);
                     _noneDisabled = true;
-                    table.SetDirty();
+                    MarkDirty();
                 });
             }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
         }, style: new StyleOverride { gap = Void.Taffy.Gap(0f, GenUI.GapTiny) });

@@ -14,6 +14,8 @@ public class Window_Table<T> : OwnedWindow
     private readonly Action<T?>? _onAdd;
     private readonly Action<TaffyBuilder, T?>? _selectedItemSlot;
     private readonly Table<T> _table;
+    private IReadOnlyList<RowFilter<T>> _filters = [];
+    private IReadOnlyList<T>? _allRows;
 
     public Window_Table(Table<T> table, Window? owner = null,
         Action<T?>? onAdd = null, Action<TaffyBuilder, T?>? selectedItemSlot = null
@@ -28,7 +30,29 @@ public class Window_Table<T> : OwnedWindow
         doCloseX = true;
     }
 
+    public Window_Table(Table<T> table, IReadOnlyList<T> allRows, IReadOnlyList<RowFilter<T>>? filters,
+        Window? owner = null, Action<T?>? onAdd = null, Action<TaffyBuilder, T?>? selectedItemSlot = null
+    ) : this(table, owner, onAdd, selectedItemSlot)
+    {
+        _allRows = allRows;
+        _filters = filters ?? [];
+    }
+
     public override Vector2 InitialSize => Page.StandardSize - new Vector2(128f, 128f);
+
+    public override void PreOpen()
+    {
+        base.PreOpen();
+        if (_allRows == null) return;
+        foreach (var filter in _filters)
+            filter.Setup(_allRows, OnFilterChanged);
+        OnFilterChanged();
+    }
+
+    private void OnFilterChanged()
+    {
+        _table.UpdateRows(_allRows!.Where(row => _filters.All(f => f.Passes(row))));
+    }
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -37,11 +61,11 @@ public class Window_Table<T> : OwnedWindow
             {
                 builder.Div(builder2 =>
                 {
-                    if (_table.Filters.Count > 0)
+                    if (_filters.Count > 0)
                         builder2.Div(
                             builder3 =>
                             {
-                                foreach (var filter in _table.Filters) filter.DrawFilter(builder3, _table);
+                                foreach (var filter in _filters) filter.DrawFilter(builder3);
                             }, new StyleOverride
                             {
                                 width = 200f, flexDirection = FlexDirection.Column
