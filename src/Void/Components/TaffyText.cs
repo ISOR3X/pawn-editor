@@ -20,8 +20,8 @@ public static partial class TaffyExtensions
         TextAnchor anchor = TextAnchor.MiddleLeft, Color? color = null, bool? wrap = null, Action<Rect>? onHover = null,
         StyleOverride? style = null)
     {
-        var mergedStyle = (style ?? new StyleOverride());
-        
+        var mergedStyle = style ?? new StyleOverride();
+
         var node = b.tree.NewLeafWithContext(mergedStyle.Resolve(),
             (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
 
@@ -74,10 +74,7 @@ public static partial class TaffyExtensions
                 }
 
                 // Definite available width - wrap at that width.
-                if (available.Width.IntoOption() is { } aw)
-                {
-                    return new Size<float>(aw, MinWidth(text, aw, wrap));
-                }
+                if (available.Width.IntoOption() is { } aw) return new Size<float>(aw, MinWidth(text, aw, wrap));
 
                 // MaxContent / unconstrained - return natural (unwrapped) size.
                 var sz = Verse.Text.CalcSize(text);

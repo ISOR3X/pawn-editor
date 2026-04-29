@@ -1,5 +1,4 @@
-﻿
-using Verse;
+﻿using Verse;
 
 namespace PawnEditor;
 

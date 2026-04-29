@@ -1,3 +1,4 @@
+using RimWorld;
 using Taffy;
 using Verse;
 using Void;
@@ -6,18 +7,18 @@ using Void.Components;
 namespace PawnEditor.Table;
 
 [StaticConstructorOnStartup]
-public class RowFilter_Level : RowFilter<RimWorld.AbilityDef>
+public class RowFilter_Level : RowFilter<AbilityDef>
 {
     public static readonly IntRange MinMaxRange;
     private IntRange _range = new(MinMaxRange.min, MinMaxRange.max);
 
     static RowFilter_Level()
     {
-        var levels = DefDatabase<RimWorld.AbilityDef>.AllDefsListForReading.Select(d => d.level).ToArray();
+        var levels = DefDatabase<AbilityDef>.AllDefsListForReading.Select(d => d.level).ToArray();
         MinMaxRange = new IntRange(levels.Min(), levels.Max());
     }
 
-    public override bool Passes(RimWorld.AbilityDef row)
+    public override bool Passes(AbilityDef row)
     {
         return row.level >= _range.min && row.level <= _range.max;
     }

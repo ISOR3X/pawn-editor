@@ -11,9 +11,9 @@ public class SectionWorker_HairColor(SectionDef def) : SectionWorker(def)
         var currentColor = pawn.story.HairColor;
         layout.ComponentById<TextElement>("text").Wrap = false;
         layout.ComponentById<TextElement>("text").Content = "Hair color";
-        
+
         layout.ComponentById<DivElement>("container").Draw = Verse.Widgets.DrawLightHighlight;
-        
+
         layout.ComponentById<DivElement>("color_preview").Draw = r =>
             Verse.Widgets.DrawRectFast(r, currentColor);
 

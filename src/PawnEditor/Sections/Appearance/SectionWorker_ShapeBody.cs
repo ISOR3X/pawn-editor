@@ -26,15 +26,17 @@ public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
                     if (Mouse.IsOver(r)) TooltipHandler.TipRegion(r, td.ReadableDefName());
 
                     if (Verse.Widgets.ButtonInvisible(r)) AppearanceUtility.TrySetBodyType(td, pawn);
-                    
+
                     // -10f to compensate for the off-centered body textures.
                     using (new GUIColor(pawn.story.SkinColor))
-                        Verse.Widgets.DrawTextureFitted(r with {y = r.y - 8f}, AppearanceUtility.BodyTypes[td], 1.6f);
+                    {
+                        Verse.Widgets.DrawTextureFitted(r with { y = r.y - 8f }, AppearanceUtility.BodyTypes[td], 1.6f);
+                    }
                 }, 64f, style: new StyleOverride { gap = Void.Taffy.Gap(4f) });
         };
         layout.ComponentById<ButtonElement>("next").OnClick = _ => StepBodyType();
         layout.ComponentById<ButtonElement>("prev").OnClick = _ => StepBodyType(-1);
-        
+
         return;
 
         void StepBodyType(int step = 1)

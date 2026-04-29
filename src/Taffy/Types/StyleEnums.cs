@@ -128,7 +128,11 @@ public static class DirectionExt
 }
 
 /// <summary>
-///     Used by block layout to implement the legacy <c><center></c> / <c>align=</c> behaviour.
+///     Used by block layout to implement the legacy
+///     <c>
+///         <center>
+///     </c>
+///     / <c>align=</c> behaviour.
 ///     CSS: <c>text-align</c> (legacy subset only).
 /// </summary>
 public enum TextAlign : byte

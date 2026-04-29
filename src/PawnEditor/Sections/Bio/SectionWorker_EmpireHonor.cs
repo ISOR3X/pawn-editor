@@ -25,7 +25,7 @@ public class SectionWorker_EmpireHonor(SectionDef def) : SectionWorker_EmpireTit
         layout.ComponentById<TextElement>("min").Content = minMaxHonor.min.ToString();
         layout.ComponentById<TextElement>("max").Content = minMaxHonor.max.ToString();
         layout.ComponentById<TextElement>("value").Content = favor.ToString(CultureInfo.InvariantCulture);
-        
+
         var slider = layout.ComponentById<InputElement>("honor");
         slider.Value = new Reactive<int>(() => pawn.royalty.GetFavor(empire),
             v => pawn.royalty.SetFavor(empire, v, false));

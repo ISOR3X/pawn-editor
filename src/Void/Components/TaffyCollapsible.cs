@@ -49,7 +49,7 @@ public static partial class TaffyExtensions
                 },
                 row =>
                 {
-                    row.Text(title, style: new StyleOverride { flexGrow = 1f, fontSize = GameFont.Tiny});
+                    row.Text(title, style: new StyleOverride { flexGrow = 1f, fontSize = GameFont.Tiny });
                     row.Icon(isOpen ? PawnColumnWorker.SortingIcon : PawnColumnWorker.SortingDescendingIcon,
                         size: UIUtility.ComponentSize.Small);
                 },

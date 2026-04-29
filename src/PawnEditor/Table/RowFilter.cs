@@ -12,11 +12,16 @@ public abstract class RowFilter<TRow>
         Initialize(allRows);
     }
 
-    protected virtual void Initialize(IReadOnlyList<TRow> allRows) { }
+    protected virtual void Initialize(IReadOnlyList<TRow> allRows)
+    {
+    }
 
     public abstract bool Passes(TRow row);
 
     public abstract void DrawFilter(TaffyBuilder builder);
 
-    protected void MarkDirty() => _onChanged?.Invoke();
+    protected void MarkDirty()
+    {
+        _onChanged?.Invoke();
+    }
 }

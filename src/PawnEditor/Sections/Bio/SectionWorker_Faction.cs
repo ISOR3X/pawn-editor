@@ -8,7 +8,10 @@ namespace PawnEditor;
 
 public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
 {
-    public override bool ShowSection(Pawn p) => base.ShowSection(p) && p.def.CanHaveFaction;
+    public override bool ShowSection(Pawn p)
+    {
+        return base.ShowSection(p) && p.def.CanHaveFaction;
+    }
 
 
     protected override void OnLayout(Layout layout, Pawn pawn)

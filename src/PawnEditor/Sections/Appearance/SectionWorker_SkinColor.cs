@@ -21,7 +21,7 @@ public class SectionWorker_SkinColor(SectionDef def) : SectionWorker(def)
             Find.WindowStack.Add(new Dialog_ColorPicker(c => TrySetSkinColor(c, pawn), currentColor,
                 AppearanceUtility.GetSkinColorsFor(pawn)));
     }
-    
+
     private static void TrySetSkinColor(Color color, Pawn pawn, bool silent = true)
     {
         if (pawn.story.SkinColor == color) return;

@@ -31,7 +31,6 @@ internal static class ExplicitGrid
         ushort nonAutoCount = 0;
         var autoRepeatDefs = new List<GridTemplateRepeat>();
         foreach (var comp in template)
-        {
             if (comp.IsSingle)
             {
                 nonAutoCount++;
@@ -43,7 +42,6 @@ internal static class ExplicitGrid
                     autoRepeatDefs.Add(rep);
                 // Integer repeat not supported; treated as zero tracks (invalid template → 0 below).
             }
-        }
 
         // Validation: at most one auto-repeat, and every track must have a fixed component.
         if (autoRepeatDefs.Count > 1) return 0;
@@ -80,7 +78,7 @@ internal static class ExplicitGrid
             : style.gap.Height.ResolveOrZero(container);
 
         // Space used by non-repeating (single) tracks.
-        float nonRepSpace = 0f;
+        var nonRepSpace = 0f;
         ushort nonAutoTrackCount = 0;
         foreach (var comp in template)
         {
@@ -90,12 +88,12 @@ internal static class ExplicitGrid
         }
 
         var repTrackCount = (ushort)repeatDef.Tracks.Count;
-        float perRepTrackSpace = repeatDef.Tracks.Sum(t => TrackDefiniteValue(t, container));
+        var perRepTrackSpace = repeatDef.Tracks.Sum(t => TrackDefiniteValue(t, container));
 
         // First repetition + non-repeating tracks, including gaps between all of them.
         var firstRepSpace = nonRepSpace
-            + perRepTrackSpace
-            + MathF.Max(0f, nonAutoTrackCount + repTrackCount - 1) * gapSize;
+                            + perRepTrackSpace
+                            + MathF.Max(0f, nonAutoTrackCount + repTrackCount - 1) * gapSize;
 
         if (firstRepSpace > container) return 1;
 
@@ -161,7 +159,8 @@ internal static class ExplicitGrid
             // Count non-auto-repeating tracks (for computing repeat expansion size).
             ushort nonAutoRepeatingCount = 0;
             foreach (var comp in template)
-                if (comp.IsSingle) nonAutoRepeatingCount++;
+                if (comp.IsSingle)
+                    nonAutoRepeatingCount++;
 
             var explicitEnd = counts.NegativeImplicit + counts.Explicit;
 

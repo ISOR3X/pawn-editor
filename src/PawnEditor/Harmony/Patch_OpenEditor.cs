@@ -20,7 +20,7 @@ public class Patch_OpenEditor
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
             if (Current.ProgramState == ProgramState.Playing)
                 VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
-        
+
         if (KeyBindingDefOf.PawnEditor_HotReloadDefs.KeyDownEvent)
         {
             var open = Find.WindowStack.IsOpen<Window_Editor>();

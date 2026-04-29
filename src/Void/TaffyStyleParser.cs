@@ -368,15 +368,19 @@ public static class TaffyStyleParser
         var depth = 0;
         var start = 0;
         for (var i = 0; i < s.Length; i++)
-        {
-            if (s[i] == '(') depth++;
-            else if (s[i] == ')') depth--;
+            if (s[i] == '(')
+            {
+                depth++;
+            }
+            else if (s[i] == ')')
+            {
+                depth--;
+            }
             else if (s[i] == ' ' && depth == 0)
             {
                 if (i > start) yield return s[start..i];
                 start = i + 1;
             }
-        }
 
         if (start < s.Length) yield return s[start..];
     }
@@ -386,11 +390,9 @@ public static class TaffyStyleParser
     {
         var depth = 0;
         for (var i = 0; i < s.Length; i++)
-        {
             if (s[i] == '(') depth++;
             else if (s[i] == ')') depth--;
             else if (s[i] == ',' && depth == 0) return i;
-        }
 
         return -1;
     }

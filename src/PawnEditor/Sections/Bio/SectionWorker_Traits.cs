@@ -17,7 +17,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
     {
         var traitsDiv = layout.ComponentById<DivElement>("traits_block");
         var incapableOfDiv = layout.ComponentById<DivElement>("incapableOf_block");
-        
+
         DoTraits(traitsDiv, pawn);
         DoIncapableOf(incapableOfDiv, pawn);
 
@@ -28,7 +28,6 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
                 selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.Trait.LabelCap ?? "None")); }
             ));
         };
-
     }
 
     private static void DoElementRect(TaffyBuilder builder, (Color?, string, string?) metaData,
@@ -71,7 +70,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
     private static void DoTraits(DivElement div, Pawn pawn)
     {
         var traits = pawn.story.traits.TraitsSorted;
-        
+
         var emptyLabel = pawn.DevelopmentalStage.Baby()
             ? "TraitsDevelopLaterBaby".Translate()
             : "None".Translate();
@@ -96,7 +95,7 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
     private static void DoIncapableOf(DivElement div, Pawn pawn)
     {
         var workTags = CharacterCardUtility.WorkTagsFrom(pawn.CombinedDisabledWorkTags).ToList();
-        
+
         DoElementsRect(div, workTags,
             t => (CharacterCardUtility.GetDisabledWorkTagLabelColor(pawn, t), t.LabelTranslated().CapitalizeFirst(),
                 GetTooltip(t, pawn)));

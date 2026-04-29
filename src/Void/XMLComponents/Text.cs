@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Xml;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Verse;
 using Void.Components;
 
@@ -10,11 +9,11 @@ namespace Void.XMLComponents;
 public class TextElement : XMLComponent
 {
     private static readonly Dictionary<string, Color?> ColorCache = [];
-    
+
     public Color? Color;
-    public bool Wrap;
 
     public string? Content;
+    public bool Wrap;
     public override bool IsLeaf => true;
 
     public override void ParseXmlAttrs(XmlNode node)

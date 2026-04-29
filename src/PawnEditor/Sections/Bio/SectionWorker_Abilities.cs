@@ -25,9 +25,9 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 filters.Add(new RowFilter_Level());
             Find.WindowStack.Add(new Window_Table<AbilityDef>(
                 GetTraitsTable(pawn),
-                allRows: DefDatabase<AbilityDef>.AllDefsListForReading,
-                filters: filters,
-                owner: Find.WindowStack.WindowOfType<Window_Editor>(),
+                DefDatabase<AbilityDef>.AllDefsListForReading,
+                filters,
+                Find.WindowStack.WindowOfType<Window_Editor>(),
                 selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
         };
     }
@@ -64,7 +64,9 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                 if (items is { Count: > 0 })
                     foreach (var item in items)
                         DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
-                else traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor, style: new StyleOverride {height = 34f});
+                else
+                    traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor,
+                        style: new StyleOverride { height = 34f });
             };
     }
 
@@ -115,7 +117,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
     private static Table<AbilityDef> GetTraitsTable(Pawn pawn)
     {
         return new Table<AbilityDef>(
-            rows: null,
+            null,
             [
                 Col.Create(
                     Void.Taffy.Px(20f),

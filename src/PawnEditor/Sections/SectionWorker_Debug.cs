@@ -1,9 +1,6 @@
-using Taffy;
-using UnityEngine;
 using Verse;
 using Void;
 using Void.XMLComponents;
-using FlexDirection = Taffy.FlexDirection;
 using Layout = Void.Layout;
 
 namespace PawnEditor;

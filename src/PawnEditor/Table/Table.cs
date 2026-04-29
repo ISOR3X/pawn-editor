@@ -27,7 +27,8 @@ public class Table<TRow>(
     // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
     // In a virtualized table only a subset of rows is rendered each frame, so the
     // auto minimum causes columns to resize as different content scrolls into view.
-    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks = [.. columns.Select(c => NormalizeTrack(c.TrackSize))];
+    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks =
+        [.. columns.Select(c => NormalizeTrack(c.TrackSize))];
 
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
 
@@ -45,7 +46,7 @@ public class Table<TRow>(
             ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
             : t;
     }
-    
+
     private void SetDirty()
     {
         _dirty = true;
@@ -212,7 +213,7 @@ public class Table<TRow>(
                         else
                             col.DrawCell(b, row);
                 }
-            }, style: new StyleOverride
+            }, new StyleOverride
             {
                 display = Display.Grid,
                 gridTemplateColumns = [.._columnTracks],
@@ -226,7 +227,7 @@ public class Table<TRow>(
 
         #endregion
     }
-    
+
     public void Draw(TaffyBuilder builder, int rowCount = 6, StyleOverride? style = null)
     {
         const float chrome = HeaderHeight + FooterHeight + GenUI.GapTiny;

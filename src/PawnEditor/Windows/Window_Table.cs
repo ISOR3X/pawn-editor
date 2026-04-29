@@ -11,11 +11,11 @@ namespace PawnEditor;
 
 public class Window_Table<T> : OwnedWindow
 {
+    private readonly IReadOnlyList<T>? _allRows;
+    private readonly IReadOnlyList<RowFilter<T>> _filters = [];
     private readonly Action<T?>? _onAdd;
     private readonly Action<TaffyBuilder, T?>? _selectedItemSlot;
     private readonly Table<T> _table;
-    private IReadOnlyList<RowFilter<T>> _filters = [];
-    private IReadOnlyList<T>? _allRows;
 
     public Window_Table(Table<T> table, Window? owner = null,
         Action<T?>? onAdd = null, Action<TaffyBuilder, T?>? selectedItemSlot = null

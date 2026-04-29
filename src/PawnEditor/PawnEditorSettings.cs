@@ -31,7 +31,7 @@ public class PawnEditorSettings : ModSettings
         Scribe_Values.Look(ref restriction, nameof(restriction), RestrictionMode.Severe);
         Scribe_Values.Look(ref spawnNear, nameof(spawnNear), true);
         Scribe_Values.Look(ref hideDeadWorldPawns, nameof(hideDeadWorldPawns), true);
-        Scribe_Values.Look(ref allowResize, nameof(allowResize), false);
+        Scribe_Values.Look(ref allowResize, nameof(allowResize));
         Scribe_Values.Look(ref Window_Editor.SavedWindowRect, nameof(Window_Editor.SavedWindowRect),
             Window_Editor.DefaultWindowRect);
     }

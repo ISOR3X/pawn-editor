@@ -15,7 +15,7 @@ public class SectionWorker_IdeologyRole(SectionDef def) : SectionWorker(def)
         btn.Label = curRole?.Label ?? "None";
         btn.Icon = curRole?.Icon ?? Verse.Widgets.PlaceholderIconTex;
         btn.IconColor = curRole != null ? pawn.Ideo?.Color : Color.white;
-        
+
         btn.OnClick = _ =>
         {
             if (pawn.Ideo == null) return;

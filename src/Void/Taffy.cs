@@ -25,7 +25,6 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Color = UnityEngine.Color;
-using Display = Taffy.Display;
 using SizeF = Taffy.SizeF;
 
 namespace Void;
