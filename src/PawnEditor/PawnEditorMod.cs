@@ -10,7 +10,7 @@ namespace PawnEditor;
 
 public class PawnEditorMod : Mod
 {
-    public static string ModName = "PawnEditor";
+    public static string ModName = "Pawn Editor";
     public static PawnEditorSettings Settings = new();
 
     public PawnEditorMod(ModContentPack content) : base(content)
@@ -20,7 +20,7 @@ public class PawnEditorMod : Mod
         var harmony = new Harmony("com.isorex.pawneditor");
         harmony.PatchAll();
 
-        // After Harmony patches are applied, since GetSettings uses Patch_ParseHelperRect.
+        // Call after Harmony patches are applied, since GetSettings uses Patch_ParseHelperRect.
         Settings = GetSettings<PawnEditorSettings>();
 
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
@@ -37,7 +37,7 @@ public class PawnEditorMod : Mod
 
     public override string SettingsCategory()
     {
-        return "Pawn Editor";
+        return ModName;
     }
 
 

@@ -34,29 +34,11 @@ public static class Rect_Extension
             rect.xMin += pixels;
             return ret;
         }
-
-
-        public void Indent(float width = 4f)
-        {
-            rect.xMin += width;
-        }
-
-        public void Gap(float height = 4f)
-        {
-            rect.yMin += height;
-        }
+        
     }
 
     extension(Rect rect)
     {
-        public void LabelH2(string label)
-        {
-            using (new TextBlock(TextAnchor.MiddleLeft))
-            {
-                Verse.Widgets.Label(rect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
-            }
-        }
-
         public Rect CenteredVertically(float height)
         {
             var remove = (rect.height - height) / 2;
@@ -71,13 +53,6 @@ public static class Rect_Extension
             rect.xMax -= remove;
             rect.xMin += remove;
             return rect;
-        }
-
-        public void SplitHorizontallyEqual(out Rect top, out Rect bottom, float padding = 0)
-        {
-            var half = rect.height / 2;
-            top = rect.TopPartPixels(half - padding);
-            bottom = rect.BottomPartPixels(half - padding);
         }
     }
 }

@@ -13,55 +13,6 @@ public static class Widgets
     // Hold-repeat state: direction (+1/-1/0), time the hold started, time of the last repeat tick.
     private static readonly Dictionary<string, (int direction, float heldSince, float lastRepeat)> SHoldState = [];
 
-    public static void WidgetLabel(Rect inRect, string label)
-    {
-        using (new TextBlock(TextAnchor.MiddleLeft))
-        {
-            Verse.Widgets.Label(inRect, label.CapitalizeFirst().Colorize(ColoredText.TipSectionTitleColor));
-        }
-    }
-
-    // REF: Widgets.DelayedTextField, but modified so that it also works with a single text field.
-    private static string DelayedTextField(Rect inRect,
-        string text,
-        ref string? buffer,
-        Func<Rect, string?, string> inputDrawer,
-        string? previousFocusedControlName,
-        string? controlName = null)
-    {
-        // controlName ??= $"TextField{(object)inRect.x},{(object)inRect.y}";
-        controlName ??= $"TextField{(object)inRect.y}{(object)inRect.x}";
-        var isPreviousFocused = previousFocusedControlName == controlName;
-        var isFocused = GUI.GetNameOfFocusedControl() == controlName;
-        var name = controlName + "_unfocused";
-
-        GUI.SetNextControlName(name);
-        GUI.Label(inRect, "");
-        GUI.SetNextControlName(controlName);
-
-        var keyPressed = false;
-        if (isFocused && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return ||
-                                                                     Event.current.keyCode == KeyCode.KeypadEnter))
-        {
-            Event.current.Use();
-            keyPressed = true;
-        }
-
-        var clickedOutside = Event.current.type == EventType.MouseDown && !inRect.Contains(Event.current.mousePosition);
-        isFocused = !keyPressed && !clickedOutside && isFocused;
-
-        if (isPreviousFocused)
-        {
-            buffer = inputDrawer.Invoke(inRect, buffer);
-            if (isFocused) return text;
-            GUI.FocusControl(name);
-            return buffer;
-        }
-
-        buffer = inputDrawer.Invoke(inRect, text);
-        return buffer;
-    }
-
     /// <summary>
     ///     Like <see cref="Verse.Widgets.ButtonImage" /> but also fires on hold-repeat.
     ///     <paramref name="key" /> must be a globally unique stable string per button.

@@ -72,35 +72,4 @@ public static class UIUtility
 
         return value;
     }
-
-
-    public static void ColorPickerLabeled(this Listing_Standard listing, string label, float height, ref Color color,
-        Dictionary<string, Color>? specialColors, List<Color> colors, Action<Color> onApply, out float newHeight,
-        string? tooltip = null)
-    {
-        listing.Label(label);
-        var rect = listing.GetRect(height);
-
-        if (!tooltip.NullOrEmpty())
-            TooltipHandler.TipRegion(rect, (TipSignal)tooltip);
-
-        var availableColors = colors.Append(new Color(0, 0, 0, 0f)).ToList();
-
-        if (rect.width <= 0)
-        {
-            newHeight = height;
-            return;
-        }
-
-        var oldColor = color;
-        Verse.Widgets.ColorSelector(rect, ref color, availableColors, out newHeight,
-            extraOnGUI: (currentColor, r) =>
-            {
-                if (currentColor.a != 0) return;
-                if (Verse.Widgets.ButtonImage(r.ExpandedBy(2f), Designator_Eyedropper.EyeDropperTex))
-                {
-                    // Find.WindowStack.Add(new Dialog_ColorPicker(onApply, oldColor, colors, specialColors));
-                }
-            });
-    }
 }

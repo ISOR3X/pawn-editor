@@ -8,13 +8,13 @@ namespace PawnEditor.XMLComponents;
 /// <summary>
 ///     Represents a <c><section></c> element within a layout tree. Delegates rendering to the
 ///     referenced <see cref="SectionDef" />'s worker, applying tab-level style composition.
-///     The <see cref="Pawn" /> property is set via <see cref="SetContext" /> before
+///     The <see cref="_pawn" /> property is set via <see cref="SetContext" /> before
 ///     <see cref="Render" /> is called.
 /// </summary>
 public class SectionElement : XMLComponent
 {
     /// <summary>Set via SetContext before each call to Render.</summary>
-    internal Pawn? Pawn;
+    private Pawn? _pawn;
 
     public SectionDef? ResolvedDef;
 
@@ -22,7 +22,7 @@ public class SectionElement : XMLComponent
 
     public override void SetContext(IContext? context)
     {
-        Pawn = (context as IContext<Pawn>)?.Value;
+        _pawn = (context as IContext<Pawn>)?.Value;
     }
 
     public override void ParseXmlAttrs(XmlNode node)
@@ -35,9 +35,9 @@ public class SectionElement : XMLComponent
     public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
     {
         var worker = ResolvedDef?.Worker;
-        if (worker == null || Pawn == null) return;
-        if (!worker.ShowSection(Pawn)) return;
+        if (worker == null || _pawn == null) return;
+        if (!worker.ShowSection(_pawn)) return;
         // Delegate entirely to BuildSection - it handles both UILayout (merge) and legacy (wrap).
-        worker.BuildSection(builder, Pawn, Style, Attrs);
+        worker.BuildSection(builder, _pawn, Style, Attrs);
     }
 }

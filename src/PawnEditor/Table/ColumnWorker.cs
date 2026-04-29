@@ -19,8 +19,7 @@ public abstract class ColumnWorker<TRow>
         return 0;
     }
 
-
-    public virtual void DrawHeader(Rect r)
+    public void DrawHeader(Rect r)
     {
         if (HeaderLabel != null)
             using (new TextBlock(TextAnchor.MiddleLeft))

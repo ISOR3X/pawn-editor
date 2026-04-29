@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using Verse;
 
 namespace PawnEditor;
 
-[StaticConstructorOnStartup]
 public static class ColorUtility
 {
     private static Texture2D? _hueTexture;
