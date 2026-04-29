@@ -8,7 +8,6 @@ namespace Void;
 ///     Resolves icon names from XML (<c>icon="plus"</c>) to <see cref="Texture2D" /> instances.
 ///     Supports two resolution strategies:
 ///     <list type="number">
-///         <item>Short-name registry: <c>"plus"</c>, <c>"delete"</c>, etc. - registered at startup.</item>
 ///         <item>Reflection: <c>"RimWorld.TexButton.Delete"</c> - split on last dot, look up static field.</item>
 ///     </list>
 /// </summary>

@@ -5,7 +5,7 @@ namespace PawnEditor;
 public abstract class OwnedWindow(Window? owner) : Window
 {
     /// <summary>
-    ///     absorbInputAroundWindow only works for click outside, while OwnedWindow also closes children when the parent
+    ///     window.absorbInputAroundWindow only works for click outside, while OwnedWindow also closes children when the parent
     ///     closes.
     /// </summary>
     public override void ExtraOnGUI()

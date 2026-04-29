@@ -7,7 +7,7 @@ namespace Void.Components;
 
 public static partial class TaffyExtensions
 {
-    private static readonly Dictionary<string, bool> SCollapsibleState = new();
+    private static readonly Dictionary<string, bool> SCollapsibleState = [];
 
     /// <summary>
     ///     Adds a collapsible section with a clickable header row and toggleable content.
@@ -25,7 +25,7 @@ public static partial class TaffyExtensions
         this TaffyBuilder b,
         string title,
         Action<TaffyBuilder> content,
-        bool defaultOpen = true,
+        bool defaultOpen = false,
         StyleOverride? style = null,
         [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
