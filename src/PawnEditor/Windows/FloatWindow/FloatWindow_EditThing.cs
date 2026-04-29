@@ -43,15 +43,17 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         Verse.Widgets.GetIconFor(thing.Stuff), thing.Stuff.stuffProps.color, _ =>
                         {
                             {
-                                Find.WindowStack.Add(new FloatMenu([.. GenStuff.AllowedStuffsFor(thing.def)
-                                    .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
-                                        {
-                                            thing.SetStuffDirect(stuff);
-                                            thing.SetColor(stuff.stuffProps.color);
-                                            thing.Notify_ColorChanged();
-                                        },
-                                        Verse.Widgets.GetIconFor(stuff),
-                                        stuff.stuffProps.color))]));
+                                Find.WindowStack.Add(new FloatMenu([
+                                    .. GenStuff.AllowedStuffsFor(thing.def)
+                                        .Select(stuff => new FloatMenuOption(stuff.LabelCap, () =>
+                                            {
+                                                thing.SetStuffDirect(stuff);
+                                                thing.SetColor(stuff.stuffProps.color);
+                                                thing.Notify_ColorChanged();
+                                            },
+                                            Verse.Widgets.GetIconFor(stuff),
+                                            stuff.stuffProps.color))
+                                ]));
                             }
                         });
                 }

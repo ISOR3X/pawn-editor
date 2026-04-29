@@ -10,7 +10,7 @@ public static partial class TaffyExtensions
     public enum ButtonVariant
     {
         Solid = 0,
-        Ghost = 1,
+        Ghost = 1
     }
 
     /// <returns>Button padding, button height, icon height, icon + label gap, font size</returns>
@@ -125,7 +125,7 @@ public static partial class TaffyExtensions
     }
 
     /// <summary>
-    /// Copy of <see cref="Verse.Widgets.DrawButtonGraphic"/> , but with a disabled flag to disable interaction states.
+    ///     Copy of <see cref="Verse.Widgets.DrawButtonGraphic" /> , but with a disabled flag to disable interaction states.
     /// </summary>
     private static void DrawButtonGraphic(Rect rect, bool disabled)
     {

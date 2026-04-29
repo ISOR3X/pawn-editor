@@ -16,12 +16,17 @@ public class StyleOverride
     public AlignContent? alignContent;
     public AlignItems? alignItems;
     public AlignItems? alignSelf;
+    public Color? backgroundColor;
+
+    // Not used by Taffy, but internally so we can easily apply background and text colors.
+    public Color? color;
     public Display? display;
     public Dimension? flexBasis;
     public FlexDirection? flexDirection;
     public float? flexGrow;
     public float? flexShrink;
     public FlexWrap? flexWrap;
+    public GameFont? fontSize;
     public Size<LengthPercentage>? gap;
     public List<TrackSizingFunction>? gridAutoColumns;
     public GridAutoFlow? gridAutoFlow;
@@ -41,11 +46,6 @@ public class StyleOverride
     public Dimension? minWidth;
     public Rect<LengthPercentage>? padding;
     public Dimension? width;
-
-    // Not used by Taffy, but internally so we can easily apply background and text colors.
-    public Color? color;
-    public Color? backgroundColor;
-    public GameFont? fontSize;
 
     /// <summary>
     ///     Returns a new <see cref="StyleOverride" /> where each field is taken from this instance
@@ -86,7 +86,7 @@ public class StyleOverride
 
             color = color ?? fallback.color,
             backgroundColor = backgroundColor ?? fallback.backgroundColor,
-            fontSize = fontSize ?? fallback.fontSize,
+            fontSize = fontSize ?? fallback.fontSize
         };
     }
 

@@ -27,7 +27,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
         col.Div(row =>
         {
             row.Text(label);
-            row.InputNumber(ref value, min, 9999, id: label);
+            row.InputNumber(ref value, min, id: label);
         }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapLabel) });
 
         if (isChrono)

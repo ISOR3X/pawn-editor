@@ -34,7 +34,6 @@ public static class Rect_Extension
             rect.xMin += pixels;
             return ret;
         }
-        
     }
 
     extension(Rect rect)

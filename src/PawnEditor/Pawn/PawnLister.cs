@@ -1,5 +1,4 @@
-﻿
-using RimWorld;
+﻿using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
@@ -7,19 +6,16 @@ namespace PawnEditor;
 
 public static class PawnLister
 {
-    private static readonly Dictionary<FactionKey, List<Pawn>> PawnsByFactionTemporary = new();
-    private static readonly List<PawnLocation> AllLocationsTemporary = [];
-
     public static List<PawnLocation> AllLocations
     {
         get
         {
-            AllLocationsTemporary.Clear();
-            AllLocationsTemporary.AddRange(PawnsFinder.All_AliveOrDead.Select(p => p.GetLocation()).Distinct()
+            field.Clear();
+            field.AddRange(PawnsFinder.All_AliveOrDead.Select(p => p.GetLocation()).Distinct()
                 .OrderBy(l => l.Label));
-            return AllLocationsTemporary;
+            return field;
         }
-    }
+    } = [];
 
     /// <summary>
     ///     Returns a dictionary of pawns grouped by faction and a list of pawns with no faction.
@@ -34,19 +30,19 @@ public static class PawnLister
                 .Where(p => !(p.IsWorldPawn() && Find.WorldPawns.GetSituation(p) == WorldPawnSituation.Dead) ||
                             !PawnEditorMod.Settings.hideDeadWorldPawns);
 
-            PawnsByFactionTemporary.Clear();
+            field.Clear();
 
             // Ensure all known factions have an entry, even if empty
             foreach (var faction in Find.FactionManager.AllFactions)
-                PawnsByFactionTemporary[faction] = [];
-            PawnsByFactionTemporary[null!] = [];
+                field[faction] = [];
+            field[null!] = [];
 
             // Bucket pawns
-            foreach (var pawn in availablePawns) PawnsByFactionTemporary[pawn.Faction].Add(pawn);
+            foreach (var pawn in availablePawns) field[pawn.Faction].Add(pawn);
 
-            return PawnsByFactionTemporary;
+            return field;
         }
-    }
+    } = new();
 
     // Some trickery so we can use null keys in a dict without our IDE complaining.
     public readonly struct FactionKey(Faction? faction) : IEquatable<FactionKey>

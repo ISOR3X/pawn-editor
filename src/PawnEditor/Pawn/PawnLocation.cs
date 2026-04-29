@@ -1,26 +1,13 @@
-﻿
-using RimWorld;
+﻿using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
 namespace PawnEditor;
 
-public class PawnLocation : IEquatable<PawnLocation>, IComparable<PawnLocation>
+public class PawnLocation(Pawn pawn) : IEquatable<PawnLocation>, IComparable<PawnLocation>
 {
-    public PawnLocation(object location)
-    {
-        Location = location;
-        Label = GetLocationLabel(location);
-    }
-
-    public PawnLocation(Pawn pawn)
-    {
-        Location = GetDirectLocation(pawn);
-        Label = GetLocationLabel(pawn);
-    }
-
-    public object Location { get; }
-    public string Label { get; }
+    public object Location { get; } = GetDirectLocation(pawn);
+    public string Label { get; } = GetLocationLabel(pawn);
 
     public int CompareTo(PawnLocation other)
     {
@@ -49,7 +36,8 @@ public class PawnLocation : IEquatable<PawnLocation>, IComparable<PawnLocation>
 
     public static string GetLocationLabel(Pawn pawn)
     {
-        if (Current.ProgramState == ProgramState.Playing || pawn.Faction != Faction.OfPlayer) return GetLocationLabel(GetDirectLocation(pawn));
+        if (Current.ProgramState == ProgramState.Playing || pawn.Faction != Faction.OfPlayer)
+            return GetLocationLabel(GetDirectLocation(pawn));
         return Find.GameInitData.startingPawnCount >= StartingPawnUtility.PawnIndex(pawn)
             ? "StartingPawnsSelected".Translate()
             : "StartingPawnsLeftBehind".Translate();

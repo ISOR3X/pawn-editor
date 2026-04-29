@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,6 +9,12 @@ namespace Void.Components;
 
 public static partial class TaffyExtensions
 {
+    public enum InputVariant
+    {
+        Solid = 0,
+        Ghost = 1
+    }
+
     private const float DefaultInputWidth = 120f;
 
     // Locked GUIStyle for InputNumber: all state backgrounds/colors match normal so that
@@ -34,31 +39,23 @@ public static partial class TaffyExtensions
 
     private static readonly Dictionary<string, (float value, float externalValue)> SRangeState = [];
 
-    public enum InputVariant
-    {
-        Solid = 0,
-        Ghost = 1,
-    }
-
     private static GUIStyle ResolveTextFieldStyle(InputVariant variant, bool focused, bool disabled)
     {
         if (variant == InputVariant.Ghost)
         {
+            var font = Verse.Text.Font;
+            if (_sGhostTextField.style == null || _sGhostTextField.font != font)
             {
-                var font = Verse.Text.Font;
-                if (_sGhostTextField.style == null || _sGhostTextField.font != font)
-                {
-                    var s = new GUIStyle(Verse.Text.CurTextFieldStyle);
-                    s.normal.background = null;
-                    s.focused.background = null;
-                    s.hover.background = null;
-                    s.active.background = null;
-                    s.border = new RectOffset(0, 0, 0, 0);
-                    _sGhostTextField = (s, font);
-                }
-
-                return _sGhostTextField.style!;
+                var s = new GUIStyle(Verse.Text.CurTextFieldStyle);
+                s.normal.background = null;
+                s.focused.background = null;
+                s.hover.background = null;
+                s.active.background = null;
+                s.border = new RectOffset(0, 0, 0, 0);
+                _sGhostTextField = (s, font);
             }
+
+            return _sGhostTextField.style!;
         }
 
         if (focused) return Verse.Text.CurTextFieldStyle;
@@ -82,10 +79,15 @@ public static partial class TaffyExtensions
     }
 
     // Clears keyboard focus. Can be called from any draw callback.
-    private static void Unfocus() => GUIUtility.keyboardControl = 0;
+    private static void Unfocus()
+    {
+        GUIUtility.keyboardControl = 0;
+    }
 
     private static string MakeKey(TaffyBuilder b, string? id, string? file, int line)
-        => id != null ? $"{b.ContextKey}:{id}" : $"{b.ContextKey}:{file}:{line}";
+    {
+        return id != null ? $"{b.ContextKey}:{id}" : $"{b.ContextKey}:{file}:{line}";
+    }
 
     private static (bool isFocused, bool effectivelyFocused) GetFocusState(string controlName, Rect r)
     {
@@ -132,7 +134,7 @@ public static partial class TaffyExtensions
 
             var (isFocused, effectivelyFocused) = GetFocusState(controlName, r);
 
-            string input = displayValue;
+            var input = displayValue;
             GUI.SetNextControlName(controlName);
             using (new GUIColor(disabled ? new Color(1f, 1f, 1f, 0.5f) : color ?? Color.white))
             {
@@ -300,10 +302,7 @@ public static partial class TaffyExtensions
         });
 
         // Smaller step when shift is held.
-        if (Event.current.shift)
-        {
-            step = Mathf.Max(step / 10, 0.01f);
-        }
+        if (Event.current.shift) step = Mathf.Max(step / 10, 0.01f);
 
         var capturedValue = Mathf.Clamp(value, min, max);
 

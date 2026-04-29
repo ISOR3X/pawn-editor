@@ -8,10 +8,10 @@ public abstract class RowFilter_ToggleableList<T, K>(string title, Func<K, strin
     : RowFilter<T> where K : class where T : class
 {
     private readonly HashSet<K> _disabledOptions = [];
-    protected List<K> allOptions = options;
     private bool _noneDisabled;
 
     private string _searchText = "";
+    protected List<K> allOptions = options;
 
     protected abstract IReadOnlyList<K>? GetOptions(T row);
 

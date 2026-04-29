@@ -13,12 +13,6 @@ public class TabDef : Def
     public int priority = 10;
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 
-    public override void ResolveReferences()
-    {
-        base.ResolveReferences();
-        layout?.ResolveClasses();
-    }
-
     [field: Unsaved]
     public TabWorker Worker
     {
@@ -30,5 +24,11 @@ public class TabDef : Def
 
             return field;
         }
+    }
+
+    public override void ResolveReferences()
+    {
+        base.ResolveReferences();
+        layout?.ResolveClasses();
     }
 }

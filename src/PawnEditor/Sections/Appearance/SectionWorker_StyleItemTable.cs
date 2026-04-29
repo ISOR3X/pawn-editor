@@ -28,14 +28,15 @@ public abstract class SectionWorker_StyleItemTable<T>(SectionDef def) : SectionW
             if (ShowTableForPawn(pawn))
                 GetCachedTable(pawn, TableItems, OnRowClick, HighlightRow).Draw(r);
             else
-            {
                 using (new TextBlock(TextAnchor.MiddleCenter))
+                {
                     Verse.Widgets.Label(r, "No options available".Colorize(ColoredText.SubtleGrayColor));
-            }
+                }
         };
     }
 
-    private Table<T> GetCachedTable(Pawn pawn, List<T> defs, Action<Pawn, T>? onRowClick = null, Func<Pawn, T, bool>? highlightRow = null)
+    private Table<T> GetCachedTable(Pawn pawn, List<T> defs, Action<Pawn, T>? onRowClick = null,
+        Func<Pawn, T, bool>? highlightRow = null)
     {
         if (_cachedTable == null || !ReferenceEquals(_cachedPawn, pawn))
         {
@@ -46,7 +47,8 @@ public abstract class SectionWorker_StyleItemTable<T>(SectionDef def) : SectionW
         return _cachedTable;
     }
 
-    private static Table<T> ConstructStyleItemTable(Pawn pawn, List<T> defs, Action<Pawn, T>? onRowClick = null, Func<Pawn, T, bool>? highlightRow = null)
+    private static Table<T> ConstructStyleItemTable(Pawn pawn, List<T> defs, Action<Pawn, T>? onRowClick = null,
+        Func<Pawn, T, bool>? highlightRow = null)
     {
         return new Table<T>(
             defs,

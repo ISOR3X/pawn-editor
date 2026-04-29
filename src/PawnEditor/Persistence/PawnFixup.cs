@@ -83,7 +83,15 @@ public static class PawnFixup
     private sealed class IdentityComparer : IEqualityComparer<object>
     {
         internal static readonly IdentityComparer Instance = new();
-        bool IEqualityComparer<object>.Equals(object? x, object? y) => ReferenceEquals(x, y);
-        int IEqualityComparer<object>.GetHashCode(object obj) => RuntimeHelpers.GetHashCode(obj);
+
+        bool IEqualityComparer<object>.Equals(object? x, object? y)
+        {
+            return ReferenceEquals(x, y);
+        }
+
+        int IEqualityComparer<object>.GetHashCode(object obj)
+        {
+            return RuntimeHelpers.GetHashCode(obj);
+        }
     }
 }

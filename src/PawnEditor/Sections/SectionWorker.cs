@@ -1,7 +1,4 @@
-﻿
-using Taffy;
-using UnityEngine;
-using Verse;
+﻿using Verse;
 using Void;
 using Layout = Void.Layout;
 
@@ -17,7 +14,11 @@ public abstract class SectionWorker(SectionDef def)
     }
 
     /// <summary>
-    ///     Override to build section contents. Not called for sections that have a <c><layout></c> - use
+    ///     Override to build section contents. Not called for sections that have a
+    ///     <c>
+    ///         <layout>
+    ///     </c>
+    ///     - use
     ///     <see cref="OnLayout" /> instead.
     /// </summary>
     protected virtual void DoSectionContents(TaffyBuilder builder, Pawn pawn)

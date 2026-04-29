@@ -44,9 +44,9 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             if (backstory != null)
                 Find.WindowStack.Add(new Window_Table<BackstoryDef>(
                     GetBackstoryTable(pawn, slot),
-                    allRows: [.. DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot)],
-                    filters: [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()],
-                    owner: Find.WindowStack.WindowOfType<Window_Editor>(),
+                    [.. DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot)],
+                    [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()],
+                    Find.WindowStack.WindowOfType<Window_Editor>(),
                     selectedItemSlot: (b, i) =>
                     {
                         b.Div(b2 =>
@@ -71,7 +71,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
     private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
     {
         return new Table<BackstoryDef>(
-            rows: null,
+            null,
             [
                 Col.Create<PawnContext>(
                     Void.Taffy.Fr(),

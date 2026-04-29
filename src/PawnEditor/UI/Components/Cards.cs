@@ -1,5 +1,4 @@
-﻿
-using RimWorld;
+﻿using RimWorld;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -8,7 +7,7 @@ using Void.Extensions;
 
 namespace PawnEditor;
 
-public static partial class Widgets
+public static class Widgets
 {
     // TODO: Convert to TaffyPawnCard?
 

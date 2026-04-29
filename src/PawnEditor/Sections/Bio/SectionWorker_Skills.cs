@@ -13,7 +13,7 @@ namespace PawnEditor;
 public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
 {
     /// <summary>
-    /// Based on <see cref="GenUI.DrawSkill"/>
+    ///     Based on <see cref="GenUI.DrawSkill" />
     /// </summary>
     private static readonly Vector2 SkillRectSize = new(230f, 24f);
 
@@ -23,7 +23,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
     private static readonly IntRange PassionRange;
 
     /// <summary>
-    /// List of preset options for skills. Made public so any mod can add onto it.
+    ///     List of preset options for skills. Made public so any mod can add onto it.
     /// </summary>
     public static Func<Pawn, List<FloatMenuOption>> Presets;
 
@@ -38,19 +38,21 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             return
             [
                 new FloatMenuOption("Minimize skill levels",
-                    () => skills.ForEach(sd => UpdateSkill(sd, p, level: s => GetMinMaxForSkill(s).min))),
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, s => GetMinMaxForSkill(s).min))),
                 new FloatMenuOption("Maximize skill levels",
-                    () => skills.ForEach(sd => UpdateSkill(sd, p, level: s => GetMinMaxForSkill(s).max))),
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, s => GetMinMaxForSkill(s).max))),
                 new FloatMenuOption("Randomize skill levels",
-                    () => skills.ForEach(sd => UpdateSkill(sd, p, level: s => GetMinMaxForSkill(s).RandomInRange)), TexPawnEditor.Randomize, Color.white,
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, s => GetMinMaxForSkill(s).RandomInRange)),
+                    TexPawnEditor.Randomize, Color.white,
                     MenuOptionPriority.VeryLow),
                 new FloatMenuOption("Minimize passion levels",
                     () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.min))),
                 new FloatMenuOption("Maximize passion levels",
                     () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.max))),
                 new FloatMenuOption("Randomize passion levels",
-                    () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.RandomInRange)), TexPawnEditor.Randomize, Color.white,
-                    MenuOptionPriority.VeryLow),
+                    () => skills.ForEach(sd => UpdateSkill(sd, p, passion: PassionRange.RandomInRange)),
+                    TexPawnEditor.Randomize, Color.white,
+                    MenuOptionPriority.VeryLow)
             ];
         };
         return;
@@ -66,7 +68,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
     protected override void OnLayout(Layout layout, Pawn pawn)
     {
         var skills = SkillUI.skillDefsInListOrderCached;
-        
+
         layout.ComponentById<DivElement>("skills_grid").Children = b => skills.ForEach(sd => DrawSkill(b, pawn, sd));
         layout.ComponentById<ButtonElement>("presets").OnClick =
             _ => Find.WindowStack.Add(new FloatMenu(Presets(pawn)));
@@ -100,7 +102,9 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                         }
                     });
                 if (skill.TotallyDisabled)
+                {
                     row.Text("-", color: SkillUI.DisabledSkillColor);
+                }
                 else
                 {
                     var level = skill.GetLevel();

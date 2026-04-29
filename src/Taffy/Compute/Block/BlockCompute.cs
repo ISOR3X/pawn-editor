@@ -100,7 +100,7 @@ internal static class BlockCompute
         if (blockCtx != null && !isScrollContainer)
             return ComputeInner(tree, nodeId, updatedInput, blockCtx);
 
-        var rootCtx = new BlockContext(true);
+        var rootCtx = new BlockContext();
         return ComputeInner(tree, nodeId, updatedInput, rootCtx);
     }
 

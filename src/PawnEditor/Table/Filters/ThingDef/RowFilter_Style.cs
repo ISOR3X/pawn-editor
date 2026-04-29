@@ -32,6 +32,8 @@ public class RowFilter_Style() : RowFilter_ToggleableList<ThingDef, StyleCategor
         ];
     }
 
-    protected override IReadOnlyList<StyleCategoryDef>? GetOptions(ThingDef row) =>
-        ThingDefByCategory.GetValueOrDefault(row);
+    protected override IReadOnlyList<StyleCategoryDef>? GetOptions(ThingDef row)
+    {
+        return ThingDefByCategory.GetValueOrDefault(row);
+    }
 }

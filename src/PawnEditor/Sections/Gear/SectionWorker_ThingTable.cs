@@ -29,13 +29,12 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
         btn.Label = $"Add {TableTitle.ToLower()}";
         btn.OnClick = _ => Find.WindowStack.Add(new Window_Table<ThingDef>(
             GetThingDefTable(),
-            allRows:
             [
                 .. DefDatabase<ThingDef>.AllDefs.Where(td =>
                     td.IsApparel && td.apparel.developmentalStageFilter.Has(DevelopmentalStage.Adult))
             ],
-            filters: [new RowFilter_DefContentSource<ThingDef>(), new RowFilter_Style(), new RowFilter_HasStuff()],
-            owner: Find.WindowStack.WindowOfType<Window_Editor>(),
+            [new RowFilter_DefContentSource<ThingDef>(), new RowFilter_Style(), new RowFilter_HasStuff()],
+            Find.WindowStack.WindowOfType<Window_Editor>(),
             selectedItemSlot: (b, i) => { b.Text("Selected: " + (i?.LabelCap ?? "None")); }));
     }
 
@@ -89,17 +88,20 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
     private static Table<ThingDef> GetThingDefTable()
     {
         return new Table<ThingDef>(
-            rows: null,
+            null,
             [
                 Col.Create(
                     Void.Taffy.Px(20f),
-                    (grid, def) => { grid.Item(r =>
+                    (grid, def) =>
                     {
-                        using (new GUIColor(GetShowColorForDef(def)))
+                        grid.Item(r =>
                         {
-                            Verse.Widgets.DefIcon(r, def);
-                        }
-                    }, new StyleOverride {  width = 20f, height = 20f }); }
+                            using (new GUIColor(GetShowColorForDef(def)))
+                            {
+                                Verse.Widgets.DefIcon(r, def);
+                            }
+                        }, new StyleOverride { width = 20f, height = 20f });
+                    }
                 ),
                 Col.CreateText(
                     Void.Taffy.Fr(),

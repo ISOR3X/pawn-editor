@@ -29,8 +29,10 @@ public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
                     if (Verse.Widgets.ButtonInvisible(r)) AppearanceUtility.TrySetHeadType(td, pawn);
 
                     using (new GUIColor(pawn.story.SkinColor))
+                    {
                         Verse.Widgets.DrawTextureFitted(r,
                             td.GetGraphic(pawn, pawn.story.SkinColor).MatSouth.mainTexture, 1.6f);
+                    }
                 }, 64f, style: new StyleOverride { gap = Void.Taffy.Gap(4f) });
         };
         layout.ComponentById<ButtonElement>("next").OnClick = _ => StepBodyType();

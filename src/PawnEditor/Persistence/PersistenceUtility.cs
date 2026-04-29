@@ -7,8 +7,10 @@ public static class PersistenceUtility
     private static string PresetFolder =>
         Path.Combine(GenFilePaths.SaveDataFolderPath, "PawnEditor", "Presets");
 
-    public static string[] GetPresetFiles() =>
-        Directory.Exists(PresetFolder) ? Directory.GetFiles(PresetFolder, "*.xml") : [];
+    public static string[] GetPresetFiles()
+    {
+        return Directory.Exists(PresetFolder) ? Directory.GetFiles(PresetFolder, "*.xml") : [];
+    }
 
     public static void SavePawn(Pawn pawn, string name)
     {

@@ -322,7 +322,10 @@ public readonly struct TrackSizingFunction
     }
 
     /// <summary>True if either the min or max component is a definite length or percentage.</summary>
-    public bool HasFixedComponent() => Min._cl.IsLengthOrPercent() || Max._cl.IsLengthOrPercent();
+    public bool HasFixedComponent()
+    {
+        return Min._cl.IsLengthOrPercent() || Max._cl.IsLengthOrPercent();
+    }
 }
 
 // ── GridLine / OriginZeroLine ─────────────────────────────────────────────
@@ -429,7 +432,7 @@ public readonly struct OriginZeroLine
 
     public ushort ImpliedNegativeImplicitTracks()
     {
-        return Value < 0 ? (ushort)(-Value) : (ushort)0;
+        return Value < 0 ? (ushort)-Value : (ushort)0;
     }
 
     public ushort ImpliedPositiveImplicitTracks(ushort explicitTrackCount)
@@ -506,7 +509,7 @@ public struct TrackCounts : IEquatable<TrackCounts>
 
     public OriginZeroLine ImplicitStartLine()
     {
-        return new OriginZeroLine((short)-(NegativeImplicit));
+        return new OriginZeroLine((short)-NegativeImplicit);
     }
 
     public OriginZeroLine ImplicitEndLine()
@@ -805,8 +808,10 @@ public static class LineOriginZeroExt
     }
 
     /// <summary>
-    ///     Resolves a definite-axis placement to a concrete Line<OriginZeroLine>.
-    ///     Applies CSS Grid conflict rules: swaps if start ≥ end; expands single auto/span end to span 1.
+    ///     Resolves a definite-axis placement to a concrete Line
+    ///     <OriginZeroLine>
+    ///         .
+    ///         Applies CSS Grid conflict rules: swaps if start ≥ end; expands single auto/span end to span 1.
     /// </summary>
     public static Line<OriginZeroLine> ResolveDefiniteGridLines(this Line<OriginZeroGridPlacement> self)
     {

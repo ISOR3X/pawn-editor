@@ -19,7 +19,10 @@ public abstract class XMLComponent
     /// </summary>
     public virtual bool IsLeaf => false;
 
-    public XMLComponent Clone() => (XMLComponent)MemberwiseClone();
+    public XMLComponent Clone()
+    {
+        return (XMLComponent)MemberwiseClone();
+    }
 
 
     /// <summary>

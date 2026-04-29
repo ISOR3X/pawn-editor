@@ -7,7 +7,10 @@ namespace PawnEditor;
 
 public class SectionWorker_EmpireTitle(SectionDef def) : SectionWorker(def)
 {
-    public override bool ShowSection(Pawn p) => base.ShowSection(p) && Faction.OfEmpire != null;
+    public override bool ShowSection(Pawn p)
+    {
+        return base.ShowSection(p) && Faction.OfEmpire != null;
+    }
 
     protected override void OnLayout(Layout layout, Pawn pawn)
     {
@@ -25,7 +28,8 @@ public class SectionWorker_EmpireTitle(SectionDef def) : SectionWorker(def)
                             pawn.royalty.SetTitle(empire, royalTitle, true, false, false);
                             pawn.royalty.ResetPermitsAndPoints(empire, royalTitle);
                         })),
-                new("None".Colorize(ColoredText.SubtleGrayColor), () => { pawn.royalty.SetTitle(empire, null, false, false, false); })
+                new("None".Colorize(ColoredText.SubtleGrayColor),
+                    () => { pawn.royalty.SetTitle(empire, null, false, false, false); })
             ];
             Find.WindowStack.Add(new FloatMenu(opts));
         };

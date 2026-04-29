@@ -38,7 +38,7 @@ public class SectionWorker_Ideology(SectionDef def) : SectionWorker(def)
     }
 
     /// <summary>
-    /// Based on <see cref="IdeoUIUtility.DrawIdeoPlate"/>
+    ///     Based on <see cref="IdeoUIUtility.DrawIdeoPlate" />
     /// </summary>
     private static TaggedString MakeIdeoTooltip(Pawn pawn, Ideo ideo)
     {

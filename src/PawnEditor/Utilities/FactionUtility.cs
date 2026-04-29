@@ -39,7 +39,7 @@ public static class FactionUtility
 
         var editorWindow = Find.WindowStack.Windows.OfType<Window_Editor>().FirstOrDefault();
         if (editorWindow == null) return;
-        
+
         // Explicitly select faction. Just selecting the pawn again fails since it returns when the pawn is already selected.
         editorWindow.TrySelect(faction);
         editorWindow.TrySelect(pawn);

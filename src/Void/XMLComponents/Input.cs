@@ -6,23 +6,20 @@ namespace Void.XMLComponents;
 
 public class InputElement : XMLComponent
 {
-    public Ref? Value;
+    private string _inputType = "text";
     public FloatRange? MinMax;
     public float? Step;
-
-    private string _inputType = "text";
+    public Ref? Value;
 
     public override void ParseXmlAttrs(XmlNode node)
     {
         if (node.Attributes?["type"]?.Value is { } variant)
-        {
             _inputType = variant switch
             {
                 "range" => "range",
                 "number" => "number",
                 _ => _inputType
             };
-        }
     }
 
     public override void Render(TaffyBuilder builder, Action<TaffyBuilder>? children)
@@ -40,20 +37,20 @@ public class InputElement : XMLComponent
                 break;
 
             case "range" when Value is Ref<float> f:
-                builder.InputRange(ref f.Inner, min: resMinMax.min, max: resMinMax.max, step: resStep, style: Style);
+                builder.InputRange(ref f.Inner, resMinMax.min, resMinMax.max, resStep, style: Style);
                 break;
             case "range" when Value is Ref<int> i:
-                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, min: resMinMax.min, max: resMinMax.max,
-                    step: resStep, style: Style);
+                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, resMinMax.min, resMinMax.max,
+                    resStep, style: Style);
                 break;
 
             case "range" when Value is Reactive<float> f:
-                builder.InputRange(() => f.Inner, v => f.Inner = v, min: resMinMax.min, max: resMinMax.max,
-                    step: resStep, style: Style);
+                builder.InputRange(() => f.Inner, v => f.Inner = v, resMinMax.min, resMinMax.max,
+                    resStep, style: Style);
                 break;
             case "range" when Value is Reactive<int> i:
-                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, min: resMinMax.min, max: resMinMax.max,
-                    step: resStep, style: Style);
+                builder.InputRange(() => i.Inner, v => i.Inner = (int)v, resMinMax.min, resMinMax.max,
+                    resStep, style: Style);
                 break;
         }
     }
