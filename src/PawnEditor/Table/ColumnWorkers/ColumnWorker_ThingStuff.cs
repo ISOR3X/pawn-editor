@@ -25,13 +25,19 @@ public class ColumnWorker_ThingStuff<T>(TrackSizingFunction trackSize) : ColumnW
             // Only a single child allowed per column.
             grid.Div(inner =>
             {
+                var t = thing.Stuff.LabelCap;
                 inner.Item(r => Verse.Widgets.ThingIcon(r, thing.Stuff),
                     new StyleOverride
                     {
                         margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapSmall, 0f, 0f),
                         width = GenUI.SmallIconSize
                     });
-                inner.Text(thing.Stuff.LabelCap);
+                inner.Text(t, wrap: false,
+                    onHover: r =>
+                    {
+                        if (Text.CalcSize(t).x > r.width)
+                            TooltipHandler.TipRegion(r, t);
+                    });
             });
     }
 }
