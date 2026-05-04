@@ -34,11 +34,6 @@ public partial class Window_Editor
         if (PawnUtility.GetPawnCategory(pawn) != prevCategory) RecacheTabs();
     }
 
-    public Faction? GetSelectedFaction()
-    {
-        return _selectedFaction;
-    }
-
     private void RecacheTabs()
     {
         _selectedTabDefsFor.Clear();

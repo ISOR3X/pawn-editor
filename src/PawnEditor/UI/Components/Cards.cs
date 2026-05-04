@@ -70,8 +70,11 @@ public static class Widgets
         }
 
         Verse.Widgets.EndGroup();
-        Verse.Widgets.Label(innerRect.TakeTopPart(Text.LineHeight), upperLabel);
-        Verse.Widgets.Label(innerRect.TakeBottomPart(Text.LineHeight), lowerLabel);
+        using (new TextBlock(GameFont.Small))
+        {
+            Verse.Widgets.Label(innerRect.TakeTopPart(Text.LineHeight), upperLabel);
+            Verse.Widgets.Label(innerRect.TakeBottomPart(Text.LineHeight), lowerLabel);
+        }
 
         MouseoverSounds.DoRegion(innerRect);
         Verse.Widgets.EndGroup();

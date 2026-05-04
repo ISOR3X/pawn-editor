@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
-using RimWorld;
 using Verse;
 
 namespace PawnEditor;

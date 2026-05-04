@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using HarmonyLib;
 using RimWorld;
 using Verse;
+using Verse.AI;
 using Verse.AI.Group;
 
 namespace PawnEditor;
@@ -23,6 +24,9 @@ public static class PawnFixup
         pawn.ownership?.UnclaimAll();
     }
 
+    /// <summary>
+    /// Using reflection, find fields that require a loadID and assign a new one.
+    /// </summary>
     public static void ReassignIDs(Pawn pawn)
     {
         var visited = new HashSet<object>(IdentityComparer.Instance);
@@ -67,8 +71,22 @@ public static class PawnFixup
             case Gene g: g.loadID = Find.UniqueIDsManager.GetNextGeneID(); break;
             case Lord l: l.loadID = Find.UniqueIDsManager.GetNextLordID(); break;
             case Bill b: b.loadID = Find.UniqueIDsManager.GetNextBillID(); break;
+            case Job j: j.loadID = Find.UniqueIDsManager.GetNextJobID(); break;
             default:
-                AccessTools.Field(r.GetType(), "loadID")?.SetValue(r, Find.UniqueIDsManager.GetNextThingID()); break;
+                // Default value is used as a fallback, for example in the case that mods add a pawn component with a loadID.
+                var loadIDField = AccessTools.Field(r.GetType(), "loadID");
+                if (loadIDField != null)
+                {
+                    // Log.Warning($"No explicit load id for {r.GetType().Name}");
+                    // Some loadIDs expect a string instead of an int.
+                    var newID = Find.UniqueIDsManager.GetNextThingID();
+                    if (loadIDField.FieldType == typeof(string))
+                        loadIDField.SetValue(r, r.GetType().Name + "_" + newID);
+                    else
+                        loadIDField.SetValue(r, newID);
+                }
+
+                break;
         }
     }
 
@@ -80,6 +98,10 @@ public static class PawnFixup
                 yield return f;
     }
 
+    /// <summary>
+    /// Compare equality using instances instead of values to avoid revisiting nodes.
+    /// The object graph being walked in <see cref="ReassignIDs"/> may hold circular references and this prevents that from the walk looping infinitely.
+    /// </summary>
     private sealed class IdentityComparer : IEqualityComparer<object>
     {
         internal static readonly IdentityComparer Instance = new();
