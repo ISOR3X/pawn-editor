@@ -51,12 +51,10 @@ public partial class Window_Editor : Window
                     out var newSelectedPawn);
                 if (newSelectedPawn != SelectedPawn) TrySelect(newSelectedPawn);
             }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
-            /*
             builder.Button("Save Preset", block: true, disabled: SelectedPawn == null,
                 onClick: _ => SaveSelectedPawn());
             builder.Button("Load Preset", block: true,
                 onClick: _ => ShowLoadPawnMenu());
-            */
         }, new StyleOverride { flexDirection = FlexDirection.Column });
     }
 

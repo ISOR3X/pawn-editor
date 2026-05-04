@@ -13,7 +13,8 @@ public static class IsolatedLoader
         crossRefs.loadedObjectDirectory = new LoadedObjectDirectory();
         try
         {
-            Scribe.loader.FinalizeLoading();
+            using (Log.LockMessages())
+                Scribe.loader.FinalizeLoading();
         }
         finally
         {
