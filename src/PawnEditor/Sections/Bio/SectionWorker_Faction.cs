@@ -24,6 +24,7 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
         layout.ComponentById<ButtonElement>("button").IconColor = color;
         layout.ComponentById<ButtonElement>("button").OnClick = _ =>
         {
+            FloatMenuDeep? parentMenu = null;
             List<FloatMenuOption> opts =
             [
                 ..Find.FactionManager.AllFactionsInViewOrder.Prepend(null).Select(f =>
@@ -35,13 +36,32 @@ public class SectionWorker_Faction(SectionDef def) : SectionWorker(def)
                 }),
                 new("Randomize", () =>
                 {
-                    Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out var f, false);
-                    // TODO(FIXME): Currently raises error when humanlike pawn is added to mechanoid faction.
-                    if (f != null) FactionUtility.SetFaction(pawn, f);
-                    else Messages.Message("No valid faction found", MessageTypeDefOf.RejectInput);
+                    FloatMenuDeep? level2 = null;
+                    level2 = parentMenu!.OpenSubMenu(
+                    [
+                        // TODO: Closes too early when A1a is open and mouse moved away
+                        new("A", () =>
+                        {
+                            FloatMenuDeep? level3 = null;
+                            level3 = level2!.OpenSubMenu(
+                            [
+                                new("A1", () =>
+                                {
+                                    level3!.OpenSubMenu(
+                                    [
+                                        new("A1a", () => Messages.Message("A1a", MessageTypeDefOf.NeutralEvent)),
+                                        new("A1b", () => Messages.Message("A1b", MessageTypeDefOf.NeutralEvent))
+                                    ]);
+                                }),
+                                new("A2", () => Messages.Message("A2", MessageTypeDefOf.NeutralEvent))
+                            ]);
+                        }),
+                        new("B", () => Messages.Message("B", MessageTypeDefOf.NeutralEvent))
+                    ]);
                 }, TexPawnEditor.Randomize, Color.white, MenuOptionPriority.VeryLow)
             ];
-            Find.WindowStack.Add(new FloatMenu(opts));
+            parentMenu = new FloatMenuDeep(opts);
+            Find.WindowStack.Add(parentMenu);
         };
         layout.ComponentById<ButtonElement>("button").OnHover = r =>
         {
