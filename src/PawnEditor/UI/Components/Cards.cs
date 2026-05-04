@@ -77,6 +77,13 @@ public static class Widgets
         Verse.Widgets.EndGroup();
     }
 
+    /*
+    public static void DrawReorderablePawnList(Rect inRect, List<Pawn> pawns, Action<Pawn> onClick, Action<Pawn> onDelete, Action<Pawn> onDoubleClick,x
+        Func<Pawn, bool> doHighlight)
+    {
+
+    }
+    */
 
     // TODO: Clean up
     public static void DrawReorderablePawnList(Rect inRect, List<Pawn> pawns, Pawn? selectedPawn,
