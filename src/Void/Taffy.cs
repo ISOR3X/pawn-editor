@@ -133,14 +133,24 @@ public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? 
 /// </summary>
 public static class Taffy
 {
+    private record MeasuredLayoutCacheEntry(
+        TaffyTree Tree,
+        NodeId Root,
+        Dictionary<NodeId, Action<Rect>?> Lookup,
+        float Height,
+        float Width,
+        string StyleKey);
+
+    private static readonly Dictionary<int, MeasuredLayoutCacheEntry> LayoutCache = [];
+
     #region ENTRY POINTS
 
     /// <summary>
     ///     RimWorld entry point for the Taffy layout engine.
     /// </summary>
-    public static void Div(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+    public static void Div(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null, bool forceRecache = false)
     {
-        Execute(rect, (style ?? new StyleOverride()).Resolve(), build);
+        Execute(rect, (style ?? new StyleOverride()).Resolve(), build, uniqueId, forceRecache);
     }
 
     #endregion
@@ -150,13 +160,26 @@ public static class Taffy
     ///     and returns the computed content height. Used for scrollable containers where
     ///     the natural content height drives the scroll view size.
     /// </summary>
-    public static float DivMeasured(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+    public static float DivMeasured(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null, bool forceRecache = false)
     {
-        return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
+        return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build, uniqueId, forceRecache);
     }
 
-    private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId,
+        bool forceRecache)
     {
+        var styleKey = DescribeStyle(rootStyle);
+        if (!forceRecache &&
+            LayoutCache.TryGetValue(uniqueId, out var cached) &&
+            Mathf.Approximately(cached.Width, rect.width) &&
+            cached.StyleKey == styleKey)
+        {
+            DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
+            if (GUI.changed) 
+                LayoutCache.Clear();
+            return cached.Height;
+        }
+
         var tree = new TaffyTree();
         var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
         // Width is definite; height is AUTO so the engine sizes to content
@@ -173,8 +196,20 @@ public static class Taffy
                     : SizeF.ZERO);
         var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
         foreach (var (id, draw) in callbacks) lookup[id] = draw;
+
+        var height = tree.Layout(root).Size.Height;
+        LayoutCache[uniqueId] = new MeasuredLayoutCacheEntry(
+            tree,
+            root,
+            lookup,
+            height,
+            rect.width,
+            styleKey);
+
         DrawTree(tree, root, rect.x, rect.y, lookup);
-        return tree.Layout(root).Size.Height;
+        if (GUI.changed) 
+            LayoutCache.Clear();
+        return height;
     }
 
     #region STYLE HELPERS
@@ -235,8 +270,24 @@ public static class Taffy
 
     #region CORE
 
-    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId, bool forceRecache)
     {
+
+        var styleKey = DescribeStyle(rootStyle);
+        if (!forceRecache &&
+            LayoutCache.TryGetValue(uniqueId, out var cached) &&
+            Mathf.Approximately(cached.Width, rect.width) &&
+            cached.StyleKey == styleKey)
+        {
+            DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
+            if (GUI.changed) 
+                LayoutCache.Clear();
+            return;
+        }
+        else
+        {
+            Log.Message($"UniqueId: {uniqueId}\nWidth: {rect.width}\nStyle: {styleKey}");
+        }
         var tree = new TaffyTree();
         var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
 
@@ -262,7 +313,65 @@ public static class Taffy
         foreach (var entry in callbacks)
             lookup[entry.id] = entry.draw;
 
+        LayoutCache[uniqueId] = new MeasuredLayoutCacheEntry(
+            tree,
+            root,
+            lookup,
+            0,
+            rect.width,
+            styleKey);
+
         DrawTree(tree, root, rect.x, rect.y, lookup);
+        if (GUI.changed)
+            LayoutCache.Clear();
+    }
+
+    private static string DescribeStyle(Style style)
+    {
+        return string.Join(";", [
+            style.display.ToString(),
+            style.flexDirection.ToString(),
+            style.flexWrap.ToString(),
+            style.flexBasis.ToString(),
+            style.flexGrow.ToString(),
+            style.flexShrink.ToString(),
+            style.size.Width.ToString(),
+            style.size.Height.ToString(),
+            style.minSize.Width.ToString(),
+            style.minSize.Height.ToString(),
+            style.maxSize.Width.ToString(),
+            style.maxSize.Height.ToString(),
+            style.margin.Left.ToString(),
+            style.margin.Right.ToString(),
+            style.margin.Top.ToString(),
+            style.margin.Bottom.ToString(),
+            style.padding.Left.ToString(),
+            style.padding.Right.ToString(),
+            style.padding.Top.ToString(),
+            style.padding.Bottom.ToString(),
+            style.alignItems?.ToString() ?? "-",
+            style.alignSelf?.ToString() ?? "-",
+            style.justifyItems?.ToString() ?? "-",
+            style.justifySelf?.ToString() ?? "-",
+            style.alignContent?.ToString() ?? "-",
+            style.justifyContent?.ToString() ?? "-",
+            style.gap.Width.ToString(),
+            style.gap.Height.ToString(),
+            DescribeSequence(style.gridTemplateColumns),
+            DescribeSequence(style.gridTemplateRows),
+            DescribeSequence(style.gridAutoColumns),
+            DescribeSequence(style.gridAutoRows),
+            style.gridAutoFlow.ToString(),
+            style.gridColumn.Start.ToString(),
+            style.gridColumn.End.ToString(),
+            style.gridRow.Start.ToString(),
+            style.gridRow.End.ToString()
+        ]);
+    }
+
+    private static string DescribeSequence<T>(IEnumerable<T>? values)
+    {
+        return values == null ? "-" : string.Join("|", values);
     }
 
     private static void DrawTree(TaffyTree tree, NodeId node, float originX, float originY,

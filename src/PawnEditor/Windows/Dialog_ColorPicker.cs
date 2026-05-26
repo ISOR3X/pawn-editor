@@ -36,7 +36,7 @@ public class Dialog_ColorPicker : Window
 
     public override void DoWindowContents(Rect inRect)
     {
-        Void.Taffy.Div(inRect, builder =>
+        Void.Taffy.Div(ID, inRect, builder =>
         {
             builder.Text("Choose a color", style: new StyleOverride { fontSize = GameFont.Medium });
             builder.Div(contentBuilder =>

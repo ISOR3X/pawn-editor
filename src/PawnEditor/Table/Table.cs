@@ -9,16 +9,7 @@ using Display = Taffy.Display;
 
 namespace PawnEditor.Table;
 
-public class Table<TRow>(
-    IEnumerable<TRow>? rows,
-    IReadOnlyList<ColumnWorker<TRow>> columns,
-    IContext? context = null,
-    Action<Rect, TRow, IContext?>? onRowHover = null,
-    Action<TRow?>? onRowClick = null,
-    Func<TRow, bool>? highlightRow = null,
-    Func<TRow, string>? searchProjection = null,
-    float rowHeight = 30f
-)
+public class Table<TRow>
 {
     private const float HeaderHeight = UIUtility.ButtonHeight;
     private const float FooterHeight = UIUtility.ButtonHeight;
@@ -27,16 +18,46 @@ public class Table<TRow>(
     // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
     // In a virtualized table only a subset of rows is rendered each frame, so the
     // auto minimum causes columns to resize as different content scrolls into view.
-    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks =
-        [.. columns.Select(c => NormalizeTrack(c.TrackSize))];
+    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks;
 
-    private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
+    private readonly QuickSearchWidget? _searchWidget;
 
     private bool _dirty = true;
-    private IEnumerable<TRow> _rows = rows ?? [];
+    private IEnumerable<TRow> _rows;
     private Vector2 _scrollPosition;
     private bool _sortDescending;
     private ColumnWorker<TRow>? _sortingBy;
+    private readonly IReadOnlyList<ColumnWorker<TRow>> _columns;
+    private readonly IContext? _context;
+    private readonly Action<Rect, TRow, IContext?>? _onRowHover;
+    private readonly Action<TRow?>? _onRowClick;
+    private readonly Func<TRow, bool>? _highlightRow;
+    private readonly Func<TRow, string>? _searchProjection;
+    private readonly float _rowHeight;
+    private readonly int _uniqueId;
+
+    public Table(IEnumerable<TRow>? rows,
+        IReadOnlyList<ColumnWorker<TRow>> columns,
+        IContext? context = null,
+        Action<Rect, TRow, IContext?>? onRowHover = null,
+        Action<TRow?>? onRowClick = null,
+        Func<TRow, bool>? highlightRow = null,
+        Func<TRow, string>? searchProjection = null,
+        float rowHeight = 30f)
+    {
+        _columns = columns;
+        _context = context;
+        _onRowHover = onRowHover;
+        _onRowClick = onRowClick;
+        _highlightRow = highlightRow;
+        _searchProjection = searchProjection;
+        _rowHeight = rowHeight;
+        _columnTracks = [.. columns.Select(c => NormalizeTrack(c.TrackSize))];
+        _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
+        _rows = rows ?? [];
+        _uniqueId = typeof(TRow).GetHashCode() + context?.HashCode ?? 0;
+
+    }
 
     public TRow? SelectedItem { get; private set; }
 
@@ -80,6 +101,7 @@ public class Table<TRow>(
         if (Event.current.type == EventType.Layout)
             return;
 
+        var forceRecache = _dirty;
         if (_dirty)
         {
             _dirty = false;
@@ -105,9 +127,9 @@ public class Table<TRow>(
             headerRect.height);
 
 
-        Void.Taffy.Div(headerContentRect, b =>
+        Void.Taffy.Div(_uniqueId, headerContentRect, b =>
         {
-            foreach (var col in columns)
+            foreach (var col in _columns)
                 b.Item(colRect =>
                 {
                     col.DrawHeader(colRect);
@@ -141,7 +163,7 @@ public class Table<TRow>(
             gridTemplateColumns = [.._columnTracks],
             gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
             gridAutoRows = [TrackSizingFunction.Px(HeaderHeight)]
-        });
+        }, forceRecache: forceRecache);
 
         using (new GUIColor(PawnTable.BorderColor))
         {
@@ -153,7 +175,7 @@ public class Table<TRow>(
         #region SCROLL VIEW
 
         var contentHeight = _cachedFilteredRows.Count > 0
-            ? _cachedFilteredRows.Count * rowHeight
+            ? _cachedFilteredRows.Count * _rowHeight
             : UIUtility.ButtonHeight;
         var viewRect = new Rect(0f, 0f, r.width - UIUtility.ScrollBarWidth, contentHeight);
 
@@ -172,44 +194,44 @@ public class Table<TRow>(
             var visibleTop = _scrollPosition.y;
             var visibleBottom = _scrollPosition.y + r.height;
 
-            var firstVisible = Math.Max(0, (int)(visibleTop / rowHeight));
-            var lastVisible = Math.Min(_cachedFilteredRows.Count - 1, (int)(visibleBottom / rowHeight));
+            var firstVisible = Math.Max(0, (int)(visibleTop / _rowHeight));
+            var lastVisible = Math.Min(_cachedFilteredRows.Count - 1, (int)(visibleBottom / _rowHeight));
 
             // Row backgrounds and interaction
             for (var i = firstVisible; i <= lastVisible; i++)
             {
                 var row = _cachedFilteredRows[i];
-                var rowRect = new Rect(0f, i * rowHeight, viewRect.width, rowHeight);
+                var rowRect = new Rect(0f, i * _rowHeight, viewRect.width, _rowHeight);
 
-                if (highlightRow?.Invoke(row) ?? false)
+                if (_highlightRow?.Invoke(row) ?? false)
                     Verse.Widgets.DrawHighlightSelected(rowRect);
                 else if (i % 2 == 1)
                     Verse.Widgets.DrawLightHighlight(rowRect);
 
                 Verse.Widgets.DrawHighlightIfMouseover(rowRect);
                 MouseoverSounds.DoRegion(rowRect);
-                onRowHover?.Invoke(rowRect, row, context);
+                _onRowHover?.Invoke(rowRect, row, _context);
 
                 if (Event.current.type == EventType.MouseDown && rowRect.Contains(Event.current.mousePosition))
                 {
                     SelectedItem = row;
-                    onRowClick?.Invoke(row);
+                    _onRowClick?.Invoke(row);
                     SoundDefOf.Click.PlayOneShotOnCamera();
                 }
             }
 
             // Cell content - one CSS Grid layout pass for all visible cells
-            var gridRect = new Rect(0f, firstVisible * rowHeight,
-                viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
+            var gridRect = new Rect(0f, firstVisible * _rowHeight,
+                viewRect.width, (lastVisible - firstVisible + 1) * _rowHeight);
 
-            Void.Taffy.Div(gridRect, b =>
+            Void.Taffy.Div(_uniqueId + 1, gridRect, b =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {
                     var row = _cachedFilteredRows[i];
-                    foreach (var col in columns)
-                        if (col is IContextColumn<TRow> ctxCol && context != null)
-                            ctxCol.DrawCell(b, row, context);
+                    foreach (var col in _columns)
+                        if (col is IContextColumn<TRow> ctxCol && _context != null)
+                            ctxCol.DrawCell(b, row, _context);
                         else
                             col.DrawCell(b, row);
                 }
@@ -219,7 +241,7 @@ public class Table<TRow>(
                 gridTemplateColumns = [.._columnTracks],
                 gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
                 alignItems = AlignItems.Center,
-                gridAutoRows = [TrackSizingFunction.Px(rowHeight)]
+                gridAutoRows = [TrackSizingFunction.Px(_rowHeight)]
             });
         }
 
@@ -234,8 +256,8 @@ public class Table<TRow>(
         var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             minWidth = 400f,
-            minHeight = chrome + rowHeight,
-            height = chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * rowHeight,
+            minHeight = chrome + _rowHeight,
+            height = chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * _rowHeight,
             width = Dimension.Percent(1)
         });
 
@@ -267,9 +289,9 @@ public class Table<TRow>(
         var searchText = _searchWidget?.filter.Text;
         foreach (var row in _rows)
         {
-            if (!searchText.NullOrEmpty() && searchProjection != null)
+            if (!searchText.NullOrEmpty() && _searchProjection != null)
             {
-                var text = searchProjection(row);
+                var text = _searchProjection(row);
                 if (text == null || text.IndexOf(searchText!, StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
             }

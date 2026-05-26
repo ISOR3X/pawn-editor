@@ -23,12 +23,16 @@ public abstract class TabWorker(TabDef def)
     {
         var r = inRect.ContractedBy(16f);
         Verse.Widgets.BeginGroup(r);
+
         var contentRect = r.AtZero();
         var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0;
         var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
+
         Verse.Widgets.BeginScrollView(contentRect, ref _tabScrollPosition, viewRect);
+
         var rootStyle = Def.layout?.Props.Style.Merge(DefaultRootStyle) ?? DefaultRootStyle;
-        _viewRectHeight = Void.Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), rootStyle);
+        _viewRectHeight = Void.Taffy.DivMeasured(Def.defNameHash + context?.HashCode ?? 0, viewRect, col => DoInnerTabContents(col, context), rootStyle);
+
         Verse.Widgets.EndScrollView();
         Verse.Widgets.EndGroup();
     }
