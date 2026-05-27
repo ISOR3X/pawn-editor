@@ -15,11 +15,11 @@ jobs:
         with:
           version: "0.11.16"
       - name: Update stable issues
-        run: uv run script/collect_issues.py --label stable --issue-number 129
+        run: uv run scripts/collect_issues.py --label stable --issue-number 129
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update rewrite issues
-        run: uv run script/collect_issues.py --label rewrite --issue-number 130
+        run: uv run scripts/collect_issues.py --label rewrite --issue-number 130
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
