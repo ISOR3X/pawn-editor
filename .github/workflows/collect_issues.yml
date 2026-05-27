@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
-  update:
+  collect-issues:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

@@ -2,9 +2,10 @@ name: Build
 
 on:
   push:
-    branches: [main, "feat/**"]
-  pull_request:
-    branches: [main]
+    branches: ["feat/**"]
+    paths:
+      - "data/**"
+      - "src/**"
 
 jobs:
   build:
