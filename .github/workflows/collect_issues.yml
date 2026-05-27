@@ -1,0 +1,25 @@
+name: Collect issues
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"  # Every Monday at midnight UTC
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.16"
+      - name: Update stable issues
+        run: uv run script/update_label_issues.py --label stable --issue-number 129
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update rewrite issues
+        run: uv run script/update_label_issues.py --label rewrite --issue-number 130
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
