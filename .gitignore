@@ -36,3 +36,4 @@ rider.project.model.nuget.info
 dlldata.c
 
 .claude/
+.ruff_cache/
