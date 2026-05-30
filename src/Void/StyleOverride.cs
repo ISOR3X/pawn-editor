@@ -1,55 +1,69 @@
-﻿using Taffy;
+using Taffy;
 using UnityEngine;
 using Verse;
-using Display = Taffy.Display;
 
 namespace Void;
 
 /// <summary>
-///     A near 1:1 copy of <see cref="Style" />, but with each field nullable.
-///     This allows use to override each field when we want to, but resolve back to the default value in Style when unset.
-///     Fields irrelevant to the usage of Taffy in RimWorld are removed.
-///     Documentation for each field can be read in <see cref="Style" />
+///     Four <see cref="TaffyDimension"/> values representing the four edges of a box (padding/margin/inset).
+/// </summary>
+public readonly record struct TaffyEdges(TaffyDimension Top, TaffyDimension Right, TaffyDimension Bottom, TaffyDimension Left)
+{
+    public TaffyEdges(TaffyDimension all) : this(all, all, all, all) { }
+}
+
+/// <summary>
+///     Two <see cref="TaffyDimension"/> values representing column and row gap.
+/// </summary>
+public readonly record struct TaffyGap(TaffyDimension Column, TaffyDimension Row)
+{
+    public TaffyGap(TaffyDimension all) : this(all, all) { }
+}
+
+/// <summary>
+///     A near 1:1 copy of <see cref="TaffyStyleRef" /> with every field nullable, so callers can
+///     override only the fields they care about and fall back to defaults for the rest.
+///     Fields irrelevant to RimWorld usage are removed.
 /// </summary>
 public class StyleOverride
 {
-    public AlignContent? alignContent;
-    public AlignItems? alignItems;
-    public AlignItems? alignSelf;
-    public Color? backgroundColor;
-
-    // Not used by Taffy, but internally so we can easily apply background and text colors.
+    // Not used by Taffy — stored here so UI code can read colors alongside layout.
     public Color? color;
-    public Display? display;
-    public Dimension? flexBasis;
-    public FlexDirection? flexDirection;
+    public Color? backgroundColor;
+    public GameFont? fontSize;
+
+    public TaffyAlignContent? alignContent;
+    public TaffyAlignItems? alignItems;
+    public TaffyAlignItems? alignSelf;
+    public TaffyDisplay? display;
+    public TaffyDimension? flexBasis;
+    public TaffyFlexDirection? flexDirection;
     public float? flexGrow;
     public float? flexShrink;
-    public FlexWrap? flexWrap;
-    public GameFont? fontSize;
-    public Size<LengthPercentage>? gap;
-    public List<TrackSizingFunction>? gridAutoColumns;
-    public GridAutoFlow? gridAutoFlow;
-    public List<TrackSizingFunction>? gridAutoRows;
-    public Line<GridPlacement>? gridColumn;
-    public Line<GridPlacement>? gridRow;
-    public List<GridTemplateComponent>? gridTemplateColumns;
-    public List<GridTemplateComponent>? gridTemplateRows;
-    public Dimension? height;
-    public AlignContent? justifyContent;
-    public AlignItems? justifyItems;
-    public AlignItems? justifySelf;
-    public Rect<LengthPercentageAuto>? margin;
-    public Dimension? maxHeight;
-    public Dimension? maxWidth;
-    public Dimension? minHeight;
-    public Dimension? minWidth;
-    public Rect<LengthPercentage>? padding;
-    public Dimension? width;
+    public TaffyFlexWrap? flexWrap;
+    public TaffyGap? gap;
+    public TaffyTrackSizingFunction[]? gridAutoColumns;
+    public TaffyGridAutoFlow? gridAutoFlow;
+    public TaffyTrackSizingFunction[]? gridAutoRows;
+    public TaffyGridPlacement? gridColumn;
+    public TaffyGridPlacement? gridRow;
+    public TaffyTrackSizingFunction[]? gridTemplateColumns;
+    public TaffyTrackSizingFunction[]? gridTemplateRows;
+    public TaffyDimension? height;
+    public TaffyAlignContent? justifyContent;
+    public TaffyAlignItems? justifyItems;
+    public TaffyAlignItems? justifySelf;
+    public TaffyEdges? margin;
+    public TaffyDimension? maxHeight;
+    public TaffyDimension? maxWidth;
+    public TaffyDimension? minHeight;
+    public TaffyDimension? minWidth;
+    public TaffyEdges? padding;
+    public TaffyDimension? width;
 
     /// <summary>
     ///     Returns a new <see cref="StyleOverride" /> where each field is taken from this instance
-    ///     when explicitly set (non-null), or from <paramref name="fallback" /> otherwise.
+    ///     when non-null, or from <paramref name="fallback" /> otherwise.
     /// </summary>
     public StyleOverride Merge(StyleOverride fallback)
     {
@@ -90,36 +104,54 @@ public class StyleOverride
         };
     }
 
-    public Style Resolve()
+    /// <summary>
+    ///     Applies all non-null fields to <paramref name="s" />.
+    /// </summary>
+    public unsafe void Apply(TaffyStyleRef s)
     {
-        var def = new Style(); // Defaults
-        return new Style
+        if (display.HasValue) s.Display = display.Value;
+        if (flexDirection.HasValue) s.FlexDirection = flexDirection.Value;
+        if (flexWrap.HasValue) s.FlexWrap = flexWrap.Value;
+        if (flexGrow.HasValue) s.FlexGrow = flexGrow.Value;
+        if (flexShrink.HasValue) s.FlexShrink = flexShrink.Value;
+        if (flexBasis.HasValue) s.FlexBasis = flexBasis.Value;
+        if (alignItems.HasValue) s.AlignItems = alignItems;
+        if (alignSelf.HasValue) s.AlignSelf = alignSelf;
+        if (alignContent.HasValue) s.AlignContent = alignContent;
+        if (justifyContent.HasValue) s.JustifyContent = justifyContent;
+        if (justifyItems.HasValue) s.JustifyItems = justifyItems;
+        if (justifySelf.HasValue) s.JustifySelf = justifySelf;
+        if (width.HasValue) s.Width = width.Value;
+        if (height.HasValue) s.Height = height.Value;
+        if (minWidth.HasValue) s.MinWidth = minWidth.Value;
+        if (minHeight.HasValue) s.MinHeight = minHeight.Value;
+        if (maxWidth.HasValue) s.MaxWidth = maxWidth.Value;
+        if (maxHeight.HasValue) s.MaxHeight = maxHeight.Value;
+        if (gap.HasValue)
         {
-            display = display ?? def.display,
-            size = new Size<Dimension>(width ?? def.size.Width, height ?? def.size.Height),
-            minSize = new Size<Dimension>(minWidth ?? def.minSize.Width, minHeight ?? def.minSize.Height),
-            maxSize = new Size<Dimension>(maxWidth ?? def.maxSize.Width, maxHeight ?? def.maxSize.Height),
-            margin = margin ?? def.margin,
-            padding = padding ?? def.padding,
-            alignItems = alignItems,
-            alignSelf = alignSelf,
-            justifyItems = justifyItems,
-            justifySelf = justifySelf,
-            alignContent = alignContent,
-            justifyContent = justifyContent,
-            gap = gap ?? def.gap,
-            flexDirection = flexDirection ?? def.flexDirection,
-            flexWrap = flexWrap ?? def.flexWrap,
-            flexBasis = flexBasis ?? def.flexBasis,
-            flexGrow = flexGrow ?? def.flexGrow,
-            flexShrink = flexShrink ?? def.flexShrink,
-            gridTemplateColumns = gridTemplateColumns,
-            gridTemplateRows = gridTemplateRows,
-            gridAutoColumns = gridAutoColumns ?? def.gridAutoColumns,
-            gridAutoRows = gridAutoRows ?? def.gridAutoRows,
-            gridAutoFlow = gridAutoFlow ?? def.gridAutoFlow,
-            gridColumn = gridColumn ?? def.gridColumn,
-            gridRow = gridRow ?? def.gridRow
-        };
+            s.ColumnGap = gap.Value.Column;
+            s.RowGap = gap.Value.Row;
+        }
+        if (padding.HasValue)
+        {
+            s.PaddingTop = padding.Value.Top;
+            s.PaddingRight = padding.Value.Right;
+            s.PaddingBottom = padding.Value.Bottom;
+            s.PaddingLeft = padding.Value.Left;
+        }
+        if (margin.HasValue)
+        {
+            s.MarginTop = margin.Value.Top;
+            s.MarginRight = margin.Value.Right;
+            s.MarginBottom = margin.Value.Bottom;
+            s.MarginLeft = margin.Value.Left;
+        }
+        if (gridAutoFlow.HasValue) s.GridAutoFlow = gridAutoFlow.Value;
+        if (gridColumn.HasValue) s.GridColumn = gridColumn.Value;
+        if (gridRow.HasValue) s.GridRow = gridRow.Value;
+        if (gridTemplateColumns != null) s.SetGridTemplateColumns(gridTemplateColumns);
+        if (gridTemplateRows != null) s.SetGridTemplateRows(gridTemplateRows);
+        if (gridAutoColumns != null) s.SetGridAutoColumns(gridAutoColumns);
+        if (gridAutoRows != null) s.SetGridAutoRows(gridAutoRows);
     }
 }

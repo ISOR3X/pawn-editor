@@ -50,7 +50,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             new StyleOverride
             {
                 padding = Void.Taffy.Padding(5f),
-                height = Dimension.AUTO
+                height = Dimension.Auto()
             });
     }
 
@@ -66,7 +66,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                         DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
                 else
                     traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor,
-                        style: new StyleOverride { height = 34f });
+                        style: new StyleOverride { height = Dimension.Px(34f) });
             };
     }
 

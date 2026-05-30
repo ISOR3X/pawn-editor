@@ -72,90 +72,80 @@ public static class TaffyStyleParser
                 break;
             case "gap":
             {
-                var v = LengthPercentage.Length(ParsePx(value));
-                target.gap = new Size<LengthPercentage>(v, v);
+                var v = Dimension.Px(ParsePx(value));
+                target.gap = new TaffyGap(v);
                 break;
             }
             case "column-gap":
             {
-                var g = target.gap ?? SLP_Zero();
-                g.Width = LengthPercentage.Length(ParsePx(value));
-                target.gap = g;
+                var g = target.gap ?? default;
+                target.gap = new TaffyGap(Dimension.Px(ParsePx(value)), g.Row);
                 break;
             }
             case "row-gap":
             {
-                var g = target.gap ?? SLP_Zero();
-                g.Height = LengthPercentage.Length(ParsePx(value));
-                target.gap = g;
+                var g = target.gap ?? default;
+                target.gap = new TaffyGap(g.Column, Dimension.Px(ParsePx(value)));
                 break;
             }
             case "padding":
             {
-                var v = LengthPercentage.Length(ParsePx(value));
-                target.padding = new Rect<LengthPercentage>(v, v, v, v);
+                var v = Dimension.Px(ParsePx(value));
+                target.padding = new TaffyEdges(v);
                 break;
             }
             case "padding-top":
             {
-                var p = target.padding ?? LP_Zero();
-                p.Top = LengthPercentage.Length(ParsePx(value));
-                target.padding = p;
+                var p = target.padding ?? default;
+                target.padding = p with { Top = Dimension.Px(ParsePx(value)) };
                 break;
             }
             case "padding-right":
             {
-                var p = target.padding ?? LP_Zero();
-                p.Right = LengthPercentage.Length(ParsePx(value));
-                target.padding = p;
+                var p = target.padding ?? default;
+                target.padding = p with { Right = Dimension.Px(ParsePx(value)) };
                 break;
             }
             case "padding-bottom":
             {
-                var p = target.padding ?? LP_Zero();
-                p.Bottom = LengthPercentage.Length(ParsePx(value));
-                target.padding = p;
+                var p = target.padding ?? default;
+                target.padding = p with { Bottom = Dimension.Px(ParsePx(value)) };
                 break;
             }
             case "padding-left":
             {
-                var p = target.padding ?? LP_Zero();
-                p.Left = LengthPercentage.Length(ParsePx(value));
-                target.padding = p;
+                var p = target.padding ?? default;
+                target.padding = p with { Left = Dimension.Px(ParsePx(value)) };
                 break;
             }
             case "margin":
             {
-                var v = LengthPercentageAuto.Length(ParsePx(value));
-                target.margin = new Rect<LengthPercentageAuto>(v, v, v, v);
+                var v = ParseMarginDimension(value);
+                target.margin = new TaffyEdges(v);
                 break;
             }
             case "margin-top":
             {
-                var m = target.margin ?? LPA_Zero();
-                m.Top = ParseLPA(value);
-                target.margin = m;
+                var m = target.margin ?? default;
+                target.margin = m with { Top = ParseMarginDimension(value) };
                 break;
             }
             case "margin-right":
             {
-                var m = target.margin ?? LPA_Zero();
-                m.Right = ParseLPA(value);
-                target.margin = m;
+                var m = target.margin ?? default;
+                target.margin = m with { Right = ParseMarginDimension(value) };
                 break;
             }
             case "margin-bottom":
             {
-                var m = target.margin ?? LPA_Zero();
-                m.Bottom = ParseLPA(value);
-                target.margin = m;
+                var m = target.margin ?? default;
+                target.margin = m with { Bottom = ParseMarginDimension(value) };
                 break;
             }
             case "margin-left":
             {
-                var m = target.margin ?? LPA_Zero();
-                m.Left = ParseLPA(value);
-                target.margin = m;
+                var m = target.margin ?? default;
+                target.margin = m with { Left = ParseMarginDimension(value) };
                 break;
             }
             case "align-items":
@@ -185,28 +175,28 @@ public static class TaffyStyleParser
             case "grid-column-start":
             {
                 var gc = target.gridColumn ?? default;
-                gc.Start = ParseGridPlacement(value);
+                SetGridStart(ref gc, value);
                 target.gridColumn = gc;
                 break;
             }
             case "grid-column-end":
             {
                 var gc = target.gridColumn ?? default;
-                gc.End = ParseGridPlacement(value);
+                SetGridEnd(ref gc, value);
                 target.gridColumn = gc;
                 break;
             }
             case "grid-row-start":
             {
                 var gr = target.gridRow ?? default;
-                gr.Start = ParseGridPlacement(value);
+                SetGridStart(ref gr, value);
                 target.gridRow = gr;
                 break;
             }
             case "grid-row-end":
             {
                 var gr = target.gridRow ?? default;
-                gr.End = ParseGridPlacement(value);
+                SetGridEnd(ref gr, value);
                 target.gridRow = gr;
                 break;
             }
@@ -216,25 +206,6 @@ public static class TaffyStyleParser
             default:
                 Log.Warning($"[{VoidMod.ModName}] Unknown style property '{name}', skipping.");
                 break;
-        }
-
-        return;
-
-        Rect<LengthPercentageAuto> LPA_Zero()
-        {
-            return new Rect<LengthPercentageAuto>(LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO,
-                LengthPercentageAuto.ZERO, LengthPercentageAuto.ZERO);
-        }
-
-        Rect<LengthPercentage> LP_Zero()
-        {
-            return new Rect<LengthPercentage>(LengthPercentage.ZERO, LengthPercentage.ZERO,
-                LengthPercentage.ZERO, LengthPercentage.ZERO);
-        }
-
-        Size<LengthPercentage> SLP_Zero()
-        {
-            return new Size<LengthPercentage>(LengthPercentage.ZERO, LengthPercentage.ZERO);
         }
     }
 
@@ -261,108 +232,107 @@ public static class TaffyStyleParser
         return float.Parse(s, CultureInfo.InvariantCulture);
     }
 
-    private static Dimension ParseDimension(string s)
+    private static TaffyDimension ParseDimension(string s)
     {
-        if (s == "auto") return Dimension.AUTO;
+        if (s == "auto") return Dimension.Auto();
         if (s.EndsWith("%", StringComparison.Ordinal))
             return Dimension.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
         if (s.EndsWith("px", StringComparison.Ordinal))
-            return Dimension.Length(float.Parse(s[..^2], CultureInfo.InvariantCulture));
-        return Dimension.Length(float.Parse(s, CultureInfo.InvariantCulture));
+            return Dimension.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture));
+        return Dimension.Px(float.Parse(s, CultureInfo.InvariantCulture));
     }
 
-    // max-width/max-height: "none" maps to AUTO (unconstrained).
-    private static Dimension ParseMaxDimension(string s)
+    // max-width / max-height: "none" maps to Auto (unconstrained).
+    private static TaffyDimension ParseMaxDimension(string s)
     {
-        if (s == "none") return Dimension.AUTO;
+        if (s == "none") return Dimension.Auto();
         return ParseDimension(s);
     }
 
-    private static LengthPercentageAuto ParseLPA(string s)
+    private static TaffyDimension ParseMarginDimension(string s)
     {
-        if (s == "auto") return LengthPercentageAuto.AUTO;
+        if (s == "auto") return Dimension.Auto();
         if (s.EndsWith("%", StringComparison.Ordinal))
-            return LengthPercentageAuto.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
-        return LengthPercentageAuto.Length(ParsePx(s));
+            return Dimension.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
+        return Dimension.Px(ParsePx(s));
     }
 
-    private static Display ParseDisplay(string s)
+    private static TaffyDisplay ParseDisplay(string s)
     {
         return s switch
         {
-            "flex" => Display.Flex,
-            "grid" => Display.Grid,
-            "block" => Display.Block,
-            "none" => Display.None,
-            _ => Display.Flex
+            "flex" => TaffyDisplay.Flex,
+            "grid" => TaffyDisplay.Grid,
+            "block" => TaffyDisplay.Block,
+            "none" => TaffyDisplay.None,
+            _ => TaffyDisplay.Flex
         };
     }
 
-    private static FlexDirection ParseFlexDirection(string s)
+    private static TaffyFlexDirection ParseFlexDirection(string s)
     {
         return s switch
         {
-            "row" => FlexDirection.Row,
-            "column" => FlexDirection.Column,
-            "row-reverse" => FlexDirection.RowReverse,
-            "column-reverse" => FlexDirection.ColumnReverse,
-            _ => FlexDirection.Row
+            "row" => TaffyFlexDirection.Row,
+            "column" => TaffyFlexDirection.Column,
+            "row-reverse" => TaffyFlexDirection.RowReverse,
+            "column-reverse" => TaffyFlexDirection.ColumnReverse,
+            _ => TaffyFlexDirection.Row
         };
     }
 
-    private static FlexWrap ParseFlexWrap(string s)
+    private static TaffyFlexWrap ParseFlexWrap(string s)
     {
         return s switch
         {
-            "nowrap" => FlexWrap.NoWrap,
-            "wrap" => FlexWrap.Wrap,
-            "wrap-reverse" => FlexWrap.WrapReverse,
-            _ => FlexWrap.NoWrap
+            "nowrap" => TaffyFlexWrap.NoWrap,
+            "wrap" => TaffyFlexWrap.Wrap,
+            "wrap-reverse" => TaffyFlexWrap.WrapReverse,
+            _ => TaffyFlexWrap.NoWrap
         };
     }
 
-    private static AlignItems? ParseAlignItems(string s)
+    private static TaffyAlignItems? ParseAlignItems(string s)
     {
         return s switch
         {
-            "start" => AlignItems.Start,
-            "end" => AlignItems.End,
-            "flex-start" => AlignItems.FlexStart,
-            "flex-end" => AlignItems.FlexEnd,
-            "center" => AlignItems.Center,
-            "baseline" => AlignItems.Baseline,
-            "stretch" => AlignItems.Stretch,
+            "start" => TaffyAlignItems.Start,
+            "end" => TaffyAlignItems.End,
+            "flex-start" => TaffyAlignItems.FlexStart,
+            "flex-end" => TaffyAlignItems.FlexEnd,
+            "center" => TaffyAlignItems.Center,
+            "baseline" => TaffyAlignItems.Baseline,
+            "stretch" => TaffyAlignItems.Stretch,
             _ => null
         };
     }
 
-    private static AlignContent? ParseAlignContent(string s)
+    private static TaffyAlignContent? ParseAlignContent(string s)
     {
         return s switch
         {
-            "start" => AlignContent.Start,
-            "end" => AlignContent.End,
-            "flex-start" => AlignContent.FlexStart,
-            "flex-end" => AlignContent.FlexEnd,
-            "center" => AlignContent.Center,
-            "stretch" => AlignContent.Stretch,
-            "space-between" => AlignContent.SpaceBetween,
-            "space-evenly" => AlignContent.SpaceEvenly,
-            "space-around" => AlignContent.SpaceAround,
+            "start" => TaffyAlignContent.Start,
+            "end" => TaffyAlignContent.End,
+            "flex-start" => TaffyAlignContent.FlexStart,
+            "flex-end" => TaffyAlignContent.FlexEnd,
+            "center" => TaffyAlignContent.Center,
+            "stretch" => TaffyAlignContent.Stretch,
+            "space-between" => TaffyAlignContent.SpaceBetween,
+            "space-evenly" => TaffyAlignContent.SpaceEvenly,
+            "space-around" => TaffyAlignContent.SpaceAround,
             _ => null
         };
     }
 
-    private static List<GridTemplateComponent> ParseTrackList(string s)
+    private static TaffyTrackSizingFunction[] ParseTrackList(string s)
     {
-        var result = new List<GridTemplateComponent>();
+        var result = new List<TaffyTrackSizingFunction>();
         foreach (var token in TokenizeTrackList(s))
-            result.Add(ParseTrackComponent(token));
-        return result;
+            result.Add(ParseTrack(token));
+        return result.ToArray();
     }
 
-    // Splits a track list on spaces while respecting balanced parentheses,
-    // so "repeat(auto-fill, minmax(250px, 1fr)) 200px" produces two tokens.
+    // Splits a track list on spaces while respecting balanced parentheses.
     private static IEnumerable<string> TokenizeTrackList(string s)
     {
         var depth = 0;
@@ -385,7 +355,6 @@ public static class TaffyStyleParser
         if (start < s.Length) yield return s[start..];
     }
 
-    // Finds the index of the first top-level comma (not inside parens).
     private static int FindTopLevelComma(string s)
     {
         var depth = 0;
@@ -393,37 +362,12 @@ public static class TaffyStyleParser
             if (s[i] == '(') depth++;
             else if (s[i] == ')') depth--;
             else if (s[i] == ',' && depth == 0) return i;
-
         return -1;
     }
 
-    private static GridTemplateComponent ParseTrackComponent(string s)
+    private static TaffyTrackSizingFunction ParseTrack(string s)
     {
-        if (s.StartsWith("repeat(", StringComparison.Ordinal) && s.EndsWith(')'))
-        {
-            var inner = s[7..^1];
-            var commaIdx = FindTopLevelComma(inner);
-            if (commaIdx < 0) goto fallback;
-
-            var countStr = inner[..commaIdx].Trim();
-            var tracksStr = inner[(commaIdx + 1)..].Trim();
-
-            GridTrackRepetition rep;
-            if (countStr == "auto-fill") rep = GridTrackRepetition.AutoFill;
-            else if (countStr == "auto-fit") rep = GridTrackRepetition.AutoFit;
-            else goto fallback;
-
-            var tracks = TokenizeTrackList(tracksStr).Select(ParsePlainTrack).ToList();
-            return GridTemplateComponent.Repeat(rep, tracks);
-        }
-
-        fallback:
-        return GridTemplateComponent.Single(ParsePlainTrack(s));
-    }
-
-    private static TrackSizingFunction ParsePlainTrack(string s)
-    {
-        if (s == "auto") return TrackSizingFunction.Auto();
+        if (s == "auto") return TrackSizingFunction.AutoTrack();
 
         if (s.StartsWith("minmax(", StringComparison.Ordinal) && s.EndsWith(')'))
         {
@@ -431,9 +375,9 @@ public static class TaffyStyleParser
             var commaIdx = FindTopLevelComma(inner);
             if (commaIdx >= 0)
             {
-                var minStr = inner[..commaIdx].Trim();
-                var maxStr = inner[(commaIdx + 1)..].Trim();
-                return TrackSizingFunction.MinMax(ParseMinTrack(minStr), ParseMaxTrack(maxStr));
+                var minDim = ParseMinTrackDimension(inner[..commaIdx].Trim());
+                var maxDim = ParseMaxTrackDimension(inner[(commaIdx + 1)..].Trim());
+                return TrackSizingFunction.MinMax(minDim, maxDim);
             }
         }
 
@@ -446,37 +390,49 @@ public static class TaffyStyleParser
         return TrackSizingFunction.Px(float.Parse(s, CultureInfo.InvariantCulture));
     }
 
-    private static MinTrackSizingFunction ParseMinTrack(string s)
+    private static TaffyDimension ParseMinTrackDimension(string s)
     {
-        if (s == "auto") return MinTrackSizingFunction.AUTO;
-        if (s == "min-content") return MinTrackSizingFunction.MIN_CONTENT;
-        if (s == "max-content") return MinTrackSizingFunction.MAX_CONTENT;
-        if (s.EndsWith("%", StringComparison.Ordinal))
-            return MinTrackSizingFunction.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
-        if (s.EndsWith("px", StringComparison.Ordinal))
-            return MinTrackSizingFunction.Length(float.Parse(s[..^2], CultureInfo.InvariantCulture));
-        return MinTrackSizingFunction.Length(float.Parse(s, CultureInfo.InvariantCulture));
+        return s switch
+        {
+            "auto" => Dimension.Auto(),
+            "min-content" => Dimension.MinContent(),
+            "max-content" => Dimension.MaxContent(),
+            _ when s.EndsWith("%") => Dimension.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f),
+            _ when s.EndsWith("px") => Dimension.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture)),
+            _ => Dimension.Px(float.Parse(s, CultureInfo.InvariantCulture))
+        };
     }
 
-    private static MaxTrackSizingFunction ParseMaxTrack(string s)
+    private static TaffyDimension ParseMaxTrackDimension(string s)
     {
-        if (s == "auto") return MaxTrackSizingFunction.AUTO;
-        if (s == "min-content") return MaxTrackSizingFunction.MIN_CONTENT;
-        if (s == "max-content") return MaxTrackSizingFunction.MAX_CONTENT;
-        if (s.EndsWith("fr", StringComparison.Ordinal))
-            return MaxTrackSizingFunction.Fr(float.Parse(s[..^2], CultureInfo.InvariantCulture));
-        if (s.EndsWith("%", StringComparison.Ordinal))
-            return MaxTrackSizingFunction.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
-        if (s.EndsWith("px", StringComparison.Ordinal))
-            return MaxTrackSizingFunction.Length(float.Parse(s[..^2], CultureInfo.InvariantCulture));
-        return MaxTrackSizingFunction.Length(float.Parse(s, CultureInfo.InvariantCulture));
+        return s switch
+        {
+            "auto" => Dimension.Auto(),
+            "min-content" => Dimension.MinContent(),
+            "max-content" => Dimension.MaxContent(),
+            _ when s.EndsWith("fr") => Dimension.Fr(float.Parse(s[..^2], CultureInfo.InvariantCulture)),
+            _ when s.EndsWith("%") => Dimension.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f),
+            _ when s.EndsWith("px") => Dimension.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture)),
+            _ => Dimension.Px(float.Parse(s, CultureInfo.InvariantCulture))
+        };
     }
 
-    private static GridPlacement ParseGridPlacement(string s)
+    // Encodes a CSS grid-line value into the start field of a TaffyGridPlacement.
+    private static void SetGridStart(ref TaffyGridPlacement p, string value)
     {
-        if (s == "auto") return GridPlacement.Auto;
-        if (s.StartsWith("span ", StringComparison.Ordinal))
-            return GridPlacement.Span(int.Parse(s[5..], CultureInfo.InvariantCulture));
-        return GridPlacement.Line(int.Parse(s, CultureInfo.InvariantCulture));
+        if (value == "auto") { p.start = 0; p.span = 0; return; }
+        if (value.StartsWith("span ", StringComparison.Ordinal))
+        {
+            p.start = 0;
+            p.span = (ushort)int.Parse(value[5..], CultureInfo.InvariantCulture);
+            return;
+        }
+        p.start = short.Parse(value, CultureInfo.InvariantCulture);
+    }
+
+    // Encodes a CSS grid-line value into the end field of a TaffyGridPlacement.
+    private static void SetGridEnd(ref TaffyGridPlacement p, string value)
+    {
+        p.end = value == "auto" ? (short)0 : short.Parse(value, CultureInfo.InvariantCulture);
     }
 }

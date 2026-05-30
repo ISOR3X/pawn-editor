@@ -1,3 +1,4 @@
+using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -37,7 +38,7 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
 
     private static void DrawInspectPaneWidget(TaffyBuilder builder, Action<WidgetRow, Pawn> draw, Pawn pawn)
     {
-        builder.Item(r => draw(new WidgetRow(r.x, r.y), pawn), new StyleOverride { width = 93f, height = 16f });
+        builder.Item(r => draw(new WidgetRow(r.x, r.y), pawn), new StyleOverride { width = Dimension.Px(93f), height = Dimension.Px(16f) });
     }
 
     private static string MakeInspectStringFor(Pawn pawn)

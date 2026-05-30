@@ -4,7 +4,6 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
-using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -48,8 +47,8 @@ public class Dialog_ColorPicker : Window
                             widgetBuilder.Item(r => ColorUtility.ColorRect(r, ref _selectedColor),
                                 new StyleOverride { flexGrow = 1f });
                             widgetBuilder.Item(r => ColorUtility.HueSlider(r, ref _selectedColor),
-                                new StyleOverride { width = 16f });
-                        }, new StyleOverride { width = 200f, height = 200f, gap = Void.Taffy.Gap(GenUI.GapSmall) });
+                                new StyleOverride { width = Dimension.Px(16f) });
+                        }, new StyleOverride { width = Dimension.Px(200f), height = Dimension.Px(200f), gap = Void.Taffy.Gap(GenUI.GapSmall) });
 
                         // HSL inputs row
                         ColorUtility.ColorToHSL(_selectedColor, out var fh, out var fs, out var fl);
@@ -65,22 +64,22 @@ public class Dialog_ColorPicker : Window
                             hslBuilder.Text("L", TextAnchor.MiddleCenter,
                                 style: new StyleOverride { fontSize = GameFont.Tiny });
                             hslBuilder.InputNumber(ref hInt, 0, 360, id: "color_h",
-                                style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
+                                style: new StyleOverride { minWidth = Dimension.Px(50f), width = Dimension.Auto() });
                             hslBuilder.InputNumber(ref sInt, 0, 100, id: "color_s",
-                                style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
+                                style: new StyleOverride { minWidth = Dimension.Px(50f), width = Dimension.Auto() });
                             hslBuilder.InputNumber(ref lInt, 0, 100, id: "color_l",
-                                style: new StyleOverride { minWidth = 50f, width = Dimension.AUTO });
+                                style: new StyleOverride { minWidth = Dimension.Px(50f), width = Dimension.Auto() });
                         }, new StyleOverride
                         {
-                            display = Display.Grid,
+                            display = TaffyDisplay.Grid,
                             gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(), Void.Taffy.Fr()],
                             gap = Void.Taffy.Gap(4f, 0f),
-                            justifyItems = AlignItems.Stretch
+                            justifyItems = TaffyAlignItems.Stretch
                         });
                         _selectedColor = ColorUtility.HSLToColor(hInt / 360f, sInt / 100f, lInt / 100f);
                     },
                     new StyleOverride
-                        { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(0f, 4f), width = 200f });
+                        { flexDirection = TaffyFlexDirection.Column, gap = Void.Taffy.Gap(0f, 4f), width = Dimension.Px(200f) });
                 contentBuilder.Div(rightBuilder =>
                     {
                         rightBuilder.Div(paletteBuilder =>
@@ -96,7 +95,7 @@ public class Dialog_ColorPicker : Window
                                             Verse.Widgets.DrawRectFast(r.ContractedBy(GenUI.GapTiny), c);
                                         },
                                         new StyleOverride
-                                            { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize });
+                                            { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) });
                                 paletteBuilder.Item(r =>
                                 {
                                     if (Verse.Widgets.ButtonInvisible(r)) _selectedColor = GenColor.RandomColorOpaque();
@@ -104,11 +103,11 @@ public class Dialog_ColorPicker : Window
                                     Verse.Widgets.DrawLightHighlight(r);
                                     GUI.DrawTexture(r.ContractedBy(GenUI.GapTiny), TexPawnEditor.Randomize);
                                 }, new StyleOverride
-                                    { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize });
+                                    { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) });
                             },
                             new StyleOverride
                             {
-                                flexWrap = FlexWrap.Wrap, alignContent = AlignContent.Start,
+                                flexWrap = TaffyFlexWrap.Wrap, alignContent = TaffyAlignContent.Start,
                                 gap = Void.Taffy.Gap(GenUI.GapTiny)
                             });
                         rightBuilder.Div(colorReadoutBuilder =>
@@ -119,18 +118,18 @@ public class Dialog_ColorPicker : Window
                                     new StyleOverride { flexGrow = 1f });
                             },
                             new StyleOverride
-                                { height = Text.LineHeightOf(GameFont.Small), gap = Void.Taffy.Gap(GenUI.GapTiny) });
+                                { height = Dimension.Px(Text.LineHeightOf(GameFont.Small)), gap = Void.Taffy.Gap(GenUI.GapTiny) });
                     },
                     new StyleOverride
-                        { flexDirection = FlexDirection.Column, justifyContent = AlignContent.SpaceBetween });
+                        { flexDirection = TaffyFlexDirection.Column, justifyContent = TaffyAlignContent.SpaceBetween });
             }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });
 
             builder.Div(footerBuilder =>
             {
                 footerBuilder.Button("Cancel", onClick: _ => Close(), size: UIUtility.ComponentSize.Large);
                 footerBuilder.Button("Accept", onClick: _ => Accept(), size: UIUtility.ComponentSize.Large);
-            }, new StyleOverride { justifyContent = AlignContent.SpaceBetween });
-        }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(0f, GenUI.GapSmall) });
+            }, new StyleOverride { justifyContent = TaffyAlignContent.SpaceBetween });
+        }, new StyleOverride { flexDirection = TaffyFlexDirection.Column, gap = Void.Taffy.Gap(0f, GenUI.GapSmall) });
     }
 
     private void Accept()

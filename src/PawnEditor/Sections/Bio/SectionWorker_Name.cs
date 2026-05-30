@@ -1,3 +1,4 @@
+using Taffy;
 using RimWorld;
 using Verse;
 using Void;
@@ -37,14 +38,14 @@ public class SectionWorker_Name(SectionDef def) : SectionWorker(def)
                     var last = triple.Last;
                     b.Input(ref first, 12, CharacterCardUtility.ValidNameRegex,
                         onHover: r => TooltipHandler.TipRegionByKey(r, "FirstNameDesc"),
-                        style: new StyleOverride { minWidth = 0 });
+                        style: new StyleOverride { minWidth = Dimension.Px(0) });
                     b.Input(ref nick, 16, CharacterCardUtility.ValidNameRegex,
                         onHover: r => TooltipHandler.TipRegionByKey(r, "ShortIdentifierDesc"),
                         disabled: triple.Nick == triple.First || triple.Nick == triple.Last,
-                        style: new StyleOverride { minWidth = 0 });
+                        style: new StyleOverride { minWidth = Dimension.Px(0) });
                     b.Input(ref last, 12, CharacterCardUtility.ValidNameRegex,
                         onHover: r => TooltipHandler.TipRegionByKey(r, "LastNameDesc"),
-                        style: new StyleOverride { minWidth = 0 });
+                        style: new StyleOverride { minWidth = Dimension.Px(0) });
 
                     if (first != triple.First || nick != triple.Nick || last != triple.Last)
                         pawn.Name = new NameTriple(first, string.IsNullOrEmpty(nick) ? first : nick, last);

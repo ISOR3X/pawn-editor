@@ -28,9 +28,9 @@ public static partial class TaffyExtensions
 
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            width = iconSize,
-            height = iconSize,
-            alignSelf = AlignItems.Center
+            width = Dimension.Px(iconSize),
+            height = Dimension.Px(iconSize),
+            alignSelf = TaffyAlignItems.Center
         });
 
         // Capture for closure.

@@ -22,70 +22,57 @@ public static partial class TaffyExtensions
     {
         var mergedStyle = style ?? new StyleOverride();
 
-        var node = b.tree.NewLeafWithContext(mergedStyle.Resolve(),
-            (Func<Size<float?>, Size<AvailableSpace>, Size<float>>)Measure);
-
-        b.children.Add(node);
-        b.callbacks.Add((node, r =>
+        b.AddLeaf(mergedStyle, r =>
         {
             using (new TextBlock(mergedStyle.fontSize, anchor, color ?? Color.white))
             {
                 Verse.Text.WordWrap = wrap ?? r.width < Verse.Text.CalcSize(text).x;
                 var displayText = wrap == false ? text.Truncate(r.width) : text;
                 Verse.Widgets.Label(r, displayText);
-                Verse.Text.WordWrap = true; // WordWrap is true by default
+                Verse.Text.WordWrap = true;
             }
 
-            if (onHover != null)
-                if (Mouse.IsOver(r))
-                    onHover(r);
-        }));
+            if (onHover != null && Mouse.IsOver(r))
+                onHover(r);
+        }, Measure);
         return;
 
-        // Store a per-node measure closure as the node's context object.
-        // The tree-level dispatch in Execute will cast it and call it.
-        Size<float> Measure(Size<float?> known, Size<AvailableSpace> available)
+        (float w, float h) Measure(TaffyMeasureMode widthMode, float width, TaffyMeasureMode heightMode, float height)
         {
             using (new TextBlock(mergedStyle.fontSize ?? GameFont.Small))
             {
-                if (known.Width.HasValue)
-                    // Width fully constrained by parent algorithm - wrap and measure height.
-                    return new Size<float>(known.Width.Value, MinWidth(text, known.Width.Value, wrap));
-
-                if (available.Width.IsMinContent)
+                switch (widthMode)
                 {
-                    // Min-content query: return the widest unbreakable word.
-                    // This mirrors CSS min-width:auto - text can shrink and wrap, but never
-                    // below the width of its longest word (which for single-word labels equals
-                    // the full text width, preventing unwanted shrinkage).
-                    // Results are cached in _wordWidthCache so Text.CalcSize is called at most
-                    // once per (word, font) pair across all frames.
-                    var minW = 0f;
-                    foreach (var word in text.Split(' '))
-                    {
-                        var key = (word, mergedStyle.fontSize ?? GameFont.Small);
-                        if (!TaffyBuilder.WordWidthCache.TryGetValue(key, out var w))
-                            TaffyBuilder.WordWidthCache[key] = w = Verse.Text.CalcSize(word).x;
-                        if (w > minW) minW = w;
-                    }
+                    case TaffyMeasureMode.Exact:
+                        // Width fully constrained — wrap and measure height.
+                        return (width, WrapHeight(text, width, wrap));
 
+                    case TaffyMeasureMode.MinContent:
+                        // Return the widest unbreakable word (CSS min-width:auto).
+                        // Cached so Text.CalcSize is called at most once per (word, font) per session.
+                        var minW = 0f;
+                        foreach (var word in text.Split(' '))
+                        {
+                            var key = (word, mergedStyle.fontSize ?? GameFont.Small);
+                            if (!TaffyBuilder.WordWidthCache.TryGetValue(key, out var w))
+                                TaffyBuilder.WordWidthCache[key] = w = Verse.Text.CalcSize(word).x;
+                            if (w > minW) minW = w;
+                        }
+                        return (minW, WrapHeight(text, minW, wrap));
 
-                    return new Size<float>(minW, MinWidth(text, minW, wrap));
+                    case TaffyMeasureMode.FitContent:
+                        // Definite available width — wrap at that width.
+                        return (width, WrapHeight(text, width, wrap));
+
+                    default:
+                        // MaxContent / unconstrained — return natural (unwrapped) size.
+                        var sz = Verse.Text.CalcSize(text);
+                        return (sz.x, sz.y);
                 }
-
-                // Definite available width - wrap at that width.
-                if (available.Width.IntoOption() is { } aw) return new Size<float>(aw, MinWidth(text, aw, wrap));
-
-                // MaxContent / unconstrained - return natural (unwrapped) size.
-                var sz = Verse.Text.CalcSize(text);
-                return new Size<float>(sz.x, sz.y);
             }
 
-            // Returns height at natural width if wrap is false.
-            static float MinWidth(string text, float width, bool? wrap)
-            {
-                return wrap == false ? Verse.Text.CalcSize(text).y : Verse.Text.CalcHeight(text, width);
-            }
+            static float WrapHeight(string t, float w, bool? wrapOverride)
+                => wrapOverride == false ? Verse.Text.CalcSize(t).y : Verse.Text.CalcHeight(t, w);
         }
     }
 }

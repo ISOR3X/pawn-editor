@@ -35,7 +35,7 @@ public static partial class TaffyExtensions
 
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            flexDirection = FlexDirection.Column
+            flexDirection = TaffyFlexDirection.Column
         });
 
         b.Div(col =>
@@ -53,7 +53,7 @@ public static partial class TaffyExtensions
                     row.Icon(isOpen ? PawnColumnWorker.SortingIcon : PawnColumnWorker.SortingDescendingIcon,
                         size: UIUtility.ComponentSize.Small);
                 },
-                new StyleOverride { flexDirection = FlexDirection.Row, alignItems = AlignItems.Center });
+                new StyleOverride { flexDirection = TaffyFlexDirection.Row, alignItems = TaffyAlignItems.Center });
 
             if (isOpen)
                 content(col);
