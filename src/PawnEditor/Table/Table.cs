@@ -5,7 +5,6 @@ using Verse;
 using Verse.Sound;
 using Void;
 using Void.Extensions;
-using Display = Taffy.Display;
 
 namespace PawnEditor.Table;
 
@@ -27,7 +26,7 @@ public class Table<TRow>(
     // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
     // In a virtualized table only a subset of rows is rendered each frame, so the
     // auto minimum causes columns to resize as different content scrolls into view.
-    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks =
+    private readonly IReadOnlyList<TaffyTrackSizingFunction> _columnTracks =
         [.. columns.Select(c => NormalizeTrack(c.TrackSize))];
 
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
@@ -40,10 +39,11 @@ public class Table<TRow>(
 
     public TRow? SelectedItem { get; private set; }
 
-    private static TrackSizingFunction NormalizeTrack(TrackSizingFunction t)
+    // Fr tracks must use minmax(0, Nfr) so virtualized rows don't resize columns as content scrolls.
+    private static TaffyTrackSizingFunction NormalizeTrack(TaffyTrackSizingFunction t)
     {
-        return t.Max.IsFr() && t.Min.Equals(MinTrackSizingFunction.AUTO)
-            ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
+        return t.max.unit == TaffyUnit.Fr && t.min.unit == TaffyUnit.Auto
+            ? TrackSizingFunction.MinMax(Dimension.Px(0), t.max)
             : t;
     }
 
@@ -137,7 +137,7 @@ public class Table<TRow>(
                 });
         }, new StyleOverride
         {
-            display = Display.Grid,
+            display = TaffyDisplay.Grid,
             gridTemplateColumns = [.._columnTracks],
             gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
             gridAutoRows = [TrackSizingFunction.Px(HeaderHeight)]
@@ -215,10 +215,10 @@ public class Table<TRow>(
                 }
             }, new StyleOverride
             {
-                display = Display.Grid,
+                display = TaffyDisplay.Grid,
                 gridTemplateColumns = [.._columnTracks],
                 gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
-                alignItems = AlignItems.Center,
+                alignItems = TaffyAlignItems.Center,
                 gridAutoRows = [TrackSizingFunction.Px(rowHeight)]
             });
         }
@@ -233,9 +233,9 @@ public class Table<TRow>(
         const float chrome = HeaderHeight + FooterHeight + GenUI.GapTiny;
         var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            minWidth = 400f,
-            minHeight = chrome + rowHeight,
-            height = chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * rowHeight,
+            minWidth = Dimension.Px(400f),
+            minHeight = Dimension.Px(chrome + rowHeight),
+            height = Dimension.Px(chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * rowHeight),
             width = Dimension.Percent(1)
         });
 

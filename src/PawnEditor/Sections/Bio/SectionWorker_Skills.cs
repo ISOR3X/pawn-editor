@@ -1,10 +1,10 @@
+using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
 using Void.XMLComponents;
-using Display = Taffy.Display;
 using Layout = Void.Layout;
 
 namespace PawnEditor;
@@ -89,10 +89,10 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
             row =>
             {
                 row.Text(skillDef.LabelCap,
-                    style: new StyleOverride { width = LevelLabelWidth });
+                    style: new StyleOverride { width = Dimension.Px(LevelLabelWidth) });
                 row.Button(icon: GetTexForPassion(skill.passion),
                     variant: TaffyExtensions.ButtonVariant.Ghost,
-                    style: new StyleOverride { width = 24f, height = 24f },
+                    style: new StyleOverride { width = Dimension.Px(24f), height = Dimension.Px(24f) },
                     onClick: _ =>
                     {
                         {
@@ -119,15 +119,15 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                                 InspectPaneFiller.HealthTex, false);
                         },
                         style: new StyleOverride
-                            { height = SkillRectSize.y, flexGrow = 1f, color = GetColorTextForSkill(skill) });
+                            { height = Dimension.Px(SkillRectSize.y), flexGrow = 1f, color = GetColorTextForSkill(skill) });
                     SetSkill(skill, level);
                 }
             },
             new StyleOverride
             {
-                display = Display.Flex,
-                minWidth = SkillRectSize.x,
-                height = SkillRectSize.y,
+                display = TaffyDisplay.Flex,
+                minWidth = Dimension.Px(SkillRectSize.x),
+                height = Dimension.Px(SkillRectSize.y),
                 gap = Void.Taffy.Gap(GenUI.GapTiny)
             });
     }

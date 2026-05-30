@@ -1,3 +1,4 @@
+using Taffy;
 using PawnEditor.Table;
 using RimWorld;
 using UnityEngine;
@@ -6,7 +7,6 @@ using Void;
 using Void.Components;
 using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
-using Display = Taffy.Display;
 using Layout = Void.Layout;
 
 namespace PawnEditor;
@@ -60,7 +60,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                             b2.Text($"Current: {currentBackstory.TitleCapFor(pawn.gender)}".Colorize(ColoredText
                                 .SubtleGrayColor));
                             b2.Text($"New: {newBackstory}");
-                        }, new StyleOverride { display = Display.Block });
+                        }, new StyleOverride { display = TaffyDisplay.Block });
                     }));
             else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
         };

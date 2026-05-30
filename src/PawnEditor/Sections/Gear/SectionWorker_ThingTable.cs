@@ -1,3 +1,4 @@
+using Taffy;
 ﻿using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
@@ -57,7 +58,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                 ColumnWorker<T>.Create(
                     Void.Taffy.Px(GenUI.SmallIconSize),
                     (grid, thing) => grid.Item(r => Verse.Widgets.ThingIcon(r, thing),
-                        new StyleOverride { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize })
+                        new StyleOverride { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) })
                 ),
                 ColumnWorker<T>.CreateText(
                     Void.Taffy.Fr(2), thing => thing.LabelCap, "Label"
@@ -100,7 +101,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                             {
                                 Verse.Widgets.DefIcon(r, def);
                             }
-                        }, new StyleOverride { width = 20f, height = 20f });
+                        }, new StyleOverride { width = Dimension.Px(20f), height = Dimension.Px(20f) });
                     }
                 ),
                 Col.CreateText(

@@ -48,8 +48,8 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             inner => { inner.Text(label, color: textColor ?? Color.white, anchor: TextAnchor.MiddleCenter); },
             new StyleOverride
             {
-                padding = new Rect<LengthPercentage>(5f, 5f, 0f, 0f),
-                height = Dimension.AUTO
+                padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(5f), Dimension.Px(0f), Dimension.Px(5f)),
+                height = Dimension.Auto()
             });
     }
 

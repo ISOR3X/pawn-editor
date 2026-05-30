@@ -5,10 +5,10 @@ using Void.Components;
 
 namespace PawnEditor.Table.ColumnWorkers;
 
-public class ColumnWorker_ThingStuff<T>(TrackSizingFunction trackSize) : ColumnWorker<T> where T : Thing
+public class ColumnWorker_ThingStuff<T>(TaffyTrackSizingFunction trackSize) : ColumnWorker<T> where T : Thing
 {
     protected override string HeaderLabel => "Stuff";
-    public override TrackSizingFunction TrackSize => trackSize;
+    public override TaffyTrackSizingFunction TrackSize => trackSize;
 
     public override bool Sortable => true;
 
@@ -29,8 +29,8 @@ public class ColumnWorker_ThingStuff<T>(TrackSizingFunction trackSize) : ColumnW
                 inner.Item(r => Verse.Widgets.ThingIcon(r, thing.Stuff),
                     new StyleOverride
                     {
-                        margin = new Rect<LengthPercentageAuto>(0f, GenUI.GapSmall, 0f, 0f),
-                        width = GenUI.SmallIconSize
+                        margin = new TaffyEdges(Dimension.Px(0), Dimension.Px(GenUI.GapSmall), Dimension.Px(0), Dimension.Px(0)),
+                        width = Dimension.Px(GenUI.SmallIconSize)
                     });
                 inner.Text(t, wrap: false,
                     onHover: r =>

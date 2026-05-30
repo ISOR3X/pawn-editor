@@ -15,7 +15,7 @@ public class ColumnWorker_Gender<T> : ColumnWorker<T> where T : StyleItemDef
 
     protected override string HeaderLabel => "Gender";
 
-    public override TrackSizingFunction TrackSize => Void.Taffy.Px(CalcHeaderWidth(HeaderLabel));
+    public override TaffyTrackSizingFunction TrackSize => Void.Taffy.Px(CalcHeaderWidth(HeaderLabel));
     public override bool Sortable => true;
 
     public override void DrawCell(TaffyBuilder grid, T row)

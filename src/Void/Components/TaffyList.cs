@@ -33,12 +33,12 @@ public static partial class TaffyExtensions
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        var gapY = style?.gap?.Height.Value ?? 0f;
+        var gapY = style?.gap?.Row.value ?? 0f;
         var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             width = Dimension.Percent(1f),
-            height = clampedCount * itemHeight + Math.Max(0, clampedCount - 1) * gapY
+            height = Dimension.Px(clampedCount * itemHeight + Math.Max(0, clampedCount - 1) * gapY)
         });
 
         var capturedItems = items;
@@ -91,12 +91,12 @@ public static partial class TaffyExtensions
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        var gapX = style?.gap?.Width.Value ?? 0f;
+        var gapX = style?.gap?.Column.value ?? 0f;
         var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
             height = Dimension.Percent(1f),
-            width = clampedCount * itemWidth + Math.Max(0, clampedCount - 1) * gapX
+            width = Dimension.Px(clampedCount * itemWidth + Math.Max(0, clampedCount - 1) * gapX)
         });
 
         var capturedItems = items;

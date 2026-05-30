@@ -62,12 +62,12 @@ public static partial class TaffyExtensions
             ? new StyleOverride
             {
                 width = Dimension.Percent(1f),
-                height = height
+                height = Dimension.Px(height)
             }
             : new StyleOverride
             {
-                width = totalW,
-                height = height
+                width = Dimension.Px(totalW),
+                height = Dimension.Px(height)
             });
 
         // Capture for closure.

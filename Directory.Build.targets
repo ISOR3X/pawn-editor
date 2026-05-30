@@ -3,6 +3,8 @@
     <Target Name="DeployAssembly" AfterTargets="Build">
         <ItemGroup>
             <AssemblyFiles Include="$(OutputPath)*.dll"/>
+            <AssemblyFiles Include="$(OutputPath)*.so"/>
+            <AssemblyFiles Include="$(OutputPath)*.dylib"/>
             <!--<PdbFiles Include="$(OutputPath)*.pdb"/>-->
         </ItemGroup>
         <MakeDir Directories="$(RimWorldModsPath)\PawnEditor\$(RimWorldVersion)\Assemblies"/>

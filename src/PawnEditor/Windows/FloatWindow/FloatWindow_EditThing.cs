@@ -5,7 +5,6 @@ using Verse;
 using Void;
 using Void.Components;
 using Void.Extensions;
-using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -23,7 +22,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
         style ??= new StyleOverride();
         style = style.Merge(new StyleOverride
         {
-            width = Dimension.AUTO, justifySelf = AlignItems.Stretch
+            width = Dimension.Auto(), justifySelf = TaffyAlignItems.Stretch
         });
         grid.Button(label, icon, iconColor, style: style, onClick: onClick);
     }
@@ -211,7 +210,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
             }, new StyleOverride
             {
                 gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
-                display = Display.Grid,
+                display = TaffyDisplay.Grid,
                 gap = Void.Taffy.Gap(GenUI.GapLabel, GenUI.GapTiny),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]
             });

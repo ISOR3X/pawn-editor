@@ -122,8 +122,8 @@ public static partial class TaffyExtensions
 
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            width = DefaultInputWidth,
-            height = UIUtility.ButtonHeight
+            width = Dimension.Px(DefaultInputWidth),
+            height = Dimension.Px(UIUtility.ButtonHeight)
         });
 
         var displayValue = text;
@@ -176,8 +176,8 @@ public static partial class TaffyExtensions
 
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            width = Dimension.Length(DefaultInputWidth),
-            height = UIUtility.ButtonHeight
+            width = Dimension.Px(DefaultInputWidth),
+            height = Dimension.Px(UIUtility.ButtonHeight)
         });
 
         var capturedValue = value;
@@ -296,9 +296,9 @@ public static partial class TaffyExtensions
 
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            width = DefaultInputWidth,
+            width = Dimension.Px(DefaultInputWidth),
             // This height makes it fit in a button height (30f) container when stacked with GameFont.Tiny text.
-            height = 12f
+            height = Dimension.Px(12f)
         });
 
         // Smaller step when shift is held.
