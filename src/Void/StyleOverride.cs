@@ -129,22 +129,23 @@ public class StyleOverride
         if (maxHeight.HasValue) s.MaxHeight = maxHeight.Value;
         if (gap.HasValue)
         {
-            s.ColumnGap = gap.Value.Column;
-            s.RowGap = gap.Value.Row;
+            // None unit = "not specified by caller" — skip to preserve the native default.
+            if (gap.Value.Column.unit != TaffyUnit.None) s.ColumnGap = gap.Value.Column;
+            if (gap.Value.Row.unit != TaffyUnit.None) s.RowGap = gap.Value.Row;
         }
         if (padding.HasValue)
         {
-            s.PaddingTop = padding.Value.Top;
-            s.PaddingRight = padding.Value.Right;
-            s.PaddingBottom = padding.Value.Bottom;
-            s.PaddingLeft = padding.Value.Left;
+            if (padding.Value.Top.unit != TaffyUnit.None) s.PaddingTop = padding.Value.Top;
+            if (padding.Value.Right.unit != TaffyUnit.None) s.PaddingRight = padding.Value.Right;
+            if (padding.Value.Bottom.unit != TaffyUnit.None) s.PaddingBottom = padding.Value.Bottom;
+            if (padding.Value.Left.unit != TaffyUnit.None) s.PaddingLeft = padding.Value.Left;
         }
         if (margin.HasValue)
         {
-            s.MarginTop = margin.Value.Top;
-            s.MarginRight = margin.Value.Right;
-            s.MarginBottom = margin.Value.Bottom;
-            s.MarginLeft = margin.Value.Left;
+            if (margin.Value.Top.unit != TaffyUnit.None) s.MarginTop = margin.Value.Top;
+            if (margin.Value.Right.unit != TaffyUnit.None) s.MarginRight = margin.Value.Right;
+            if (margin.Value.Bottom.unit != TaffyUnit.None) s.MarginBottom = margin.Value.Bottom;
+            if (margin.Value.Left.unit != TaffyUnit.None) s.MarginLeft = margin.Value.Left;
         }
         if (gridAutoFlow.HasValue) s.GridAutoFlow = gridAutoFlow.Value;
         if (gridColumn.HasValue) s.GridColumn = gridColumn.Value;

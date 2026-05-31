@@ -328,8 +328,35 @@ public static class TaffyStyleParser
     {
         var result = new List<TaffyTrackSizingFunction>();
         foreach (var token in TokenizeTrackList(s))
-            result.Add(ParseTrack(token));
+        {
+            if (token.StartsWith("repeat(", StringComparison.Ordinal) && token.EndsWith(')'))
+                ExpandRepeat(token, result);
+            else
+                result.Add(ParseTrack(token));
+        }
         return result.ToArray();
+    }
+
+    // Expands repeat(N, track...) into N copies. Skips auto-fill/auto-fit (not supported in ctaffy flat arrays).
+    private static void ExpandRepeat(string token, List<TaffyTrackSizingFunction> result)
+    {
+        var inner = token[7..^1]; // strip "repeat(" and ")"
+        var commaIdx = FindTopLevelComma(inner);
+        if (commaIdx < 0) goto fallback;
+
+        var countStr = inner[..commaIdx].Trim();
+        var tracksStr = inner[(commaIdx + 1)..].Trim();
+
+        if (!int.TryParse(countStr, out var count) || count <= 0) goto fallback;
+
+        var tracks = TokenizeTrackList(tracksStr).Select(ParseTrack).ToArray();
+        for (var i = 0; i < count; i++)
+            result.AddRange(tracks);
+        return;
+
+        fallback:
+        Log.Warning($"[{VoidMod.ModName}] grid repeat() with non-integer count is not supported by ctaffy; substituting auto.");
+        result.Add(TrackSizingFunction.AutoTrack());
     }
 
     // Splits a track list on spaces while respecting balanced parentheses.
@@ -381,40 +408,49 @@ public static class TaffyStyleParser
             }
         }
 
-        if (s.EndsWith("fr", StringComparison.Ordinal))
-            return TrackSizingFunction.Fr(float.Parse(s[..^2], CultureInfo.InvariantCulture));
-        if (s.EndsWith("%", StringComparison.Ordinal))
-            return TrackSizingFunction.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f);
-        if (s.EndsWith("px", StringComparison.Ordinal))
-            return TrackSizingFunction.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture));
-        return TrackSizingFunction.Px(float.Parse(s, CultureInfo.InvariantCulture));
+        if (s.EndsWith("fr", StringComparison.Ordinal) &&
+            float.TryParse(s[..^2], NumberStyles.Float, CultureInfo.InvariantCulture, out var fr))
+            return TrackSizingFunction.Fr(fr);
+        if (s.EndsWith("%", StringComparison.Ordinal) &&
+            float.TryParse(s[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var pct))
+            return TrackSizingFunction.Percent(pct / 100f);
+        if (s.EndsWith("px", StringComparison.Ordinal) &&
+            float.TryParse(s[..^2], NumberStyles.Float, CultureInfo.InvariantCulture, out var px))
+            return TrackSizingFunction.Px(px);
+        if (float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var bare))
+            return TrackSizingFunction.Px(bare);
+        Log.Warning($"[{VoidMod.ModName}] Unrecognized grid track value '{s}'; substituting auto.");
+        return TrackSizingFunction.AutoTrack();
     }
 
     private static TaffyDimension ParseMinTrackDimension(string s)
     {
-        return s switch
-        {
-            "auto" => Dimension.Auto(),
-            "min-content" => Dimension.MinContent(),
-            "max-content" => Dimension.MaxContent(),
-            _ when s.EndsWith("%") => Dimension.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f),
-            _ when s.EndsWith("px") => Dimension.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture)),
-            _ => Dimension.Px(float.Parse(s, CultureInfo.InvariantCulture))
-        };
+        if (s == "auto") return Dimension.Auto();
+        if (s == "min-content") return Dimension.MinContent();
+        if (s == "max-content") return Dimension.MaxContent();
+        if (s.EndsWith("%") && float.TryParse(s[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var p))
+            return Dimension.Percent(p / 100f);
+        if (s.EndsWith("px") && float.TryParse(s[..^2], NumberStyles.Float, CultureInfo.InvariantCulture, out var px))
+            return Dimension.Px(px);
+        if (float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var bare))
+            return Dimension.Px(bare);
+        return Dimension.Auto();
     }
 
     private static TaffyDimension ParseMaxTrackDimension(string s)
     {
-        return s switch
-        {
-            "auto" => Dimension.Auto(),
-            "min-content" => Dimension.MinContent(),
-            "max-content" => Dimension.MaxContent(),
-            _ when s.EndsWith("fr") => Dimension.Fr(float.Parse(s[..^2], CultureInfo.InvariantCulture)),
-            _ when s.EndsWith("%") => Dimension.Percent(float.Parse(s[..^1], CultureInfo.InvariantCulture) / 100f),
-            _ when s.EndsWith("px") => Dimension.Px(float.Parse(s[..^2], CultureInfo.InvariantCulture)),
-            _ => Dimension.Px(float.Parse(s, CultureInfo.InvariantCulture))
-        };
+        if (s == "auto") return Dimension.Auto();
+        if (s == "min-content") return Dimension.MinContent();
+        if (s == "max-content") return Dimension.MaxContent();
+        if (s.EndsWith("fr") && float.TryParse(s[..^2], NumberStyles.Float, CultureInfo.InvariantCulture, out var fr))
+            return Dimension.Fr(fr);
+        if (s.EndsWith("%") && float.TryParse(s[..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var p))
+            return Dimension.Percent(p / 100f);
+        if (s.EndsWith("px") && float.TryParse(s[..^2], NumberStyles.Float, CultureInfo.InvariantCulture, out var px))
+            return Dimension.Px(px);
+        if (float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var bare))
+            return Dimension.Px(bare);
+        return Dimension.Auto();
     }
 
     // Encodes a CSS grid-line value into the start field of a TaffyGridPlacement.
