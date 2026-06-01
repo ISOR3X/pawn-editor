@@ -49,7 +49,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             inner => inner.Icon(texture, size: UIUtility.ComponentSize.Large),
             new StyleOverride
             {
-                padding = Void.Taffy.Padding(5f),
+                padding = new TaffyEdges(Dimension.Px(5f)),
                 height = Dimension.Auto()
             });
     }
@@ -120,14 +120,14 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             null,
             [
                 Col.Create(
-                    Void.Taffy.Px(20f),
+                    TrackSizingFunction.Px(20f),
                     (grid, def) => grid.Icon(def.uiIcon)
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(), def => def.LabelCap, "Label"
+                    TrackSizingFunction.Fr(), def => def.LabelCap, "Label"
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
                     ColoredText.SubtleGrayColor

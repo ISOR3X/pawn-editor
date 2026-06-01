@@ -106,7 +106,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
             },
             new StyleOverride
             {
-                gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
+                gridTemplateColumns = [TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2)],
                 display = TaffyDisplay.Grid,
                 gap = Void.Taffy.Gap(GenUI.GapLabel, GenUI.GapTiny),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]

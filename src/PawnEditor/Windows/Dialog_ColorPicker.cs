@@ -72,7 +72,7 @@ public class Dialog_ColorPicker : Window
                         }, new StyleOverride
                         {
                             display = TaffyDisplay.Grid,
-                            gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(), Void.Taffy.Fr()],
+                            gridTemplateColumns = [TrackSizingFunction.Fr(), TrackSizingFunction.Fr(), TrackSizingFunction.Fr()],
                             gap = Void.Taffy.Gap(4f, 0f),
                             justifyItems = TaffyAlignItems.Stretch
                         });
