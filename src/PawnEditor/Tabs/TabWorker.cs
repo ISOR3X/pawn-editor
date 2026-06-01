@@ -1,3 +1,4 @@
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
@@ -8,7 +9,7 @@ public abstract class TabWorker(TabDef def)
 {
     private static readonly StyleOverride DefaultRootStyle = new()
     {
-        gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall)
+        gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapSmall))
     };
 
     public readonly List<FloatMenuOption> quickActions = [];

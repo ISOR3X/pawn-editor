@@ -5,22 +5,6 @@ using Verse;
 namespace Void;
 
 /// <summary>
-///     Four <see cref="TaffyDimension"/> values representing the four edges of a box (padding/margin/inset).
-/// </summary>
-public readonly record struct TaffyEdges(TaffyDimension Top, TaffyDimension Right, TaffyDimension Bottom, TaffyDimension Left)
-{
-    public TaffyEdges(TaffyDimension all) : this(all, all, all, all) { }
-}
-
-/// <summary>
-///     Two <see cref="TaffyDimension"/> values representing column and row gap.
-/// </summary>
-public readonly record struct TaffyGap(TaffyDimension Column, TaffyDimension Row)
-{
-    public TaffyGap(TaffyDimension all) : this(all, all) { }
-}
-
-/// <summary>
 ///     A near 1:1 copy of <see cref="TaffyStyleRef" /> with every field nullable, so callers can
 ///     override only the fields they care about and fall back to defaults for the rest.
 ///     Fields irrelevant to RimWorld usage are removed.
@@ -41,7 +25,7 @@ public class StyleOverride
     public float? flexGrow;
     public float? flexShrink;
     public TaffyFlexWrap? flexWrap;
-    public TaffyGap? gap;
+    public TaffyAxes? gap;
     public TaffyTrackSizingFunction[]? gridAutoColumns;
     public TaffyGridAutoFlow? gridAutoFlow;
     public TaffyTrackSizingFunction[]? gridAutoRows;
@@ -130,8 +114,8 @@ public class StyleOverride
         if (gap.HasValue)
         {
             // None unit = "not specified by caller" — skip to preserve the native default.
-            if (gap.Value.Column.unit != TaffyUnit.None) s.ColumnGap = gap.Value.Column;
-            if (gap.Value.Row.unit != TaffyUnit.None) s.RowGap = gap.Value.Row;
+            if (gap.Value.Width.unit != TaffyUnit.None) s.ColumnGap = gap.Value.Width;
+            if (gap.Value.Height.unit != TaffyUnit.None) s.RowGap = gap.Value.Height;
         }
         if (padding.HasValue)
         {

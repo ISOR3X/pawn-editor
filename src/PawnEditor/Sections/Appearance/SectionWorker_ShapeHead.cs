@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -33,7 +34,7 @@ public class SectionWorker_ShapeHead(SectionDef def) : SectionWorker(def)
                         Verse.Widgets.DrawTextureFitted(r,
                             td.GetGraphic(pawn, pawn.story.SkinColor).MatSouth.mainTexture, 1.6f);
                     }
-                }, 64f, style: new StyleOverride { gap = Void.Taffy.Gap(4f) });
+                }, 64f, style: new StyleOverride { gap = new TaffyAxes(Dimension.Px(4f), Dimension.Px(4f)) });
         };
         layout.ComponentById<ButtonElement>("next").OnClick = _ => StepBodyType();
         layout.ComponentById<ButtonElement>("prev").OnClick = _ => StepBodyType(-1);

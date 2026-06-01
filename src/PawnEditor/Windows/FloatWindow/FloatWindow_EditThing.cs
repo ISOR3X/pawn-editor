@@ -211,7 +211,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
             {
                 gridTemplateColumns = [TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2)],
                 display = TaffyDisplay.Grid,
-                gap = Void.Taffy.Gap(GenUI.GapLabel, GenUI.GapTiny),
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapLabel), Dimension.Px(GenUI.GapTiny)),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]
             });
 

@@ -73,19 +73,19 @@ public static class TaffyStyleParser
             case "gap":
             {
                 var v = Dimension.Px(ParsePx(value));
-                target.gap = new TaffyGap(v);
+                target.gap = new TaffyAxes(v);
                 break;
             }
             case "column-gap":
             {
                 var g = target.gap ?? default;
-                target.gap = new TaffyGap(Dimension.Px(ParsePx(value)), g.Row);
+                target.gap = new TaffyAxes(Dimension.Px(ParsePx(value)), g.Height);
                 break;
             }
             case "row-gap":
             {
                 var g = target.gap ?? default;
-                target.gap = new TaffyGap(g.Column, Dimension.Px(ParsePx(value)));
+                target.gap = new TaffyAxes(g.Width, Dimension.Px(ParsePx(value)));
                 break;
             }
             case "padding":

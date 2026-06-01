@@ -1,3 +1,4 @@
+using Taffy;
 using Verse;
 using Void;
 using Void.Components;
@@ -30,7 +31,7 @@ public abstract class RowFilter_ToggleableList<T, K>(string title, Func<K, strin
             {
                 row2.Icon(TexButton.Search);
                 row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
-            }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
+            }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny)) });
 
             // null sentinel represents the "None" entry pinned at the top
             var filtered = new List<K?> { null };
@@ -74,7 +75,7 @@ public abstract class RowFilter_ToggleableList<T, K>(string title, Func<K, strin
                     _noneDisabled = true;
                     MarkDirty();
                 });
-            }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
-        }, style: new StyleOverride { gap = Void.Taffy.Gap(0f, GenUI.GapTiny) });
+            }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny)) });
+        }, style: new StyleOverride { gap = new TaffyAxes(Dimension.Px(0f), Dimension.Px(GenUI.GapTiny)) });
     }
 }

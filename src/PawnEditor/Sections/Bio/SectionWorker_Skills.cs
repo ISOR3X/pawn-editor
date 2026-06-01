@@ -128,7 +128,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                 display = TaffyDisplay.Flex,
                 minWidth = Dimension.Px(SkillRectSize.x),
                 height = Dimension.Px(SkillRectSize.y),
-                gap = Void.Taffy.Gap(GenUI.GapTiny)
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny))
             });
     }
 
