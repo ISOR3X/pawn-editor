@@ -28,7 +28,7 @@ public class Window_Benchmark : Window
             s.Height = Dimension.Px(100f);
             _children[i] = node;
         }
-
+        
         _root = _tree.NewNode();
         {
             var s = _tree.GetStyle(_root);

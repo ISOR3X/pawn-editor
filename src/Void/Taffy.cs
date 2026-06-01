@@ -21,7 +21,6 @@
 //       grid.GridItem(colSpan: 2, draw: r => DrawFooter(r));
 //   });
 
-using System.Runtime.InteropServices;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -53,14 +52,10 @@ public sealed class TaffyBuilder
     public readonly List<TaffyNode> children = [];
     public readonly TaffyTree tree;
 
-    // GCHandles for pinned measure-function contexts — freed after ComputeLayout.
-    private readonly List<GCHandle> _measureHandles;
-
-    public TaffyBuilder(TaffyTree tree, List<(TaffyNode id, Action<Rect>? draw)> callbacks, List<GCHandle> measureHandles)
+    public TaffyBuilder(TaffyTree tree, List<(TaffyNode id, Action<Rect>? draw)> callbacks)
     {
         this.tree = tree;
         this.callbacks = callbacks;
-        _measureHandles = measureHandles;
     }
 
     /// <summary>
@@ -97,14 +92,14 @@ public sealed class TaffyBuilder
             style.gridRow = p;
         }
 
-        AddLeaf(style, draw);
+        AddNode(style, draw);
     }
 
     #region LEAF ITEMS
 
     public void Item(Action<Rect>? draw = null, StyleOverride? style = null)
     {
-        AddLeaf(style ?? new StyleOverride(), draw);
+        AddNode(style ?? new StyleOverride(), draw);
     }
 
     public void Div(Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
@@ -124,15 +119,17 @@ public sealed class TaffyBuilder
 
     #region HELPERS
 
-    internal unsafe void AddLeaf(StyleOverride style, Action<Rect>? draw, TaffyMeasureFunc? measure = null)
+    internal void AddNode(StyleOverride style, Action<Rect>? draw, TaffyMeasureFunc? measure = null)
     {
         var node = tree.NewNode();
         style.Apply(tree.GetStyle(node));
         if (measure != null)
         {
-            var handle = GCHandle.Alloc(measure);
-            _measureHandles.Add(handle);
-            tree.SetMeasureFunction(node, Taffy.s_measureFn, (void*)GCHandle.ToIntPtr(handle));
+            tree.SetMeasureFunction(node, (wm, w, hm, h) =>
+            {
+                var (width, height) = measure(wm, w, hm, h);
+                return new TaffySize { width = width, height = height };
+            });
         }
         children.Add(node);
         callbacks.Add((node, draw));
@@ -140,7 +137,7 @@ public sealed class TaffyBuilder
 
     private void AddContainer(StyleOverride style, Action<Rect>? draw, Action<TaffyBuilder>? build)
     {
-        var inner = new TaffyBuilder(tree, callbacks, _measureHandles) { ContextKey = ContextKey };
+        var inner = new TaffyBuilder(tree, callbacks) { ContextKey = ContextKey };
         build?.Invoke(inner);
         var node = tree.NewNode();
         style.Apply(tree.GetStyle(node));
@@ -156,23 +153,8 @@ public sealed class TaffyBuilder
 ///     Static entry points for ctaffy-backed layout in RimWorld.
 ///     Creates a fresh layout tree per call; layout is computed and draw callbacks invoked before returning.
 /// </summary>
-public static unsafe class Taffy
+public static class Taffy
 {
-    // Static delegate prevents GC from collecting the function pointer while native code holds it.
-    internal static readonly NativeMethods.TaffyTree_SetNodeContext_measure_function_delegate s_measureFn = MeasureCallback;
-
-    private static TaffySize MeasureCallback(
-        TaffyMeasureMode widthMode, float width,
-        TaffyMeasureMode heightMode, float height,
-        void* context)
-    {
-        if (context == null) return default;
-        var handle = GCHandle.FromIntPtr((IntPtr)context);
-        if (handle.Target is not TaffyMeasureFunc measure) return default;
-        var (w, h) = measure(widthMode, width, heightMode, height);
-        return new TaffySize { width = w, height = h };
-    }
-
     #region ENTRY POINTS
 
     /// <summary>
@@ -196,11 +178,10 @@ public static unsafe class Taffy
 
     private static float ExecuteMeasured(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)
     {
-        var handles = new List<GCHandle>();
         using var tree = new TaffyTree();
         var callbacks = new List<(TaffyNode id, Action<Rect>? draw)>();
 
-        var builder = new TaffyBuilder(tree, callbacks, handles);
+        var builder = new TaffyBuilder(tree, callbacks);
         build(builder);
 
         var root = tree.NewNode();
@@ -212,8 +193,6 @@ public static unsafe class Taffy
         foreach (var child in builder.children) tree.AppendChild(root, child);
 
         tree.ComputeLayout(root, rect.width, float.PositiveInfinity);
-
-        FreeHandles(handles);
 
         var lookup = BuildLookup(callbacks);
         DrawTree(tree, root, rect.x, rect.y, lookup);
@@ -230,24 +209,7 @@ public static unsafe class Taffy
 
     /// <summary>Creates uniform padding on all four sides.</summary>
     public static TaffyEdges Padding(float all) => new(Dimension.Px(all));
-
-    /// <summary>Creates asymmetric padding: <paramref name="lr" /> on left/right, <paramref name="tb" /> on top/bottom.</summary>
-    public static TaffyEdges Padding(float lr, float tb)
-    {
-        var h = Dimension.Px(lr);
-        var v = Dimension.Px(tb);
-        return new TaffyEdges(v, h, v, h);
-    }
-
-    public static TaffyEdges Margin(float all) => new(Dimension.Px(all));
-
-    public static TaffyEdges Margin(float lr, float tb)
-    {
-        var h = Dimension.Px(lr);
-        var v = Dimension.Px(tb);
-        return new TaffyEdges(v, h, v, h);
-    }
-
+    
     /// <summary>Creates uniform gap on both axes.</summary>
     public static TaffyGap Gap(float all) => new(Dimension.Px(all));
 
@@ -260,12 +222,11 @@ public static unsafe class Taffy
 
     private static void Execute(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)
     {
-        var handles = new List<GCHandle>();
         using var tree = new TaffyTree();
         var callbacks = new List<(TaffyNode id, Action<Rect>? draw)>();
 
         // Give the root a definite size so fr columns resolve correctly.
-        var builder = new TaffyBuilder(tree, callbacks, handles);
+        var builder = new TaffyBuilder(tree, callbacks);
         build(builder);
 
         var root = tree.NewNode();
@@ -277,8 +238,6 @@ public static unsafe class Taffy
 
         tree.ComputeLayout(root, rect.width, rect.height);
 
-        FreeHandles(handles);
-
         var lookup = BuildLookup(callbacks);
         DrawTree(tree, root, rect.x, rect.y, lookup);
     }
@@ -288,11 +247,6 @@ public static unsafe class Taffy
         var lookup = new Dictionary<TaffyNode, Action<Rect>?>(callbacks.Count);
         foreach (var (id, draw) in callbacks) lookup[id] = draw;
         return lookup;
-    }
-
-    private static void FreeHandles(List<GCHandle> handles)
-    {
-        foreach (var h in handles) h.Free();
     }
 
     private static void DrawTree(TaffyTree tree, TaffyNode node, float originX, float originY,

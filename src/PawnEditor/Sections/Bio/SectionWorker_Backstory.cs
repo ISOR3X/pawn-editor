@@ -74,7 +74,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             null,
             [
                 Col.Create<PawnContext>(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
                     "Title",
                     (a, b) => string.Compare(
@@ -83,13 +83,13 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                         StringComparison.CurrentCultureIgnoreCase)
                 ),
                 Col.CreateText(
-                    Void.Taffy.Px(150f),
+                    TrackSizingFunction.Px(150f),
                     def => def.modContentPack?.Name ?? "",
                     "Source",
                     ColoredText.SubtleGrayColor
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => string.Join(", ", def.spawnCategories),
                     "Spawn categories",
                     ColoredText.SubtleGrayColor

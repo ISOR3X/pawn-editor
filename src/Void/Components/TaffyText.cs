@@ -22,7 +22,7 @@ public static partial class TaffyExtensions
     {
         var mergedStyle = style ?? new StyleOverride();
 
-        b.AddLeaf(mergedStyle, r =>
+        b.AddNode(mergedStyle, r =>
         {
             using (new TextBlock(mergedStyle.fontSize, anchor, color ?? Color.white))
             {

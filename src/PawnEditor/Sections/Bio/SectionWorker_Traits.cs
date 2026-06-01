@@ -114,12 +114,12 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             TraitUtility.AllTraits,
             [
                 Col.Create(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     (grid, record) => grid.Text(record.Degree.LabelCap),
                     "Label"
                 ),
                 Col.Create(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     (grid, record) => grid.Text(record.TraitDef.modContentPack?.Name ?? "",
                         color: ColoredText.SubtleGrayColor),
                     "Source"
