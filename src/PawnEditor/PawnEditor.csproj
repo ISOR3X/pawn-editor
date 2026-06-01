@@ -54,8 +54,13 @@
     <Target Name="Deploy" AfterTargets="Build">
         <ItemGroup>
             <ModFiles Include="$(MSBuildThisFileDirectory)..\..\data\$(ModName)\**\*.*"/>
+            <NativeFiles Include="$(MSBuildThisFileDirectory)..\..\lib\**\*.*"
+                         Exclude="$(MSBuildThisFileDirectory)..\..\lib\Taffy.dll"/>
         </ItemGroup>
         <Copy SourceFiles="@(ModFiles)"
               DestinationFiles="@(ModFiles->'$(RimWorldModsPath)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')"/>
+        <Copy
+                SourceFiles="@(NativeFiles)"
+                DestinationFiles="@(NativeFiles->'$(RimWorldModsPath)\PawnEditor\Native\%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 </Project>
