@@ -192,7 +192,7 @@ public static class Taffy
         s.Height = Dimension.Auto();
         foreach (var child in builder.children) tree.AppendChild(root, child);
 
-        tree.ComputeLayout(root, rect.width, float.PositiveInfinity);
+        tree.ComputeLayout(root, rect.width);
 
         var lookup = BuildLookup(callbacks);
         DrawTree(tree, root, rect.x, rect.y, lookup);
