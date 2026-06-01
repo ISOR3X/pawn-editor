@@ -36,6 +36,8 @@ public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? 
 {
     // Memoizes Text.CalcSize(word).x per (word, font) pair - populated once, reused every frame.
     public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
+    public static readonly Dictionary<(string text, GameFont font), Vector2> TextSizeCache = [];
+    public static readonly Dictionary<(string text, GameFont font, int width), float> TextHeightCache = [];
     public readonly List<(NodeId id, Action<Rect>? draw)> callbacks = callbacks;
     public readonly List<NodeId> children = [];
 
@@ -133,22 +135,34 @@ public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? 
 /// </summary>
 public static class Taffy
 {
-    private record MeasuredLayoutCacheEntry(
+    private record FrameLayoutCacheEntry(
         TaffyTree Tree,
         NodeId Root,
         Dictionary<NodeId, Action<Rect>?> Lookup,
-        float Height,
         float Width,
-        string StyleKey);
+        float Height,
+        int FrameCount,
+        bool Measured);
 
-    private static readonly Dictionary<int, MeasuredLayoutCacheEntry> LayoutCache = [];
+    private static readonly MeasureFunction DefaultMeasure =
+        (known, available, _, ctx, _) =>
+            ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
+                ? measure(known, available)
+                : SizeF.ZERO;
+    private static readonly Dictionary<int, FrameLayoutCacheEntry> FrameLayoutCache = [];
 
     #region ENTRY POINTS
 
     /// <summary>
     ///     RimWorld entry point for the Taffy layout engine.
     /// </summary>
-    public static void Div(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null, bool forceRecache = false)
+    public static void Div(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+    {
+        Execute(rect, (style ?? new StyleOverride()).Resolve(), build);
+    }
+
+    public static void Div(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null,
+        bool forceRecache = false)
     {
         Execute(rect, (style ?? new StyleOverride()).Resolve(), build, uniqueId, forceRecache);
     }
@@ -160,26 +174,66 @@ public static class Taffy
     ///     and returns the computed content height. Used for scrollable containers where
     ///     the natural content height drives the scroll view size.
     /// </summary>
-    public static float DivMeasured(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null, bool forceRecache = false)
+    public static float DivMeasured(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+    {
+        return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
+    }
+
+    public static float DivMeasured(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null,
+        bool forceRecache = false)
     {
         return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build, uniqueId, forceRecache);
+    }
+
+    /// <summary>
+    ///     Computes the natural content height for a layout without drawing it.
+    /// </summary>
+    public static float MeasureHeight(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+    {
+        return MeasureHeight(rect, (style ?? new StyleOverride()).Resolve(), build);
+    }
+
+    private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    {
+        var (tree, root, callbacks) = BuildMeasuredTree(rect, rootStyle, build);
+        var lookup = BuildLookup(callbacks);
+        DrawTree(tree, root, rect.x, rect.y, lookup);
+        return tree.Layout(root).Size.Height;
     }
 
     private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId,
         bool forceRecache)
     {
-        var styleKey = DescribeStyle(rootStyle);
-        if (!forceRecache &&
-            LayoutCache.TryGetValue(uniqueId, out var cached) &&
-            Mathf.Approximately(cached.Width, rect.width) &&
-            cached.StyleKey == styleKey)
+        if (!forceRecache && TryGetCachedLayout(uniqueId, rect, measured: true, out var cached))
         {
             DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
-            if (GUI.changed) 
-                LayoutCache.Clear();
             return cached.Height;
         }
 
+        var (tree, root, callbacks) = BuildMeasuredTree(rect, rootStyle, build);
+        var lookup = BuildLookup(callbacks);
+        var height = tree.Layout(root).Size.Height;
+        FrameLayoutCache[uniqueId] = new FrameLayoutCacheEntry(
+            tree,
+            root,
+            lookup,
+            rect.width,
+            height,
+            Time.frameCount,
+            true);
+        DrawTree(tree, root, rect.x, rect.y, lookup);
+        return height;
+    }
+
+    private static float MeasureHeight(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    {
+        var (tree, root, _) = BuildMeasuredTree(rect, rootStyle, build);
+        return tree.Layout(root).Size.Height;
+    }
+
+    private static (TaffyTree tree, NodeId root, List<(NodeId id, Action<Rect>? draw)> callbacks) BuildMeasuredTree(
+        Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    {
         var tree = new TaffyTree();
         var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
         // Width is definite; height is AUTO so the engine sizes to content
@@ -190,26 +244,8 @@ public static class Taffy
         var root = tree.NewWithChildren(rootStyle, builder.children);
         tree.ComputeLayoutWithMeasure(root,
             new Size<AvailableSpace>(AvailableSpace.Definite(rect.width), AvailableSpace.MaxContent),
-            (known, available, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
-                    ? measure(known, available)
-                    : SizeF.ZERO);
-        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var (id, draw) in callbacks) lookup[id] = draw;
-
-        var height = tree.Layout(root).Size.Height;
-        LayoutCache[uniqueId] = new MeasuredLayoutCacheEntry(
-            tree,
-            root,
-            lookup,
-            height,
-            rect.width,
-            styleKey);
-
-        DrawTree(tree, root, rect.x, rect.y, lookup);
-        if (GUI.changed) 
-            LayoutCache.Clear();
-        return height;
+            DefaultMeasure);
+        return (tree, root, callbacks);
     }
 
     #region STYLE HELPERS
@@ -270,24 +306,8 @@ public static class Taffy
 
     #region CORE
 
-    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId, bool forceRecache)
+    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
     {
-
-        var styleKey = DescribeStyle(rootStyle);
-        if (!forceRecache &&
-            LayoutCache.TryGetValue(uniqueId, out var cached) &&
-            Mathf.Approximately(cached.Width, rect.width) &&
-            cached.StyleKey == styleKey)
-        {
-            DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
-            if (GUI.changed) 
-                LayoutCache.Clear();
-            return;
-        }
-        else
-        {
-            Log.Message($"UniqueId: {uniqueId}\nWidth: {rect.width}\nStyle: {styleKey}");
-        }
         var tree = new TaffyTree();
         var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
 
@@ -304,74 +324,66 @@ public static class Taffy
         tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
                 AvailableSpace.Definite(rect.width),
                 AvailableSpace.Definite(rect.height)),
-            (known, available, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
-                    ? measure(known, available)
-                    : SizeF.ZERO);
+            DefaultMeasure);
 
-        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var entry in callbacks)
-            lookup[entry.id] = entry.draw;
+        var lookup = BuildLookup(callbacks);
 
-        LayoutCache[uniqueId] = new MeasuredLayoutCacheEntry(
+        DrawTree(tree, root, rect.x, rect.y, lookup);
+    }
+
+    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId,
+        bool forceRecache)
+    {
+        if (!forceRecache && TryGetCachedLayout(uniqueId, rect, measured: false, out var cached))
+        {
+            DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
+            return;
+        }
+
+        var tree = new TaffyTree();
+        var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
+
+        rootStyle.size = new Size<Dimension>(Dimension.Length(rect.width), Dimension.Length(rect.height));
+
+        var builder = new TaffyBuilder(tree, callbacks);
+        build(builder);
+        var root = tree.NewWithChildren(rootStyle, builder.children);
+
+        tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
+                AvailableSpace.Definite(rect.width),
+                AvailableSpace.Definite(rect.height)),
+            DefaultMeasure);
+
+        var lookup = BuildLookup(callbacks);
+        FrameLayoutCache[uniqueId] = new FrameLayoutCacheEntry(
             tree,
             root,
             lookup,
-            0,
             rect.width,
-            styleKey);
-
+            rect.height,
+            Time.frameCount,
+            false);
         DrawTree(tree, root, rect.x, rect.y, lookup);
-        if (GUI.changed)
-            LayoutCache.Clear();
     }
 
-    private static string DescribeStyle(Style style)
+    private static Dictionary<NodeId, Action<Rect>?> BuildLookup(List<(NodeId id, Action<Rect>? draw)> callbacks)
     {
-        return string.Join(";", [
-            style.display.ToString(),
-            style.flexDirection.ToString(),
-            style.flexWrap.ToString(),
-            style.flexBasis.ToString(),
-            style.flexGrow.ToString(),
-            style.flexShrink.ToString(),
-            style.size.Width.ToString(),
-            style.size.Height.ToString(),
-            style.minSize.Width.ToString(),
-            style.minSize.Height.ToString(),
-            style.maxSize.Width.ToString(),
-            style.maxSize.Height.ToString(),
-            style.margin.Left.ToString(),
-            style.margin.Right.ToString(),
-            style.margin.Top.ToString(),
-            style.margin.Bottom.ToString(),
-            style.padding.Left.ToString(),
-            style.padding.Right.ToString(),
-            style.padding.Top.ToString(),
-            style.padding.Bottom.ToString(),
-            style.alignItems?.ToString() ?? "-",
-            style.alignSelf?.ToString() ?? "-",
-            style.justifyItems?.ToString() ?? "-",
-            style.justifySelf?.ToString() ?? "-",
-            style.alignContent?.ToString() ?? "-",
-            style.justifyContent?.ToString() ?? "-",
-            style.gap.Width.ToString(),
-            style.gap.Height.ToString(),
-            DescribeSequence(style.gridTemplateColumns),
-            DescribeSequence(style.gridTemplateRows),
-            DescribeSequence(style.gridAutoColumns),
-            DescribeSequence(style.gridAutoRows),
-            style.gridAutoFlow.ToString(),
-            style.gridColumn.Start.ToString(),
-            style.gridColumn.End.ToString(),
-            style.gridRow.Start.ToString(),
-            style.gridRow.End.ToString()
-        ]);
+        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
+        foreach (var (id, draw) in callbacks) lookup[id] = draw;
+        return lookup;
     }
 
-    private static string DescribeSequence<T>(IEnumerable<T>? values)
+    private static bool TryGetCachedLayout(int uniqueId, Rect rect, bool measured, out FrameLayoutCacheEntry cached)
     {
-        return values == null ? "-" : string.Join("|", values);
+        if (FrameLayoutCache.TryGetValue(uniqueId, out cached!)
+            && cached.FrameCount == Time.frameCount
+            && cached.Measured == measured
+            && Mathf.Approximately(cached.Width, rect.width)
+            && (measured || Mathf.Approximately(cached.Height, rect.height)))
+            return true;
+
+        cached = null!;
+        return false;
     }
 
     private static void DrawTree(TaffyTree tree, NodeId node, float originX, float originY,
