@@ -33,7 +33,7 @@ public static partial class TaffyExtensions
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        var gapY = style?.gap?.Row.value ?? 0f;
+        var gapY = style?.gap?.Height.value ?? 0f;
         var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
@@ -91,7 +91,7 @@ public static partial class TaffyExtensions
     {
         var key = $"{b.ContextKey}:{file}:{line}";
 
-        var gapX = style?.gap?.Column.value ?? 0f;
+        var gapX = style?.gap?.Width.value ?? 0f;
         var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);
         var mergedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {

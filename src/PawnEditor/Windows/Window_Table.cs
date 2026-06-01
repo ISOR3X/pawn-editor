@@ -71,7 +71,7 @@ public class Window_Table<T> : OwnedWindow
                             });
 
                     builder2.Item(r => _table.Draw(r), new StyleOverride { flexGrow = 1f });
-                }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });
+                }, new StyleOverride { flexGrow = 1f, gap = new TaffyAxes(Dimension.Px(GenUI.Gap), Dimension.Px(GenUI.Gap)) });
                 if (_selectedItemSlot != null || _onAdd != null)
                     builder.Div(
                         builder4 =>
@@ -82,6 +82,6 @@ public class Window_Table<T> : OwnedWindow
                         },
                         new StyleOverride
                             { justifyContent = TaffyAlignContent.SpaceBetween, alignItems = TaffyAlignItems.Center });
-            }, new StyleOverride { flexDirection = TaffyFlexDirection.Column, gap = Void.Taffy.Gap(GenUI.GapSmall) });
+            }, new StyleOverride { flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapSmall)) });
     }
 }

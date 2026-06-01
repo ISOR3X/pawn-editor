@@ -198,26 +198,6 @@ public static class Taffy
         DrawTree(tree, root, rect.x, rect.y, lookup);
         return tree.GetLayout(root).height;
     }
-
-    #region STYLE HELPERS
-
-    /// <summary>A flexible track that takes the given fraction of remaining space (default 1fr).</summary>
-    public static TaffyTrackSizingFunction Fr(float fr = 1f) => TrackSizingFunction.Fr(fr);
-
-    /// <summary>A fixed-size track of <paramref name="px" /> pixels.</summary>
-    public static TaffyTrackSizingFunction Px(float px) => TrackSizingFunction.Px(px);
-
-    /// <summary>Creates uniform padding on all four sides.</summary>
-    public static TaffyEdges Padding(float all) => new(Dimension.Px(all));
-    
-    /// <summary>Creates uniform gap on both axes.</summary>
-    public static TaffyGap Gap(float all) => new(Dimension.Px(all));
-
-    /// <summary>Creates asymmetric gap: <paramref name="column" /> between columns, <paramref name="row" /> between rows.</summary>
-    public static TaffyGap Gap(float column, float row) => new(Dimension.Px(column), Dimension.Px(row));
-
-    #endregion
-
     #region CORE
 
     private static void Execute(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)

@@ -139,7 +139,7 @@ public class Table<TRow>(
         {
             display = TaffyDisplay.Grid,
             gridTemplateColumns = [.._columnTracks],
-            gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
+            gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(0f)),
             gridAutoRows = [TrackSizingFunction.Px(HeaderHeight)]
         });
 
@@ -217,7 +217,7 @@ public class Table<TRow>(
             {
                 display = TaffyDisplay.Grid,
                 gridTemplateColumns = [.._columnTracks],
-                gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(0f)),
                 alignItems = TaffyAlignItems.Center,
                 gridAutoRows = [TrackSizingFunction.Px(rowHeight)]
             });

@@ -24,7 +24,7 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
                 DrawInspectPaneWidget(row, InspectPaneFiller.DrawTimetableSetting, pawn);
             if (pawn.needs?.energy != null)
                 DrawInspectPaneWidget(row, InspectPaneFiller.DrawMechEnergy, pawn);
-        }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny) });
+        }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapTiny) ) });
         builder.Text(MakeInspectStringFor(pawn));
     }
 
