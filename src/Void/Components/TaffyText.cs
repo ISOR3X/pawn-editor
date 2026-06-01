@@ -30,7 +30,8 @@ public static partial class TaffyExtensions
         {
             using (new TextBlock(mergedStyle.fontSize, anchor, color ?? Color.white))
             {
-                Verse.Text.WordWrap = wrap ?? r.width < Verse.Text.CalcSize(text).x;
+                var font = mergedStyle.fontSize ?? GameFont.Small;
+                Verse.Text.WordWrap = wrap ?? r.width < GetNaturalTextSize(text, font).x;
                 var displayText = wrap == false ? text.Truncate(r.width) : text;
                 Verse.Widgets.Label(r, displayText);
                 Verse.Text.WordWrap = true; // WordWrap is true by default
@@ -46,11 +47,12 @@ public static partial class TaffyExtensions
         // The tree-level dispatch in Execute will cast it and call it.
         Size<float> Measure(Size<float?> known, Size<AvailableSpace> available)
         {
-            using (new TextBlock(mergedStyle.fontSize ?? GameFont.Small))
+            var font = mergedStyle.fontSize ?? GameFont.Small;
+            using (new TextBlock(font))
             {
                 if (known.Width.HasValue)
                     // Width fully constrained by parent algorithm - wrap and measure height.
-                    return new Size<float>(known.Width.Value, MinWidth(text, known.Width.Value, wrap));
+                    return new Size<float>(known.Width.Value, MeasureHeight(text, font, known.Width.Value, wrap));
 
                 if (available.Width.IsMinContent)
                 {
@@ -63,28 +65,48 @@ public static partial class TaffyExtensions
                     var minW = 0f;
                     foreach (var word in text.Split(' '))
                     {
-                        var key = (word, mergedStyle.fontSize ?? GameFont.Small);
+                        var key = (word, font);
                         if (!TaffyBuilder.WordWidthCache.TryGetValue(key, out var w))
                             TaffyBuilder.WordWidthCache[key] = w = Verse.Text.CalcSize(word).x;
                         if (w > minW) minW = w;
                     }
 
 
-                    return new Size<float>(minW, MinWidth(text, minW, wrap));
+                    return new Size<float>(minW, MeasureHeight(text, font, minW, wrap));
                 }
 
                 // Definite available width - wrap at that width.
-                if (available.Width.IntoOption() is { } aw) return new Size<float>(aw, MinWidth(text, aw, wrap));
+                if (available.Width.IntoOption() is { } aw) return new Size<float>(aw, MeasureHeight(text, font, aw, wrap));
 
                 // MaxContent / unconstrained - return natural (unwrapped) size.
-                var sz = Verse.Text.CalcSize(text);
+                var sz = GetNaturalTextSize(text, font);
                 return new Size<float>(sz.x, sz.y);
             }
 
             // Returns height at natural width if wrap is false.
-            static float MinWidth(string text, float width, bool? wrap)
+            static float MeasureHeight(string text, GameFont font, float width, bool? wrap)
             {
-                return wrap == false ? Verse.Text.CalcSize(text).y : Verse.Text.CalcHeight(text, width);
+                if (wrap == false) return GetNaturalTextSize(text, font).y;
+
+                var cacheKey = (text, font, Mathf.CeilToInt(width));
+                if (TaffyBuilder.TextHeightCache.TryGetValue(cacheKey, out var cachedHeight)) return cachedHeight;
+
+                var height = Verse.Text.CalcHeight(text, width);
+                TaffyBuilder.TextHeightCache[cacheKey] = height;
+                return height;
+            }
+        }
+
+        static Vector2 GetNaturalTextSize(string text, GameFont font)
+        {
+            var cacheKey = (text, font);
+            if (TaffyBuilder.TextSizeCache.TryGetValue(cacheKey, out var cachedSize)) return cachedSize;
+
+            using (new TextBlock(font))
+            {
+                var size = Verse.Text.CalcSize(text);
+                TaffyBuilder.TextSizeCache[cacheKey] = size;
+                return size;
             }
         }
     }

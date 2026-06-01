@@ -11,7 +11,12 @@ public abstract class TabWorker(TabDef def)
         gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall)
     };
 
+    private const float LayoutEpsilon = 0.01f;
+
     public readonly List<FloatMenuOption> quickActions = [];
+    private bool _measuredHeightDirty = true;
+    private bool _measuredHeightUsesScrollbar;
+    private float _lastMeasuredWidth = -1f;
     private Vector2 _tabScrollPosition = Vector2.zero;
     private float _viewRectHeight = 5000f;
     public TabDef Def = def;
@@ -23,20 +28,57 @@ public abstract class TabWorker(TabDef def)
     {
         var r = inRect.ContractedBy(16f);
         Verse.Widgets.BeginGroup(r);
+
         var contentRect = r.AtZero();
-        var additionalWidth = r.height < _viewRectHeight ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0;
-        var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
-        Verse.Widgets.BeginScrollView(contentRect, ref _tabScrollPosition, viewRect);
         var rootStyle = Def.layout?.Props.Style.Merge(DefaultRootStyle) ?? DefaultRootStyle;
-        _viewRectHeight = Void.Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), rootStyle);
+        EnsureMeasuredHeight(contentRect, context, rootStyle);
+        var additionalWidth = _measuredHeightUsesScrollbar ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0;
+        var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
+
+        Verse.Widgets.BeginScrollView(contentRect, ref _tabScrollPosition, viewRect);
+        Void.Taffy.Div(Def.defNameHash + (context?.HashCode ?? 0), viewRect, col => DoInnerTabContents(col, context),
+            rootStyle);
+
         Verse.Widgets.EndScrollView();
         Verse.Widgets.EndGroup();
+    }
+
+    private void EnsureMeasuredHeight(Rect contentRect, IContext? context, StyleOverride rootStyle)
+    {
+        var measuredWidth = contentRect.width - (_measuredHeightUsesScrollbar ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0f);
+        if (!_measuredHeightDirty && Mathf.Abs(measuredWidth - _lastMeasuredWidth) < LayoutEpsilon) return;
+
+        var needsScrollbar = _measuredHeightUsesScrollbar;
+        var nextMeasuredWidth = measuredWidth;
+        float measuredHeight;
+
+        do
+        {
+            measuredHeight = Void.Taffy.MeasureHeight(
+                new Rect(0f, 0f, nextMeasuredWidth, contentRect.height),
+                col => DoInnerTabContents(col, context),
+                rootStyle);
+
+            var resolvedNeedsScrollbar = contentRect.height < measuredHeight;
+            if (resolvedNeedsScrollbar == needsScrollbar)
+            {
+                _measuredHeightUsesScrollbar = resolvedNeedsScrollbar;
+                _viewRectHeight = measuredHeight;
+                _lastMeasuredWidth = nextMeasuredWidth;
+                _measuredHeightDirty = false;
+                return;
+            }
+
+            needsScrollbar = resolvedNeedsScrollbar;
+            nextMeasuredWidth = contentRect.width - (needsScrollbar ? UIUtility.ScrollBarWidth + GenUI.GapTiny : 0f);
+        } while (true);
     }
 
     protected abstract void DoInnerTabContents(TaffyBuilder col, IContext? context);
 
     public virtual void Notify_ContentChanged()
     {
+        _measuredHeightDirty = true;
         QuickActionUtility.actions.TryGetValue(Def.defName, out var actions);
         if (actions.NullOrEmpty()) return;
 

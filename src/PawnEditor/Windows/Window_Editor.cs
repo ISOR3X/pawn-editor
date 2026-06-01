@@ -110,7 +110,7 @@ public partial class Window_Editor : Window
     private void DoLeftSection(Rect inRect)
     {
         var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-        Void.Taffy.Div(inRect, builder =>
+        Void.Taffy.Div(ID, inRect, builder =>
         {
             builder.Text("Selected faction", style: new StyleOverride { fontSize = GameFont.Tiny });
             builder.Button(label, tex, c, block: true,

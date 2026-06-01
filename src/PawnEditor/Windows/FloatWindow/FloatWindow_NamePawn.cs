@@ -43,7 +43,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
-        var contentHeight = Void.Taffy.DivMeasured(inRect,
+        var contentHeight = Void.Taffy.DivMeasured(pawn.thingIDNumber, inRect,
             b =>
             {
                 if (_selectedCulture != null)

@@ -33,7 +33,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
         // TODO: Convert to clean taffy components/ layout.
-        var contentHeight = Void.Taffy.DivMeasured(inRect,
+        var contentHeight = Void.Taffy.DivMeasured(thing.thingIDNumber, inRect,
             b =>
             {
                 if (thing.def.MadeFromStuff)

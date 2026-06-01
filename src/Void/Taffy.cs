@@ -36,6 +36,8 @@ public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? 
 {
     // Memoizes Text.CalcSize(word).x per (word, font) pair - populated once, reused every frame.
     public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
+    public static readonly Dictionary<(string text, GameFont font), Vector2> TextSizeCache = [];
+    public static readonly Dictionary<(string text, GameFont font, int width), float> TextHeightCache = [];
     public readonly List<(NodeId id, Action<Rect>? draw)> callbacks = callbacks;
     public readonly List<NodeId> children = [];
 
@@ -133,6 +135,22 @@ public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? 
 /// </summary>
 public static class Taffy
 {
+    private record FrameLayoutCacheEntry(
+        TaffyTree Tree,
+        NodeId Root,
+        Dictionary<NodeId, Action<Rect>?> Lookup,
+        float Width,
+        float Height,
+        int FrameCount,
+        bool Measured);
+
+    private static readonly MeasureFunction DefaultMeasure =
+        (known, available, _, ctx, _) =>
+            ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
+                ? measure(known, available)
+                : SizeF.ZERO;
+    private static readonly Dictionary<int, FrameLayoutCacheEntry> FrameLayoutCache = [];
+
     #region ENTRY POINTS
 
     /// <summary>
@@ -141,6 +159,12 @@ public static class Taffy
     public static void Div(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
     {
         Execute(rect, (style ?? new StyleOverride()).Resolve(), build);
+    }
+
+    public static void Div(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null,
+        bool forceRecache = false)
+    {
+        Execute(rect, (style ?? new StyleOverride()).Resolve(), build, uniqueId, forceRecache);
     }
 
     #endregion
@@ -155,7 +179,60 @@ public static class Taffy
         return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
     }
 
+    public static float DivMeasured(int uniqueId, Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null,
+        bool forceRecache = false)
+    {
+        return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build, uniqueId, forceRecache);
+    }
+
+    /// <summary>
+    ///     Computes the natural content height for a layout without drawing it.
+    /// </summary>
+    public static float MeasureHeight(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
+    {
+        return MeasureHeight(rect, (style ?? new StyleOverride()).Resolve(), build);
+    }
+
     private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    {
+        var (tree, root, callbacks) = BuildMeasuredTree(rect, rootStyle, build);
+        var lookup = BuildLookup(callbacks);
+        DrawTree(tree, root, rect.x, rect.y, lookup);
+        return tree.Layout(root).Size.Height;
+    }
+
+    private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId,
+        bool forceRecache)
+    {
+        if (!forceRecache && TryGetCachedLayout(uniqueId, rect, measured: true, out var cached))
+        {
+            DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
+            return cached.Height;
+        }
+
+        var (tree, root, callbacks) = BuildMeasuredTree(rect, rootStyle, build);
+        var lookup = BuildLookup(callbacks);
+        var height = tree.Layout(root).Size.Height;
+        FrameLayoutCache[uniqueId] = new FrameLayoutCacheEntry(
+            tree,
+            root,
+            lookup,
+            rect.width,
+            height,
+            Time.frameCount,
+            true);
+        DrawTree(tree, root, rect.x, rect.y, lookup);
+        return height;
+    }
+
+    private static float MeasureHeight(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    {
+        var (tree, root, _) = BuildMeasuredTree(rect, rootStyle, build);
+        return tree.Layout(root).Size.Height;
+    }
+
+    private static (TaffyTree tree, NodeId root, List<(NodeId id, Action<Rect>? draw)> callbacks) BuildMeasuredTree(
+        Rect rect, Style rootStyle, Action<TaffyBuilder> build)
     {
         var tree = new TaffyTree();
         var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
@@ -167,14 +244,8 @@ public static class Taffy
         var root = tree.NewWithChildren(rootStyle, builder.children);
         tree.ComputeLayoutWithMeasure(root,
             new Size<AvailableSpace>(AvailableSpace.Definite(rect.width), AvailableSpace.MaxContent),
-            (known, available, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
-                    ? measure(known, available)
-                    : SizeF.ZERO);
-        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var (id, draw) in callbacks) lookup[id] = draw;
-        DrawTree(tree, root, rect.x, rect.y, lookup);
-        return tree.Layout(root).Size.Height;
+            DefaultMeasure);
+        return (tree, root, callbacks);
     }
 
     #region STYLE HELPERS
@@ -253,16 +324,66 @@ public static class Taffy
         tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
                 AvailableSpace.Definite(rect.width),
                 AvailableSpace.Definite(rect.height)),
-            (known, available, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
-                    ? measure(known, available)
-                    : SizeF.ZERO);
+            DefaultMeasure);
 
-        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var entry in callbacks)
-            lookup[entry.id] = entry.draw;
+        var lookup = BuildLookup(callbacks);
 
         DrawTree(tree, root, rect.x, rect.y, lookup);
+    }
+
+    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build, int uniqueId,
+        bool forceRecache)
+    {
+        if (!forceRecache && TryGetCachedLayout(uniqueId, rect, measured: false, out var cached))
+        {
+            DrawTree(cached.Tree, cached.Root, rect.x, rect.y, cached.Lookup);
+            return;
+        }
+
+        var tree = new TaffyTree();
+        var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
+
+        rootStyle.size = new Size<Dimension>(Dimension.Length(rect.width), Dimension.Length(rect.height));
+
+        var builder = new TaffyBuilder(tree, callbacks);
+        build(builder);
+        var root = tree.NewWithChildren(rootStyle, builder.children);
+
+        tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
+                AvailableSpace.Definite(rect.width),
+                AvailableSpace.Definite(rect.height)),
+            DefaultMeasure);
+
+        var lookup = BuildLookup(callbacks);
+        FrameLayoutCache[uniqueId] = new FrameLayoutCacheEntry(
+            tree,
+            root,
+            lookup,
+            rect.width,
+            rect.height,
+            Time.frameCount,
+            false);
+        DrawTree(tree, root, rect.x, rect.y, lookup);
+    }
+
+    private static Dictionary<NodeId, Action<Rect>?> BuildLookup(List<(NodeId id, Action<Rect>? draw)> callbacks)
+    {
+        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
+        foreach (var (id, draw) in callbacks) lookup[id] = draw;
+        return lookup;
+    }
+
+    private static bool TryGetCachedLayout(int uniqueId, Rect rect, bool measured, out FrameLayoutCacheEntry cached)
+    {
+        if (FrameLayoutCache.TryGetValue(uniqueId, out cached!)
+            && cached.FrameCount == Time.frameCount
+            && cached.Measured == measured
+            && Mathf.Approximately(cached.Width, rect.width)
+            && (measured || Mathf.Approximately(cached.Height, rect.height)))
+            return true;
+
+        cached = null!;
+        return false;
     }
 
     private static void DrawTree(TaffyTree tree, NodeId node, float originX, float originY,

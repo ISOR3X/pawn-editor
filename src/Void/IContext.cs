@@ -4,7 +4,10 @@ namespace Void;
 ///     Read-only context value. Covariant — a <c>IContext&lt;Dog&gt;</c> can be used where
 ///     <c>IContext&lt;Animal&gt;</c> is expected. Use when you only need to read the value.
 /// </summary>
-public interface IContext;
+public interface IContext
+{
+    int HashCode { get; }
+}
 
 /// <inheritdoc />
 public interface IContext<out T> : IContext

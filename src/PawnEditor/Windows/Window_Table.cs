@@ -56,7 +56,7 @@ public class Window_Table<T> : OwnedWindow
 
     public override void DoWindowContents(Rect inRect)
     {
-        Void.Taffy.Div(inRect,
+        Void.Taffy.Div(ID, inRect,
             builder =>
             {
                 builder.Div(builder2 =>
