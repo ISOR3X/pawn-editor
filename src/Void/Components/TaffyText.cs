@@ -34,7 +34,10 @@ public static partial class TaffyExtensions
 
             if (onHover != null && Mouse.IsOver(r))
                 onHover(r);
-        }, Measure);
+            // }, Measure);
+        });
+
+        /*
         return;
 
         (float w, float h) Measure(TaffyMeasureMode widthMode, float width, TaffyMeasureMode heightMode, float height)
@@ -74,5 +77,6 @@ public static partial class TaffyExtensions
             static float WrapHeight(string t, float w, bool? wrapOverride)
                 => wrapOverride == false ? Verse.Text.CalcSize(t).y : Verse.Text.CalcHeight(t, w);
         }
+        */
     }
 }

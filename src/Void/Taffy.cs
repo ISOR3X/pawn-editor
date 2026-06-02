@@ -119,18 +119,10 @@ public sealed class TaffyBuilder
 
     #region HELPERS
 
-    internal void AddNode(StyleOverride style, Action<Rect>? draw, TaffyMeasureFunc? measure = null)
+    internal void AddNode(StyleOverride style, Action<Rect>? draw)
     {
         var node = tree.NewNode();
         style.Apply(tree.GetStyle(node));
-        if (measure != null)
-        {
-            tree.SetMeasureFunction(node, (wm, w, hm, h) =>
-            {
-                var (width, height) = measure(wm, w, hm, h);
-                return new TaffySize { width = width, height = height };
-            });
-        }
         children.Add(node);
         callbacks.Add((node, draw));
     }
