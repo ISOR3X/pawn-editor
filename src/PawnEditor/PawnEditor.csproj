@@ -61,6 +61,7 @@
               DestinationFiles="@(ModFiles->'$(RimWorldModsPath)\$(ModName)\%(RecursiveDir)%(Filename)%(Extension)')"/>
         <Copy
                 SourceFiles="@(NativeFiles)"
-                DestinationFiles="@(NativeFiles->'$(RimWorldModsPath)\PawnEditor\Native\%(RecursiveDir)%(Filename)%(Extension)')"/>
+                DestinationFiles="@(NativeFiles->'$(RimWorldModsPath)\PawnEditor\Native\%(RecursiveDir)%(Filename)%(Extension)')"
+                ContinueOnError="WarnAndContinue"/>
     </Target>
 </Project>
