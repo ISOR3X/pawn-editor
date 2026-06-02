@@ -1,10 +1,58 @@
-using System;
-using System.Linq;
 using Taffy;
 using UnityEngine;
 using Verse;
 
 namespace PawnEditor;
+
+public class VoidTree<T> : TaffyTree<T> where T : class
+{
+    private Dictionary<string, TaffyNode> _nodesById = [];
+
+    public void SetNodeId(TaffyNode node, string id)
+    {
+        _nodesById.Add(id, node);
+    }
+
+    public TaffyNode? GetNodeById(string id)
+    {
+        return _nodesById.TryGetValue(id, out var node) ? node : null;
+    }
+}
+
+public class FakePawn(string name, string gender, int age, string backStory)
+{
+    private static int _nextId = 0;
+    public readonly float uniqueId = _nextId++;
+    public string name = name;
+    public string gender = gender;
+    public int age = age;
+    public string backStory = backStory;
+
+    private static readonly string[] Names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank"];
+    private static readonly string[] Genders = ["Male", "Female"];
+    private static readonly string[] BackStories =
+    [
+        "A former soldier who turned to farming.",
+        "A wandering merchant with a troubled past.",
+        "A scholar exiled from their homeland.",
+        "A survivor of a colony ship crash."
+    ];
+
+    public static FakePawn GenerateRandomPawn()
+    {
+        var rng = new System.Random();
+        return new FakePawn(
+            Names[rng.Next(Names.Length)],
+            Genders[rng.Next(Genders.Length)],
+            rng.Next(18, 65),
+            BackStories[rng.Next(BackStories.Length)]
+        );
+    }
+}
+
+public abstract record NodeContext;
+public record TextContext(string Text, GameFont Font = GameFont.Small) : NodeContext;
+public record FloatContext(float Id) : NodeContext;
 
 public static class TaffyHelper
 {
@@ -13,40 +61,33 @@ public static class TaffyHelper
         return new Rect(positionOffset.x + layout.x, positionOffset.y + layout.y, layout.width, layout.height);
     }
 
-    public struct TaffyContext(string text, GameFont font = GameFont.Small)
-    {
-        public GameFont font = font;
-        public string text = text;
-    }
-
     public static TaffySize MeasureText(
         TaffyMeasureMode widthMode, float width,
         TaffyMeasureMode heightMode, float height,
-        TaffyContext? context)
+        NodeContext? context)
     {
-        Log.Message("MeasureText");
-        if (!context.HasValue) return new TaffySize();
-        using (new TextBlock(context.Value.font))
+        if (context is not TextContext tCtx) return new TaffySize();
+        using (new TextBlock(tCtx.Font))
         {
             switch (widthMode)
             {
                 case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
-                    return new TaffySize { width = width, height = Text.CalcHeight(context.Value.text, width) };
+                    return new TaffySize { width = width, height = Text.CalcHeight(tCtx.Text, width) };
                 case TaffyMeasureMode.MinContent:
                     {
-                        var minW = context.Value.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
-                        return new TaffySize { width = minW, height = Text.CalcHeight(context.Value.text, minW) };
+                        var minW = tCtx.Text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
+                        return new TaffySize { width = minW, height = Text.CalcHeight(tCtx.Text, minW) };
                     }
                 default:
                     {
-                        var sz = Text.CalcSize(context.Value.text);
+                        var sz = Text.CalcSize(tCtx.Text);
                         return new TaffySize { width = sz.x, height = sz.y };
                     }
             }
         }
     }
 
-    extension<T>(TaffyTree<T> tree) where T : struct
+    extension<T>(TaffyTree<T> tree) where T : class
     {
         public TaffyNode NewNodeWithStyle(Action<TaffyStyleRef> configure, TaffyNode[]? children = null)
         {
@@ -68,10 +109,10 @@ public static class TaffyHelper
     }
 }
 
-public class ConditionalNode<T> where T : struct
+public class ConditionalNode<T> where T : class
 {
     private readonly TaffyTree<T> _tree;
-    private readonly TaffyNode _parent;
+    public readonly TaffyNode _parent;
     private readonly TaffyNode _content;
 
     internal ConditionalNode(TaffyTree<T> tree, TaffyNode parent, TaffyNode content)
@@ -97,10 +138,16 @@ public class ConditionalNode<T> where T : struct
 
 public class Window_Benchmark : Window
 {
-    private readonly TaffyTree<TaffyHelper.TaffyContext> _tree;
-    private readonly TaffyNode _rootNode;
+    private readonly VoidTree<NodeContext> _tree;
+
+    private static FakePawn pawn1 = FakePawn.GenerateRandomPawn();
+    private static FakePawn pawn2 = FakePawn.GenerateRandomPawn();
+    private static FakePawn pawn3 = FakePawn.GenerateRandomPawn();
+    private static FakePawn selectedPawn = pawn1; // TODO: weak reference
+
     private readonly TaffyNode _buttonNode;
-    private readonly ConditionalNode<TaffyHelper.TaffyContext> _conditional;
+    private readonly ConditionalNode<NodeContext> _conditional;
+
 
     private const string LoremIpsum =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
@@ -112,19 +159,35 @@ public class Window_Benchmark : Window
     {
         resizeable = true;
 
-        _tree = new TaffyTree<TaffyHelper.TaffyContext>();
+        _tree = new VoidTree<NodeContext>();
 
-        var textNode = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext
-        { font = GameFont.Small, text = LoremIpsum });
-
-        _rootNode = _tree.NewNodeWithStyle(s =>
+        using var btnStyle = new TaffyStyleOwned(r =>
         {
-            s.Display = TaffyDisplay.Flex;
-            s.FlexDirection = TaffyFlexDirection.Column;
-            s.Width = Dimension.Percent(1f);
-            s.Height = Dimension.Auto();
-        }, children: [textNode]);
+            r.Width = Dimension.Px(200f);
+            r.Height = Dimension.Px(30f);
+        });
 
+        var _rootNode = _tree.NewLeafWithContext(new FloatContext(selectedPawn.uniqueId));
+        _tree.SetNodeId(_rootNode, "root");
+        
+        var s = _tree.GetStyle(_rootNode);
+        s.Display = TaffyDisplay.Flex;
+        s.FlexDirection = TaffyFlexDirection.Column;
+        s.Width = Dimension.Percent(1f);
+        s.Height = Dimension.Auto();
+
+        var textNode = _tree.NewLeafWithContext(new TextContext(LoremIpsum));
+        _tree.SetNodeId(textNode, "text");
+        _tree.AppendChild(_rootNode, textNode);
+
+        // button with dynamic text?
+        var switchPawnBtnNode = _tree.NewLeafWithContext(new TextContext(selectedPawn.name));
+        _tree.SetNodeId(switchPawnBtnNode, "btn2");
+        _tree.SetStyle(switchPawnBtnNode, btnStyle);
+
+        _tree.AppendChild(_rootNode, switchPawnBtnNode);
+
+        // Conditional node
         var dynNode = _tree.NewNodeWithStyle(s =>
         {
             s.Width = Dimension.Px(200f);
@@ -133,11 +196,8 @@ public class Window_Benchmark : Window
         });
         _tree.AppendChild(_rootNode, dynNode);
 
-        _buttonNode = _tree.NewNodeWithStyle(s =>
-        {
-            s.Width = Dimension.Px(200f);
-            s.Height = Dimension.Px(30f);
-        });
+        _buttonNode = _tree.NewNode();
+        _tree.SetStyle(_buttonNode, btnStyle);
         _tree.AppendChild(dynNode, _buttonNode);
 
         _conditional = _tree.NewConditionalChild(dynNode, s =>
@@ -156,29 +216,38 @@ public class Window_Benchmark : Window
 
     public override void DoWindowContents(Rect inRect)
     {
-        _tree.ComputeLayoutWithMeasure(_rootNode, inRect.width, inRect.height, TaffyHelper.MeasureText);
+        _tree.ComputeLayoutWithMeasure(_tree.GetNodeById("root")!.Value, inRect.width, inRect.height, TaffyHelper.MeasureText);
 
-        var textNode = _tree.ChildAt(_rootNode, 0);
-        var layout = _tree.GetLayout(textNode);
-        var ctx = _tree.GetNodeContext(textNode);
-        if (ctx == null) return;
+        var textNode = _tree.GetNodeById("text")!;
+        var layout = _tree.GetLayout(textNode.Value);
+        var ctx = _tree.GetNodeContext(textNode.Value);
+        if (ctx is TextContext tCtx)
+        {
+            var r = layout.ToRect(inRect.position);
+            using (new TextBlock(tCtx.Font, TextAnchor.UpperLeft))
+            {
+                Text.WordWrap = true;
+                Verse.Widgets.Label(r, tCtx.Text);
+            }
+        }
 
         var dynLayout = _conditional.GetParentLayout();
         var dynOffset = inRect.position + new Vector2(dynLayout.x, dynLayout.y);
 
-        var r = layout.ToRect(inRect.position);
         var r2 = _tree.GetLayout(_buttonNode).ToRect(dynOffset);
+        var r3 = _tree.GetLayout(_tree.GetNodeById("btn2")!.Value).ToRect(inRect.position);
 
-        using (new TextBlock(ctx.Value.font, TextAnchor.UpperLeft))
-        {
-            Text.WordWrap = true;
-            Verse.Widgets.Label(r, ctx.Value.text);
-        }
+        Log.Message(r2.position + "-" + r2.size);
 
         if (Verse.Widgets.ButtonText(r2, _conditional.IsVisible ? "Hide" : "Show"))
             _conditional.Toggle();
 
+        if (Verse.Widgets.ButtonText(r3, selectedPawn?.name))
+        {
+
+        }
+
         if (_conditional.IsVisible)
-            Verse.Widgets.DrawRectFast(_conditional.GetContentLayout().ToRect(dynOffset), Color.blue);
+            Verse.Widgets.DrawRectFast(_conditional.GetContentLayout().ToRect(dynOffset), Color.blue with { a = 0.5f });
     }
 }
