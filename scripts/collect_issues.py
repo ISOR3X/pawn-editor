@@ -19,8 +19,7 @@ from argparse import ArgumentParser
 from typing import Optional
 
 import requests
-
-from scripts._common import make_headers, resolve_token
+from _common import make_headers, resolve_token
 
 REPO_OWNER = "ISOR3X"
 REPO_NAME = "pawn-editor"
