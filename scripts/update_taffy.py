@@ -21,8 +21,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import requests
-
-from scripts._common import (
+from _common import (
     GITHUB_API_BASE,
     REPO_OWNER,
     TIMEOUT,
