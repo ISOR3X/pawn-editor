@@ -41,6 +41,7 @@ public delegate (float width, float height) TaffyMeasureFunc(
     TaffyMeasureMode widthMode, float width,
     TaffyMeasureMode heightMode, float height);
 
+public struct NoContext {}
 /// <summary>
 ///     Fluent layout builder passed to <see cref="Taffy.Div" /> lambdas.
 /// </summary>
@@ -50,9 +51,9 @@ public sealed class TaffyBuilder
     public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
     public readonly List<(TaffyNode id, Action<Rect>? draw)> callbacks;
     public readonly List<TaffyNode> children = [];
-    public readonly TaffyTree tree;
+    public readonly TaffyTree<NoContext> tree;
 
-    public TaffyBuilder(TaffyTree tree, List<(TaffyNode id, Action<Rect>? draw)> callbacks)
+    public TaffyBuilder(TaffyTree<NoContext> tree, List<(TaffyNode id, Action<Rect>? draw)> callbacks)
     {
         this.tree = tree;
         this.callbacks = callbacks;
@@ -170,7 +171,7 @@ public static class Taffy
 
     private static float ExecuteMeasured(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)
     {
-        using var tree = new TaffyTree();
+        using var tree = new TaffyTree<NoContext>();
         var callbacks = new List<(TaffyNode id, Action<Rect>? draw)>();
 
         var builder = new TaffyBuilder(tree, callbacks);
@@ -194,7 +195,7 @@ public static class Taffy
 
     private static void Execute(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)
     {
-        using var tree = new TaffyTree();
+        using var tree = new TaffyTree<NoContext>();
         var callbacks = new List<(TaffyNode id, Action<Rect>? draw)>();
 
         // Give the root a definite size so fr columns resolve correctly.
@@ -221,7 +222,7 @@ public static class Taffy
         return lookup;
     }
 
-    private static void DrawTree(TaffyTree tree, TaffyNode node, float originX, float originY,
+    private static void DrawTree(TaffyTree<NoContext> tree, TaffyNode node, float originX, float originY,
         Dictionary<TaffyNode, Action<Rect>?> lookup)
     {
         var layout = tree.GetLayout(node);
