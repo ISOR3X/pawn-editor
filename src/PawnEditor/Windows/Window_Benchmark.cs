@@ -146,6 +146,11 @@ public class Window_Benchmark : Window
             s.Width = Dimension.Percent(1f);
             s.Height = Dimension.Px(200f);
         });
+
+        var textNode2 = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext
+        { font = GameFont.Small, text = LoremIpsum });
+
+        _tree.AppendChild(_rootNode, textNode2);
     }
 
     public override void Close(bool doCloseSound = true)
@@ -159,20 +164,31 @@ public class Window_Benchmark : Window
         _tree.ComputeLayoutWithMeasure(_rootNode, inRect.width, inRect.height, TaffyHelper.MeasureText);
 
         var textNode = _tree.ChildAt(_rootNode, 0);
+        var textNode2 = _tree.ChildAt(_rootNode, 2);
         var layout = _tree.GetLayout(textNode);
+        var layout2 = _tree.GetLayout(textNode2);
         var ctx = _tree.GetNodeContext(textNode);
+        var ctx2 = _tree.GetNodeContext(textNode2);
         if (ctx == null) return;
+        if (ctx2 == null) return;
 
         var dynLayout = _conditional.GetParentLayout();
         var dynOffset = inRect.position + new Vector2(dynLayout.x, dynLayout.y);
 
         var r = layout.ToRect(inRect.position);
         var r2 = _tree.GetLayout(_buttonNode).ToRect(dynOffset);
+        var r3 = layout2.ToRect(inRect.position);
 
         using (new TextBlock(ctx.Value.font, TextAnchor.UpperLeft))
         {
             Text.WordWrap = true;
             Verse.Widgets.Label(r, ctx.Value.text);
+        }
+
+        using (new TextBlock(ctx2.Value.font, TextAnchor.UpperLeft))
+        {
+            Text.WordWrap = true;
+            Verse.Widgets.Label(r3, ctx2.Value.text);
         }
 
         if (Verse.Widgets.ButtonText(r2, _conditional.IsVisible ? "Hide" : "Show"))
