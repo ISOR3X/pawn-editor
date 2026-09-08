@@ -24,7 +24,6 @@ public static class TaffyHelper
         TaffyMeasureMode heightMode, float height,
         TaffyContext? context)
     {
-        Log.Message("MeasureText");
         if (context is null) return new TaffySize();
         using (new TextBlock(context.font))
         {
@@ -95,7 +94,7 @@ public class ConditionalNode<T> where T : class
     public void Toggle() => SetVisible(!IsVisible);
 }
 
-public class Window_Benchmark : Window
+public class Window_BenchmarkTaffy : Window
 {
     private readonly TaffyTree<TaffyHelper.TaffyContext> _tree;
     private readonly TaffyNode _rootNode;
@@ -108,7 +107,7 @@ public class Window_Benchmark : Window
         "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure " +
         "dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
 
-    public Window_Benchmark()
+    public Window_BenchmarkTaffy()
     {
         resizeable = true;
 
@@ -144,7 +143,7 @@ public class Window_Benchmark : Window
             s.MinWidth = Dimension.Px(400f);
             s.Width = Dimension.Percent(1f);
             s.Height = Dimension.Px(200f);
-        });
+        }, startVisible: false);
 
         var textNode2 = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum, GameFont.Small));
 

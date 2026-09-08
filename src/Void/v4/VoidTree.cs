@@ -8,7 +8,7 @@ namespace Void.v4
     /// Context used for calculating the size of a leaf.
     /// Modifying context marks a leaf dirty.
     /// </summary>
-    public class LeafContext
+    public record LeafContext
     {
         public GameFont? font;
         public string? text;
@@ -63,6 +63,14 @@ namespace Void.v4
         /// </summary>
         private readonly Dictionary<TaffyNode, BranchRecord> _branchRecordsByNode = [];
 
+        // Debug counters to check whether style/context are actually being skipped on steady-state
+        // frames as intended, rather than inferring it indirectly from profiler timings. Logged
+        // (and reset) every LogEveryNBuilds calls to Build so this doesn't spam the console.
+        private int _stylePushCount;
+        private int _contextPushCount;
+        private int _buildCount;
+        private const int LogEveryNBuilds = 120;
+
         public RenderTree()
         {
             _rootBranchNode = _tree.NewNode();
@@ -77,6 +85,7 @@ namespace Void.v4
             // If the styles are not equal, and the new style isn't null, update the native style.
             if (!Utility.NullableEquals(style, rootRecord.prevStyle, equalIfNull: false) && style != null)
             {
+                _stylePushCount++;
                 var _branchStyle = _tree.GetStyle(_rootBranchNode);
                 style.Push(_branchStyle);
                 _tree.SetStyle(_rootBranchNode, _branchStyle);
@@ -85,12 +94,30 @@ namespace Void.v4
             rootRecord.prevStyle = style;
 
             builder(branch);
+
+            if (++_buildCount >= LogEveryNBuilds)
+            {
+                Log.Message($"[Void.v4] over {_buildCount} Build calls: {_stylePushCount} style pushes, {_contextPushCount} context pushes");
+                _buildCount = 0;
+                _stylePushCount = 0;
+                _contextPushCount = 0;
+            }
         }
+
+        private int _drawCount;
+        private const int LogEveryNDraws = 120;
 
         public void Draw(Rect rect)
         {
             _tree.ComputeLayoutWithMeasure(_rootBranchNode, rect.width, rect.height, DefaultMeasure);
             DrawNode(_rootBranchNode, rect.position);
+
+            if (++_drawCount >= LogEveryNDraws)
+            {
+                Log.Message($"[Void.v4] over {_drawCount} Draw calls: {_measureCallCount} DefaultMeasure calls");
+                _drawCount = 0;
+                _measureCallCount = 0;
+            }
         }
 
         private void DrawNode(TaffyNode node, Vector2 origin)
@@ -105,11 +132,17 @@ namespace Void.v4
                 DrawNode(childId, rect.position);
         }
 
+        // Static because DefaultMeasure itself is static. Logged periodically from Draw instead of
+        // here, so we get an explicit "0 calls" line rather than silence when it's not being hit.
+        private static int _measureCallCount;
+
         private static TaffySize DefaultMeasure(
             TaffyMeasureMode widthMode, float width,
             TaffyMeasureMode heightMode, float height,
             LeafContext? context)
         {
+            _measureCallCount++;
+
             if (context is null || context.text == null) return new TaffySize();
             using (new TextBlock(context.font ?? GameFont.Small))
             {
@@ -155,6 +188,7 @@ namespace Void.v4
             // Apply style and context if they have changed and are not null.
             if (!Utility.NullableEquals(style, branchRecord.prevStyle, equalIfNull: false) && style != null)
             {
+                _stylePushCount++;
                 var _branchStyle = _tree.GetStyle(branchNode);
                 style.Push(_branchStyle);
                 _tree.SetStyle(branchNode, _branchStyle);
@@ -162,6 +196,7 @@ namespace Void.v4
 
             if (!Utility.NullableEquals(context, _tree.GetNodeContext(branchNode), equalIfNull: false) && context != null)
             {
+                _contextPushCount++;
                 _tree.SetNodeContext(branchNode, context);
             }
 

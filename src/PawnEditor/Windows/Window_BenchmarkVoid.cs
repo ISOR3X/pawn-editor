@@ -6,7 +6,7 @@ using Void.v4;
 namespace PawnEditor;
 
 /// <summary>
-///     Same scenario as <see cref="Window_Benchmark" /> (two text blocks, a fixed-size sidebar
+///     Same scenario as <see cref="Window_BenchmarkTaffy" /> (two text blocks, a fixed-size sidebar
 ///     with a toggle button, and a box that appears/disappears) but built on the new
 ///     <see cref="VoidTree" /> reconciled-tree core, through its scoped <see cref="ChildBuilder" />
 ///     API. The toggle button exercises keyed child add/remove through the automatic
@@ -14,7 +14,7 @@ namespace PawnEditor;
 ///     <c>ConditionalNode</c> helper the v1 benchmark uses — this is deliberately the same content
 ///     so the two windows are comparable.
 /// </summary>
-public class Window_BenchmarkV4 : Window
+public class Window_BenchmarkVoid : Window
 {
     private readonly RenderTree _tree = new();
     private bool _showBox;
@@ -25,7 +25,7 @@ public class Window_BenchmarkV4 : Window
         "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure " +
         "dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
 
-    public Window_BenchmarkV4()
+    public Window_BenchmarkVoid()
     {
         resizeable = true;
     }
