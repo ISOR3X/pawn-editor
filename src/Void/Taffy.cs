@@ -41,7 +41,7 @@ public delegate (float width, float height) TaffyMeasureFunc(
     TaffyMeasureMode widthMode, float width,
     TaffyMeasureMode heightMode, float height);
 
-public struct NoContext {}
+public sealed class NoContext;
 /// <summary>
 ///     Fluent layout builder passed to <see cref="Taffy.Div" /> lambdas.
 /// </summary>

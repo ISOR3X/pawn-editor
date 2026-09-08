@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using JetBrains.Annotations;
+using UnityEngine;
 using Verse;
 using Void;
 
@@ -18,12 +19,20 @@ public class Patch_OpenEditor
         }
 
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
-            // if (Current.ProgramState == ProgramState.Playing)
-            // VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
+        {
+            // Shift opens the Void.v2 benchmark window instead of the v1 one.
+            if (Event.current.shift)
+            {
+                if (Find.WindowStack.IsOpen<Window_BenchmarkV4>()) Find.WindowStack.TryRemove(typeof(Window_BenchmarkV4));
+                else Find.WindowStack.Add(new Window_BenchmarkV4());
+            }
+            else
+            {
+                if (Find.WindowStack.IsOpen<Window_Benchmark>()) Find.WindowStack.TryRemove(typeof(Window_Benchmark));
+                else Find.WindowStack.Add(new Window_Benchmark());
+            }
+        }
 
-            if (Find.WindowStack.IsOpen<Window_Benchmark>()) Find.WindowStack.TryRemove(typeof(Window_Benchmark));
-            else Find.WindowStack.Add(new Window_Benchmark());
-        
         if (KeyBindingDefOf.PawnEditor_HotReloadDefs.KeyDownEvent)
         {
             var open = Find.WindowStack.IsOpen<Window_Editor>();

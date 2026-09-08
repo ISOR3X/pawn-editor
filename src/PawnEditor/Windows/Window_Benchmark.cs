@@ -13,7 +13,7 @@ public static class TaffyHelper
         return new Rect(positionOffset.x + layout.x, positionOffset.y + layout.y, layout.width, layout.height);
     }
 
-    public struct TaffyContext(string text, GameFont font = GameFont.Small)
+    public sealed class TaffyContext(string text, GameFont font = GameFont.Small)
     {
         public GameFont font = font;
         public string text = text;
@@ -25,28 +25,28 @@ public static class TaffyHelper
         TaffyContext? context)
     {
         Log.Message("MeasureText");
-        if (!context.HasValue) return new TaffySize();
-        using (new TextBlock(context.Value.font))
+        if (context is null) return new TaffySize();
+        using (new TextBlock(context.font))
         {
             switch (widthMode)
             {
                 case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
-                    return new TaffySize { width = width, height = Text.CalcHeight(context.Value.text, width) };
+                    return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
                 case TaffyMeasureMode.MinContent:
                     {
-                        var minW = context.Value.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
-                        return new TaffySize { width = minW, height = Text.CalcHeight(context.Value.text, minW) };
+                        var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
+                        return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
                     }
                 default:
                     {
-                        var sz = Text.CalcSize(context.Value.text);
+                        var sz = Text.CalcSize(context.text);
                         return new TaffySize { width = sz.x, height = sz.y };
                     }
             }
         }
     }
 
-    extension<T>(TaffyTree<T> tree) where T : struct
+    extension<T>(TaffyTree<T> tree) where T : class
     {
         public TaffyNode NewNodeWithStyle(Action<TaffyStyleRef> configure, TaffyNode[]? children = null)
         {
@@ -68,7 +68,7 @@ public static class TaffyHelper
     }
 }
 
-public class ConditionalNode<T> where T : struct
+public class ConditionalNode<T> where T : class
 {
     private readonly TaffyTree<T> _tree;
     private readonly TaffyNode _parent;
@@ -114,8 +114,7 @@ public class Window_Benchmark : Window
 
         _tree = new TaffyTree<TaffyHelper.TaffyContext>();
 
-        var textNode = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext
-        { font = GameFont.Small, text = LoremIpsum });
+        var textNode = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum, GameFont.Small));
 
         _rootNode = _tree.NewNodeWithStyle(s =>
         {
@@ -147,15 +146,14 @@ public class Window_Benchmark : Window
             s.Height = Dimension.Px(200f);
         });
 
-        var textNode2 = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext
-        { font = GameFont.Small, text = LoremIpsum });
+        var textNode2 = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum, GameFont.Small));
 
         _tree.AppendChild(_rootNode, textNode2);
     }
 
-    public override void Close(bool doCloseSound = true)
+    public override void PostClose()
     {
-        base.Close(doCloseSound);
+        base.PostClose();
         _tree.Dispose();
     }
 
@@ -179,16 +177,16 @@ public class Window_Benchmark : Window
         var r2 = _tree.GetLayout(_buttonNode).ToRect(dynOffset);
         var r3 = layout2.ToRect(inRect.position);
 
-        using (new TextBlock(ctx.Value.font, TextAnchor.UpperLeft))
+        using (new TextBlock(ctx.font, TextAnchor.UpperLeft))
         {
             Text.WordWrap = true;
-            Verse.Widgets.Label(r, ctx.Value.text);
+            Verse.Widgets.Label(r, ctx.text);
         }
 
-        using (new TextBlock(ctx2.Value.font, TextAnchor.UpperLeft))
+        using (new TextBlock(ctx2.font, TextAnchor.UpperLeft))
         {
             Text.WordWrap = true;
-            Verse.Widgets.Label(r3, ctx2.Value.text);
+            Verse.Widgets.Label(r3, ctx2.text);
         }
 
         if (Verse.Widgets.ButtonText(r2, _conditional.IsVisible ? "Hide" : "Show"))
