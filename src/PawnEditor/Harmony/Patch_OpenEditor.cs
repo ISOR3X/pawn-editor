@@ -20,16 +20,31 @@ public class Patch_OpenEditor
 
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
         {
-            // Shift opens the Void.v2 benchmark window instead of the v1 one.
-            if (Event.current.shift)
+            // Opens all three benchmark windows side by side, for comparing them (e.g. with Dubs
+            // Performance Analyzer) in the same play session instead of one at a time.
+            if (Find.WindowStack.IsOpen<Window_BenchmarkTaffy>())
             {
-                if (Find.WindowStack.IsOpen<Window_BenchmarkV4>()) Find.WindowStack.TryRemove(typeof(Window_BenchmarkV4));
-                else Find.WindowStack.Add(new Window_BenchmarkV4());
+                Find.WindowStack.TryRemove(typeof(Window_BenchmarkTaffy));
+                Find.WindowStack.TryRemove(typeof(Window_BenchmarkVerse));
+                Find.WindowStack.TryRemove(typeof(Window_BenchmarkVoid));
             }
             else
             {
-                if (Find.WindowStack.IsOpen<Window_Benchmark>()) Find.WindowStack.TryRemove(typeof(Window_Benchmark));
-                else Find.WindowStack.Add(new Window_Benchmark());
+                const float margin = 20f;
+                var width = (UI.screenWidth - margin * 4f) / 3f;
+                var height = UI.screenHeight * 0.7f;
+
+                var taffy = new Window_BenchmarkTaffy();
+                Find.WindowStack.Add(taffy);
+                taffy.windowRect = new Rect(margin, margin, width, height);
+
+                var verse = new Window_BenchmarkVerse();
+                Find.WindowStack.Add(verse);
+                verse.windowRect = new Rect(margin * 2f + width, margin, width, height);
+
+                var voidWindow = new Window_BenchmarkVoid();
+                Find.WindowStack.Add(voidWindow);
+                voidWindow.windowRect = new Rect(margin * 3f + width * 2f, margin, width, height);
             }
         }
 
