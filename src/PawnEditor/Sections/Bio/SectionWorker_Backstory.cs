@@ -1,3 +1,4 @@
+using Taffy;
 using PawnEditor.Table;
 using RimWorld;
 using UnityEngine;
@@ -6,7 +7,6 @@ using Void;
 using Void.Components;
 using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
-using Display = Taffy.Display;
 using Layout = Void.Layout;
 
 namespace PawnEditor;
@@ -60,7 +60,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                             b2.Text($"Current: {currentBackstory.TitleCapFor(pawn.gender)}".Colorize(ColoredText
                                 .SubtleGrayColor));
                             b2.Text($"New: {newBackstory}");
-                        }, new StyleOverride { display = Display.Block });
+                        }, new StyleOverride { display = TaffyDisplay.Block });
                     }));
             else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
         };
@@ -74,7 +74,7 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
             null,
             [
                 Col.Create<PawnContext>(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
                     "Title",
                     (a, b) => string.Compare(
@@ -83,13 +83,13 @@ public class SectionWorker_Backstory(SectionDef def) : SectionWorker(def)
                         StringComparison.CurrentCultureIgnoreCase)
                 ),
                 Col.CreateText(
-                    Void.Taffy.Px(150f),
+                    TrackSizingFunction.Px(150f),
                     def => def.modContentPack?.Name ?? "",
                     "Source",
                     ColoredText.SubtleGrayColor
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => string.Join(", ", def.spawnCategories),
                     "Spawn categories",
                     ColoredText.SubtleGrayColor

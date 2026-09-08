@@ -2,14 +2,15 @@ using Taffy;
 using UnityEngine;
 using Verse;
 
-namespace Void;
+namespace Void.v4;
 
 /// <summary>
 ///     A near 1:1 copy of <see cref="TaffyStyleRef" /> with every field nullable, so callers can
 ///     override only the fields they care about and fall back to defaults for the rest.
-///     Fields irrelevant to RimWorld usage are removed.
+///     Fields irrelevant to RimWorld usage are removed. (TODO: Which ones?)
+///     TODO: Find better name
 /// </summary>
-public class StyleOverride
+public class StyleOverride : IEquatable<StyleOverride>
 {
     // Not used by Taffy — stored here so UI code can read colors alongside layout.
     public Color? color;
@@ -91,7 +92,7 @@ public class StyleOverride
     /// <summary>
     ///     Applies all non-null fields to <paramref name="s" />.
     /// </summary>
-    public unsafe void Apply(TaffyStyleRef s)
+    public void Push(TaffyStyleRef s)
     {
         if (display.HasValue) s.Display = display.Value;
         if (flexDirection.HasValue) s.FlexDirection = flexDirection.Value;
@@ -138,5 +139,49 @@ public class StyleOverride
         if (gridTemplateRows != null) s.SetGridTemplateRows(gridTemplateRows);
         if (gridAutoColumns != null) s.SetGridAutoColumns(gridAutoColumns);
         if (gridAutoRows != null) s.SetGridAutoRows(gridAutoRows);
+    }
+
+    /// <summary>
+    /// Only compares values that may influence layout.
+    public bool Equals(StyleOverride other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return display == other.display
+            && flexDirection == other.flexDirection
+            && flexWrap == other.flexWrap
+            && flexGrow == other.flexGrow
+            && flexShrink == other.flexShrink
+            && flexBasis.Equals(other.flexBasis)
+            && alignItems == other.alignItems
+            && alignSelf == other.alignSelf
+            && alignContent == other.alignContent
+            && justifyContent == other.justifyContent
+            && justifyItems == other.justifyItems
+            && justifySelf == other.justifySelf
+            && width.Equals(other.width)
+            && height.Equals(other.height)
+            && minWidth.Equals(other.minWidth)
+            && minHeight.Equals(other.minHeight)
+            && maxWidth.Equals(other.maxWidth)
+            && maxHeight.Equals(other.maxHeight)
+            && gap.Equals(other.gap)
+            && padding.Equals(other.padding)
+            && margin.Equals(other.margin)
+            && gridAutoFlow == other.gridAutoFlow
+            && gridColumn.Equals(other.gridColumn)
+            && gridRow.Equals(other.gridRow)
+            && SequenceEqualNullable(gridTemplateColumns, other.gridTemplateColumns)
+            && SequenceEqualNullable(gridTemplateRows, other.gridTemplateRows)
+            && SequenceEqualNullable(gridAutoColumns, other.gridAutoColumns)
+            && SequenceEqualNullable(gridAutoRows, other.gridAutoRows);
+    }
+
+    private static bool SequenceEqualNullable(TaffyTrackSizingFunction[]? a, TaffyTrackSizingFunction[]? b)
+    {
+        if (ReferenceEquals(a, b)) return true;
+        if (a is null || b is null) return false;
+        return a.SequenceEqual(b);
     }
 }

@@ -1,6 +1,6 @@
 // Taffy integration layer for RimWorld.
 //
-// Provides a callback-style fluent API backed by Taffy's Taffy layout engine.
+// Provides a callback-style fluent API backed by the ctaffy native layout engine.
 //
 // Usage:
 //   Taffy.Column(inRect, gap: 4f, col =>
@@ -25,101 +25,116 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Color = UnityEngine.Color;
-using SizeF = Taffy.SizeF;
 
 namespace Void;
 
 /// <summary>
-///     Fluent layout builder passed to <see cref="Taffy.Row" /> / <see cref="UnityEngine.UIElements.Column" /> lambdas.
+///     A delegate for custom node measurement. Mirrors the ctaffy measure callback signature.
+///     <list type="bullet">
+///     <item><see cref="TaffyMeasureMode.Exact"/> — the value is a fixed constraint.</item>
+///     <item><see cref="TaffyMeasureMode.FitContent"/> — the value is definite available space.</item>
+///     <item><see cref="TaffyMeasureMode.MinContent"/> — min-content size query; value is +∞.</item>
+///     <item><see cref="TaffyMeasureMode.MaxContent"/> — unconstrained; value is +∞.</item>
+///     </list>
 /// </summary>
-public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? draw)> callbacks)
-{
-    // Memoizes Text.CalcSize(word).x per (word, font) pair - populated once, reused every frame.
-    public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
-    public readonly List<(NodeId id, Action<Rect>? draw)> callbacks = callbacks;
-    public readonly List<NodeId> children = [];
+public delegate (float width, float height) TaffyMeasureFunc(
+    TaffyMeasureMode widthMode, float width,
+    TaffyMeasureMode heightMode, float height);
 
-    public readonly TaffyTree tree = tree;
+public sealed class NoContext;
+/// <summary>
+///     Fluent layout builder passed to <see cref="Taffy.Div" /> lambdas.
+/// </summary>
+public sealed class TaffyBuilder
+{
+    // Memoizes Text.CalcSize(word).x per (word, font) pair — populated once, reused every frame.
+    public static readonly Dictionary<(string word, GameFont font), float> WordWidthCache = [];
+    public readonly List<(TaffyNode id, Action<Rect>? draw)> callbacks;
+    public readonly List<TaffyNode> children = [];
+    public readonly TaffyTree<NoContext> tree;
+
+    public TaffyBuilder(TaffyTree<NoContext> tree, List<(TaffyNode id, Action<Rect>? draw)> callbacks)
+    {
+        this.tree = tree;
+        this.callbacks = callbacks;
+    }
 
     /// <summary>
     ///     Stable identifier for the current context, used by stateful extensions like
     ///     <c>TaffyExtensions.Input(ref string)</c> to key their per-widget persistent state.
-    ///     Set by <see cref="SectionWorker.BuildSection" /> before entering section content.
     /// </summary>
     public string? ContextKey { get; set; }
 
     // ── Grid items ──────────────────────────────────────────────────────────
 
     /// <summary>
-    ///     Adds a grid item with optional column/row placement.
-    ///     All parameters use CSS Grid 1-based line indices.
+    ///     Adds a grid item with optional column/row placement (1-based CSS Grid indices).
     ///     TODO: deprecate and remove
     /// </summary>
-    /// <param name="draw">Draw callback invoked with the item's computed rect.</param>
-    /// <param name="colSpan">Number of columns to span (default 1).</param>
-    /// <param name="rowSpan">Number of rows to span (default 1).</param>
-    /// <param name="colStart">Explicit column-start line (1-based). Null = auto-placed.</param>
-    /// <param name="rowStart">Explicit row-start line (1-based). Null = auto-placed.</param>
     public void GridItem(Action<Rect>? draw = null,
         int colSpan = 1, int rowSpan = 1,
         int? colStart = null, int? rowStart = null)
     {
-        var style = new Style();
+        var style = new StyleOverride();
 
         if (colStart.HasValue || colSpan > 1)
         {
-            var start = colStart.HasValue ? GridPlacement.Line(colStart.Value) : GridPlacement.Auto;
-            var end = colSpan > 1 ? GridPlacement.Span(colSpan) : GridPlacement.Auto;
-            style.gridColumn = new Line<GridPlacement>(start, end);
+            var p = new TaffyGridPlacement();
+            if (colStart.HasValue) p.start = (short)colStart.Value;
+            if (colSpan > 1) p.span = (ushort)colSpan;
+            style.gridColumn = p;
         }
 
         if (rowStart.HasValue || rowSpan > 1)
         {
-            var start = rowStart.HasValue ? GridPlacement.Line(rowStart.Value) : GridPlacement.Auto;
-            var end = rowSpan > 1 ? GridPlacement.Span(rowSpan) : GridPlacement.Auto;
-            style.gridRow = new Line<GridPlacement>(start, end);
+            var p = new TaffyGridPlacement();
+            if (rowStart.HasValue) p.start = (short)rowStart.Value;
+            if (rowSpan > 1) p.span = (ushort)rowSpan;
+            style.gridRow = p;
         }
 
-        AddLeaf(style, draw);
+        AddNode(style, draw);
     }
 
     #region LEAF ITEMS
 
     public void Item(Action<Rect>? draw = null, StyleOverride? style = null)
     {
-        AddLeaf((style ?? new StyleOverride()).Resolve(), draw);
+        AddNode(style ?? new StyleOverride(), draw);
     }
 
     public void Div(Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
     {
-        AddContainer((style ?? new StyleOverride()).Resolve(), null, builder);
+        AddContainer(style ?? new StyleOverride(), null, builder);
     }
 
     /// <summary>
-    ///     Adds a container that runs <paramref name="draw" /> on its own rect (e.g. highlight/tooltip) before drawing
-    ///     children.
+    ///     Adds a container that runs <paramref name="draw" /> on its own rect before drawing children.
     /// </summary>
     public void Div(Action<Rect>? draw = null, Action<TaffyBuilder>? builder = null, StyleOverride? style = null)
     {
-        AddContainer((style ?? new StyleOverride()).Resolve(), draw, builder);
+        AddContainer(style ?? new StyleOverride(), draw, builder);
     }
 
     #endregion
 
     #region HELPERS
 
-    private void AddLeaf(Style style, Action<Rect>? draw)
+    internal void AddNode(StyleOverride style, Action<Rect>? draw)
     {
-        var node = tree.NewLeaf(style);
+        var node = tree.NewNode();
+        style.Apply(tree.GetStyle(node));
         children.Add(node);
         callbacks.Add((node, draw));
     }
 
-    private void AddContainer(Style style, Action<Rect>? draw, Action<TaffyBuilder>? build)
+    private void AddContainer(StyleOverride style, Action<Rect>? draw, Action<TaffyBuilder>? build)
     {
         var inner = new TaffyBuilder(tree, callbacks) { ContextKey = ContextKey };
         build?.Invoke(inner);
-        var node = tree.NewWithChildren(style, inner.children);
+        var node = tree.NewNode();
+        style.Apply(tree.GetStyle(node));
+        foreach (var child in inner.children) tree.AppendChild(node, child);
         children.Add(node);
         callbacks.Add((node, draw));
     }
@@ -128,8 +143,8 @@ public sealed class TaffyBuilder(TaffyTree tree, List<(NodeId id, Action<Rect>? 
 }
 
 /// <summary>
-///     Static entry points for Taffy-backed layout in RimWorld.
-///     Creates a fresh layout tree per call; the layout is computed and draws callbacks invoked before returning.
+///     Static entry points for ctaffy-backed layout in RimWorld.
+///     Creates a fresh layout tree per call; layout is computed and draw callbacks invoked before returning.
 /// </summary>
 public static class Taffy
 {
@@ -140,138 +155,80 @@ public static class Taffy
     /// </summary>
     public static void Div(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
     {
-        Execute(rect, (style ?? new StyleOverride()).Resolve(), build);
+        Execute(rect, style ?? new StyleOverride(), build);
     }
 
     #endregion
 
     /// <summary>
     ///     Like <see cref="Div" /> but lays out with unconstrained height, draws all content,
-    ///     and returns the computed content height. Used for scrollable containers where
-    ///     the natural content height drives the scroll view size.
+    ///     and returns the computed content height. Used for scrollable containers.
     /// </summary>
     public static float DivMeasured(Rect rect, Action<TaffyBuilder> build, StyleOverride? style = null)
     {
-        return ExecuteMeasured(rect, (style ?? new StyleOverride()).Resolve(), build);
+        return ExecuteMeasured(rect, style ?? new StyleOverride(), build);
     }
 
-    private static float ExecuteMeasured(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    private static float ExecuteMeasured(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)
     {
-        var tree = new TaffyTree();
-        var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
-        // Width is definite; height is AUTO so the engine sizes to content
-        // (equivalent to passing Size::MAX_CONTENT on the height axis in Rust Taffy).
-        rootStyle.size = new Size<Dimension>(Dimension.Length(rect.width), Dimension.AUTO);
+        using var tree = new TaffyTree<NoContext>();
+        var callbacks = new List<(TaffyNode id, Action<Rect>? draw)>();
+
         var builder = new TaffyBuilder(tree, callbacks);
         build(builder);
-        var root = tree.NewWithChildren(rootStyle, builder.children);
-        tree.ComputeLayoutWithMeasure(root,
-            new Size<AvailableSpace>(AvailableSpace.Definite(rect.width), AvailableSpace.MaxContent),
-            (known, available, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
-                    ? measure(known, available)
-                    : SizeF.ZERO);
-        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var (id, draw) in callbacks) lookup[id] = draw;
+
+        var root = tree.NewNode();
+        var s = tree.GetStyle(root);
+        rootStyle.Apply(s);
+        // Width is definite; +∞ maps to MaxContent in ctaffy, giving unconstrained height.
+        s.Width = Dimension.Px(rect.width);
+        s.Height = Dimension.Auto();
+        foreach (var child in builder.children) tree.AppendChild(root, child);
+
+        tree.ComputeLayout(root, rect.width);
+
+        var lookup = BuildLookup(callbacks);
         DrawTree(tree, root, rect.x, rect.y, lookup);
-        return tree.Layout(root).Size.Height;
+        return tree.GetLayout(root).height;
     }
-
-    #region STYLE HELPERS
-
-    /// <summary>A flexible track that takes the given fraction of remaining space (default 1fr).</summary>
-    public static TrackSizingFunction Fr(float fr = 1f)
-    {
-        return TrackSizingFunction.Fr(fr);
-    }
-
-    /// <summary>A fixed-size track of <paramref name="px" /> pixels.</summary>
-    public static TrackSizingFunction Px(float px)
-    {
-        return TrackSizingFunction.Px(px);
-    }
-
-    /// <summary>Creates uniform padding on all four sides.</summary>
-    public static Rect<LengthPercentage> Padding(float all)
-    {
-        var v = LengthPercentage.Length(all);
-        return new Rect<LengthPercentage>(v, v, v, v);
-    }
-
-    /// <summary>Creates asymmetric padding: <paramref name="lr" /> on left/right, <paramref name="tb" /> on top/bottom.</summary>
-    public static Rect<LengthPercentage> Padding(float lr, float tb)
-    {
-        var h = LengthPercentage.Length(lr);
-        var v = LengthPercentage.Length(tb);
-        return new Rect<LengthPercentage>(h, h, v, v);
-    }
-
-    public static Rect<LengthPercentageAuto> Margin(float all)
-    {
-        var v = LengthPercentageAuto.Length(all);
-        return new Rect<LengthPercentageAuto>(v, v, v, v);
-    }
-
-    public static Rect<LengthPercentageAuto> Margin(float lr, float tb)
-    {
-        var h = LengthPercentageAuto.Length(lr);
-        var v = LengthPercentageAuto.Length(tb);
-        return new Rect<LengthPercentageAuto>(h, h, v, v);
-    }
-
-    /// <summary>Creates uniform gap on both axes.</summary>
-    public static Size<LengthPercentage> Gap(float all)
-    {
-        return new Size<LengthPercentage>(LengthPercentage.Length(all), LengthPercentage.Length(all));
-    }
-
-    /// <summary>Creates asymmetric gap: <paramref name="column" /> between columns, <paramref name="row" /> between rows.</summary>
-    public static Size<LengthPercentage> Gap(float column, float row)
-    {
-        return new Size<LengthPercentage>(LengthPercentage.Length(column), LengthPercentage.Length(row));
-    }
-
-    #endregion
-
     #region CORE
 
-    private static void Execute(Rect rect, Style rootStyle, Action<TaffyBuilder> build)
+    private static void Execute(Rect rect, StyleOverride rootStyle, Action<TaffyBuilder> build)
     {
-        var tree = new TaffyTree();
-        var callbacks = new List<(NodeId id, Action<Rect>? draw)>();
+        using var tree = new TaffyTree<NoContext>();
+        var callbacks = new List<(TaffyNode id, Action<Rect>? draw)>();
 
-        // Give the root container a definite width from the rect so that fr columns resolve
-        // correctly. Without this, inner_node_size.Width is None, which causes ExpandFlexibleTracks
-        // to use MaxContent semantics: fr fraction = max content of items = 0 for leaf nodes,
-        // making all fr columns 0px wide. Height is left Auto so the container shrinks to content.
-        rootStyle.size = new Size<Dimension>(Dimension.Length(rect.width), Dimension.Length(rect.height));
-
+        // Give the root a definite size so fr columns resolve correctly.
         var builder = new TaffyBuilder(tree, callbacks);
         build(builder);
-        var root = tree.NewWithChildren(rootStyle, builder.children);
 
-        tree.ComputeLayoutWithMeasure(root, new Size<AvailableSpace>(
-                AvailableSpace.Definite(rect.width),
-                AvailableSpace.Definite(rect.height)),
-            (known, available, _, ctx, _) =>
-                ctx is Func<Size<float?>, Size<AvailableSpace>, Size<float>> measure
-                    ? measure(known, available)
-                    : SizeF.ZERO);
+        var root = tree.NewNode();
+        var s = tree.GetStyle(root);
+        rootStyle.Apply(s);
+        s.Width = Dimension.Px(rect.width);
+        s.Height = Dimension.Px(rect.height);
+        foreach (var child in builder.children) tree.AppendChild(root, child);
 
-        var lookup = new Dictionary<NodeId, Action<Rect>?>(callbacks.Count);
-        foreach (var entry in callbacks)
-            lookup[entry.id] = entry.draw;
+        tree.ComputeLayout(root, rect.width, rect.height);
 
+        var lookup = BuildLookup(callbacks);
         DrawTree(tree, root, rect.x, rect.y, lookup);
     }
 
-    private static void DrawTree(TaffyTree tree, NodeId node, float originX, float originY,
-        Dictionary<NodeId, Action<Rect>?> lookup)
+    private static Dictionary<TaffyNode, Action<Rect>?> BuildLookup(List<(TaffyNode id, Action<Rect>? draw)> callbacks)
     {
-        ref var layout = ref tree.Layout(node);
-        var absX = originX + layout.Location.X;
-        var absY = originY + layout.Location.Y;
-        var r = new Rect(absX, absY, layout.Size.Width, layout.Size.Height);
+        var lookup = new Dictionary<TaffyNode, Action<Rect>?>(callbacks.Count);
+        foreach (var (id, draw) in callbacks) lookup[id] = draw;
+        return lookup;
+    }
+
+    private static void DrawTree(TaffyTree<NoContext> tree, TaffyNode node, float originX, float originY,
+        Dictionary<TaffyNode, Action<Rect>?> lookup)
+    {
+        var layout = tree.GetLayout(node);
+        var absX = originX + layout.x;
+        var absY = originY + layout.y;
+        var r = new Rect(absX, absY, layout.width, layout.height);
 
         if (VoidMod.Settings.drawDebug)
         {
@@ -282,19 +239,20 @@ public static class Taffy
             if (Mouse.IsOver(r))
             {
                 Verse.Widgets.DrawBox(r, 6, SolidColorMaterials.NewSolidColorTexture(c));
-                var s = tree.GetStyle(node);
+                var style = tree.GetStyle(node);
                 var tip =
                     "color:" + $" #{ColorUtility.ToHtmlStringRGB(c)}".Colorize(c) + "\n" +
                     $"rect: {r.width:F0}×{r.height:F0} @ ({r.x:F0},{r.y:F0})\n" +
-                    $"display: {s.display}  dir: {s.flexDirection}  wrap: {s.flexWrap}\n" +
-                    $"size: {s.size.Width}×{s.size.Height}" +
-                    $"  min: {s.minSize.Width}×{s.minSize.Height}" +
-                    $"  max: {s.maxSize.Width}×{s.maxSize.Height}" +
-                    $"  basis: {s.flexBasis}\n" +
-                    $"grow: {s.flexGrow}  shrink: {s.flexShrink}" +
-                    $"  gap: {s.gap.Width}×{s.gap.Height}" +
-                    $"  padding: {s.padding.ToStringSimple()}, margin: {s.margin.ToStringSimple()}" +
-                    $"\nalign-items: {s.alignItems?.ToString() ?? "-"},  justify: {s.justifyContent?.ToString() ?? "-"}";
+                    $"display: {style.Display}  dir: {style.FlexDirection}  wrap: {style.FlexWrap}\n" +
+                    $"size: {style.Width}×{style.Height}" +
+                    $"  min: {style.MinWidth}×{style.MinHeight}" +
+                    $"  max: {style.MaxWidth}×{style.MaxHeight}" +
+                    $"  basis: {style.FlexBasis}\n" +
+                    $"grow: {style.FlexGrow}  shrink: {style.FlexShrink}" +
+                    $"  gap: {style.ColumnGap}×{style.RowGap}" +
+                    $"  padding: T{style.PaddingTop} R{style.PaddingRight} B{style.PaddingBottom} L{style.PaddingLeft}" +
+                    $"  margin: T{style.MarginTop} R{style.MarginRight} B{style.MarginBottom} L{style.MarginLeft}" +
+                    $"\nalign-items: {style.AlignItems?.ToString() ?? "-"},  justify: {style.JustifyContent?.ToString() ?? "-"}";
                 TooltipHandler.TipRegion(r, tip);
             }
         }
@@ -306,13 +264,9 @@ public static class Taffy
             Text.WordWrap = prevWordWrap;
         }
 
-        foreach (var child in tree.Children(node))
-            DrawTree(tree, child, absX, absY, lookup);
-    }
-
-    private static string ToStringSimple<T>(this Rect<T> rect)
-    {
-        return $"({rect.Left}, {rect.Right}, {rect.Top}, {rect.Bottom})";
+        var childCount = tree.ChildCount(node);
+        for (var i = 0; i < childCount; i++)
+            DrawTree(tree, tree.ChildAt(node, i), absX, absY, lookup);
     }
 
     #endregion

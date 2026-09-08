@@ -6,7 +6,6 @@ using Verse;
 using Void;
 using Void.Components;
 using Void.Extensions;
-using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
@@ -120,12 +119,12 @@ public partial class Window_Editor : Window
                 Widgets.DrawReorderablePawnList(rect, PawnLister.Pawns_ByFaction[_selectedFaction], SelectedPawn,
                     out var newSelectedPawn);
                 if (newSelectedPawn != SelectedPawn) TrySelect(newSelectedPawn);
-            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
+            }, new StyleOverride { flexGrow = 1f, margin = new TaffyEdges(Dimension.Px(GenUI.GapSmall), Dimension.Px(0), Dimension.Px(0), Dimension.Px(0)) });
             builder.Button("Save Preset", block: true, disabled: SelectedPawn == null,
                 onClick: _ => SaveSelectedPawn());
             builder.Button("Load Preset", block: true,
                 onClick: _ => ShowLoadPawnMenu());
-        }, new StyleOverride { flexDirection = FlexDirection.Column });
+        }, new StyleOverride { flexDirection = TaffyFlexDirection.Column });
     }
 
     private void SaveSelectedPawn()

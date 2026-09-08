@@ -1,3 +1,4 @@
+using Taffy;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -23,7 +24,7 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
                 DrawInspectPaneWidget(row, InspectPaneFiller.DrawTimetableSetting, pawn);
             if (pawn.needs?.energy != null)
                 DrawInspectPaneWidget(row, InspectPaneFiller.DrawMechEnergy, pawn);
-        }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny) });
+        }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapTiny) ) });
         builder.Text(MakeInspectStringFor(pawn));
     }
 
@@ -37,7 +38,7 @@ public class SectionWorker_Info(SectionDef def) : SectionWorker(def)
 
     private static void DrawInspectPaneWidget(TaffyBuilder builder, Action<WidgetRow, Pawn> draw, Pawn pawn)
     {
-        builder.Item(r => draw(new WidgetRow(r.x, r.y), pawn), new StyleOverride { width = 93f, height = 16f });
+        builder.Item(r => draw(new WidgetRow(r.x, r.y), pawn), new StyleOverride { width = Dimension.Px(93f), height = Dimension.Px(16f) });
     }
 
     private static string MakeInspectStringFor(Pawn pawn)

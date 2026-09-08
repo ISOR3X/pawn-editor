@@ -48,8 +48,8 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             inner => { inner.Text(label, color: textColor ?? Color.white, anchor: TextAnchor.MiddleCenter); },
             new StyleOverride
             {
-                padding = new Rect<LengthPercentage>(5f, 5f, 0f, 0f),
-                height = Dimension.AUTO
+                padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(5f), Dimension.Px(0f), Dimension.Px(5f)),
+                height = Dimension.Auto()
             });
     }
 
@@ -114,12 +114,12 @@ public class SectionWorker_Traits(SectionDef def) : SectionWorker(def)
             TraitUtility.AllTraits,
             [
                 Col.Create(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     (grid, record) => grid.Text(record.Degree.LabelCap),
                     "Label"
                 ),
                 Col.Create(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     (grid, record) => grid.Text(record.TraitDef.modContentPack?.Name ?? "",
                         color: ColoredText.SubtleGrayColor),
                     "Source"

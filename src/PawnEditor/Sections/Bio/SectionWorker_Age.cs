@@ -16,7 +16,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
         {
             DoAgeItem(row, pawn, "Biological", false);
             DoAgeItem(row, pawn, "Chronological", true);
-        }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapTiny), flexWrap = FlexWrap.Wrap });
+        }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapTiny)), flexWrap = TaffyFlexWrap.Wrap });
     }
 
     private static void DoAgeItem(TaffyBuilder col, Pawn pawn, string label, bool isChrono)
@@ -28,7 +28,7 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
         {
             row.Text(label);
             row.InputNumber(ref value, min, id: label);
-        }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapLabel) });
+        }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapLabel), Dimension.Px(GenUI.GapLabel)) });
 
         if (isChrono)
         {

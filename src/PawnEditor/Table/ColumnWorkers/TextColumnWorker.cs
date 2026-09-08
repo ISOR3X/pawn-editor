@@ -7,14 +7,14 @@ using Void.Components;
 namespace PawnEditor.Table.ColumnWorkers;
 
 public class TextColumnWorker<T>(
-    TrackSizingFunction trackSize,
+    TaffyTrackSizingFunction trackSize,
     Func<T, string> getText,
     string? header,
     Color? color,
     string? headerTip)
     : ColumnWorker<T>
 {
-    public override TrackSizingFunction TrackSize => trackSize;
+    public override TaffyTrackSizingFunction TrackSize => trackSize;
     public override bool Sortable => true;
     protected override string? HeaderLabel => header;
     protected override string? HeaderTip => headerTip;
