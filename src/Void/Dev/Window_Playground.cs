@@ -11,13 +11,36 @@ namespace Void.Dev;
 /// <summary>
 /// Dev-only sandbox for exercising components on the new <see cref="UITree" /> without needing
 /// PawnEditor to compile. Opened from the dev-mode debug actions menu under the "Void" category,
-/// available on the main menu as well as in play. Edit the <see cref="DoWindowContents" /> body
-/// and EditCompileReload picks the change up live.
+/// available on the main menu as well as in play. Edit the tab bodies and EditCompileReload picks
+/// the change up live.
 /// </summary>
 public class Window_Playground : Window
 {
+    private enum Tab
+    {
+        Buttons,
+        Text,
+        Icons
+    }
+
+    private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
+
+    private static readonly (string name, Texture2D tex)[] Icons =
+    [
+        ("ArrowUp", TexUI.ArrowUp),
+        ("ArrowDown", TexUI.ArrowDown),
+        ("ArrowLeft", TexUI.ArrowLeft),
+        ("ArrowRight", TexUI.ArrowRight),
+        ("ArrowLeftDouble", TexUI.ArrowLeftDouble),
+        ("ArrowRightDouble", TexUI.ArrowRightDouble)
+    ];
+
+    private const string Lorem =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut " +
+        "labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.";
+
     private readonly UITree _tree = new();
-    private int pageNo = 0;
+    private Tab _tab = Tab.Buttons;
     private int _clicks;
     private bool _showExtra;
 
@@ -32,8 +55,7 @@ public class Window_Playground : Window
         absorbInputAroundWindow = false;
     }
 
-    [DebugAction("Void", "Open playground",
-        allowedGameStates = AllowedGameStates.Invalid)]
+    [DebugAction("Void", "Open playground", allowedGameStates = AllowedGameStates.Invalid)]
     private static void Open()
     {
         if (Find.WindowStack.IsOpen<Window_Playground>()) Find.WindowStack.TryRemove(typeof(Window_Playground));
@@ -44,14 +66,14 @@ public class Window_Playground : Window
     {
         _tree.Build(root =>
         {
-            root.Div(builder: b =>
-            {
-                b.Button("<", onClick: _ => pageNo--);
-                b.Text($"Page {pageNo}");
-                b.Button(">", onClick: _ => pageNo++);
-            }, style: new Style {display = TaffyDisplay.Flex, justifyContent = TaffyAlignContent.SpaceBetween});
-            if (pageNo == 1) ButtonPlayground(root);
+            TabBar(root);
 
+            switch (_tab)
+            {
+                case Tab.Buttons: ButtonPlayground(root); break;
+                case Tab.Text: TextPlayground(root); break;
+                case Tab.Icons: IconPlayground(root); break;
+            }
         }, new Style
         {
             display = TaffyDisplay.Flex,
@@ -68,6 +90,25 @@ public class Window_Playground : Window
     {
         base.PostClose();
         _tree.Dispose();
+    }
+
+    /// <summary>
+    /// Components are keyed by caller line, so everything emitted inside a loop needs an explicit id
+    /// or every iteration collapses onto the same node.
+    /// </summary>
+    private void TabBar(UIBranch root)
+    {
+        root.Div(b =>
+        {
+            foreach (var tab in Tabs)
+                b.Button(tab.ToString(),
+                    variant: tab == _tab ? ButtonVariant.Solid : ButtonVariant.Ghost,
+                    onClick: _ => _tab = tab,
+                    id: $"tab-{tab}");
+
+            b.Div(style: new Style { flexGrow = 1f });
+            b.Button("Overlay", size: ComponentSize.Small, onClick: _ => VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug);
+        }, style: Row());
     }
 
     private void ButtonPlayground(UIBranch builder)
@@ -98,22 +139,105 @@ public class Window_Playground : Window
         }, style: Row());
 
         // Block button stretches to the parent width; resize the window to see it follow.
-        builder.Button(block: true, onClick: _ => _showExtra = !_showExtra);
+        builder.Button(_showExtra ? "Hide extra" : "Show extra", block: true, onClick: _ => _showExtra = !_showExtra);
 
         // Toggled subtree exercises keyed add/remove of children.
         if (_showExtra)
             builder.Div(b =>
             {
                 b.Text("This block is added and removed by the button above. A very long label follows to check truncation:");
-                b.Button("Click to toggle debug. Also, this label is far too long for the space it has been given and should truncate",
-                    TexUI.ArrowLeft, onClick: _ => { VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug; }, style: new Style { maxWidth = Dimension.Px(220f) });
-            }, style: new Style
+                b.Button("This label is far too long for the space it has been given and should truncate",
+                    TexUI.ArrowLeft, style: new Style { maxWidth = Dimension.Px(220f) });
+            }, style: Column(6f, 8f));
+    }
+
+    private void TextPlayground(UIBranch builder)
+    {
+        builder.Text("Text playground", new Style { fontSize = GameFont.Medium });
+
+        // Fonts: each leaf measures with its own font, so the three lines should have different heights.
+        builder.Div(b =>
+        {
+            b.Text("Tiny font", new Style { fontSize = GameFont.Tiny });
+            b.Text("Small font", new Style { fontSize = GameFont.Small });
+            b.Text("Medium font", new Style { fontSize = GameFont.Medium });
+            b.Text("Colored text", new Style { color = Color.cyan });
+        }, style: Row());
+
+        // Anchors only show when the leaf is larger than its text, so each gets a fixed box.
+        builder.Div(b =>
+        {
+            foreach (var anchor in new[] { TextAnchor.UpperLeft, TextAnchor.MiddleCenter, TextAnchor.LowerRight })
+                b.Text(anchor.ToString(),
+                    new Style { textAnchor = anchor, width = Dimension.Px(150f), height = Dimension.Px(60f) },
+                    id: $"anchor-{anchor}");
+        }, style: Row());
+
+        // Wrapping paragraph at full width; resize the window and the height should follow.
+        builder.Text(Lorem, new Style { width = Dimension.Percent(1f) });
+
+        // Same paragraph beside a fixed box in a row. With shrinking allowed it should wrap down
+        // to its widest word before the box gives way.
+        builder.Div(b =>
+        {
+            b.Div(draw: r => Verse.Widgets.DrawRectFast(r, Color.gray with { a = 0.4f }),
+                style: new Style { width = Dimension.Px(200f), height = Dimension.Px(40f), flexShrink = 0f });
+            b.Text(Lorem, new Style { flexShrink = 1f });
+        }, style: Row());
+
+        // No wrap: measured as a single line, then truncated to whatever width it ends up with.
+        builder.Div(b =>
+        {
+            b.Text("No wrap, this single line is longer than its 200px box and must truncate rather than grow",
+                new Style { wordWrap = false, flexShrink = 1f, minWidth = Dimension.Px(0) });
+        }, style: new Style { display = TaffyDisplay.Flex, width = Dimension.Px(200f) });
+
+        // Dynamic text: the context changes every frame the value changes, which must re-measure.
+        builder.Text($"Ticks: {Time.frameCount}   Clicks: {_clicks}", new Style { wordWrap = false });
+    }
+
+    private void IconPlayground(UIBranch builder)
+    {
+        builder.Text("Icon playground", new Style { fontSize = GameFont.Medium });
+
+        foreach (var size in new[] { ComponentSize.Small, ComponentSize.Default, ComponentSize.Large })
+            builder.Div(b =>
+            {
+                b.Text(size.ToString(), new Style { width = Dimension.Px(60f) }, id: $"label-{size}");
+                foreach (var (name, tex) in Icons)
+                    b.Icon(tex, size: size, id: $"icon-{size}-{name}");
+            }, style: Row(), id: $"row-{size}");
+
+        // Tinted icons.
+        builder.Div(b =>
+        {
+            b.Text("Tinted", new Style { width = Dimension.Px(60f) });
+            b.Icon(TexUI.ArrowUp, Color.red);
+            b.Icon(TexUI.ArrowDown, Color.green);
+            b.Icon(TexUI.ArrowLeft, Color.cyan);
+            b.Icon(TexUI.ArrowRight, Color.yellow);
+        }, style: Row());
+
+        // Shrink test: the icons sit beside a non-wrapping label that is allowed to shrink. When the
+        // window narrows the label should truncate while every icon keeps its fixed size.
+        builder.Div(b =>
+        {
+            foreach (var (name, tex) in Icons)
+                b.Icon(tex, id: $"shrink-{name}");
+            b.Text("Narrow the window: this label should give way before any icon shrinks",
+                new Style { wordWrap = false, flexShrink = 1f, minWidth = Dimension.Px(0) });
+        }, style: Row());
+
+        // Icon inside a fixed-size box, centered both ways via the parent.
+        builder.Div(b => b.Icon(TexUI.ArrowRightDouble, size: ComponentSize.Large),
+            draw: r => Verse.Widgets.DrawBox(r),
+            style: new Style
             {
                 display = TaffyDisplay.Flex,
-                flexDirection = TaffyFlexDirection.Column,
-                gap = Axes(6f),
-                padding = Edges(8f),
-                width = Dimension.Percent(1f)
+                alignItems = TaffyAlignItems.Center,
+                justifyContent = TaffyAlignContent.Center,
+                width = Dimension.Px(80f),
+                height = Dimension.Px(80f)
             });
     }
 
@@ -123,6 +247,15 @@ public class Window_Playground : Window
         flexDirection = TaffyFlexDirection.Row,
         alignItems = TaffyAlignItems.Center,
         gap = Axes(8f),
+        width = Dimension.Percent(1f)
+    };
+
+    private static Style Column(float gap, float padding) => new()
+    {
+        display = TaffyDisplay.Flex,
+        flexDirection = TaffyFlexDirection.Column,
+        gap = Axes(gap),
+        padding = Edges(padding),
         width = Dimension.Percent(1f)
     };
 
