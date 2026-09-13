@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
@@ -20,18 +20,19 @@ public class Patch_OpenEditor
 
         if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
         {
-            // Opens all three benchmark windows side by side, for comparing them (e.g. with Dubs
+            // Opens all four benchmark windows side by side, for comparing them (e.g. with Dubs
             // Performance Analyzer) in the same play session instead of one at a time.
             if (Find.WindowStack.IsOpen<Window_BenchmarkTaffy>())
             {
                 Find.WindowStack.TryRemove(typeof(Window_BenchmarkTaffy));
                 Find.WindowStack.TryRemove(typeof(Window_BenchmarkVerse));
                 Find.WindowStack.TryRemove(typeof(Window_BenchmarkVoid));
+                Find.WindowStack.TryRemove(typeof(Window_BenchmarkXml));
             }
             else
             {
                 const float margin = 20f;
-                var width = (UI.screenWidth - margin * 4f) / 3f;
+                var width = (UI.screenWidth - margin * 5f) / 4f;
                 var height = UI.screenHeight * 0.7f;
 
                 var taffy = new Window_BenchmarkTaffy();
@@ -45,6 +46,10 @@ public class Patch_OpenEditor
                 var voidWindow = new Window_BenchmarkVoid();
                 Find.WindowStack.Add(voidWindow);
                 voidWindow.windowRect = new Rect(margin * 3f + width * 2f, margin, width, height);
+
+                var xmlWindow = new Window_BenchmarkXml();
+                Find.WindowStack.Add(xmlWindow);
+                xmlWindow.windowRect = new Rect(margin * 4f + width * 3f, margin, width, height);
             }
         }
 

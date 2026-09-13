@@ -1,7 +1,7 @@
 using Taffy;
 using UnityEngine;
 using Verse;
-using Void.v4;
+using Void.Taffy;
 
 namespace PawnEditor;
 
@@ -16,7 +16,7 @@ namespace PawnEditor;
 /// </summary>
 public class Window_BenchmarkVoid : Window
 {
-    private readonly RenderTree _tree = new();
+    private readonly UITree _tree = new();
     private bool _showBox;
 
     private const string LoremIpsum =
@@ -52,16 +52,16 @@ public class Window_BenchmarkVoid : Window
                                 if (Verse.Widgets.ButtonText(r, _showBox ? "Hide" : "Show"))
                                     _showBox = !_showBox;
                             },
-                            style: new StyleOverride { width = Dimension.Px(200f), height = Dimension.Px(30f) });
+                            style: new Style { width = Dimension.Px(200f), height = Dimension.Px(30f) });
 
                         if (_showBox)
-                            dyn.Div("box", draw: r => Verse.Widgets.DrawRectFast(r, Color.blue), style: new StyleOverride
+                            dyn.Div("box", draw: r => Verse.Widgets.DrawRectFast(r, Color.blue), style: new Style
                             {
                                 minWidth = Dimension.Px(400f),
                                 width = Dimension.Percent(1f),
                                 height = Dimension.Px(200f)
                             });
-                    }, style: new StyleOverride
+                    }, style: new Style
                     {
                         width = Dimension.Px(200f),
                         height = Dimension.Auto(),
@@ -69,7 +69,7 @@ public class Window_BenchmarkVoid : Window
                     });
 
                 root.Text("text2", LoremIpsum);
-            }, new StyleOverride
+            }, new Style
             {
                 display = TaffyDisplay.Flex,
                 flexDirection = TaffyFlexDirection.Column,
