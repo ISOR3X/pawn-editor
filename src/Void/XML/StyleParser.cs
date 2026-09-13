@@ -1,18 +1,19 @@
 using System.Globalization;
 using Taffy;
 using Verse;
+using Void.Taffy;
 
-namespace Void;
+namespace Void.XML;
 
-public static class TaffyStyleParser
+public static class StyleParser
 {
     /// <summary>
     ///     Parses a CSS inline style string (e.g. <c>"flex-direction: row; gap: 4px"</c>) into a
-    ///     <see cref="StyleOverride" />. Unknown properties are logged as warnings and skipped.
+    ///     <see cref="Style" />. Unknown properties are logged as warnings and skipped.
     /// </summary>
-    public static StyleOverride ParseInlineStyle(string css)
+    public static Style ParseInlineStyle(string css)
     {
-        var style = new StyleOverride();
+        var style = new Style();
         foreach (var declaration in css.Split(';', StringSplitOptions.RemoveEmptyEntries))
         {
             var colonIdx = declaration.IndexOf(':');
@@ -30,7 +31,7 @@ public static class TaffyStyleParser
     ///     Applies a single CSS property name/value pair to <paramref name="target" />.
     ///     Unknown properties are logged as warnings and skipped.
     /// </summary>
-    public static void ApplyProperty(string name, string value, StyleOverride target)
+    public static void ApplyProperty(string name, string value, Style target)
     {
         switch (name)
         {

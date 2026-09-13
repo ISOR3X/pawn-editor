@@ -2,7 +2,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 
-namespace Void.v4
+namespace Void.Taffy
 {
     /// <summary>
     /// Context used for calculating the size of a leaf.
@@ -24,7 +24,7 @@ namespace Void.v4
         /// Track the previous style of a branch so we can diff-check it.
         /// Context is tracked internally in the TaffyTree.
         /// </summary>
-        public StyleOverride? prevStyle;
+        public Style? prevStyle;
 
         /// <summary>
         /// Context is tracked internally in the TaffyTree as its also required for content measuring.
@@ -46,7 +46,7 @@ namespace Void.v4
         public Action<Rect>? draw = null;
     }
 
-    public class RenderTree : IDisposable
+    public class UITree : IDisposable
     {
         /// <summary>
         /// The native tree. We use a private version of the tree instead of subclassing it to control the public API.
@@ -54,7 +54,7 @@ namespace Void.v4
         private readonly TaffyTree<LeafContext> _tree = new();
 
         /// <summary>
-        /// The node of the root branch.
+        /// The node (id) of the root branch.
         /// </summary>
         private readonly TaffyNode _rootBranchNode;
 
@@ -68,15 +68,15 @@ namespace Void.v4
         private float _lastAvailableWidth = -1f;
         private float _lastAvailableHeight = -1f;
 
-        public RenderTree()
+        public UITree()
         {
             _rootBranchNode = _tree.NewNode();
             _branchRecordsByNode[_rootBranchNode] = new BranchRecord();
         }
 
-        public void Build(Action<Branch> builder, StyleOverride? style = null)
+        public void Build(Action<UIBranch> builder, Style? style = null)
         {
-            var branch = new Branch(this, _rootBranchNode);
+            var branch = new UIBranch(this, _rootBranchNode);
             var rootRecord = _branchRecordsByNode[_rootBranchNode];
 
             // If the styles are not equal, and the new style isn't null, update the native style.
@@ -151,7 +151,7 @@ namespace Void.v4
         /// <summary>
         /// Update or insert a new branch into the parent node.
         /// </summary>
-        public TaffyNode UpsertBranch(TaffyNode parentNode, string key, Action<Rect>? draw = null, LeafContext? context = null, StyleOverride? style = null)
+        public TaffyNode UpsertBranch(TaffyNode parentNode, string key, Action<Rect>? draw = null, LeafContext? context = null, Style? style = null)
         {
             var parentRecord = _branchRecordsByNode[parentNode];
             var exists = parentRecord.childrenByKey.TryGetValue(key, out var branchNode);
@@ -270,16 +270,16 @@ namespace Void.v4
     /// <summary>
     /// Builder for creating a branch in a tree.
     /// </summary>
-    public class Branch(RenderTree tree, TaffyNode rootBranch)
+    public class UIBranch(UITree tree, TaffyNode parentBranch)
     {
-        private readonly RenderTree _tree = tree;
-        private readonly TaffyNode _rootBranch = rootBranch;
+        private readonly UITree _tree = tree;
+        private readonly TaffyNode _parentBranch = parentBranch;
 
-        public TaffyNode Div(string key, Action<Branch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null, StyleOverride? style = null)
+        public TaffyNode Div(string key, Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null, Style? style = null)
         {
-            var node = _tree.UpsertBranch(_rootBranch, key, draw, context, style);
+            var node = _tree.UpsertBranch(_parentBranch, key, draw, context, style);
             // Create a new branch to which the children can attach.
-            var childBranch = new Branch(_tree, node);
+            var childBranch = new UIBranch(_tree, node);
 
             builder?.Invoke(childBranch);
 
@@ -293,8 +293,7 @@ namespace Void.v4
 
         public TaffyNode Text(string key, string text, GameFont font = GameFont.Small, TextAnchor align = TextAnchor.UpperLeft)
         {
-            var ctx = new LeafContext { text = text, font = font };
-            void draw(Rect r)
+            void _draw(Rect r)
             {
                 using (new TextBlock(font, align))
                 {
@@ -303,7 +302,8 @@ namespace Void.v4
                 }
             }
 
-            var node = _tree.UpsertBranch(_rootBranch, key, context: ctx, draw: draw);
+            var ctx = new LeafContext { text = text, font = font };
+            var node = _tree.UpsertBranch(_parentBranch, key, context: ctx, draw: _draw);
 
             return node;
         }
