@@ -10,27 +10,27 @@ public static class ThingUtility
     static ThingUtility()
     {
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
-        foreach (var thingDefStyle in
-                 styleCategoryDef.thingDefStyles) // A list of thing defs and their style def to apply.
-        {
-            if (ThingStyles.Select(ts => ts.thingDef).Contains(thingDefStyle.ThingDef))
+            foreach (var thingDefStyle in
+                     styleCategoryDef.thingDefStyles) // A list of thing defs and their style def to apply.
             {
-                // If the def already exists in the list, add the style to the existing list.
-                ThingStyles.FirstOrDefault(ts => ts.thingDef == thingDefStyle.thingDef).styleDefs
-                    .TryAdd(thingDefStyle.StyleDef, styleCategoryDef);
-                continue;
-            }
+                if (ThingStyles.Select(ts => ts.thingDef).Contains(thingDefStyle.ThingDef))
+                {
+                    // If the def already exists in the list, add the style to the existing list.
+                    ThingStyles.FirstOrDefault(ts => ts.thingDef == thingDefStyle.thingDef).styleDefs
+                        .TryAdd(thingDefStyle.StyleDef, styleCategoryDef);
+                    continue;
+                }
 
 
-            ThingStyles.Add(new ThingStyle
-            {
-                thingDef = thingDefStyle.ThingDef,
-                styleDefs = new Dictionary<ThingStyleDef, StyleCategoryDef>
+                ThingStyles.Add(new ThingStyle
+                {
+                    thingDef = thingDefStyle.ThingDef,
+                    styleDefs = new Dictionary<ThingStyleDef, StyleCategoryDef>
                 {
                     { thingDefStyle.styleDef, styleCategoryDef }
                 }
-            });
-        }
+                });
+            }
     }
 
 

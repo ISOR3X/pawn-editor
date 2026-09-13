@@ -15,7 +15,9 @@ public class Style : IEquatable<Style>
     // Not used by Taffy, stored here so UI code can read colors alongside layout.
     public Color? color;
     public Color? backgroundColor;
+    public bool? wordWrap;
     public GameFont? fontSize;
+    public TextAnchor? textAnchor;
 
     public TaffyAlignContent? alignContent;
     public TaffyAlignItems? alignItems;

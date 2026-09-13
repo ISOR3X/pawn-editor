@@ -138,7 +138,7 @@ public class Table<TRow>(
         }, new StyleOverride
         {
             display = TaffyDisplay.Grid,
-            gridTemplateColumns = [.._columnTracks],
+            gridTemplateColumns = [.. _columnTracks],
             gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(0f)),
             gridAutoRows = [TrackSizingFunction.Px(HeaderHeight)]
         });
@@ -216,7 +216,7 @@ public class Table<TRow>(
             }, new StyleOverride
             {
                 display = TaffyDisplay.Grid,
-                gridTemplateColumns = [.._columnTracks],
+                gridTemplateColumns = [.. _columnTracks],
                 gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(0f)),
                 alignItems = TaffyAlignItems.Center,
                 gridAutoRows = [TrackSizingFunction.Px(rowHeight)]

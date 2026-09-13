@@ -79,7 +79,7 @@ public class Dialog_ColorPicker : Window
                         _selectedColor = ColorUtility.HSLToColor(hInt / 360f, sInt / 100f, lInt / 100f);
                     },
                     new StyleOverride
-                        { flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(Dimension.Px(0f), Dimension.Px(4f)), width = Dimension.Px(200f) });
+                    { flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(Dimension.Px(0f), Dimension.Px(4f)), width = Dimension.Px(200f) });
                 contentBuilder.Div(rightBuilder =>
                     {
                         rightBuilder.Div(paletteBuilder =>
@@ -95,7 +95,7 @@ public class Dialog_ColorPicker : Window
                                             Verse.Widgets.DrawRectFast(r.ContractedBy(GenUI.GapTiny), c);
                                         },
                                         new StyleOverride
-                                            { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) });
+                                        { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) });
                                 paletteBuilder.Item(r =>
                                 {
                                     if (Verse.Widgets.ButtonInvisible(r)) _selectedColor = GenColor.RandomColorOpaque();
@@ -103,11 +103,12 @@ public class Dialog_ColorPicker : Window
                                     Verse.Widgets.DrawLightHighlight(r);
                                     GUI.DrawTexture(r.ContractedBy(GenUI.GapTiny), TexPawnEditor.Randomize);
                                 }, new StyleOverride
-                                    { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) });
+                                { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) });
                             },
                             new StyleOverride
                             {
-                                flexWrap = TaffyFlexWrap.Wrap, alignContent = TaffyAlignContent.Start,
+                                flexWrap = TaffyFlexWrap.Wrap,
+                                alignContent = TaffyAlignContent.Start,
                                 gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny))
                             });
                         rightBuilder.Div(colorReadoutBuilder =>
@@ -118,10 +119,10 @@ public class Dialog_ColorPicker : Window
                                     new StyleOverride { flexGrow = 1f });
                             },
                             new StyleOverride
-                                { height = Dimension.Px(Text.LineHeightOf(GameFont.Small)), gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny)) });
+                            { height = Dimension.Px(Text.LineHeightOf(GameFont.Small)), gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny)) });
                     },
                     new StyleOverride
-                        { flexDirection = TaffyFlexDirection.Column, justifyContent = TaffyAlignContent.SpaceBetween });
+                    { flexDirection = TaffyFlexDirection.Column, justifyContent = TaffyAlignContent.SpaceBetween });
             }, new StyleOverride { flexGrow = 1f, gap = new TaffyAxes(Dimension.Px(GenUI.Gap), Dimension.Px(GenUI.Gap)) });
 
             builder.Div(footerBuilder =>

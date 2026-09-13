@@ -39,7 +39,7 @@ public class VoidMod : Mod
         }
         else
         {
-            Log.Error($"[{ModName}] Unknown OS — ctaffy native library not loaded.");
+            Log.Error($"[{ModName}] Unknown OS: ctaffy native library not loaded.");
         }
     }
 

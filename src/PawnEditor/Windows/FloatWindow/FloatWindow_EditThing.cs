@@ -22,7 +22,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
         style ??= new StyleOverride();
         style = style.Merge(new StyleOverride
         {
-            width = Dimension.Auto(), justifySelf = TaffyAlignItems.Stretch
+            width = Dimension.Auto(),
+            justifySelf = TaffyAlignItems.Stretch
         });
         grid.Button(label, icon, iconColor, style: style, onClick: onClick);
     }
@@ -186,7 +187,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         const float margin = (UIUtility.ButtonHeight - elementHeight) / 2;
                         var widgetRect = r.ContractedBy(margin);
                         GenUI.DrawElementStack(widgetRect, elementHeight, bladelink.traits,
-                            delegate(Rect er, WeaponTraitDef weaponTraitDef)
+                            delegate (Rect er, WeaponTraitDef weaponTraitDef)
                             {
                                 GUI.color = CharacterCardUtility.StackElementBackground;
                                 GUI.DrawTexture(er, BaseContent.WhiteTex);

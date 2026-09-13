@@ -29,11 +29,11 @@ public static class LayoutParser
         if (xml.Name == "text")
         {
             var text = xml.InnerText.Trim();
-            return b => b.Text(key, text, style.fontSize ?? GameFont.Small);
+            return b => b.Text(text, style, key);
         }
 
         var children = ParseChildren(xml);
-        return b => b.Div(key, children, style: style);
+        return b => b.Div(children, style: style, id: key);
     }
 
     /// <summary>

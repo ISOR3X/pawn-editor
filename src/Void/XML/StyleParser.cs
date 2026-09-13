@@ -8,8 +8,8 @@ namespace Void.XML;
 public static class StyleParser
 {
     /// <summary>
-    ///     Parses a CSS inline style string (e.g. <c>"flex-direction: row; gap: 4px"</c>) into a
-    ///     <see cref="Style" />. Unknown properties are logged as warnings and skipped.
+    /// Parses a CSS inline style string (e.g. <c>"flex-direction: row; gap: 4px"</c>) into a
+    /// <see cref="Style" />. Unknown properties are logged as warnings and skipped.
     /// </summary>
     public static Style ParseInlineStyle(string css)
     {
@@ -28,8 +28,8 @@ public static class StyleParser
     }
 
     /// <summary>
-    ///     Applies a single CSS property name/value pair to <paramref name="target" />.
-    ///     Unknown properties are logged as warnings and skipped.
+    /// Applies a single CSS property name/value pair to <paramref name="target" />.
+    /// Unknown properties are logged as warnings and skipped.
     /// </summary>
     public static void ApplyProperty(string name, string value, Style target)
     {
@@ -72,83 +72,83 @@ public static class StyleParser
                 target.maxHeight = ParseMaxDimension(value);
                 break;
             case "gap":
-            {
-                var v = Dimension.Px(ParsePx(value));
-                target.gap = new TaffyAxes(v);
-                break;
-            }
+                {
+                    var v = Dimension.Px(ParsePx(value));
+                    target.gap = new TaffyAxes(v);
+                    break;
+                }
             case "column-gap":
-            {
-                var g = target.gap ?? default;
-                target.gap = new TaffyAxes(Dimension.Px(ParsePx(value)), g.Height);
-                break;
-            }
+                {
+                    var g = target.gap ?? default;
+                    target.gap = new TaffyAxes(Dimension.Px(ParsePx(value)), g.Height);
+                    break;
+                }
             case "row-gap":
-            {
-                var g = target.gap ?? default;
-                target.gap = new TaffyAxes(g.Width, Dimension.Px(ParsePx(value)));
-                break;
-            }
+                {
+                    var g = target.gap ?? default;
+                    target.gap = new TaffyAxes(g.Width, Dimension.Px(ParsePx(value)));
+                    break;
+                }
             case "padding":
-            {
-                var v = Dimension.Px(ParsePx(value));
-                target.padding = new TaffyEdges(v);
-                break;
-            }
+                {
+                    var v = Dimension.Px(ParsePx(value));
+                    target.padding = new TaffyEdges(v);
+                    break;
+                }
             case "padding-top":
-            {
-                var p = target.padding ?? default;
-                target.padding = p with { Top = Dimension.Px(ParsePx(value)) };
-                break;
-            }
+                {
+                    var p = target.padding ?? default;
+                    target.padding = p with { Top = Dimension.Px(ParsePx(value)) };
+                    break;
+                }
             case "padding-right":
-            {
-                var p = target.padding ?? default;
-                target.padding = p with { Right = Dimension.Px(ParsePx(value)) };
-                break;
-            }
+                {
+                    var p = target.padding ?? default;
+                    target.padding = p with { Right = Dimension.Px(ParsePx(value)) };
+                    break;
+                }
             case "padding-bottom":
-            {
-                var p = target.padding ?? default;
-                target.padding = p with { Bottom = Dimension.Px(ParsePx(value)) };
-                break;
-            }
+                {
+                    var p = target.padding ?? default;
+                    target.padding = p with { Bottom = Dimension.Px(ParsePx(value)) };
+                    break;
+                }
             case "padding-left":
-            {
-                var p = target.padding ?? default;
-                target.padding = p with { Left = Dimension.Px(ParsePx(value)) };
-                break;
-            }
+                {
+                    var p = target.padding ?? default;
+                    target.padding = p with { Left = Dimension.Px(ParsePx(value)) };
+                    break;
+                }
             case "margin":
-            {
-                var v = ParseMarginDimension(value);
-                target.margin = new TaffyEdges(v);
-                break;
-            }
+                {
+                    var v = ParseMarginDimension(value);
+                    target.margin = new TaffyEdges(v);
+                    break;
+                }
             case "margin-top":
-            {
-                var m = target.margin ?? default;
-                target.margin = m with { Top = ParseMarginDimension(value) };
-                break;
-            }
+                {
+                    var m = target.margin ?? default;
+                    target.margin = m with { Top = ParseMarginDimension(value) };
+                    break;
+                }
             case "margin-right":
-            {
-                var m = target.margin ?? default;
-                target.margin = m with { Right = ParseMarginDimension(value) };
-                break;
-            }
+                {
+                    var m = target.margin ?? default;
+                    target.margin = m with { Right = ParseMarginDimension(value) };
+                    break;
+                }
             case "margin-bottom":
-            {
-                var m = target.margin ?? default;
-                target.margin = m with { Bottom = ParseMarginDimension(value) };
-                break;
-            }
+                {
+                    var m = target.margin ?? default;
+                    target.margin = m with { Bottom = ParseMarginDimension(value) };
+                    break;
+                }
             case "margin-left":
-            {
-                var m = target.margin ?? default;
-                target.margin = m with { Left = ParseMarginDimension(value) };
-                break;
-            }
+                {
+                    var m = target.margin ?? default;
+                    target.margin = m with { Left = ParseMarginDimension(value) };
+                    break;
+                }
             case "align-items":
                 target.alignItems = ParseAlignItems(value);
                 break;
@@ -174,33 +174,33 @@ public static class StyleParser
                 target.gridTemplateRows = ParseTrackList(value);
                 break;
             case "grid-column-start":
-            {
-                var gc = target.gridColumn ?? default;
-                SetGridStart(ref gc, value);
-                target.gridColumn = gc;
-                break;
-            }
+                {
+                    var gc = target.gridColumn ?? default;
+                    SetGridStart(ref gc, value);
+                    target.gridColumn = gc;
+                    break;
+                }
             case "grid-column-end":
-            {
-                var gc = target.gridColumn ?? default;
-                SetGridEnd(ref gc, value);
-                target.gridColumn = gc;
-                break;
-            }
+                {
+                    var gc = target.gridColumn ?? default;
+                    SetGridEnd(ref gc, value);
+                    target.gridColumn = gc;
+                    break;
+                }
             case "grid-row-start":
-            {
-                var gr = target.gridRow ?? default;
-                SetGridStart(ref gr, value);
-                target.gridRow = gr;
-                break;
-            }
+                {
+                    var gr = target.gridRow ?? default;
+                    SetGridStart(ref gr, value);
+                    target.gridRow = gr;
+                    break;
+                }
             case "grid-row-end":
-            {
-                var gr = target.gridRow ?? default;
-                SetGridEnd(ref gr, value);
-                target.gridRow = gr;
-                break;
-            }
+                {
+                    var gr = target.gridRow ?? default;
+                    SetGridEnd(ref gr, value);
+                    target.gridRow = gr;
+                    break;
+                }
             case "font-size":
                 target.fontSize = ParseGameFont(value);
                 break;
@@ -355,7 +355,7 @@ public static class StyleParser
             result.AddRange(tracks);
         return;
 
-        fallback:
+    fallback:
         Log.Warning($"[{VoidMod.ModName}] grid repeat() with non-integer count is not supported by ctaffy; substituting auto.");
         result.Add(TrackSizingFunction.AutoTrack());
     }
