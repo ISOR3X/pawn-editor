@@ -21,19 +21,19 @@ namespace Void.Taffy
     /// <summary>
     /// Stores relevant data about a branch on the C# side to prevent a large amount of FFI calls per frame.
     /// Used for diff-checking and storing the actual draw callback.
+    /// Note that context is tracked internally in the TaffyTree as its also required for content measuring.
     /// </summary>
     public class BranchRecord
     {
         /// <summary>
         /// Track the previous style of a branch so we can diff-check it.
-        /// Context is tracked internally in the TaffyTree.
         /// </summary>
         public Style? prevStyle;
 
         /// <summary>
-        /// Context is tracked internally in the TaffyTree as its also required for content measuring.
+        /// For keeping track of state of children across frames.
         /// </summary>
-        // public LeafContext? prevCtx;
+        public Dictionary<string, object>? childState;
 
         /// <summary>
         /// The child branches/ leaves of a branch
@@ -142,44 +142,19 @@ namespace Void.Taffy
         }
 
         /// <summary>
-        /// Measure function for nodes with context.
-        /// This calculates the needed size for items with a yet unknown size.
-        /// <summary/>
-        private static TaffySize DefaultMeasure(
-            TaffyMeasureMode widthMode, float width,
-            TaffyMeasureMode heightMode, float height,
-            LeafContext? context)
+        /// Update or insert new state into the parent node.
+        /// Note that state must be a reference type
+        /// </summary>
+        public T UpsertState<T>(TaffyNode parentNode, string key, Func<T> init) where T : class
         {
-            if (context is null || context.text == null) return new TaffySize();
-            using (new TextBlock(context.fontSize))
-            {
-                // Wrapping
-                if (!context.textWrap)
-                {
-                    var sz = Text.CalcSize(context.text);
-                    var w = widthMode is TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent
-                        ? Mathf.Min(width, sz.x)
-                        : sz.x;
-                    return new TaffySize { width = w, height = sz.y };
-                }
+            var parentRecord = _branchRecordsByNode[parentNode];
+            parentRecord.childState ??= [];
 
-                // No wrapping
-                switch (widthMode)
-                {
-                    case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
-                        return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
-                    case TaffyMeasureMode.MinContent:
-                        {
-                            var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
-                            return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
-                        }
-                    default:
-                        {
-                            var sz = Text.CalcSize(context.text);
-                            return new TaffySize { width = sz.x, height = sz.y };
-                        }
-                }
-            }
+            if (parentRecord.childState.TryGetValue(key, out var existing)) return (T)existing;
+
+            var created = init();
+            parentRecord.childState[key] = created;
+            return created;
         }
 
         /// <summary>
@@ -250,7 +225,13 @@ namespace Void.Taffy
                 // Remove all branches not present since last frame.
                 foreach (var (key, childNode) in prev)
                     if (!pending.ContainsKey(key))
+                    {
+                        // Detach first. Taffy's remove_child marks the parent dirty, but remove alone
+                        // does not, and the parent's cached layout would keep the child's size.
+                        _tree.RemoveChild(node, childNode);
                         RemoveSubtree(childNode);
+                        branchRecord.childState?.Remove(key);
+                    }
             }
 
             branchRecord.childrenByKey = pending;
@@ -286,8 +267,49 @@ namespace Void.Taffy
         public void Dispose()
         {
             if (_disposed) return;
-             _disposed = true;
+            _disposed = true;
             _tree.Dispose();
+        }
+
+        /// <summary>
+        /// Measure function for nodes with context.
+        /// This calculates the needed size for items with a yet unknown size.
+        /// <summary/>
+        private static TaffySize DefaultMeasure(
+            TaffyMeasureMode widthMode, float width,
+            TaffyMeasureMode heightMode, float height,
+            LeafContext? context)
+        {
+            if (context is null || context.text == null) return new TaffySize();
+            using (new TextBlock(context.fontSize))
+            {
+                // Wrapping
+                if (!context.textWrap)
+                {
+                    var sz = Text.CalcSize(context.text);
+                    var w = widthMode is TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent
+                        ? Mathf.Min(width, sz.x)
+                        : sz.x;
+                    return new TaffySize { width = w, height = sz.y };
+                }
+
+                // No wrapping
+                switch (widthMode)
+                {
+                    case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
+                        return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
+                    case TaffyMeasureMode.MinContent:
+                        {
+                            var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
+                            return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
+                        }
+                    default:
+                        {
+                            var sz = Text.CalcSize(context.text);
+                            return new TaffySize { width = sz.x, height = sz.y };
+                        }
+                }
+            }
         }
     }
 
@@ -298,6 +320,8 @@ namespace Void.Taffy
     {
         private readonly UITree _tree = tree;
         private readonly TaffyNode _parentBranch = parentBranch;
+
+        public T State<T>(string key, Func<T> init) where T : class => _tree.UpsertState(_parentBranch, key, init);
 
         public TaffyNode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
