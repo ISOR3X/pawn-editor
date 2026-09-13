@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -10,7 +11,10 @@ namespace Void.Taffy
     /// </summary>
     public record LeafContext
     {
-        public GameFont? font;
+        public GameFont fontSize = GameFont.Small;
+        public bool textWrap = true;
+        public TextAnchor textAnchor = TextAnchor.UpperLeft;
+
         public string? text;
     }
 
@@ -91,6 +95,7 @@ namespace Void.Taffy
             rootRecord.prevStyle = style;
 
             builder(branch);
+            CompareChildren(_rootBranchNode);
         }
 
         public void Draw(Rect rect)
@@ -118,18 +123,35 @@ namespace Void.Taffy
             if (!_branchRecordsByNode.TryGetValue(node, out var record)) return;
 
             record.draw?.Invoke(rect);
+            if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(rect, Color.red with { a = 0.25f });
+
             foreach (var (_, childId) in record.childrenByKey)
                 DrawNode(childId, rect.position);
         }
 
+        /// <summary>
+        /// Measure function for nodes with context.
+        /// This calculates the needed size for items with a yet unknown size.
+        /// <summary/>
         private static TaffySize DefaultMeasure(
             TaffyMeasureMode widthMode, float width,
             TaffyMeasureMode heightMode, float height,
             LeafContext? context)
         {
             if (context is null || context.text == null) return new TaffySize();
-            using (new TextBlock(context.font ?? GameFont.Small))
+            using (new TextBlock(context.fontSize))
             {
+                // Wrapping
+                if (!context.textWrap)
+                {
+                    var sz = Text.CalcSize(context.text);
+                    var w = widthMode is TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent
+                        ? Mathf.Min(width, sz.x)
+                        : sz.x;
+                    return new TaffySize { width = w, height = sz.y };
+                }
+
+                // No wrapping
                 switch (widthMode)
                 {
                     case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
@@ -199,54 +221,42 @@ namespace Void.Taffy
         /// First compare if the length and order are the same,
         /// then check for added/ removed items.
         /// If differences are found, free the removed branches.
-        ///
-        /// NOTE: While SameOrder checks for the order of children, if just the order of the array has changed and not the length,
-        /// No changes are actually pushed to the native tree.
         /// </summary>
         public void CompareChildren(TaffyNode node)
         {
             var branchRecord = _branchRecordsByNode[node];
+            var prev = branchRecord.childrenByKey;
+            var pending = branchRecord.pendingChildrenByKey;
 
-            var prevChildKeysInOrder = branchRecord.childrenByKey.Keys.ToArray();
-            var pendingChildKeysInOrder = branchRecord.pendingChildrenByKey.Keys.ToArray();
+            // Early return for leaves and empty branches
+            if (prev.Count == 0 && pending.Count == 0) return;
 
-            if (SameOrder(prevChildKeysInOrder, pendingChildKeysInOrder))
+            if (!SameOrder(prev, pending))
             {
-                branchRecord.childrenByKey = branchRecord.pendingChildrenByKey;
-                branchRecord.pendingChildrenByKey = [];
-                return;
+                _dirtyThisFrame = true;
+
+                // Remove all branches not present since last frame.
+                foreach (var (key, childNode) in prev)
+                    if (!pending.ContainsKey(key))
+                        RemoveSubtree(childNode);
             }
 
-            _dirtyThisFrame = true;
-
-            var removed = prevChildKeysInOrder.Except(pendingChildKeysInOrder);
-            // var added = pendingChildKeysInOrder.Except(prevChildKeysInOrder);
-
-            foreach (string r in removed)
-            {
-                var childNode = branchRecord.childrenByKey[r];
-                RemoveSubtree(childNode);
-
-            }
-
-            /*
-            // Branches are already added by the UpsertBranch function.
-            foreach (string a in added)
-            {
-                var childNode = branchRecord.pendingChildrenByKey[a];
-                _tree.AppendChild(node, childNode);
-            }
-             */
-
-            branchRecord.childrenByKey = branchRecord.pendingChildrenByKey;
+            branchRecord.childrenByKey = pending;
             branchRecord.pendingChildrenByKey = [];
         }
-
-        private static bool SameOrder(string[] a, string[] b)
+        /// <summary>
+        /// While SameOrder checks for the order of children, if just the order of the array has changed and not the length,
+        /// No changes are actually pushed to the native tree. In the future we could use <c>set-children</c> to fix this.
+        /// </summary>
+        private static bool SameOrder(Dictionary<string, TaffyNode> a, Dictionary<string, TaffyNode> b)
         {
-            if (a.Length != b.Length) return false;
-            for (var i = 0; i < a.Length; i++)
-                if (a[i] != b[i]) return false;
+            if (a.Count != b.Count) return false;
+
+            // Struct enumerators, so this walks both without allocating.
+            using var ea = a.Keys.GetEnumerator();
+            using var eb = b.Keys.GetEnumerator();
+            while (ea.MoveNext() && eb.MoveNext())
+                if (ea.Current != eb.Current) return false;
             return true;
         }
 
@@ -275,35 +285,23 @@ namespace Void.Taffy
         private readonly UITree _tree = tree;
         private readonly TaffyNode _parentBranch = parentBranch;
 
-        public TaffyNode Div(string key, Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null, Style? style = null)
+        public TaffyNode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
+        [CallerLineNumber] int line = 0)
         {
+            var key = id ?? $"{file}_{line}";
             var node = _tree.UpsertBranch(_parentBranch, key, draw, context, style);
-            // Create a new branch to which the children can attach.
-            var childBranch = new UIBranch(_tree, node);
 
-            builder?.Invoke(childBranch);
+            if (builder != null)
+            {
+                // Create a new branch to which the children can attach.
+                var childBranch = new UIBranch(_tree, node);
+                builder?.Invoke(childBranch);
+            }
 
             // After the builder is called, all (this frame's) children should be attached.
             // Compare them to last frame and update the snapshot accordingly.
             // Also marks the native tree dirty when differences are found.
             _tree.CompareChildren(node);
-
-            return node;
-        }
-
-        public TaffyNode Text(string key, string text, GameFont font = GameFont.Small, TextAnchor align = TextAnchor.UpperLeft)
-        {
-            void _draw(Rect r)
-            {
-                using (new TextBlock(font, align))
-                {
-                    Verse.Text.WordWrap = true;
-                    Verse.Widgets.Label(r, text);
-                }
-            }
-
-            var ctx = new LeafContext { text = text, font = font };
-            var node = _tree.UpsertBranch(_parentBranch, key, context: ctx, draw: _draw);
 
             return node;
         }

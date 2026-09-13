@@ -67,7 +67,8 @@ public class Window_Table<T> : OwnedWindow
                                 foreach (var filter in _filters) filter.DrawFilter(builder3);
                             }, new StyleOverride
                             {
-                                width = Dimension.Px(200f), flexDirection = TaffyFlexDirection.Column
+                                width = Dimension.Px(200f),
+                                flexDirection = TaffyFlexDirection.Column
                             });
 
                     builder2.Item(r => _table.Draw(r), new StyleOverride { flexGrow = 1f });
@@ -81,7 +82,7 @@ public class Window_Table<T> : OwnedWindow
                                 size: UIUtility.ComponentSize.Large);
                         },
                         new StyleOverride
-                            { justifyContent = TaffyAlignContent.SpaceBetween, alignItems = TaffyAlignItems.Center });
+                        { justifyContent = TaffyAlignContent.SpaceBetween, alignItems = TaffyAlignItems.Center });
             }, new StyleOverride { flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapSmall)) });
     }
 }

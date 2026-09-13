@@ -1,5 +1,5 @@
 using Taffy;
-﻿using PawnEditor.Table;
+using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
 using UnityEngine;

@@ -119,7 +119,7 @@ public class SectionWorker_Skills(SectionDef def) : SectionWorker(def)
                                 InspectPaneFiller.HealthTex, false);
                         },
                         style: new StyleOverride
-                            { height = Dimension.Px(SkillRectSize.y), flexGrow = 1f, color = GetColorTextForSkill(skill) });
+                        { height = Dimension.Px(SkillRectSize.y), flexGrow = 1f, color = GetColorTextForSkill(skill) });
                     SetSkill(skill, level);
                 }
             },
