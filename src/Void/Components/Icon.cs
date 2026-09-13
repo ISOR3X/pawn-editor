@@ -32,7 +32,8 @@ public static partial class VoidComponents
             {
                 width = Dimension.Px(iconSize),
                 height = Dimension.Px(iconSize),
-                alignSelf = TaffyAlignItems.Center
+                alignSelf = TaffyAlignItems.Center,
+                flexShrink = 0f
             });
 
             // Capture for closure.

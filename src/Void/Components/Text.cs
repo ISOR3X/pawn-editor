@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Taffy;
 using UnityEngine;
 using Verse;
+using Void;
 using Void.Taffy;
 
 public static partial class VoidComponents
@@ -19,9 +20,10 @@ public static partial class VoidComponents
 
             void _draw(Rect r)
             {
+                using (new GUIColor(style?.color ?? Color.white))
                 using (new TextBlock(fontSize, align, wrap))
                 {
-                    Widgets.Label(r, wrap ? text : text.Truncate(r.width));
+                    Verse.Widgets.Label(r, wrap ? text : text.Truncate(r.width));
                 }
             }
 
