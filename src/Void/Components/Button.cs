@@ -37,8 +37,7 @@ public static partial class VoidComponents
         if (Mouse.IsOver(rect) && !disabled)
         {
             atlas = Verse.Widgets.ButtonBGAtlasMouseover;
-            if (UnityEngine.Input.GetMouseButton(0))
-                atlas = Verse.Widgets.ButtonBGAtlasClick;
+            if (Input.GetMouseButton(0)) atlas = Verse.Widgets.ButtonBGAtlasClick;
         }
 
         Verse.Widgets.DrawAtlas(rect, atlas);

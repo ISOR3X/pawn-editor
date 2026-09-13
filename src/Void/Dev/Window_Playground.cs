@@ -21,7 +21,8 @@ public class Window_Playground : Window
         Buttons,
         Text,
         Icons,
-        Collapsible
+        Collapsible,
+        List
     }
 
     private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
@@ -44,6 +45,11 @@ public class Window_Playground : Window
     private Tab _tab = Tab.Buttons;
     private int _clicks;
     private bool _showExtra;
+
+    // List tab state. Items live on the window so add/remove buttons can mutate them between frames.
+    private readonly List<string> _listItems = Enumerable.Range(1, 200).Select(i => $"Item {i}").ToList();
+    private readonly HashSet<string> _listSelected = [];
+    private bool _listGap;
 
     public override Vector2 InitialSize => new(640f, 480f);
 
@@ -75,6 +81,7 @@ public class Window_Playground : Window
                 case Tab.Text: TextPlayground(root); break;
                 case Tab.Icons: IconPlayground(root); break;
                 case Tab.Collapsible: CollapsiblePlayground(root); break;
+                case Tab.List: ListPlayground(root); break;
             }
         }, new Style
         {
@@ -249,6 +256,76 @@ public class Window_Playground : Window
         builder.Collapsible("I am collapsed2", b => { b.Text(Lorem); });
         builder.Collapsible("I am collapsed3", b => { b.Button(Lorem); });
         builder.Collapsible("I am collapsed4", b => { b.Text(Lorem); });
+    }
+
+    private void ListPlayground(UIBranch builder)
+    {
+        builder.Text($"List playground ({_listItems.Count} items, {_listSelected.Count} selected)",
+            new Style { fontSize = GameFont.Medium });
+
+        // Mutating the item count changes the list's own height whenever it is below the visible cap,
+        // and the scroll range once it is above it.
+        builder.Div(b =>
+        {
+            b.Button("Add 10", size: ComponentSize.Small, onClick: _ =>
+            {
+                for (var i = 0; i < 10; i++) _listItems.Add($"Item {_listItems.Count + 1}");
+            });
+            b.Button("Remove 10", size: ComponentSize.Small, onClick: _ =>
+            {
+                var n = Math.Min(10, _listItems.Count);
+                _listItems.RemoveRange(_listItems.Count - n, n);
+            });
+            b.Button("Clear", size: ComponentSize.Small, onClick: _ => { _listItems.Clear(); _listSelected.Clear(); });
+            b.Button("Reset", size: ComponentSize.Small, onClick: _ =>
+            {
+                _listItems.Clear();
+                _listItems.AddRange(Enumerable.Range(1, 200).Select(i => $"Item {i}"));
+                _listSelected.Clear();
+            });
+            b.Button(_listGap ? "Gap: on" : "Gap: off", size: ComponentSize.Small,
+                variant: _listGap ? ButtonVariant.Solid : ButtonVariant.Ghost, onClick: _ => _listGap = !_listGap);
+        }, style: Row());
+
+        // Main list: virtualized, capped at eight visible rows, checkbox rows that toggle selection.
+        // Scroll far down and back to confirm only visible rows are drawn and the scroll position sticks.
+        builder.List(_listItems, (r, item) =>
+        {
+            var selected = _listSelected.Contains(item);
+            var was = selected;
+            Verse.Widgets.CheckboxLabeled(r, item, ref selected);
+            if (selected != was)
+            {
+                if (selected) _listSelected.Add(item);
+                else _listSelected.Remove(item);
+            }
+        }, maxItemsVisibleAtOnce: 8, style: _listGap ? new Style { gap = Axes(4f) } : null);
+
+        // Two independent lists side by side. Same call site in a loop, so each needs an id, and each
+        // must keep its own scroll position through the per-parent state slot.
+        builder.Text("Independent scroll state:", new Style { fontSize = GameFont.Tiny });
+        builder.Div(b =>
+        {
+            foreach (var side in new[] { "left", "right" })
+                b.Div(inner => inner.List(_listItems, (r, item) =>
+                    {
+                        Verse.Widgets.DrawHighlightIfMouseover(r);
+                        Verse.Widgets.Label(r, $"{side}: {item}");
+                    }, itemHeight: 22f, maxItemsVisibleAtOnce: 5, id: $"list-{side}"),
+                    style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) },
+                    id: $"col-{side}");
+        }, style: Row());
+
+        // Short and empty lists: height follows the item count below the cap, and the empty
+        // list falls back to a single row with the placeholder label.
+        builder.Text("Short (3 items) and empty:", new Style { fontSize = GameFont.Tiny });
+        builder.Div(b =>
+        {
+            b.Div(inner => inner.List(_listItems.Take(3).ToList(), (r, item) => Verse.Widgets.Label(r, item)),
+                style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) });
+            b.Div(inner => inner.List(Array.Empty<string>(), (r, item) => Verse.Widgets.Label(r, item)),
+                style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) });
+        }, style: Row());
     }
 
     private static Style Row() => new()
