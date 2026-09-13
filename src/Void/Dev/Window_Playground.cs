@@ -20,7 +20,8 @@ public class Window_Playground : Window
     {
         Buttons,
         Text,
-        Icons
+        Icons,
+        Collapsible
     }
 
     private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
@@ -73,6 +74,7 @@ public class Window_Playground : Window
                 case Tab.Buttons: ButtonPlayground(root); break;
                 case Tab.Text: TextPlayground(root); break;
                 case Tab.Icons: IconPlayground(root); break;
+                case Tab.Collapsible: CollapsiblePlayground(root); break;
             }
         }, new Style
         {
@@ -239,6 +241,14 @@ public class Window_Playground : Window
                 width = Dimension.Px(80f),
                 height = Dimension.Px(80f)
             });
+    }
+
+    private void CollapsiblePlayground(UIBranch builder)
+    {
+        builder.Collapsible("I am collapsed", b => { b.Button(Lorem); });
+        builder.Collapsible("I am collapsed2", b => { b.Text(Lorem); });
+        builder.Collapsible("I am collapsed3", b => { b.Button(Lorem); });
+        builder.Collapsible("I am collapsed4", b => { b.Text(Lorem); });
     }
 
     private static Style Row() => new()
