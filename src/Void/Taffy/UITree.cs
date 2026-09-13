@@ -67,10 +67,18 @@ namespace Void.Taffy
         /// </summary>
         private readonly Dictionary<TaffyNode, BranchRecord> _branchRecordsByNode = [];
 
+        /// <summary>
         // Tracks whether anything changed since last frame
+        /// </summary>
         private bool _dirtyThisFrame = true;
         private float _lastAvailableWidth = -1f;
         private float _lastAvailableHeight = -1f;
+
+        /// <summary>
+        /// For some reason <c>DoWindowContents</c> calls <c>UITree.Draw</c> even after <c>PostClose</c> is called.
+        /// This is a fix for that to properly dispose the tree.
+        /// </summary>
+        private bool _disposed;
 
         public UITree()
         {
@@ -80,6 +88,8 @@ namespace Void.Taffy
 
         public void Build(Action<UIBranch> builder, Style? style = null)
         {
+            if (_disposed) return;
+
             var branch = new UIBranch(this, _rootBranchNode);
             var rootRecord = _branchRecordsByNode[_rootBranchNode];
 
@@ -100,6 +110,8 @@ namespace Void.Taffy
 
         public void Draw(Rect rect)
         {
+            if (_disposed) return;
+
             var sizeChanged = !Mathf.Approximately(rect.width, _lastAvailableWidth)
                 || !Mathf.Approximately(rect.height, _lastAvailableHeight);
 
@@ -273,6 +285,8 @@ namespace Void.Taffy
 
         public void Dispose()
         {
+            if (_disposed) return;
+             _disposed = true;
             _tree.Dispose();
         }
     }
