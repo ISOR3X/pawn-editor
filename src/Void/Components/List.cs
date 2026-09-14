@@ -25,6 +25,7 @@ public static partial class VoidComponents
         ///     if (selected != _set.Contains(cat)) { ... }
         /// });
         /// </code>
+        /// TODO: Refactor to use components inside of childs as well.
         /// </summary>
         public void List<T>(
             IReadOnlyList<T> items,

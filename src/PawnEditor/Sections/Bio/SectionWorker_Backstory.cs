@@ -8,6 +8,7 @@ using Void.Components;
 using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
 using Layout = Void.Layout;
+using Void.XML.Elements;
 
 namespace PawnEditor;
 

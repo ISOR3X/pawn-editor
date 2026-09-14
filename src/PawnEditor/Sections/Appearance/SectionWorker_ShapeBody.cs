@@ -3,6 +3,7 @@ using Taffy;
 using Verse;
 using Void;
 using Void.Components;
+using Void.XML.Elements;
 using Void.XMLComponents;
 
 namespace PawnEditor;

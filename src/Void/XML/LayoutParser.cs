@@ -1,6 +1,7 @@
 using System.Xml;
 using Verse;
 using Void.Taffy;
+using Void.XML.Elements;
 
 namespace Void.XML;
 
@@ -10,41 +11,50 @@ namespace Void.XML;
 /// </summary>
 public static class LayoutParser
 {
-    public static Action<UIBranch> ParseChildren(XmlNode xml)
+    /// <summary>
+    /// Registry for XML elements. Key is a function that creates a new element.
+    /// </summary>
+    public static Dictionary<string, Func<XMLElement>> REGISTRY = [];
+
+    static LayoutParser()
+    {
+        REGISTRY.Add("button", () => new ButtonElement());
+        REGISTRY.Add("div", () => new DivElement());
+        REGISTRY.Add("text", () => new TextElement());
+    }
+
+    public static Action<UIBranch> ParseChildren(XmlNode xmlNode)
     {
         var children = new List<Action<UIBranch>>();
         var index = 0;
-        foreach (XmlNode child in xml.ChildNodes)
+        foreach (XmlNode child in xmlNode.ChildNodes)
             if (child is XmlElement)
                 children.Add(ParseNode(child, index++));
 
         return b => { foreach (var child in children) child(b); };
     }
 
-    private static Action<UIBranch> ParseNode(XmlNode xml, int index)
+    private static Action<UIBranch> ParseNode(XmlNode xmlNode, int index)
     {
-        var key = xml.Attributes?["id"]?.Value ?? $"{xml.Name}[{index}]";
-        var style = ParseStyle(xml);
+        var key = xmlNode.Attributes?["id"]?.Value ?? $"{xmlNode.Name}[{index}]";
 
-        if (xml.Name == "text")
-        {
-            var text = xml.InnerText.Trim();
-            return b => b.Text(text, style, key);
-        }
+        if (!REGISTRY.TryGetValue(xmlNode.Name, out var factory))
+            throw new LayoutParseException(xmlNode, $"unknown element. Registered: {string.Join(", ", REGISTRY.Keys)}");
 
-        var children = ParseChildren(xml);
-        return b => b.Div(children, style: style, id: key);
+        var element = factory();
+        element.Parse(xmlNode, key, ParseStyle, ParseChildren);
+        return element.Draw();
     }
 
     /// <summary>
     /// Parses the <c>class</c> attribute against loaded <see cref="StyleMapDef" />s (later classes win)
     /// and merges the inline <c>style</c> attribute on top. Unknown classes log a warning and are skipped.
     /// </summary>
-    public static Style ParseStyle(XmlNode xml)
+    public static Style ParseStyle(XmlNode xmlNode)
     {
         var style = new Style();
 
-        if (xml.Attributes?["class"]?.Value is { Length: > 0 } classAttr)
+        if (xmlNode.Attributes?["class"]?.Value is { Length: > 0 } classAttr)
             foreach (var className in classAttr.Split(' ', StringSplitOptions.RemoveEmptyEntries))
             {
                 var classStyle = DefDatabase<StyleMapDef>.AllDefsListForReading
@@ -55,14 +65,14 @@ public static class LayoutParser
 
                 if (classStyle == null)
                 {
-                    Log.Warning($"[{VoidMod.ModName}] Unknown class '{className}' on <{xml.Name}> (not found in any StyleMapDef).");
+                    Log.Warning($"[{VoidMod.ModName}] Unknown class '{className}' on <{xmlNode.Name}> (not found in any StyleMapDef).");
                     continue;
                 }
 
                 style = classStyle.Merge(style);
             }
 
-        if (xml.Attributes?["style"]?.Value is { Length: > 0 } inline)
+        if (xmlNode.Attributes?["style"]?.Value is { Length: > 0 } inline)
             style = StyleParser.ParseInlineStyle(inline).Merge(style);
 
         return style;
@@ -95,4 +105,9 @@ public sealed class ParsedLayout
         _style = LayoutParser.ParseStyle(xml);
         _builder = LayoutParser.ParseChildren(xml);
     }
+
+}
+
+public sealed class LayoutParseException(XmlNode node, string message) : Exception($"[{VoidMod.ModName}] <{node.Name}>: {message}")
+{
 }

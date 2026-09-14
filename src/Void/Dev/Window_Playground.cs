@@ -22,7 +22,8 @@ public class Window_Playground : Window
         Text,
         Icons,
         Collapsible,
-        List
+        List,
+        Layout
     }
 
     private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
@@ -51,7 +52,7 @@ public class Window_Playground : Window
     private readonly HashSet<string> _listSelected = [];
     private bool _listGap;
 
-    public override Vector2 InitialSize => new(640f, 480f);
+    public override Vector2 InitialSize => new(1280f, 860f);
 
     public Window_Playground()
     {
@@ -82,6 +83,7 @@ public class Window_Playground : Window
                 case Tab.Icons: IconPlayground(root); break;
                 case Tab.Collapsible: CollapsiblePlayground(root); break;
                 case Tab.List: ListPlayground(root); break;
+                case Tab.Layout: LayoutPlayground(root); break;
             }
         }, new Style
         {
@@ -326,6 +328,24 @@ public class Window_Playground : Window
             b.Div(inner => inner.List(Array.Empty<string>(), (r, item) => Verse.Widgets.Label(r, item)),
                 style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) });
         }, style: Row());
+    }
+
+    /// <summary>
+    /// Renders the <c>Void_Playground</c> <see cref="LayoutDef" /> parsed from XML, so the XML element
+    /// registry can be exercised next to the hand-written tabs.
+    /// </summary>
+    private static void LayoutPlayground(UIBranch builder)
+    {
+        builder.Text("Layout playground (Void_Playground def)", new Style { fontSize = GameFont.Medium });
+
+        var def = DefDatabase<LayoutDef>.GetNamedSilentFail("Void_Playground");
+        if (def?.layout?._builder == null)
+        {
+            builder.Text("LayoutDef 'Void_Playground' not found or has no layout.", new Style { color = Color.red });
+            return;
+        }
+
+        builder.Div(def.layout._builder, style: def.layout._style);
     }
 
     private static Style Row() => new()
