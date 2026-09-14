@@ -13,12 +13,12 @@ public class Dialog_EditThing : Dialog_EditItem<Thing>
 {
     private string _buffer;
 
-    public Dialog_EditThing(Thing item, Pawn pawn = null, UIElement element = null) : base(item, pawn, element) => _buffer = "";
+    public Dialog_EditThing(Thing item, Pawn pawn = null, UIElement element = null) : base(item, pawn, element) => _buffer = null;
 
     public override void Select(Thing item)
     {
         base.Select(item);
-        _buffer = "";
+        _buffer = null;
     }
 
     protected override void DoContents(Listing_Horizontal listing)
