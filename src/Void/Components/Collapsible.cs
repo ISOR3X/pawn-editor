@@ -24,7 +24,7 @@ public static partial class VoidComponents
             [CallerFilePath] string? file = null,
             [CallerLineNumber] int line = 0)
         {
-            var key = id ?? $"{file}_{line}";
+            var key = UIBranch.ResolveKey(id, file, line);
 
             var state = branch.State(key, () => new CollapsibleState { Open = defaultOpen });
 

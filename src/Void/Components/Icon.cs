@@ -39,7 +39,7 @@ public static partial class VoidComponents
             Style? style = null, string? id = null, [CallerFilePath] string? file = null,
             [CallerLineNumber] int line = 0)
         {
-            var key = id ?? $"{file}_{line}";
+            var key = UIBranch.ResolveKey(id, file, line);
 
             var baseStyle = IconStyles.Get(size);
             var mergedStyle = style == null ? baseStyle : style.Merge(baseStyle);

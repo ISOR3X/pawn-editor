@@ -12,7 +12,7 @@ public static partial class VoidComponents
         public TaffyNode Text(string text, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
         {
-            var key = id ?? $"{file}_{line}";
+            var key = UIBranch.ResolveKey(id, file, line);
 
             var fontSize = style?.fontSize ?? GameFont.Small;
             var align = style?.textAnchor ?? TextAnchor.UpperLeft;
