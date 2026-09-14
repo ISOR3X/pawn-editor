@@ -2,7 +2,6 @@
 using RimWorld;
 using Verse;
 using Void;
-using Void.XMLComponents;
 using Layout = Void.Layout;
 
 namespace PawnEditor;

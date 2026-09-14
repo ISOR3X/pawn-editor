@@ -1,7 +1,5 @@
 ﻿using Taffy;
 using Verse;
-using Void;
-using Void.Components;
 
 namespace PawnEditor.Table.ColumnWorkers;
 
@@ -29,7 +27,8 @@ public class ColumnWorker_ThingStuff<T>(TaffyTrackSizingFunction trackSize) : Co
                 inner.Item(r => Verse.Widgets.ThingIcon(r, thing.Stuff),
                     new StyleOverride
                     {
-                        margin = new TaffyEdges(Dimension.Px(0), Dimension.Px(GenUI.GapSmall), Dimension.Px(0), Dimension.Px(0)),
+                        margin = new TaffyEdges(Dimension.Px(0), Dimension.Px(GenUI.GapSmall), Dimension.Px(0),
+                            Dimension.Px(0)),
                         width = Dimension.Px(GenUI.SmallIconSize)
                     });
                 inner.Text(t, wrap: false,

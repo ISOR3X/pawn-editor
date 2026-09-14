@@ -4,13 +4,14 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Taffy;
+using Widgets = Verse.Widgets;
 
 public static partial class VoidComponents
 {
     extension(UIBranch branch)
     {
         public TaffyNode Text(string text, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
-        [CallerLineNumber] int line = 0)
+            [CallerLineNumber] int line = 0)
         {
             var key = UIBranch.ResolveKey(id, file, line);
 
@@ -23,7 +24,7 @@ public static partial class VoidComponents
                 using (new GUIColor(style?.color ?? Color.white))
                 using (new TextBlock(fontSize, align, wrap))
                 {
-                    Verse.Widgets.Label(r, wrap ? text : text.Truncate(r.width));
+                    Widgets.Label(r, wrap ? text : text.Truncate(r.width));
                 }
             }
 

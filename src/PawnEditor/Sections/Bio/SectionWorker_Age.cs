@@ -1,8 +1,6 @@
 using RimWorld;
 using Taffy;
 using Verse;
-using Void;
-using Void.Components;
 
 namespace PawnEditor;
 
@@ -13,10 +11,15 @@ public class SectionWorker_Age(SectionDef def) : SectionWorker(def)
     {
         builder.Text("Age", color: ColoredText.TipSectionTitleColor);
         builder.Div(row =>
-        {
-            DoAgeItem(row, pawn, "Biological", false);
-            DoAgeItem(row, pawn, "Chronological", true);
-        }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapTiny)), flexWrap = TaffyFlexWrap.Wrap });
+            {
+                DoAgeItem(row, pawn, "Biological", false);
+                DoAgeItem(row, pawn, "Chronological", true);
+            },
+            new StyleOverride
+            {
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapTiny)),
+                flexWrap = TaffyFlexWrap.Wrap
+            });
     }
 
     private static void DoAgeItem(TaffyBuilder col, Pawn pawn, string label, bool isChrono)

@@ -45,7 +45,8 @@ public class Window_BenchmarkVerse : Window
         var dynColY = y;
         var dynColHeight = ButtonHeight;
 
-        if (Verse.Widgets.ButtonText(new Rect(inRect.x, dynColY, SidebarWidth, ButtonHeight), _showBox ? "Hide" : "Show"))
+        if (Verse.Widgets.ButtonText(new Rect(inRect.x, dynColY, SidebarWidth, ButtonHeight),
+                _showBox ? "Hide" : "Show"))
             _showBox = !_showBox;
 
         if (_showBox)

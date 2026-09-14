@@ -7,33 +7,21 @@ using static VoidComponents;
 namespace Void.Dev;
 
 /// <summary>
-/// Vanilla-API twin of <see cref="Window_Playground" /> for benchmarking. Draws the same tab bar and
-/// button playground with plain <see cref="Verse.Widgets" /> calls and manual <see cref="Rect" /> math,
-/// so profiler numbers can be compared against the <see cref="Taffy.UITree" /> version. Only the
-/// Buttons tab has content; the other tabs exist so the tab bar draws the same number of buttons.
+///     Vanilla-API twin of <see cref="Window_Playground" /> for benchmarking. Draws the same tab bar and
+///     button playground with plain <see cref="Verse.Widgets" /> calls and manual <see cref="Rect" /> math,
+///     so profiler numbers can be compared against the <see cref="Taffy.UITree" /> version. Only the
+///     Buttons tab has content; the other tabs exist so the tab bar draws the same number of buttons.
 /// </summary>
 public class Window_PlaygroundVanilla : Window
 {
-    private enum Tab
-    {
-        Buttons,
-        Text,
-        Icons,
-        Collapsible,
-        List,
-        Layout
-    }
-
-    private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
-
     private const float Gap = 8f;
     private const float RowGap = 10f;
 
-    private Tab _tab = Tab.Buttons;
+    private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
     private int _clicks;
     private bool _showExtra;
 
-    public override Vector2 InitialSize => new(1280f, 860f);
+    private Tab _tab = Tab.Buttons;
 
     public Window_PlaygroundVanilla()
     {
@@ -44,10 +32,13 @@ public class Window_PlaygroundVanilla : Window
         absorbInputAroundWindow = false;
     }
 
+    public override Vector2 InitialSize => new(1280f, 860f);
+
     [DebugAction("Void", "Open vanilla playground", allowedGameStates = AllowedGameStates.Invalid)]
     private static void Open()
     {
-        if (Find.WindowStack.IsOpen<Window_PlaygroundVanilla>()) Find.WindowStack.TryRemove(typeof(Window_PlaygroundVanilla));
+        if (Find.WindowStack.IsOpen<Window_PlaygroundVanilla>())
+            Find.WindowStack.TryRemove(typeof(Window_PlaygroundVanilla));
         else Find.WindowStack.Add(new Window_PlaygroundVanilla());
     }
 
@@ -60,13 +51,14 @@ public class Window_PlaygroundVanilla : Window
         {
             case Tab.Buttons: ButtonPlayground(inRect, y); break;
             default:
-                Verse.Widgets.Label(new Rect(inRect.x, y, inRect.width, 30f), $"{_tab}: not implemented in the vanilla playground.");
+                Verse.Widgets.Label(new Rect(inRect.x, y, inRect.width, 30f),
+                    $"{_tab}: not implemented in the vanilla playground.");
                 break;
         }
     }
 
     /// <summary>
-    /// Row of tab buttons, a flexible spacer, and a right-aligned overlay toggle.
+    ///     Row of tab buttons, a flexible spacer, and a right-aligned overlay toggle.
     /// </summary>
     private float TabBar(Rect inRect, float y)
     {
@@ -74,17 +66,16 @@ public class Window_PlaygroundVanilla : Window
         var height = ButtonMetrics(ComponentSize.Default).height;
 
         foreach (var tab in Tabs)
-        {
             if (DrawButton(ref x, y, tab.ToString(), null, ComponentSize.Default,
                     tab == _tab ? ButtonVariant.Solid : ButtonVariant.Ghost, false))
                 _tab = tab;
-        }
 
         // Right-aligned: measure first, then place at the far edge.
         var overlayWidth = MeasureButton("Overlay", null, ComponentSize.Small);
         var smallHeight = ButtonMetrics(ComponentSize.Small).height;
         var ox = inRect.xMax - overlayWidth;
-        if (DrawButton(ref ox, y + (height - smallHeight) / 2f, "Overlay", null, ComponentSize.Small, ButtonVariant.Solid, false))
+        if (DrawButton(ref ox, y + (height - smallHeight) / 2f, "Overlay", null, ComponentSize.Small,
+                ButtonVariant.Solid, false))
             VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
 
         return y + height;
@@ -103,13 +94,15 @@ public class Window_PlaygroundVanilla : Window
         // One row per size.
         var x = inRect.x;
         if (DrawButton(ref x, y, "Small", null, ComponentSize.Small, ButtonVariant.Solid, false)) _clicks++;
-        if (DrawButton(ref x, y, "Small + icon", TexUI.ArrowRight, ComponentSize.Small, ButtonVariant.Solid, false)) _clicks++;
+        if (DrawButton(ref x, y, "Small + icon", TexUI.ArrowRight, ComponentSize.Small, ButtonVariant.Solid,
+                false)) _clicks++;
         if (DrawButton(ref x, y, null, TexUI.ArrowRight, ComponentSize.Small, ButtonVariant.Solid, false)) _clicks++;
         y += ButtonMetrics(ComponentSize.Small).height + RowGap;
 
         x = inRect.x;
         if (DrawButton(ref x, y, "Default", null, ComponentSize.Default, ButtonVariant.Solid, false)) _clicks++;
-        if (DrawButton(ref x, y, "Default + icon", TexUI.ArrowRight, ComponentSize.Default, ButtonVariant.Solid, false)) _clicks++;
+        if (DrawButton(ref x, y, "Default + icon", TexUI.ArrowRight, ComponentSize.Default, ButtonVariant.Solid,
+                false)) _clicks++;
         if (DrawButton(ref x, y, null, TexUI.ArrowRight, ComponentSize.Default, ButtonVariant.Solid, false)) _clicks++;
         if (DrawButton(ref x, y, "Ghost", null, ComponentSize.Default, ButtonVariant.Ghost, false)) _clicks++;
         DrawButton(ref x, y, "Disabled", null, ComponentSize.Default, ButtonVariant.Solid, true);
@@ -117,7 +110,8 @@ public class Window_PlaygroundVanilla : Window
 
         x = inRect.x;
         if (DrawButton(ref x, y, "Large", null, ComponentSize.Large, ButtonVariant.Solid, false)) _clicks++;
-        if (DrawButton(ref x, y, "Large + icon", TexUI.ArrowRight, ComponentSize.Large, ButtonVariant.Solid, false)) _clicks++;
+        if (DrawButton(ref x, y, "Large + icon", TexUI.ArrowRight, ComponentSize.Large, ButtonVariant.Solid,
+                false)) _clicks++;
         y += ButtonMetrics(ComponentSize.Large).height + RowGap;
 
         // Block button: full parent width.
@@ -134,18 +128,20 @@ public class Window_PlaygroundVanilla : Window
         const float innerGap = 6f;
         var inner = new Rect(inRect.x + padding, y + padding, inRect.width - padding * 2f, 0f);
 
-        const string text = "This block is added and removed by the button above. A very long label follows to check truncation:";
+        const string text =
+            "This block is added and removed by the button above. A very long label follows to check truncation:";
         var textHeight = Text.CalcHeight(text, inner.width);
         Verse.Widgets.Label(new Rect(inner.x, inner.y, inner.width, textHeight), text);
 
         var bx = inner.x;
         DrawButton(ref bx, inner.y + textHeight + innerGap,
             "This label is far too long for the space it has been given and should truncate",
-            TexUI.ArrowLeft, ComponentSize.Default, ButtonVariant.Solid, false, maxWidth: 220f);
+            TexUI.ArrowLeft, ComponentSize.Default, ButtonVariant.Solid, false, 220f);
     }
 
     /// <returns>Horizontal padding, button height, icon size, icon + label gap, font.</returns>
-    private static (float padding, float height, float iconSize, float iconGap, GameFont font) ButtonMetrics(ComponentSize size)
+    private static (float padding, float height, float iconSize, float iconGap, GameFont font) ButtonMetrics(
+        ComponentSize size)
     {
         return size switch
         {
@@ -157,8 +153,8 @@ public class Window_PlaygroundVanilla : Window
     }
 
     /// <summary>
-    /// Intrinsic width of a button: padding on both sides, the icon, the gap, and the measured label.
-    /// Icon-only buttons are square.
+    ///     Intrinsic width of a button: padding on both sides, the icon, the gap, and the measured label.
+    ///     Icon-only buttons are square.
     /// </summary>
     private static float MeasureButton(string? label, Texture2D? icon, ComponentSize size)
     {
@@ -168,12 +164,16 @@ public class Window_PlaygroundVanilla : Window
         var width = padding * 2f;
         if (icon != null) width += iconSize + iconGap;
         if (label != null)
-            using (new TextBlock(font)) width += Text.CalcSize(label).x;
+            using (new TextBlock(font))
+            {
+                width += Text.CalcSize(label).x;
+            }
+
         return width;
     }
 
     /// <summary>
-    /// Draws a button at the cursor and advances it by the button width plus the row gap.
+    ///     Draws a button at the cursor and advances it by the button width plus the row gap.
     /// </summary>
     private static bool DrawButton(ref float x, float y, string? label, Texture2D? icon, ComponentSize size,
         ButtonVariant variant, bool disabled, float? maxWidth = null)
@@ -186,8 +186,8 @@ public class Window_PlaygroundVanilla : Window
     }
 
     /// <summary>
-    /// Same drawing as the VoidComponents Button: invisible hit box, atlas or hover highlight,
-    /// centered icon + label, dark overlay when disabled.
+    ///     Same drawing as the VoidComponents Button: invisible hit box, atlas or hover highlight,
+    ///     centered icon + label, dark overlay when disabled.
     /// </summary>
     private static bool DrawButtonRect(Rect rect, string? label, Texture2D? icon, ComponentSize size,
         ButtonVariant variant, bool disabled)
@@ -237,12 +237,24 @@ public class Window_PlaygroundVanilla : Window
 
             if (label != null)
                 using (new TextBlock(null, TextAnchor.MiddleLeft, false))
+                {
                     Verse.Widgets.Label(new Rect(cx, rect.y, labelWidth, rect.height), label.Truncate(labelWidth));
+                }
         }
 
         if (disabled) Verse.Widgets.DrawBoxSolid(rect, Color.black with { a = 0.25f });
 
         return clicked && !disabled;
+    }
+
+    private enum Tab
+    {
+        Buttons,
+        Text,
+        Icons,
+        Collapsible,
+        List,
+        Layout
     }
 }
 #endif

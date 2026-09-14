@@ -6,7 +6,7 @@ using Void.XML;
 namespace Void;
 
 /// <summary>
-/// A RimWorld <see cref="Def" /> that maps CSS class names to inline style strings.
+///     A RimWorld <see cref="Def" /> that maps CSS class names to inline style strings.
 /// </summary>
 [UsedImplicitly]
 public class StyleMapDef : Def
@@ -16,7 +16,7 @@ public class StyleMapDef : Def
     [field: Unsaved] public Dictionary<string, Style> Styles { get; private set; } = [];
 
     /// <summary>
-    /// PostLoad instead of ResolveReferences so the Styles dictionary is available immediately for other defs.
+    ///     PostLoad instead of ResolveReferences so the Styles dictionary is available immediately for other defs.
     /// </summary>
     public override void PostLoad()
     {

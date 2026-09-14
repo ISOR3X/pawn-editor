@@ -6,13 +6,13 @@ using Void.XML.Elements;
 namespace Void.XML;
 
 /// <summary>
-/// Parses an XML element into a builder that describes the same tree to a <see cref="UITree"/>
-/// every frame.
+///     Parses an XML element into a builder that describes the same tree to a <see cref="UITree" />
+///     every frame.
 /// </summary>
 public static class LayoutParser
 {
     /// <summary>
-    /// Registry for XML elements. Key is a function that creates a new element.
+    ///     Registry for XML elements. Key is a function that creates a new element.
     /// </summary>
     public static Dictionary<string, Func<XMLElement>> REGISTRY = [];
 
@@ -31,7 +31,10 @@ public static class LayoutParser
             if (child is XmlElement)
                 children.Add(ParseNode(child, index++));
 
-        return b => { foreach (var child in children) child(b); };
+        return b =>
+        {
+            foreach (var child in children) child(b);
+        };
     }
 
     private static Action<UIBranch> ParseNode(XmlNode xmlNode, int index)
@@ -47,8 +50,8 @@ public static class LayoutParser
     }
 
     /// <summary>
-    /// Parses the <c>class</c> attribute against loaded <see cref="StyleMapDef" />s (later classes win)
-    /// and merges the inline <c>style</c> attribute on top. Unknown classes log a warning and are skipped.
+    ///     Parses the <c>class</c> attribute against loaded <see cref="StyleMapDef" />s (later classes win)
+    ///     and merges the inline <c>style</c> attribute on top. Unknown classes log a warning and are skipped.
     /// </summary>
     public static Style ParseStyle(XmlNode xmlNode)
     {
@@ -58,14 +61,15 @@ public static class LayoutParser
             foreach (var className in classAttr.Split(' ', StringSplitOptions.RemoveEmptyEntries))
             {
                 var classStyle = DefDatabase<StyleMapDef>.AllDefsListForReading
-                        .SelectMany(def => def.Styles)
-                        .Where(pair => pair.Key == className)
-                        .Select(pair => pair.Value)
-                        .FirstOrDefault();
+                    .SelectMany(def => def.Styles)
+                    .Where(pair => pair.Key == className)
+                    .Select(pair => pair.Value)
+                    .FirstOrDefault();
 
                 if (classStyle == null)
                 {
-                    Log.Warning($"[{VoidMod.ModName}] Unknown class '{className}' on <{xmlNode.Name}> (not found in any StyleMapDef).");
+                    Log.Warning(
+                        $"[{VoidMod.ModName}] Unknown class '{className}' on <{xmlNode.Name}> (not found in any StyleMapDef).");
                     continue;
                 }
 
@@ -77,21 +81,22 @@ public static class LayoutParser
 
         return style;
     }
-
 }
+
 /// <summary>
-/// A layout element loaded from a def.
-/// Make sure to call <c>ParseAndResolveReferences</c> in <c>ResolveReferences</c> when implementing this in a <c>Def</c>.
+///     A layout element loaded from a def.
+///     Make sure to call <c>ParseAndResolveReferences</c> in <c>ResolveReferences</c> when implementing this in a
+///     <c>Def</c>.
 /// </summary>
 public sealed class ParsedLayout
 {
-    public Action<UIBranch>? _builder = null;
-    public Style? _style = null;
+    public Action<UIBranch>? _builder;
+    public Style? _style;
     private XmlNode? _xmlNode;
 
     /// <summary>
-    /// Store the xml node for future parsing.
-    /// Class attribute resolving requires the <see cref="StyleMapDef"/> to be loaded.
+    ///     Store the xml node for future parsing.
+    ///     Class attribute resolving requires the <see cref="StyleMapDef" /> to be loaded.
     /// </summary>
     public void LoadDataFromXmlCustom(XmlNode xmlNode)
     {
@@ -101,13 +106,14 @@ public sealed class ParsedLayout
     public void ParseAndResolveReferences()
     {
         if (_builder != null) return;
-        var xml = _xmlNode ?? throw new InvalidOperationException($"[{VoidMod.ModName}] ParsedLayout was never loaded from XML.");
+        var xml = _xmlNode ??
+                  throw new InvalidOperationException($"[{VoidMod.ModName}] ParsedLayout was never loaded from XML.");
         _style = LayoutParser.ParseStyle(xml);
         _builder = LayoutParser.ParseChildren(xml);
     }
-
 }
 
-public sealed class LayoutParseException(XmlNode node, string message) : Exception($"[{VoidMod.ModName}] <{node.Name}>: {message}")
+public sealed class LayoutParseException(XmlNode node, string message)
+    : Exception($"[{VoidMod.ModName}] <{node.Name}>: {message}")
 {
 }

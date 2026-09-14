@@ -9,22 +9,16 @@ using static VoidComponents;
 namespace Void.Dev;
 
 /// <summary>
-/// Dev-only sandbox for exercising components on the new <see cref="UITree" /> without needing
-/// PawnEditor to compile. Opened from the dev-mode debug actions menu under the "Void" category,
-/// available on the main menu as well as in play. Edit the tab bodies and EditCompileReload picks
-/// the change up live.
+///     Dev-only sandbox for exercising components on the new <see cref="UITree" /> without needing
+///     PawnEditor to compile. Opened from the dev-mode debug actions menu under the "Void" category,
+///     available on the main menu as well as in play. Edit the tab bodies and EditCompileReload picks
+///     the change up live.
 /// </summary>
 public class Window_Playground : Window
 {
-    private enum Tab
-    {
-        Buttons,
-        Text,
-        Icons,
-        Collapsible,
-        List,
-        Layout
-    }
+    private const string Lorem =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut " +
+        "labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.";
 
     private static readonly Tab[] Tabs = (Tab[])Enum.GetValues(typeof(Tab));
 
@@ -38,21 +32,37 @@ public class Window_Playground : Window
         ("ArrowRightDouble", TexUI.ArrowRightDouble)
     ];
 
-    private const string Lorem =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut " +
-        "labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.";
+    private static readonly StyleCache<(int variant, float gap, float padding)> Styles = new(k =>
+    {
+        if (k.variant == 0)
+            return new Style
+            {
+                display = TaffyDisplay.Flex,
+                flexDirection = TaffyFlexDirection.Row,
+                alignItems = TaffyAlignItems.Center,
+                gap = Axes(8f),
+                width = Dimension.Percent(1f)
+            };
 
-    private readonly UITree _tree = new();
-    private Tab _tab = Tab.Buttons;
-    private int _clicks;
-    private bool _showExtra;
+        return new Style
+        {
+            display = TaffyDisplay.Flex,
+            flexDirection = TaffyFlexDirection.Column,
+            gap = Axes(k.gap),
+            padding = Edges(k.padding),
+            width = Dimension.Percent(1f)
+        };
+    });
 
     // List tab state. Items live on the window so add/remove buttons can mutate them between frames.
     private readonly List<string> _listItems = Enumerable.Range(1, 200).Select(i => $"Item {i}").ToList();
     private readonly HashSet<string> _listSelected = [];
-    private bool _listGap;
 
-    public override Vector2 InitialSize => new(1280f, 860f);
+    private readonly UITree _tree = new();
+    private int _clicks;
+    private bool _listGap;
+    private bool _showExtra;
+    private Tab _tab = Tab.Buttons;
 
     public Window_Playground()
     {
@@ -62,6 +72,8 @@ public class Window_Playground : Window
         closeOnClickedOutside = false;
         absorbInputAroundWindow = false;
     }
+
+    public override Vector2 InitialSize => new(1280f, 860f);
 
     [DebugAction("Void", "Open playground", allowedGameStates = AllowedGameStates.Invalid)]
     private static void Open()
@@ -104,8 +116,8 @@ public class Window_Playground : Window
     }
 
     /// <summary>
-    /// Components are keyed by caller line, so everything emitted inside a loop needs an explicit id
-    /// or every iteration collapses onto the same node.
+    ///     Components are keyed by caller line, so everything emitted inside a loop needs an explicit id
+    ///     or every iteration collapses onto the same node.
     /// </summary>
     private void TabBar(UIBranch root)
     {
@@ -118,7 +130,8 @@ public class Window_Playground : Window
                     id: $"tab-{tab}");
 
             b.Div(style: new Style { flexGrow = 1f });
-            b.Button("Overlay", size: ComponentSize.Small, onClick: _ => VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug);
+            b.Button("Overlay", size: ComponentSize.Small,
+                onClick: _ => VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug);
         }, style: Row());
     }
 
@@ -156,7 +169,8 @@ public class Window_Playground : Window
         if (_showExtra)
             builder.Div(b =>
             {
-                b.Text("This block is added and removed by the button above. A very long label follows to check truncation:");
+                b.Text(
+                    "This block is added and removed by the button above. A very long label follows to check truncation:");
                 b.Button("This label is far too long for the space it has been given and should truncate",
                     TexUI.ArrowLeft, style: new Style { maxWidth = Dimension.Px(220f) });
             }, style: Column(6f, 8f));
@@ -181,7 +195,7 @@ public class Window_Playground : Window
             foreach (var anchor in new[] { TextAnchor.UpperLeft, TextAnchor.MiddleCenter, TextAnchor.LowerRight })
                 b.Text(anchor.ToString(),
                     new Style { textAnchor = anchor, width = Dimension.Px(150f), height = Dimension.Px(60f) },
-                    id: $"anchor-{anchor}");
+                    $"anchor-{anchor}");
         }, style: Row());
 
         // Wrapping paragraph at full width; resize the window and the height should follow.
@@ -213,11 +227,11 @@ public class Window_Playground : Window
 
         foreach (var size in new[] { ComponentSize.Small, ComponentSize.Default, ComponentSize.Large })
             builder.Div(b =>
-            {
-                b.Text(size.ToString(), new Style { width = Dimension.Px(60f) }, id: $"label-{size}");
-                foreach (var (name, tex) in Icons)
-                    b.Icon(tex, size: size, id: $"icon-{size}-{name}");
-            }, style: Row(), id: $"row-{size}");
+                {
+                    b.Text(size.ToString(), new Style { width = Dimension.Px(60f) }, $"label-{size}");
+                    foreach (var (name, tex) in Icons)
+                        b.Icon(tex, size: size, id: $"icon-{size}-{name}");
+                }, style: Row(), id: $"row-{size}");
 
         // Tinted icons.
         builder.Div(b =>
@@ -241,7 +255,7 @@ public class Window_Playground : Window
 
         // Icon inside a fixed-size box, centered both ways via the parent.
         builder.Div(b => b.Icon(TexUI.ArrowRightDouble, size: ComponentSize.Large),
-            draw: r => Verse.Widgets.DrawBox(r),
+            r => Verse.Widgets.DrawBox(r),
             style: new Style
             {
                 display = TaffyDisplay.Flex,
@@ -278,7 +292,11 @@ public class Window_Playground : Window
                 var n = Math.Min(10, _listItems.Count);
                 _listItems.RemoveRange(_listItems.Count - n, n);
             });
-            b.Button("Clear", size: ComponentSize.Small, onClick: _ => { _listItems.Clear(); _listSelected.Clear(); });
+            b.Button("Clear", size: ComponentSize.Small, onClick: _ =>
+            {
+                _listItems.Clear();
+                _listSelected.Clear();
+            });
             b.Button("Reset", size: ComponentSize.Small, onClick: _ =>
             {
                 _listItems.Clear();
@@ -310,10 +328,10 @@ public class Window_Playground : Window
         {
             foreach (var side in new[] { "left", "right" })
                 b.Div(inner => inner.List(_listItems, (r, item) =>
-                    {
-                        Verse.Widgets.DrawHighlightIfMouseover(r);
-                        Verse.Widgets.Label(r, $"{side}: {item}");
-                    }, itemHeight: 22f, maxItemsVisibleAtOnce: 5, id: $"list-{side}"),
+                        {
+                            Verse.Widgets.DrawHighlightIfMouseover(r);
+                            Verse.Widgets.Label(r, $"{side}: {item}");
+                        }, 22f, 5, id: $"list-{side}"),
                     style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) },
                     id: $"col-{side}");
         }, style: Row());
@@ -331,8 +349,8 @@ public class Window_Playground : Window
     }
 
     /// <summary>
-    /// Renders the <c>Void_Playground</c> <see cref="LayoutDef" /> parsed from XML, so the XML element
-    /// registry can be exercised next to the hand-written tabs.
+    ///     Renders the <c>Void_Playground</c> <see cref="LayoutDef" /> parsed from XML, so the XML element
+    ///     registry can be exercised next to the hand-written tabs.
     /// </summary>
     private static void LayoutPlayground(UIBranch builder)
     {
@@ -348,38 +366,34 @@ public class Window_Playground : Window
         builder.Div(def.layout._builder, style: def.layout._style);
     }
 
-    private static readonly StyleCache<(int variant, float gap, float padding)> Styles = new(k =>
+    private static Style Row()
     {
-        if (k.variant == 0)
-        {
-            return new()
-            {
-                display = TaffyDisplay.Flex,
-                flexDirection = TaffyFlexDirection.Row,
-                alignItems = TaffyAlignItems.Center,
-                gap = Axes(8f),
-                width = Dimension.Percent(1f)
-            };
-        }
-        else
-        {
-            return new()
-            {
-                display = TaffyDisplay.Flex,
-                flexDirection = TaffyFlexDirection.Column,
-                gap = Axes(k.gap),
-                padding = Edges(k.padding),
-                width = Dimension.Percent(1f)
-            };
-        }
-    });
+        return Styles.Get((0, 0, 0));
+    }
 
-    private static Style Row() => Styles.Get((0, 0, 0));
+    private static Style Column(float gap, float padding)
+    {
+        return Styles.Get((1, gap, padding));
+    }
 
-    private static Style Column(float gap, float padding) => Styles.Get((1, gap, padding));
+    private static TaffyAxes Axes(float v)
+    {
+        return new TaffyAxes(Dimension.Px(v));
+    }
 
-    private static TaffyAxes Axes(float v) => new(Dimension.Px(v));
+    private static TaffyEdges Edges(float v)
+    {
+        return new TaffyEdges(Dimension.Px(v));
+    }
 
-    private static TaffyEdges Edges(float v) => new(Dimension.Px(v));
+    private enum Tab
+    {
+        Buttons,
+        Text,
+        Icons,
+        Collapsible,
+        List,
+        Layout
+    }
 }
 #endif

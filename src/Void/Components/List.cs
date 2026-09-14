@@ -4,6 +4,7 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Taffy;
+using Widgets = Verse.Widgets;
 
 public static partial class VoidComponents
 {
@@ -15,9 +16,9 @@ public static partial class VoidComponents
     extension(UIBranch branch)
     {
         /// <summary>
-        /// Adds a fixed-height scrollable list with virtualized rendering.
-        /// All items must share the same <paramref name="itemHeight" />.
-        /// <code>
+        ///     Adds a fixed-height scrollable list with virtualized rendering.
+        ///     All items must share the same <paramref name="itemHeight" />.
+        ///     <code>
         /// col.List(categories, (rect, cat) =>
         /// {
         ///     var selected = _set.Contains(cat);
@@ -25,7 +26,7 @@ public static partial class VoidComponents
         ///     if (selected != _set.Contains(cat)) { ... }
         /// });
         /// </code>
-        /// TODO: Refactor to use components inside of childs as well.
+        ///     TODO: Refactor to use components inside of childs as well.
         /// </summary>
         public void List<T>(
             IReadOnlyList<T> items,
@@ -60,7 +61,7 @@ public static partial class VoidComponents
                 var scrollbarW = totalHeight > r.height ? UIUtility.ScrollBarWidth + 4f : 0f;
                 var viewRect = new Rect(0f, 0f, r.width - scrollbarW, totalHeight);
 
-                Verse.Widgets.BeginScrollView(r, ref state.ScrollPos, viewRect);
+                Widgets.BeginScrollView(r, ref state.ScrollPos, viewRect);
 
                 if (itemCount > 0)
                 {
@@ -77,13 +78,12 @@ public static partial class VoidComponents
                     using (new GUIColor(ColoredText.SubtleGrayColor))
                     using (new TextBlock(TextAnchor.MiddleLeft))
                     {
-                        Verse.Widgets.Label(viewRect, "No results available.");
+                        Widgets.Label(viewRect, "No results available.");
                     }
                 }
 
-                Verse.Widgets.EndScrollView();
+                Widgets.EndScrollView();
             }, style: mergedStyle);
-
         }
     }
 }

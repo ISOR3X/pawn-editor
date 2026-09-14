@@ -11,13 +11,13 @@ public class RowFilter_Style() : RowFilter_ToggleableList<ThingDef, StyleCategor
     {
         ThingDefByCategory = [];
         foreach (var styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
-            foreach (var thingDefStyle in styleCategoryDef.thingDefStyles)
-            {
-                if (thingDefStyle.ThingDef == null) continue;
-                if (!ThingDefByCategory.TryGetValue(thingDefStyle.ThingDef, out var list))
-                    ThingDefByCategory[thingDefStyle.ThingDef] = list = [];
-                list.Add(styleCategoryDef);
-            }
+        foreach (var thingDefStyle in styleCategoryDef.thingDefStyles)
+        {
+            if (thingDefStyle.ThingDef == null) continue;
+            if (!ThingDefByCategory.TryGetValue(thingDefStyle.ThingDef, out var list))
+                ThingDefByCategory[thingDefStyle.ThingDef] = list = [];
+            list.Add(styleCategoryDef);
+        }
     }
 
     protected override void Initialize(IReadOnlyList<ThingDef> allRows)

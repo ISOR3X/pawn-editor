@@ -5,29 +5,28 @@ using Verse;
 namespace Void.Taffy;
 
 /// <summary>
-/// A near 1:1 copy of <see cref="TaffyStyleRef" /> with every field nullable, so callers can
-/// override only the fields they care about and fall back to defaults for the rest.
-/// Fields irrelevant to RimWorld usage are removed. (TODO: Which ones?)
-/// TODO: Find better name
+///     A near 1:1 copy of <see cref="TaffyStyleRef" /> with every field nullable, so callers can
+///     override only the fields they care about and fall back to defaults for the rest.
+///     Fields irrelevant to RimWorld usage are removed. (TODO: Which ones?)
+///     TODO: Find better name
 /// </summary>
 public class Style : IEquatable<Style>
 {
-    // Not used by Taffy, stored here so UI code can read colors alongside layout.
-    public Color? color;
-    public Color? backgroundColor;
-    public bool? wordWrap;
-    public GameFont? fontSize;
-    public TextAnchor? textAnchor;
-
     public TaffyAlignContent? alignContent;
     public TaffyAlignItems? alignItems;
     public TaffyAlignItems? alignSelf;
+
+    public Color? backgroundColor;
+
+    // Not used by Taffy, stored here so UI code can read colors alongside layout.
+    public Color? color;
     public TaffyDisplay? display;
     public TaffyDimension? flexBasis;
     public TaffyFlexDirection? flexDirection;
     public float? flexGrow;
     public float? flexShrink;
     public TaffyFlexWrap? flexWrap;
+    public GameFont? fontSize;
     public TaffyAxes? gap;
     public TaffyTrackSizingFunction[]? gridAutoColumns;
     public TaffyGridAutoFlow? gridAutoFlow;
@@ -46,11 +45,51 @@ public class Style : IEquatable<Style>
     public TaffyDimension? minHeight;
     public TaffyDimension? minWidth;
     public TaffyEdges? padding;
+    public TextAnchor? textAnchor;
     public TaffyDimension? width;
+    public bool? wordWrap;
 
     /// <summary>
-    /// Returns a new <see cref="Style" /> where each field is taken from this instance
-    /// when non-null, or from <paramref name="fallback" /> otherwise.
+    ///     Only compares values that may influence layout.
+    /// </summary>
+    public bool Equals(Style other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return display == other.display
+               && flexDirection == other.flexDirection
+               && flexWrap == other.flexWrap
+               && flexGrow == other.flexGrow
+               && flexShrink == other.flexShrink
+               && flexBasis == other.flexBasis
+               && alignItems == other.alignItems
+               && alignSelf == other.alignSelf
+               && alignContent == other.alignContent
+               && justifyContent == other.justifyContent
+               && justifyItems == other.justifyItems
+               && justifySelf == other.justifySelf
+               && width == other.width
+               && height == other.height
+               && minWidth == other.minWidth
+               && minHeight == other.minHeight
+               && maxWidth == other.maxWidth
+               && maxHeight == other.maxHeight
+               && gap == other.gap
+               && padding == other.padding
+               && margin == other.margin
+               && gridAutoFlow == other.gridAutoFlow
+               && gridColumn == other.gridColumn
+               && gridRow == other.gridRow
+               && SequenceEqualNullable(gridTemplateColumns, other.gridTemplateColumns)
+               && SequenceEqualNullable(gridTemplateRows, other.gridTemplateRows)
+               && SequenceEqualNullable(gridAutoColumns, other.gridAutoColumns)
+               && SequenceEqualNullable(gridAutoRows, other.gridAutoRows);
+    }
+
+    /// <summary>
+    ///     Returns a new <see cref="Style" /> where each field is taken from this instance
+    ///     when non-null, or from <paramref name="fallback" /> otherwise.
     /// </summary>
     public Style Merge(Style fallback)
     {
@@ -92,7 +131,7 @@ public class Style : IEquatable<Style>
     }
 
     /// <summary>
-    /// Applies all non-null fields to <paramref name="s" />.
+    ///     Applies all non-null fields to <paramref name="s" />.
     /// </summary>
     public void Push(TaffyStyleRef s)
     {
@@ -120,6 +159,7 @@ public class Style : IEquatable<Style>
             if (gap.Value.Width.unit != TaffyUnit.None) s.ColumnGap = gap.Value.Width;
             if (gap.Value.Height.unit != TaffyUnit.None) s.RowGap = gap.Value.Height;
         }
+
         if (padding.HasValue)
         {
             if (padding.Value.Top.unit != TaffyUnit.None) s.PaddingTop = padding.Value.Top;
@@ -127,6 +167,7 @@ public class Style : IEquatable<Style>
             if (padding.Value.Bottom.unit != TaffyUnit.None) s.PaddingBottom = padding.Value.Bottom;
             if (padding.Value.Left.unit != TaffyUnit.None) s.PaddingLeft = padding.Value.Left;
         }
+
         if (margin.HasValue)
         {
             if (margin.Value.Top.unit != TaffyUnit.None) s.MarginTop = margin.Value.Top;
@@ -134,6 +175,7 @@ public class Style : IEquatable<Style>
             if (margin.Value.Bottom.unit != TaffyUnit.None) s.MarginBottom = margin.Value.Bottom;
             if (margin.Value.Left.unit != TaffyUnit.None) s.MarginLeft = margin.Value.Left;
         }
+
         if (gridAutoFlow.HasValue) s.GridAutoFlow = gridAutoFlow.Value;
         if (gridColumn.HasValue) s.GridColumn = gridColumn.Value;
         if (gridRow.HasValue) s.GridRow = gridRow.Value;
@@ -141,44 +183,6 @@ public class Style : IEquatable<Style>
         if (gridTemplateRows != null) s.SetGridTemplateRows(gridTemplateRows);
         if (gridAutoColumns != null) s.SetGridAutoColumns(gridAutoColumns);
         if (gridAutoRows != null) s.SetGridAutoRows(gridAutoRows);
-    }
-
-    /// <summary>
-    /// Only compares values that may influence layout.
-    /// </summary>
-    public bool Equals(Style other)
-    {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-
-        return display == other.display
-            && flexDirection == other.flexDirection
-            && flexWrap == other.flexWrap
-            && flexGrow == other.flexGrow
-            && flexShrink == other.flexShrink
-            && flexBasis == other.flexBasis
-            && alignItems == other.alignItems
-            && alignSelf == other.alignSelf
-            && alignContent == other.alignContent
-            && justifyContent == other.justifyContent
-            && justifyItems == other.justifyItems
-            && justifySelf == other.justifySelf
-            && width == other.width
-            && height == other.height
-            && minWidth == other.minWidth
-            && minHeight == other.minHeight
-            && maxWidth == other.maxWidth
-            && maxHeight == other.maxHeight
-            && gap == other.gap
-            && padding == other.padding
-            && margin == other.margin
-            && gridAutoFlow == other.gridAutoFlow
-            && gridColumn == other.gridColumn
-            && gridRow == other.gridRow
-            && SequenceEqualNullable(gridTemplateColumns, other.gridTemplateColumns)
-            && SequenceEqualNullable(gridTemplateRows, other.gridTemplateRows)
-            && SequenceEqualNullable(gridAutoColumns, other.gridAutoColumns)
-            && SequenceEqualNullable(gridAutoRows, other.gridAutoRows);
     }
 
     // TaffyTrackSizingFunction implements IEquatable<T>, so the default comparer compares without boxing.
