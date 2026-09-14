@@ -13,22 +13,56 @@ public static partial class VoidComponents
         Ghost = 1
     }
 
-    /// <returns>Button padding, button height, icon height, icon + label gap, font size</returns>
-    private static (float, float, float, float, GameFont) ResolveButtonSize(ComponentSize size)
+    /// <summary>
+    /// Fixed sizing for one <see cref="ComponentSize" /> of button.
+    /// This ensures consistent styling.
+    /// </summary>
+    private readonly record struct ButtonMetrics(float Padding, float Height, float IconSize, float IconGap, GameFont Font)
     {
-        return size switch
+        public static ButtonMetrics For(ComponentSize size) => size switch
         {
-            ComponentSize.Small => (12f, 20f, 12f, 4f, GameFont.Tiny),
-            ComponentSize.Default => (GenUI.GapLabel, UIUtility.ButtonHeight, 18f, 6f,
-                GameFont.Small),
-            ComponentSize.Large => (52f, Verse.Widgets.BackButtonHeight, 18f, 6f,
-                GameFont.Small),
+            ComponentSize.Small => new(12f, 20f, 12f, 4f, GameFont.Tiny),
+            ComponentSize.Default => new(GenUI.GapLabel, UIUtility.ButtonHeight, 18f, 6f, GameFont.Small),
+            ComponentSize.Large => new(52f, Verse.Widgets.BackButtonHeight, 18f, 6f, GameFont.Small),
             _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
         };
     }
 
+    #region CACHE
+    // Cache base styles to that they are not created newly on every button call.
+    // Note that these return mutable values and should therefore not be modified.
+    private static readonly StyleCache<(ComponentSize size, bool block, bool iconOnly)> ButtonStyles = new(k =>
+    {
+        var m = ButtonMetrics.For(k.size);
+        // No padding if we only have an icon; the button is square instead.
+        var paddingInline = k.iconOnly ? 0f : m.Padding;
+        var s = new Style
+        {
+            height = Dimension.Px(m.Height),
+            display = TaffyDisplay.Flex,
+            alignItems = TaffyAlignItems.Center,
+            justifyContent = TaffyAlignContent.Center,
+            gap = new TaffyAxes(Dimension.Px(m.IconGap), Dimension.Px(0f)),
+            padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(paddingInline), Dimension.Px(0f), Dimension.Px(paddingInline)),
+        };
+        // By default, the button has a fixed size. Setting it to block makes it width: 100%.
+        // This is inspired by the API for https://ui.nuxt.com/docs/components/button
+        if (k.block) s.width = Dimension.Percent(1f);
+        if (k.iconOnly) s.width = Dimension.Px(m.Height);
+        return s;
+    });
+
+    private static readonly StyleCache<ComponentSize> ButtonLabelStyles = new(size => new Style
+    {
+        flexShrink = 1f,
+        minWidth = Dimension.Px(0),
+        wordWrap = false,
+        fontSize = ButtonMetrics.For(size).Font,
+    });
+    #endregion
+
     /// <summary>
-    /// Copy of <see cref="Verse.Widgets.DrawButtonGraphic" />, but with a disabled flag to disable interaction states.
+    /// Copy of <see cref="Verse.Widgets.DrawButtonGraphic"/>, but with a disabled flag to disable interaction states.
     /// </summary>
     private static void DrawButtonGraphic(Rect rect, bool disabled)
     {
@@ -53,27 +87,10 @@ public static partial class VoidComponents
             [CallerLineNumber] int line = 0)
         {
             var key = id ?? $"{file}_{line}";
-
-            var (padding, height, iconSize, iconGap, fontSize) = ResolveButtonSize(size);
-
-            // Override so there's no padding if we only have an icon.
             var iconOnly = label == null && icon != null;
-            var paddingInline = iconOnly ? 0f : padding;
 
-            var mergedStyle = (style ?? new Style()).Merge(new Style
-            {
-                height = Dimension.Px(height),
-                display = TaffyDisplay.Flex,
-                alignItems = TaffyAlignItems.Center,
-                justifyContent = TaffyAlignContent.Center,
-                gap = new TaffyAxes(Dimension.Px(iconGap), Dimension.Px(0f)),
-                padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(paddingInline), Dimension.Px(0f), Dimension.Px(paddingInline))
-            });
-
-            // By default, the button has a fixed size. Setting it to block makes it width: 100%.
-            // This is inspired by the API for https://ui.nuxt.com/docs/components/button
-            if (block) mergedStyle.width = Dimension.Percent(1f);
-            if (iconOnly) mergedStyle.width = Dimension.Px(height);
+            var baseStyle = ButtonStyles.Get((size, block, iconOnly));
+            var mergedStyle = style == null ? baseStyle : style.Merge(baseStyle);
 
             return branch.Div(draw: r =>
             {
@@ -93,17 +110,9 @@ public static partial class VoidComponents
             }, builder: b =>
             {
                 if (icon != null)
-                    b.Div(style: new Style { width = Dimension.Px(iconSize), height = Dimension.Px(iconSize), flexShrink = 0f },
-                        draw: r => GUI.DrawTexture(r, icon));
+                    b.Icon(icon, size: size);
                 if (label != null)
-                    b.Text(label,
-                        style: new Style
-                        {
-                            flexShrink = 1f,
-                            minWidth = Dimension.Px(0),
-                            wordWrap = false,
-                            fontSize = fontSize,
-                        });
+                    b.Text(label, style: ButtonLabelStyles.Get(size));
             }, style: mergedStyle, id: key);
         }
     }
