@@ -6,6 +6,7 @@ using Void;
 using Void.Components;
 using Void.XMLComponents;
 using Layout = Void.Layout;
+using Void.XML.Elements;
 
 namespace PawnEditor;
 

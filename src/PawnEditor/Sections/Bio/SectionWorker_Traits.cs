@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Components;
+using Void.XML.Elements;
 using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
 using Layout = Void.Layout;

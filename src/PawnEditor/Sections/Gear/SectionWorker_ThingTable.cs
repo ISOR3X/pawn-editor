@@ -8,6 +8,7 @@ using Void;
 using Void.Components;
 using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<Verse.ThingDef>;
+using Void.XML.Elements;
 
 namespace PawnEditor;
 
