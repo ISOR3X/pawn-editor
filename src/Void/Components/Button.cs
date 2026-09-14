@@ -37,7 +37,6 @@ public static partial class VoidComponents
     private readonly record struct ButtonMetrics(
         float Padding,
         float Height,
-        float IconSize,
         float IconGap,
         GameFont Font)
     {
@@ -45,10 +44,10 @@ public static partial class VoidComponents
         {
             return size switch
             {
-                ComponentSize.Small => new ButtonMetrics(12f, 20f, 12f, 4f, GameFont.Tiny),
-                ComponentSize.Default => new ButtonMetrics(GenUI.GapLabel, UIUtility.ButtonHeight, 18f, 6f,
+                ComponentSize.Small => new ButtonMetrics(12f, 20f, 4f, GameFont.Tiny),
+                ComponentSize.Default => new ButtonMetrics(GenUI.GapLabel, UIUtility.ButtonHeight, 6f,
                     GameFont.Small),
-                ComponentSize.Large => new ButtonMetrics(52f, Widgets.BackButtonHeight, 18f, 6f, GameFont.Small),
+                ComponentSize.Large => new ButtonMetrics(52f, Widgets.BackButtonHeight, 6f, GameFont.Small),
                 _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
             };
         }
