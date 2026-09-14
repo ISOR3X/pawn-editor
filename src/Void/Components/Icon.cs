@@ -7,7 +7,7 @@ using Void.Taffy;
 
 public static partial class VoidComponents
 {
-    private static float ResolveIconSize(ComponentSize size)
+    private static float IconMetrics(ComponentSize size)
     {
         return size switch
         {
@@ -18,6 +18,20 @@ public static partial class VoidComponents
         };
     }
 
+    #region CACHE
+    private static readonly StyleCache<ComponentSize> IconStyles = new(size =>
+    {
+        var iconSize = IconMetrics(size);
+        return new Style
+        {
+            width = Dimension.Px(iconSize),
+            height = Dimension.Px(iconSize),
+            alignSelf = TaffyAlignItems.Center,
+            flexShrink = 0f
+        };
+    });
+    #endregion
+
     extension(UIBranch branch)
     {
         public void Icon(Texture2D icon,
@@ -26,25 +40,15 @@ public static partial class VoidComponents
             [CallerLineNumber] int line = 0)
         {
             var key = id ?? $"{file}_{line}";
-            var iconSize = ResolveIconSize(size);
 
-            var mergedStyle = (style ?? new Style()).Merge(new Style
-            {
-                width = Dimension.Px(iconSize),
-                height = Dimension.Px(iconSize),
-                alignSelf = TaffyAlignItems.Center,
-                flexShrink = 0f
-            });
-
-            // Capture for closure.
-            var capturedIcon = icon;
-            var capturedColor = iconColor;
+            var baseStyle = IconStyles.Get(size);
+            var mergedStyle = style == null ? baseStyle : style.Merge(baseStyle);
 
             branch.Div(draw: r =>
             {
-                using (new GUIColor(capturedColor ?? Color.white))
+                using (new GUIColor(iconColor ?? Color.white))
                 {
-                    GUI.DrawTexture(r, capturedIcon);
+                    GUI.DrawTexture(r, icon);
                 }
             }, style: mergedStyle, id: key);
         }

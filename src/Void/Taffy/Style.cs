@@ -156,35 +156,38 @@ public class Style : IEquatable<Style>
             && flexWrap == other.flexWrap
             && flexGrow == other.flexGrow
             && flexShrink == other.flexShrink
-            && flexBasis.Equals(other.flexBasis)
+            && flexBasis == other.flexBasis
             && alignItems == other.alignItems
             && alignSelf == other.alignSelf
             && alignContent == other.alignContent
             && justifyContent == other.justifyContent
             && justifyItems == other.justifyItems
             && justifySelf == other.justifySelf
-            && width.Equals(other.width)
-            && height.Equals(other.height)
-            && minWidth.Equals(other.minWidth)
-            && minHeight.Equals(other.minHeight)
-            && maxWidth.Equals(other.maxWidth)
-            && maxHeight.Equals(other.maxHeight)
-            && gap.Equals(other.gap)
-            && padding.Equals(other.padding)
-            && margin.Equals(other.margin)
+            && width == other.width
+            && height == other.height
+            && minWidth == other.minWidth
+            && minHeight == other.minHeight
+            && maxWidth == other.maxWidth
+            && maxHeight == other.maxHeight
+            && gap == other.gap
+            && padding == other.padding
+            && margin == other.margin
             && gridAutoFlow == other.gridAutoFlow
-            && gridColumn.Equals(other.gridColumn)
-            && gridRow.Equals(other.gridRow)
+            && gridColumn == other.gridColumn
+            && gridRow == other.gridRow
             && SequenceEqualNullable(gridTemplateColumns, other.gridTemplateColumns)
             && SequenceEqualNullable(gridTemplateRows, other.gridTemplateRows)
             && SequenceEqualNullable(gridAutoColumns, other.gridAutoColumns)
             && SequenceEqualNullable(gridAutoRows, other.gridAutoRows);
     }
 
+    // TaffyTrackSizingFunction implements IEquatable<T>, so the default comparer compares without boxing.
+    // Called through Enumerable explicitly: the IEquatable constraint also makes the span-based
+    // MemoryExtensions.SequenceEqual applicable, and it exists in both mscorlib and MonoMod.Backports.
     private static bool SequenceEqualNullable(TaffyTrackSizingFunction[]? a, TaffyTrackSizingFunction[]? b)
     {
         if (ReferenceEquals(a, b)) return true;
         if (a is null || b is null) return false;
-        return a.SequenceEqual(b);
+        return Enumerable.SequenceEqual(a, b);
     }
 }
