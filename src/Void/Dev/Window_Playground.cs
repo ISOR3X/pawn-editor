@@ -348,23 +348,35 @@ public class Window_Playground : Window
         builder.Div(def.layout._builder, style: def.layout._style);
     }
 
-    private static Style Row() => new()
+    private static readonly StyleCache<(int variant, float gap, float padding)> Styles = new(k =>
     {
-        display = TaffyDisplay.Flex,
-        flexDirection = TaffyFlexDirection.Row,
-        alignItems = TaffyAlignItems.Center,
-        gap = Axes(8f),
-        width = Dimension.Percent(1f)
-    };
+        if (k.variant == 0)
+        {
+            return new()
+            {
+                display = TaffyDisplay.Flex,
+                flexDirection = TaffyFlexDirection.Row,
+                alignItems = TaffyAlignItems.Center,
+                gap = Axes(8f),
+                width = Dimension.Percent(1f)
+            };
+        }
+        else
+        {
+            return new()
+            {
+                display = TaffyDisplay.Flex,
+                flexDirection = TaffyFlexDirection.Column,
+                gap = Axes(k.gap),
+                padding = Edges(k.padding),
+                width = Dimension.Percent(1f)
+            };
+        }
+    });
 
-    private static Style Column(float gap, float padding) => new()
-    {
-        display = TaffyDisplay.Flex,
-        flexDirection = TaffyFlexDirection.Column,
-        gap = Axes(gap),
-        padding = Edges(padding),
-        width = Dimension.Percent(1f)
-    };
+    private static Style Row() => Styles.Get((0, 0, 0));
+
+    private static Style Column(float gap, float padding) => Styles.Get((1, gap, padding));
 
     private static TaffyAxes Axes(float v) => new(Dimension.Px(v));
 

@@ -235,7 +235,8 @@ namespace Void.Taffy
             }
 
             branchRecord.childrenByKey = pending;
-            branchRecord.pendingChildrenByKey = [];
+            branchRecord.pendingChildrenByKey = prev;
+            prev.Clear();
         }
         /// <summary>
         /// While SameOrder checks for the order of children, if just the order of the array has changed and not the length,
@@ -320,13 +321,14 @@ namespace Void.Taffy
     {
         private readonly UITree _tree = tree;
         private readonly TaffyNode _parentBranch = parentBranch;
+        private static readonly Dictionary<(string file, int line), string> CallerKeys = [];
 
         public T State<T>(string key, Func<T> init) where T : class => _tree.UpsertState(_parentBranch, key, init);
 
         public TaffyNode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
         {
-            var key = id ?? $"{file}_{line}";
+            var key = ResolveKey(id, file, line);
             var node = _tree.UpsertBranch(_parentBranch, key, draw, context, style);
 
             if (builder != null)
@@ -343,7 +345,18 @@ namespace Void.Taffy
 
             return node;
         }
+        /// <summary>
+        /// Explicit id if given, otherwise a key for the call site, built once and reused.
+        /// </summary>
+        internal static string ResolveKey(string? id, string? file, int line)
+        {
+            if (id != null) return id;
+            if (file == null) throw new ArgumentNullException(nameof(file), "No id and no caller file path.");
+            if (CallerKeys.TryGetValue((file, line), out var key)) return key;
+            return CallerKeys[(file, line)] = $"{file}_{line}";
+        }
     }
+
 
     static class Utility
     {

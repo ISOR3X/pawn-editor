@@ -86,7 +86,7 @@ public static partial class VoidComponents
             Style? style = null, string? id = null, [CallerFilePath] string? file = null,
             [CallerLineNumber] int line = 0)
         {
-            var key = id ?? $"{file}_{line}";
+            var key = UIBranch.ResolveKey(id, file, line);
             var iconOnly = label == null && icon != null;
 
             var baseStyle = ButtonStyles.Get((size, block, iconOnly));
@@ -110,7 +110,7 @@ public static partial class VoidComponents
             }, builder: b =>
             {
                 if (icon != null)
-                    b.Icon(icon, size: size);
+                    b.Icon(icon, iconColor, size: size);
                 if (label != null)
                     b.Text(label, style: ButtonLabelStyles.Get(size));
             }, style: mergedStyle, id: key);
