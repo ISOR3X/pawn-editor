@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Verse;
-using Void;
+using Void.XML;
 
 namespace PawnEditor;
 
@@ -14,7 +14,7 @@ public class SectionDef : Def
     ///     in the base class will build the UI from this tree via <see cref="Layout" />.
     ///     Workers that provide their own <see cref="SectionWorker.DoSectionContents" /> override ignore this field.
     /// </summary>
-    public Void.XML.ParsedLayout? layout;
+    public ParsedLayout? layout;
 
     public PawnUtility.PawnCategory sectionCategory = PawnUtility.PawnCategory.All;
 

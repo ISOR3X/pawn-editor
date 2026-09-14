@@ -1,7 +1,6 @@
 using System.Xml;
 using Verse;
 using Void;
-using Void.XMLComponents;
 
 namespace PawnEditor.XMLComponents;
 

@@ -5,8 +5,6 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
-using Void.XMLComponents;
 using Layout = Void.Layout;
 
 namespace PawnEditor;

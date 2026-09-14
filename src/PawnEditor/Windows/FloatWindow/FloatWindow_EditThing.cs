@@ -3,8 +3,6 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
-using Void.Extensions;
 
 namespace PawnEditor;
 
@@ -187,7 +185,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                         const float margin = (UIUtility.ButtonHeight - elementHeight) / 2;
                         var widgetRect = r.ContractedBy(margin);
                         GenUI.DrawElementStack(widgetRect, elementHeight, bladelink.traits,
-                            delegate (Rect er, WeaponTraitDef weaponTraitDef)
+                            delegate(Rect er, WeaponTraitDef weaponTraitDef)
                             {
                                 GUI.color = CharacterCardUtility.StackElementBackground;
                                 GUI.DrawTexture(er, BaseContent.WhiteTex);
@@ -210,7 +208,11 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 }
             }, new StyleOverride
             {
-                gridTemplateColumns = [TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2)],
+                gridTemplateColumns =
+                [
+                    TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(),
+                    TrackSizingFunction.Fr(2)
+                ],
                 display = TaffyDisplay.Grid,
                 gap = new TaffyAxes(Dimension.Px(GenUI.GapLabel), Dimension.Px(GenUI.GapTiny)),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]

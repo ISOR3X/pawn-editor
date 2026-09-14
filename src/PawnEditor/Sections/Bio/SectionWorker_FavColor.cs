@@ -1,7 +1,6 @@
 using UnityEngine;
 using Verse;
 using Void.XML.Elements;
-using Void.XMLComponents;
 using Layout = Void.Layout;
 
 namespace PawnEditor;

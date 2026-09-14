@@ -1,8 +1,6 @@
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Void;
-using Void.XMLComponents;
 
 namespace PawnEditor;
 

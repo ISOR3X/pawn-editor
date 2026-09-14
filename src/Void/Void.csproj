@@ -31,7 +31,7 @@
     </PropertyGroup>
     <ItemGroup>
         <!-- Old TaffyBuilder-era components kept as porting reference; not compiled. Delete each file once ported. -->
-        <Compile Remove="Legacy/**" />
+        <Compile Remove="Legacy/**"/>
     </ItemGroup>
     <ItemGroup>
         <Reference Include="Taffy">

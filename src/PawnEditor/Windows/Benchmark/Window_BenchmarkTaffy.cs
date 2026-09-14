@@ -11,12 +11,6 @@ public static class TaffyHelper
         return new Rect(positionOffset.x + layout.x, positionOffset.y + layout.y, layout.width, layout.height);
     }
 
-    public sealed class TaffyContext(string text, GameFont font = GameFont.Small)
-    {
-        public GameFont font = font;
-        public string text = text;
-    }
-
     public static TaffySize MeasureText(
         TaffyMeasureMode widthMode, float width,
         TaffyMeasureMode heightMode, float height,
@@ -30,17 +24,23 @@ public static class TaffyHelper
                 case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
                     return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
                 case TaffyMeasureMode.MinContent:
-                    {
-                        var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
-                        return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
-                    }
+                {
+                    var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
+                    return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
+                }
                 default:
-                    {
-                        var sz = Text.CalcSize(context.text);
-                        return new TaffySize { width = sz.x, height = sz.y };
-                    }
+                {
+                    var sz = Text.CalcSize(context.text);
+                    return new TaffySize { width = sz.x, height = sz.y };
+                }
             }
         }
+    }
+
+    public sealed class TaffyContext(string text, GameFont font = GameFont.Small)
+    {
+        public GameFont font = font;
+        public string text = text;
     }
 
     extension<T>(TaffyTree<T> tree) where T : class
@@ -55,7 +55,8 @@ public static class TaffyHelper
             return node;
         }
 
-        public ConditionalNode<T> NewConditionalChild(TaffyNode parent, Action<TaffyStyleRef> configure, bool startVisible = true)
+        public ConditionalNode<T> NewConditionalChild(TaffyNode parent, Action<TaffyStyleRef> configure,
+            bool startVisible = true)
         {
             var content = tree.NewNodeWithStyle(configure);
             if (startVisible)
@@ -67,9 +68,9 @@ public static class TaffyHelper
 
 public class ConditionalNode<T> where T : class
 {
-    private readonly TaffyTree<T> _tree;
-    private readonly TaffyNode _parent;
     private readonly TaffyNode _content;
+    private readonly TaffyNode _parent;
+    private readonly TaffyTree<T> _tree;
 
     internal ConditionalNode(TaffyTree<T> tree, TaffyNode parent, TaffyNode content)
     {
@@ -79,8 +80,16 @@ public class ConditionalNode<T> where T : class
     }
 
     public bool IsVisible => _tree.GetParent(_content).HasValue;
-    public TaffyLayout GetParentLayout() => _tree.GetLayout(_parent);
-    public TaffyLayout GetContentLayout() => _tree.GetLayout(_content);
+
+    public TaffyLayout GetParentLayout()
+    {
+        return _tree.GetLayout(_parent);
+    }
+
+    public TaffyLayout GetContentLayout()
+    {
+        return _tree.GetLayout(_content);
+    }
 
     public void SetVisible(bool visible)
     {
@@ -89,21 +98,24 @@ public class ConditionalNode<T> where T : class
         else _tree.RemoveChild(_parent, _content);
     }
 
-    public void Toggle() => SetVisible(!IsVisible);
+    public void Toggle()
+    {
+        SetVisible(!IsVisible);
+    }
 }
 
 public class Window_BenchmarkTaffy : Window
 {
-    private readonly TaffyTree<TaffyHelper.TaffyContext> _tree;
-    private readonly TaffyNode _rootNode;
-    private readonly TaffyNode _buttonNode;
-    private readonly ConditionalNode<TaffyHelper.TaffyContext> _conditional;
-
     private const string LoremIpsum =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
         "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " +
         "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure " +
         "dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+
+    private readonly TaffyNode _buttonNode;
+    private readonly ConditionalNode<TaffyHelper.TaffyContext> _conditional;
+    private readonly TaffyNode _rootNode;
+    private readonly TaffyTree<TaffyHelper.TaffyContext> _tree;
 
     public Window_BenchmarkTaffy()
     {
@@ -111,7 +123,7 @@ public class Window_BenchmarkTaffy : Window
 
         _tree = new TaffyTree<TaffyHelper.TaffyContext>();
 
-        var textNode = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum, GameFont.Small));
+        var textNode = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum));
 
         _rootNode = _tree.NewNodeWithStyle(s =>
         {
@@ -119,7 +131,7 @@ public class Window_BenchmarkTaffy : Window
             s.FlexDirection = TaffyFlexDirection.Column;
             s.Width = Dimension.Percent(1f);
             s.Height = Dimension.Auto();
-        }, children: [textNode]);
+        }, [textNode]);
 
         var dynNode = _tree.NewNodeWithStyle(s =>
         {
@@ -141,9 +153,9 @@ public class Window_BenchmarkTaffy : Window
             s.MinWidth = Dimension.Px(400f);
             s.Width = Dimension.Percent(1f);
             s.Height = Dimension.Px(200f);
-        }, startVisible: false);
+        }, false);
 
-        var textNode2 = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum, GameFont.Small));
+        var textNode2 = _tree.NewLeafWithContext(new TaffyHelper.TaffyContext(LoremIpsum));
 
         _tree.AppendChild(_rootNode, textNode2);
     }

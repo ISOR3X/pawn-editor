@@ -1,14 +1,12 @@
-using Taffy;
 using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
-using Void.XMLComponents;
-using Col = PawnEditor.Table.ColumnWorker<Verse.ThingDef>;
 using Void.XML.Elements;
+using Col = PawnEditor.Table.ColumnWorker<Verse.ThingDef>;
 
 namespace PawnEditor;
 
@@ -59,7 +57,8 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                 ColumnWorker<T>.Create(
                     TrackSizingFunction.Px(GenUI.SmallIconSize),
                     (grid, thing) => grid.Item(r => Verse.Widgets.ThingIcon(r, thing),
-                        new StyleOverride { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) })
+                        new StyleOverride
+                            { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) })
                 ),
                 ColumnWorker<T>.CreateText(
                     TrackSizingFunction.Fr(2), thing => thing.LabelCap, "Label"

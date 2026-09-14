@@ -4,9 +4,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
 using Void.XML.Elements;
-using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.AbilityDef>;
 using Layout = Void.Layout;
 

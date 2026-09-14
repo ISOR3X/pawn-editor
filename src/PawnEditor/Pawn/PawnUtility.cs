@@ -83,11 +83,11 @@ public static class PawnUtility
             switch (location)
             {
                 case Map map:
-                    {
-                        var pos = position != default ? position : CellFinder.RandomEdgeCell(map);
-                        GenPlace.TryPlaceThing(pawn, pos, map, ThingPlaceMode.Near);
-                        break;
-                    }
+                {
+                    var pos = position != default ? position : CellFinder.RandomEdgeCell(map);
+                    GenPlace.TryPlaceThing(pawn, pos, map, ThingPlaceMode.Near);
+                    break;
+                }
                 case Caravan caravan when pawn.Faction == Faction.OfPlayer:
                     caravan.AddPawn(pawn, false);
                     break;
@@ -95,14 +95,14 @@ public static class PawnUtility
                     Messages.Message("Cannot add non-player pawn to caravan.", MessageTypeDefOf.RejectInput);
                     break;
                 case World:
-                    {
-                        if (pawn.IsWorldPawn())
-                            Messages.Message("Pawn already exists as a world pawn", MessageTypeDefOf.RejectInput);
-                        pawn.teleporting = true; // To prevent pawn from being moved to another faction.
-                        Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
-                        pawn.teleporting = false;
-                        break;
-                    }
+                {
+                    if (pawn.IsWorldPawn())
+                        Messages.Message("Pawn already exists as a world pawn", MessageTypeDefOf.RejectInput);
+                    pawn.teleporting = true; // To prevent pawn from being moved to another faction.
+                    Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
+                    pawn.teleporting = false;
+                    break;
+                }
             }
         }
         catch (Exception e)

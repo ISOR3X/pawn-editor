@@ -4,7 +4,6 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using Void;
-using Void.Components;
 
 namespace PawnEditor;
 
@@ -88,7 +87,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
                 b.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
                     style: new StyleOverride
-                    { gridColumn = new TaffyGridPlacement { start = 1, end = 3 } });
+                        { gridColumn = new TaffyGridPlacement { start = 1, end = 3 } });
                 GridButton(b, "Generate", _ =>
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
@@ -107,7 +106,11 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
             },
             new StyleOverride
             {
-                gridTemplateColumns = [TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2)],
+                gridTemplateColumns =
+                [
+                    TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(),
+                    TrackSizingFunction.Fr(2)
+                ],
                 display = TaffyDisplay.Grid,
                 gap = new TaffyAxes(Dimension.Px(GenUI.GapLabel), Dimension.Px(GenUI.GapTiny)),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]

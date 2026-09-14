@@ -1,14 +1,11 @@
-using Taffy;
 using PawnEditor.Table;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
-using Void;
-using Void.Components;
-using Void.XMLComponents;
+using Void.XML.Elements;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
 using Layout = Void.Layout;
-using Void.XML.Elements;
 
 namespace PawnEditor;
 

@@ -4,8 +4,8 @@ using Void.XML;
 namespace Void;
 
 /// <summary>
-/// A standalone XML layout. The <c>layout</c> element is parsed once all defs are loaded, since class
-/// attributes resolve against <see cref="StyleMapDef"/>.
+///     A standalone XML layout. The <c>layout</c> element is parsed once all defs are loaded, since class
+///     attributes resolve against <see cref="StyleMapDef" />.
 /// </summary>
 public class LayoutDef : Def
 {
