@@ -8,6 +8,7 @@ namespace Void.Taffy;
 /// <summary>
 ///     Context used for calculating the size of a leaf.
 ///     Modifying context marks a leaf dirty.
+///     TODO: Rename to something more befitting of the function, e.g. MeasureSpec.
 /// </summary>
 public record LeafContext
 {
@@ -19,7 +20,7 @@ public record LeafContext
 }
 
 /// <summary>
-///     Stores relevant data about a branch on the C# side to prevent a large amount of FFI calls per frame.
+///     Stores relevant data across frames about a branch on the C# side to prevent a large amount of FFI calls.
 ///     Used for diff-checking and storing the actual draw callback.
 ///     Note that context is tracked internally in the TaffyTree as its also required for content measuring.
 /// </summary>
