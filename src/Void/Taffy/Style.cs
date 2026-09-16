@@ -155,7 +155,7 @@ public class Style : IEquatable<Style>
         if (maxHeight.HasValue) s.MaxHeight = maxHeight.Value;
         if (gap.HasValue)
         {
-            // None unit = "not specified by caller" — skip to preserve the native default.
+            // None unit = "not specified by caller". Skip to preserve the native default.
             if (gap.Value.Width.unit != TaffyUnit.None) s.ColumnGap = gap.Value.Width;
             if (gap.Value.Height.unit != TaffyUnit.None) s.RowGap = gap.Value.Height;
         }
@@ -185,13 +185,14 @@ public class Style : IEquatable<Style>
         if (gridAutoRows != null) s.SetGridAutoRows(gridAutoRows);
     }
 
-    // TaffyTrackSizingFunction implements IEquatable<T>, so the default comparer compares without boxing.
-    // Called through Enumerable explicitly: the IEquatable constraint also makes the span-based
-    // MemoryExtensions.SequenceEqual applicable, and it exists in both mscorlib and MonoMod.Backports.
     private static bool SequenceEqualNullable(TaffyTrackSizingFunction[]? a, TaffyTrackSizingFunction[]? b)
     {
         if (ReferenceEquals(a, b)) return true;
         if (a is null || b is null) return false;
-        return a.SequenceEqual(b);
+
+        if (a.Length != b.Length) return false;
+        for (var i = 0; i < a.Length; i++)
+            if (!a[i].Equals(b[i])) return false;
+        return true;
     }
 }

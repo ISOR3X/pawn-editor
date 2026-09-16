@@ -136,6 +136,31 @@ public class UITree : IDisposable
         DrawNode(_rootBranchNode, rect.position);
     }
 
+    /// <summary>
+    ///     Draws with an unconstrained height and returns the height the content actually needed,
+    ///     for windows that resize to fit their contents.
+    /// </summary>
+    public float DrawMeasured(Rect rect)
+    {
+        if (_disposed) return 0f;
+
+        // Mathf.Approximately(inf, inf) is false, so the height term is an explicit infinity check.
+        var sizeChanged = !Mathf.Approximately(rect.width, _lastAvailableWidth)
+                          || !float.IsPositiveInfinity(_lastAvailableHeight);
+
+        if (_dirtyThisFrame || sizeChanged)
+        {
+            _tree.ComputeLayoutWithMeasure(_rootBranchNode, rect.width, float.PositiveInfinity, DefaultMeasure);
+
+            _dirtyThisFrame = false;
+            _lastAvailableWidth = rect.width;
+            _lastAvailableHeight = float.PositiveInfinity;
+        }
+
+        DrawNode(_rootBranchNode, rect.position);
+        return _tree.GetLayout(_rootBranchNode).height;
+    }
+
     private void DrawNode(TaffyNode node, Vector2 origin)
     {
         var layout = _tree.GetLayout(node);
