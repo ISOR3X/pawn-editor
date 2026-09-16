@@ -27,9 +27,16 @@ public static class LayoutParser
     {
         var children = new List<Action<UIBranch>>();
         var index = 0;
+
         foreach (XmlNode child in xmlNode.ChildNodes)
-            if (child is XmlElement)
-                children.Add(ParseNode(child, index++));
+        {
+            if (child is not XmlElement) continue;
+            var i = index++;
+            if (!DirectXmlToObjectNew.ValidateMayRequires(
+                    child.Attributes?["MayRequire"]?.Value,
+                    child.Attributes?["MayRequireAnyOf"]?.Value)) continue;
+            children.Add(ParseNode(child, i));
+        }
 
         return b =>
         {

@@ -30,7 +30,7 @@
         <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
-        <!-- Old TaffyBuilder-era components kept as porting reference; not compiled. Delete each file once ported. -->
+        <!-- Old components kept as porting reference; not compiled -->
         <Compile Remove="Legacy/**"/>
     </ItemGroup>
     <ItemGroup>
