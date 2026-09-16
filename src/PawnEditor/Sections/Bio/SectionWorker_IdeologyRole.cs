@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Verse;
-using Void.XML.Elements;
+using Void;
+using Void.XMLComponents;
 
 namespace PawnEditor;
 

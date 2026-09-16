@@ -1,8 +1,10 @@
 using RimWorld;
 using Taffy;
 using Verse;
-using Void.XML.Elements;
 using Layout = Void.Layout;
+using Void.XMLComponents;
+using Void;
+using Void.Components;
 
 namespace PawnEditor;
 

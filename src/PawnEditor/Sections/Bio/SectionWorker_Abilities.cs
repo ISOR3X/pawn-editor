@@ -4,9 +4,11 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.XML.Elements;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.AbilityDef>;
 using Layout = Void.Layout;
+using static VoidComponents;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -45,7 +47,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 
                 if (Verse.Widgets.ButtonInvisible(r) && onClick != null) onClick(r);
             },
-            inner => inner.Icon(texture, size: UIUtility.ComponentSize.Large),
+            inner => inner.Icon(texture, size: ComponentSize.Large),
             new StyleOverride
             {
                 padding = new TaffyEdges(Dimension.Px(5f)),

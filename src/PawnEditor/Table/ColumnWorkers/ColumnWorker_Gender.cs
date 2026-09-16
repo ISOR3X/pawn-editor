@@ -2,6 +2,8 @@ using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
+using Void;
+using Void.Components;
 
 namespace PawnEditor.Table.ColumnWorkers;
 

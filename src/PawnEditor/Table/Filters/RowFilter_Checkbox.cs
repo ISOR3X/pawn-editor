@@ -1,5 +1,6 @@
-﻿using Taffy;
+using Taffy;
 using Void;
+using Void.Components;
 
 namespace PawnEditor.Table;
 

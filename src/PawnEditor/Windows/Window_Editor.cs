@@ -1,10 +1,11 @@
-﻿using RimWorld;
+using RimWorld;
 using RimWorld.Planet;
 using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
 using Void.Extensions;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -70,7 +71,7 @@ public partial class Window_Editor : Window
     private void DoLeftSection(Rect inRect)
     {
         var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-        Void.Taffy.Div(inRect, builder =>
+        Void.TaffyLegacy.Div(inRect, builder =>
         {
             builder.Text("Selected faction", style: new StyleOverride { fontSize = GameFont.Tiny });
             builder.Button(label, tex, c, block: true,

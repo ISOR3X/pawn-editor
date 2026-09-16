@@ -1,6 +1,8 @@
 using Taffy;
 using Verse;
 using Void;
+using static VoidComponents;
+using Void.Components;
 
 namespace PawnEditor.Table;
 
@@ -62,13 +64,13 @@ public abstract class RowFilter_ToggleableList<T, K>(string title, Func<K, strin
 
             col.Div(row =>
             {
-                row.Button("Enable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
+                row.Button("Enable all", size: ComponentSize.Small, block: true, onClick: _ =>
                 {
                     _disabledOptions.Clear();
                     _noneDisabled = false;
                     MarkDirty();
                 });
-                row.Button("Disable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
+                row.Button("Disable all", size: ComponentSize.Small, block: true, onClick: _ =>
                 {
                     foreach (var c in allOptions) _disabledOptions.Add(c);
                     _noneDisabled = true;

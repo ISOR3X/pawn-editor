@@ -2,6 +2,7 @@ using RimWorld;
 using Taffy;
 using Verse;
 using Void;
+using Void.Components;
 
 namespace PawnEditor.Table;
 

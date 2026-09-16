@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using RimWorld;
 using Taffy;
 using Verse;
+using static VoidComponents;
 
 namespace Void.Components;
 
@@ -51,7 +52,7 @@ public static partial class TaffyExtensions
                 {
                     row.Text(title, style: new StyleOverride { flexGrow = 1f, fontSize = GameFont.Tiny });
                     row.Icon(isOpen ? PawnColumnWorker.SortingIcon : PawnColumnWorker.SortingDescendingIcon,
-                        size: UIUtility.ComponentSize.Small);
+                        size: ComponentSize.Small);
                 },
                 new StyleOverride { flexDirection = TaffyFlexDirection.Row, alignItems = TaffyAlignItems.Center });
 

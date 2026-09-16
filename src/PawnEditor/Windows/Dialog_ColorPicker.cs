@@ -1,8 +1,10 @@
-﻿using RimWorld;
+using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
+using static VoidComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -34,7 +36,7 @@ public class Dialog_ColorPicker : Window
 
     public override void DoWindowContents(Rect inRect)
     {
-        Void.Taffy.Div(inRect, builder =>
+        Void.TaffyLegacy.Div(inRect, builder =>
             {
                 builder.Text("Choose a color", style: new StyleOverride { fontSize = GameFont.Medium });
                 builder.Div(contentBuilder =>
@@ -153,8 +155,8 @@ public class Dialog_ColorPicker : Window
 
                 builder.Div(footerBuilder =>
                 {
-                    footerBuilder.Button("Cancel", onClick: _ => Close(), size: UIUtility.ComponentSize.Large);
-                    footerBuilder.Button("Accept", onClick: _ => Accept(), size: UIUtility.ComponentSize.Large);
+                    footerBuilder.Button("Cancel", onClick: _ => Close(), size: ComponentSize.Large);
+                    footerBuilder.Button("Accept", onClick: _ => Accept(), size: ComponentSize.Large);
                 }, new StyleOverride { justifyContent = TaffyAlignContent.SpaceBetween });
             },
             new StyleOverride

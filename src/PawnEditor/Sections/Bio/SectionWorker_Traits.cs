@@ -3,9 +3,11 @@ using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
-using Void.XML.Elements;
 using Col = PawnEditor.Table.ColumnWorker<PawnEditor.TraitUtility.TraitRecord>;
 using Layout = Void.Layout;
+using Void;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
