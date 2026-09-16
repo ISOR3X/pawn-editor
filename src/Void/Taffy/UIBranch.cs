@@ -15,8 +15,8 @@ public class UIBranch(UITree tree, TaffyNode parentBranch, RenderContext? contex
     private RenderContext Context { get; } = context ?? RenderContext.Empty;
 
     /// <summary>
-    /// State stored on the branch node, saved across frames.
-    /// Should only store light component data, e.g. scroll position & input buffers.
+    ///     State stored on the branch node, saved across frames.
+    ///     Should only store light component data, e.g. scroll position & input buffers.
     /// </summary>
     public T State<T>(string key, Func<T> init) where T : class
     {
@@ -24,20 +24,29 @@ public class UIBranch(UITree tree, TaffyNode parentBranch, RenderContext? contex
     }
 
     /// <summary>
-    /// Extend the context for a subtree.
-    /// Note that while it creates a new UIBranch instance it does not create any new nodes on the native tree.
+    ///     Extend the context for a subtree.
+    ///     Note that while it creates a new UIBranch instance it does not create any new nodes on the native tree.
     /// </summary>
-    public void Provide<T>(T value, Action<UIBranch> builder) => builder(new UIBranch(_tree, _parentBranch, Context.With(value)));
+    public void Provide<T>(T value, Action<UIBranch> builder)
+    {
+        builder(new UIBranch(_tree, _parentBranch, Context.With(value)));
+    }
 
     /// <summary>
-    /// Read the context for a subtree. Throws when no <typeparamref name="T"/> was provided.
+    ///     Read the context for a subtree. Throws when no <typeparamref name="T" /> was provided.
     /// </summary>
-    public T Inject<T>() => Context.Get<T>();
+    public T Inject<T>()
+    {
+        return Context.Get<T>();
+    }
 
     /// <summary>
-    /// Read the context for a subtree when a component can render without it.
+    ///     Read the context for a subtree when a component can render without it.
     /// </summary>
-    public bool TryInject<T>(out T value) => Context.TryGet(out value);
+    public bool TryInject<T>(out T value)
+    {
+        return Context.TryGet(out value);
+    }
 
 
     public TaffyNode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null,

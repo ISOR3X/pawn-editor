@@ -2,7 +2,6 @@ using PawnEditor.Table.ColumnWorkers;
 using Taffy;
 using UnityEngine;
 using Verse;
-using Void;
 
 namespace PawnEditor.Table;
 
@@ -32,7 +31,6 @@ public abstract class ColumnWorker<TRow>
 
     public abstract void DrawCell(TaffyBuilder grid, TRow row);
 
-    #region ENTRY POINTS
 
     public static ColumnWorker<TRow> Create(
         TaffyTrackSizingFunction trackSize,
@@ -69,9 +67,6 @@ public abstract class ColumnWorker<TRow>
         return new TextColumnWorker<TRow>(trackSize, getText, header, color, headerTip);
     }
 
-    #endregion
-
-    #region FACTORIES
 
     private sealed class DelegateColumn(
         TaffyTrackSizingFunction trackSize,
@@ -123,8 +118,6 @@ public abstract class ColumnWorker<TRow>
             drawCell(grid, row, ctx);
         }
     }
-
-    #endregion
 }
 
 internal interface IContextColumn<in TRow>

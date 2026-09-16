@@ -86,7 +86,6 @@ public class Table<TRow>(
             RecacheFilteredRows();
         }
 
-        #region FOOTER
 
         if (_searchWidget != null && drawFooter)
         {
@@ -95,9 +94,6 @@ public class Table<TRow>(
             _searchWidget.OnGUI(footerRect.RightPartPixels(180f), SetDirty);
         }
 
-        #endregion
-
-        #region HEADER
 
         // Use the same content width as the scroll view to keep columns aligned.
         var headerRect = r.TakeTopPart(HeaderHeight);
@@ -148,9 +144,6 @@ public class Table<TRow>(
             Verse.Widgets.DrawLineHorizontal(r.x, r.y, r.width);
         }
 
-        #endregion
-
-        #region SCROLL VIEW
 
         var contentHeight = _cachedFilteredRows.Count > 0
             ? _cachedFilteredRows.Count * rowHeight
@@ -224,8 +217,6 @@ public class Table<TRow>(
         }
 
         Verse.Widgets.EndScrollView();
-
-        #endregion
     }
 
     public void Draw(TaffyBuilder builder, int rowCount = 6, StyleOverride? style = null)

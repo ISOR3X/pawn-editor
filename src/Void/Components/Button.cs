@@ -14,6 +14,39 @@ public static partial class VoidComponents
         Ghost = 1
     }
 
+
+    // Cache base styles to that they are not created newly on every button call.
+    // Note that these return mutable values and should therefore not be modified.
+    private static readonly StyleCache<(ComponentSize size, bool block, bool iconOnly)> ButtonStyles = new(k =>
+    {
+        var m = ButtonMetrics.For(k.size);
+        // No padding if we only have an icon; the button is square instead.
+        var paddingInline = k.iconOnly ? 0f : m.Padding;
+        var s = new Style
+        {
+            height = Dimension.Px(m.Height),
+            display = TaffyDisplay.Flex,
+            alignItems = TaffyAlignItems.Center,
+            justifyContent = TaffyAlignContent.Center,
+            gap = new TaffyAxes(Dimension.Px(m.IconGap), Dimension.Px(0f)),
+            padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(paddingInline), Dimension.Px(0f),
+                Dimension.Px(paddingInline))
+        };
+        // By default, the button has a fixed size. Setting it to block makes it width: 100%.
+        // This is inspired by the API for https://ui.nuxt.com/docs/components/button
+        if (k.block) s.width = Dimension.Percent(1f);
+        if (k.iconOnly) s.width = Dimension.Px(m.Height);
+        return s;
+    });
+
+    private static readonly StyleCache<ComponentSize> ButtonLabelStyles = new(size => new Style
+    {
+        flexShrink = 1f,
+        minWidth = Dimension.Px(0),
+        wordWrap = false,
+        fontSize = ButtonMetrics.For(size).Font
+    });
+
     /// <summary>
     ///     Copy of <see cref="Verse.Widgets.DrawButtonGraphic" />, but with a disabled flag to disable interaction states.
     /// </summary>
@@ -91,40 +124,4 @@ public static partial class VoidComponents
             }, style: mergedStyle, id: key);
         }
     }
-
-    #region CACHE
-
-    // Cache base styles to that they are not created newly on every button call.
-    // Note that these return mutable values and should therefore not be modified.
-    private static readonly StyleCache<(ComponentSize size, bool block, bool iconOnly)> ButtonStyles = new(k =>
-    {
-        var m = ButtonMetrics.For(k.size);
-        // No padding if we only have an icon; the button is square instead.
-        var paddingInline = k.iconOnly ? 0f : m.Padding;
-        var s = new Style
-        {
-            height = Dimension.Px(m.Height),
-            display = TaffyDisplay.Flex,
-            alignItems = TaffyAlignItems.Center,
-            justifyContent = TaffyAlignContent.Center,
-            gap = new TaffyAxes(Dimension.Px(m.IconGap), Dimension.Px(0f)),
-            padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(paddingInline), Dimension.Px(0f),
-                Dimension.Px(paddingInline))
-        };
-        // By default, the button has a fixed size. Setting it to block makes it width: 100%.
-        // This is inspired by the API for https://ui.nuxt.com/docs/components/button
-        if (k.block) s.width = Dimension.Percent(1f);
-        if (k.iconOnly) s.width = Dimension.Px(m.Height);
-        return s;
-    });
-
-    private static readonly StyleCache<ComponentSize> ButtonLabelStyles = new(size => new Style
-    {
-        flexShrink = 1f,
-        minWidth = Dimension.Px(0),
-        wordWrap = false,
-        fontSize = ButtonMetrics.For(size).Font
-    });
-
-    #endregion
 }

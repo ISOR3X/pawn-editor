@@ -10,6 +10,38 @@ namespace PawnEditor;
 
 public partial class Window_Editor : Window
 {
+    // Pawn-related fields
+    // These are private, so they are only set through the TrySelect methods.
+    // WeakRefs are static so the selection persists once a window is closed; strong refs are instance-scoped.
+    private static readonly System.WeakReference<Faction?> SelectedFactionWeak = new(null);
+    private static readonly System.WeakReference<IContext?> SelectedContextWeak = new(null);
+
+    public static Rect DefaultWindowRect = new(0, 0, UI.screenWidth / 2f, UI.screenHeight);
+    public static Rect SavedWindowRect = DefaultWindowRect;
+
+    // Options
+    public static bool ShowHeadgear = true;
+    public static bool ShowClothes = true;
+    private IContext? _currentContext;
+    private Faction? _selectedFaction;
+
+    // Tab related fields
+    private TabDef? _selectedTabDef;
+    private List<TabDef> _selectedTabDefsFor = [];
+    private List<TabRecord> _tabsList = [];
+
+
+    public Window_Editor()
+    {
+        layer = Current.ProgramState == ProgramState.Playing ? WindowLayer.Dialog : WindowLayer.Super;
+        forcePause = true;
+        closeOnClickedOutside = true;
+        resizeable = PawnEditorMod.Settings.allowResize;
+        draggable = PawnEditorMod.Settings.allowResize;
+    }
+
+    private Pawn? SelectedPawn => (_currentContext as IContext<Pawn>)?.Value;
+
     public override void DoWindowContents(Rect inRect)
     {
         DoLeftSection(inRect.TakeLeftPart(Widgets.CardSize.x + 24f));
@@ -104,42 +136,6 @@ public partial class Window_Editor : Window
             Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
     }
 
-    #region Fields
-
-    // Pawn-related fields
-    // These are private, so they are only set through the TrySelect methods.
-    // WeakRefs are static so the selection persists once a window is closed; strong refs are instance-scoped.
-    private static readonly System.WeakReference<Faction?> SelectedFactionWeak = new(null);
-    private static readonly System.WeakReference<IContext?> SelectedContextWeak = new(null);
-    private Faction? _selectedFaction;
-    private IContext? _currentContext;
-    private Pawn? SelectedPawn => (_currentContext as IContext<Pawn>)?.Value;
-
-    // Tab related fields
-    private TabDef? _selectedTabDef;
-    private List<TabDef> _selectedTabDefsFor = [];
-    private List<TabRecord> _tabsList = [];
-
-    public static Rect DefaultWindowRect = new(0, 0, UI.screenWidth / 2f, UI.screenHeight);
-    public static Rect SavedWindowRect = DefaultWindowRect;
-
-    // Options
-    public static bool ShowHeadgear = true;
-    public static bool ShowClothes = true;
-
-    #endregion
-
-    #region Constructors & base methods
-
-    public Window_Editor()
-    {
-        layer = Current.ProgramState == ProgramState.Playing ? WindowLayer.Dialog : WindowLayer.Super;
-        forcePause = true;
-        closeOnClickedOutside = true;
-        resizeable = PawnEditorMod.Settings.allowResize;
-        draggable = PawnEditorMod.Settings.allowResize;
-    }
-
     public override void SetInitialSizeAndPosition()
     {
         base.SetInitialSizeAndPosition();
@@ -171,6 +167,4 @@ public partial class Window_Editor : Window
         _selectedTabDefsFor.Clear();
         _tabsList.Clear();
     }
-
-    #endregion
 }
