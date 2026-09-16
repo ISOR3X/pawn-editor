@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using RimWorld;
 using Verse;
-using Void;
 using Layout = Void.Layout;
 
 namespace PawnEditor;

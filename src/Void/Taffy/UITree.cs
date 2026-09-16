@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -321,7 +320,6 @@ public class UITree : IDisposable
         }
     }
 }
-
 
 internal static class Utility
 {

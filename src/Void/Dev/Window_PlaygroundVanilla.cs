@@ -26,6 +26,11 @@ public class Window_PlaygroundVanilla : Window
     // Whole-value regex, mirroring the Taffy playground.
     private static readonly Regex LettersOnly = new("^[a-zA-Z]*$");
 
+
+    // Mirrors the caches in VoidComponents.Input so the two windows do the same GUIStyle work.
+    private static readonly Dictionary<GameFont, GUIStyle> LockedTextFields = [];
+    private static readonly Dictionary<GameFont, GUIStyle> GhostTextFields = [];
+
     // Input tab state, mirroring the fields on Window_Playground one for one.
     private readonly string[] _inputRow = ["one", "two", "three"];
     private readonly List<string> _listItems = Enumerable.Range(1, 200).Select(i => $"Item {i}").ToList();
@@ -185,7 +190,6 @@ public class Window_PlaygroundVanilla : Window
             TexUI.ArrowLeft, ComponentSize.Default, ButtonVariant.Solid, false, 220f);
     }
 
-    #region INPUT TAB
 
     /// <summary>
     ///     Same content as <c>Window_Playground.InputPlayground</c>, laid out by hand. Every row here
@@ -524,14 +528,6 @@ public class Window_PlaygroundVanilla : Window
         return committed;
     }
 
-    #endregion
-
-    #region INPUT DRAWING HELPERS
-
-    // Mirrors the caches in VoidComponents.Input so the two windows do the same GUIStyle work.
-    private static readonly Dictionary<GameFont, GUIStyle> LockedTextFields = [];
-    private static readonly Dictionary<GameFont, GUIStyle> GhostTextFields = [];
-
     private static GUIStyle ResolveTextFieldStyle(InputVariant variant, bool focused)
     {
         var font = Text.Font;
@@ -585,9 +581,6 @@ public class Window_PlaygroundVanilla : Window
         return sb.ToString();
     }
 
-    #endregion
-
-    #region BUTTON DRAWING HELPERS
 
     /// <returns>Horizontal padding, button height, icon size, icon + label gap, font.</returns>
     private static (float padding, float height, float iconSize, float iconGap, GameFont font) ButtonMetrics(
@@ -696,8 +689,6 @@ public class Window_PlaygroundVanilla : Window
 
         return clicked && !disabled;
     }
-
-    #endregion
 
     private enum Tab
     {

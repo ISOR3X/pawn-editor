@@ -58,6 +58,10 @@ public class Window_Playground : Window
         };
     });
 
+    // Input tab state. Each field is the single source of truth for its widget; the component
+    // renders whatever it is handed and reports edits back through onChange.
+    private readonly string[] _inputRow = ["one", "two", "three"];
+
     // List tab state. Items live on the window so add/remove buttons can mutate them between frames.
     private readonly List<string> _listItems = Enumerable.Range(1, 200).Select(i => $"Item {i}").ToList();
     private readonly HashSet<string> _listSelected = [];
@@ -69,35 +73,31 @@ public class Window_Playground : Window
         new("a", "Alpha"), new("b", "Bravo"), new("c", "Charlie")
     ];
 
-    // Input tab state. Each field is the single source of truth for its widget; the component
-    // renders whatever it is handed and reports edits back through onChange.
-    private readonly string[] _inputRow = ["one", "two", "three"];
-
     private readonly UITree _tree = new();
     private int _clicks;
     private string _inputCapped = "max 8";
     private string _inputDigits = "2077";
     private string _inputExternal = "100";
-    private string _inputGhost = "Ghost variant";
-    private string _inputPattern = "letters";
     private string _inputFilter = "";
     private string _inputFull = "Full width";
+    private string _inputGhost = "Ghost variant";
     private string _inputGrow = "grows with the row";
     private string _inputLarge = "Large";
+    private string _inputPattern = "letters";
     private string _inputSelfKeyed = "retype me";
     private string _inputSmall = "Small";
     private string _inputStd = "Default";
+    private bool _listGap;
     private int _numBasic = 42;
     private int _numClamped = 5;
     private int _numLarge = 3;
     private int _numSigned;
     private int _numSmall = 1;
     private int _numStd = 2;
-    private int _subjectSeq;
-    private bool _warmTheme;
-    private bool _listGap;
     private bool _showExtra;
+    private int _subjectSeq;
     private Tab _tab = Tab.Buttons;
+    private bool _warmTheme;
 
     public Window_Playground()
     {
@@ -633,24 +633,24 @@ public class Window_Playground : Window
         var theme = branch.Inject<Theme>();
 
         branch.Div(card =>
-        {
-            card.Div(row =>
             {
-                row.Text(subject.Name,
-                    new Style { color = theme.Accent, width = Dimension.Px(110f), wordWrap = false },
-                    $"{key}-name");
-                row.Input(subject.Name, v => subject.Name = v, 24, id: $"{key}-input");
-                row.Button($"Clicks: {subject.Clicks}", size: ComponentSize.Small,
-                    onClick: _ => subject.Clicks++, id: $"{key}-btn");
-            }, style: Row(), id: $"{key}-row");
+                card.Div(row =>
+                    {
+                        row.Text(subject.Name,
+                            new Style { color = theme.Accent, width = Dimension.Px(110f), wordWrap = false },
+                            $"{key}-name");
+                        row.Input(subject.Name, v => subject.Name = v, 24, id: $"{key}-input");
+                        row.Button($"Clicks: {subject.Clicks}", size: ComponentSize.Small,
+                            onClick: _ => subject.Clicks++, id: $"{key}-btn");
+                    }, style: Row(), id: $"{key}-row");
 
-            // Collapsible keeps its open flag in branch.State on the parent record, so each card must
-            // hold its own. It also passes context across a component boundary into its content lambda.
-            card.Collapsible($"Notes for {subject.Name}", inner =>
-                    inner.Text($"still in scope: {inner.Inject<Subject>().Name} / {inner.Inject<Theme>().Label}",
-                        id: $"{key}-note"),
-                id: $"{key}-collapsible");
-        }, style: Column(4f, 6f), id: $"{key}-card");
+                // Collapsible keeps its open flag in branch.State on the parent record, so each card must
+                // hold its own. It also passes context across a component boundary into its content lambda.
+                card.Collapsible($"Notes for {subject.Name}", inner =>
+                        inner.Text($"still in scope: {inner.Inject<Subject>().Name} / {inner.Inject<Theme>().Label}",
+                            id: $"{key}-note"),
+                    id: $"{key}-collapsible");
+            }, style: Column(4f, 6f), id: $"{key}-card");
     }
 
     /// <summary>

@@ -6,19 +6,45 @@ using UnityEngine;
 using Verse;
 using Void;
 using Void.Taffy;
+using TexUI = Void.TexUI;
+using Widgets = Void.Widgets;
 
 public static partial class VoidComponents
 {
-    /// <summary>
-    /// Text buffer for numeric inputs.This allows us to type "5000" for it to be later be clamped to 50 on blur.
-    /// </summary>
-    private sealed class InputNumberState
+    public enum InputVariant
     {
-        public string Buffer = "";
+        Solid = 0,
+        Ghost = 1
     }
 
+    private const float DefaultInputWidth = 160f;
+
+    /// <summary>
+    ///     Locked GUIStyle for InputNumber: all state backgrounds/colors match normal so that
+    ///     spurious focus transfers (e.g. button clicks inside the field rect) produce no visual
+    ///     change. Used when the field is not genuinely focused.
+    /// </summary>
+    private static readonly Dictionary<GameFont, GUIStyle> LockedTextFields = [];
+
+    /// <summary>
+    ///     Ghost GUIStyle: no background or border in any state.
+    /// </summary>
+    private static readonly Dictionary<GameFont, GUIStyle> GhostTextFields = [];
+
+
+    private static readonly StyleCache<ComponentSize> InputStyles = new(size => new Style
+    {
+        width = Dimension.Px(DefaultInputWidth),
+        height = Dimension.Px(size == ComponentSize.Small ? 20f : UIUtility.ButtonHeight),
+        flexShrink = 0f,
+        fontSize = InputMetrics(size)
+    });
+
     /// <summary>Clears keyboard focus. Can be called from any draw callback.</summary>
-    private static void Unfocus() => GUIUtility.keyboardControl = 0;
+    private static void Unfocus()
+    {
+        GUIUtility.keyboardControl = 0;
+    }
 
     private static (bool isFocused, bool effectivelyFocused) GetFocusState(string controlName, Rect r)
     {
@@ -40,28 +66,6 @@ public static partial class VoidComponents
         return sb.ToString();
     }
 
-    #region STYLE
-
-    public enum InputVariant
-    {
-        Solid = 0,
-        Ghost = 1
-    }
-
-    private const float DefaultInputWidth = 160f;
-
-    /// <summary>
-    /// Locked GUIStyle for InputNumber: all state backgrounds/colors match normal so that
-    /// spurious focus transfers (e.g. button clicks inside the field rect) produce no visual
-    /// change. Used when the field is not genuinely focused.
-    /// </summary>
-    private static readonly Dictionary<GameFont, GUIStyle> LockedTextFields = [];
-
-    /// <summary>
-    /// Ghost GUIStyle: no background or border in any state.
-    /// </summary>
-    private static readonly Dictionary<GameFont, GUIStyle> GhostTextFields = [];
-
     private static GUIStyle ResolveTextFieldStyle(InputVariant variant, bool focused)
     {
         var font = Verse.Text.Font;
@@ -82,9 +86,11 @@ public static partial class VoidComponents
 
         if (LockedTextFields.TryGetValue(font, out var locked)) return locked;
         locked = new GUIStyle(Verse.Text.CurTextFieldStyle);
-        locked.focused = new GUIStyleState { background = locked.normal.background, textColor = locked.normal.textColor };
+        locked.focused = new GUIStyleState
+            { background = locked.normal.background, textColor = locked.normal.textColor };
         locked.hover = new GUIStyleState { background = locked.normal.background, textColor = locked.normal.textColor };
-        locked.active = new GUIStyleState { background = locked.normal.background, textColor = locked.normal.textColor };
+        locked.active = new GUIStyleState
+            { background = locked.normal.background, textColor = locked.normal.textColor };
         return LockedTextFields[font] = locked;
     }
 
@@ -99,7 +105,13 @@ public static partial class VoidComponents
         };
     }
 
-    #endregion
+    /// <summary>
+    ///     Text buffer for numeric inputs.This allows us to type "5000" for it to be later be clamped to 50 on blur.
+    /// </summary>
+    private sealed class InputNumberState
+    {
+        public string Buffer = "";
+    }
 
     extension(UIBranch branch)
     {
@@ -182,10 +194,7 @@ public static partial class VoidComponents
 
             // If the value is not equal to the buffer, that means it has changed externally.
             // Reset the buffer in this case.
-            if (value.ToString() != state.Buffer)
-            {
-                state.Buffer = value.ToString();
-            }
+            if (value.ToString() != state.Buffer) state.Buffer = value.ToString();
 
             // // A write from anywhere but this widget (a slider dragged, a Generate button) has to win
             // // over the buffer, so reset whenever the incoming value moved on its own.
@@ -216,12 +225,12 @@ public static partial class VoidComponents
                 if (scrollFired) Commit(scrolled);
 
                 var buttonFired = false;
-                if (Void.Widgets.ButtonImageWithHold(spinner.TopHalf(), Void.TexUI.ArrowUp, controlName + ":up", disabled))
+                if (Widgets.ButtonImageWithHold(spinner.TopHalf(), TexUI.ArrowUp, controlName + ":up", disabled))
                 {
                     Commit(value + 1);
                     buttonFired = true;
                 }
-                else if (Void.Widgets.ButtonImageWithHold(spinner.BottomHalf(), Void.TexUI.ArrowDown,
+                else if (Widgets.ButtonImageWithHold(spinner.BottomHalf(), TexUI.ArrowDown,
                              controlName + ":down", disabled))
                 {
                     Commit(value - 1);
@@ -281,16 +290,4 @@ public static partial class VoidComponents
             }
         }
     }
-
-    #region CACHE
-
-    private static readonly StyleCache<ComponentSize> InputStyles = new(size => new Style
-    {
-        width = Dimension.Px(DefaultInputWidth),
-        height = Dimension.Px(size == ComponentSize.Small ? 20f : UIUtility.ButtonHeight),
-        flexShrink = 0f,
-        fontSize = InputMetrics(size)
-    });
-
-    #endregion
 }

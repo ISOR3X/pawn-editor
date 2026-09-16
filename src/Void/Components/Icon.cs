@@ -7,8 +7,6 @@ using Void.Taffy;
 
 public static partial class VoidComponents
 {
-    #region CACHE
-
     private static readonly StyleCache<ComponentSize> IconStyles = new(size =>
     {
         var iconSize = IconMetrics(size);
@@ -20,8 +18,6 @@ public static partial class VoidComponents
             flexShrink = 0f
         };
     });
-
-    #endregion
 
     private static float IconMetrics(ComponentSize size)
     {
