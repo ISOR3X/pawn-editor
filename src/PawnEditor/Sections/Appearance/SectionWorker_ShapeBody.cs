@@ -2,7 +2,8 @@ using RimWorld;
 using Taffy;
 using Verse;
 using Void;
-using Void.XML.Elements;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 

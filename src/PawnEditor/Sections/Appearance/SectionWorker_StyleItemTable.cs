@@ -6,6 +6,9 @@ using UnityEngine;
 using Verse;
 using Void;
 using Layout = Void.Layout;
+using static VoidComponents;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -54,7 +57,7 @@ public abstract class SectionWorker_StyleItemTable<T>(SectionDef def) : SectionW
             [
                 ColumnWorker<T>.Create<PawnContext>(
                     TrackSizingFunction.Px(36f),
-                    (grid, def, ctx) => grid.Icon(def.Icon, ctx.Value.story.HairColor, UIUtility.ComponentSize.Large)
+                    (grid, def, ctx) => grid.Icon(def.Icon, ctx.Value.story.HairColor, ComponentSize.Large)
                 ),
                 ColumnWorker<T>.CreateText(
                     TrackSizingFunction.Fr(3), def => def.LabelCap, "Label"

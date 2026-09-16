@@ -1,18 +1,19 @@
 using Taffy;
 using UnityEngine;
 using Verse;
+using static VoidComponents;
 
 namespace Void.Components;
 
 public static partial class TaffyExtensions
 {
-    private static float ResolveIconSize(UIUtility.ComponentSize size)
+    private static float ResolveIconSize(ComponentSize size)
     {
         return size switch
         {
-            UIUtility.ComponentSize.Small => 8f,
-            UIUtility.ComponentSize.Default => 18f,
-            UIUtility.ComponentSize.Large => GenUI.SmallIconSize,
+            ComponentSize.Small => 8f,
+            ComponentSize.Default => 18f,
+            ComponentSize.Large => GenUI.SmallIconSize,
             _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
         };
     }
@@ -21,7 +22,7 @@ public static partial class TaffyExtensions
     ///     Adds a button with auto-computed width.
     /// </summary>
     public static void Icon(this TaffyBuilder b, Texture2D icon,
-        Color? iconColor = null, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default,
+        Color? iconColor = null, ComponentSize size = ComponentSize.Default,
         StyleOverride? style = null)
     {
         var iconSize = ResolveIconSize(size);

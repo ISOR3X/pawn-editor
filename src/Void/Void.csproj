@@ -30,10 +30,6 @@
         <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
-        <!-- Old components kept as porting reference; not compiled -->
-        <Compile Remove="Legacy/**"/>
-    </ItemGroup>
-    <ItemGroup>
         <Reference Include="Taffy">
             <HintPath>..\..\lib\Taffy.dll</HintPath>
             <Private>true</Private>

@@ -2,6 +2,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void.Extensions;
+using static VoidComponents;
 
 namespace Void.Components;
 
@@ -14,14 +15,14 @@ public static partial class TaffyExtensions
     }
 
     /// <returns>Button padding, button height, icon height, icon + label gap, font size</returns>
-    private static (float, float, float, float, GameFont) ResolveButtonSize(UIUtility.ComponentSize size)
+    private static (float, float, float, float, GameFont) ResolveButtonSize(ComponentSize size)
     {
         return size switch
         {
-            UIUtility.ComponentSize.Small => (12f, 20f, 12f, 4f, GameFont.Tiny),
-            UIUtility.ComponentSize.Default => (GenUI.GapLabel, UIUtility.ButtonHeight, 18f, 6f,
+            ComponentSize.Small => (12f, 20f, 12f, 4f, GameFont.Tiny),
+            ComponentSize.Default => (GenUI.GapLabel, UIUtility.ButtonHeight, 18f, 6f,
                 GameFont.Small),
-            UIUtility.ComponentSize.Large => (52f, Verse.Widgets.BackButtonHeight, 18f, 6f,
+            ComponentSize.Large => (52f, Verse.Widgets.BackButtonHeight, 18f, 6f,
                 GameFont.Small),
             _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
         };
@@ -33,7 +34,7 @@ public static partial class TaffyExtensions
     /// </summary>
     public static void Button(this TaffyBuilder b, string? label = null, Texture2D? icon = null,
         Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
-        bool block = false, bool disabled = false, UIUtility.ComponentSize size = UIUtility.ComponentSize.Default,
+        bool block = false, bool disabled = false, ComponentSize size = ComponentSize.Default,
         ButtonVariant variant = ButtonVariant.Solid,
         StyleOverride? style = null)
     {

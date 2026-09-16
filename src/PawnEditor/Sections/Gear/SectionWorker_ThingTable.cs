@@ -5,8 +5,9 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.XML.Elements;
 using Col = PawnEditor.Table.ColumnWorker<Verse.ThingDef>;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 

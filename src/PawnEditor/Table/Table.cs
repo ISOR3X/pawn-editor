@@ -5,6 +5,7 @@ using Verse;
 using Verse.Sound;
 using Void;
 using Void.Extensions;
+using Void.Components;
 
 namespace PawnEditor.Table;
 
@@ -101,7 +102,7 @@ public class Table<TRow>(
             headerRect.height);
 
 
-        Void.Taffy.Div(headerContentRect, b =>
+        Void.TaffyLegacy.Div(headerContentRect, b =>
         {
             foreach (var col in columns)
                 b.Item(colRect =>
@@ -195,7 +196,7 @@ public class Table<TRow>(
             var gridRect = new Rect(0f, firstVisible * rowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
 
-            Void.Taffy.Div(gridRect, b =>
+            Void.TaffyLegacy.Div(gridRect, b =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {

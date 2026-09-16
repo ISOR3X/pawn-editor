@@ -4,6 +4,8 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
+using static VoidComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -54,7 +56,7 @@ public class Window_Table<T> : OwnedWindow
 
     public override void DoWindowContents(Rect inRect)
     {
-        Void.Taffy.Div(inRect,
+        Void.TaffyLegacy.Div(inRect,
             builder =>
             {
                 builder.Div(builder2 =>
@@ -80,7 +82,7 @@ public class Window_Table<T> : OwnedWindow
                         {
                             _selectedItemSlot?.Invoke(builder4, _table.SelectedItem);
                             builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.SelectedItem),
-                                size: UIUtility.ComponentSize.Large);
+                                size: ComponentSize.Large);
                         },
                         new StyleOverride
                             { justifyContent = TaffyAlignContent.SpaceBetween, alignItems = TaffyAlignItems.Center });
