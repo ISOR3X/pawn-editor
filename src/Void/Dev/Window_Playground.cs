@@ -108,7 +108,16 @@ public class Window_Playground : Window
         absorbInputAroundWindow = false;
     }
 
-    public override Vector2 InitialSize => new(1280f, 860f);
+    public override Vector2 InitialSize => new(UI.screenWidth / 2f, UI.screenHeight);
+
+    /// <summary>
+    ///     Left half of the screen, so this can sit beside <see cref="Window_PlaygroundVanilla" /> for a
+    ///     side-by-side comparison. Also re-applied on a resolution change by the base class.
+    /// </summary>
+    public override void SetInitialSizeAndPosition()
+    {
+        windowRect = new Rect(0f, 0f, UI.screenWidth / 2f, UI.screenHeight).Rounded();
+    }
 
     [DebugAction("Void", "Open playground", allowedGameStates = AllowedGameStates.Invalid)]
     private static void Open()
