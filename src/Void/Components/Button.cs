@@ -24,7 +24,7 @@ public static partial class VoidComponents
         if (Mouse.IsOver(rect) && !disabled)
         {
             atlas = Widgets.ButtonBGAtlasMouseover;
-            if (Input.GetMouseButton(0)) atlas = Widgets.ButtonBGAtlasClick;
+            if (UnityEngine.Input.GetMouseButton(0)) atlas = Widgets.ButtonBGAtlasClick;
         }
 
         Widgets.DrawAtlas(rect, atlas);

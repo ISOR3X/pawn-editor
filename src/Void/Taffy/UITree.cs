@@ -322,53 +322,6 @@ public class UITree : IDisposable
     }
 }
 
-/// <summary>
-///     Builder for creating a branch in a tree.
-/// </summary>
-public class UIBranch(UITree tree, TaffyNode parentBranch)
-{
-    private static readonly Dictionary<(string file, int line), string> CallerKeys = [];
-    private readonly TaffyNode _parentBranch = parentBranch;
-    private readonly UITree _tree = tree;
-
-    public T State<T>(string key, Func<T> init) where T : class
-    {
-        return _tree.UpsertState(_parentBranch, key, init);
-    }
-
-    public TaffyNode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null,
-        Style? style = null, string? id = null, [CallerFilePath] string? file = null,
-        [CallerLineNumber] int line = 0)
-    {
-        var key = ResolveKey(id, file, line);
-        var node = _tree.UpsertBranch(_parentBranch, key, draw, context, style);
-
-        if (builder != null)
-        {
-            // Create a new branch to which the children can attach.
-            var childBranch = new UIBranch(_tree, node);
-            builder?.Invoke(childBranch);
-        }
-
-        // After the builder is called, all (this frame's) children should be attached.
-        // Compare them to last frame and update the snapshot accordingly.
-        // Also marks the native tree dirty when differences are found.
-        _tree.CompareChildren(node);
-
-        return node;
-    }
-
-    /// <summary>
-    ///     Explicit id if given, otherwise a key for the call site, built once and reused.
-    /// </summary>
-    internal static string ResolveKey(string? id, string? file, int line)
-    {
-        if (id != null) return id;
-        if (file == null) throw new ArgumentNullException(nameof(file), "No id and no caller file path.");
-        if (CallerKeys.TryGetValue((file, line), out var key)) return key;
-        return CallerKeys[(file, line)] = $"{file}_{line}";
-    }
-}
 
 internal static class Utility
 {
