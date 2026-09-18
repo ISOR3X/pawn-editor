@@ -5,6 +5,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.XML;
 
 namespace PawnEditor;
 
@@ -24,6 +25,7 @@ public class PawnEditorMod : Mod
         Settings = GetSettings<PawnEditorSettings>();
 
         XMLLayoutParser.RegisterTag("section", () => new SectionElement());
+        LayoutParser.REGISTRY.Add("section", () => new v2.SectionElement());
 
 
 #if DEBUG

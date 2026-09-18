@@ -10,41 +10,38 @@ namespace Void.Taffy;
 public sealed class RenderContext
 {
     private readonly RenderContext? _parent;
-    private readonly Type _type;
+    private readonly string _key;
     private readonly object? _value;
 
-    private RenderContext(RenderContext? parent, Type type, object? value)
+    private RenderContext(RenderContext? parent, string key, object? value)
     {
-        (_parent, _type, _value) = (parent, type, value);
+        (_parent, _key, _value) = (parent, key, value);
     }
 
-    public static RenderContext Empty { get; } = new(null, typeof(void), null);
+    public static RenderContext Empty { get; } = new(null, "empty", null);
 
-    /// <summary>
-    ///     Note that the key is the STATIC type of <paramref name="value" />: providing a
-    ///     <c>Pawn</c> as <c>Thing</c> makes it retrievable as <c>Thing</c> only, and vice versa.
-    /// </summary>
-    public RenderContext With<T>(T value)
+    public RenderContext With<T>(string key, T value)
     {
-        return new RenderContext(this, typeof(T), value);
+        return new RenderContext(this, key, value);
     }
 
-    public bool TryGet<T>(out T value)
+    public bool TryGet<T>(string key, out T value)
     {
         for (var c = this; c is not null; c = c._parent)
-            if (c._type == typeof(T))
+            if (c._key == key)
             {
-                value = (T)c._value!;
-                return true;
+                if (c._value is T t) { value = t; return true; }
+                value = default!;
+                return false;
             }
 
         value = default!;
         return false;
     }
 
-    public T Get<T>()
+    public T Get<T>(string key)
     {
-        return TryGet<T>(out var v)
+        return TryGet<T>(key, out var v)
             ? v
             : throw new InvalidOperationException($"No {typeof(T)} attached in this scope");
     }

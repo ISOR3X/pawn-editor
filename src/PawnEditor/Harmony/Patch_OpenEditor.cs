@@ -2,6 +2,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
+using Void;
 
 namespace PawnEditor;
 
@@ -22,6 +23,11 @@ public class Patch_OpenEditor
             var open = Find.WindowStack.IsOpen<Window_Editor>();
             PlayDataLoader.HotReloadDefs();
             if (open) Find.WindowStack.Add(new Window_Editor());
+        }
+
+        if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
+        {
+            VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
         }
     }
 }
