@@ -27,25 +27,25 @@ public class UIBranch(UITree tree, TaffyNode parentBranch, RenderContext? contex
     ///     Extend the context for a subtree.
     ///     Note that while it creates a new UIBranch instance it does not create any new nodes on the native tree.
     /// </summary>
-    public void Provide<T>(T value, Action<UIBranch> builder)
+    public void Provide<T>(string key, T value, Action<UIBranch> builder)
     {
-        builder(new UIBranch(_tree, _parentBranch, Context.With(value)));
+        builder(new UIBranch(_tree, _parentBranch, Context.With(key, value)));
     }
 
     /// <summary>
-    ///     Read the context for a subtree. Throws when no <typeparamref name="T" /> was provided.
+    ///     Read the context for a subtree.
     /// </summary>
-    public T Inject<T>()
+    public T Inject<T>(string key)
     {
-        return Context.Get<T>();
+        return Context.Get<T>(key);
     }
 
     /// <summary>
     ///     Read the context for a subtree when a component can render without it.
     /// </summary>
-    public bool TryInject<T>(out T value)
+    public bool TryInject<T>(string key, out T value)
     {
-        return Context.TryGet(out value);
+        return Context.TryGet(key, out value);
     }
 
 
@@ -75,7 +75,7 @@ public class UIBranch(UITree tree, TaffyNode parentBranch, RenderContext? contex
     /// <summary>
     ///     Explicit id if given, otherwise a key for the call site, built once and reused.
     /// </summary>
-    internal static string ResolveKey(string? id, string? file, int line)
+    public static string ResolveKey(string? id, string? file, int line)
     {
         if (id != null) return id;
         if (file == null) throw new ArgumentNullException(nameof(file), "No id and no caller file path.");

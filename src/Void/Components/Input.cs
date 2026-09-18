@@ -17,7 +17,7 @@ public static partial class VoidComponents
         Ghost = 1
     }
 
-    private const float DefaultInputWidth = 160f;
+    private const float DefaultInputWidth = 128f;
 
     /// <summary>
     ///     Locked GUIStyle for InputNumber: all state backgrounds/colors match normal so that

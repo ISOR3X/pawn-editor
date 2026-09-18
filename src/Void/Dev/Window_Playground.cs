@@ -557,9 +557,9 @@ public class Window_Playground : Window
         builder.Text("1. Reaches through nested Divs", new Style { fontSize = GameFont.Tiny });
         // Section 3 can empty the list, so this block has to tolerate that.
         if (_subjects.Count > 0)
-            builder.Provide(_subjects[0], scope =>
+            builder.Provide("subject", _subjects[0], scope =>
                 scope.Div(l1 => l1.Div(l2 => l2.Div(l3 =>
-                        l3.Text($"depth 3 sees: {l3.Inject<Subject>().Name}", new Style { color = Color.green })),
+                    l3.Text($"depth 3 sees: {l3.Inject<Subject>("subject").Name}", new Style { color = Color.green })),
                     style: Column(0f, 4f)), style: Column(0f, 4f)));
         else
             builder.Text("(no subjects)", new Style { color = ColoredText.SubtleGrayColor });
@@ -569,19 +569,19 @@ public class Window_Playground : Window
         builder.Text("2. Shadowing stays inside the lambda", new Style { fontSize = GameFont.Tiny });
         builder.Div(col =>
         {
-            col.Provide(new Theme(Color.cyan, "outer"), outer =>
+            col.Provide("theme", new Theme(Color.cyan, "outer"), outer =>
             {
-                outer.Text($"outer scope: {outer.Inject<Theme>().Label}");
-                outer.Provide(new Theme(Color.yellow, "inner"),
-                    inner => inner.Text($"  nested scope: {inner.Inject<Theme>().Label}"));
+                outer.Text($"outer scope: {outer.Inject<Theme>("theme").Label}");
+                outer.Provide("theme", new Theme(Color.yellow, "inner"),
+                    inner => inner.Text($"  nested scope: {inner.Inject<Theme>("theme").Label}"));
                 // Under a mutate-in-place Provide this line would print "inner".
-                var after = outer.Inject<Theme>().Label;
+                var after = outer.Inject<Theme>("theme").Label;
                 outer.Text($"outer scope after nesting: {after}",
                     new Style { color = after == "outer" ? Color.green : Color.red });
             });
 
             // Provide ended, so nothing should be resolvable here.
-            var leaks = col.TryInject<Theme>(out var leaked);
+            var leaks = col.TryInject<Theme>("theme", out var leaked);
             col.Text(leaks ? $"LEAK: sibling sees {leaked.Label}" : "sibling sees no Theme",
                 new Style { color = leaks ? Color.red : Color.green });
         }, style: Column(4f, 8f));
@@ -606,10 +606,10 @@ public class Window_Playground : Window
         }, style: Row());
 
         var theme = _warmTheme ? new Theme(Color.yellow, "warm") : new Theme(Color.cyan, "cool");
-        builder.Provide(theme, themed =>
+        builder.Provide("theme", theme, themed =>
         {
             foreach (var subject in _subjects)
-                themed.Provide(subject, scope => SubjectCard(scope, subject.Id));
+                themed.Provide("subject", subject, scope => SubjectCard(scope, subject.Id));
         });
 
         // 4. The same component under different scopes. Type into one input and only that subject's
@@ -629,8 +629,8 @@ public class Window_Playground : Window
     /// </summary>
     private static void SubjectCard(UIBranch branch, string key)
     {
-        var subject = branch.Inject<Subject>();
-        var theme = branch.Inject<Theme>();
+        var subject = branch.Inject<Subject>("subject");
+        var theme = branch.Inject<Theme>("theme");
 
         branch.Div(card =>
             {
@@ -647,7 +647,7 @@ public class Window_Playground : Window
                 // Collapsible keeps its open flag in branch.State on the parent record, so each card must
                 // hold its own. It also passes context across a component boundary into its content lambda.
                 card.Collapsible($"Notes for {subject.Name}", inner =>
-                        inner.Text($"still in scope: {inner.Inject<Subject>().Name} / {inner.Inject<Theme>().Label}",
+                        inner.Text($"still in scope: {inner.Inject<Subject>("subject").Name} / {inner.Inject<Theme>("theme").Label}",
                             id: $"{key}-note"),
                     id: $"{key}-collapsible");
             }, style: Column(4f, 6f), id: $"{key}-card");

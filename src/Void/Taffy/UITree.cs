@@ -198,6 +198,7 @@ public class UITree : IDisposable
         LeafContext? context = null, Style? style = null)
     {
         var parentRecord = _branchRecordsByNode[parentNode];
+        key = ResolveSiblingKey(parentRecord, key);
         var exists = parentRecord.childrenByKey.TryGetValue(key, out var branchNode);
 
         // Check if the branch exists according to the parent record
@@ -305,9 +306,22 @@ public class UITree : IDisposable
     }
 
     /// <summary>
+    /// Append a unique index to the key so branches added from the same line (e.g. through a loop) still get unique values.
+    /// <summary/>
+    private static string ResolveSiblingKey(BranchRecord parent, string baseKey)
+    {
+        if (!parent.pendingChildrenByKey.ContainsKey(baseKey)) return baseKey;
+        for (var n = 1; ; n++)
+        {
+            var candidate = $"{baseKey}#{n}";
+            if (!parent.pendingChildrenByKey.ContainsKey(candidate)) return candidate;
+        }
+    }
+
+    /// <summary>
     ///     Measure function for nodes with context.
     ///     This calculates the needed size for items with a yet unknown size.
-    ///     <summary />
+    /// <summary/>
     private static TaffySize DefaultMeasure(
         TaffyMeasureMode widthMode, float width,
         TaffyMeasureMode heightMode, float height,
@@ -332,15 +346,15 @@ public class UITree : IDisposable
                 case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
                     return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
                 case TaffyMeasureMode.MinContent:
-                {
-                    var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
-                    return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
-                }
+                    {
+                        var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
+                        return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
+                    }
                 default:
-                {
-                    var sz = Text.CalcSize(context.text);
-                    return new TaffySize { width = sz.x, height = sz.y };
-                }
+                    {
+                        var sz = Text.CalcSize(context.text);
+                        return new TaffySize { width = sz.x, height = sz.y };
+                    }
             }
         }
     }
