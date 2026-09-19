@@ -179,25 +179,32 @@ public class UITree : IDisposable
 
         if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(rect, Color.red with { a = 0.25f });
 
-        if (scrollX || scrollY)
+        // Ensure scroll view is properly closed if child nodes throw.
+        try
         {
-            var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
+            if (scrollX || scrollY)
+            {
+                var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
 
-            var viewRect = new Rect(0f, 0f,
-                scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
-                scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
+                var viewRect = new Rect(0f, 0f,
+                    scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
+                    scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
 
-            Verse.Widgets.BeginScrollView(rect, ref s.pos, viewRect);
-            s.VisibleRect = new Rect(s.pos, rect.size - new Vector2(layout.scrollbar_width, layout.scrollbar_height));
-            rect.position = Vector2.zero;
+                Verse.Widgets.BeginScrollView(rect, ref s.pos, viewRect);
+                s.VisibleRect = new Rect(s.pos, rect.size - new Vector2(layout.scrollbar_width, layout.scrollbar_height));
+                rect.position = Vector2.zero;
+            }
+
+            foreach (var (_, childId) in record.childrenByKey)
+                DrawNode(childId, rect.position);
         }
 
-        foreach (var (_, childId) in record.childrenByKey)
-            DrawNode(childId, rect.position);
-
-        if (scrollX || scrollY)
+        finally
         {
-            Verse.Widgets.EndScrollView();
+            if (scrollX || scrollY)
+            {
+                Verse.Widgets.EndScrollView();
+            }
         }
     }
 
@@ -242,11 +249,11 @@ public class UITree : IDisposable
             // Create a new node and record
             branchNode = context != null ? _tree.NewLeafWithContext(context) : _tree.NewNode();
             _branchRecordsByNode[branchNode] = new BranchRecord();
-
-            // Update the parent
-            parentRecord.childrenByKey[key] = branchNode;
-            _tree.AppendChild(parentNode, branchNode);
             _dirtyThisFrame = true;
+
+            // Left detached, and deliberately not recorded in childrenByKey: that dictionary is last
+            // frame's committed set, and CompareChildren diffs it against pendingChildrenByKey.
+            // CompareChildren runs after the builder (UIBranch.Div, or Build for the root) and attaches everything via SetChildren.
         }
 
         var branchRecord = _branchRecordsByNode[branchNode];
@@ -294,13 +301,13 @@ public class UITree : IDisposable
         {
             _dirtyThisFrame = true;
 
+            // SetChildren attaches the nodes UpsertBranch left detached.
+            _tree.SetChildren(node, [.. pending.Values]);
+
             // Remove all branches not present since last frame.
             foreach (var (key, childNode) in prev)
                 if (!pending.ContainsKey(key))
                 {
-                    // Detach first. Taffy's remove_child marks the parent dirty, but remove alone
-                    // does not, and the parent's cached layout would keep the child's size.
-                    _tree.RemoveChild(node, childNode);
                     RemoveSubtree(childNode);
                     branchRecord.childState?.Remove(key);
                 }
@@ -312,8 +319,9 @@ public class UITree : IDisposable
     }
 
     /// <summary>
-    ///     While SameOrder checks for the order of children, if just the order of the array has changed and not the length,
-    ///     No changes are actually pushed to the native tree. In the future we could use <c>set-children</c> to fix this.
+    ///     Compares this frame's children against last frame's, by key and by order. A false result
+    ///     sends <see cref="CompareChildren" /> through <c>SetChildren</c>, which is what pushes the
+    ///     new order to the native tree -- so a pure reorder is applied, not silently dropped.
     /// </summary>
     private static bool SameOrder(Dictionary<string, TaffyNode> a, Dictionary<string, TaffyNode> b)
     {
@@ -383,10 +391,10 @@ public class UITree : IDisposable
                     return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
                 // Take required width
                 case TaffyMeasureMode.FitContent:
-                {
-                    var w = Mathf.Min(width, Text.CalcSize(context.text).x);
-                    return new TaffySize { width = w, height = Text.CalcHeight(context.text, w) };
-                }
+                    {
+                        var w = Mathf.Min(width, Text.CalcSize(context.text).x);
+                        return new TaffySize { width = w, height = Text.CalcHeight(context.text, w) };
+                    }
                 case TaffyMeasureMode.MinContent:
                     {
                         var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
