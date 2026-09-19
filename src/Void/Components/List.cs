@@ -41,7 +41,7 @@ public static partial class VoidComponents
         {
             var key = UIBranch.ResolveKey(id, file, line);
 
-            var state = branch.State(key, () => new ListState { ScrollPos = new Vector2() });
+            var state = branch.UpsertState(key, () => new ListState { ScrollPos = new Vector2() });
 
             var gapY = style?.gap?.Height.value ?? 0f;
             var clampedCount = Mathf.Clamp(items.Count, 1, maxItemsVisibleAtOnce ?? items.Count);

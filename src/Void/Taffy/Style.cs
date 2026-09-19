@@ -7,26 +7,30 @@ namespace Void.Taffy;
 /// <summary>
 ///     A near 1:1 copy of <see cref="TaffyStyleRef" /> with every field nullable, so callers can
 ///     override only the fields they care about and fall back to defaults for the rest.
+///     Also includes some RimWorld specific fields for general styling, usch as fontSize and color.
+///
 ///     Fields irrelevant to RimWorld usage are removed. (TODO: Which ones?)
+///
 ///     TODO: Find better name
 /// </summary>
 public class Style : IEquatable<Style>
 {
+    public Color? backgroundColor;
+    public Color? color;
+    public GameFont? fontSize;
+    public bool? wordWrap;
+
+    public TaffyOverflow? overflowX;
+    public TaffyOverflow? overflowY;
     public TaffyAlignContent? alignContent;
     public TaffyAlignItems? alignItems;
     public TaffyAlignItems? alignSelf;
-
-    public Color? backgroundColor;
-
-    // Not used by Taffy, stored here so UI code can read colors alongside layout.
-    public Color? color;
     public TaffyDisplay? display;
     public TaffyDimension? flexBasis;
     public TaffyFlexDirection? flexDirection;
     public float? flexGrow;
     public float? flexShrink;
     public TaffyFlexWrap? flexWrap;
-    public GameFont? fontSize;
     public TaffyAxes? gap;
     public TaffyTrackSizingFunction[]? gridAutoColumns;
     public TaffyGridAutoFlow? gridAutoFlow;
@@ -47,7 +51,6 @@ public class Style : IEquatable<Style>
     public TaffyEdges? padding;
     public TextAnchor? textAnchor;
     public TaffyDimension? width;
-    public bool? wordWrap;
 
     /// <summary>
     ///     Only compares values that may influence layout.
@@ -81,6 +84,8 @@ public class Style : IEquatable<Style>
                && gridAutoFlow == other.gridAutoFlow
                && gridColumn == other.gridColumn
                && gridRow == other.gridRow
+               && overflowX == other.overflowX
+               && overflowY == other.overflowY
                && SequenceEqualNullable(gridTemplateColumns, other.gridTemplateColumns)
                && SequenceEqualNullable(gridTemplateRows, other.gridTemplateRows)
                && SequenceEqualNullable(gridAutoColumns, other.gridAutoColumns)
@@ -123,7 +128,8 @@ public class Style : IEquatable<Style>
             gridAutoFlow = gridAutoFlow ?? fallback.gridAutoFlow,
             gridColumn = gridColumn ?? fallback.gridColumn,
             gridRow = gridRow ?? fallback.gridRow,
-
+            overflowX  = overflowX ?? fallback.overflowX,
+            overflowY = overflowY ?? fallback.overflowY,
             color = color ?? fallback.color,
             backgroundColor = backgroundColor ?? fallback.backgroundColor,
             fontSize = fontSize ?? fallback.fontSize
@@ -175,6 +181,14 @@ public class Style : IEquatable<Style>
             if (margin.Value.Bottom.unit != TaffyUnit.None) s.MarginBottom = margin.Value.Bottom;
             if (margin.Value.Left.unit != TaffyUnit.None) s.MarginLeft = margin.Value.Left;
         }
+
+        if (overflowX.HasValue) s.OverflowX = overflowX.Value;
+        if (overflowY.HasValue) s.OverflowY = overflowY.Value;
+
+        // We do not expose scrollbar width as in RimWorld it only has one width.
+        // So we only apply the value when scrolling is required.
+        if (overflowX == TaffyOverflow.Scroll || overflowY == TaffyOverflow.Scroll)
+            s.ScrollbarWidth = UIUtility.ScrollBarWidth + GenUI.GapTiny;
 
         if (gridAutoFlow.HasValue) s.GridAutoFlow = gridAutoFlow.Value;
         if (gridColumn.HasValue) s.GridColumn = gridColumn.Value;

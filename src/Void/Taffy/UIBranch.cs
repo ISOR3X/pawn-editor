@@ -18,9 +18,17 @@ public class UIBranch(UITree tree, TaffyNode parentBranch, RenderContext? contex
     ///     State stored on the branch node, saved across frames.
     ///     Should only store light component data, e.g. scroll position & input buffers.
     /// </summary>
-    public T State<T>(string key, Func<T> init) where T : class
+    public T UpsertState<T>(string key, Func<T> init) where T : class
     {
         return _tree.UpsertState(_parentBranch, key, init);
+    }
+
+    /// <summary>
+    ///     Get state for the branch node by key. Instead of calling an initializer when state isnt found, this returns null.
+    /// </summary>
+    public T? GetState<T>(string key) where T : class
+    {
+        return _tree.GetState<T>(_parentBranch, key);
     }
 
     /// <summary>

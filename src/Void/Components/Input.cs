@@ -190,7 +190,7 @@ public static partial class VoidComponents
         {
             var key = UIBranch.ResolveKey(id, file, line);
             var controlName = $"VoidInputNumber_{key}";
-            var state = branch.State(key, () => new InputNumberState());
+            var state = branch.UpsertState(key, () => new InputNumberState());
 
             // If the value is not equal to the buffer, that means it has changed externally.
             // Reset the buffer in this case.
