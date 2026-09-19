@@ -470,22 +470,109 @@ public class Window_Playground : Window
         builder.Collapsible("I am collapsed4", b => { b.Text(Lorem); });
     }
 
-    private ScrollState? _s = null;
+    // Scroll tab state. Counting the rows actually built each frame is the cheapest proof that
+    // virtualization is doing anything: it should track the visible count, not the item count.
+    private readonly Dictionary<string, int> _rowValues = [];
+    private int _rowsBuilt;
 
+    /// <summary>
+    ///     Exercises the <see cref="UIBranch" /> overload of <c>List</c>, where rows are real nodes and
+    ///     their contents are built with components instead of drawn from a <see cref="Rect" />.
+    /// </summary>
     private void ScrollPlayground(UIBranch builder)
     {
-        if (_s != null) builder.Text($"{_s.VisibleRect}");
+        builder.Text($"List playground - node rows ({_listItems.Count} items)",
+            new Style { fontSize = GameFont.Medium });
+        _rowsBuilt = 0;
 
-        builder.Div(b => {
-            var s = b.GetState<ScrollState>("scroll");
-            if (s is not ScrollState { }) return;
-            _s = s;
+        // 1. A row is a Div, so its contents are components. The row node stretches its children on
+        // the cross axis, which is why Text needs an anchor while Button and Icon (fixed heights) do not.
+        builder.Text("1. Components inside rows", new Style { fontSize = GameFont.Tiny });
+        builder.Div(b =>
+        {
+            b.Button(_listGap ? "Gap: 4px" : "Gap: none", size: ComponentSize.Small,
+                onClick: _ => _listGap = !_listGap);
+            b.Text($"{_listSelected.Count} selected", new Style { fontSize = GameFont.Tiny });
+        }, style: Row());
 
-            for (int i = 0; i < 100; i++) {
-                b.Text($"node: {i}");
+        builder.List(_listItems, (row, item) =>
+        {
+            _rowsBuilt++;
+            row.Icon(_listSelected.Contains(item) ? TexUI.ArrowRightDouble : TexUI.ArrowRight,
+                size: ComponentSize.Small);
+            row.Text(item, new Style
+            {
+                flexGrow = 1f, textAnchor = TextAnchor.MiddleLeft, wordWrap = false
+            });
+            row.Button(_listSelected.Contains(item) ? "Deselect" : "Select", size: ComponentSize.Small,
+                onClick: _ =>
+                {
+                    if (!_listSelected.Add(item)) _listSelected.Remove(item);
+                });
+        }, maxItemsVisibleAtOnce: 8, itemKey: item => item,
+            style: _listGap ? new Style { gap = Axes(4f) } : null);
+
+        // 2. Rows are destroyed when they leave the window, so anything stateful inside one has to be
+        // fed from outside. InputNumber reconciles its buffer against the value every frame, so it
+        // survives either way - but its Unity control name comes from the node key, so only the keyed
+        // list keeps focus on the row you are typing in while the list scrolls.
+        builder.Text("2. Stateful rows: itemKey decides what focus follows",
+            new Style { fontSize = GameFont.Tiny });
+        builder.Div(b =>
+        {
+            foreach (var keyed in new[] { true, false })
+            {
+                var isKeyed = keyed;
+                b.Div(col =>
+                    {
+                        col.Text(isKeyed ? "itemKey: item" : "itemKey: null (index)",
+                            new Style { fontSize = GameFont.Tiny });
+                        col.List(_listItems, (row, item) =>
+                            {
+                                _rowsBuilt++;
+                                row.Text(item, new Style
+                                {
+                                    flexGrow = 1f, textAnchor = TextAnchor.MiddleLeft, wordWrap = false
+                                });
+                                row.InputNumber(_rowValues.TryGetValue(item, out var v) ? v : 0,
+                                    n => _rowValues[item] = n, size: ComponentSize.Small,
+                                    style: new Style { width = Dimension.Px(64f) });
+                            }, 24f, 6,
+                            isKeyed ? item => item : null,
+                            id: $"list-keyed-{isKeyed}");
+                    },
+                    style: new Style
+                    {
+                        flexGrow = 1f, flexBasis = Dimension.Px(0),
+                        flexDirection = TaffyFlexDirection.Column
+                    },
+                    id: $"col-keyed-{isKeyed}");
             }
-        }, style: new Style { alignSelf = TaffyAlignItems.FlexStart, overflowY = TaffyOverflow.Scroll, height = Dimension.Px(200f), flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(Dimension.Px(10f)) });
+        }, style: Row());
+
+        // 3. Height follows the item count below the cap, and an empty list falls back to one row
+        // holding the placeholder.
+        builder.Text("3. Short (3 items) and empty", new Style { fontSize = GameFont.Tiny });
+        builder.Div(b =>
+        {
+            b.Div(inner => inner.List(_listItems.Take(3).ToList(),
+                    (row, item) => { _rowsBuilt++; row.Text(item, MiddleLeft); }),
+                style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) });
+            b.Div(inner => inner.List(Array.Empty<string>(),
+                    (row, item) => row.Text(item, MiddleLeft)),
+                style: new Style { flexGrow = 1f, flexBasis = Dimension.Px(0) });
+        }, style: Row());
+
+        // Built last so it sees this pass's total. Three lists over 200 items each: if virtualization
+        // works this stays in the low tens, and drawDebug will outline only the rows that exist.
+        builder.Text($"rows built this pass: {_rowsBuilt} (of {_listItems.Count * 3 + 3} possible)",
+            new Style { fontSize = GameFont.Tiny, color = ColoredText.SubtleGrayColor });
     }
+
+    private static readonly Style MiddleLeft = new()
+    {
+        textAnchor = TextAnchor.MiddleLeft, wordWrap = false, flexGrow = 1f
+    };
 
     private void ListPlayground(UIBranch builder)
     {
