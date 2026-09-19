@@ -24,7 +24,7 @@ public static partial class VoidComponents
         {
             var key = UIBranch.ResolveKey(id, file, line);
 
-            var state = branch.State(key, () => new CollapsibleState { Open = defaultOpen });
+            var state = branch.UpsertState(key, () => new CollapsibleState { Open = defaultOpen });
 
             var resolvedStyle = (style ?? new Style()).Merge(new Style
             {

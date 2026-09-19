@@ -96,7 +96,7 @@ public class Window_Playground : Window
     private int _numStd = 2;
     private bool _showExtra;
     private int _subjectSeq;
-    private Tab _tab = Tab.Buttons;
+    private Tab _tab = Tab.Scroll;
     private bool _warmTheme;
 
     public Window_Playground()
@@ -120,7 +120,7 @@ public class Window_Playground : Window
     }
 
     [DebugAction("Void", "Open playground", allowedGameStates = AllowedGameStates.Invalid)]
-    private static void Open()
+    public static void Open()
     {
         if (Find.WindowStack.IsOpen<Window_Playground>()) Find.WindowStack.TryRemove(typeof(Window_Playground));
         else Find.WindowStack.Add(new Window_Playground());
@@ -134,6 +134,7 @@ public class Window_Playground : Window
 
             switch (_tab)
             {
+                case Tab.Scroll: ScrollPlayground(root); break;
                 case Tab.Buttons: ButtonPlayground(root); break;
                 case Tab.Text: TextPlayground(root); break;
                 case Tab.Icons: IconPlayground(root); break;
@@ -469,6 +470,23 @@ public class Window_Playground : Window
         builder.Collapsible("I am collapsed4", b => { b.Text(Lorem); });
     }
 
+    private ScrollState? _s = null;
+
+    private void ScrollPlayground(UIBranch builder)
+    {
+        if (_s != null) builder.Text($"{_s.VisibleRect}");
+
+        builder.Div(b => {
+            var s = b.GetState<ScrollState>("scroll");
+            if (s is not ScrollState { }) return;
+            _s = s;
+
+            for (int i = 0; i < 100; i++) {
+                b.Text($"node: {i}");
+            }
+        }, style: new Style { alignSelf = TaffyAlignItems.FlexStart, overflowY = TaffyOverflow.Scroll, height = Dimension.Px(200f), flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(Dimension.Px(10f)) });
+    }
+
     private void ListPlayground(UIBranch builder)
     {
         builder.Text($"List playground ({_listItems.Count} items, {_listSelected.Count} selected)",
@@ -707,6 +725,7 @@ public class Window_Playground : Window
 
     private enum Tab
     {
+        Scroll,
         Buttons,
         Text,
         Icons,

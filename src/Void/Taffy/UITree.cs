@@ -4,6 +4,12 @@ using Verse;
 
 namespace Void.Taffy;
 
+public class ScrollState
+{
+    public Vector2 pos;
+    public Rect VisibleRect;
+}
+
 /// <summary>
 ///     Context used for calculating the size of a leaf.
 ///     Modifying context marks a leaf dirty.
@@ -34,7 +40,6 @@ public class BranchRecord
     ///     For keeping track of state of children across frames.
     /// </summary>
     public Dictionary<string, object>? childState;
-
 
     public Action<Rect>? draw;
 
@@ -167,12 +172,33 @@ public class UITree : IDisposable
         var rect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
 
         if (!_branchRecordsByNode.TryGetValue(node, out var record)) return;
+        var scrollX = record.prevStyle?.overflowX == TaffyOverflow.Scroll;
+        var scrollY = record.prevStyle?.overflowY == TaffyOverflow.Scroll;
 
         record.draw?.Invoke(rect);
+
         if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(rect, Color.red with { a = 0.25f });
+
+        if (scrollX || scrollY)
+        {
+            var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
+
+            var viewRect = new Rect(0f, 0f,
+                scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
+                scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
+
+            Verse.Widgets.BeginScrollView(rect, ref s.pos, viewRect);
+            s.VisibleRect = new Rect(s.pos, rect.size - new Vector2(layout.scrollbar_width, layout.scrollbar_height));
+            rect.position = Vector2.zero;
+        }
 
         foreach (var (_, childId) in record.childrenByKey)
             DrawNode(childId, rect.position);
+
+        if (scrollX || scrollY)
+        {
+            Verse.Widgets.EndScrollView();
+        }
     }
 
     /// <summary>
@@ -189,6 +215,15 @@ public class UITree : IDisposable
         var created = init();
         parentRecord.childState[key] = created;
         return created;
+    }
+
+    public T? GetState<T>(TaffyNode parentNode, string key) where T : class
+    {
+        var parentRecord = _branchRecordsByNode[parentNode];
+        parentRecord.childState ??= [];
+
+        if (parentRecord.childState.TryGetValue(key, out var existing)) return (T)existing;
+        else return null;
     }
 
     /// <summary>
@@ -330,7 +365,7 @@ public class UITree : IDisposable
         if (context is null || context.text == null) return new TaffySize();
         using (new TextBlock(context.fontSize))
         {
-            // Wrapping
+            // No wrapping
             if (!context.textWrap)
             {
                 var sz = Text.CalcSize(context.text);
@@ -340,11 +375,18 @@ public class UITree : IDisposable
                 return new TaffySize { width = w, height = sz.y };
             }
 
-            // No wrapping
+            // Wrapping
             switch (widthMode)
             {
-                case TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent:
+                // Take available width
+                case TaffyMeasureMode.Exact:
                     return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
+                // Take required width
+                case TaffyMeasureMode.FitContent:
+                {
+                    var w = Mathf.Min(width, Text.CalcSize(context.text).x);
+                    return new TaffySize { width = w, height = Text.CalcHeight(context.text, w) };
+                }
                 case TaffyMeasureMode.MinContent:
                     {
                         var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
