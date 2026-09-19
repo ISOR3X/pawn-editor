@@ -19,28 +19,11 @@ from argparse import ArgumentParser
 from typing import Optional
 
 import requests
+from _common import make_headers, resolve_token
 
 REPO_OWNER = "ISOR3X"
 REPO_NAME = "pawn-editor"
 GITHUB_API_BASE = "https://api.github.com"
-
-
-def resolve_token(cli_token: Optional[str]) -> str:
-    if cli_token:
-        return cli_token
-    env = os.getenv("GITHUB_TOKEN")
-    if env:
-        return env
-    try:
-        result = subprocess.run(
-            ["gh", "auth", "token"], capture_output=True, text=True, check=True
-        )
-        return result.stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        sys.exit(
-            "GitHub token is required. Pass --github-token, set GITHUB_TOKEN, "
-            "or log in with `gh auth login`."
-        )
 
 
 def fetch_issues(headers: dict, label: str) -> list[dict]:
@@ -100,13 +83,7 @@ def main() -> None:
         help="Issue number to update with the generated body (omit to print instead)",
     )
     args = parser.parse_args()
-
-    token = resolve_token(args.github_token)
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
+    headers = make_headers(resolve_token(args.github_token))
 
     issues = fetch_issues(headers, args.label)
     print(f"Found {len(issues)} open issue(s) labelled '{args.label}'.")

@@ -1,6 +1,8 @@
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -8,7 +10,7 @@ public abstract class TabWorker(TabDef def)
 {
     private static readonly StyleOverride DefaultRootStyle = new()
     {
-        gap = Void.Taffy.Gap(GenUI.GapSmall, GenUI.GapSmall)
+        gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapSmall))
     };
 
     public readonly List<FloatMenuOption> quickActions = [];
@@ -28,7 +30,7 @@ public abstract class TabWorker(TabDef def)
         var viewRect = new Rect(0f, 0f, contentRect.width - additionalWidth, _viewRectHeight);
         Verse.Widgets.BeginScrollView(contentRect, ref _tabScrollPosition, viewRect);
         var rootStyle = Def.layout?.Props.Style.Merge(DefaultRootStyle) ?? DefaultRootStyle;
-        _viewRectHeight = Void.Taffy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), rootStyle);
+        _viewRectHeight = Void.TaffyLegacy.DivMeasured(viewRect, col => DoInnerTabContents(col, context), rootStyle);
         Verse.Widgets.EndScrollView();
         Verse.Widgets.EndGroup();
     }

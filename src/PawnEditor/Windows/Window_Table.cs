@@ -4,8 +4,8 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
+using static VoidComponents;
 using Void.Components;
-using FlexDirection = Taffy.FlexDirection;
 
 namespace PawnEditor;
 
@@ -56,33 +56,41 @@ public class Window_Table<T> : OwnedWindow
 
     public override void DoWindowContents(Rect inRect)
     {
-        Void.Taffy.Div(inRect,
+        Void.TaffyLegacy.Div(inRect,
             builder =>
             {
                 builder.Div(builder2 =>
-                {
-                    if (_filters.Count > 0)
-                        builder2.Div(
-                            builder3 =>
-                            {
-                                foreach (var filter in _filters) filter.DrawFilter(builder3);
-                            }, new StyleOverride
-                            {
-                                width = 200f, flexDirection = FlexDirection.Column
-                            });
+                    {
+                        if (_filters.Count > 0)
+                            builder2.Div(
+                                builder3 =>
+                                {
+                                    foreach (var filter in _filters) filter.DrawFilter(builder3);
+                                }, new StyleOverride
+                                {
+                                    width = Dimension.Px(200f),
+                                    flexDirection = TaffyFlexDirection.Column
+                                });
 
-                    builder2.Item(r => _table.Draw(r), new StyleOverride { flexGrow = 1f });
-                }, new StyleOverride { flexGrow = 1f, gap = Void.Taffy.Gap(GenUI.Gap) });
+                        builder2.Item(r => _table.Draw(r), new StyleOverride { flexGrow = 1f });
+                    },
+                    new StyleOverride
+                        { flexGrow = 1f, gap = new TaffyAxes(Dimension.Px(GenUI.Gap), Dimension.Px(GenUI.Gap)) });
                 if (_selectedItemSlot != null || _onAdd != null)
                     builder.Div(
                         builder4 =>
                         {
                             _selectedItemSlot?.Invoke(builder4, _table.SelectedItem);
                             builder4.Button("Add", onClick: _ => _onAdd?.Invoke(_table.SelectedItem),
-                                size: UIUtility.ComponentSize.Large);
+                                size: ComponentSize.Large);
                         },
                         new StyleOverride
-                            { justifyContent = AlignContent.SpaceBetween, alignItems = AlignItems.Center });
-            }, new StyleOverride { flexDirection = FlexDirection.Column, gap = Void.Taffy.Gap(GenUI.GapSmall) });
+                            { justifyContent = TaffyAlignContent.SpaceBetween, alignItems = TaffyAlignItems.Center });
+            },
+            new StyleOverride
+            {
+                flexDirection = TaffyFlexDirection.Column,
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(GenUI.GapSmall))
+            });
     }
 }

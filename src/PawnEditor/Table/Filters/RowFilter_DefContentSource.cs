@@ -21,7 +21,7 @@ public sealed class RowFilter_DefContentSource<TDef> : RowFilter<TDef> where TDe
             style: new StyleOverride
             {
                 width = Dimension.Percent(1f),
-                margin = new Rect<LengthPercentageAuto>(0f, 0f, 0f, GenUI.GapSmall)
+                margin = new TaffyEdges(Dimension.Px(0), Dimension.Px(0), Dimension.Px(GenUI.GapSmall), Dimension.Px(0))
             }, onClick: _ =>
             {
                 var opts = LoadedModManager.RunningMods

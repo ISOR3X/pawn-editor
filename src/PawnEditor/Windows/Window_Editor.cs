@@ -1,32 +1,21 @@
-﻿using RimWorld;
+using RimWorld;
 using RimWorld.Planet;
 using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
 using Void.Extensions;
-using FlexDirection = Taffy.FlexDirection;
+using Void.Components;
 
 namespace PawnEditor;
 
 public partial class Window_Editor : Window
 {
-    #region Fields
-
     // Pawn-related fields
     // These are private, so they are only set through the TrySelect methods.
     // WeakRefs are static so the selection persists once a window is closed; strong refs are instance-scoped.
     private static readonly System.WeakReference<Faction?> SelectedFactionWeak = new(null);
     private static readonly System.WeakReference<IContext?> SelectedContextWeak = new(null);
-    private Faction? _selectedFaction;
-    private IContext? _currentContext;
-    private Pawn? SelectedPawn => (_currentContext as IContext<Pawn>)?.Value;
-
-    // Tab related fields
-    private TabDef? _selectedTabDef;
-    private List<TabDef> _selectedTabDefsFor = [];
-    private List<TabRecord> _tabsList = [];
 
     public static Rect DefaultWindowRect = new(0, 0, UI.screenWidth / 2f, UI.screenHeight);
     public static Rect SavedWindowRect = DefaultWindowRect;
@@ -34,10 +23,14 @@ public partial class Window_Editor : Window
     // Options
     public static bool ShowHeadgear = true;
     public static bool ShowClothes = true;
+    private IContext? _currentContext;
+    private Faction? _selectedFaction;
 
-    #endregion
+    // Tab related fields
+    private TabDef? _selectedTabDef;
+    private List<TabDef> _selectedTabDefsFor = [];
+    private List<TabRecord> _tabsList = [];
 
-    #region Constructors & base methods
 
     public Window_Editor()
     {
@@ -48,39 +41,7 @@ public partial class Window_Editor : Window
         draggable = PawnEditorMod.Settings.allowResize;
     }
 
-    public override void SetInitialSizeAndPosition()
-    {
-        base.SetInitialSizeAndPosition();
-        windowRect = SavedWindowRect;
-    }
-
-    public override void PreOpen()
-    {
-        base.PreOpen();
-        // When the reference is lost, of context is null, select the player faction as default. This also selects a player faction pawn.
-        if (!SelectedContextWeak.TryGetTarget(out _currentContext)) TrySelect(Find.FactionManager.OfPlayer);
-        // Set the _selectedFaction back to what is stored in the weak ref.
-        SelectedFactionWeak.TryGetTarget(out _selectedFaction);
-
-        // Update tabs
-        RecacheTabs();
-    }
-
-    public override void PostClose()
-    {
-        base.PostClose();
-        SavedWindowRect = windowRect;
-
-        // Clear the direct refs.
-        _selectedFaction = null;
-        _currentContext = null;
-
-        _selectedTabDef = null;
-        _selectedTabDefsFor.Clear();
-        _tabsList.Clear();
-    }
-
-    #endregion
+    private Pawn? SelectedPawn => (_currentContext as IContext<Pawn>)?.Value;
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -110,22 +71,28 @@ public partial class Window_Editor : Window
     private void DoLeftSection(Rect inRect)
     {
         var (label, tex, c) = FactionUtility.GetFactionMeta(_selectedFaction);
-        Void.Taffy.Div(inRect, builder =>
+        Void.TaffyLegacy.Div(inRect, builder =>
         {
             builder.Text("Selected faction", style: new StyleOverride { fontSize = GameFont.Tiny });
             builder.Button(label, tex, c, block: true,
                 onClick: _ => { Find.WindowStack.Add(FactionFloatMenu()); });
             builder.Item(rect =>
-            {
-                Widgets.DrawReorderablePawnList(rect, PawnLister.Pawns_ByFaction[_selectedFaction], SelectedPawn,
-                    out var newSelectedPawn);
-                if (newSelectedPawn != SelectedPawn) TrySelect(newSelectedPawn);
-            }, new StyleOverride { flexGrow = 1f, margin = new Rect<LengthPercentageAuto>(0, 0, GenUI.GapSmall, 0) });
+                {
+                    Widgets.DrawReorderablePawnList(rect, PawnLister.Pawns_ByFaction[_selectedFaction], SelectedPawn,
+                        out var newSelectedPawn);
+                    if (newSelectedPawn != SelectedPawn) TrySelect(newSelectedPawn);
+                },
+                new StyleOverride
+                {
+                    flexGrow = 1f,
+                    margin = new TaffyEdges(Dimension.Px(GenUI.GapSmall), Dimension.Px(0), Dimension.Px(0),
+                        Dimension.Px(0))
+                });
             builder.Button("Save Preset", block: true, disabled: SelectedPawn == null,
                 onClick: _ => SaveSelectedPawn());
             builder.Button("Load Preset", block: true,
                 onClick: _ => ShowLoadPawnMenu());
-        }, new StyleOverride { flexDirection = FlexDirection.Column });
+        }, new StyleOverride { flexDirection = TaffyFlexDirection.Column });
     }
 
     private void SaveSelectedPawn()
@@ -168,5 +135,37 @@ public partial class Window_Editor : Window
             GenPlace.TryPlaceThing(pawn, CellFinder.RandomEdgeCell(map), map, ThingPlaceMode.Near);
         else
             Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.KeepForever);
+    }
+
+    public override void SetInitialSizeAndPosition()
+    {
+        base.SetInitialSizeAndPosition();
+        windowRect = SavedWindowRect;
+    }
+
+    public override void PreOpen()
+    {
+        base.PreOpen();
+        // When the reference is lost, of context is null, select the player faction as default. This also selects a player faction pawn.
+        if (!SelectedContextWeak.TryGetTarget(out _currentContext)) TrySelect(Find.FactionManager.OfPlayer);
+        // Set the _selectedFaction back to what is stored in the weak ref.
+        SelectedFactionWeak.TryGetTarget(out _selectedFaction);
+
+        // Update tabs
+        RecacheTabs();
+    }
+
+    public override void PostClose()
+    {
+        base.PostClose();
+        SavedWindowRect = windowRect;
+
+        // Clear the direct refs.
+        _selectedFaction = null;
+        _currentContext = null;
+
+        _selectedTabDef = null;
+        _selectedTabDefsFor.Clear();
+        _tabsList.Clear();
     }
 }

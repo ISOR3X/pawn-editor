@@ -3,6 +3,7 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
+using Void.Components;
 
 namespace PawnEditor.Table;
 
@@ -10,7 +11,7 @@ public abstract class ColumnWorker<TRow>
 {
     protected virtual string? HeaderLabel => null;
     protected virtual string? HeaderTip => null;
-    public virtual TrackSizingFunction TrackSize => TrackSizingFunction.Auto();
+    public virtual TaffyTrackSizingFunction TrackSize => TrackSizingFunction.AutoTrack();
 
     public virtual bool Sortable => false;
 
@@ -32,10 +33,9 @@ public abstract class ColumnWorker<TRow>
 
     public abstract void DrawCell(TaffyBuilder grid, TRow row);
 
-    #region ENTRY POINTS
 
     public static ColumnWorker<TRow> Create(
-        TrackSizingFunction trackSize,
+        TaffyTrackSizingFunction trackSize,
         Action<TaffyBuilder, TRow> drawCell,
         string? header = null,
         Func<TRow, TRow, int>? compare = null,
@@ -45,7 +45,7 @@ public abstract class ColumnWorker<TRow>
     }
 
     public static ColumnWorker<TRow> Create<TContext>(
-        TrackSizingFunction trackSize,
+        TaffyTrackSizingFunction trackSize,
         Action<TaffyBuilder, TRow, TContext> drawCell,
         string? header = null,
         Func<TRow, TRow, int>? compare = null,
@@ -60,7 +60,7 @@ public abstract class ColumnWorker<TRow>
     ///     for case-insensitive alphabetical sorting.
     /// </summary>
     public static ColumnWorker<TRow> CreateText(
-        TrackSizingFunction trackSize,
+        TaffyTrackSizingFunction trackSize,
         Func<TRow, string> getText,
         string? header = null,
         Color? color = null,
@@ -69,19 +69,16 @@ public abstract class ColumnWorker<TRow>
         return new TextColumnWorker<TRow>(trackSize, getText, header, color, headerTip);
     }
 
-    #endregion
-
-    #region FACTORIES
 
     private sealed class DelegateColumn(
-        TrackSizingFunction trackSize,
+        TaffyTrackSizingFunction trackSize,
         Action<TaffyBuilder, TRow> drawCell,
         string? header,
         Func<TRow, TRow, int>? compare,
         string? headerTip)
         : ColumnWorker<TRow>
     {
-        public override TrackSizingFunction TrackSize => trackSize;
+        public override TaffyTrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
 
         protected override string? HeaderLabel => header;
@@ -99,7 +96,7 @@ public abstract class ColumnWorker<TRow>
     }
 
     private sealed class DelegateContextColumn<TContext>(
-        TrackSizingFunction trackSize,
+        TaffyTrackSizingFunction trackSize,
         Action<TaffyBuilder, TRow, TContext> drawCell,
         string? header,
         Func<TRow, TRow, int>? compare,
@@ -107,7 +104,7 @@ public abstract class ColumnWorker<TRow>
         : ColumnWorker<TRow, TContext>
         where TContext : IContext
     {
-        public override TrackSizingFunction TrackSize => trackSize;
+        public override TaffyTrackSizingFunction TrackSize => trackSize;
         public override bool Sortable => compare != null;
 
         protected override string? HeaderLabel => header;
@@ -123,8 +120,6 @@ public abstract class ColumnWorker<TRow>
             drawCell(grid, row, ctx);
         }
     }
-
-    #endregion
 }
 
 internal interface IContextColumn<in TRow>

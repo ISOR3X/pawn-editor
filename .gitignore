@@ -5,6 +5,7 @@ x64/
 x86/
 [Bb]in/
 [Oo]bj/
+__pycache__/
 
 # Visual Studio / Rider cache/options
 .vs/

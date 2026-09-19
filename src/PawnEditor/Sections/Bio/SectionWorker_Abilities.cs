@@ -4,10 +4,11 @@ using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
-using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<RimWorld.AbilityDef>;
 using Layout = Void.Layout;
+using static VoidComponents;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -46,11 +47,11 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
 
                 if (Verse.Widgets.ButtonInvisible(r) && onClick != null) onClick(r);
             },
-            inner => inner.Icon(texture, size: UIUtility.ComponentSize.Large),
+            inner => inner.Icon(texture, size: ComponentSize.Large),
             new StyleOverride
             {
-                padding = Void.Taffy.Padding(5f),
-                height = Dimension.AUTO
+                padding = new TaffyEdges(Dimension.Px(5f)),
+                height = Dimension.Auto()
             });
     }
 
@@ -66,7 +67,7 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
                         DoElementRect(traitsBuilder, itemMetaGetter(item), _ => onClick?.Invoke(item));
                 else
                     traitsBuilder.Text(emptyLabel, color: ColoredText.SubtleGrayColor,
-                        style: new StyleOverride { height = 34f });
+                        style: new StyleOverride { height = Dimension.Px(34f) });
             };
     }
 
@@ -120,14 +121,14 @@ public class SectionWorker_Abilities(SectionDef def) : SectionWorker(def)
             null,
             [
                 Col.Create(
-                    Void.Taffy.Px(20f),
+                    TrackSizingFunction.Px(20f),
                     (grid, def) => grid.Icon(def.uiIcon)
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(), def => def.LabelCap, "Label"
+                    TrackSizingFunction.Fr(), def => def.LabelCap, "Label"
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
                     ColoredText.SubtleGrayColor

@@ -5,7 +5,7 @@ using Verse;
 using Verse.Sound;
 using Void;
 using Void.Extensions;
-using Display = Taffy.Display;
+using Void.Components;
 
 namespace PawnEditor.Table;
 
@@ -27,7 +27,7 @@ public class Table<TRow>(
     // Fr tracks must use minmax(0, Nfr) instead of the default minmax(auto, Nfr).
     // In a virtualized table only a subset of rows is rendered each frame, so the
     // auto minimum causes columns to resize as different content scrolls into view.
-    private readonly IReadOnlyList<TrackSizingFunction> _columnTracks =
+    private readonly IReadOnlyList<TaffyTrackSizingFunction> _columnTracks =
         [.. columns.Select(c => NormalizeTrack(c.TrackSize))];
 
     private readonly QuickSearchWidget? _searchWidget = searchProjection != null ? new QuickSearchWidget() : null;
@@ -40,10 +40,11 @@ public class Table<TRow>(
 
     public TRow? SelectedItem { get; private set; }
 
-    private static TrackSizingFunction NormalizeTrack(TrackSizingFunction t)
+    // Fr tracks must use minmax(0, Nfr) so virtualized rows don't resize columns as content scrolls.
+    private static TaffyTrackSizingFunction NormalizeTrack(TaffyTrackSizingFunction t)
     {
-        return t.Max.IsFr() && t.Min.Equals(MinTrackSizingFunction.AUTO)
-            ? TrackSizingFunction.MinMax(MinTrackSizingFunction.ZERO, t.Max)
+        return t.max.unit == TaffyUnit.Fr && t.min.unit == TaffyUnit.Auto
+            ? TrackSizingFunction.MinMax(Dimension.Px(0), t.max)
             : t;
     }
 
@@ -86,7 +87,6 @@ public class Table<TRow>(
             RecacheFilteredRows();
         }
 
-        #region FOOTER
 
         if (_searchWidget != null && drawFooter)
         {
@@ -95,9 +95,6 @@ public class Table<TRow>(
             _searchWidget.OnGUI(footerRect.RightPartPixels(180f), SetDirty);
         }
 
-        #endregion
-
-        #region HEADER
 
         // Use the same content width as the scroll view to keep columns aligned.
         var headerRect = r.TakeTopPart(HeaderHeight);
@@ -105,7 +102,7 @@ public class Table<TRow>(
             headerRect.height);
 
 
-        Void.Taffy.Div(headerContentRect, b =>
+        Void.TaffyLegacy.Div(headerContentRect, b =>
         {
             foreach (var col in columns)
                 b.Item(colRect =>
@@ -137,9 +134,9 @@ public class Table<TRow>(
                 });
         }, new StyleOverride
         {
-            display = Display.Grid,
-            gridTemplateColumns = [.._columnTracks],
-            gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
+            display = TaffyDisplay.Grid,
+            gridTemplateColumns = [.. _columnTracks],
+            gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(0f)),
             gridAutoRows = [TrackSizingFunction.Px(HeaderHeight)]
         });
 
@@ -148,9 +145,6 @@ public class Table<TRow>(
             Verse.Widgets.DrawLineHorizontal(r.x, r.y, r.width);
         }
 
-        #endregion
-
-        #region SCROLL VIEW
 
         var contentHeight = _cachedFilteredRows.Count > 0
             ? _cachedFilteredRows.Count * rowHeight
@@ -202,7 +196,7 @@ public class Table<TRow>(
             var gridRect = new Rect(0f, firstVisible * rowHeight,
                 viewRect.width, (lastVisible - firstVisible + 1) * rowHeight);
 
-            Void.Taffy.Div(gridRect, b =>
+            Void.TaffyLegacy.Div(gridRect, b =>
             {
                 for (var i = firstVisible; i <= lastVisible; i++)
                 {
@@ -215,17 +209,15 @@ public class Table<TRow>(
                 }
             }, new StyleOverride
             {
-                display = Display.Grid,
-                gridTemplateColumns = [.._columnTracks],
-                gap = Void.Taffy.Gap(GenUI.GapSmall, 0f),
-                alignItems = AlignItems.Center,
+                display = TaffyDisplay.Grid,
+                gridTemplateColumns = [.. _columnTracks],
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall), Dimension.Px(0f)),
+                alignItems = TaffyAlignItems.Center,
                 gridAutoRows = [TrackSizingFunction.Px(rowHeight)]
             });
         }
 
         Verse.Widgets.EndScrollView();
-
-        #endregion
     }
 
     public void Draw(TaffyBuilder builder, int rowCount = 6, StyleOverride? style = null)
@@ -233,9 +225,9 @@ public class Table<TRow>(
         const float chrome = HeaderHeight + FooterHeight + GenUI.GapTiny;
         var resolvedStyle = (style ?? new StyleOverride()).Merge(new StyleOverride
         {
-            minWidth = 400f,
-            minHeight = chrome + rowHeight,
-            height = chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * rowHeight,
+            minWidth = Dimension.Px(400f),
+            minHeight = Dimension.Px(chrome + rowHeight),
+            height = Dimension.Px(chrome + Mathf.Clamp(_cachedFilteredRows.Count, 1, rowCount) * rowHeight),
             width = Dimension.Percent(1)
         });
 

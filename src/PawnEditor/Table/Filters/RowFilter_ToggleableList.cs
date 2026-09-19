@@ -1,5 +1,7 @@
+using Taffy;
 using Verse;
 using Void;
+using static VoidComponents;
 using Void.Components;
 
 namespace PawnEditor.Table;
@@ -30,7 +32,7 @@ public abstract class RowFilter_ToggleableList<T, K>(string title, Func<K, strin
             {
                 row2.Icon(TexButton.Search);
                 row2.Input(ref _searchText, style: new StyleOverride { flexGrow = 1f });
-            }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
+            }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny)) });
 
             // null sentinel represents the "None" entry pinned at the top
             var filtered = new List<K?> { null };
@@ -62,19 +64,19 @@ public abstract class RowFilter_ToggleableList<T, K>(string title, Func<K, strin
 
             col.Div(row =>
             {
-                row.Button("Enable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
+                row.Button("Enable all", size: ComponentSize.Small, block: true, onClick: _ =>
                 {
                     _disabledOptions.Clear();
                     _noneDisabled = false;
                     MarkDirty();
                 });
-                row.Button("Disable all", size: UIUtility.ComponentSize.Small, block: true, onClick: _ =>
+                row.Button("Disable all", size: ComponentSize.Small, block: true, onClick: _ =>
                 {
                     foreach (var c in allOptions) _disabledOptions.Add(c);
                     _noneDisabled = true;
                     MarkDirty();
                 });
-            }, new StyleOverride { gap = Void.Taffy.Gap(GenUI.GapTiny) });
-        }, style: new StyleOverride { gap = Void.Taffy.Gap(0f, GenUI.GapTiny) });
+            }, new StyleOverride { gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny), Dimension.Px(GenUI.GapTiny)) });
+        }, style: new StyleOverride { gap = new TaffyAxes(Dimension.Px(0f), Dimension.Px(GenUI.GapTiny)) });
     }
 }

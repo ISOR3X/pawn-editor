@@ -1,7 +1,7 @@
 using Verse;
+using Layout = Void.Layout;
 using Void;
 using Void.XMLComponents;
-using Layout = Void.Layout;
 
 namespace PawnEditor;
 

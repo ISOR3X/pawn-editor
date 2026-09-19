@@ -30,7 +30,25 @@
         <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Taffy\Taffy.csproj"/>
+        <Reference Include="Taffy">
+            <HintPath>..\..\lib\Taffy.dll</HintPath>
+            <Private>true</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Native ctaffy library — all platforms copied so the mod works on Windows, Linux, and macOS -->
+        <Content Include="..\..\lib\win-x64\ctaffy.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>ctaffy.dll</Link>
+        </Content>
+        <Content Include="..\..\lib\linux-x64\libctaffy.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>libctaffy.so</Link>
+        </Content>
+        <Content Include="..\..\lib\osx-arm64\libctaffy.dylib">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Link>libctaffy.dylib</Link>
+        </Content>
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' == 'Debug'">
         <PackageReference Include="EditCompileReload" Version="1.0.2"/>

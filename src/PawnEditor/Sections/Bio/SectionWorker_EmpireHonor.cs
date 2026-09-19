@@ -1,9 +1,9 @@
-﻿using System.Globalization;
+using System.Globalization;
 using RimWorld;
 using Verse;
+using Layout = Void.Layout;
 using Void;
 using Void.XMLComponents;
-using Layout = Void.Layout;
 
 namespace PawnEditor;
 
