@@ -20,6 +20,42 @@ public static partial class VoidComponents
         wordWrap = false
     };
 
+    private static readonly StyleCache<(float itemHeight, float topMargin)> RowStyles = new(k =>
+    {
+        return new Style
+        {
+            width = Dimension.Percent(1f),
+            height = Dimension.Px(k.itemHeight),
+            flexShrink = 0f,
+            margin = new TaffyEdges(Dimension.Px(k.topMargin), Dimension.Px(0f),
+                    Dimension.Px(0f), Dimension.Px(0f))
+        };
+    });
+
+    private static readonly StyleCache<(float contentHeight, float gap)> ContainerStyles = new(k =>
+    {
+        return new Style
+        {
+            width = Dimension.Percent(1f),
+            height = Dimension.Px(k.contentHeight),
+            flexShrink = 0f,
+            flexDirection = TaffyFlexDirection.Column,
+            gap = new TaffyAxes(Dimension.Px(k.gap))
+        };
+    });
+
+    private static readonly StyleCache<float> RootStyles = new(k =>
+    {
+        return new Style
+        {
+            width = Dimension.Percent(1f),
+            height = Dimension.Px(k),
+            flexShrink = 0f,
+            overflowX = TaffyOverflow.Hidden,
+            overflowY = TaffyOverflow.Scroll
+        };
+    });
+
     extension(UIBranch branch)
     {
         /// <summary>
@@ -137,26 +173,12 @@ public static partial class VoidComponents
                     last = Mathf.Min(count - 1, Mathf.CeilToInt((scrollY + windowHeight) / step) + overscan);
                 }
 
-                // Rows skipped above the window are replaced by a margin on the first one built, so
-                // the offset costs a style change on one node rather than a node of its own.
-                //
-                // Every row states its margin, including the zero: Style.Push only writes fields that
-                // are set, so a row that stops being first would otherwise keep the offset it carried
-                // and shove everything below it down. That only shows up when scrolling up, since
-                // scrolling down destroys the row that was first.
-                var rowStyle = new Style
-                {
-                    width = Dimension.Percent(1f), height = Dimension.Px(itemHeight), flexShrink = 0f,
-                    margin = new TaffyEdges(Dimension.Px(0f))
-                };
-                var firstRowStyle = first == 0
-                    ? rowStyle
-                    : new Style
-                    {
-                        width = Dimension.Percent(1f), height = Dimension.Px(itemHeight), flexShrink = 0f,
-                        margin = new TaffyEdges(Dimension.Px(first * step), Dimension.Px(0f),
-                            Dimension.Px(0f), Dimension.Px(0f))
-                    };
+                // Explicitly set the margin for each row to zero,
+                // so when a first row style is demoted to n-th child style,
+                // Its margin is properly updated.
+                // This is done because Style.Push priorities previous style fields over null.
+                var rowStyle = RowStyles.Get((itemHeight, 0f));
+                var firstRowStyle = RowStyles.Get((itemHeight, first * step));
 
                 viewport.Div(content =>
                     {
@@ -174,25 +196,9 @@ public static partial class VoidComponents
                                 id: itemKey?.Invoke(item) ?? $"i{i}");
                         }
                     },
-                    // Declares the full scroll range even though only the visible rows exist. DrawNode
-                    // reads this node's height back as the viewport's content size, so the scrollbar
-                    // covers the whole list rather than the handful of rows currently built.
-                    style: new Style
-                    {
-                        width = Dimension.Percent(1f),
-                        height = Dimension.Px(contentHeight),
-                        flexShrink = 0f,
-                        flexDirection = TaffyFlexDirection.Column,
-                        gap = new TaffyAxes(Dimension.Px(gapY))
-                    });
-            }, style: (style ?? new Style()).Merge(new Style
-            {
-                width = Dimension.Percent(1f),
-                height = Dimension.Px(viewportHeight),
-                flexShrink = 0f,
-                overflowX = TaffyOverflow.Hidden,
-                overflowY = TaffyOverflow.Scroll
-            }), id: key);
+                    // Full content height is used so the scroll view is correctly sized.
+                    style: ContainerStyles.Get((contentHeight, gapY)));
+            }, style: (style ?? new Style()).Merge(RootStyles.Get(viewportHeight)), id: key);
         }
     }
 }
