@@ -1,37 +1,26 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using Verse;
+using Void.Taffy;
+using Void.XML;
 
 namespace Void;
 
 /// <summary>
 ///     A RimWorld <see cref="Def" /> that maps CSS class names to inline style strings.
-///     Any mod can define one; classes are available to all
-///     <c>
-///         <layout />
-///     </c>
-///     elements
-///     via the <c>class="..."</c> attribute.
 /// </summary>
-/// <example>
-///     <code>
-/// <PawnEditor.TaffyStyleDef>
-///             <defName>PawnEditorStyles</defName>
-///             <styles>
-///                 <li name="row" value="flex-direction: row" />
-///                 <li name="wrap" value="flex-wrap: wrap" />
-///                 <li name="w-full" value="width: 100%" />
-///                 <li name="grow" value="flex-grow: 1" />
-///                 <li name="gap-sm" value="gap: 4px" />
-///             </styles>
-///         </PawnEditor.TaffyStyleDef>
-/// </code>
-/// </example>
 [UsedImplicitly]
 public class StyleMapDef : Def
 {
     public List<StyleEntry> styles = [];
 
-    [field: Unsaved] public Dictionary<string, StyleOverride> Styles { get; private set; } = [];
+    [field: Unsaved] public Dictionary<string, Style> Styles { get; private set; } = [];
+
+    /// <summary>
+    ///     The same class map for the pre-UITree API. Parsed from the same strings by the legacy
+    ///     parser rather than converted, so the legacy path keeps its original behaviour exactly.
+    ///     Delete along with Legacy/**.
+    /// </summary>
+    [field: Unsaved] public Dictionary<string, StyleOverride> LegacyStyles { get; private set; } = [];
 
     /// <summary>
     ///     PostLoad instead of ResolveReferences so the Styles dictionary is available immediately for other defs.
@@ -40,6 +29,9 @@ public class StyleMapDef : Def
     {
         base.PostLoad();
         Styles = styles.ToDictionary(
+            e => e.name,
+            e => StyleParser.ParseInlineStyle(e.value));
+        LegacyStyles = styles.ToDictionary(
             e => e.name,
             e => TaffyStyleParser.ParseInlineStyle(e.value));
     }

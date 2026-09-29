@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <!--
+        Rendered by the "Layout" tab of the dev playground (Window_Playground). Exercises every element
+        the XML parser currently knows about (div, text, button), StyleMapDef classes, inline styles,
+        nesting, and explicit ids inside repeated structures.
+    -->
+    <Void.LayoutDef>
+        <defName>Void_Playground</defName>
+        <layout class="flex flex-col gap-3 w-full">
+
+            <!-- Text: class-driven font sizes and an inline override. -->
+            <div class="flex flex-col gap-1">
+                <text class="text-lg">Text from XML</text>
+                <text class="text-base">Base font via the text-base class.</text>
+                <text class="text-xs">Tiny font via the text-xs class.</text>
+                <text style="font-size: medium">Medium font via an inline style.</text>
+            </div>
+
+            <!-- Buttons: size and variant attributes, one row per size. -->
+            <div class="flex flex-col gap-2">
+                <text class="text-lg">Buttons</text>
+                <div class="flex flex-row items-center gap-2">
+                    <button size="small">Small</button>
+                    <button size="small" variant="ghost">Small ghost</button>
+                </div>
+                <div class="flex flex-row items-center gap-2">
+                    <button>Default</button>
+                    <button variant="ghost">Default ghost</button>
+                    <button disabled="true">Disabled</button>
+                </div>
+                <div class="flex flex-row items-center gap-2">
+                    <button size="large">Large</button>
+                    <button size="large" variant="ghost">Large ghost</button>
+                </div>
+                <button block="true">Block button stretches to the parent width</button>
+            </div>
+
+            <!-- Layout: justify-between row, a fixed-width column next to a growing one, and padding. -->
+            <div class="flex flex-col gap-2">
+                <text class="text-lg">Layout</text>
+                <div class="flex flex-row justify-between items-center w-full">
+                    <text>Left</text>
+                    <text>Center</text>
+                    <text>Right</text>
+                </div>
+                <div class="flex flex-row gap-4 w-full">
+                    <div class="flex flex-col gap-1 p-2 shrink-0" style="width: 160px">
+                        <text class="text-xs">Fixed 160px column</text>
+                        <button size="small" block="true">Column button</button>
+                    </div>
+                    <div class="flex flex-col gap-1 p-2 grow">
+                        <text class="text-xs">Growing column</text>
+                        <text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Resize the window and this paragraph should wrap to the column width.</text>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid: three equal columns from an inline grid-template-columns. -->
+            <div class="flex flex-col gap-2">
+                <text class="text-lg">Grid</text>
+                <div class="grid gap-2 w-full" style="grid-template-columns: 1fr 1fr 1fr">
+                    <button id="grid-1" size="small">One</button>
+                    <button id="grid-2" size="small">Two</button>
+                    <button id="grid-3" size="small">Three</button>
+                    <button id="grid-4" size="small">Four</button>
+                    <button id="grid-5" size="small">Five</button>
+                </div>
+            </div>
+
+        </layout>
+    </Void.LayoutDef>
+</Defs>

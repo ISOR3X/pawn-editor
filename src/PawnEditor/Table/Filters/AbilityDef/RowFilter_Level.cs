@@ -36,8 +36,8 @@ public class RowFilter_Level : RowFilter<AbilityDef>
             new StyleOverride
             {
                 width = Dimension.Percent(1f),
-                height = UIUtility.ButtonHeight,
-                margin = new Rect<LengthPercentageAuto>(0f, 0f, 0f, GenUI.GapSmall)
+                height = Dimension.Px(UIUtility.ButtonHeight),
+                margin = new TaffyEdges(Dimension.Px(0), Dimension.Px(0), Dimension.Px(GenUI.GapSmall), Dimension.Px(0))
             }
         );
     }

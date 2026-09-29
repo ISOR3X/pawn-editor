@@ -5,7 +5,6 @@ using Verse;
 using Verse.Sound;
 using Void;
 using Void.Components;
-using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -29,7 +28,8 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
         style ??= new StyleOverride();
         style = style.Merge(new StyleOverride
         {
-            width = Dimension.AUTO, justifySelf = AlignItems.Stretch
+            width = Dimension.Auto(),
+            justifySelf = TaffyAlignItems.Stretch
         });
         grid.Button(label, style: style, onClick: onClick);
     }
@@ -43,7 +43,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
-        var contentHeight = Void.Taffy.DivMeasured(inRect,
+        var contentHeight = Void.TaffyLegacy.DivMeasured(inRect,
             b =>
             {
                 if (_selectedCulture != null)
@@ -88,7 +88,7 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
 
                 b.Text(pawn.Name.ToStringFull, color: ColoredText.SubtleGrayColor,
                     style: new StyleOverride
-                        { gridColumn = new Line<GridPlacement>(GridPlacement.Line(1), GridPlacement.Span(2)) });
+                        { gridColumn = new TaffyGridPlacement { start = 1, end = 3 } });
                 GridButton(b, "Generate", _ =>
                     {
                         SoundDefOf.Tick_High.PlayOneShotOnCamera();
@@ -102,14 +102,18 @@ public class FloatWindow_NamePawn(Rect boundWidgetRect, Pawn pawn, Window? owner
                     },
                     new StyleOverride
                     {
-                        gridColumn = new Line<GridPlacement>(GridPlacement.Line(3), GridPlacement.Span(2))
+                        gridColumn = new TaffyGridPlacement { start = 3, end = 5 }
                     });
             },
             new StyleOverride
             {
-                gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
-                display = Display.Grid,
-                gap = Void.Taffy.Gap(GenUI.GapLabel, GenUI.GapTiny),
+                gridTemplateColumns =
+                [
+                    TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(),
+                    TrackSizingFunction.Fr(2)
+                ],
+                display = TaffyDisplay.Grid,
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapLabel), Dimension.Px(GenUI.GapTiny)),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]
             }
         );

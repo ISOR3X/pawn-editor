@@ -6,13 +6,6 @@ namespace Void;
 
 public static class UIUtility
 {
-    public enum ComponentSize
-    {
-        Small = -1,
-        Default = 0,
-        Large = 1
-    }
-
     public const float ScrollBarWidth = 16f;
     public const float ButtonHeight = 30f;
 

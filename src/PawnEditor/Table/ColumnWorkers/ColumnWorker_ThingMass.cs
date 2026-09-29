@@ -5,7 +5,7 @@ using Verse;
 
 namespace PawnEditor;
 
-public class ColumnWorker_ThingMass<T>(TrackSizingFunction trackSize)
+public class ColumnWorker_ThingMass<T>(TaffyTrackSizingFunction trackSize)
     : TextColumnWorker<T>(trackSize, t => GetMass(t).ToStringMass(), "Mass", null, null) where T : Thing
 {
     private static float GetMass(T thing)
