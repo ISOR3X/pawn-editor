@@ -157,71 +157,58 @@ public static class UIUtility
 
     public static void IntField(Rect inRect, ref int value, int min, int max, ref string buffer, bool minMaxButtons = false)
     {
-        int intBuff = -1;
-        if (buffer == null) intBuff = value;
+        var color = GUI.color;
+        buffer ??= value.ToString();
 
         if (minMaxButtons)
             if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalfDouble))
             {
-                if (value >= min + 1)
-                {
-                    value = min;
-                    buffer = null;
-                }
-                else
-                    Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
-
+                value = min;
+                buffer = min.ToString();
                 return;
             }
 
         if (Widgets.ButtonImage(inRect.TakeLeftPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowLeftHalf))
         {
-            if (value >= min + 1)
+            if (value <= min)
             {
-                value--;
-                buffer = null;
-            }
-            else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
-
+                return;
+            }
+            value--;
+            buffer = value.ToString();
             return;
         }
 
         if (minMaxButtons)
             if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalfDouble))
             {
-                if (value <= max - 1)
-                {
-                    value = max;
-                    buffer = null;
-                }
-                else
-                    Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
-
+                value = max;
+                buffer = max.ToString();
                 return;
             }
 
         if (Widgets.ButtonImage(inRect.TakeRightPart(25).ContractedBy(0, 5), TexPawnEditor.ArrowRightHalf))
         {
-            if (value <= max - 1)
+            if (value >= max)
             {
-                value++;
-                buffer = null;
-            }
-            else
                 Messages.Message(new("Reached limit of input", MessageTypeDefOf.RejectInput));
-
+                return;
+            }
+            value++;
+            buffer = value.ToString();
             return;
         }
 
-        Rect fieldRect = inRect.ContractedBy(0f, 4f);
-        Widgets.TextFieldNumeric(fieldRect, ref intBuff, ref buffer);
+        var prev = value;
+        var fieldRect = inRect.ContractedBy(0f, 4f);
+        if (buffer != value.ToString()) 
+            GUI.color = Color.red;
+        Widgets.TextFieldNumeric(fieldRect, ref value, ref buffer);
+        GUI.color = color;
 
-        if (GUI.GetNameOfFocusedControl() != "TextField" + fieldRect.y.ToString("F0") + fieldRect.x.ToString("F0"))
-        {
-            value = Mathf.Clamp(intBuff, min, max);
-            buffer = null;
-        }
+        if (value < min || value > max)
+            value = prev;
     }
 
     public static Rect CellRect(int cell, Rect inRect)
