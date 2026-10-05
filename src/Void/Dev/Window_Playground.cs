@@ -760,35 +760,37 @@ public class Window_Playground : Window
             }, style: Column(4f, 6f), id: $"{key}-card");
     }
 
-    // Columns are built once: their styles are made at construction and reused every frame.
+    // Columns are built once: their cell styles are made on first use and reused every frame.
     private IReadOnlyList<TableColumn<string>>? _tableColumns;
     private string? _tableSelected;
     private int _tableCellsBuilt;
 
     /// <summary>
-    ///     Exercises <see cref="VoidComponents.Table{TRow}" />: one scrolling grid whose header stays pinned, with
-    ///     columns from grid tracks (flexible, fixed and auto), zebra, hover and selection painted per cell, and
-    ///     only the rows in view built. Without a scrollbar the header and rows must still line up.
+    ///     Exercises <see cref="VoidComponents.Table{TRow}" />: a header row above a scrolling body of flex rows,
+    ///     with fill and fixed columns, zebra, hover and selection painted per row, and only the rows in view built.
+    ///     The header must line up with the rows both with and without a scrollbar.
     /// </summary>
     private void TablePlayground(UIBranch builder)
     {
         builder.Text($"Table playground ({_listItems.Count} rows, selected: {_tableSelected ?? "none"})",
             new Style { fontSize = GameFont.Medium });
         builder.Text(
-            "Scroll: the header stays put and the scrollbar starts below it. Click a row, or its button, to select. " +
-            "The button column is sized to its content.",
+            "Scroll: the header stays put and leaves room for the scrollbar. Click a row, or its button, to select. " +
+            "Hover the header while rows are scrolled under it: no row should highlight.",
             new Style { fontSize = GameFont.Tiny, width = Dimension.Percent(1f) });
 
         _tableColumns ??=
         [
-            TableColumn<string>.Flexible("Name", (c, item) =>
+            new TableColumn<string>("Name", (c, item) =>
             {
                 _tableCellsBuilt++;
                 c.Text(item, new Style { wordWrap = false, minWidth = Dimension.Px(0f) });
             }),
-            TableColumn<string>.Fixed(60f, "Length", (c, item) => c.Text(item.Length.ToString())),
-            TableColumn<string>.Auto("", (c, item) => c.Button("Select",
-                size: ComponentSize.Small, onClick: _ => _tableSelected = item))
+            new TableColumn<string>("Length", (c, item) => c.Text(item.Length.ToString()))
+                { Width = TableColumnWidth.Fixed(60f) },
+            new TableColumn<string>("", (c, item) => c.Button("Select",
+                    size: ComponentSize.Small, onClick: _ => _tableSelected = item))
+                { Width = TableColumnWidth.Fixed(70f) }
         ];
 
         _tableCellsBuilt = 0;
@@ -808,8 +810,8 @@ public class Window_Playground : Window
         builder.Table(Array.Empty<string>(), _tableColumns, id: "table-empty");
     }
 
-    // Filtering lives out here: the table gets the filtered list, rebuilt only when the filter changes. Sorting is
-    // handed to the table, which sorts that list (and caches the result) for the column in _tableSorting.
+    // The view is built out here, filtered and then sorted, and only rebuilt when the filter or the sorting
+    // changes. The table just draws it and reports header clicks.
     private static readonly string[] TableKinds = ["Tool", "Food", "Weapon", "Apparel"];
 
     private readonly List<TableThing> _tableThings = Enumerable.Range(1, 60)
@@ -829,25 +831,34 @@ public class Window_Playground : Window
 
         _tableSortColumns ??=
         [
-            TableColumn<TableThing>.Flexible("Name", (c, t) => c.Text(t.Name,
-                    new Style { wordWrap = false, minWidth = Dimension.Px(0f) }),
-                sort: TableColumn<TableThing>.ByText(t => t.Name)),
-            TableColumn<TableThing>.Fixed(80f, "Mass", (c, t) => c.Text(t.Mass.ToString()),
-                sort: TableColumn<TableThing>.By(t => t.Mass)),
-            TableColumn<TableThing>.Fixed(90f, "Kind", (c, t) => c.Text(t.Kind),
-                sort: TableColumn<TableThing>.ByText(t => t.Kind)),
+            new TableColumn<TableThing>("Name",
+                (c, t) => c.Text(t.Name, new Style { wordWrap = false, minWidth = Dimension.Px(0f) }))
+            {
+                Sort = TableColumn<TableThing>.ByText(t => t.Name)
+            },
+            new TableColumn<TableThing>("Mass", (c, t) => c.Text(t.Mass.ToString()))
+            {
+                Width = TableColumnWidth.Fixed(80f),
+                Sort = TableColumn<TableThing>.By(t => t.Mass)
+            },
+            new TableColumn<TableThing>("Kind", (c, t) => c.Text(t.Kind))
+            {
+                Width = TableColumnWidth.Fixed(90f),
+                Sort = TableColumn<TableThing>.ByText(t => t.Kind)
+            },
             // No sort, so its header is a plain label.
-            TableColumn<TableThing>.Auto("", (c, t) => c.Button("Log", size: ComponentSize.Small,
-                onClick: _ => Log.Message(t.Name)))
+            new TableColumn<TableThing>("", (c, t) => c.Button("Log", size: ComponentSize.Small,
+                onClick: _ => Log.Message(t.Name))) { Width = TableColumnWidth.Fixed(50f) }
         ];
 
         if (_tableViewDirty)
         {
             _tableViewDirty = false;
-            _tableView = string.IsNullOrEmpty(_tableFilter)
-                ? [.. _tableThings]
-                : [.. _tableThings.Where(t => t.Name.IndexOf(_tableFilter, StringComparison.OrdinalIgnoreCase) >= 0
-                                              || t.Kind.IndexOf(_tableFilter, StringComparison.OrdinalIgnoreCase) >= 0)];
+            var filtered = string.IsNullOrEmpty(_tableFilter)
+                ? _tableThings
+                : _tableThings.Where(t => t.Name.IndexOf(_tableFilter, StringComparison.OrdinalIgnoreCase) >= 0
+                                          || t.Kind.IndexOf(_tableFilter, StringComparison.OrdinalIgnoreCase) >= 0);
+            _tableView = _tableSorting?.Apply(filtered, _tableSortColumns) ?? [.. filtered];
         }
 
         builder.Div(b =>
@@ -867,7 +878,11 @@ public class Window_Playground : Window
         }, style: Row());
 
         builder.Table(_tableView, _tableSortColumns, maxRowsVisibleAtOnce: 8, rowKey: t => t.Name,
-            sorting: _tableSorting, onSortingChange: s => _tableSorting = s, id: "table-sort");
+            sorting: _tableSorting, onSortingChange: s =>
+            {
+                _tableSorting = s;
+                _tableViewDirty = true;
+            }, id: "table-sort");
     }
 
     private sealed record TableThing(string Name, int Mass, string Kind);
@@ -886,7 +901,10 @@ public class Window_Playground : Window
     ];
 
     private IReadOnlyList<TableColumn<Payment>>? _paymentColumns;
-    private TableSorting? _paymentSorting = new("Email", false);
+
+    // Sorted by Email (column 3) from the start.
+    private TableSorting? _paymentSorting = new(3, false);
+    private List<Payment>? _paymentView;
     private int _refunds;
 
     private void PaymentsTable(UIBranch builder)
@@ -896,28 +914,46 @@ public class Window_Playground : Window
 
         _paymentColumns ??=
         [
-            TableColumn<Payment>.Fixed(60f, "#", (c, p) => c.Text($"#{p.Id}")),
-            TableColumn<Payment>.Fixed(110f, "Date", (c, p) => c.Text(p.Date.ToString("d MMM HH:mm")),
-                sort: TableColumn<Payment>.By(p => p.Date)),
-            TableColumn<Payment>.Fixed(90f, "Status",
-                (c, p) => c.Text(p.Status.ToString(), new Style { color = PaymentColor(p.Status) }),
-                sort: TableColumn<Payment>.By(p => p.Status)),
-            TableColumn<Payment>.Flexible("Email", (c, p) => c.Text(p.Email),
-                sort: TableColumn<Payment>.ByText(p => p.Email),
-                drawHeader: (b, h) => b.Button("Email", h.Sorted switch
-                    {
-                        TableSortDirection.Ascending => PawnColumnWorker.SortingIcon,
-                        TableSortDirection.Descending => PawnColumnWorker.SortingDescendingIcon,
-                        _ => null
-                    }, size: ComponentSize.Small, variant: ButtonVariant.Ghost, onClick: _ => h.ToggleSorting())),
-            TableColumn<Payment>.Fixed(80f, "Amount", (c, p) => c.Text($"{p.Amount:N0} EUR"), RightAligned,
-                TableColumn<Payment>.By(p => p.Amount)),
-            TableColumn<Payment>.Auto("", (c, p) => c.Button("Refund", size: ComponentSize.Small,
-                onClick: _ => _refunds++))
+            new TableColumn<Payment>("#", (c, p) => c.Text($"#{p.Id}")) { Width = TableColumnWidth.Fixed(60f) },
+            new TableColumn<Payment>("Date", (c, p) => c.Text(p.Date.ToString("d MMM HH:mm")))
+            {
+                Width = TableColumnWidth.Fixed(110f),
+                Sort = TableColumn<Payment>.By(p => p.Date)
+            },
+            new TableColumn<Payment>("Status",
+                (c, p) => c.Text(p.Status.ToString(), new Style { color = PaymentColor(p.Status) }))
+            {
+                Width = TableColumnWidth.Fixed(90f),
+                Sort = TableColumn<Payment>.By(p => p.Status)
+            },
+            new TableColumn<Payment>("Email", (c, p) => c.Text(p.Email))
+            {
+                Sort = TableColumn<Payment>.ByText(p => p.Email),
+                DrawHeader = (b, h) => b.Button("Email", h.Sorted switch
+                {
+                    TableSortDirection.Ascending => PawnColumnWorker.SortingIcon,
+                    TableSortDirection.Descending => PawnColumnWorker.SortingDescendingIcon,
+                    _ => null
+                }, size: ComponentSize.Small, variant: ButtonVariant.Ghost, onClick: _ => h.ToggleSorting())
+            },
+            new TableColumn<Payment>("Amount", (c, p) => c.Text($"{p.Amount:N0} EUR"))
+            {
+                Width = TableColumnWidth.Fixed(80f),
+                Style = RightAligned,
+                Sort = TableColumn<Payment>.By(p => p.Amount)
+            },
+            new TableColumn<Payment>("", (c, p) => c.Button("Refund", size: ComponentSize.Small,
+                onClick: _ => _refunds++)) { Width = TableColumnWidth.Fixed(70f) }
         ];
 
-        builder.Table(_payments, _paymentColumns, rowKey: p => p.Id, maxRowsVisibleAtOnce: 8,
-            sorting: _paymentSorting, onSortingChange: s => _paymentSorting = s, id: "table-payments");
+        _paymentView ??= _paymentSorting?.Apply(_payments, _paymentColumns) ?? _payments;
+
+        builder.Table(_paymentView, _paymentColumns, rowKey: p => p.Id, maxRowsVisibleAtOnce: 8,
+            sorting: _paymentSorting, onSortingChange: s =>
+            {
+                _paymentSorting = s;
+                _paymentView = null;
+            }, id: "table-payments");
     }
 
     private static Color PaymentColor(PaymentStatus status)
