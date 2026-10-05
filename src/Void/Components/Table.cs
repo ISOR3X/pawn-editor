@@ -13,10 +13,6 @@ public static partial class VoidComponents
 {
     private const float TableHeaderHeight = UIUtility.ButtonHeight;
 
-    // Wide enough to cover any table; the scroll view clips the part that is not visible.
-    // Workaround until Taffy implements Table (https://github.com/DioxusLabs/taffy/issues/467)
-    private const float TableRowHoverWidth = 100000f;
-
     private static readonly Style TableHeaderTextStyle = new()
     {
         textAnchor = TextAnchor.MiddleLeft,
@@ -25,128 +21,144 @@ public static partial class VoidComponents
     };
 
     // Base of every cell: a flex row, so a bare Text is centred vertically and a Button or Icon keeps its size.
-    // Columns touch (the grid has no gap, so row painting is continuous), hence the padding on the right.
+    // Cells touch (rows have no gap, so row painting is continuous), hence the padding on the right.
     private static readonly Style TableCellBaseStyle = new()
     {
         display = TaffyDisplay.Flex,
         alignItems = TaffyAlignItems.Center,
         gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall)),
         padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(GenUI.GapSmall), Dimension.Px(0f),
-            Dimension.Px(0f)),
+            Dimension.Px(0f))
+    };
+
+    private static readonly Style TableRootStyle = new()
+    {
+        display = TaffyDisplay.Flex,
+        flexDirection = TaffyFlexDirection.Column,
+        width = Dimension.Percent(1f),
+        flexShrink = 0f
+    };
+
+    // The header sits outside the scrolling body, so while the body shows a scrollbar the header leaves the same
+    // gutter free and the columns line up. Both cases set the padding, as Style.Push keeps old values over null.
+    private static readonly StyleCache<bool> TableHeaderStyles = new(scrolls => new Style
+    {
+        display = TaffyDisplay.Flex,
+        height = Dimension.Px(TableHeaderHeight),
+        flexShrink = 0f,
+        padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(scrolls ? Style.ScrollbarGutter : 0f),
+            Dimension.Px(0f), Dimension.Px(0f))
+    });
+
+    // Only scrolls when the rows do not fit, so a short table has no empty scrollbar gutter.
+    private static readonly StyleCache<(float height, bool scrolls)> TableBodyStyles = new(k => new Style
+    {
+        display = TaffyDisplay.Flex,
+        flexDirection = TaffyFlexDirection.Column,
+        height = Dimension.Px(k.height),
+        flexShrink = 0f,
+        overflowX = TaffyOverflow.Hidden,
+        overflowY = k.scrolls ? TaffyOverflow.Scroll : TaffyOverflow.Hidden
+    });
+
+    private static readonly StyleCache<float> TableRowStyles = new(height => new Style
+    {
+        display = TaffyDisplay.Flex,
+        alignItems = TaffyAlignItems.Stretch,
+        height = Dimension.Px(height),
+        flexShrink = 0f
+    });
+
+    // Stands in for the rows that are not rendered.
+    private static readonly StyleCache<float> TableSpacerStyles = new(height => new Style
+    {
+        height = Dimension.Px(height),
+        flexShrink = 0f
+    });
+
+    private static readonly Style TableMessageStyle = new()
+    {
+        textAnchor = TextAnchor.MiddleLeft,
+        color = ColoredText.SubtleGrayColor,
+        wordWrap = false,
+        alignSelf = TaffyAlignItems.Center
+    };
+
+    // Fills the header cell; the arrow is drawn over it, so it does not move the label.
+    private static readonly Style SortableHeaderStyle = new()
+    {
+        display = TaffyDisplay.Flex,
+        alignItems = TaffyAlignItems.Center,
+        alignSelf = TaffyAlignItems.Stretch,
+        flexGrow = 1f,
         minWidth = Dimension.Px(0f)
     };
 
-    private static readonly Style TableStickyStyle = new() { sticky = true };
+    // Cell style per column, made on first use. Keyed weakly on the column itself, so a column made by
+    // `with` gets its own, and nothing is kept alive or stored on the tree.
+    private static readonly ConditionalWeakTable<object, Style> TableCellStyles = new();
 
-    private static readonly StyleCache<int> TableMessageStyles = new(columns => new Style
+    private static readonly List<string> TableCellIds = [];
+
+    private static Style GetTableCellStyle<TRow>(TableColumn<TRow> column)
     {
-        gridColumn = new TaffyGridPlacement { span = (ushort)columns },
-        textAnchor = TextAnchor.MiddleLeft,
-        color = ColoredText.SubtleGrayColor,
-        wordWrap = false
-    });
+        if (TableCellStyles.TryGetValue(column, out var style)) return style;
 
-    // Stands in for the rows that are not rendered: all columns wide and as many rows tall as it replaces.
-    private static readonly StyleCache<(int columns, int rows)> TableSpacerStyles = new(k => new Style
-    {
-        gridColumn = new TaffyGridPlacement { span = (ushort)k.columns },
-        gridRow = new TaffyGridPlacement { span = (ushort)k.rows }
-    });
-
-    private static readonly List<string> TableCellSuffixes = [];
-
-    // Memo of the styles that depend on a column list. Keyed weakly on the list itself, so a list built
-    // fresh every call just gets collected, and nothing is kept alive or stored on the tree.
-    private static readonly ConditionalWeakTable<object, TableLayout> TableLayouts = [];
-
-    private sealed class TableLayout(TaffyTrackSizingFunction[] tracks)
-    {
-        private readonly Dictionary<(float rowHeight, int visibleRows), Style> _roots = [];
-
-        public int Columns => tracks.Length;
-
-        /// <summary>
-        ///     The scrolling grid. The header is its first row, so header and body share the column tracks.
-        /// </summary>
-        public Style Root(float rowHeight, int visibleRows)
+        var width = column.Width;
+        var sized = new Style
         {
-            if (_roots.TryGetValue((rowHeight, visibleRows), out var style)) return style;
+            width = width.Grow > 0f ? Dimension.Px(0f) : Dimension.Px(width.Px),
+            minWidth = Dimension.Px(0f),
+            flexGrow = width.Grow,
+            flexShrink = width.Grow > 0f ? 1f : 0f
+        }.Merge(TableCellBaseStyle);
 
-            return _roots[(rowHeight, visibleRows)] = new Style
-            {
-                display = TaffyDisplay.Grid,
-                gridTemplateColumns = tracks,
-                gridTemplateRows = [TrackSizingFunction.Px(TableHeaderHeight)],
-                gridAutoRows = [TrackSizingFunction.Px(rowHeight)],
-                width = Dimension.Percent(1f),
-                height = Dimension.Px(TableHeaderHeight + visibleRows * rowHeight),
-                flexShrink = 0f,
-                overflowX = TaffyOverflow.Hidden,
-                overflowY = TaffyOverflow.Scroll
-            };
-        }
+        style = column.Style?.Merge(sized) ?? sized;
+        TableCellStyles.Add(column, style);
+        return style;
     }
 
-    private static TableLayout GetTableLayout<TRow>(IReadOnlyList<TableColumn<TRow>> columns)
+    // Cells are keyed by column under their row, so a cell keeps its node (and any state) while its row scrolls.
+    private static string TableCellId(int column)
     {
-        if (TableLayouts.TryGetValue(columns, out var layout)) return layout;
-
-        var tracks = new TaffyTrackSizingFunction[columns.Count];
-        for (var i = 0; i < tracks.Length; i++) tracks[i] = columns[i].Track;
-
-        layout = new TableLayout(tracks);
-        TableLayouts.Add(columns, layout);
-        return layout;
-    }
-
-    // Cell keys are the row key plus this, so a cell keeps its node (and any state) while its row scrolls.
-    private static string TableCellSuffix(int column)
-    {
-        for (var i = TableCellSuffixes.Count; i <= column; i++) TableCellSuffixes.Add(":" + i);
-        return TableCellSuffixes[column];
+        for (var i = TableCellIds.Count; i <= column; i++) TableCellIds.Add("c" + i);
+        return TableCellIds[column];
     }
 
     /// <summary>
-    ///     Paints one cell's slice of its row: selection or zebra, and hover. A row has no node of its own, so every
-    ///     cell does this for itself, and hover looks at the row's whole band instead of only the cell.
+    ///     How wide a column is. Every column declares it, so the header and each row, which are separate flex
+    ///     rows, line up without measuring each other, and nothing moves as rows scroll in.
     /// </summary>
-    private static void DrawTableCell<TRow>(Rect r, int index, TRow item, Func<TRow, bool>? highlightRow,
-        Action<TRow>? onRowClick)
+    public readonly record struct TableColumnWidth(float Px, float Grow)
     {
-        if (highlightRow?.Invoke(item) ?? false) Widgets.DrawHighlightSelected(r);
-        else if (index % 2 == 1) Widgets.DrawLightHighlight(r);
+        /// <summary>
+        ///     A fixed width in pixels.
+        /// </summary>
+        public static TableColumnWidth Fixed(float px) => new(px, 0f);
 
-        if (Mouse.IsOver(new Rect(0f, r.y, TableRowHoverWidth, r.height))) Widgets.DrawHighlight(r);
-
-        // Only the cell under the mouse reports the click, so a row fires once.
-        if (onRowClick != null
-            && Event.current.type == EventType.MouseDown
-            && Event.current.button == 0
-            && Mouse.IsOver(r))
-            onRowClick(item);
+        /// <summary>
+        ///     A share of the space left over by the fixed columns, in proportion to <paramref name="grow" />.
+        /// </summary>
+        public static TableColumnWidth Fill(float grow = 1f) => new(0f, grow);
     }
 
     /// <summary>
-    ///     A table column. <see cref="Track" /> is its width in the table's grid, so header and body cells line up
-    ///     whatever they contain. Build columns once and keep them (a static field, say): the styles are made once
-    ///     and used as-is every frame.
-    ///     Prefer <see cref="Fixed" />, <see cref="Flexible" /> and <see cref="Auto" />.
+    ///     A table column. Build columns once and keep them (a static field, say): the cell style is made on
+    ///     first use and reused every frame.
     /// </summary>
-    public sealed record TableColumn<TRow>(string Header, Style Style, Action<UIBranch, TRow> Cell)
+    public sealed record TableColumn<TRow>(string Header, Action<UIBranch, TRow> Cell)
     {
-        /// <summary>
-        ///     The column's grid track. Auto when not set.
-        /// </summary>
-        public TaffyTrackSizingFunction Track { get; init; } = TrackSizingFunction.AutoTrack();
+        public TableColumnWidth Width { get; init; } = TableColumnWidth.Fill();
 
         /// <summary>
-        ///     <see cref="Style" /> of the header cell, which is pinned while the body scrolls.
+        ///     Merged over the cell's base and width. Used for the header cell too, so alignment carries over.
         /// </summary>
-        public Style HeaderStyle { get; } = Style.Merge(TableStickyStyle);
+        public Style? Style { get; init; }
 
         /// <summary>
-        ///     How to order rows by this column. Optional: with it, and a table given <c>sorting</c> and
-        ///     <c>onSortingChange</c>, the header sorts. Sorted columns need distinct header text, which is their id.
+        ///     How to order rows by this column. With it, and a table given <c>onSortingChange</c>, the header
+        ///     sorts. The table only shows and reports the sorting: order the rows with
+        ///     <see cref="TableSorting.Apply{TRow}" />.
         /// </summary>
         public Comparison<TRow>? Sort { get; init; }
 
@@ -157,7 +169,7 @@ public static partial class VoidComponents
 
         // These two are deliberately not a generic By<TKey>. EditCompileReload (Debug builds) emits a broken
         // ECR.Ptrs field reference for a generic method inside a generic type, and Mono hard-crashes when it
-        // first compiles it. Boxing a key costs nothing here: the sorted list is cached by the caller.
+        // first compiles it. Boxing a key costs nothing here: rows are only sorted when the view is rebuilt.
 
         /// <summary>
         ///     Builds a <see cref="Sort" /> from a key. Any <see cref="IComparable" /> works, nulls first.
@@ -182,69 +194,80 @@ public static partial class VoidComponents
         {
             return (a, b) => string.Compare(key(a), key(b), comparison);
         }
+    }
 
+    /// <summary>
+    ///     The column rows are sorted by (its index) and the direction. The caller owns it, like
+    ///     <c>v-model:sorting</c>: the table shows it in the headers and reports changes, but never sorts.
+    /// </summary>
+    public readonly record struct TableSorting(int Column, bool Descending)
+    {
         /// <summary>
-        ///     A column of a fixed width in pixels.
+        ///     <paramref name="rows" /> as a new list in this order, stable. Call it where the view is rebuilt
+        ///     (after filtering, say), not every frame.
         /// </summary>
-        public static TableColumn<TRow> Fixed(float width, string header, Action<UIBranch, TRow> cell,
-            Style? style = null, Comparison<TRow>? sort = null, Action<UIBranch, TableHeader>? drawHeader = null)
+        public List<TRow> Apply<TRow>(IEnumerable<TRow> rows, IReadOnlyList<TableColumn<TRow>> columns)
         {
-            return new TableColumn<TRow>(header, (style ?? new Style()).Merge(TableCellBaseStyle), cell)
-            {
-                Track = TrackSizingFunction.Px(width),
-                Sort = sort,
-                DrawHeader = drawHeader
-            };
+            if (columns[Column].Sort is not { } sort) return [.. rows];
+
+            var comparer = Comparer<TRow>.Create(sort);
+            return Descending ? [.. rows.OrderByDescending(r => r, comparer)] : [.. rows.OrderBy(r => r, comparer)];
         }
+    }
+
+    public enum TableSortDirection
+    {
+        None,
+        Ascending,
+        Descending
+    }
+
+    /// <summary>
+    ///     What a column's <see cref="TableColumn{TRow}.DrawHeader" /> sees: its label, whether and how it is
+    ///     sorted, and a way to sort. Made fresh every frame, so the column itself stays a static definition.
+    /// </summary>
+    public readonly struct TableHeader(string label, int column, TableSorting? sorting,
+        Action<TableSorting?>? onSortingChange)
+    {
+        public string Label => label;
 
         /// <summary>
-        ///     A column that takes the space left over by the others. Several flexible columns share it in
-        ///     proportion to <paramref name="grow" />. Its width does not depend on its content.
+        ///     Whether clicking sorts: the column has a sort and the table was given <c>onSortingChange</c>.
         /// </summary>
-        public static TableColumn<TRow> Flexible(string header, Action<UIBranch, TRow> cell, float grow = 1f,
-            Style? style = null, Comparison<TRow>? sort = null, Action<UIBranch, TableHeader>? drawHeader = null)
-        {
-            // minmax(0, Nfr) instead of the default minmax(auto, Nfr): with only some rows rendered, the auto
-            // minimum would resize the column as different content scrolls into view.
-            return new TableColumn<TRow>(header, (style ?? new Style()).Merge(TableCellBaseStyle), cell)
-            {
-                Track = TrackSizingFunction.MinMax(Dimension.Px(0f), Dimension.Fr(grow)),
-                Sort = sort,
-                DrawHeader = drawHeader
-            };
-        }
+        public bool Sortable => onSortingChange != null;
+
+        public TableSortDirection Sorted =>
+            sorting is { } s && s.Column == column
+                ? s.Descending ? TableSortDirection.Descending : TableSortDirection.Ascending
+                : TableSortDirection.None;
 
         /// <summary>
-        ///     A column as wide as its widest rendered cell, such as one holding a button. Only the rows that are
-        ///     rendered count, so with different content per row the width can change as rows scroll in.
+        ///     Cycles ascending, descending, off (descending, ascending, off when <paramref name="descendingFirst" />).
+        ///     A click on another column starts a new cycle.
         /// </summary>
-        public static TableColumn<TRow> Auto(string header, Action<UIBranch, TRow> cell, Style? style = null,
-            Comparison<TRow>? sort = null, Action<UIBranch, TableHeader>? drawHeader = null)
+        public void ToggleSorting(bool descendingFirst = false)
         {
-            return new TableColumn<TRow>(header, (style ?? new Style()).Merge(TableCellBaseStyle), cell)
-            {
-                Track = TrackSizingFunction.AutoTrack(),
-                Sort = sort,
-                DrawHeader = drawHeader
-            };
+            if (onSortingChange == null) return;
+
+            if (sorting is not { } s || s.Column != column)
+                onSortingChange(new TableSorting(column, descendingFirst));
+            else
+                onSortingChange(s.Descending == descendingFirst ? new TableSorting(column, !descendingFirst) : null);
         }
     }
 
     extension(UIBranch branch)
     {
         /// <summary>
-        ///     Table: one scrolling grid. The header cells are its first row, pinned with <see cref="Style.sticky" />
-        ///     so only the body scrolls, and the cells of every row follow in row order, so all of them share the
-        ///     column tracks. Rows have a fixed <paramref name="rowHeight" /> and are virtualized: only those in
-        ///     view (plus <paramref name="overscan" />) exist, with a spacer standing in for the rest, and they are
-        ///     destroyed when scrolled out, so cells should not carry state that <paramref name="rowKey" /> does not
-        ///     identify. Rows have no node of their own: each cell paints its slice of the zebra, hover and
+        ///     Table: a header row above a scrolling body of rows. Every row is a flex row whose cells take their
+        ///     width from <see cref="TableColumn{TRow}.Width" />, so header and rows line up. Rows have a fixed
+        ///     <paramref name="rowHeight" /> and are virtualized: only those in view (plus <paramref name="overscan" />)
+        ///     exist, with spacers standing in for the rest, and they are destroyed when scrolled out, so cells should
+        ///     not carry state that <paramref name="rowKey" /> does not identify. Each row paints its zebra, hover and
         ///     selection.
-        ///     Sorting is optional: with <paramref name="sorting" /> and <paramref name="onSortingChange" />, headers of
-        ///     columns that have a <see cref="TableColumn{TRow}.Sort" /> can be clicked and the rows are sorted here, in
-        ///     the order of <paramref name="sorting" />. Like <c>v-model:sorting</c> the value is the caller's, and each
-        ///     change is reported, never stored. Set <paramref name="manualSorting" /> to sort the rows yourself and use
-        ///     the sorting only for the headers.
+        ///     Sorting is optional: with <paramref name="onSortingChange" />, headers of columns that have a
+        ///     <see cref="TableColumn{TRow}.Sort" /> can be clicked. <paramref name="rows" /> are drawn in the order
+        ///     given; sort them yourself with <see cref="TableSorting.Apply{TRow}" />.
         ///     <paramref name="onRowClick" /> fires on mouse-down without consuming the event, so a button
         ///     inside a cell will fire as well.
         /// </summary>
@@ -259,7 +282,6 @@ public static partial class VoidComponents
             int overscan = 2,
             TableSorting? sorting = null,
             Action<TableSorting?>? onSortingChange = null,
-            bool manualSorting = false,
             Style? style = null,
             string? id = null,
             [CallerFilePath] string? file = null,
@@ -267,184 +289,99 @@ public static partial class VoidComponents
         {
             var key = UIBranch.ResolveKey(id, file, line);
 
-            var layout = GetTableLayout(columns);
-            var view = manualSorting || onSortingChange == null ? rows : SortTableRows(rows, columns, sorting);
-            var count = view.Count;
+            var count = rows.Count;
             var visibleRows = Mathf.Clamp(count, 1, maxRowsVisibleAtOnce ?? Math.Max(count, 1));
-            var root = layout.Root(rowHeight, visibleRows);
+            var scrolls = count > visibleRows;
 
-            branch.Div(grid =>
+            branch.Div(table =>
             {
-                for (var c = 0; c < columns.Count; c++)
-                {
-                    var column = columns[c];
-                    grid.Div(cell => DrawTableHeader(cell, column, sorting, onSortingChange),
-                        style: column.HeaderStyle, id: column.Header);
-                }
-
-                if (count == 0)
-                {
-                    grid.Text("No results available.", TableMessageStyles.Get(layout.Columns), "empty");
-                    return;
-                }
-
-                // Written by DrawNode during the previous pass; on the very first build the declared
-                // height is exact. pos is the scroll offset of the body, which starts below the header.
-                var scroll = grid.GetState<ScrollState>("scroll");
-                var viewTop = scroll?.pos.y ?? 0f;
-                var viewHeight = scroll is { VisibleRect.height: > 0f } ? scroll.VisibleRect.height : visibleRows * rowHeight;
-
-                var first = Mathf.Max(0, Mathf.FloorToInt(viewTop / rowHeight) - overscan);
-                var last = Mathf.Min(count - 1, Mathf.CeilToInt((viewTop + viewHeight) / rowHeight) + overscan);
-
-                if (first > 0) grid.Div(style: TableSpacerStyles.Get((layout.Columns, first)), id: "top");
-
-                for (var i = first; i <= last; i++)
-                {
-                    var item = view[i];
-                    var index = i;
-                    var rowId = rowKey?.Invoke(item) ?? i.ToString();
-
-                    // One painter per row, shared by its cells.
-                    Action<Rect> paint = r => DrawTableCell(r, index, item, highlightRow, onRowClick);
-
-                    for (var c = 0; c < columns.Count; c++)
+                table.Div(header =>
                     {
-                        var column = columns[c];
-                        grid.Div(cell => column.Cell(cell, item), draw: paint, style: column.Style,
-                            id: rowId + TableCellSuffix(c));
-                    }
-                }
+                        for (var c = 0; c < columns.Count; c++)
+                        {
+                            var column = columns[c];
+                            var info = new TableHeader(column.Header, c, sorting,
+                                column.Sort != null ? onSortingChange : null);
+                            header.Div(cell => DrawTableHeader(cell, column, info),
+                                style: GetTableCellStyle(column), id: TableCellId(c));
+                        }
+                    }, draw: r => Widgets.DrawLineHorizontal(r.x, r.yMax, r.width, PawnTable.BorderColor),
+                    style: TableHeaderStyles.Get(scrolls), id: "header");
 
-                if (last < count - 1)
-                    grid.Div(style: TableSpacerStyles.Get((layout.Columns, count - 1 - last)), id: "bottom");
-            }, draw: r => { Widgets.DrawLineHorizontal(r.x, r.y + TableHeaderHeight, r.width, PawnTable.BorderColor); },
-            style: style == null ? root : style.Merge(root), id: key);
-        }
+                table.Div(body =>
+                    {
+                        if (count == 0)
+                        {
+                            body.Div(m => m.Text("No results available.", TableMessageStyle),
+                                style: TableRowStyles.Get(rowHeight), id: "empty");
+                            return;
+                        }
 
-    }
+                        // Written by DrawNode during the previous pass; on the very first build the declared height
+                        // is exact. Only read while scrolling: a body that stopped scrolling keeps its old state.
+                        var scroll = scrolls ? body.GetState<ScrollState>("scroll") : null;
+                        var first = 0;
+                        var last = count - 1;
+                        if (scroll != null)
+                        {
+                            var viewHeight = scroll.VisibleRect.height > 0f
+                                ? scroll.VisibleRect.height
+                                : visibleRows * rowHeight;
+                            first = Mathf.Max(0, Mathf.FloorToInt(scroll.pos.y / rowHeight) - overscan);
+                            last = Mathf.Min(count - 1,
+                                Mathf.CeilToInt((scroll.pos.y + viewHeight) / rowHeight) + overscan);
+                        }
+                        else if (scrolls)
+                        {
+                            last = Mathf.Min(count - 1, visibleRows + overscan);
+                        }
 
-    /// <summary>
-    ///     The column rows are sorted by (its header text) and the direction, like TanStack's <c>[{ id, desc }]</c>
-    ///     for a single column.
-    /// </summary>
-    public readonly record struct TableSorting(string Id, bool Descending);
+                        if (first > 0) body.Div(style: TableSpacerStyles.Get(first * rowHeight), id: "top");
 
-    public enum TableSortDirection
-    {
-        None,
-        Ascending,
-        Descending
-    }
+                        for (var i = first; i <= last; i++)
+                        {
+                            var item = rows[i];
+                            var index = i;
+                            body.Div(row =>
+                                {
+                                    for (var c = 0; c < columns.Count; c++)
+                                    {
+                                        var column = columns[c];
+                                        row.Div(cell => column.Cell(cell, item), style: GetTableCellStyle(column),
+                                            id: TableCellId(c));
+                                    }
+                                }, draw: r => DrawTableRow(r, index, item, scroll, highlightRow, onRowClick),
+                                style: TableRowStyles.Get(rowHeight), id: rowKey?.Invoke(item) ?? i.ToString());
+                        }
 
-    /// <summary>
-    ///     What a column's <see cref="TableColumn{TRow}.DrawHeader" /> sees: its label, whether and how it is sorted,
-    ///     and a way to sort. Made fresh every frame, so the column itself stays a static definition.
-    /// </summary>
-    public readonly struct TableHeader
-    {
-        private readonly string _id;
-        private readonly Action<TableSorting?>? _onSorting;
-        private readonly TableSorting? _sorting;
-
-        public TableHeader(string label, TableSorting? sorting, Action<TableSorting?>? onSorting)
-        {
-            _id = label;
-            _sorting = sorting;
-            _onSorting = onSorting;
-            Label = label;
-        }
-
-        public string Label { get; }
-
-        /// <summary>
-        ///     Whether clicking sorts: the column has a sort and the table was given <c>onSortingChange</c>.
-        /// </summary>
-        public bool Sortable => _onSorting != null;
-
-        public TableSortDirection Sorted =>
-            _sorting is { } s && s.Id == _id
-                ? s.Descending ? TableSortDirection.Descending : TableSortDirection.Ascending
-                : TableSortDirection.None;
-
-        /// <summary>
-        ///     Cycles ascending, descending, off (descending, ascending, off when <paramref name="descendingFirst" />).
-        ///     A click on another column starts a new cycle.
-        /// </summary>
-        public void ToggleSorting(bool descendingFirst = false)
-        {
-            if (_onSorting == null) return;
-
-            if (_sorting is not { } s || s.Id != _id)
-                _onSorting(new TableSorting(_id, descendingFirst));
-            else
-                _onSorting(s.Descending == descendingFirst ? new TableSorting(_id, !descendingFirst) : null);
+                        if (last < count - 1)
+                            body.Div(style: TableSpacerStyles.Get((count - 1 - last) * rowHeight), id: "bottom");
+                    }, style: TableBodyStyles.Get((visibleRows * rowHeight, scrolls)), id: "body");
+            }, style: style == null ? TableRootStyle : style.Merge(TableRootStyle), id: key);
         }
     }
 
-    private sealed class TableSortCache
-    {
-        public int Count;
-        public bool Descending;
-        public string? Id;
-        public object? Result;
-    }
-
-    // Weak, keyed on the caller's rows list: nothing is kept alive, and nothing lives on the tree.
-    private static readonly ConditionalWeakTable<object, TableSortCache> TableSortCaches = new();
-
-    // Fills the header cell; the arrow is drawn over it, so it does not move the label.
-    private static readonly Style SortableHeaderStyle = new()
-    {
-        display = TaffyDisplay.Flex,
-        alignItems = TaffyAlignItems.Center,
-        alignSelf = TaffyAlignItems.Stretch,
-        flexGrow = 1f,
-        minWidth = Dimension.Px(0f)
-    };
-
     /// <summary>
-    ///     <paramref name="rows" /> in the order of <paramref name="sorting" />, stable, and only re-sorted when the
-    ///     list, its count or the sorting changed. A list edited in place keeps its reference and count, so that is
-    ///     not noticed; give the table a new list instead.
+    ///     Paints a row: selection or zebra, and hover; and reports the click.
     /// </summary>
-    private static IReadOnlyList<TRow> SortTableRows<TRow>(IReadOnlyList<TRow> rows,
-        IReadOnlyList<TableColumn<TRow>> columns, TableSorting? sorting)
+    private static void DrawTableRow<TRow>(Rect r, int index, TRow item, ScrollState? scroll,
+        Func<TRow, bool>? highlightRow, Action<TRow>? onRowClick)
     {
-        if (sorting is not { } s) return rows;
+        if (highlightRow?.Invoke(item) ?? false) Widgets.DrawHighlightSelected(r);
+        else if (index % 2 == 1) Widgets.DrawLightHighlight(r);
 
-        Comparison<TRow>? compare = null;
-        for (var i = 0; i < columns.Count; i++)
-            if (columns[i].Header == s.Id)
-            {
-                compare = columns[i].Sort;
-                break;
-            }
+        // Overscan rows lie outside the visible part of the body, under the header say, where the mouse is still
+        // reported in the body's coordinates.
+        if (!Mouse.IsOver(r) || (scroll != null && !scroll.VisibleRect.Contains(Event.current.mousePosition)))
+            return;
 
-        if (compare == null) return rows;
-
-        var cache = TableSortCaches.GetOrCreateValue(rows);
-        if (cache.Result is List<TRow> cached && cache.Count == rows.Count && cache.Id == s.Id
-            && cache.Descending == s.Descending)
-            return cached;
-
-        var comparer = Comparer<TRow>.Create(compare);
-        var sorted = s.Descending
-            ? new List<TRow>(rows.OrderByDescending(r => r, comparer))
-            : new List<TRow>(rows.OrderBy(r => r, comparer));
-
-        cache.Result = sorted;
-        cache.Count = rows.Count;
-        cache.Id = s.Id;
-        cache.Descending = s.Descending;
-        return sorted;
+        Widgets.DrawHighlight(r);
+        if (onRowClick != null && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+            onRowClick(item);
     }
 
-    private static void DrawTableHeader<TRow>(UIBranch cell, TableColumn<TRow> column, TableSorting? sorting,
-        Action<TableSorting?>? onSorting)
+    private static void DrawTableHeader<TRow>(UIBranch cell, TableColumn<TRow> column, TableHeader header)
     {
-        var header = new TableHeader(column.Header, sorting, column.Sort != null ? onSorting : null);
-
         if (column.DrawHeader != null) column.DrawHeader(cell, header);
         else DrawDefaultTableHeader(cell, header);
     }
