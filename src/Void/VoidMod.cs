@@ -58,7 +58,7 @@ public class VoidMod : Mod
     {
         try
         {
-            var mismatch = VoidNative.VerifyAbi();
+            var mismatch = NativeMethods.VerifyAbi();
             if (mismatch != null)
             {
                 Log.Error($"[{ModName}] void_native does not match this build of Void ({mismatch}). UI will not work.");

@@ -1,7 +1,7 @@
 //! Native core of the Void UI library: reconciliation, layout (Taffy) and measurement caching.
 //!
 //! The C API is deliberately small. C# registers styles and measurable content once, then hands over the
-//! whole UI once per frame with [`void_frame`]. Every function returns a status code (see [`status`]);
+//! whole UI once per frame with [`void_frame`]. Every function returns a status code (`STATUS_*`);
 //! details of the last failure are available through [`void_last_error`]. Panics never cross the boundary.
 
 pub mod measure;
@@ -13,18 +13,16 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::{Mutex, MutexGuard};
 
 use measure::{HeightCallback, MeasureDesc, MeasureRegistry};
-use style::{StyleDesc, StyleRegistry, VDimension, VGridPlacement, VTrack};
+use style::{StyleDesc, StyleRegistry, TaffyDimension, TaffyGridPlacement, TaffyTrackSizingFunction};
 use tree::{FrameResult, NodeOut, NodeRecord, VoidTree};
 
 /// Bumped whenever a shared struct or function signature changes.
 pub const ABI_VERSION: u32 = 1;
 
-pub mod status {
-    pub const OK: i32 = 0;
-    pub const PANIC: i32 = 1;
-    pub const NULL_POINTER: i32 = 2;
-    pub const INVALID: i32 = 3;
-}
+pub const STATUS_OK: i32 = 0;
+pub const STATUS_PANIC: i32 = 1;
+pub const STATUS_NULL_POINTER: i32 = 2;
+pub const STATUS_INVALID: i32 = 3;
 
 #[derive(Default)]
 pub struct Registries {
@@ -54,7 +52,7 @@ thread_local! {
 
 fn guarded(f: impl FnOnce() -> Result<(), (i32, String)>) -> i32 {
     match catch_unwind(AssertUnwindSafe(f)) {
-        Ok(Ok(())) => status::OK,
+        Ok(Ok(())) => STATUS_OK,
         Ok(Err((code, message))) => {
             LAST_ERROR.with(|e| *e.borrow_mut() = message);
             code
@@ -66,17 +64,17 @@ fn guarded(f: impl FnOnce() -> Result<(), (i32, String)>) -> i32 {
                 .or_else(|| payload.downcast_ref::<String>().cloned())
                 .unwrap_or_else(|| "unknown panic".into());
             LAST_ERROR.with(|e| *e.borrow_mut() = format!("panic: {message}"));
-            status::PANIC
+            STATUS_PANIC
         }
     }
 }
 
 fn invalid(message: String) -> (i32, String) {
-    (status::INVALID, message)
+    (STATUS_INVALID, message)
 }
 
 fn null(what: &str) -> (i32, String) {
-    (status::NULL_POINTER, format!("{what} is null"))
+    (STATUS_NULL_POINTER, format!("{what} is null"))
 }
 
 #[repr(C)]
@@ -111,9 +109,9 @@ pub unsafe extern "C" fn void_abi_sizes(out: *mut AbiSizes) -> i32 {
             frame_result: size_of::<FrameResult>() as u32,
             style_desc: size_of::<StyleDesc>() as u32,
             measure_desc: size_of::<MeasureDesc>() as u32,
-            dimension: size_of::<VDimension>() as u32,
-            track: size_of::<VTrack>() as u32,
-            grid_placement: size_of::<VGridPlacement>() as u32,
+            dimension: size_of::<TaffyDimension>() as u32,
+            track: size_of::<TaffyTrackSizingFunction>() as u32,
+            grid_placement: size_of::<TaffyGridPlacement>() as u32,
         };
         Ok(())
     })

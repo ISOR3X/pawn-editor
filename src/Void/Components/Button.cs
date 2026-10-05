@@ -88,7 +88,7 @@ public static partial class VoidComponents
 
     extension(UIBranch branch)
     {
-        public UINode Button(string? label = null, Texture2D? icon = null,
+        public TaffyNode Button(string? label = null, Texture2D? icon = null,
             Color? iconColor = null, Action<Rect>? onClick = null, Action<Rect>? onHover = null,
             bool block = false, bool disabled = false, ComponentSize size = ComponentSize.Default,
             ButtonVariant variant = ButtonVariant.Solid,

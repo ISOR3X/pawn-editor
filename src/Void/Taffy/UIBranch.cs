@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Taffy;
 using UnityEngine;
 
 namespace Void.Taffy;
@@ -6,20 +7,12 @@ namespace Void.Taffy;
 /// <summary>
 ///     Builder for creating a branch in a tree.
 /// </summary>
-public class UIBranch
+public class UIBranch(UITree tree, TaffyNode parentBranch, RenderContext? context = null)
 {
     private static readonly Dictionary<(string file, int line), string> CallerKeys = [];
-    private readonly ulong _key;
-    private readonly UITree _tree;
-
-    internal UIBranch(UITree tree, ulong key, RenderContext? context = null)
-    {
-        _tree = tree;
-        _key = key;
-        Context = context ?? RenderContext.Empty;
-    }
-
-    private RenderContext Context { get; }
+    private readonly TaffyNode _parentBranch = parentBranch;
+    private readonly UITree _tree = tree;
+    private RenderContext Context { get; } = context ?? RenderContext.Empty;
 
     /// <summary>
     ///     State stored on the branch node, saved across frames.
@@ -27,7 +20,7 @@ public class UIBranch
     /// </summary>
     public T UpsertState<T>(string key, Func<T> init) where T : class
     {
-        return _tree.UpsertState(_key, key, init);
+        return _tree.UpsertState(_parentBranch, key, init);
     }
 
     /// <summary>
@@ -35,7 +28,7 @@ public class UIBranch
     /// </summary>
     public T? GetState<T>(string key) where T : class
     {
-        return _tree.GetState<T>(_key, key);
+        return _tree.GetState<T>(_parentBranch, key);
     }
 
     /// <summary>
@@ -44,7 +37,7 @@ public class UIBranch
     /// </summary>
     public void Provide<T>(string key, T value, Action<UIBranch> builder)
     {
-        builder(new UIBranch(_tree, _key, Context.With(key, value)));
+        builder(new UIBranch(_tree, _parentBranch, Context.With(key, value)));
     }
 
     /// <summary>
@@ -64,19 +57,27 @@ public class UIBranch
     }
 
 
-    public UINode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null,
+    public TaffyNode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null,
         Style? style = null, string? id = null, [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
     {
-        var key = _tree.ResolveChildKey(_key, ResolveKey(id, file, line));
-        var index = _tree.Open(key, draw, context, style);
+        var key = ResolveKey(id, file, line);
+        var node = _tree.UpsertBranch(_parentBranch, key, draw, context, style);
 
-        // Children append themselves after this node; Close records where its subtree ends.
-        // Context rides along to children; the tree itself never stores it.
-        builder?.Invoke(new UIBranch(_tree, key, Context));
+        if (builder != null)
+        {
+            // Create a new branch to which the children can attach.
+            // Context rides along to children; the tree itself never stores it.
+            var childBranch = new UIBranch(_tree, node, Context);
+            builder?.Invoke(childBranch);
+        }
 
-        _tree.Close(index);
-        return new UINode(key);
+        // After the builder is called, all (this frame's) children should be attached.
+        // Compare them to last frame and update the snapshot accordingly.
+        // Also marks the native tree dirty when differences are found.
+        _tree.CompareChildren(node);
+
+        return node;
     }
 
     /// <summary>

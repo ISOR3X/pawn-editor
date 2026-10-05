@@ -6,7 +6,7 @@ use taffy::style::Overflow;
 
 use crate::measure::{self, MeasureDesc};
 use crate::style::StyleRegistry;
-use crate::tree::{FrameResult, NodeOut, NodeRecord, VoidTree, out_flags};
+use crate::tree::{FrameResult, NODE_SCROLL_Y, NodeOut, NodeRecord, VoidTree};
 use crate::{Registries, measure::MeasureRegistry};
 
 /// Test node: key, style handle, measure handle, children.
@@ -167,7 +167,7 @@ fn scroll_container_children_are_relative_to_its_content() {
         500.0,
     );
 
-    assert_eq!(out[2].flags, out_flags::SCROLL_Y);
+    assert_eq!(out[2].flags, NODE_SCROLL_Y);
     assert_eq!((out[2].x, out[2].y), (10.0, 27.0));
     assert_eq!(out[2].content_height, 60.0);
     assert_eq!(out[2].scrollbar_width, 16.0);

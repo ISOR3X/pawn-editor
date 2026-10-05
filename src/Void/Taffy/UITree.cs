@@ -1,6 +1,6 @@
+using Taffy;
 using UnityEngine;
 using Verse;
-using Void.Native;
 
 namespace Void.Taffy;
 
@@ -25,92 +25,120 @@ public record LeafContext
 }
 
 /// <summary>
-///     A node as seen from C#: its key, which stays the same across frames as long as the node keeps its place.
+///     Stores relevant data across frames about a branch on the C# side to prevent a large amount of FFI calls.
+///     Used for diff-checking and storing the actual draw callback.
+///     Note that context is tracked internally in the TaffyTree as its also required for content measuring.
 /// </summary>
-public readonly record struct UINode(ulong Key);
+public class BranchRecord
+{
+    /// <summary>
+    ///     The child branches/ leaves of a branch
+    /// </summary>
+    public Dictionary<string, TaffyNode> childrenByKey = [];
 
-/// <summary>
-///     A tree of UI nodes, laid out by <c>void_native</c>.
-///     <para>
-///         <see cref="Build" /> only writes a description of the frame: one <see cref="NodeRecord" /> per node, in
-///         pre-order, with the draw callback at the same index in <see cref="_draws" />. <see cref="Draw" /> hands
-///         the whole description over in a single native call, which diffs it against the previous frame, lays it
-///         out when anything changed and fills <see cref="_out" /> with one rect per record. Drawing is then a flat
-///         loop over the three arrays.
-///     </para>
-/// </summary>
+    /// <summary>
+    ///     For keeping track of state of children across frames.
+    /// </summary>
+    public Dictionary<string, object>? childState;
+
+    public Action<Rect>? draw;
+
+    /// <summary>
+    ///     The pending children by key. This is build up every frame and cleared at the end.
+    ///     It is used to check if the children have changed across frames.
+    /// </summary>
+    public Dictionary<string, TaffyNode> pendingChildrenByKey = [];
+
+    /// <summary>
+    ///     Track the previous style of a branch so we can diff-check it.
+    /// </summary>
+    public Style? prevStyle;
+}
+
 public class UITree : IDisposable
 {
-    private const ulong RootKey = 0x56_4F_49_44_52_4F_4F_54; // "VOIDROOT"
-
-    private readonly List<int> _openScrollViews = [];
+    /// <summary>
+    ///     Records keyed by their branch node.
+    /// </summary>
+    private readonly Dictionary<TaffyNode, BranchRecord> _branchRecordsByNode = [];
 
     /// <summary>
-    ///     Keys of the states each node owns, so they can be dropped when the node disappears.
+    ///     The node (id) of the root branch.
     /// </summary>
-    private readonly Dictionary<ulong, HashSet<ulong>> _ownedState = [];
+    private readonly TaffyNode _rootBranchNode;
 
     /// <summary>
-    ///     Component state, keyed by <see cref="NodeKey.Child" /> of the owning node and the state key. A component
-    ///     that stores state on its parent under its own id therefore uses its node's key, and loses the state
-    ///     together with the node, as before.
+    ///     The native tree. We use a private version of the tree instead of subclassing it to control the public API.
     /// </summary>
-    private readonly Dictionary<ulong, object> _state = [];
+    private readonly TaffyTree<LeafContext> _tree = new();
 
-    /// <summary>Keys handed out this frame, used to give repeated sibling keys a unique suffix.</summary>
-    private readonly HashSet<ulong> _usedKeys = [];
+    /// <summary>
+    // Tracks whether anything changed since last frame
+    /// </summary>
+    private bool _dirtyThisFrame = true;
 
-    private int _count;
+    /// <summary>
+    ///     For some reason <c>DoWindowContents</c> calls <c>UITree.Draw</c> even after <c>PostClose</c> is called.
+    ///     This is a fix for that to properly dispose the tree.
+    /// </summary>
     private bool _disposed;
-    private Action<Rect>?[] _draws = new Action<Rect>?[64];
-    private IntPtr _native;
-    private NodeOut[] _out = new NodeOut[64];
-    private NodeRecord[] _records = new NodeRecord[64];
-    private ulong[] _removed = new ulong[64];
+
+    private float _lastAvailableHeight = -1f;
+    private float _lastAvailableWidth = -1f;
 
     public UITree()
     {
-        _native = VoidNative.void_tree_new();
+        _rootBranchNode = _tree.NewNode();
+        _branchRecordsByNode[_rootBranchNode] = new BranchRecord();
     }
 
     public void Dispose()
     {
         if (_disposed) return;
         _disposed = true;
-        VoidNative.void_tree_free(_native);
-        _native = IntPtr.Zero;
+        _tree.Dispose();
     }
 
     public void Build(Action<UIBranch> builder, Style? style = null)
     {
         if (_disposed) return;
 
-        var previousCount = _count;
-        _count = 0;
-        _usedKeys.Clear();
-        _usedKeys.Add(RootKey);
+        var branch = new UIBranch(this, _rootBranchNode);
+        var rootRecord = _branchRecordsByNode[_rootBranchNode];
 
-        var root = Open(RootKey, null, null, style);
-        try
+        // If the styles are not equal, and the new style isn't null, update the native style.
+        if (!Utility.NullableEquals(style, rootRecord.prevStyle, false) && style != null)
         {
-            builder(new UIBranch(this, RootKey));
-        }
-        catch
-        {
-            // A half-built frame has unclosed nodes; draw nothing rather than send it.
-            _count = 0;
-            throw;
+            _dirtyThisFrame = true;
+            var _branchStyle = _tree.GetStyle(_rootBranchNode);
+            style.Push(_branchStyle);
+            _tree.SetStyle(_rootBranchNode, _branchStyle);
         }
 
-        Close(root);
+        // Update the style history regardless of if its null or not.
+        rootRecord.prevStyle = style;
 
-        // Drop callbacks left over from a larger previous frame so they can be collected.
-        if (previousCount > _count) Array.Clear(_draws, _count, previousCount - _count);
+        builder(branch);
+        CompareChildren(_rootBranchNode);
     }
 
     public void Draw(Rect rect)
     {
-        Frame(rect, rect.height);
+        if (_disposed) return;
+
+        var sizeChanged = !Mathf.Approximately(rect.width, _lastAvailableWidth)
+                          || !Mathf.Approximately(rect.height, _lastAvailableHeight);
+
+        if (_dirtyThisFrame || sizeChanged)
+        {
+            _tree.ComputeLayoutWithMeasure(_rootBranchNode, rect.width, rect.height, DefaultMeasure);
+
+            _dirtyThisFrame = false;
+            _lastAvailableWidth = rect.width;
+            _lastAvailableHeight = rect.height;
+        }
+
+        DrawNode(_rootBranchNode, rect.position);
     }
 
     /// <summary>
@@ -119,192 +147,274 @@ public class UITree : IDisposable
     /// </summary>
     public float DrawMeasured(Rect rect)
     {
-        return Frame(rect, float.PositiveInfinity);
-    }
+        if (_disposed) return 0f;
 
-    private unsafe float Frame(Rect rect, float availableHeight)
-    {
-        if (_disposed || _count == 0) return 0f;
+        // Mathf.Approximately(inf, inf) is false, so the height term is an explicit infinity check.
+        var sizeChanged = !Mathf.Approximately(rect.width, _lastAvailableWidth)
+                          || !float.IsPositiveInfinity(_lastAvailableHeight);
 
-        if (_out.Length < _count) _out = new NodeOut[_records.Length];
-
-        FrameResult result;
-        fixed (NodeRecord* records = _records)
-        fixed (NodeOut* output = _out)
+        if (_dirtyThisFrame || sizeChanged)
         {
-            VoidNative.Check(
-                VoidNative.void_frame(_native, records, (uint)_count, rect.width, availableHeight, rect.x, rect.y,
-                    output, &result), nameof(VoidNative.void_frame));
+            _tree.ComputeLayoutWithMeasure(_rootBranchNode, rect.width, float.PositiveInfinity, DefaultMeasure);
+
+            _dirtyThisFrame = false;
+            _lastAvailableWidth = rect.width;
+            _lastAvailableHeight = float.PositiveInfinity;
         }
 
-        if (result.removedCount > 0) DropRemovedState();
-
-        DrawNodes();
-        return result.rootHeight;
+        DrawNode(_rootBranchNode, rect.position);
+        return _tree.GetLayout(_rootBranchNode).height;
     }
 
-    private void DrawNodes()
+    private void DrawNode(TaffyNode node, Vector2 origin)
     {
-        var debug = VoidMod.Settings.drawDebug;
-        _openScrollViews.Clear();
+        var layout = _tree.GetLayout(node);
+        var assignedRect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
 
-        // Closes the scroll views even if a draw callback throws, so IMGUI's clip stack stays balanced.
+        if (!_branchRecordsByNode.TryGetValue(node, out var record)) return;
+
+        var scrollX = record.prevStyle?.overflowX == TaffyOverflow.Scroll;
+        var scrollY = record.prevStyle?.overflowY == TaffyOverflow.Scroll;
+        var scrolls = scrollX || scrollY;
+
+        record.draw?.Invoke(assignedRect);
+        if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(assignedRect, Color.red with { a = 0.25f });
+
+        // Scroll behaviour
+        if (scrolls)
+        {
+            var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
+
+            var viewRect = new Rect(0f, 0f,
+                scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
+                scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
+
+            Verse.Widgets.BeginScrollView(assignedRect, ref s.pos, viewRect);
+            s.VisibleRect = new Rect(s.pos.x, s.pos.y, assignedRect.width - layout.scrollbar_width,
+                assignedRect.height - layout.scrollbar_height);
+        }
+
+        // Ensure the scroll view is properly closed if child nodes throw.
         try
         {
-            for (var i = 0; i < _count; i++)
-            {
-                while (_openScrollViews.Count > 0 && i >= _openScrollViews[_openScrollViews.Count - 1])
-                {
-                    Verse.Widgets.EndScrollView();
-                    _openScrollViews.RemoveAt(_openScrollViews.Count - 1);
-                }
+            var childOrigin = scrolls ? Vector2.zero : assignedRect.position;
 
-                var o = _out[i];
-                var rect = new Rect(o.x, o.y, o.width, o.height);
-
-                _draws[i]?.Invoke(rect);
-                if (debug) Verse.Widgets.DrawRectFast(rect, Color.red with { a = 0.25f });
-
-                if ((o.flags & (NodeOut.ScrollX | NodeOut.ScrollY)) == 0) continue;
-
-                var scrollX = (o.flags & NodeOut.ScrollX) != 0;
-                var scrollY = (o.flags & NodeOut.ScrollY) != 0;
-                var s = UpsertState(_records[i].key, "scroll", () => new ScrollState { pos = Vector2.zero });
-
-                var viewRect = new Rect(0f, 0f,
-                    scrollX ? o.contentWidth : o.width - o.scrollbarWidth,
-                    scrollY ? o.contentHeight : o.height - o.scrollbarHeight);
-
-                Verse.Widgets.BeginScrollView(rect, ref s.pos, viewRect);
-                s.VisibleRect = new Rect(s.pos.x, s.pos.y, rect.width - o.scrollbarWidth,
-                    rect.height - o.scrollbarHeight);
-                _openScrollViews.Add((int)_records[i].subtreeEnd);
-            }
+            foreach (var childId in record.childrenByKey.Values)
+                DrawNode(childId, childOrigin);
         }
         finally
         {
-            for (var n = _openScrollViews.Count; n > 0; n--) Verse.Widgets.EndScrollView();
-            _openScrollViews.Clear();
-        }
-    }
-
-    private unsafe void DropRemovedState()
-    {
-        while (true)
-        {
-            uint taken;
-            fixed (ulong* buffer = _removed)
-            {
-                taken = VoidNative.void_take_removed(_native, buffer, (uint)_removed.Length);
-            }
-
-            for (var i = 0; i < taken; i++)
-            {
-                var key = _removed[i];
-                _state.Remove(key);
-                if (!_ownedState.TryGetValue(key, out var owned)) continue;
-                foreach (var stateKey in owned) _state.Remove(stateKey);
-                _ownedState.Remove(key);
-            }
-
-            if (taken < _removed.Length) return;
+            if (scrolls) Verse.Widgets.EndScrollView();
         }
     }
 
     /// <summary>
-    ///     Appends a node to this frame and returns its index. Its children are the nodes appended until the
-    ///     matching <see cref="Close" />.
+    ///     Update or insert new state into the parent node.
+    ///     Note that state must be a reference type.
     /// </summary>
-    internal int Open(ulong key, Action<Rect>? draw, LeafContext? context, Style? style)
+    public T UpsertState<T>(TaffyNode parentNode, string key, Func<T> init) where T : class
     {
-        if (_count == _records.Length)
-        {
-            Array.Resize(ref _records, _records.Length * 2);
-            Array.Resize(ref _draws, _draws.Length * 2);
-        }
+        var parentRecord = _branchRecordsByNode[parentNode];
+        parentRecord.childState ??= [];
 
-        _records[_count] = new NodeRecord
-        {
-            key = key,
-            style = StyleRegistry.Get(style),
-            measure = MeasureRegistry.Get(context)
-        };
-        _draws[_count] = draw;
-        return _count++;
-    }
-
-    internal void Close(int index)
-    {
-        _records[index].subtreeEnd = (uint)_count;
-    }
-
-    /// <summary>
-    ///     The key of a child of <paramref name="parentKey" />. Repeated sibling keys (e.g. a component called in a
-    ///     loop without an id) get a stable suffix in call order, like <c>key#1</c>, <c>key#2</c>.
-    /// </summary>
-    internal ulong ResolveChildKey(ulong parentKey, string siblingKey)
-    {
-        var key = NodeKey.Child(parentKey, siblingKey);
-        if (_usedKeys.Add(key)) return key;
-
-        for (ulong n = 1; ; n++)
-        {
-            var candidate = NodeKey.Mix(key + n);
-            if (_usedKeys.Add(candidate)) return candidate;
-        }
-    }
-
-    /// <summary>
-    ///     Update or insert state owned by <paramref name="ownerKey" />. Note that state must be a reference type.
-    /// </summary>
-    internal T UpsertState<T>(ulong ownerKey, string key, Func<T> init) where T : class
-    {
-        var stateKey = NodeKey.Child(ownerKey, key);
-        if (_state.TryGetValue(stateKey, out var existing)) return (T)existing;
+        if (parentRecord.childState.TryGetValue(key, out var existing)) return (T)existing;
 
         var created = init();
-        _state[stateKey] = created;
-        if (!_ownedState.TryGetValue(ownerKey, out var owned)) _ownedState[ownerKey] = owned = [];
-        owned.Add(stateKey);
+        parentRecord.childState[key] = created;
         return created;
     }
 
-    internal T? GetState<T>(ulong ownerKey, string key) where T : class
+    public T? GetState<T>(TaffyNode parentNode, string key) where T : class
     {
-        return _state.TryGetValue(NodeKey.Child(ownerKey, key), out var existing) ? (T)existing : null;
+        var parentRecord = _branchRecordsByNode[parentNode];
+        parentRecord.childState ??= [];
+
+        if (parentRecord.childState.TryGetValue(key, out var existing)) return (T)existing;
+        else return null;
+    }
+
+    /// <summary>
+    ///     Update or insert a new branch into the parent node.
+    /// </summary>
+    public TaffyNode UpsertBranch(TaffyNode parentNode, string key, Action<Rect>? draw = null,
+        LeafContext? context = null, Style? style = null)
+    {
+        var parentRecord = _branchRecordsByNode[parentNode];
+        key = ResolveSiblingKey(parentRecord, key);
+        var exists = parentRecord.childrenByKey.TryGetValue(key, out var branchNode);
+
+        // Check if the branch exists according to the parent record
+        if (!exists)
+        {
+            // Create a new node and record
+            branchNode = context != null ? _tree.NewLeafWithContext(context) : _tree.NewNode();
+            _branchRecordsByNode[branchNode] = new BranchRecord();
+            _dirtyThisFrame = true;
+
+            // Left detached, and deliberately not recorded in childrenByKey: that dictionary is last
+            // frame's committed set, and CompareChildren diffs it against pendingChildrenByKey.
+            // CompareChildren runs after the builder (UIBranch.Div, or Build for the root) and attaches everything via SetChildren.
+        }
+
+        var branchRecord = _branchRecordsByNode[branchNode];
+
+        // Apply style and context if they have changed and are not null.
+        if (!Utility.NullableEquals(style, branchRecord.prevStyle, false) && style != null)
+        {
+            _dirtyThisFrame = true;
+            var _branchStyle = _tree.GetStyle(branchNode);
+            style.Push(_branchStyle);
+            _tree.SetStyle(branchNode, _branchStyle);
+        }
+
+        if (!Utility.NullableEquals(context, _tree.GetNodeContext(branchNode), false) && context != null)
+        {
+            _dirtyThisFrame = true;
+            _tree.SetNodeContext(branchNode, context);
+        }
+
+        // Always update the branchRecord with the values of the current frame.
+        branchRecord.prevStyle = style;
+        branchRecord.draw = draw;
+
+        parentRecord.pendingChildrenByKey[key] = branchNode;
+
+        return branchNode;
+    }
+
+    /// <summary>
+    ///     Compare the children of the previous and current frame.
+    ///     First compare if the length and order are the same,
+    ///     then check for added/ removed items.
+    ///     If differences are found, free the removed branches.
+    /// </summary>
+    public void CompareChildren(TaffyNode node)
+    {
+        var branchRecord = _branchRecordsByNode[node];
+        var prev = branchRecord.childrenByKey;
+        var pending = branchRecord.pendingChildrenByKey;
+
+        // Early return for leaves and empty branches
+        if (prev.Count == 0 && pending.Count == 0) return;
+
+        if (!SameOrder(prev, pending))
+        {
+            _dirtyThisFrame = true;
+
+            // SetChildren attaches the nodes UpsertBranch left detached.
+            _tree.SetChildren(node, [.. pending.Values]);
+
+            // Remove all branches not present since last frame.
+            foreach (var (key, childNode) in prev)
+                if (!pending.ContainsKey(key))
+                {
+                    RemoveSubtree(childNode);
+                    branchRecord.childState?.Remove(key);
+                }
+        }
+
+        branchRecord.childrenByKey = pending;
+        branchRecord.pendingChildrenByKey = prev;
+        prev.Clear();
+    }
+
+    /// <summary>
+    ///     Compares this frame's children against last frame's, by key and by order. A false result
+    ///     sends <see cref="CompareChildren" /> through <c>SetChildren</c>, which is what pushes the
+    ///     new order to the native tree -- so a pure reorder is applied, not silently dropped.
+    /// </summary>
+    private static bool SameOrder(Dictionary<string, TaffyNode> a, Dictionary<string, TaffyNode> b)
+    {
+        if (a.Count != b.Count) return false;
+
+        // Struct enumerators, so this walks both without allocating.
+        using var ea = a.Keys.GetEnumerator();
+        using var eb = b.Keys.GetEnumerator();
+        while (ea.MoveNext() && eb.MoveNext())
+            if (ea.Current != eb.Current)
+                return false;
+        return true;
+    }
+
+    private void RemoveSubtree(TaffyNode node)
+    {
+        if (_branchRecordsByNode.TryGetValue(node, out var record))
+        {
+            foreach (var childNode in record.childrenByKey.Values)
+                RemoveSubtree(childNode);
+            _branchRecordsByNode.Remove(node);
+        }
+
+        _tree.RemoveNode(node);
+    }
+
+    /// <summary>
+    /// Append a unique index to the key so branches added from the same line (e.g. through a loop) still get unique values.
+    /// <summary/>
+    private static string ResolveSiblingKey(BranchRecord parent, string baseKey)
+    {
+        if (!parent.pendingChildrenByKey.ContainsKey(baseKey)) return baseKey;
+        for (var n = 1; ; n++)
+        {
+            var candidate = $"{baseKey}#{n}";
+            if (!parent.pendingChildrenByKey.ContainsKey(candidate)) return candidate;
+        }
+    }
+
+    /// <summary>
+    ///     Measure function for nodes with context.
+    ///     This calculates the needed size for items with a yet unknown size.
+    /// <summary/>
+    private static TaffySize DefaultMeasure(
+        TaffyMeasureMode widthMode, float width,
+        TaffyMeasureMode heightMode, float height,
+        LeafContext? context)
+    {
+        if (context is null || context.text == null) return new TaffySize();
+        using (new TextBlock(context.fontSize))
+        {
+            // No wrapping
+            if (!context.textWrap)
+            {
+                var sz = Text.CalcSize(context.text);
+                var w = widthMode is TaffyMeasureMode.Exact or TaffyMeasureMode.FitContent
+                    ? Mathf.Min(width, sz.x)
+                    : sz.x;
+                return new TaffySize { width = w, height = sz.y };
+            }
+
+            // Wrapping
+            switch (widthMode)
+            {
+                // Take available width
+                case TaffyMeasureMode.Exact:
+                    return new TaffySize { width = width, height = Text.CalcHeight(context.text, width) };
+                // Take required width
+                case TaffyMeasureMode.FitContent:
+                    {
+                        var w = Mathf.Min(width, Text.CalcSize(context.text).x);
+                        return new TaffySize { width = w, height = Text.CalcHeight(context.text, w) };
+                    }
+                case TaffyMeasureMode.MinContent:
+                    {
+                        var minW = context.text.Split(' ').Select(w => Text.CalcSize(w).x).Prepend(0f).Max();
+                        return new TaffySize { width = minW, height = Text.CalcHeight(context.text, minW) };
+                    }
+                default:
+                    {
+                        var sz = Text.CalcSize(context.text);
+                        return new TaffySize { width = sz.x, height = sz.y };
+                    }
+            }
+        }
     }
 }
 
-/// <summary>
-///     Node keys: 64-bit hashes of the path from the root, so the native side can match nodes across frames
-///     without strings.
-/// </summary>
-internal static class NodeKey
+internal static class Utility
 {
-    public static ulong Child(ulong parentKey, string siblingKey)
+    public static bool NullableEquals<T>(T? x, T? y, bool equalIfNull = true)
     {
-        return Mix(Mix(parentKey) ^ Hash(siblingKey));
-    }
-
-    /// <summary>FNV-1a over the UTF-16 code units.</summary>
-    public static ulong Hash(string s)
-    {
-        var h = 14695981039346656037UL;
-        foreach (var c in s)
-        {
-            h ^= c;
-            h *= 1099511628211UL;
-        }
-
-        return h;
-    }
-
-    /// <summary>splitmix64 finalizer.</summary>
-    public static ulong Mix(ulong x)
-    {
-        x += 0x9E3779B97F4A7C15UL;
-        x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9UL;
-        x = (x ^ (x >> 27)) * 0x94D049BB133111EBUL;
-        return x ^ (x >> 31);
+        if (x is null && y is null) return equalIfNull;
+        return EqualityComparer<T>.Default.Equals(x!, y!);
     }
 }

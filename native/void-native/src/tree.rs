@@ -29,10 +29,9 @@ pub struct NodeRecord {
     pub _pad: u32,
 }
 
-pub mod out_flags {
-    pub const SCROLL_X: u32 = 1 << 0;
-    pub const SCROLL_Y: u32 = 1 << 1;
-}
+// Bits of `NodeOut::flags`.
+pub const NODE_SCROLL_X: u32 = 0x1;
+pub const NODE_SCROLL_Y: u32 = 0x2;
 
 /// Layout of one record. Positions are absolute, except that children of a scroll container are relative
 /// to the container's content (the coordinate space of `Widgets.BeginScrollView`).
@@ -304,10 +303,10 @@ impl VoidTree {
             let style = styles.get(r.style).unwrap();
             let mut flags = 0;
             if style.overflow.x == Overflow::Scroll {
-                flags |= out_flags::SCROLL_X;
+                flags |= NODE_SCROLL_X;
             }
             if style.overflow.y == Overflow::Scroll {
-                flags |= out_flags::SCROLL_Y;
+                flags |= NODE_SCROLL_Y;
             }
 
             let o = NodeOut {

@@ -10,7 +10,7 @@ public static partial class VoidComponents
 {
     extension(UIBranch branch)
     {
-        public UINode Text(string text, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
+        public TaffyNode Text(string text, Style? style = null, string? id = null, [CallerFilePath] string? file = null,
             [CallerLineNumber] int line = 0)
         {
             var key = UIBranch.ResolveKey(id, file, line);

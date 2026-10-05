@@ -11,7 +11,7 @@ public static class PawnEditorComponents
 
     extension(UIBranch branch)
     {
-        public UINode SectionLabel(string label,
+        public TaffyNode SectionLabel(string label,
             Style? style = null, string? id = null, [CallerFilePath] string? file = null,
             [CallerLineNumber] int line = 0)
         {

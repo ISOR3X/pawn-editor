@@ -174,7 +174,10 @@ public static partial class VoidComponents
                     last = Mathf.Min(count - 1, Mathf.CeilToInt((scrollY + windowHeight) / step) + overscan);
                 }
 
-                // The first visible row is pushed down by the rows scrolled past; every other row has no margin.
+                // Explicitly set the margin for each row to zero,
+                // so when a first row style is demoted to n-th child style,
+                // Its margin is properly updated.
+                // This is done because Style.Push priorities previous style fields over null.
                 var rowStyle = RowStyles.Get((itemHeight, 0f));
                 var firstRowStyle = RowStyles.Get((itemHeight, first * step));
 

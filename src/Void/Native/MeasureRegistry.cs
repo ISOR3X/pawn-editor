@@ -1,5 +1,4 @@
 using Verse;
-using Void.Taffy;
 
 namespace Void.Native;
 
@@ -14,13 +13,13 @@ internal static unsafe class MeasureRegistry
     private static readonly Dictionary<uint, LeafContext> ByHandle = [];
 
     /// <summary>Kept in a static field so the delegate the native side holds is never collected.</summary>
-    private static readonly VoidNative.HeightCallback Callback = Height;
+    private static readonly NativeMethods.void_set_height_callback_callback_delegate Callback = Height;
 
     public static int Count => Handles.Count;
 
     public static void Install()
     {
-        VoidNative.Check(VoidNative.void_set_height_callback(Callback), nameof(VoidNative.void_set_height_callback));
+        NativeMethods.Check(NativeMethods.void_set_height_callback(Callback), nameof(NativeMethods.void_set_height_callback));
     }
 
     /// <returns>The handle for the content, or 0 when there is nothing to measure.</returns>
@@ -30,7 +29,7 @@ internal static unsafe class MeasureRegistry
         if (Handles.TryGetValue(context, out var handle)) return handle;
 
         var desc = Describe(context);
-        VoidNative.Check(VoidNative.void_measure_register(&desc, &handle), nameof(VoidNative.void_measure_register));
+        NativeMethods.Check(NativeMethods.void_measure_register(&desc, &handle), nameof(NativeMethods.void_measure_register));
         // TODO: release handles that have not been used for a while; every distinct string (e.g. each keystroke
         // in an input) currently stays registered for the rest of the session.
         Handles[context] = handle;
@@ -54,9 +53,9 @@ internal static unsafe class MeasureRegistry
 
             return new MeasureDesc
             {
-                maxWidth = size.x,
-                maxHeight = size.y,
-                minContentWidth = minContent,
+                max_width = size.x,
+                max_height = size.y,
+                min_content_width = minContent,
                 wraps = context.textWrap ? 1u : 0u
             };
         }
