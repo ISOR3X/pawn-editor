@@ -169,48 +169,48 @@ public class UITree : IDisposable
     private void DrawNode(TaffyNode node, Vector2 origin)
     {
         var layout = _tree.GetLayout(node);
-        var rect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
+        var assignedRect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
 
         if (!_branchRecordsByNode.TryGetValue(node, out var record)) return;
+
         var scrollX = record.prevStyle?.overflowX == TaffyOverflow.Scroll;
         var scrollY = record.prevStyle?.overflowY == TaffyOverflow.Scroll;
+        var scrolls = scrollX || scrollY;
 
-        record.draw?.Invoke(rect);
+        record.draw?.Invoke(assignedRect);
+        if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(assignedRect, Color.red with { a = 0.25f });
 
-        if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(rect, Color.red with { a = 0.25f });
-
-        // Ensure scroll view is properly closed if child nodes throw.
-        try
+        // Scroll behaviour
+        if (scrolls)
         {
-            if (scrollX || scrollY)
-            {
-                var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
+            var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
 
-                var viewRect = new Rect(0f, 0f,
-                    scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
-                    scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
+            var viewRect = new Rect(0f, 0f,
+                scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
+                scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
 
-                Verse.Widgets.BeginScrollView(rect, ref s.pos, viewRect);
-                s.VisibleRect = new Rect(s.pos, rect.size - new Vector2(layout.scrollbar_width, layout.scrollbar_height));
-                rect.position = Vector2.zero;
-            }
-
-            foreach (var (_, childId) in record.childrenByKey)
-                DrawNode(childId, rect.position);
+            Verse.Widgets.BeginScrollView(assignedRect, ref s.pos, viewRect);
+            s.VisibleRect = new Rect(s.pos.x, s.pos.y, assignedRect.width - layout.scrollbar_width,
+                assignedRect.height - layout.scrollbar_height);
         }
 
+        // Ensure the scroll view is properly closed if child nodes throw.
+        try
+        {
+            var childOrigin = scrolls ? Vector2.zero : assignedRect.position;
+
+            foreach (var childId in record.childrenByKey.Values)
+                DrawNode(childId, childOrigin);
+        }
         finally
         {
-            if (scrollX || scrollY)
-            {
-                Verse.Widgets.EndScrollView();
-            }
+            if (scrolls) Verse.Widgets.EndScrollView();
         }
     }
 
     /// <summary>
     ///     Update or insert new state into the parent node.
-    ///     Note that state must be a reference type
+    ///     Note that state must be a reference type.
     /// </summary>
     public T UpsertState<T>(TaffyNode parentNode, string key, Func<T> init) where T : class
     {

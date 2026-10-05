@@ -10,16 +10,18 @@ namespace Void.Taffy;
 ///     Also includes some RimWorld specific fields for general styling, usch as fontSize and color.
 ///
 ///     Fields irrelevant to RimWorld usage are removed. (TODO: Which ones?)
-///
-///     TODO: Find better name
 /// </summary>
 public class Style : IEquatable<Style>
 {
+    /// <summary>
+    ///     Width a scroll container keeps free for its scrollbar while it scrolls.
+    /// </summary>
+    public const float ScrollbarGutter = UIUtility.ScrollBarWidth + GenUI.GapTiny;
+
     public Color? backgroundColor;
     public Color? color;
     public GameFont? fontSize;
     public bool? wordWrap;
-
     public TaffyOverflow? overflowX;
     public TaffyOverflow? overflowY;
     public TaffyAlignContent? alignContent;
@@ -188,7 +190,7 @@ public class Style : IEquatable<Style>
         // We do not expose scrollbar width as in RimWorld it only has one width.
         // So we only apply the value when scrolling is required.
         if (overflowX == TaffyOverflow.Scroll || overflowY == TaffyOverflow.Scroll)
-            s.ScrollbarWidth = UIUtility.ScrollBarWidth + GenUI.GapTiny;
+            s.ScrollbarWidth = ScrollbarGutter;
 
         if (gridAutoFlow.HasValue) s.GridAutoFlow = gridAutoFlow.Value;
         if (gridColumn.HasValue) s.GridColumn = gridColumn.Value;
