@@ -131,6 +131,7 @@ public static partial class VoidComponents
 
         /// <summary>
         ///     Virtualized scrollable list. Note that items outside the viewport (excluding overscan items) are destroyed and should therefore not carry state.
+        ///     TODO: Use spacers instead of margins? See https://ui.nuxt.com/docs/components/table#with-column-sorting (inspect DOM)
         /// </summary>
         public void List<T>(
             IReadOnlyList<T> items,

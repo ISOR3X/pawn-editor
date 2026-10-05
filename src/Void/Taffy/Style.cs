@@ -10,8 +10,6 @@ namespace Void.Taffy;
 ///     Also includes some RimWorld specific fields for general styling, usch as fontSize and color.
 ///
 ///     Fields irrelevant to RimWorld usage are removed. (TODO: Which ones?)
-///
-///     TODO: Find better name
 /// </summary>
 public class Style : IEquatable<Style>
 {
@@ -19,7 +17,11 @@ public class Style : IEquatable<Style>
     public Color? color;
     public GameFont? fontSize;
     public bool? wordWrap;
-
+    /// <summary>
+    /// Only supports sticky at the top currently. Not the same as <c>position: sticky; top: 0;</c> from CSS.
+    /// Instead of drawing on top of non-sticky childrne, it pushes them down.
+    /// </summary>
+    public bool? sticky;
     public TaffyOverflow? overflowX;
     public TaffyOverflow? overflowY;
     public TaffyAlignContent? alignContent;
@@ -130,6 +132,7 @@ public class Style : IEquatable<Style>
             gridRow = gridRow ?? fallback.gridRow,
             overflowX  = overflowX ?? fallback.overflowX,
             overflowY = overflowY ?? fallback.overflowY,
+            sticky = sticky ?? fallback.sticky,
             color = color ?? fallback.color,
             backgroundColor = backgroundColor ?? fallback.backgroundColor,
             fontSize = fontSize ?? fallback.fontSize
