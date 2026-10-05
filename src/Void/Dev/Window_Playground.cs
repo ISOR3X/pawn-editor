@@ -1,6 +1,7 @@
 #if DEBUG
 using System.Text.RegularExpressions;
 using LudeonTK;
+using RimWorld;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -96,7 +97,7 @@ public class Window_Playground : Window
     private int _numStd = 2;
     private bool _showExtra;
     private int _subjectSeq;
-    private Tab _tab = Tab.Scroll;
+    private Tab _tab = Tab.Table;
     private bool _warmTheme;
 
     public Window_Playground()
@@ -142,6 +143,7 @@ public class Window_Playground : Window
                 case Tab.Collapsible: CollapsiblePlayground(root); break;
                 case Tab.List: ListPlayground(root); break;
                 case Tab.Context: ContextPlayground(root); break;
+                case Tab.Table: TablePlayground(root); break;
                 case Tab.Layout: LayoutPlayground(root); break;
             }
         }, new Style
@@ -758,6 +760,185 @@ public class Window_Playground : Window
             }, style: Column(4f, 6f), id: $"{key}-card");
     }
 
+    // Columns are built once: their styles are made at construction and reused every frame.
+    private IReadOnlyList<TableColumn<string>>? _tableColumns;
+    private string? _tableSelected;
+    private int _tableCellsBuilt;
+
+    /// <summary>
+    ///     Exercises <see cref="VoidComponents.Table{TRow}" />: one scrolling grid whose header stays pinned, with
+    ///     columns from grid tracks (flexible, fixed and auto), zebra, hover and selection painted per cell, and
+    ///     only the rows in view built. Without a scrollbar the header and rows must still line up.
+    /// </summary>
+    private void TablePlayground(UIBranch builder)
+    {
+        builder.Text($"Table playground ({_listItems.Count} rows, selected: {_tableSelected ?? "none"})",
+            new Style { fontSize = GameFont.Medium });
+        builder.Text(
+            "Scroll: the header stays put and the scrollbar starts below it. Click a row, or its button, to select. " +
+            "The button column is sized to its content.",
+            new Style { fontSize = GameFont.Tiny, width = Dimension.Percent(1f) });
+
+        _tableColumns ??=
+        [
+            TableColumn<string>.Flexible("Name", (c, item) =>
+            {
+                _tableCellsBuilt++;
+                c.Text(item, new Style { wordWrap = false, minWidth = Dimension.Px(0f) });
+            }),
+            TableColumn<string>.Fixed(60f, "Length", (c, item) => c.Text(item.Length.ToString())),
+            TableColumn<string>.Auto("", (c, item) => c.Button("Select",
+                size: ComponentSize.Small, onClick: _ => _tableSelected = item))
+        ];
+
+        _tableCellsBuilt = 0;
+        builder.Table(_listItems, _tableColumns, maxRowsVisibleAtOnce: 8, rowKey: item => item,
+            highlightRow: item => item == _tableSelected, onRowClick: item => _tableSelected = item);
+
+        // Counted while the table builds, so it is only right when read after it. Virtualization works if
+        // this stays near the visible count, not the item count.
+        builder.Text($"rows built this pass: {_tableCellsBuilt} (of {_listItems.Count})",
+            new Style { fontSize = GameFont.Tiny, color = ColoredText.SubtleGrayColor });
+
+        SortFilterTable(builder);
+        PaymentsTable(builder);
+
+        builder.Text("Short (3 rows, no scrollbar) and empty", new Style { fontSize = GameFont.Tiny });
+        builder.Table(_listItems.Take(3).ToList(), _tableColumns, rowKey: item => item, id: "table-short");
+        builder.Table(Array.Empty<string>(), _tableColumns, id: "table-empty");
+    }
+
+    // Filtering lives out here: the table gets the filtered list, rebuilt only when the filter changes. Sorting is
+    // handed to the table, which sorts that list (and caches the result) for the column in _tableSorting.
+    private static readonly string[] TableKinds = ["Tool", "Food", "Weapon", "Apparel"];
+
+    private readonly List<TableThing> _tableThings = Enumerable.Range(1, 60)
+        .Select(i => new TableThing($"Thing {i}", i * 37 % 97, TableKinds[i % TableKinds.Length]))
+        .ToList();
+
+    private string _tableFilter = "";
+    private TableSorting? _tableSorting;
+    private List<TableThing> _tableView = [];
+    private bool _tableViewDirty = true;
+    private IReadOnlyList<TableColumn<TableThing>>? _tableSortColumns;
+
+    private void SortFilterTable(UIBranch builder)
+    {
+        builder.Text("Sort (click a header, right click for descending) and filter",
+            new Style { fontSize = GameFont.Tiny });
+
+        _tableSortColumns ??=
+        [
+            TableColumn<TableThing>.Flexible("Name", (c, t) => c.Text(t.Name,
+                    new Style { wordWrap = false, minWidth = Dimension.Px(0f) }),
+                sort: TableColumn<TableThing>.ByText(t => t.Name)),
+            TableColumn<TableThing>.Fixed(80f, "Mass", (c, t) => c.Text(t.Mass.ToString()),
+                sort: TableColumn<TableThing>.By(t => t.Mass)),
+            TableColumn<TableThing>.Fixed(90f, "Kind", (c, t) => c.Text(t.Kind),
+                sort: TableColumn<TableThing>.ByText(t => t.Kind)),
+            // No sort, so its header is a plain label.
+            TableColumn<TableThing>.Auto("", (c, t) => c.Button("Log", size: ComponentSize.Small,
+                onClick: _ => Log.Message(t.Name)))
+        ];
+
+        if (_tableViewDirty)
+        {
+            _tableViewDirty = false;
+            _tableView = string.IsNullOrEmpty(_tableFilter)
+                ? [.. _tableThings]
+                : [.. _tableThings.Where(t => t.Name.IndexOf(_tableFilter, StringComparison.OrdinalIgnoreCase) >= 0
+                                              || t.Kind.IndexOf(_tableFilter, StringComparison.OrdinalIgnoreCase) >= 0)];
+        }
+
+        builder.Div(b =>
+        {
+            b.Input(_tableFilter, v =>
+            {
+                _tableFilter = v;
+                _tableViewDirty = true;
+            }, id: "table-filter");
+            b.Text($"{_tableView.Count} / {_tableThings.Count} rows", new Style { fontSize = GameFont.Tiny });
+            b.Button("Reset", size: ComponentSize.Small, onClick: _ =>
+            {
+                _tableFilter = "";
+                _tableSorting = null;
+                _tableViewDirty = true;
+            });
+        }, style: Row());
+
+        builder.Table(_tableView, _tableSortColumns, maxRowsVisibleAtOnce: 8, rowKey: t => t.Name,
+            sorting: _tableSorting, onSortingChange: s => _tableSorting = s, id: "table-sort");
+    }
+
+    private sealed record TableThing(string Name, int Mass, string Kind);
+
+    // The Nuxt UI "Table with column sorting" example. Only the Email header is made by hand; the other sortable
+    // columns use the default sorting header, and the last column has no sort, so its header is a plain label.
+    private static readonly Style RightAligned = new() { justifyContent = TaffyAlignContent.End };
+
+    private readonly List<Payment> _payments =
+    [
+        new("4600", new DateTime(2024, 3, 11, 15, 30, 0), PaymentStatus.Paid, "james.anderson@example.com", 594),
+        new("4599", new DateTime(2024, 3, 11, 10, 10, 0), PaymentStatus.Failed, "mia.white@example.com", 276),
+        new("4598", new DateTime(2024, 3, 11, 8, 50, 0), PaymentStatus.Refunded, "william.brown@example.com", 315),
+        new("4597", new DateTime(2024, 3, 10, 19, 45, 0), PaymentStatus.Paid, "emma.davis@example.com", 529),
+        new("4596", new DateTime(2024, 3, 10, 15, 55, 0), PaymentStatus.Paid, "ethan.harris@example.com", 639)
+    ];
+
+    private IReadOnlyList<TableColumn<Payment>>? _paymentColumns;
+    private TableSorting? _paymentSorting = new("Email", false);
+    private int _refunds;
+
+    private void PaymentsTable(UIBranch builder)
+    {
+        builder.Text($"Nuxt UI example: hand-made Email header, right-aligned amount (refunds clicked: {_refunds})",
+            new Style { fontSize = GameFont.Tiny });
+
+        _paymentColumns ??=
+        [
+            TableColumn<Payment>.Fixed(60f, "#", (c, p) => c.Text($"#{p.Id}")),
+            TableColumn<Payment>.Fixed(110f, "Date", (c, p) => c.Text(p.Date.ToString("d MMM HH:mm")),
+                sort: TableColumn<Payment>.By(p => p.Date)),
+            TableColumn<Payment>.Fixed(90f, "Status",
+                (c, p) => c.Text(p.Status.ToString(), new Style { color = PaymentColor(p.Status) }),
+                sort: TableColumn<Payment>.By(p => p.Status)),
+            TableColumn<Payment>.Flexible("Email", (c, p) => c.Text(p.Email),
+                sort: TableColumn<Payment>.ByText(p => p.Email),
+                drawHeader: (b, h) => b.Button("Email", h.Sorted switch
+                    {
+                        TableSortDirection.Ascending => PawnColumnWorker.SortingIcon,
+                        TableSortDirection.Descending => PawnColumnWorker.SortingDescendingIcon,
+                        _ => null
+                    }, size: ComponentSize.Small, variant: ButtonVariant.Ghost, onClick: _ => h.ToggleSorting())),
+            TableColumn<Payment>.Fixed(80f, "Amount", (c, p) => c.Text($"{p.Amount:N0} EUR"), RightAligned,
+                TableColumn<Payment>.By(p => p.Amount)),
+            TableColumn<Payment>.Auto("", (c, p) => c.Button("Refund", size: ComponentSize.Small,
+                onClick: _ => _refunds++))
+        ];
+
+        builder.Table(_payments, _paymentColumns, rowKey: p => p.Id, maxRowsVisibleAtOnce: 8,
+            sorting: _paymentSorting, onSortingChange: s => _paymentSorting = s, id: "table-payments");
+    }
+
+    private static Color PaymentColor(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Paid => Color.green,
+            PaymentStatus.Failed => Color.red,
+            _ => Color.gray
+        };
+    }
+
+    private enum PaymentStatus
+    {
+        Paid,
+        Failed,
+        Refunded
+    }
+
+    private sealed record Payment(string Id, DateTime Date, PaymentStatus Status, string Email, int Amount);
+
     /// <summary>
     ///     Renders the <c>Void_Playground</c> <see cref="LayoutDef" /> parsed from XML, so the XML element
     ///     registry can be exercised next to the hand-written tabs.
@@ -812,6 +993,7 @@ public class Window_Playground : Window
 
     private enum Tab
     {
+        Table,
         Scroll,
         Buttons,
         Text,

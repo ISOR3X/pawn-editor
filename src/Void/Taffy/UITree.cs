@@ -166,51 +166,65 @@ public class UITree : IDisposable
         return _tree.GetLayout(_rootBranchNode).height;
     }
 
-    private void DrawNode(TaffyNode node, Vector2 origin)
+    private Rect DrawNode(TaffyNode node, Vector2 origin)
     {
         var layout = _tree.GetLayout(node);
-        var rect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
+        var assignedRect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
 
-        if (!_branchRecordsByNode.TryGetValue(node, out var record)) return;
+        if (!_branchRecordsByNode.TryGetValue(node, out var record)) return assignedRect;
+
         var scrollX = record.prevStyle?.overflowX == TaffyOverflow.Scroll;
         var scrollY = record.prevStyle?.overflowY == TaffyOverflow.Scroll;
+        var scrolls = scrollX || scrollY;
 
-        record.draw?.Invoke(rect);
+        record.draw?.Invoke(assignedRect);
+        if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(assignedRect, Color.red with { a = 0.25f });
 
-        if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(rect, Color.red with { a = 0.25f });
+        // Draw sticky children and collect their maximum height.
+        var band = 0f;
+        if (scrollY)
+            foreach (var childId in record.childrenByKey.Values)
+                if (IsSticky(childId))
+                    // Min() to Ensure band is never larger than the assigned rect.
+                    band = Mathf.Min(Mathf.Max(DrawNode(childId, assignedRect.position).yMax - assignedRect.y, band), assignedRect.height);
 
-        // Ensure scroll view is properly closed if child nodes throw.
+
+        // Scroll behaviour
+        if (scrolls)
+        {
+            var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
+
+            var outRect = new Rect(assignedRect.x, assignedRect.y + band, assignedRect.width, assignedRect.height - band);
+            var viewRect = new Rect(0f, 0f,
+                scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
+                scrollY ? Mathf.Max(0f, layout.content_height - band) : layout.height - layout.scrollbar_height);
+
+            Verse.Widgets.BeginScrollView(outRect, ref s.pos, viewRect);
+            s.VisibleRect = new Rect(s.pos.x, s.pos.y + band, outRect.width - layout.scrollbar_width, outRect.height - layout.scrollbar_height);
+        }
+
         try
         {
-            if (scrollX || scrollY)
-            {
-                var s = UpsertState(node, "scroll", () => new ScrollState { pos = Vector2.zero });
+            // Shift origin of children by the band so they aren't drawn underneath (which would cause issues with widget interactions).
+            var childOrigin = scrolls ? new Vector2(0f, -band) : assignedRect.position;
 
-                var viewRect = new Rect(0f, 0f,
-                    scrollX ? layout.content_width : layout.width - layout.scrollbar_width,
-                    scrollY ? layout.content_height : layout.height - layout.scrollbar_height);
-
-                Verse.Widgets.BeginScrollView(rect, ref s.pos, viewRect);
-                s.VisibleRect = new Rect(s.pos, rect.size - new Vector2(layout.scrollbar_width, layout.scrollbar_height));
-                rect.position = Vector2.zero;
-            }
-
-            foreach (var (_, childId) in record.childrenByKey)
-                DrawNode(childId, rect.position);
+            foreach (var childId in record.childrenByKey.Values)
+                if (!scrollY || !IsSticky(childId))
+                    DrawNode(childId, childOrigin);
         }
-
         finally
         {
-            if (scrollX || scrollY)
-            {
-                Verse.Widgets.EndScrollView();
-            }
+            if (scrolls) Verse.Widgets.EndScrollView();
         }
+
+        return assignedRect;
+
+        bool IsSticky(TaffyNode id) => _branchRecordsByNode.TryGetValue(id, out var r) && r.prevStyle?.sticky == true;
     }
 
     /// <summary>
     ///     Update or insert new state into the parent node.
-    ///     Note that state must be a reference type
+    ///     Note that state must be a reference type.
     /// </summary>
     public T UpsertState<T>(TaffyNode parentNode, string key, Func<T> init) where T : class
     {
