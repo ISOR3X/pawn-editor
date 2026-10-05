@@ -1,6 +1,9 @@
 > [!WARNING]
 > You are currently on the rewrite branch. This version of Pawn Editor is not stable and intended to be used in a playthrough. For the current stable version available on Steam, [check out the main branch.](https://github.com/ISOR3X/pawn-editor/tree/main)
 
+> [!NOTE]
+> State of Development: At the moment this has turned more into a hobby of mine experimenting with [rust, c# and integrating a layout library into RimWorld](https://github.com/ISOR3X/pawn-editor/tree/feat/taffy-bindings). Don't expect a new release anytime soon. Of course anyone is still welcome to make PR's to the stable (main) branch. 
+
 ![Preview](data/PawnEditor/About/Preview.png)
 # Pawn Editor
 A rewrite of Pawn Editor. The original code was difficult too maintain and suffered from some core issues.
