@@ -1,0 +1,19 @@
+[package]
+name = "void-native"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "void_native"
+# cdylib is what Void loads; rlib lets `cargo test` exercise the same code without FFI.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+taffy = "0.14"
+
+[profile.release]
+lto = true
+codegen-units = 1
+# Panics are caught at the FFI boundary and turned into status codes, so unwinding must stay enabled.
+panic = "unwind"

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Verse;
+using Void.Native;
 
 namespace Void;
 
@@ -11,35 +12,64 @@ public class VoidMod : Mod
     public VoidMod(ModContentPack content) : base(content)
     {
         ModName = content.Name;
-        LoadNativeLibrary(content.RootDir);
+        // ctaffy is still used by the Legacy layout code; void_native backs UITree.
+        LoadNativeLibrary(content.RootDir, "ctaffy");
+        if (LoadNativeLibrary(content.RootDir, "void_native")) InitializeVoidNative();
 
         Settings = GetSettings<VoidSettings>();
     }
 
-    private static void LoadNativeLibrary(string modRoot)
+    private static bool LoadNativeLibrary(string modRoot, string name)
     {
         string path;
+        IntPtr handle;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            path = Path.Combine(modRoot, "Native", "win-x64", "ctaffy.dll");
-            var handle = LoadLibraryW(path);
-            Log.Message($"[{ModName}] Loaded ctaffy (Windows): handle={handle}");
+            path = Path.Combine(modRoot, "Native", "win-x64", $"{name}.dll");
+            handle = LoadLibraryW(path);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            path = Path.Combine(modRoot, "Native", "linux-x64", "libctaffy.so");
-            var handle = Dlopen(path, 2 /* RTLD_NOW */);
-            Log.Message($"[{ModName}] Loaded ctaffy (Linux): handle={handle}");
+            path = Path.Combine(modRoot, "Native", "linux-x64", $"lib{name}.so");
+            handle = Dlopen(path, 2 /* RTLD_NOW */);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            path = Path.Combine(modRoot, "Native", "osx-arm64", "libctaffy.dylib");
-            var handle = Dlopen(path, 2 /* RTLD_NOW */);
-            Log.Message($"[{ModName}] Loaded ctaffy (macOS): handle={handle}");
+            path = Path.Combine(modRoot, "Native", "osx-arm64", $"lib{name}.dylib");
+            handle = Dlopen(path, 2 /* RTLD_NOW */);
         }
         else
         {
-            Log.Error($"[{ModName}] Unknown OS: ctaffy native library not loaded.");
+            Log.Error($"[{ModName}] Unknown OS: {name} native library not loaded.");
+            return false;
+        }
+
+        if (handle == IntPtr.Zero)
+        {
+            Log.Error($"[{ModName}] Could not load {name} from {path}.");
+            return false;
+        }
+
+        Log.Message($"[{ModName}] Loaded {name}: handle={handle}");
+        return true;
+    }
+
+    private static void InitializeVoidNative()
+    {
+        try
+        {
+            var mismatch = VoidNative.VerifyAbi();
+            if (mismatch != null)
+            {
+                Log.Error($"[{ModName}] void_native does not match this build of Void ({mismatch}). UI will not work.");
+                return;
+            }
+
+            MeasureRegistry.Install();
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{ModName}] Initializing void_native failed: {e}");
         }
     }
 

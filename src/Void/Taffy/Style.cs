@@ -94,6 +94,92 @@ public class Style : IEquatable<Style>
                && SequenceEqualNullable(gridAutoRows, other.gridAutoRows);
     }
 
+    public override bool Equals(object? obj)
+    {
+        return obj is Style other && Equals(other);
+    }
+
+    /// <summary>
+    ///     Covers exactly the fields <see cref="Equals(Style)" /> compares, so equal styles share a hash and a
+    ///     native style handle.
+    /// </summary>
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var h = 17;
+
+            void Add(int value)
+            {
+                h = h * 31 + value;
+            }
+
+            Add(display.GetHashCode());
+            Add(flexDirection.GetHashCode());
+            Add(flexWrap.GetHashCode());
+            Add(flexGrow.GetHashCode());
+            Add(flexShrink.GetHashCode());
+            Add(Hash(flexBasis));
+            Add(alignItems.GetHashCode());
+            Add(alignSelf.GetHashCode());
+            Add(alignContent.GetHashCode());
+            Add(justifyContent.GetHashCode());
+            Add(justifyItems.GetHashCode());
+            Add(justifySelf.GetHashCode());
+            Add(Hash(width));
+            Add(Hash(height));
+            Add(Hash(minWidth));
+            Add(Hash(minHeight));
+            Add(Hash(maxWidth));
+            Add(Hash(maxHeight));
+            Add(gap is { } g ? Hash(g.Width) * 31 + Hash(g.Height) : 0);
+            Add(Hash(padding));
+            Add(Hash(margin));
+            Add(gridAutoFlow.GetHashCode());
+            Add(Hash(gridColumn));
+            Add(Hash(gridRow));
+            Add(overflowX.GetHashCode());
+            Add(overflowY.GetHashCode());
+            Add(Hash(gridTemplateColumns));
+            Add(Hash(gridTemplateRows));
+            Add(Hash(gridAutoColumns));
+            Add(Hash(gridAutoRows));
+            return h;
+        }
+    }
+
+    private static int Hash(TaffyDimension d)
+    {
+        return unchecked(d.value.GetHashCode() * 31 + (int)d.unit);
+    }
+
+    private static int Hash(TaffyDimension? d)
+    {
+        return d is { } v ? Hash(v) : 0;
+    }
+
+    private static int Hash(TaffyEdges? e)
+    {
+        if (e is not { } v) return 0;
+        return unchecked(((Hash(v.Top) * 31 + Hash(v.Right)) * 31 + Hash(v.Bottom)) * 31 + Hash(v.Left));
+    }
+
+    private static int Hash(TaffyGridPlacement? p)
+    {
+        return p is { } v ? unchecked((v.start * 31 + v.end) * 31 + v.span) : 0;
+    }
+
+    private static int Hash(TaffyTrackSizingFunction[]? tracks)
+    {
+        if (tracks is null) return 0;
+        unchecked
+        {
+            var h = tracks.Length;
+            foreach (var t in tracks) h = (h * 31 + Hash(t.min)) * 31 + Hash(t.max);
+            return h;
+        }
+    }
+
     /// <summary>
     ///     Returns a new <see cref="Style" /> where each field is taken from this instance
     ///     when non-null, or from <paramref name="fallback" /> otherwise.
@@ -136,69 +222,6 @@ public class Style : IEquatable<Style>
             backgroundColor = backgroundColor ?? fallback.backgroundColor,
             fontSize = fontSize ?? fallback.fontSize
         };
-    }
-
-    /// <summary>
-    ///     Applies all non-null fields to <paramref name="s" />.
-    /// </summary>
-    public void Push(TaffyStyleRef s)
-    {
-        if (display.HasValue) s.Display = display.Value;
-        if (flexDirection.HasValue) s.FlexDirection = flexDirection.Value;
-        if (flexWrap.HasValue) s.FlexWrap = flexWrap.Value;
-        if (flexGrow.HasValue) s.FlexGrow = flexGrow.Value;
-        if (flexShrink.HasValue) s.FlexShrink = flexShrink.Value;
-        if (flexBasis.HasValue) s.FlexBasis = flexBasis.Value;
-        if (alignItems.HasValue) s.AlignItems = alignItems;
-        if (alignSelf.HasValue) s.AlignSelf = alignSelf;
-        if (alignContent.HasValue) s.AlignContent = alignContent;
-        if (justifyContent.HasValue) s.JustifyContent = justifyContent;
-        if (justifyItems.HasValue) s.JustifyItems = justifyItems;
-        if (justifySelf.HasValue) s.JustifySelf = justifySelf;
-        if (width.HasValue) s.Width = width.Value;
-        if (height.HasValue) s.Height = height.Value;
-        if (minWidth.HasValue) s.MinWidth = minWidth.Value;
-        if (minHeight.HasValue) s.MinHeight = minHeight.Value;
-        if (maxWidth.HasValue) s.MaxWidth = maxWidth.Value;
-        if (maxHeight.HasValue) s.MaxHeight = maxHeight.Value;
-        if (gap.HasValue)
-        {
-            // None unit = "not specified by caller". Skip to preserve the native default.
-            if (gap.Value.Width.unit != TaffyUnit.None) s.ColumnGap = gap.Value.Width;
-            if (gap.Value.Height.unit != TaffyUnit.None) s.RowGap = gap.Value.Height;
-        }
-
-        if (padding.HasValue)
-        {
-            if (padding.Value.Top.unit != TaffyUnit.None) s.PaddingTop = padding.Value.Top;
-            if (padding.Value.Right.unit != TaffyUnit.None) s.PaddingRight = padding.Value.Right;
-            if (padding.Value.Bottom.unit != TaffyUnit.None) s.PaddingBottom = padding.Value.Bottom;
-            if (padding.Value.Left.unit != TaffyUnit.None) s.PaddingLeft = padding.Value.Left;
-        }
-
-        if (margin.HasValue)
-        {
-            if (margin.Value.Top.unit != TaffyUnit.None) s.MarginTop = margin.Value.Top;
-            if (margin.Value.Right.unit != TaffyUnit.None) s.MarginRight = margin.Value.Right;
-            if (margin.Value.Bottom.unit != TaffyUnit.None) s.MarginBottom = margin.Value.Bottom;
-            if (margin.Value.Left.unit != TaffyUnit.None) s.MarginLeft = margin.Value.Left;
-        }
-
-        if (overflowX.HasValue) s.OverflowX = overflowX.Value;
-        if (overflowY.HasValue) s.OverflowY = overflowY.Value;
-
-        // We do not expose scrollbar width as in RimWorld it only has one width.
-        // So we only apply the value when scrolling is required.
-        if (overflowX == TaffyOverflow.Scroll || overflowY == TaffyOverflow.Scroll)
-            s.ScrollbarWidth = ScrollbarGutter;
-
-        if (gridAutoFlow.HasValue) s.GridAutoFlow = gridAutoFlow.Value;
-        if (gridColumn.HasValue) s.GridColumn = gridColumn.Value;
-        if (gridRow.HasValue) s.GridRow = gridRow.Value;
-        if (gridTemplateColumns != null) s.SetGridTemplateColumns(gridTemplateColumns);
-        if (gridTemplateRows != null) s.SetGridTemplateRows(gridTemplateRows);
-        if (gridAutoColumns != null) s.SetGridAutoColumns(gridAutoColumns);
-        if (gridAutoRows != null) s.SetGridAutoRows(gridAutoRows);
     }
 
     private static bool SequenceEqualNullable(TaffyTrackSizingFunction[]? a, TaffyTrackSizingFunction[]? b)

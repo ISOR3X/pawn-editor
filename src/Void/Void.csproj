@@ -12,6 +12,14 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <!-- The void_native bindings pass pinned buffers to native code. -->
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <PropertyGroup>
+        <VoidNativeDir>$(MSBuildThisFileDirectory)..\..\native\void-native\</VoidNativeDir>
+        <!-- rustup's default location, for shells (and IDEs) that do not have it on PATH. -->
+        <CargoExe Condition="Exists('$(USERPROFILE)\.cargo\bin\cargo.exe')">$(USERPROFILE)\.cargo\bin\cargo.exe</CargoExe>
+        <CargoExe Condition="'$(CargoExe)' == ''">cargo</CargoExe>
     </PropertyGroup>
     <PropertyGroup>
         <OutputPath>bin\</OutputPath>
@@ -57,6 +65,18 @@
     <ItemGroup>
         <Publicize Include="Assembly-CSharp"/>
     </ItemGroup>
+    <!--
+        Builds void_native with cargo and places it next to the other native libraries in lib/, from where
+        PawnEditor deploys everything to Mods/PawnEditor/Native. Only the Windows build is produced locally.
+        Set SkipVoidNative=true to build without Rust (the existing lib/win-x64/void_native.dll is then used).
+    -->
+    <Target Name="BuildVoidNative" BeforeTargets="BeforeBuild"
+            Condition="'$(OS)' == 'Windows_NT' And '$(SkipVoidNative)' != 'true'">
+        <Exec Command="&quot;$(CargoExe)&quot; build --release --manifest-path &quot;$(VoidNativeDir)Cargo.toml&quot;"/>
+        <Copy SourceFiles="$(VoidNativeDir)target\release\void_native.dll"
+              DestinationFolder="$(MSBuildThisFileDirectory)..\..\lib\win-x64"
+              SkipUnchangedFiles="true"/>
+    </Target>
     <ItemGroup>
         <!-- Embed small icons used in the components directly into the dll. -->
         <EmbeddedResource Include="Textures\*.png"/>

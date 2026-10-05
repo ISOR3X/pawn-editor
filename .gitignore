@@ -38,3 +38,7 @@ dlldata.c
 
 .claude/
 .ruff_cache/
+
+# void-native build output
+native/void-native/target/
+lib/win-x64/void_native.dll

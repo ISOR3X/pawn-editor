@@ -127,7 +127,7 @@ public static partial class VoidComponents
         ///     Keyboard focus is keyed off the resolved component key, so two inputs only keep
         ///     independent focus when their call sites differ or they are given explicit ids.
         /// </summary>
-        public TaffyNode Input(string value, Action<string> onChange, int? maxLength = null,
+        public UINode Input(string value, Action<string> onChange, int? maxLength = null,
             Regex? pattern = null, Action<Rect>? onHover = null, Action<Rect>? draw = null,
             bool disabled = false, ComponentSize size = ComponentSize.Default,
             InputVariant variant = InputVariant.Solid,
@@ -181,7 +181,7 @@ public static partial class VoidComponents
         ///     blur, so an intermediate value can be typed through.
         ///     <paramref name="onChange" /> fires only when the committed value actually changes.
         /// </summary>
-        public TaffyNode InputNumber(int value, Action<int> onChange, int min = 0, int max = 9999,
+        public UINode InputNumber(int value, Action<int> onChange, int min = 0, int max = 9999,
             Action<Rect>? onHover = null, Action<Rect>? draw = null,
             bool disabled = false, ComponentSize size = ComponentSize.Default,
             InputVariant variant = InputVariant.Solid,
