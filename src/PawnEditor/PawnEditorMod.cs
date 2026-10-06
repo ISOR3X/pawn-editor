@@ -1,4 +1,6 @@
-﻿using EditCompileReload;
+﻿#if DEBUG
+using EditCompileReload;
+#endif
 using HarmonyLib;
 using PawnEditor.XMLComponents;
 using RimWorld;

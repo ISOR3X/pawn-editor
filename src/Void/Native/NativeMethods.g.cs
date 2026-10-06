@@ -17,7 +17,7 @@ namespace Void.Native
         /// <summary>
         ///  Bumped whenever a shared struct or function signature changes.
         /// </summary>
-        public const uint ABI_VERSION = 2;
+        public const uint ABI_VERSION = 3;
         public const int STATUS_OK = 0;
         public const int STATUS_PANIC = 1;
         public const int STATUS_NULL_POINTER = 2;
@@ -58,7 +58,7 @@ namespace Void.Native
 
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate float void_set_height_callback_callback_delegate(uint handle, float width);
+        public delegate void void_set_measure_callback_callback_delegate(uint handle, MeasureMode mode, float width, MeasureSize* @out);
 
 
 
@@ -84,10 +84,10 @@ namespace Void.Native
         public static extern uint void_last_error(byte* buf, uint cap);
 
         /// <summary>
-        ///  Sets the function that measures the height of wrapping content at a given width. Pass null to clear it.
+        ///  Sets the function that measures registered content. Pass null to clear it.
         /// </summary>
-        [DllImport(__DllName, EntryPoint = "void_set_height_callback", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern int void_set_height_callback(void_set_height_callback_callback_delegate callback);
+        [DllImport(__DllName, EntryPoint = "void_set_measure_callback", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int void_set_measure_callback(void_set_measure_callback_callback_delegate callback);
 
         /// <summary>
         ///  # Safety
@@ -97,11 +97,14 @@ namespace Void.Native
         public static extern int void_style_register(StyleDesc* desc, uint* out_handle);
 
         /// <summary>
+        ///  Registers a piece of measurable content and returns its handle. C# keeps track of what the handle stands for;
+        ///  this side only caches the sizes the measure callback returns for it.
+        ///
         ///  # Safety
-        ///  `desc` must be valid for reads and `out_handle` for writes.
+        ///  `out_handle` must be valid for writes.
         /// </summary>
         [DllImport(__DllName, EntryPoint = "void_measure_register", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern int void_measure_register(MeasureDesc* desc, uint* out_handle);
+        public static extern int void_measure_register(uint* out_handle);
 
         /// <summary>
         ///  Frees a measure handle so it can be reused. Nodes must no longer refer to it.
@@ -110,10 +113,10 @@ namespace Void.Native
         public static extern int void_measure_release(uint handle);
 
         /// <summary>
-        ///  Number of times the height callback has been invoked, for profiling.
+        ///  Number of times the measure callback has been invoked, for profiling.
         /// </summary>
-        [DllImport(__DllName, EntryPoint = "void_height_callback_count", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ulong void_height_callback_count();
+        [DllImport(__DllName, EntryPoint = "void_measure_callback_count", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ulong void_measure_callback_count();
 
         [DllImport(__DllName, EntryPoint = "void_tree_new", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern VoidTree* void_tree_new();
@@ -158,7 +161,7 @@ namespace Void.Native
         public uint node_out;
         public uint frame_result;
         public uint style_desc;
-        public uint measure_desc;
+        public uint measure_size;
         public uint dimension;
         public uint track;
         public uint grid_placement;
@@ -355,21 +358,10 @@ namespace Void.Native
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe partial struct MeasureDesc
+    public unsafe partial struct MeasureSize
     {
-        /// <summary>
-        ///  Unwrapped size of the content.
-        /// </summary>
-        public float max_width;
-        public float max_height;
-        /// <summary>
-        ///  Width of the widest unbreakable part (the longest word).
-        /// </summary>
-        public float min_content_width;
-        /// <summary>
-        ///  0 when the content never wraps, so its size does not depend on the width.
-        /// </summary>
-        public uint wraps;
+        public float width;
+        public float height;
     }
 
 
@@ -455,6 +447,30 @@ namespace Void.Native
         Column = 1,
         RowDense = 2,
         ColumnDense = 3,
+    }
+
+    /// <summary>
+    ///  How the available width constrains a measurement. The width passed alongside is only meaningful for
+    ///  `Exact` and `FitContent`.
+    /// </summary>
+    public enum MeasureMode : uint
+    {
+        /// <summary>
+        ///  The width is fixed.
+        /// </summary>
+        Exact = 0,
+        /// <summary>
+        ///  The width is the most that is available.
+        /// </summary>
+        FitContent = 1,
+        /// <summary>
+        ///  As narrow as the content can be.
+        /// </summary>
+        MinContent = 2,
+        /// <summary>
+        ///  As wide as the content wants to be.
+        /// </summary>
+        MaxContent = 3,
     }
 
 

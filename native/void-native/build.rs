@@ -24,6 +24,7 @@ fn main() {
             "TaffyAlignContent",
             "TaffyOverflow",
             "TaffyGridAutoFlow",
+            "MeasureMode",
         ])
         .csharp_dll_name("void_native")
         .csharp_namespace("Void.Native")

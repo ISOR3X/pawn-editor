@@ -12,12 +12,12 @@ use std::cell::RefCell;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::{Mutex, MutexGuard};
 
-use measure::{HeightCallback, MeasureDesc, MeasureRegistry};
+use measure::{MeasureCallback, MeasureRegistry, MeasureSize};
 use style::{StyleDesc, StyleRegistry, TaffyDimension, TaffyGridPlacement, TaffyTrackSizingFunction};
 use tree::{FrameResult, NodeOut, NodeRecord, VoidTree};
 
 /// Bumped whenever a shared struct or function signature changes.
-pub const ABI_VERSION: u32 = 2;
+pub const ABI_VERSION: u32 = 3;
 
 pub const STATUS_OK: i32 = 0;
 pub const STATUS_PANIC: i32 = 1;
@@ -36,7 +36,7 @@ unsafe impl Send for Registries {}
 
 static REGISTRIES: Mutex<Option<Registries>> = Mutex::new(None);
 
-/// Locks the process-wide registries. The height callback runs while this is held, so it must never call
+/// Locks the process-wide registries. The measure callback runs while this is held, so it must never call
 /// back into this library.
 fn registries() -> MutexGuard<'static, Option<Registries>> {
     // A panic while holding the lock already reported itself as a failed call; the data is still consistent
@@ -84,7 +84,7 @@ pub struct AbiSizes {
     pub node_out: u32,
     pub frame_result: u32,
     pub style_desc: u32,
-    pub measure_desc: u32,
+    pub measure_size: u32,
     pub dimension: u32,
     pub track: u32,
     pub grid_placement: u32,
@@ -108,7 +108,7 @@ pub unsafe extern "C" fn void_abi_sizes(out: *mut AbiSizes) -> i32 {
             node_out: size_of::<NodeOut>() as u32,
             frame_result: size_of::<FrameResult>() as u32,
             style_desc: size_of::<StyleDesc>() as u32,
-            measure_desc: size_of::<MeasureDesc>() as u32,
+            measure_size: size_of::<MeasureSize>() as u32,
             dimension: size_of::<TaffyDimension>() as u32,
             track: size_of::<TaffyTrackSizingFunction>() as u32,
             grid_placement: size_of::<TaffyGridPlacement>() as u32,
@@ -134,11 +134,11 @@ pub unsafe extern "C" fn void_last_error(buf: *mut u8, cap: u32) -> u32 {
     })
 }
 
-/// Sets the function that measures the height of wrapping content at a given width. Pass null to clear it.
+/// Sets the function that measures registered content. Pass null to clear it.
 #[unsafe(no_mangle)]
-pub extern "C" fn void_set_height_callback(callback: Option<HeightCallback>) -> i32 {
+pub extern "C" fn void_set_measure_callback(callback: Option<MeasureCallback>) -> i32 {
     guarded(|| {
-        measure::set_height_callback(callback);
+        measure::set_callback(callback);
         Ok(())
     })
 }
@@ -156,14 +156,16 @@ pub unsafe extern "C" fn void_style_register(desc: *const StyleDesc, out_handle:
     })
 }
 
+/// Registers a piece of measurable content and returns its handle. C# keeps track of what the handle stands for;
+/// this side only caches the sizes the measure callback returns for it.
+///
 /// # Safety
-/// `desc` must be valid for reads and `out_handle` for writes.
+/// `out_handle` must be valid for writes.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn void_measure_register(desc: *const MeasureDesc, out_handle: *mut u32) -> i32 {
+pub unsafe extern "C" fn void_measure_register(out_handle: *mut u32) -> i32 {
     guarded(|| {
-        let desc = unsafe { desc.as_ref() }.ok_or_else(|| null("desc"))?;
         let out_handle = unsafe { out_handle.as_mut() }.ok_or_else(|| null("out_handle"))?;
-        *out_handle = registries().as_mut().unwrap().measures.register(*desc);
+        *out_handle = registries().as_mut().unwrap().measures.register();
         Ok(())
     })
 }
@@ -180,9 +182,9 @@ pub extern "C" fn void_measure_release(handle: u32) -> i32 {
     })
 }
 
-/// Number of times the height callback has been invoked, for profiling.
+/// Number of times the measure callback has been invoked, for profiling.
 #[unsafe(no_mangle)]
-pub extern "C" fn void_height_callback_count() -> u64 {
+pub extern "C" fn void_measure_callback_count() -> u64 {
     registries().as_ref().unwrap().measures.callback_calls
 }
 

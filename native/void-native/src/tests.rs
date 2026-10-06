@@ -4,7 +4,7 @@ use taffy::prelude::*;
 use taffy::geometry::Point;
 use taffy::style::Overflow;
 
-use crate::measure::{self, MeasureDesc};
+use crate::measure::{self, MeasureMode, MeasureSize};
 use crate::style::StyleRegistry;
 use crate::tree::{FrameResult, NODE_SCROLL_Y, NodeOut, NodeRecord, VoidTree};
 use crate::{Registries, measure::MeasureRegistry};
@@ -222,15 +222,30 @@ fn rejects_malformed_frames() {
 
 static CALLS: AtomicU32 = AtomicU32::new(0);
 
-/// Pretends every line is 10 wide and 20 tall: height = ceil(100 / width) lines.
-extern "C" fn fake_height(_handle: u32, width: f32) -> f32 {
+/// Handle 1 is a wrapping text of ten 10-wide words on 20-tall lines; anything else is a 30x20 label.
+extern "C" fn fake_measure(handle: u32, mode: MeasureMode, width: f32, out: *mut MeasureSize) {
     CALLS.fetch_add(1, Ordering::SeqCst);
-    (100.0 / width).ceil() * 20.0
+    let size = if handle == 1 {
+        let w = match mode {
+            MeasureMode::Exact => width,
+            MeasureMode::FitContent => width.min(100.0),
+            MeasureMode::MinContent => 10.0,
+            MeasureMode::MaxContent => 100.0,
+        };
+        MeasureSize { width: w, height: (100.0 / w).ceil() * 20.0 }
+    } else {
+        let w = match mode {
+            MeasureMode::Exact | MeasureMode::FitContent => width.min(30.0),
+            MeasureMode::MinContent | MeasureMode::MaxContent => 30.0,
+        };
+        MeasureSize { width: w, height: 20.0 }
+    };
+    unsafe { *out = size };
 }
 
 #[test]
 fn measurement_is_cached_by_content() {
-    measure::set_height_callback(Some(fake_height));
+    measure::set_callback(Some(fake_measure));
     let mut h = Harness::new();
     let col = h.style(Style {
         flex_direction: FlexDirection::Column,
@@ -238,37 +253,38 @@ fn measurement_is_cached_by_content() {
         size: Size { width: length(50.0), height: auto() },
         ..Default::default()
     });
-    let wraps = h.regs.measures.register(MeasureDesc { max_width: 100.0, max_height: 20.0, min_content_width: 10.0, wraps: 1 });
-    let label = h.regs.measures.register(MeasureDesc { max_width: 30.0, max_height: 20.0, min_content_width: 30.0, wraps: 0 });
+    let wraps = h.regs.measures.register();
+    let label = h.regs.measures.register();
+    assert_eq!(wraps, 1);
 
-    // Three nodes share the wrapping content, one shows the non-wrapping label.
+    // Three nodes share the wrapping content, one shows the label.
     let tree = N(0, col, 0, vec![N(1, 0, wraps, vec![]), N(2, 0, wraps, vec![]), N(3, 0, wraps, vec![]), N(4, 0, label, vec![])]);
     let (_, out) = h.frame(&tree, 200.0, 500.0);
 
     assert_eq!((out[1].width, out[1].height), (50.0, 40.0), "wrapped to two lines at 50 wide");
+    assert_eq!((out[2].width, out[2].height), (50.0, 40.0));
     assert_eq!((out[4].width, out[4].height), (30.0, 20.0));
     let after_first = CALLS.load(Ordering::SeqCst);
-    assert!(after_first >= 1);
-    assert!(after_first <= 2, "shared content measured once per distinct width, got {after_first} calls");
+    assert!(after_first >= 2);
 
-    // New nodes with the same content, e.g. rows scrolling into view, reuse the cached heights.
+    // New nodes with the same content, e.g. rows scrolling into view, reuse the cached answers.
     let tree = N(0, col, 0, vec![N(5, 0, wraps, vec![]), N(6, 0, wraps, vec![]), N(4, 0, label, vec![])]);
     h.frame(&tree, 200.0, 500.0);
     assert_eq!(CALLS.load(Ordering::SeqCst), after_first);
 
-    measure::set_height_callback(None);
+    measure::set_callback(None);
 }
 
 #[test]
 fn measure_handles_are_reused_after_release() {
     let mut m = MeasureRegistry::default();
-    let a = m.register(MeasureDesc::default());
-    let b = m.register(MeasureDesc::default());
+    let a = m.register();
+    let b = m.register();
     assert_ne!(a, 0);
     assert!(m.release(a));
     assert!(!m.release(a));
     assert!(!m.contains(a));
-    assert_eq!(m.register(MeasureDesc::default()), a);
+    assert_eq!(m.register(), a);
     assert!(m.contains(b));
     assert!(!m.release(0));
 }

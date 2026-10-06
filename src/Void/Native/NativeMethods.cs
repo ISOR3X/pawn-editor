@@ -48,7 +48,7 @@ public static unsafe partial class NativeMethods
         Compare(nameof(NodeOut), native.node_out, sizeof(NodeOut));
         Compare(nameof(FrameResult), native.frame_result, sizeof(FrameResult));
         Compare(nameof(StyleDesc), native.style_desc, sizeof(StyleDesc));
-        Compare(nameof(MeasureDesc), native.measure_desc, sizeof(MeasureDesc));
+        Compare(nameof(MeasureSize), native.measure_size, sizeof(MeasureSize));
         Compare(nameof(TaffyDimension), native.dimension, sizeof(TaffyDimension));
         Compare(nameof(TaffyTrackSizingFunction), native.track, sizeof(TaffyTrackSizingFunction));
         Compare(nameof(TaffyGridPlacement), native.grid_placement, sizeof(TaffyGridPlacement));

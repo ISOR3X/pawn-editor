@@ -154,7 +154,7 @@ public class Window_PlaygroundVoid : Window
         Readout(root, () =>
             $"nodes {_tree.NodeCount} · layout last frame: {(_tree.LastFrameLaidOut ? "yes" : "no")} · " +
             $"styles {StyleRegistry.Count} · texts {MeasureRegistry.Count} · " +
-            $"height callbacks {NativeMethods.void_height_callback_count()}", "stats");
+            $"measure callbacks {NativeMethods.void_measure_callback_count()}", "stats");
     }
 
     /// <summary>

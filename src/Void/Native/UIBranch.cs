@@ -69,7 +69,7 @@ public class UIBranch
         [CallerLineNumber] int line = 0)
     {
         var key = _tree.Keys.Child(_key, ResolveKey(id, file, line));
-        var index = _tree.Frame.Open(key, draw, StyleRegistry.Get(style), MeasureRegistry.Get(context));
+        var index = _tree.Frame.Open(key, draw, _tree.Handles.Style(key, style), _tree.Handles.Measure(key, context));
 
         // Children append themselves after this node; Close records where its subtree ends.
         // Context rides along to children; the tree itself never stores it.
