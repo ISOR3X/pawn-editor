@@ -1,8 +1,9 @@
 using RimWorld;
+using Taffy;
 using Verse;
 using Void;
-using Void.Components;
 using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -32,7 +33,7 @@ public class SectionWorker_ShapeBody(SectionDef def) : SectionWorker(def)
                     {
                         Verse.Widgets.DrawTextureFitted(r with { y = r.y - 8f }, AppearanceUtility.BodyTypes[td], 1.6f);
                     }
-                }, 64f, style: new StyleOverride { gap = Void.Taffy.Gap(4f) });
+                }, 64f, style: new StyleOverride { gap = new TaffyAxes(Dimension.Px(4f), Dimension.Px(4f)) });
         };
         layout.ComponentById<ButtonElement>("next").OnClick = _ => StepBodyType();
         layout.ComponentById<ButtonElement>("prev").OnClick = _ => StepBodyType(-1);

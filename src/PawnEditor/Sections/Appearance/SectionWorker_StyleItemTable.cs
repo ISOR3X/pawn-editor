@@ -1,12 +1,14 @@
 using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
-using Void.XMLComponents;
 using Layout = Void.Layout;
+using static VoidComponents;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -54,16 +56,16 @@ public abstract class SectionWorker_StyleItemTable<T>(SectionDef def) : SectionW
             defs,
             [
                 ColumnWorker<T>.Create<PawnContext>(
-                    Void.Taffy.Px(36f),
-                    (grid, def, ctx) => grid.Icon(def.Icon, ctx.Value.story.HairColor, UIUtility.ComponentSize.Large)
+                    TrackSizingFunction.Px(36f),
+                    (grid, def, ctx) => grid.Icon(def.Icon, ctx.Value.story.HairColor, ComponentSize.Large)
                 ),
                 ColumnWorker<T>.CreateText(
-                    Void.Taffy.Fr(3), def => def.LabelCap, "Label"
+                    TrackSizingFunction.Fr(3), def => def.LabelCap, "Label"
                 ),
                 new ColumnWorker_Gender<T>(),
-                ColumnWorker<T>.CreateText(Void.Taffy.Fr(), def => def.StyleItemCategory.LabelCap, "Style"),
+                ColumnWorker<T>.CreateText(TrackSizingFunction.Fr(), def => def.StyleItemCategory.LabelCap, "Style"),
                 ColumnWorker<T>.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => def.modContentPack.Name,
                     "Source",
                     ColoredText.SubtleGrayColor

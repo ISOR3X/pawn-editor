@@ -25,7 +25,7 @@ public static class PawnFixup
     }
 
     /// <summary>
-    /// Using reflection, find fields that require a loadID and assign a new one.
+    ///     Using reflection, find fields that require a loadID and assign a new one.
     /// </summary>
     public static void ReassignIDs(Pawn pawn)
     {
@@ -99,8 +99,9 @@ public static class PawnFixup
     }
 
     /// <summary>
-    /// Compare equality using instances instead of values to avoid revisiting nodes.
-    /// The object graph being walked in <see cref="ReassignIDs"/> may hold circular references and this prevents that from the walk looping infinitely.
+    ///     Compare equality using instances instead of values to avoid revisiting nodes.
+    ///     The object graph being walked in <see cref="ReassignIDs" /> may hold circular references and this prevents that
+    ///     from the walk looping infinitely.
     /// </summary>
     private sealed class IdentityComparer : IEqualityComparer<object>
     {

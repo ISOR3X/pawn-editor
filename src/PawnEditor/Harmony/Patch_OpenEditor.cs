@@ -1,5 +1,6 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using JetBrains.Annotations;
+using UnityEngine;
 using Verse;
 using Void;
 
@@ -17,15 +18,16 @@ public class Patch_OpenEditor
             else Find.WindowStack.Add(new Window_Editor());
         }
 
-        if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
-            if (Current.ProgramState == ProgramState.Playing)
-                VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
-
         if (KeyBindingDefOf.PawnEditor_HotReloadDefs.KeyDownEvent)
         {
             var open = Find.WindowStack.IsOpen<Window_Editor>();
             PlayDataLoader.HotReloadDefs();
             if (open) Find.WindowStack.Add(new Window_Editor());
+        }
+
+        if (KeyBindingDefOf.PawnEditor_OpenDev.KeyDownEvent)
+        {
+            VoidMod.Settings.drawDebug = !VoidMod.Settings.drawDebug;
         }
     }
 }

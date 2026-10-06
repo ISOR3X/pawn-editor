@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using Verse;
 using Void;
 
@@ -9,7 +9,7 @@ public class TabDef : Def
 {
     private readonly Type workerClass = typeof(TabWorker);
 
-    public ParsedLayout? layout;
+    public ParsedLayoutLegacy? layout;
     public int priority = 10;
     public PawnUtility.PawnCategory tabCategory = PawnUtility.PawnCategory.Humanlike;
 

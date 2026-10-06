@@ -1,5 +1,6 @@
-﻿using Taffy;
+using Taffy;
 using Void;
+using Void.Components;
 
 namespace PawnEditor.Table;
 
@@ -20,6 +21,6 @@ public class RowFilter_Checkbox<T>(Func<T, bool> passes, string label) : RowFilt
                 Verse.Widgets.CheckboxLabeled(r, label, ref _active);
                 if (prev != _active) MarkDirty();
             },
-            new StyleOverride { height = UIUtility.ButtonHeight, width = Dimension.Percent(1f) });
+            new StyleOverride { height = Dimension.Px(UIUtility.ButtonHeight), width = Dimension.Percent(1f) });
     }
 }

@@ -1,12 +1,13 @@
-﻿using PawnEditor.Table;
+using PawnEditor.Table;
 using PawnEditor.Table.ColumnWorkers;
 using RimWorld;
+using Taffy;
 using UnityEngine;
 using Verse;
 using Void;
-using Void.Components;
-using Void.XMLComponents;
 using Col = PawnEditor.Table.ColumnWorker<Verse.ThingDef>;
+using Void.XMLComponents;
+using Void.Components;
 
 namespace PawnEditor;
 
@@ -55,16 +56,17 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
             defs,
             [
                 ColumnWorker<T>.Create(
-                    Void.Taffy.Px(GenUI.SmallIconSize),
+                    TrackSizingFunction.Px(GenUI.SmallIconSize),
                     (grid, thing) => grid.Item(r => Verse.Widgets.ThingIcon(r, thing),
-                        new StyleOverride { width = GenUI.SmallIconSize, height = GenUI.SmallIconSize })
+                        new StyleOverride
+                            { width = Dimension.Px(GenUI.SmallIconSize), height = Dimension.Px(GenUI.SmallIconSize) })
                 ),
                 ColumnWorker<T>.CreateText(
-                    Void.Taffy.Fr(2), thing => thing.LabelCap, "Label"
+                    TrackSizingFunction.Fr(2), thing => thing.LabelCap, "Label"
                 ),
-                new ColumnWorker_ThingStuff<T>(Void.Taffy.Fr()),
-                new ColumnWorker_ThingMass<T>(Void.Taffy.Px(100f)),
-                ColumnWorker<T>.Create(Void.Taffy.Px(GenUI.SmallIconSize),
+                new ColumnWorker_ThingStuff<T>(TrackSizingFunction.Fr()),
+                new ColumnWorker_ThingMass<T>(TrackSizingFunction.Px(100f)),
+                ColumnWorker<T>.Create(TrackSizingFunction.Px(GenUI.SmallIconSize),
                     (builder, thing) =>
                     {
                         builder.Button(icon: TexButton.NewItem,
@@ -75,7 +77,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                                         Find.WindowStack.WindowOfType<Window_Editor>()));
                             }, variant: TaffyExtensions.ButtonVariant.Ghost);
                     }),
-                ColumnWorker<T>.Create(Void.Taffy.Px(GenUI.SmallIconSize),
+                ColumnWorker<T>.Create(TrackSizingFunction.Px(GenUI.SmallIconSize),
                     (builder, thing) => { builder.Item(r => Verse.Widgets.InfoCardButtonCentered(r, thing)); })
             ],
             onRowClick: row => onRowClick?.Invoke(row),
@@ -91,7 +93,7 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
             null,
             [
                 Col.Create(
-                    Void.Taffy.Px(20f),
+                    TrackSizingFunction.Px(20f),
                     (grid, def) =>
                     {
                         grid.Item(r =>
@@ -100,16 +102,16 @@ public abstract class SectionWorker_ThingTable<T>(SectionDef def) : SectionWorke
                             {
                                 Verse.Widgets.DefIcon(r, def);
                             }
-                        }, new StyleOverride { width = 20f, height = 20f });
+                        }, new StyleOverride { width = Dimension.Px(20f), height = Dimension.Px(20f) });
                     }
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => def.LabelCap,
                     "Label"
                 ),
                 Col.CreateText(
-                    Void.Taffy.Fr(),
+                    TrackSizingFunction.Fr(),
                     def => def.modContentPack?.Name ?? "",
                     "Source",
                     ColoredText.SubtleGrayColor

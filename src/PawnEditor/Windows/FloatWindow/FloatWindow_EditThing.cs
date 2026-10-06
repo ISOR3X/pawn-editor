@@ -5,7 +5,6 @@ using Verse;
 using Void;
 using Void.Components;
 using Void.Extensions;
-using Display = Taffy.Display;
 
 namespace PawnEditor;
 
@@ -23,7 +22,8 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
         style ??= new StyleOverride();
         style = style.Merge(new StyleOverride
         {
-            width = Dimension.AUTO, justifySelf = AlignItems.Stretch
+            width = Dimension.Auto(),
+            justifySelf = TaffyAlignItems.Stretch
         });
         grid.Button(label, icon, iconColor, style: style, onClick: onClick);
     }
@@ -33,7 +33,7 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
         // MeasuredGrid runs with unconstrained height, so Taffy computes the exact content height,
         // which we use to auto-resize the window below.
         // TODO: Convert to clean taffy components/ layout.
-        var contentHeight = Void.Taffy.DivMeasured(inRect,
+        var contentHeight = Void.TaffyLegacy.DivMeasured(inRect,
             b =>
             {
                 if (thing.def.MadeFromStuff)
@@ -210,9 +210,13 @@ public class FloatWindow_EditThing(Rect boundWidgetRect, Thing thing, Window? ow
                 }
             }, new StyleOverride
             {
-                gridTemplateColumns = [Void.Taffy.Fr(), Void.Taffy.Fr(2), Void.Taffy.Fr(), Void.Taffy.Fr(2)],
-                display = Display.Grid,
-                gap = Void.Taffy.Gap(GenUI.GapLabel, GenUI.GapTiny),
+                gridTemplateColumns =
+                [
+                    TrackSizingFunction.Fr(), TrackSizingFunction.Fr(2), TrackSizingFunction.Fr(),
+                    TrackSizingFunction.Fr(2)
+                ],
+                display = TaffyDisplay.Grid,
+                gap = new TaffyAxes(Dimension.Px(GenUI.GapLabel), Dimension.Px(GenUI.GapTiny)),
                 gridAutoRows = [TrackSizingFunction.Px(UIUtility.ButtonHeight)]
             });
 
