@@ -15,6 +15,9 @@ internal static unsafe class MeasureRegistry
     /// <summary>Kept in a static field so the delegate the native side holds is never collected.</summary>
     private static readonly NativeMethods.void_set_height_callback_callback_delegate Callback = Height;
 
+    /// <summary>Log.ErrorOnce identifies a message by a number; any number unique to this message will do.</summary>
+    private static readonly int HeightErrorKey = "Void.Native.MeasureRegistry.Height".GetHashCode();
+
     public static int Count => Handles.Count;
 
     public static void Install()
@@ -76,7 +79,7 @@ internal static unsafe class MeasureRegistry
         }
         catch (Exception e)
         {
-            Log.ErrorOnce($"[{VoidMod.ModName}] Measuring text failed: {e}", 0x56_4F_49_44);
+            Log.ErrorOnce($"[{VoidMod.ModName}] Measuring text failed: {e}", HeightErrorKey);
             return 0f;
         }
     }

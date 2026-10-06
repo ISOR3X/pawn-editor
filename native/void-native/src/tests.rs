@@ -71,7 +71,7 @@ fn lays_out_with_absolute_positions() {
     let a = h.style(fixed(50.0, 30.0));
     let b = h.style(fixed(60.0, 40.0));
 
-    let (r, out) = h.frame(&N(1, col, 0, vec![N(2, a, 0, vec![]), N(3, b, 0, vec![])]), 200.0, 500.0);
+    let (r, out) = h.frame(&N(0, col, 0, vec![N(1, a, 0, vec![]), N(2, b, 0, vec![])]), 200.0, 500.0);
 
     assert_eq!(r.laid_out, 1);
     assert_eq!((out[0].x, out[0].y, out[0].width, out[0].height), (10.0, 20.0, 200.0, 70.0));
@@ -85,7 +85,7 @@ fn unchanged_frame_skips_layout() {
     let mut h = Harness::new();
     let col = h.style(column());
     let a = h.style(fixed(50.0, 30.0));
-    let tree = N(1, col, 0, vec![N(2, a, 0, vec![])]);
+    let tree = N(0, col, 0, vec![N(1, a, 0, vec![])]);
 
     let (first, out1) = h.frame(&tree, 200.0, 500.0);
     let (second, out2) = h.frame(&tree, 200.0, 500.0);
@@ -104,8 +104,8 @@ fn style_change_relayouts() {
     let small = h.style(fixed(50.0, 30.0));
     let big = h.style(fixed(50.0, 90.0));
 
-    h.frame(&N(1, col, 0, vec![N(2, small, 0, vec![])]), 200.0, 500.0);
-    let (r, out) = h.frame(&N(1, col, 0, vec![N(2, big, 0, vec![])]), 200.0, 500.0);
+    h.frame(&N(0, col, 0, vec![N(1, small, 0, vec![])]), 200.0, 500.0);
+    let (r, out) = h.frame(&N(0, col, 0, vec![N(1, big, 0, vec![])]), 200.0, 500.0);
 
     assert_eq!(r.laid_out, 1);
     assert_eq!(out[1].height, 90.0);
@@ -117,15 +117,42 @@ fn removed_nodes_are_reported_including_descendants() {
     let col = h.style(column());
     let a = h.style(fixed(50.0, 30.0));
 
-    h.frame(&N(1, col, 0, vec![N(2, col, 0, vec![N(3, a, 0, vec![]), N(4, a, 0, vec![])]), N(5, a, 0, vec![])]), 200.0, 500.0);
-    let (r, out) = h.frame(&N(1, col, 0, vec![N(5, a, 0, vec![])]), 200.0, 500.0);
+    h.frame(&N(0, col, 0, vec![N(1, col, 0, vec![N(2, a, 0, vec![]), N(3, a, 0, vec![])]), N(4, a, 0, vec![])]), 200.0, 500.0);
+    let (r, out) = h.frame(&N(0, col, 0, vec![N(4, a, 0, vec![])]), 200.0, 500.0);
 
     assert_eq!(r.laid_out, 1);
     assert_eq!(r.removed_count, 3);
-    assert_eq!(h.removed(), vec![2, 3, 4]);
+    assert_eq!(h.removed(), vec![1, 2, 3]);
     assert_eq!(h.removed(), Vec::<u64>::new(), "taking drains the queue");
     assert_eq!(h.tree.node_count(), 2);
     assert_eq!(out[1].y, 20.0, "the remaining child moved up");
+}
+
+#[test]
+fn removed_keys_can_be_reused_for_new_nodes() {
+    let mut h = Harness::new();
+    let col = h.style(column());
+    let small = h.style(fixed(50.0, 30.0));
+    let big = h.style(fixed(50.0, 90.0));
+
+    h.frame(&N(0, col, 0, vec![N(1, small, 0, vec![])]), 200.0, 500.0);
+    h.frame(&N(0, col, 0, vec![]), 200.0, 500.0);
+    assert_eq!(h.removed(), vec![1]);
+
+    // C# hands key 1 to an unrelated node; it must start fresh rather than inherit the old node.
+    let (r, out) = h.frame(&N(0, col, 0, vec![N(1, big, 0, vec![])]), 200.0, 500.0);
+    assert_eq!(r.laid_out, 1);
+    assert_eq!(out[1].height, 90.0);
+    assert_eq!(h.tree.node_count(), 2);
+}
+
+#[test]
+fn rejects_keys_that_are_not_dense() {
+    let mut h = Harness::new();
+    let col = h.style(column());
+
+    let err = h.try_frame(&N(0, col, 0, vec![N(1_000_000, col, 0, vec![])]), 100.0, 100.0).unwrap_err();
+    assert!(err.contains("not a dense key"), "{err}");
 }
 
 #[test]
@@ -135,8 +162,8 @@ fn reorder_is_applied() {
     let a = h.style(fixed(50.0, 30.0));
     let b = h.style(fixed(50.0, 40.0));
 
-    h.frame(&N(1, col, 0, vec![N(2, a, 0, vec![]), N(3, b, 0, vec![])]), 200.0, 500.0);
-    let (r, out) = h.frame(&N(1, col, 0, vec![N(3, b, 0, vec![]), N(2, a, 0, vec![])]), 200.0, 500.0);
+    h.frame(&N(0, col, 0, vec![N(1, a, 0, vec![]), N(2, b, 0, vec![])]), 200.0, 500.0);
+    let (r, out) = h.frame(&N(0, col, 0, vec![N(2, b, 0, vec![]), N(1, a, 0, vec![])]), 200.0, 500.0);
 
     assert_eq!(r.laid_out, 1);
     assert_eq!((out[1].y, out[1].height), (20.0, 40.0));
@@ -158,10 +185,10 @@ fn scroll_container_children_are_relative_to_its_content() {
     let spacer = h.style(fixed(10.0, 7.0));
 
     let (_, out) = h.frame(
-        &N(1, col, 0, vec![
-            N(9, spacer, 0, vec![]),
-            N(2, scroller, 0, vec![N(3, item, 0, vec![]), N(4, item, 0, vec![])]),
-            N(5, item, 0, vec![]),
+        &N(0, col, 0, vec![
+            N(5, spacer, 0, vec![]),
+            N(1, scroller, 0, vec![N(2, item, 0, vec![]), N(3, item, 0, vec![])]),
+            N(4, item, 0, vec![]),
         ]),
         200.0,
         500.0,
@@ -181,10 +208,10 @@ fn rejects_malformed_frames() {
     let mut h = Harness::new();
     let col = h.style(column());
 
-    let dup = h.try_frame(&N(1, col, 0, vec![N(2, col, 0, vec![]), N(2, col, 0, vec![])]), 100.0, 100.0);
+    let dup = h.try_frame(&N(0, col, 0, vec![N(1, col, 0, vec![]), N(1, col, 0, vec![])]), 100.0, 100.0);
     assert!(dup.unwrap_err().contains("appears twice"));
 
-    let unknown = h.try_frame(&N(1, 999, 0, vec![]), 100.0, 100.0);
+    let unknown = h.try_frame(&N(0, 999, 0, vec![]), 100.0, 100.0);
     assert!(unknown.unwrap_err().contains("unknown style handle"));
 
     let records = [NodeRecord { key: 1, subtree_end: 2, style: 0, measure: 0, _pad: 0 }];
@@ -215,7 +242,7 @@ fn measurement_is_cached_by_content() {
     let label = h.regs.measures.register(MeasureDesc { max_width: 30.0, max_height: 20.0, min_content_width: 30.0, wraps: 0 });
 
     // Three nodes share the wrapping content, one shows the non-wrapping label.
-    let tree = N(1, col, 0, vec![N(2, 0, wraps, vec![]), N(3, 0, wraps, vec![]), N(4, 0, wraps, vec![]), N(5, 0, label, vec![])]);
+    let tree = N(0, col, 0, vec![N(1, 0, wraps, vec![]), N(2, 0, wraps, vec![]), N(3, 0, wraps, vec![]), N(4, 0, label, vec![])]);
     let (_, out) = h.frame(&tree, 200.0, 500.0);
 
     assert_eq!((out[1].width, out[1].height), (50.0, 40.0), "wrapped to two lines at 50 wide");
@@ -225,7 +252,7 @@ fn measurement_is_cached_by_content() {
     assert!(after_first <= 2, "shared content measured once per distinct width, got {after_first} calls");
 
     // New nodes with the same content, e.g. rows scrolling into view, reuse the cached heights.
-    let tree = N(1, col, 0, vec![N(6, 0, wraps, vec![]), N(7, 0, wraps, vec![]), N(5, 0, label, vec![])]);
+    let tree = N(0, col, 0, vec![N(5, 0, wraps, vec![]), N(6, 0, wraps, vec![]), N(4, 0, label, vec![])]);
     h.frame(&tree, 200.0, 500.0);
     assert_eq!(CALLS.load(Ordering::SeqCst), after_first);
 

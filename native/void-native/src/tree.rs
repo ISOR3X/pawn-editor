@@ -2,10 +2,6 @@
 //! [`VoidTree::frame`] reconciles that against the previous frame, lays it out when anything changed, and
 //! writes one [`NodeOut`] per record.
 
-use std::collections::HashMap;
-use std::collections::hash_map::Entry;
-use std::hash::{BuildHasherDefault, Hasher};
-
 use taffy::compute_leaf_layout;
 use taffy::prelude::*;
 use taffy::style::Overflow;
@@ -17,7 +13,8 @@ use crate::style::StyleRegistry;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NodeRecord {
-    /// Stable identity across frames: a hash of the path from the root.
+    /// The node's identity across frames, assigned by C#. Keys are small and dense: C# hands them out in order
+    /// and reuses a key once this side has reported its node removed. They index [`VoidTree`]'s node table.
     pub key: u64,
     /// Index one past this node's last descendant. Children of record `i` are found by starting at `i + 1`
     /// and jumping from each child to its `subtree_end`.
@@ -52,31 +49,13 @@ pub struct NodeOut {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct FrameResult {
-    /// Keys of nodes that disappeared this frame; fetch them with `void_take_removed`.
+    /// Keys of nodes that disappeared this frame; fetch them with `void_take_removed`. C# may reuse them after.
     pub removed_count: u32,
     /// 1 when layout was recomputed this frame.
     pub laid_out: u32,
     pub root_width: f32,
     pub root_height: f32,
 }
-
-/// Keys are already well-mixed 64-bit hashes, so hashing them again is wasted work.
-#[derive(Default)]
-struct IdentityHasher(u64);
-
-impl Hasher for IdentityHasher {
-    fn finish(&self) -> u64 {
-        self.0
-    }
-    fn write(&mut self, _: &[u8]) {
-        unreachable!("only u64 keys are hashed")
-    }
-    fn write_u64(&mut self, v: u64) {
-        self.0 = v;
-    }
-}
-
-type KeyMap<V> = HashMap<u64, V, BuildHasherDefault<IdentityHasher>>;
 
 struct NodeEntry {
     id: NodeId,
@@ -90,7 +69,8 @@ struct NodeEntry {
 pub struct VoidTree {
     /// Node context is the measure handle.
     taffy: TaffyTree<u32>,
-    nodes: KeyMap<NodeEntry>,
+    /// Indexed by [`NodeRecord::key`]; `None` for keys not currently in use.
+    nodes: Vec<Option<NodeEntry>>,
     generation: u32,
     last_available: Option<(f32, f32)>,
     removed: Vec<u64>,
@@ -104,7 +84,7 @@ impl Default for VoidTree {
     fn default() -> Self {
         Self {
             taffy: TaffyTree::new(),
-            nodes: KeyMap::default(),
+            nodes: Vec::new(),
             generation: 0,
             last_available: None,
             removed: Vec::new(),
@@ -127,7 +107,7 @@ fn available(v: f32) -> AvailableSpace {
 
 impl VoidTree {
     pub fn node_count(&self) -> usize {
-        self.nodes.len()
+        self.nodes.iter().flatten().count()
     }
 
     /// Drains the keys removed by previous frames into `buf`, returning how many were written.
@@ -138,11 +118,14 @@ impl VoidTree {
         n
     }
 
-    fn validate(records: &[NodeRecord], styles: &StyleRegistry, measures: &MeasureRegistry) -> Result<(), String> {
+    fn validate(&self, records: &[NodeRecord], styles: &StyleRegistry, measures: &MeasureRegistry) -> Result<(), String> {
         let n = records.len();
         if n == 0 {
             return Err("frame has no records".into());
         }
+        // Keys are dense, so a new key can at most extend the table by one per record. Anything larger is a bug
+        // on the C# side, and would otherwise allocate a huge table.
+        let max_key = self.nodes.len() + n;
         if records[0].subtree_end as usize != n {
             return Err(format!("root subtree_end is {}, expected {n}", records[0].subtree_end));
         }
@@ -150,6 +133,9 @@ impl VoidTree {
             let end = r.subtree_end as usize;
             if end <= i || end > n {
                 return Err(format!("record {i}: subtree_end {end} out of range"));
+            }
+            if r.key as usize >= max_key {
+                return Err(format!("record {i}: key {} is not a dense key (table holds {})", r.key, self.nodes.len()));
             }
             if styles.get(r.style).is_none() {
                 return Err(format!("record {i}: unknown style handle {}", r.style));
@@ -172,7 +158,7 @@ impl VoidTree {
         measures: &mut MeasureRegistry,
         out: &mut [NodeOut],
     ) -> Result<FrameResult, String> {
-        Self::validate(records, styles, measures)?;
+        self.validate(records, styles, measures)?;
         if out.len() < records.len() {
             return Err(format!("output buffer holds {} entries, need {}", out.len(), records.len()));
         }
@@ -184,11 +170,15 @@ impl VoidTree {
         // 1. Find or create the node for every record and bring its style and measure up to date.
         self.ids.clear();
         for (i, r) in records.iter().enumerate() {
-            let entry = match self.nodes.entry(r.key) {
-                Entry::Occupied(occupied) => {
-                    let entry = occupied.into_mut();
+            let slot = r.key as usize;
+            if slot >= self.nodes.len() {
+                self.nodes.resize_with(slot + 1, || None);
+            }
+
+            let entry = match &mut self.nodes[slot] {
+                Some(entry) => {
                     if entry.seen == generation {
-                        return Err(format!("record {i}: key {:#018x} appears twice in one frame", r.key));
+                        return Err(format!("record {i}: key {} appears twice in one frame", r.key));
                     }
                     if entry.style != r.style {
                         self.taffy.set_style(entry.id, styles.get(r.style).unwrap().clone()).map_err(|e| e.to_string())?;
@@ -203,7 +193,7 @@ impl VoidTree {
                     }
                     entry
                 }
-                Entry::Vacant(vacant) => {
+                empty @ None => {
                     let style = styles.get(r.style).unwrap().clone();
                     let id = if r.measure != 0 {
                         self.taffy.new_leaf_with_context(style, r.measure)
@@ -212,7 +202,7 @@ impl VoidTree {
                     }
                     .map_err(|e| e.to_string())?;
                     changed = true;
-                    vacant.insert(NodeEntry {
+                    empty.insert(NodeEntry {
                         id,
                         style: r.style,
                         measure: r.measure,
@@ -240,7 +230,7 @@ impl VoidTree {
                 j = child_end;
             }
 
-            let entry = self.nodes.get_mut(&r.key).unwrap();
+            let entry = self.nodes[r.key as usize].as_mut().unwrap();
             if entry.children != self.children {
                 self.taffy.set_children(entry.id, &self.children).map_err(|e| e.to_string())?;
                 entry.children.clone_from(&self.children);
@@ -251,22 +241,22 @@ impl VoidTree {
         // 3. Remove nodes that were not described this frame. Detach every removed node's children first, so
         //    no removal has to look at a node that is already gone.
         let first_removed = self.removed.len();
-        for (key, entry) in &self.nodes {
-            if entry.seen != generation {
-                self.removed.push(*key);
+        for (key, slot) in self.nodes.iter().enumerate() {
+            if matches!(slot, Some(entry) if entry.seen != generation) {
+                self.removed.push(key as u64);
             }
         }
         if self.removed.len() > first_removed {
             changed = true;
-            for key in &self.removed[first_removed..] {
-                let entry = self.nodes.get_mut(key).unwrap();
+            for &key in &self.removed[first_removed..] {
+                let entry = self.nodes[key as usize].as_mut().unwrap();
                 if !entry.children.is_empty() {
                     self.taffy.set_children(entry.id, &[]).map_err(|e| e.to_string())?;
                     entry.children.clear();
                 }
             }
-            for key in &self.removed[first_removed..] {
-                let entry = self.nodes.remove(key).unwrap();
+            for &key in &self.removed[first_removed..] {
+                let entry = self.nodes[key as usize].take().unwrap();
                 self.taffy.remove(entry.id).map_err(|e| e.to_string())?;
             }
         }

@@ -17,7 +17,7 @@ use style::{StyleDesc, StyleRegistry, TaffyDimension, TaffyGridPlacement, TaffyT
 use tree::{FrameResult, NodeOut, NodeRecord, VoidTree};
 
 /// Bumped whenever a shared struct or function signature changes.
-pub const ABI_VERSION: u32 = 1;
+pub const ABI_VERSION: u32 = 2;
 
 pub const STATUS_OK: i32 = 0;
 pub const STATUS_PANIC: i32 = 1;

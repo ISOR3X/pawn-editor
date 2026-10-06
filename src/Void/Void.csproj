@@ -77,6 +77,18 @@
               DestinationFolder="$(MSBuildThisFileDirectory)..\..\lib\win-x64"
               SkipUnchangedFiles="true"/>
     </Target>
+    <!--
+        MonoMod.Backports (a Harmony dependency) re-declares BCL types such as System.HashCode, which RimWorld's
+        mscorlib already has, making them ambiguous. Void does not use MonoMod directly, so its types are moved
+        behind an extern alias and the mscorlib ones are used.
+    -->
+    <Target Name="AliasMonoModBackports" AfterTargets="ResolveAssemblyReferences">
+        <ItemGroup>
+            <ReferencePath Condition="'%(Filename)' == 'MonoMod.Backports'">
+                <Aliases>monomod</Aliases>
+            </ReferencePath>
+        </ItemGroup>
+    </Target>
     <ItemGroup>
         <!-- Embed small icons used in the components directly into the dll. -->
         <EmbeddedResource Include="Textures\*.png"/>

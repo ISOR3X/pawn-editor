@@ -104,79 +104,46 @@ public class Style : IEquatable<Style>
     /// </summary>
     public override int GetHashCode()
     {
-        unchecked
-        {
-            var h = 17;
-
-            void Add(int value)
-            {
-                h = h * 31 + value;
-            }
-
-            Add(display.GetHashCode());
-            Add(flexDirection.GetHashCode());
-            Add(flexWrap.GetHashCode());
-            Add(flexGrow.GetHashCode());
-            Add(flexShrink.GetHashCode());
-            Add(Hash(flexBasis));
-            Add(alignItems.GetHashCode());
-            Add(alignSelf.GetHashCode());
-            Add(alignContent.GetHashCode());
-            Add(justifyContent.GetHashCode());
-            Add(justifyItems.GetHashCode());
-            Add(justifySelf.GetHashCode());
-            Add(Hash(width));
-            Add(Hash(height));
-            Add(Hash(minWidth));
-            Add(Hash(minHeight));
-            Add(Hash(maxWidth));
-            Add(Hash(maxHeight));
-            Add(gap is { } g ? Hash(g.Width) * 31 + Hash(g.Height) : 0);
-            Add(Hash(padding));
-            Add(Hash(margin));
-            Add(gridAutoFlow.GetHashCode());
-            Add(Hash(gridColumn));
-            Add(Hash(gridRow));
-            Add(overflowX.GetHashCode());
-            Add(overflowY.GetHashCode());
-            Add(Hash(gridTemplateColumns));
-            Add(Hash(gridTemplateRows));
-            Add(Hash(gridAutoColumns));
-            Add(Hash(gridAutoRows));
-            return h;
-        }
+        var hash = new HashCode();
+        hash.Add(display);
+        hash.Add(flexDirection);
+        hash.Add(flexWrap);
+        hash.Add(flexGrow);
+        hash.Add(flexShrink);
+        hash.Add(flexBasis);
+        hash.Add(alignItems);
+        hash.Add(alignSelf);
+        hash.Add(alignContent);
+        hash.Add(justifyContent);
+        hash.Add(justifyItems);
+        hash.Add(justifySelf);
+        hash.Add(width);
+        hash.Add(height);
+        hash.Add(minWidth);
+        hash.Add(minHeight);
+        hash.Add(maxWidth);
+        hash.Add(maxHeight);
+        hash.Add(gap);
+        hash.Add(padding);
+        hash.Add(margin);
+        hash.Add(gridAutoFlow);
+        hash.Add(gridColumn);
+        hash.Add(gridRow);
+        hash.Add(overflowX);
+        hash.Add(overflowY);
+        AddTracks(ref hash, gridTemplateColumns);
+        AddTracks(ref hash, gridTemplateRows);
+        AddTracks(ref hash, gridAutoColumns);
+        AddTracks(ref hash, gridAutoRows);
+        return hash.ToHashCode();
     }
 
-    private static int Hash(TaffyDimension d)
+    /// <summary>Tracks are compared element by element, so they are hashed that way too.</summary>
+    private static void AddTracks(ref HashCode hash, TaffyTrackSizingFunction[]? tracks)
     {
-        return unchecked(d.value.GetHashCode() * 31 + (int)d.unit);
-    }
-
-    private static int Hash(TaffyDimension? d)
-    {
-        return d is { } v ? Hash(v) : 0;
-    }
-
-    private static int Hash(TaffyEdges? e)
-    {
-        if (e is not { } v) return 0;
-        return unchecked(((Hash(v.Top) * 31 + Hash(v.Right)) * 31 + Hash(v.Bottom)) * 31 + Hash(v.Left));
-    }
-
-    private static int Hash(TaffyGridPlacement? p)
-    {
-        return p is { } v ? unchecked((v.start * 31 + v.end) * 31 + v.span) : 0;
-    }
-
-    private static int Hash(TaffyTrackSizingFunction[]? tracks)
-    {
-        if (tracks is null) return 0;
-        unchecked
-        {
-            var h = tracks.Length;
-            foreach (var t in tracks) h = (h * 31 + Hash(t.min)) * 31 + Hash(t.max);
-            return h;
-        }
+        hash.Add(tracks?.Length ?? -1);
+        if (tracks == null) return;
+        foreach (var track in tracks) hash.Add(track);
     }
 
     /// <summary>

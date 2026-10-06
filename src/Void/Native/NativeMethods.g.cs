@@ -17,7 +17,7 @@ namespace Void.Native
         /// <summary>
         ///  Bumped whenever a shared struct or function signature changes.
         /// </summary>
-        public const uint ABI_VERSION = 1;
+        public const uint ABI_VERSION = 2;
         public const int STATUS_OK = 0;
         public const int STATUS_PANIC = 1;
         public const int STATUS_NULL_POINTER = 2;
@@ -296,7 +296,8 @@ namespace Void.Native
     public unsafe partial struct NodeRecord
     {
         /// <summary>
-        ///  Stable identity across frames: a hash of the path from the root.
+        ///  The node's identity across frames, assigned by C#. Keys are small and dense: C# hands them out in order
+        ///  and reuses a key once this side has reported its node removed. They index [`VoidTree`]'s node table.
         /// </summary>
         public ulong key;
         /// <summary>
@@ -337,7 +338,7 @@ namespace Void.Native
     public unsafe partial struct FrameResult
     {
         /// <summary>
-        ///  Keys of nodes that disappeared this frame; fetch them with `void_take_removed`.
+        ///  Keys of nodes that disappeared this frame; fetch them with `void_take_removed`. C# may reuse them after.
         /// </summary>
         public uint removed_count;
         /// <summary>

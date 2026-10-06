@@ -25,7 +25,7 @@ public partial struct TaffyDimension : IEquatable<TaffyDimension>
 
     public override int GetHashCode()
     {
-        return unchecked(value.GetHashCode() * 31 + (int)unit);
+        return HashCode.Combine(value, unit);
     }
 
     public static bool operator ==(TaffyDimension a, TaffyDimension b)
@@ -59,7 +59,7 @@ public partial struct TaffyTrackSizingFunction : IEquatable<TaffyTrackSizingFunc
 
     public override int GetHashCode()
     {
-        return unchecked(min.GetHashCode() * 31 + max.GetHashCode());
+        return HashCode.Combine(min, max);
     }
 
     public static bool operator ==(TaffyTrackSizingFunction a, TaffyTrackSizingFunction b)
@@ -97,7 +97,7 @@ public partial struct TaffyGridPlacement : IEquatable<TaffyGridPlacement>
 
     public override int GetHashCode()
     {
-        return unchecked((start * 31 + end) * 31 + span);
+        return HashCode.Combine(start, end, span);
     }
 
     public static bool operator ==(TaffyGridPlacement a, TaffyGridPlacement b)
@@ -139,7 +139,7 @@ public partial struct TaffyAxes : IEquatable<TaffyAxes>
 
     public override int GetHashCode()
     {
-        return unchecked(Width.GetHashCode() * 31 + Height.GetHashCode());
+        return HashCode.Combine(Width, Height);
     }
 
     public static bool operator ==(TaffyAxes a, TaffyAxes b)
@@ -188,11 +188,7 @@ public partial struct TaffyEdges : IEquatable<TaffyEdges>
 
     public override int GetHashCode()
     {
-        unchecked
-        {
-            return ((Top.GetHashCode() * 31 + Right.GetHashCode()) * 31 + Bottom.GetHashCode()) * 31 +
-                   Left.GetHashCode();
-        }
+        return HashCode.Combine(Top, Right, Bottom, Left);
     }
 
     public static bool operator ==(TaffyEdges a, TaffyEdges b)

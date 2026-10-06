@@ -28,7 +28,7 @@ public class UIBranch
     /// </summary>
     public T UpsertState<T>(string key, Func<T> init) where T : class
     {
-        return _tree.UpsertState(_key, key, init);
+        return _tree.State.Upsert(_key, key, init);
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public class UIBranch
     /// </summary>
     public T? GetState<T>(string key) where T : class
     {
-        return _tree.GetState<T>(_key, key);
+        return _tree.State.Get<T>(_key, key);
     }
 
     /// <summary>
@@ -64,19 +64,18 @@ public class UIBranch
         return Context.TryGet(key, out value);
     }
 
-
     public UINode Div(Action<UIBranch>? builder = null, Action<Rect>? draw = null, LeafContext? context = null,
         Style? style = null, string? id = null, [CallerFilePath] string? file = null,
         [CallerLineNumber] int line = 0)
     {
-        var key = _tree.ResolveChildKey(_key, ResolveKey(id, file, line));
-        var index = _tree.Open(key, draw, context, style);
+        var key = _tree.Keys.Child(_key, ResolveKey(id, file, line));
+        var index = _tree.Frame.Open(key, draw, StyleRegistry.Get(style), MeasureRegistry.Get(context));
 
         // Children append themselves after this node; Close records where its subtree ends.
         // Context rides along to children; the tree itself never stores it.
         builder?.Invoke(new UIBranch(_tree, key, Context));
 
-        _tree.Close(index);
+        _tree.Frame.Close(index);
         return new UINode(key);
     }
 
