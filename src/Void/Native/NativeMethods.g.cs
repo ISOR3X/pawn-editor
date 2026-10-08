@@ -173,15 +173,15 @@ namespace Void.Native
     [StructLayout(LayoutKind.Sequential)]
     public unsafe partial struct TaffyDimension
     {
-        public float value;
-        public uint unit;
+        public float value = value;
+        public uint unit = (uint)unit;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public unsafe partial struct TaffyTrackSizingFunction
     {
-        public TaffyDimension min;
-        public TaffyDimension max;
+        public TaffyDimension min = min;
+        public TaffyDimension max = max;
     }
 
     /// <summary>
@@ -198,17 +198,17 @@ namespace Void.Native
     [StructLayout(LayoutKind.Sequential)]
     public unsafe partial struct TaffyAxes
     {
-        public TaffyDimension Width;
-        public TaffyDimension Height;
+        public TaffyDimension Width = width;
+        public TaffyDimension Height = height;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public unsafe partial struct TaffyEdges
     {
-        public TaffyDimension Top;
-        public TaffyDimension Right;
-        public TaffyDimension Bottom;
-        public TaffyDimension Left;
+        public TaffyDimension Top = top;
+        public TaffyDimension Right = right;
+        public TaffyDimension Bottom = bottom;
+        public TaffyDimension Left = left;
     }
 
     /// <summary>

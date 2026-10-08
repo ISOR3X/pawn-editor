@@ -3,13 +3,8 @@ namespace Void.Native;
 // Hand-written halves of the value types generated into NativeMethods.g.cs: constructors, equality and the
 // Dimension/TrackSizingFunction helpers, matching the API of the Taffy.dll types they replace.
 
-public partial struct TaffyDimension : IEquatable<TaffyDimension>
+public partial struct TaffyDimension(float value, TaffyUnit unit) : IEquatable<TaffyDimension>
 {
-    public TaffyDimension(float value, TaffyUnit unit)
-    {
-        this.value = value;
-        this.unit = (uint)unit;
-    }
 
     public TaffyUnit Unit => (TaffyUnit)unit;
 
@@ -20,13 +15,8 @@ public partial struct TaffyDimension : IEquatable<TaffyDimension>
     public static bool operator !=(TaffyDimension a, TaffyDimension b) => !a.Equals(b);
 }
 
-public partial struct TaffyTrackSizingFunction : IEquatable<TaffyTrackSizingFunction>
+public partial struct TaffyTrackSizingFunction(TaffyDimension min, TaffyDimension max) : IEquatable<TaffyTrackSizingFunction>
 {
-    public TaffyTrackSizingFunction(TaffyDimension min, TaffyDimension max)
-    {
-        this.min = min;
-        this.max = max;
-    }
 
     public bool Equals(TaffyTrackSizingFunction other) => min == other.min && max == other.max;
     public override bool Equals(object? obj) => obj is TaffyTrackSizingFunction other && Equals(other);
@@ -50,13 +40,8 @@ public partial struct TaffyGridPlacement
 ///     A pair of values per axis, used for gaps: <see cref="Width" /> is the gap between columns, <see cref="Height" />
 ///     the gap between rows. A component with unit <see cref="TaffyUnit.None" /> keeps the default.
 /// </summary>
-public partial struct TaffyAxes
+public partial struct TaffyAxes(TaffyDimension width, TaffyDimension height)
 {
-    public TaffyAxes(TaffyDimension width, TaffyDimension height)
-    {
-        Width = width;
-        Height = height;
-    }
 
     public TaffyAxes(TaffyDimension all) : this(all, all)
     {
@@ -66,15 +51,8 @@ public partial struct TaffyAxes
 /// <summary>
 ///     A value per edge, used for padding and margin. An edge with unit <see cref="TaffyUnit.None" /> keeps the default.
 /// </summary>
-public partial struct TaffyEdges
+public partial struct TaffyEdges(TaffyDimension top, TaffyDimension right, TaffyDimension bottom, TaffyDimension left)
 {
-    public TaffyEdges(TaffyDimension top, TaffyDimension right, TaffyDimension bottom, TaffyDimension left)
-    {
-        Top = top;
-        Right = right;
-        Bottom = bottom;
-        Left = left;
-    }
 
     public TaffyEdges(TaffyDimension all) : this(all, all, all, all)
     {
