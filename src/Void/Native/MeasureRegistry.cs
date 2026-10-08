@@ -50,6 +50,7 @@ internal static unsafe class MeasureRegistry
     {
         try
         {
+            // Get the context for a handle, and if found use it to measure the size it requires.
             var size = ByHandle.TryGetValue(handle, out var context) ? Measure(context, mode, width) : Vector2.zero;
             *result = new MeasureSize { width = size.x, height = size.y };
         }
@@ -60,6 +61,9 @@ internal static unsafe class MeasureRegistry
         }
     }
 
+    /// <summary>
+    /// Measuring logic. Based on LeafContext and other parameters, return the size needed to display the context.
+    /// </summary>
     private static Vector2 Measure(LeafContext context, MeasureMode mode, float width)
     {
         var text = context.text!;

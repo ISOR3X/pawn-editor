@@ -44,14 +44,14 @@ fn callback() -> Option<MeasureCallback> {
     }
 }
 
-/// How many answers each piece of content remembers. Small on purpose: resizing a window asks for a new width
-/// every frame, and old widths are rarely asked for again.
+/// How many answers each piece of content remembers.
+/// Taffy requires answers for several measure modes in a layout pass (min-content, max-content, etc.) in order to find the ideal layout.
 const ANSWERS_PER_CONTENT: usize = 8;
 
 #[derive(Default)]
 struct Answers {
-    /// (mode, width bits, size), replaced oldest first once full.
-    entries: Vec<(MeasureMode, u32, Size<f32>)>,
+    /// Cache entries with (mode, width) as key, returning size. Replaces oldest entry first once full.
+    entries: Vec<(MeasureMode, f32, Size<f32>)>,
     next: usize,
 }
 
@@ -65,18 +65,22 @@ pub struct MeasureRegistry {
 
 impl MeasureRegistry {
     pub fn register(&mut self) -> u32 {
+        // First handle is always None for "not measured" nodes.
         if self.content.is_empty() {
             self.content.push(None);
         }
+        // Prioritize previously released handles over new ones.
         if let Some(handle) = self.free.pop() {
             self.content[handle as usize] = Some(Answers::default());
             return handle;
         }
+        // Register a new handle.
         self.content.push(Some(Answers::default()));
         (self.content.len() - 1) as u32
     }
 
     pub fn release(&mut self, handle: u32) -> bool {
+        // Set the Answer to None for a handle, and add the handle to the free list of handles.
         match self.content.get_mut(handle as usize) {
             Some(slot @ Some(_)) if handle != 0 => {
                 *slot = None;
@@ -93,6 +97,7 @@ impl MeasureRegistry {
 
     /// Answers Taffy's measure request for a leaf, from the cache or by asking C#.
     pub fn measure(&mut self, handle: u32, known: Size<Option<f32>>, available: Size<AvailableSpace>) -> Size<f32> {
+        // Set measure mode and available width for measuring.
         let (mode, width) = match (known.width, available.width) {
             (Some(w), _) => (MeasureMode::Exact, w),
             (None, AvailableSpace::Definite(w)) => (MeasureMode::FitContent, w),
@@ -100,12 +105,15 @@ impl MeasureRegistry {
             (None, AvailableSpace::MaxContent) => (MeasureMode::MaxContent, f32::INFINITY),
         };
 
+        // Check if the cache already contains answers for the handle. If so, return it.
         let Some(Some(answers)) = self.content.get_mut(handle as usize) else { return Size::ZERO };
-        let bits = width.to_bits();
-        if let Some(&(_, _, size)) = answers.entries.iter().find(|(m, b, _)| *m == mode && *b == bits) {
+        if let Some(&(_, _, size)) = answers.entries.iter().find(|(m, b, _)| *m == mode && *b == width) {
             return size;
         }
 
+        // If the cache misses, try to get the callback.
+        // The callback calls into C# to return actual sizing based on the context (context is stored on the C# side.)
+        // Once a new size is returned, update the answers cache.
         let Some(callback) = callback() else { return Size::ZERO };
         let mut out = MeasureSize::default();
         callback(handle, mode, width, &mut out);
@@ -113,9 +121,9 @@ impl MeasureRegistry {
         let size = Size { width: out.width, height: out.height };
 
         if answers.entries.len() < ANSWERS_PER_CONTENT {
-            answers.entries.push((mode, bits, size));
+            answers.entries.push((mode, width, size));
         } else {
-            answers.entries[answers.next] = (mode, bits, size);
+            answers.entries[answers.next] = (mode, width, size);
             answers.next = (answers.next + 1) % ANSWERS_PER_CONTENT;
         }
         size
