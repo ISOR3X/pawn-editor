@@ -58,10 +58,10 @@
             <Link>libctaffy.dylib</Link>
         </Content>
     </ItemGroup>
-    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-        <PackageReference Include="EditCompileReload" Version="1.0.2"/>
-        <PackageReference Include="EditCompileReload.CompilerPlugin" Version="1.0.2"/>
-    </ItemGroup>
+    <!--
+        Void is deliberately not hot reloaded (no EditCompileReload here, only in PawnEditor): reloading it crashed
+        RimWorld, probably because it holds state that native code points into. Edits to Void need a restart.
+    -->
     <ItemGroup>
         <Publicize Include="Assembly-CSharp"/>
     </ItemGroup>
