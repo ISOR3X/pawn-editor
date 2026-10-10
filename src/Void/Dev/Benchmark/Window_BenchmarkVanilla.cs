@@ -8,13 +8,15 @@ namespace Void.Dev.Benchmark;
 ///     The benchmark content drawn with plain <see cref="Verse.Widgets" /> calls and manual rect math, laid out to the
 ///     same sizes as the two Void versions. Like void_native, it only draws the list rows that are in view.
 /// </summary>
-public class Window_BenchmarkVanilla() : Window_Benchmark("Vanilla", 0)
+public class Window_BenchmarkVanilla(bool dynamic = false) : Window_Benchmark("Vanilla", 0, dynamic)
 {
     private int _clicks;
     private Vector2 _scroll;
 
     protected override void DrawContents(Rect inRect)
     {
+        if (Dynamic) _scroll.y = ListScroll(Time.frameCount);
+
         var width = inRect.width;
         var y = inRect.y;
 
@@ -34,21 +36,37 @@ public class Window_BenchmarkVanilla() : Window_Benchmark("Vanilla", 0)
                 y += height + Gap;
             }
 
-            foreach (var labels in ButtonRows) y = ButtonRow(labels, inRect.x, y, width) + Gap;
+            foreach (var labels in ButtonRows) y = ButtonRow(labels, labels.Length, inRect.x, y, width) + Gap;
+            if (Dynamic) y = DynamicSection(inRect.x, y, width) + Gap;
         }
 
         y = Grid(inRect.x, y, width) + Gap;
         List(new Rect(inRect.x, y, width, ListHeight));
     }
 
-    /// <summary>Buttons sized to their label, wrapping onto a new line when the row is full.</summary>
+    /// <summary>The ticker and the buttons that come and go, drawn like the Void windows build them.</summary>
+    /// <returns>The bottom of the section.</returns>
+    private float DynamicSection(float left, float top, float width)
+    {
+        var frame = Time.frameCount;
+        var ticker = Ticker(frame);
+        var height = Text.CalcHeight(ticker, width);
+        Verse.Widgets.Label(new Rect(left, top, width, height), ticker);
+        return ButtonRow(DynamicLabels, DynamicCount(frame), left, top + height + Gap, width);
+    }
+
+    /// <summary>
+    ///     The first <paramref name="count" /> of <paramref name="labels" /> as buttons sized to their label, wrapping onto
+    ///     a new line when the row is full.
+    /// </summary>
     /// <returns>The bottom of the row.</returns>
-    private float ButtonRow(string[] labels, float left, float top, float width)
+    private float ButtonRow(string[] labels, int count, float left, float top, float width)
     {
         var x = left;
         var y = top;
-        foreach (var label in labels)
+        for (var i = 0; i < count; i++)
         {
+            var label = labels[i];
             var buttonWidth = Text.CalcSize(label).x + GenUI.GapLabel * 2f;
             if (x > left && x + buttonWidth > left + width)
             {

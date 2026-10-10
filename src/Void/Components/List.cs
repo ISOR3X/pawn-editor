@@ -133,7 +133,7 @@ public static partial class VoidComponents
         ///     Virtualized scrollable list. Note that items outside the viewport (excluding overscan items) are destroyed and should therefore not carry state.
         ///     TODO: Use spacers instead of margins? See https://ui.nuxt.com/docs/components/table#with-column-sorting (inspect DOM)
         /// </summary>
-        public void List<T>(
+        public TaffyNode List<T>(
             IReadOnlyList<T> items,
             Action<UIBranch, T> drawItem,
             float itemHeight = UIUtility.ButtonHeight,
@@ -156,11 +156,11 @@ public static partial class VoidComponents
             var visibleRows = Mathf.Clamp(count, 1, maxItemsVisibleAtOnce ?? Math.Max(count, 1));
             var viewportHeight = visibleRows * itemHeight + Math.Max(0, visibleRows - 1) * gapY;
 
-            branch.Div(viewport =>
+            return branch.Div(viewport =>
             {
-                // The scroll offset and the measured viewport are written by DrawNode during the
-                // previous pass. RimWorld runs several event passes per frame and rebuilds on each,
-                // so a wheel or drag handled in one pass is already visible to the repaint pass.
+                // The scroll offset and the measured viewport are written by DrawNode while drawing. The tree is
+                // built once per frame, so this is the position as of the previous frame; a scroll during this one
+                // is covered by the overscan.
                 // On the very first build there is no state yet, and the declared height is exact.
                 var scroll = viewport.GetState<ScrollState>("scroll");
                 var scrollY = scroll?.pos.y ?? 0f;

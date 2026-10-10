@@ -7,10 +7,12 @@ using static Void.Dev.Benchmark.BenchmarkContent;
 namespace Void.Dev.Benchmark;
 
 /// <summary>
-///     The benchmark content on the current Void API (<see cref="Void.Taffy.UITree" />, diffing in C# over ctaffy).
+///     The benchmark content on the Void API over the Taffy bindings (<see cref="Void.Taffy.UITree" />, diffing in C#
+///     over ctaffy). On this branch the tree has the C#-only optimisations of the void_native one: it builds once per
+///     frame, skips the Layout event, keeps layouts between frames and culls what is scrolled out of sight.
 ///     <see cref="Window_BenchmarkNative" /> is the same code on <c>void_native</c>.
 /// </summary>
-public class Window_BenchmarkVoid() : Window_Benchmark("Void (ctaffy)", 1)
+public class Window_BenchmarkVoid(bool dynamic = false) : Window_Benchmark("Void (ctaffy, optimised)", 1, dynamic)
 {
     private static readonly Style RootStyle = new()
     {
@@ -80,6 +82,7 @@ public class Window_BenchmarkVoid() : Window_Benchmark("Void (ctaffy)", 1)
     };
 
     private readonly UITree _tree = new();
+    private TaffyNode? _list;
     private int _clicks;
 
     public override void PostClose()
@@ -90,6 +93,10 @@ public class Window_BenchmarkVoid() : Window_Benchmark("Void (ctaffy)", 1)
 
     protected override void DrawContents(Rect inRect)
     {
+        // Before the build, which picks the rows to build from the scroll position.
+        if (Dynamic && _list is { } list && _tree.GetState<ScrollState>(list, "scroll") is { } scroll)
+            scroll.pos.y = ListScroll(Time.frameCount);
+
         _tree.Build(root =>
         {
             root.Text(Heading, HeadingStyle);
@@ -106,6 +113,8 @@ public class Window_BenchmarkVoid() : Window_Benchmark("Void (ctaffy)", 1)
                 }, style: ButtonRowStyle, id: $"buttons-{r}");
             }
 
+            if (Dynamic) DynamicSection(root);
+
             root.Div(grid =>
             {
                 for (var i = 0; i < Cells.Length; i++)
@@ -118,7 +127,7 @@ public class Window_BenchmarkVoid() : Window_Benchmark("Void (ctaffy)", 1)
             }, style: GridStyle);
 
             // Only builds the rows in view, like the vanilla window only draws them.
-            root.List(IndexedRows, (row, item) =>
+            _list = root.List(IndexedRows, (row, item) =>
                 {
                     row.Div(content =>
                     {
@@ -131,5 +140,20 @@ public class Window_BenchmarkVoid() : Window_Benchmark("Void (ctaffy)", 1)
         }, RootStyle);
 
         _tree.Draw(inRect);
+    }
+
+    /// <summary>
+    ///     Buttons that come and go, and a text that changes, for the nodes this adds, removes and measures.
+    /// </summary>
+    private void DynamicSection(UIBranch root)
+    {
+        var frame = Time.frameCount;
+        root.Text(Ticker(frame), id: "ticker");
+        root.Div(row =>
+        {
+            var count = DynamicCount(frame);
+            for (var b = 0; b < count; b++)
+                row.Button(DynamicLabels[b], onClick: _ => _clicks++, id: $"dynamic-{b}");
+        }, style: ButtonRowStyle, id: "dynamic");
     }
 }

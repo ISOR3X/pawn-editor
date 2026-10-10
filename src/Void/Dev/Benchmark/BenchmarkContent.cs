@@ -45,6 +45,20 @@ internal static class BenchmarkContent
     /// <summary>The rows with their position, for list components that hand items to the row builder.</summary>
     public static readonly (int index, string label, string value)[] IndexedRows;
 
+    // The dynamic scenario: everything below is a function of the frame number, so every window shows exactly the
+    // same thing in the same frame, and a run is the same every time.
+
+    /// <summary>Frames between changes to the number of dynamic buttons.</summary>
+    public const int DynamicStepFrames = 20;
+
+    /// <summary>Frames between changes to the ticker text.</summary>
+    public const int TickerFrames = 10;
+
+    private const float ScrollPixelsPerFrame = 24f;
+
+    /// <summary>The labels the dynamic buttons are taken from.</summary>
+    public static readonly string[] DynamicLabels;
+
     static BenchmarkContent()
     {
         var random = new System.Random(Seed);
@@ -64,6 +78,36 @@ internal static class BenchmarkContent
         Cells = Enumerable.Range(0, 24).Select(_ => Phrase(1, 3)).ToArray();
         Rows = Enumerable.Range(0, 200).Select(_ => (Phrase(2, 5), random.Next(0, 10000).ToString())).ToArray();
         IndexedRows = Rows.Select((row, i) => (i, row.label, row.value)).ToArray();
+
+        // Generated last, so the content of the static scenario stays what it was.
+        DynamicLabels = Enumerable.Range(0, 24).Select(_ => Phrase(1, 2)).ToArray();
+    }
+
+    /// <summary>
+    ///     How many dynamic buttons there are in <paramref name="frame" />. Buttons are added and removed every
+    ///     <see cref="DynamicStepFrames" /> frames, between 3 and 22 of them.
+    /// </summary>
+    public static int DynamicCount(int frame)
+    {
+        return 3 + frame / DynamicStepFrames * 7 % 20;
+    }
+
+    /// <summary>A text that gets new content every <see cref="TickerFrames" /> frames, so it has to be measured again.</summary>
+    public static string Ticker(int frame)
+    {
+        var tick = frame / TickerFrames;
+        return $"Frame {tick * TickerFrames}, value {tick * 7919 % 1000}";
+    }
+
+    /// <summary>
+    ///     Where the list is scrolled to in <paramref name="frame" />: down to the last row and back up again, at a
+    ///     constant speed.
+    /// </summary>
+    public static float ListScroll(int frame)
+    {
+        var range = Rows.Length * RowHeight - ListHeight;
+        var t = frame * ScrollPixelsPerFrame % (2f * range);
+        return t < range ? t : 2f * range - t;
     }
 
     public static Color CellColor(int index)

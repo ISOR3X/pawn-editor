@@ -9,7 +9,7 @@ namespace Void.Dev.Benchmark;
 ///     The benchmark content on <c>void_native</c> (<see cref="Void.Native.UITree" />). Apart from the namespace
 ///     this is the same code as <see cref="Window_BenchmarkVoid" />.
 /// </summary>
-public class Window_BenchmarkNative() : Window_Benchmark("Void (void_native)", 2)
+public class Window_BenchmarkNative(bool dynamic = false) : Window_Benchmark("Void (void_native)", 2, dynamic)
 {
     private static readonly Style RootStyle = new()
     {
@@ -79,6 +79,7 @@ public class Window_BenchmarkNative() : Window_Benchmark("Void (void_native)", 2
     };
 
     private readonly UITree _tree = new();
+    private UINode? _list;
     private int _clicks;
 
     public override void PostClose()
@@ -89,6 +90,10 @@ public class Window_BenchmarkNative() : Window_Benchmark("Void (void_native)", 2
 
     protected override void DrawContents(Rect inRect)
     {
+        // Before the build, which picks the rows to build from the scroll position.
+        if (Dynamic && _list is { } list && _tree.State.Get<ScrollState>(list.Key, "scroll") is { } scroll)
+            scroll.pos.y = ListScroll(Time.frameCount);
+
         _tree.Build(root =>
         {
             root.Text(Heading, HeadingStyle);
@@ -105,6 +110,8 @@ public class Window_BenchmarkNative() : Window_Benchmark("Void (void_native)", 2
                 }, style: ButtonRowStyle, id: $"buttons-{r}");
             }
 
+            if (Dynamic) DynamicSection(root);
+
             root.Div(grid =>
             {
                 for (var i = 0; i < Cells.Length; i++)
@@ -117,7 +124,7 @@ public class Window_BenchmarkNative() : Window_Benchmark("Void (void_native)", 2
             }, style: GridStyle);
 
             // Only builds the rows in view, like the vanilla window only draws them.
-            root.List(IndexedRows, (row, item) =>
+            _list = root.List(IndexedRows, (row, item) =>
                 {
                     row.Div(content =>
                     {
@@ -130,5 +137,20 @@ public class Window_BenchmarkNative() : Window_Benchmark("Void (void_native)", 2
         }, RootStyle);
 
         _tree.Draw(inRect);
+    }
+
+    /// <summary>
+    ///     Buttons that come and go, and a text that changes, for the nodes this adds, removes and measures.
+    /// </summary>
+    private void DynamicSection(UIBranch root)
+    {
+        var frame = Time.frameCount;
+        root.Text(Ticker(frame), id: "ticker");
+        root.Div(row =>
+        {
+            var count = DynamicCount(frame);
+            for (var b = 0; b < count; b++)
+                row.Button(DynamicLabels[b], onClick: _ => _clicks++, id: $"dynamic-{b}");
+        }, style: ButtonRowStyle, id: "dynamic");
     }
 }

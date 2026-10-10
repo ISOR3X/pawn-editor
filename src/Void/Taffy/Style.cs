@@ -18,41 +18,82 @@ public class Style : IEquatable<Style>
     /// </summary>
     public const float ScrollbarGutter = UIUtility.ScrollBarWidth + GenUI.GapTiny;
 
-    public Color? backgroundColor;
-    public Color? color;
-    public GameFont? fontSize;
-    public bool? wordWrap;
-    public TaffyOverflow? overflowX;
-    public TaffyOverflow? overflowY;
-    public TaffyAlignContent? alignContent;
-    public TaffyAlignItems? alignItems;
-    public TaffyAlignItems? alignSelf;
-    public TaffyDisplay? display;
-    public TaffyDimension? flexBasis;
-    public TaffyFlexDirection? flexDirection;
-    public float? flexGrow;
-    public float? flexShrink;
-    public TaffyFlexWrap? flexWrap;
-    public TaffyAxes? gap;
-    public TaffyTrackSizingFunction[]? gridAutoColumns;
-    public TaffyGridAutoFlow? gridAutoFlow;
-    public TaffyTrackSizingFunction[]? gridAutoRows;
-    public TaffyGridPlacement? gridColumn;
-    public TaffyGridPlacement? gridRow;
-    public TaffyTrackSizingFunction[]? gridTemplateColumns;
-    public TaffyTrackSizingFunction[]? gridTemplateRows;
-    public TaffyDimension? height;
-    public TaffyAlignContent? justifyContent;
-    public TaffyAlignItems? justifyItems;
-    public TaffyAlignItems? justifySelf;
-    public TaffyEdges? margin;
-    public TaffyDimension? maxHeight;
-    public TaffyDimension? maxWidth;
-    public TaffyDimension? minHeight;
-    public TaffyDimension? minWidth;
-    public TaffyEdges? padding;
-    public TextAnchor? textAnchor;
-    public TaffyDimension? width;
+    /// <summary>
+    ///     Bumped by every change to a property, so a style that is the same instance with the same version is known to
+    ///     be unchanged without comparing its fields.
+    /// </summary>
+    internal int version;
+
+    private Color? _backgroundColor;
+    public Color? backgroundColor { get => _backgroundColor; set { _backgroundColor = value; version++; } }
+    private Color? _color;
+    public Color? color { get => _color; set { _color = value; version++; } }
+    private GameFont? _fontSize;
+    public GameFont? fontSize { get => _fontSize; set { _fontSize = value; version++; } }
+    private bool? _wordWrap;
+    public bool? wordWrap { get => _wordWrap; set { _wordWrap = value; version++; } }
+    private TaffyOverflow? _overflowX;
+    public TaffyOverflow? overflowX { get => _overflowX; set { _overflowX = value; version++; } }
+    private TaffyOverflow? _overflowY;
+    public TaffyOverflow? overflowY { get => _overflowY; set { _overflowY = value; version++; } }
+    private TaffyAlignContent? _alignContent;
+    public TaffyAlignContent? alignContent { get => _alignContent; set { _alignContent = value; version++; } }
+    private TaffyAlignItems? _alignItems;
+    public TaffyAlignItems? alignItems { get => _alignItems; set { _alignItems = value; version++; } }
+    private TaffyAlignItems? _alignSelf;
+    public TaffyAlignItems? alignSelf { get => _alignSelf; set { _alignSelf = value; version++; } }
+    private TaffyDisplay? _display;
+    public TaffyDisplay? display { get => _display; set { _display = value; version++; } }
+    private TaffyDimension? _flexBasis;
+    public TaffyDimension? flexBasis { get => _flexBasis; set { _flexBasis = value; version++; } }
+    private TaffyFlexDirection? _flexDirection;
+    public TaffyFlexDirection? flexDirection { get => _flexDirection; set { _flexDirection = value; version++; } }
+    private float? _flexGrow;
+    public float? flexGrow { get => _flexGrow; set { _flexGrow = value; version++; } }
+    private float? _flexShrink;
+    public float? flexShrink { get => _flexShrink; set { _flexShrink = value; version++; } }
+    private TaffyFlexWrap? _flexWrap;
+    public TaffyFlexWrap? flexWrap { get => _flexWrap; set { _flexWrap = value; version++; } }
+    private TaffyAxes? _gap;
+    public TaffyAxes? gap { get => _gap; set { _gap = value; version++; } }
+    private TaffyTrackSizingFunction[]? _gridAutoColumns;
+    public TaffyTrackSizingFunction[]? gridAutoColumns { get => _gridAutoColumns; set { _gridAutoColumns = value; version++; } }
+    private TaffyGridAutoFlow? _gridAutoFlow;
+    public TaffyGridAutoFlow? gridAutoFlow { get => _gridAutoFlow; set { _gridAutoFlow = value; version++; } }
+    private TaffyTrackSizingFunction[]? _gridAutoRows;
+    public TaffyTrackSizingFunction[]? gridAutoRows { get => _gridAutoRows; set { _gridAutoRows = value; version++; } }
+    private TaffyGridPlacement? _gridColumn;
+    public TaffyGridPlacement? gridColumn { get => _gridColumn; set { _gridColumn = value; version++; } }
+    private TaffyGridPlacement? _gridRow;
+    public TaffyGridPlacement? gridRow { get => _gridRow; set { _gridRow = value; version++; } }
+    private TaffyTrackSizingFunction[]? _gridTemplateColumns;
+    public TaffyTrackSizingFunction[]? gridTemplateColumns { get => _gridTemplateColumns; set { _gridTemplateColumns = value; version++; } }
+    private TaffyTrackSizingFunction[]? _gridTemplateRows;
+    public TaffyTrackSizingFunction[]? gridTemplateRows { get => _gridTemplateRows; set { _gridTemplateRows = value; version++; } }
+    private TaffyDimension? _height;
+    public TaffyDimension? height { get => _height; set { _height = value; version++; } }
+    private TaffyAlignContent? _justifyContent;
+    public TaffyAlignContent? justifyContent { get => _justifyContent; set { _justifyContent = value; version++; } }
+    private TaffyAlignItems? _justifyItems;
+    public TaffyAlignItems? justifyItems { get => _justifyItems; set { _justifyItems = value; version++; } }
+    private TaffyAlignItems? _justifySelf;
+    public TaffyAlignItems? justifySelf { get => _justifySelf; set { _justifySelf = value; version++; } }
+    private TaffyEdges? _margin;
+    public TaffyEdges? margin { get => _margin; set { _margin = value; version++; } }
+    private TaffyDimension? _maxHeight;
+    public TaffyDimension? maxHeight { get => _maxHeight; set { _maxHeight = value; version++; } }
+    private TaffyDimension? _maxWidth;
+    public TaffyDimension? maxWidth { get => _maxWidth; set { _maxWidth = value; version++; } }
+    private TaffyDimension? _minHeight;
+    public TaffyDimension? minHeight { get => _minHeight; set { _minHeight = value; version++; } }
+    private TaffyDimension? _minWidth;
+    public TaffyDimension? minWidth { get => _minWidth; set { _minWidth = value; version++; } }
+    private TaffyEdges? _padding;
+    public TaffyEdges? padding { get => _padding; set { _padding = value; version++; } }
+    private TextAnchor? _textAnchor;
+    public TextAnchor? textAnchor { get => _textAnchor; set { _textAnchor = value; version++; } }
+    private TaffyDimension? _width;
+    public TaffyDimension? width { get => _width; set { _width = value; version++; } }
 
     /// <summary>
     ///     Only compares values that may influence layout.

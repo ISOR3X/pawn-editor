@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Taffy;
 using UnityEngine;
 using Verse;
@@ -53,6 +54,26 @@ public class BranchRecord
     ///     Track the previous style of a branch so we can diff-check it.
     /// </summary>
     public Style? prevStyle;
+
+    /// <summary>
+    ///     <see cref="Style.version"/> of <see cref="prevStyle"/> when it was last seen. A style that is the same
+    ///     instance with the same version has not changed, which saves comparing all of its fields.
+    /// </summary>
+    public int prevStyleVersion;
+
+    /// <summary>
+    ///     The layout of this node as of <see cref="layoutStamp"/>, so unchanged frames do not ask the native tree for it
+    ///     again.
+    /// </summary>
+    public TaffyLayout layout;
+
+    public int layoutStamp = -1;
+
+    /// <summary>
+    ///     How often each key was used among the children this frame, to give repeated keys (a loop on one line) a
+    ///     suffix without searching for a free one.
+    /// </summary>
+    public Dictionary<string, int>? occurrences;
 }
 
 public class UITree : IDisposable
@@ -83,6 +104,18 @@ public class UITree : IDisposable
     /// </summary>
     private bool _disposed;
 
+    /// <summary>
+    ///     The frame <see cref="Build"/> last ran in. IMGUI calls the window once per event (Layout, Repaint, mouse
+    ///     events), and the tree only has to be built once for all of them.
+    /// </summary>
+    private int _builtFrame = -1;
+
+    /// <summary>
+    ///     Incremented whenever the native layout is recomputed, which invalidates the layouts cached on the records.
+    /// </summary>
+    private int _layoutStamp;
+
+    private float _rootHeight;
     private float _lastAvailableHeight = -1f;
     private float _lastAvailableWidth = -1f;
 
@@ -101,13 +134,13 @@ public class UITree : IDisposable
 
     public void Build(Action<UIBranch> builder, Style? style = null)
     {
-        if (_disposed) return;
+        if (_disposed || _builtFrame == Time.frameCount) return;
 
         var branch = new UIBranch(this, _rootBranchNode);
         var rootRecord = _branchRecordsByNode[_rootBranchNode];
 
         // If the styles are not equal, and the new style isn't null, update the native style.
-        if (!Utility.NullableEquals(style, rootRecord.prevStyle, false) && style != null)
+        if (StyleChanged(style, rootRecord))
         {
             _dirtyThisFrame = true;
             var _branchStyle = _tree.GetStyle(_rootBranchNode);
@@ -117,14 +150,16 @@ public class UITree : IDisposable
 
         // Update the style history regardless of if its null or not.
         rootRecord.prevStyle = style;
+        rootRecord.prevStyleVersion = style?.version ?? 0;
 
         builder(branch);
         CompareChildren(_rootBranchNode);
+        _builtFrame = Time.frameCount;
     }
 
     public void Draw(Rect rect)
     {
-        if (_disposed) return;
+        if (_disposed || Event.current.type == EventType.Layout) return;
 
         var sizeChanged = !Mathf.Approximately(rect.width, _lastAvailableWidth)
                           || !Mathf.Approximately(rect.height, _lastAvailableHeight);
@@ -132,13 +167,14 @@ public class UITree : IDisposable
         if (_dirtyThisFrame || sizeChanged)
         {
             _tree.ComputeLayoutWithMeasure(_rootBranchNode, rect.width, rect.height, DefaultMeasure);
+            _layoutStamp++;
 
             _dirtyThisFrame = false;
             _lastAvailableWidth = rect.width;
             _lastAvailableHeight = rect.height;
         }
 
-        DrawNode(_rootBranchNode, rect.position);
+        DrawNode(_rootBranchNode, rect.position, null);
     }
 
     /// <summary>
@@ -147,7 +183,7 @@ public class UITree : IDisposable
     /// </summary>
     public float DrawMeasured(Rect rect)
     {
-        if (_disposed) return 0f;
+        if (_disposed || Event.current.type == EventType.Layout) return _rootHeight;
 
         // Mathf.Approximately(inf, inf) is false, so the height term is an explicit infinity check.
         var sizeChanged = !Mathf.Approximately(rect.width, _lastAvailableWidth)
@@ -156,26 +192,40 @@ public class UITree : IDisposable
         if (_dirtyThisFrame || sizeChanged)
         {
             _tree.ComputeLayoutWithMeasure(_rootBranchNode, rect.width, float.PositiveInfinity, DefaultMeasure);
+            _layoutStamp++;
 
             _dirtyThisFrame = false;
             _lastAvailableWidth = rect.width;
             _lastAvailableHeight = float.PositiveInfinity;
         }
 
-        DrawNode(_rootBranchNode, rect.position);
-        return _tree.GetLayout(_rootBranchNode).height;
+        DrawNode(_rootBranchNode, rect.position, null);
+        return _rootHeight = _tree.GetLayout(_rootBranchNode).height;
     }
 
-    private void DrawNode(TaffyNode node, Vector2 origin)
+    /// <summary>
+    ///     Draws a node and its children. <paramref name="clip" /> is the visible part of the innermost scroll view,
+    ///     in the coordinates the node is laid out in; nodes outside it are skipped together with their children.
+    /// </summary>
+    private void DrawNode(TaffyNode node, Vector2 origin, Rect? clip)
     {
-        var layout = _tree.GetLayout(node);
-        var assignedRect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
-
         if (!_branchRecordsByNode.TryGetValue(node, out var record)) return;
+
+        // Only ask the native tree for the layout once per layout pass, however many events are drawn in between.
+        if (record.layoutStamp != _layoutStamp)
+        {
+            record.layout = _tree.GetLayout(node);
+            record.layoutStamp = _layoutStamp;
+        }
+
+        var layout = record.layout;
+        var assignedRect = new Rect(origin.x + layout.x, origin.y + layout.y, layout.width, layout.height);
+        if (clip is { } visible && !visible.Overlaps(assignedRect)) return;
 
         var scrollX = record.prevStyle?.overflowX == TaffyOverflow.Scroll;
         var scrollY = record.prevStyle?.overflowY == TaffyOverflow.Scroll;
         var scrolls = scrollX || scrollY;
+        var childClip = clip;
 
         record.draw?.Invoke(assignedRect);
         if (VoidMod.Settings.drawDebug) Verse.Widgets.DrawRectFast(assignedRect, Color.red with { a = 0.25f });
@@ -192,6 +242,7 @@ public class UITree : IDisposable
             Verse.Widgets.BeginScrollView(assignedRect, ref s.pos, viewRect);
             s.VisibleRect = new Rect(s.pos.x, s.pos.y, assignedRect.width - layout.scrollbar_width,
                 assignedRect.height - layout.scrollbar_height);
+            childClip = s.VisibleRect;
         }
 
         // Ensure the scroll view is properly closed if child nodes throw.
@@ -200,12 +251,25 @@ public class UITree : IDisposable
             var childOrigin = scrolls ? Vector2.zero : assignedRect.position;
 
             foreach (var childId in record.childrenByKey.Values)
-                DrawNode(childId, childOrigin);
+                DrawNode(childId, childOrigin, childClip);
         }
         finally
         {
             if (scrolls) Verse.Widgets.EndScrollView();
         }
+    }
+
+    /// <summary>
+    ///     Whether <paramref name="style" /> differs from the one the node had last frame. The same instance with the
+    ///     same version is unchanged; anything else is compared field by field.
+    /// </summary>
+    private static bool StyleChanged([NotNullWhen(true)] Style? style, BranchRecord record)
+    {
+        if (style == null) return false;
+        if (record.prevStyle == null) return true;
+        return ReferenceEquals(style, record.prevStyle)
+            ? style.version != record.prevStyleVersion
+            : !style.Equals(record.prevStyle);
     }
 
     /// <summary>
@@ -259,7 +323,7 @@ public class UITree : IDisposable
         var branchRecord = _branchRecordsByNode[branchNode];
 
         // Apply style and context if they have changed and are not null.
-        if (!Utility.NullableEquals(style, branchRecord.prevStyle, false) && style != null)
+        if (StyleChanged(style, branchRecord))
         {
             _dirtyThisFrame = true;
             var _branchStyle = _tree.GetStyle(branchNode);
@@ -275,6 +339,7 @@ public class UITree : IDisposable
 
         // Always update the branchRecord with the values of the current frame.
         branchRecord.prevStyle = style;
+        branchRecord.prevStyleVersion = style?.version ?? 0;
         branchRecord.draw = draw;
 
         parentRecord.pendingChildrenByKey[key] = branchNode;
@@ -316,6 +381,7 @@ public class UITree : IDisposable
         branchRecord.childrenByKey = pending;
         branchRecord.pendingChildrenByKey = prev;
         prev.Clear();
+        branchRecord.occurrences?.Clear();
     }
 
     /// <summary>
@@ -349,16 +415,30 @@ public class UITree : IDisposable
     }
 
     /// <summary>
-    /// Append a unique index to the key so branches added from the same line (e.g. through a loop) still get unique values.
-    /// <summary/>
+    ///     Gives siblings that share a key (e.g. created from the same line in a loop) a suffix by call order, so
+    ///     they keep the same key from frame to frame.
+    /// </summary>
     private static string ResolveSiblingKey(BranchRecord parent, string baseKey)
     {
-        if (!parent.pendingChildrenByKey.ContainsKey(baseKey)) return baseKey;
-        for (var n = 1; ; n++)
-        {
-            var candidate = $"{baseKey}#{n}";
-            if (!parent.pendingChildrenByKey.ContainsKey(candidate)) return candidate;
-        }
+        parent.occurrences ??= [];
+        parent.occurrences.TryGetValue(baseKey, out var n);
+
+        var key = n == 0 ? baseKey : SuffixedKey(baseKey, n);
+
+        // An explicit id can look like a generated one; keep looking until the key is free.
+        while (parent.pendingChildrenByKey.ContainsKey(key)) key = SuffixedKey(baseKey, ++n);
+
+        parent.occurrences[baseKey] = n + 1;
+        return key;
+    }
+
+    // The same keys come back every frame, so the strings are made once.
+    private static readonly Dictionary<(string baseKey, int n), string> SuffixedKeys = [];
+
+    private static string SuffixedKey(string baseKey, int n)
+    {
+        if (SuffixedKeys.TryGetValue((baseKey, n), out var key)) return key;
+        return SuffixedKeys[(baseKey, n)] = $"{baseKey}#{n}";
     }
 
     /// <summary>
