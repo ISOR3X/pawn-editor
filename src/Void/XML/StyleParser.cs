@@ -1,7 +1,6 @@
 using System.Globalization;
-using Taffy;
 using Verse;
-using Void.Taffy;
+using Void.Native;
 
 namespace Void.XML;
 

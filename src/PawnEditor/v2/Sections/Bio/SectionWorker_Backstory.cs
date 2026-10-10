@@ -3,13 +3,24 @@ using UnityEngine;
 using Verse;
 using Void.Native;
 using static Void.Native.Components;
-using UIBranch = Void.Taffy.UIBranch;
 
 namespace PawnEditor.v2;
 
 public class SectionWorker_Backstory : SectionWorker<Pawn>
 {
     private static readonly Style SlotStyle = new() { display = TaffyDisplay.Block };
+
+    private static readonly Style TitleStyle = new() { color = ColoredText.TipSectionTitleColor };
+
+    private static readonly Style LabelStyle = new() { width = Dimension.Px(100f) };
+
+    private static readonly Style RowStyle = new()
+    {
+        display = TaffyDisplay.Flex,
+        flexDirection = TaffyFlexDirection.Row,
+        alignItems = TaffyAlignItems.Center,
+        gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall))
+    };
 
     /// <summary>
     ///     Only pawns with a story have backstories. Animals and mechs, for one, do not.
@@ -21,6 +32,7 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
 
     public override void DoSectionContents(UIBranch b, Pawn pawn)
     {
+        b.Text("Backstory", TitleStyle);
         DoBackstoryItem(b, pawn, BackstorySlot.Childhood);
         DoBackstoryItem(b, pawn, BackstorySlot.Adulthood);
     }
@@ -34,8 +46,13 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
         if (backstory != null)
             onHover = r => TooltipHandler.TipRegion(r, DescribeBackstory(backstory, pawn));
 
-        b.Button(buttonLabel, onHover: onHover, disabled: backstory == null,
-            onClick: _ => OpenTable(pawn, slot));
+        // Both rows come from this call site, so they are told apart by their order.
+        b.Div(row =>
+        {
+            row.Text(slot.ToString(), LabelStyle);
+            row.Button(buttonLabel, onHover: onHover, disabled: backstory == null,
+                onClick: _ => OpenTable(pawn, slot));
+        }, style: RowStyle);
     }
 
     /// <summary>

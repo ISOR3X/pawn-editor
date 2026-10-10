@@ -1,9 +1,8 @@
 using LudeonTK;
 using RimWorld;
-using Taffy;
 using UnityEngine;
 using Verse;
-using Void.Taffy;
+using Void.Native;
 
 namespace PawnEditor.v2;
 

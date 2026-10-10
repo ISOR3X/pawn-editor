@@ -1,5 +1,5 @@
 using Verse;
-using Void.Taffy;
+using Void.Native;
 
 namespace PawnEditor.v2;
 

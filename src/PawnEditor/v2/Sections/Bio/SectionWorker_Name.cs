@@ -1,7 +1,6 @@
 using RimWorld;
-using Taffy;
 using Verse;
-using Void.Taffy;
+using Void.Native;
 
 namespace PawnEditor.v2;
 
@@ -48,7 +47,7 @@ public class SectionWorker_Name : SectionWorker<Pawn>
             gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny))
         });
 
-        b.Button(icon: TexButton.Rename, variant: VoidComponents.ButtonVariant.Ghost, onClick: r =>
+        b.Button(icon: TexButton.Rename, variant: Void.Native.Components.ButtonVariant.Ghost, onClick: r =>
         {
             Messages.Message("Not implemented yet", MessageTypeDefOf.RejectInput);
             // FloatWindow.ToggleState(r, () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>()));

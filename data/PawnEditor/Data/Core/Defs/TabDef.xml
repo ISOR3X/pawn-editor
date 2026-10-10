@@ -16,7 +16,7 @@
                 </div>
                 <section style="min-width: 80px; max-width: 160px">PawnEditor.v2.SectionWorker_Portrait</section>
             </div>
-            <section>PawnEditor.v2.SectionWorker_Backstory</section>
+            <section class="flex flex-col">PawnEditor.v2.SectionWorker_Backstory</section>
         </layout>
     </PawnEditor.v2.TabDef>
     <PawnEditor.TabDef>

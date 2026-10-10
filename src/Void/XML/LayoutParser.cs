@@ -1,6 +1,6 @@
 using System.Xml;
 using Verse;
-using Void.Taffy;
+using Void.Native;
 using Void.XML.Elements;
 
 namespace Void.XML;

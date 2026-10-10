@@ -1,5 +1,5 @@
 using System.Xml;
-using Void.Taffy;
+using Void.Native;
 
 namespace Void.XML.Elements;
 

@@ -140,6 +140,7 @@ public class Window_PlaygroundVoid : Window
                 case Tab.Scroll: Scroll(root); break;
                 case Tab.Grid: Grid(root); break;
                 case Tab.Table: Table(root); break;
+                case Tab.Layout: LayoutPlayground(root); break;
             }
         }, RootStyle);
 
@@ -378,6 +379,24 @@ public class Window_PlaygroundVoid : Window
         root.Table(Array.Empty<TableThing>(), _tableColumns, id: "table-empty");
     }
 
+    /// <summary>
+    ///     Renders the <c>Void_Playground</c> <see cref="LayoutDef" /> parsed from XML, so the XML element
+    ///     registry can be exercised next to the hand-written tabs.
+    /// </summary>
+    private static void LayoutPlayground(UIBranch root)
+    {
+        root.Text("Layout playground (Void_Playground def)", HeadingStyle);
+
+        var def = DefDatabase<LayoutDef>.GetNamedSilentFail("Void_Playground");
+        if (def?.layout?._builder == null)
+        {
+            root.Text("LayoutDef 'Void_Playground' not found or has no layout.", new Style { color = Color.red });
+            return;
+        }
+
+        root.Div(def.layout._builder, style: def.layout._style);
+    }
+
     private static TaffyAxes Axes(float v)
     {
         return new TaffyAxes(Dimension.Px(v));
@@ -388,7 +407,8 @@ public class Window_PlaygroundVoid : Window
         Basics,
         Scroll,
         Grid,
-        Table
+        Table,
+        Layout
     }
 }
 #endif

@@ -144,7 +144,6 @@ public class Window_Playground : Window
                 case Tab.List: ListPlayground(root); break;
                 case Tab.Context: ContextPlayground(root); break;
                 case Tab.Table: TablePlayground(root); break;
-                case Tab.Layout: LayoutPlayground(root); break;
             }
         }, new Style
         {
@@ -975,24 +974,6 @@ public class Window_Playground : Window
 
     private sealed record Payment(string Id, DateTime Date, PaymentStatus Status, string Email, int Amount);
 
-    /// <summary>
-    ///     Renders the <c>Void_Playground</c> <see cref="LayoutDef" /> parsed from XML, so the XML element
-    ///     registry can be exercised next to the hand-written tabs.
-    /// </summary>
-    private static void LayoutPlayground(UIBranch builder)
-    {
-        builder.Text("Layout playground (Void_Playground def)", new Style { fontSize = GameFont.Medium });
-
-        var def = DefDatabase<LayoutDef>.GetNamedSilentFail("Void_Playground");
-        if (def?.layout?._builder == null)
-        {
-            builder.Text("LayoutDef 'Void_Playground' not found or has no layout.", new Style { color = Color.red });
-            return;
-        }
-
-        builder.Div(def.layout._builder, style: def.layout._style);
-    }
-
     private static Style Row()
     {
         return Styles.Get((0, 0, 0));
@@ -1037,8 +1018,7 @@ public class Window_Playground : Window
         Input,
         Collapsible,
         List,
-        Context,
-        Layout
+        Context
     }
 }
 #endif

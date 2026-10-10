@@ -1,8 +1,8 @@
 using System.Xml;
 using UnityEngine;
 using Verse;
-using Void.Taffy;
-using static VoidComponents;
+using Void.Native;
+using static Void.Native.Components;
 
 namespace Void.XML.Elements;
 
