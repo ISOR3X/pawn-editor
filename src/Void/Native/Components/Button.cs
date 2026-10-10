@@ -103,15 +103,14 @@ public static partial class Components
                 var clicked = Verse.Widgets.ButtonInvisible(r);
 
                 if (variant == ButtonVariant.Solid) DrawButtonGraphic(r, disabled);
-                else Verse.Widgets.DrawHighlightIfMouseover(r);
+                else if (!disabled) Verse.Widgets.DrawHighlightIfMouseover(r);
 
-                if (onHover != null)
-                    if (Mouse.IsOver(r))
-                        onHover(r);
+                if (onHover != null && Mouse.IsOver(r))
+                    onHover(r);
 
                 if (clicked) onClick?.Invoke(r);
 
-                if (disabled) Verse.Widgets.DrawBoxSolid(r, Color.black with { a = 0.25f });
+                if (disabled && variant == ButtonVariant.Solid) Verse.Widgets.DrawBoxSolid(r, Color.black with { a = 0.25f });
             }, builder: b =>
             {
                 if (icon != null)

@@ -139,6 +139,7 @@ public class Window_PlaygroundVoid : Window
                 case Tab.Basics: Basics(root); break;
                 case Tab.Scroll: Scroll(root); break;
                 case Tab.Grid: Grid(root); break;
+                case Tab.Table: Table(root); break;
             }
         }, RootStyle);
 
@@ -293,6 +294,90 @@ public class Window_PlaygroundVoid : Window
         }, style: GridStyle);
     }
 
+    private static readonly string[] TableKinds = ["Tool", "Food", "Weapon", "Apparel"];
+
+    private sealed record TableThing(string Name, int Mass, string Kind);
+
+    private readonly List<TableThing> _tableThings = Enumerable.Range(1, 60)
+        .Select(i => new TableThing($"Thing {i}", i * 37 % 97, TableKinds[i % TableKinds.Length]))
+        .ToList();
+
+    // Columns are built once: their styles are made on first use and reused every frame.
+    private IReadOnlyList<TableColumn<TableThing>>? _tableColumns;
+    private string? _tableKind;
+    private string? _tableSelected;
+    private TableSorting? _tableSorting;
+    private List<TableThing> _tableView = [];
+    private bool _tableViewDirty = true;
+
+    private void Table(UIBranch root)
+    {
+        root.Text($"Table ({_tableView.Count} / {_tableThings.Count} rows, selected: {_tableSelected ?? "none"})",
+            HeadingStyle);
+        root.Text("Click a header to sort (right click for descending) and a row to select. Only the rows in view " +
+                  "are built; the header stays put and leaves room for the scrollbar.",
+            new Style { fontSize = GameFont.Tiny, width = Dimension.Percent(1f) });
+
+        _tableColumns ??=
+        [
+            new TableColumn<TableThing>("Name",
+                (c, t) => c.Text(t.Name, new Style { wordWrap = false, minWidth = Dimension.Px(0f) }))
+            {
+                Sort = TableColumn<TableThing>.ByText(t => t.Name)
+            },
+            new TableColumn<TableThing>("Mass", (c, t) => c.Text(t.Mass.ToString()))
+            {
+                Width = TableColumnWidth.Fixed(80f),
+                Sort = TableColumn<TableThing>.By(t => t.Mass)
+            },
+            new TableColumn<TableThing>("Kind", (c, t) => c.Text(t.Kind))
+            {
+                Width = TableColumnWidth.Fixed(90f),
+                Sort = TableColumn<TableThing>.ByText(t => t.Kind)
+            },
+            // No sort, so its header is a plain label.
+            new TableColumn<TableThing>("", (c, t) => c.Button("Select", size: ComponentSize.Small,
+                onClick: _ => _tableSelected = t.Name)) { Width = TableColumnWidth.Fixed(70f) }
+        ];
+
+        // The view is built out here, filtered and then sorted, and only rebuilt when the filter or the sorting
+        // changes. The table just draws it and reports header clicks.
+        if (_tableViewDirty)
+        {
+            _tableViewDirty = false;
+            var filtered = _tableKind == null ? _tableThings : _tableThings.Where(t => t.Kind == _tableKind);
+            _tableView = _tableSorting?.Apply(filtered, _tableColumns) ?? [.. filtered];
+        }
+
+        root.Div(b =>
+        {
+            foreach (var kind in TableKinds)
+                b.Button(kind, size: ComponentSize.Small,
+                    variant: kind == _tableKind ? ButtonVariant.Solid : ButtonVariant.Ghost,
+                    onClick: _ =>
+                    {
+                        _tableKind = _tableKind == kind ? null : kind;
+                        _tableViewDirty = true;
+                    }, id: $"kind-{kind}");
+        }, style: RowStyle);
+
+        root.Table(_tableView, _tableColumns, maxRowsVisibleAtOnce: 8, rowKey: t => t.Name,
+            highlightRow: t => t.Name == _tableSelected, onRowClick: t => _tableSelected = t.Name,
+            sorting: _tableSorting, onSortingChange: s =>
+            {
+                _tableSorting = s;
+                _tableViewDirty = true;
+            }, id: "table-things");
+
+        root.Text("Short (3 rows, no scrollbar) and empty", new Style { fontSize = GameFont.Tiny });
+        root.Table(_tableView.Take(3).ToList(), _tableColumns, rowKey: t => t.Name, id: "table-short", sorting: _tableSorting, onSortingChange: s =>
+        {
+            _tableSorting = s;
+            _tableViewDirty = true;
+        });
+        root.Table(Array.Empty<TableThing>(), _tableColumns, id: "table-empty");
+    }
+
     private static TaffyAxes Axes(float v)
     {
         return new TaffyAxes(Dimension.Px(v));
@@ -302,7 +387,8 @@ public class Window_PlaygroundVoid : Window
     {
         Basics,
         Scroll,
-        Grid
+        Grid,
+        Table
     }
 }
 #endif

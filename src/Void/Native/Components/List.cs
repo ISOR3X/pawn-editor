@@ -45,6 +45,12 @@ public static partial class Components
         ///     A scrollable list that only builds the rows in view (plus <paramref name="overscan" /> on either side).
         ///     All rows share <paramref name="itemHeight" />. Rows outside the view are removed, so they should not keep
         ///     state of their own.
+        ///     <para>
+        ///         <paramref name="rowDraw" /> gives a row something to paint behind its content, for rows that want a
+        ///         background of their own (zebra, hover, selection). It gets the item and its index, and the scroll state of
+        ///         the list as of the last draw, which is <c>null</c> until the list has been drawn once or when it does not
+        ///         scroll.
+        ///     </para>
         /// </summary>
         public UINode List<T>(
             IReadOnlyList<T> items,
@@ -53,6 +59,7 @@ public static partial class Components
             int? maxItemsVisibleAtOnce = null,
             Func<T, string>? itemKey = null,
             int overscan = 2,
+            Func<T, int, Action<Rect>?>? rowDraw = null,
             Style? style = null,
             string? id = null,
             [CallerFilePath] string? file = null,
@@ -100,8 +107,8 @@ public static partial class Components
                     for (var i = first; i <= last; i++)
                     {
                         var item = items[i];
-                        content.Div(row => drawItem(row, item), style: i == first ? firstRowStyle : rowStyle,
-                            id: itemKey?.Invoke(item) ?? $"i{i}");
+                        content.Div(row => drawItem(row, item), draw: rowDraw?.Invoke(item, i),
+                            style: i == first ? firstRowStyle : rowStyle, id: itemKey?.Invoke(item) ?? $"i{i}");
                     }
                 }, style: ListContentStyles.Get((contentHeight, gapY)));
             }, style: (style ?? new Style()).Merge(ListViewportStyles.Get(viewportHeight)), id: key);
