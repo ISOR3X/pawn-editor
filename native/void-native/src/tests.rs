@@ -294,3 +294,99 @@ fn default_style_handle_is_zero() {
     let reg = StyleRegistry::default();
     assert_eq!(reg.get(0), Some(&Style::default()));
 }
+
+/// The layout of `Window_Table`: filters and table in a row that grows, a search box under the table, and a bar
+/// along the bottom. The table is a column of header and a scrolling list, and has to stay inside its parent.
+/// Returns the layout of every node: 0 root, 1 main, 2 area, 3 table, 4 header, 5 list viewport, 6 list content,
+/// 7 search, 8 bottom bar.
+fn window_table_layout(table_shrinks: bool, basis_zero: bool) -> Vec<NodeOut> {
+    let mut h = Harness::new();
+    let column = |s: Style| Style { display: Display::Flex, flex_direction: FlexDirection::Column, ..s };
+    let basis = if basis_zero { length(0.0) } else { auto() };
+    let no_min_height = Size { width: auto(), height: length(0.0) };
+
+    let root = h.style(column(Style {
+        size: Size { width: length(400.0), height: length(600.0) },
+        gap: Size { width: length(8.0), height: length(8.0) },
+        ..Default::default()
+    }));
+    let main = h.style(Style {
+        display: Display::Flex,
+        flex_grow: 1.0,
+        flex_basis: basis,
+        min_size: no_min_height,
+        ..Default::default()
+    });
+    let area = h.style(column(Style {
+        flex_grow: 1.0,
+        min_size: no_min_height,
+        gap: Size { width: length(4.0), height: length(4.0) },
+        ..Default::default()
+    }));
+    let table = h.style(column(Style {
+        size: Size { width: percent(1.0), height: auto() },
+        flex_grow: 1.0,
+        flex_shrink: if table_shrinks { 1.0 } else { 0.0 },
+        flex_basis: basis,
+        min_size: no_min_height,
+        ..Default::default()
+    }));
+    let header = h.style(Style {
+        size: Size { width: auto(), height: length(30.0) },
+        flex_shrink: 0.0,
+        ..Default::default()
+    });
+    let viewport = h.style(column(Style {
+        flex_grow: 1.0,
+        flex_shrink: 1.0,
+        flex_basis: basis,
+        min_size: no_min_height,
+        overflow: Point { x: Overflow::Hidden, y: Overflow::Scroll },
+        scrollbar_width: 16.0,
+        ..Default::default()
+    }));
+    // 100 rows of 30.
+    let content = h.style(Style {
+        size: Size { width: percent(1.0), height: length(3000.0) },
+        flex_shrink: 0.0,
+        ..Default::default()
+    });
+    let search = h.style(Style {
+        size: Size { width: length(180.0), height: length(30.0) },
+        flex_shrink: 0.0,
+        ..Default::default()
+    });
+    let bar = h.style(Style {
+        size: Size { width: auto(), height: length(40.0) },
+        flex_shrink: 0.0,
+        ..Default::default()
+    });
+
+    let tree = N(0, root, 0, vec![
+        N(1, main, 0, vec![N(2, area, 0, vec![
+            N(3, table, 0, vec![N(4, header, 0, vec![]), N(5, viewport, 0, vec![N(6, content, 0, vec![])])]),
+            N(7, search, 0, vec![]),
+        ])]),
+        N(8, bar, 0, vec![]),
+    ]);
+    h.frame(&tree, 400.0, 600.0).1
+}
+
+#[test]
+fn a_table_that_does_not_shrink_overflows_its_parent() {
+    // What the Table component did: its root kept `flex-shrink: 0`, so it was as tall as all of its rows.
+    let out = window_table_layout(false, false);
+    assert!(out[3].height > 600.0, "table is {} tall", out[3].height);
+}
+
+#[test]
+fn a_filling_table_stays_between_its_header_and_the_bottom_bar() {
+    let out = window_table_layout(true, true);
+    // 600 - bar (40) - gap (8) = 552 for the main area, minus the search box (30) and gap (4) for the table.
+    assert_eq!(out[1].height, 552.0);
+    assert_eq!(out[3].height, 518.0);
+    // The header takes 30, the list the rest, and the bar is not overlapped.
+    assert_eq!(out[5].height, 488.0);
+    assert!(out[3].y + out[3].height <= out[7].y);
+    assert_eq!(out[8].y, 20.0 + 600.0 - 40.0);
+}

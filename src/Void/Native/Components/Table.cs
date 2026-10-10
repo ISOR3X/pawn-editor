@@ -50,6 +50,26 @@ public static partial class Components
     // A list scrolls by default. A table whose rows all fit does not, so it has no empty scrollbar gutter.
     private static readonly Style TableListFitsStyle = new() { overflowY = TaffyOverflow.Hidden };
 
+    // A table that fills its parent: its list takes what the header leaves, instead of the height of its rows.
+    // Both start from a zero basis and may shrink. With an automatic basis they would be as tall as their content, all
+    // of the rows, and `TableRootStyle` must not keep its `flexShrink = 0`, or the table would not fit its parent.
+    private static readonly Style TableRootFillStyle = new Style
+    {
+        flexGrow = 1f,
+        flexShrink = 1f,
+        flexBasis = Dimension.Px(0f),
+        minHeight = Dimension.Px(0f)
+    }.Merge(TableRootStyle);
+
+    private static readonly Style TableListFillStyle = new()
+    {
+        height = Dimension.Auto(),
+        flexGrow = 1f,
+        flexShrink = 1f,
+        flexBasis = Dimension.Px(0f),
+        minHeight = Dimension.Px(0f)
+    };
+
     // Fills the header cell; the arrow is drawn over it, so it does not move the label.
     private static readonly Style SortableHeaderStyle = new()
     {
@@ -137,6 +157,23 @@ public static partial class Components
         // These two are deliberately not a generic By<TKey>. EditCompileReload (Debug builds) emits a broken
         // ECR.Ptrs field reference for a generic method inside a generic type, and Mono hard-crashes when it
         // first compiles it. Boxing a key costs nothing here: rows are only sorted when the view is rebuilt.
+
+        private static readonly Style TextCellStyle = new() { wordWrap = false, minWidth = Dimension.Px(0f) };
+
+        /// <summary>
+        ///     A column of plain text on one line, sorted by that text.
+        /// </summary>
+        public static TableColumn<TRow> Text(string header, Func<TRow, string> getText,
+            TableColumnWidth? width = null, Color? color = null,
+            StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            var style = color == null ? TextCellStyle : new Style { color = color }.Merge(TextCellStyle);
+            return new TableColumn<TRow>(header, (cell, row) => cell.Text(getText(row), style))
+            {
+                Width = width ?? TableColumnWidth.Fill(),
+                Sort = ByText(getText, comparison)
+            };
+        }
 
         /// <summary>
         ///     Builds a <see cref="Sort" /> from a key. Any <see cref="IComparable" /> works, nulls first.
@@ -246,6 +283,9 @@ public static partial class Components
         ///     given; sort them yourself with <see cref="TableSorting.Apply{TRow}" />.
         ///     <paramref name="onRowClick" /> fires on mouse-down without consuming the event, so a button
         ///     inside a cell will fire as well.
+        ///     <paramref name="onRowHover" /> is called every frame the mouse is over a row, for tooltips.
+        ///     With <paramref name="fill" />, the table takes the space its parent gives it instead of the height of its
+        ///     rows, and <paramref name="maxRowsVisibleAtOnce" /> is only a first guess of how many rows that is.
         /// </summary>
         public void Table<TRow>(
             IReadOnlyList<TRow> rows,
@@ -255,9 +295,11 @@ public static partial class Components
             Func<TRow, string>? rowKey = null,
             Func<TRow, bool>? highlightRow = null,
             Action<TRow>? onRowClick = null,
+            Action<Rect, TRow>? onRowHover = null,
             int overscan = 2,
             TableSorting? sorting = null,
             Action<TableSorting?>? onSortingChange = null,
+            bool fill = false,
             Style? style = null,
             string? id = null,
             [CallerFilePath] string? file = null,
@@ -267,7 +309,8 @@ public static partial class Components
 
             var count = rows.Count;
             var visibleRows = Mathf.Clamp(count, 1, maxRowsVisibleAtOnce ?? Math.Max(count, 1));
-            var scrolls = count > visibleRows;
+            // A table that fills its parent does not know how many rows fit, so it always has room for the scrollbar.
+            var scrolls = fill || count > visibleRows;
 
             branch.Div(table =>
             {
@@ -282,7 +325,7 @@ public static partial class Components
                                 style: GetTableCellStyle(column), id: TableCellId(c));
                         }
                     }, draw: r => Verse.Widgets.DrawLineHorizontal(r.x, r.yMax, r.width, PawnTable.BorderColor),
-                    style: TableHeaderStyles.Get(scrolls), id: "header");
+                    style: TableHeaderStyles.Get(scrolls));
 
                 table.List(rows, (row, item) =>
                     {
@@ -293,9 +336,10 @@ public static partial class Components
                                 id: TableCellId(c));
                         }
                     }, rowHeight, visibleRows, rowKey, overscan,
-                    (item, index) => r => DrawTableRow(r, index, item, highlightRow, onRowClick),
-                    scrolls ? null : TableListFitsStyle, "rows");
-            }, style: style == null ? TableRootStyle : style.Merge(TableRootStyle), id: key);
+                    (item, index) => r => DrawTableRow(r, index, item, highlightRow, onRowClick, onRowHover),
+                    fill ? TableListFillStyle : scrolls ? null : TableListFitsStyle);
+            }, style: style == null ? fill ? TableRootFillStyle : TableRootStyle
+                : style.Merge(fill ? TableRootFillStyle : TableRootStyle), id: key);
         }
     }
 
@@ -303,12 +347,16 @@ public static partial class Components
     ///     Paints a row: selection or zebra, and hover; and reports the click.
     /// </summary>
     private static void DrawTableRow<TRow>(Rect r, int index, TRow item,
-        Func<TRow, bool>? highlightRow, Action<TRow>? onRowClick)
+        Func<TRow, bool>? highlightRow, Action<TRow>? onRowClick, Action<Rect, TRow>? onRowHover)
     {
         if (highlightRow?.Invoke(item) ?? false) Verse.Widgets.DrawHighlightSelected(r);
         else if (index % 2 == 1) Verse.Widgets.DrawLightHighlight(r);
 
         Verse.Widgets.DrawHighlightIfMouseover(r);
-        onRowClick?.Invoke(item);
+        if (!Mouse.IsOver(r)) return;
+
+        onRowHover?.Invoke(r, item);
+        if (onRowClick != null && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+            onRowClick(item);
     }
 }

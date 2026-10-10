@@ -1,144 +1,103 @@
-using PawnEditor.Table;
 using RimWorld;
-using Taffy;
 using UnityEngine;
 using Verse;
-using Col = PawnEditor.Table.ColumnWorker<RimWorld.BackstoryDef>;
-using Layout = Void.Layout;
-using Void.XMLComponents;
-using Void;
-using Void.Components;
-using Void.Taffy;
+using Void.Native;
+using static Void.Native.Components;
+using UIBranch = Void.Taffy.UIBranch;
 
 namespace PawnEditor.v2;
 
 public class SectionWorker_Backstory : SectionWorker<Pawn>
 {
+    private static readonly Style SlotStyle = new() { display = TaffyDisplay.Block };
+
+    /// <summary>
+    ///     Only pawns with a story have backstories. Animals and mechs, for one, do not.
+    /// </summary>
+    public override bool ShowFor(object obj)
+    {
+        return base.ShowFor(obj) && obj is Pawn { story: not null };
+    }
+
     public override void DoSectionContents(UIBranch b, Pawn pawn)
     {
-        foreach (var slot in (List<string>)["childhood", "adulthood"])
-        {
-            var backstorySlot = slot == "childhood" ? BackstorySlot.Childhood : BackstorySlot.Adulthood;
-
-            DoBackstoryItem(b, backstorySlot);
-        }
-
-        void DoBackstoryItem(UIBranch b, BackstorySlot slot) {
-
-            var backstory = pawn.story.GetBackstory(slot);
-            var buttonLabel = backstory != null ? backstory.TitleCapFor(pawn.gender) : "None".Translate().ToString();
-
-            Action<Rect>? onHover = null;
-            if (backstory != null)
-                onHover = r =>
-                {
-                    var tip = buttonLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
-                    var desc = backstory.FullDescriptionFor(pawn).Resolve();
-                    TooltipHandler.TipRegion(r, tip + desc);
-                };
-
-
-
-
-
-        }
-
+        DoBackstoryItem(b, pawn, BackstorySlot.Childhood);
+        DoBackstoryItem(b, pawn, BackstorySlot.Adulthood);
     }
 
-    protected void OnLayout(Layout layout, Pawn pawn)
-    {
-        foreach (var slot in (List<string>)["childhood", "adulthood"])
-        {
-            var backstorySlot = slot == "childhood" ? BackstorySlot.Childhood : BackstorySlot.Adulthood;
-            var btn = layout.ComponentById<ButtonElement>($"button_{slot}");
-
-            DoBackstoryItem(btn, pawn, backstorySlot);
-        }
-    }
-
-
-
-    private static void DoBackstoryItem(ButtonElement button, Pawn pawn, BackstorySlot slot)
+    private static void DoBackstoryItem(UIBranch b, Pawn pawn, BackstorySlot slot)
     {
         var backstory = pawn.story.GetBackstory(slot);
         var buttonLabel = backstory != null ? backstory.TitleCapFor(pawn.gender) : "None".Translate().ToString();
 
         Action<Rect>? onHover = null;
         if (backstory != null)
-            onHover = r =>
-            {
-                var tip = buttonLabel.Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
-                var desc = backstory.FullDescriptionFor(pawn).Resolve();
-                TooltipHandler.TipRegion(r, tip + desc);
-            };
+            onHover = r => TooltipHandler.TipRegion(r, DescribeBackstory(backstory, pawn));
 
-        button.Label = buttonLabel;
-        button.OnClick = _ =>
-        {
-            if (backstory != null)
-                Find.WindowStack.Add(new Window_Table<BackstoryDef>(
-                    GetBackstoryTable(pawn, slot),
-                    [.. DefDatabase<BackstoryDef>.AllDefs.Where(td => td.slot == slot)],
-                    [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()],
-                    Find.WindowStack.WindowOfType<Window_Editor>(),
-                    selectedItemSlot: (b, i) =>
-                    {
-                        b.Div(b2 =>
-                        {
-                            var newBackstory = i != null
-                                ? i.TitleCapFor(pawn.gender)
-                                : "None".Colorize(ColoredText.SubtleGrayColor);
-                            var currentBackstory = slot == BackstorySlot.Adulthood
-                                ? pawn.story.adulthood
-                                : pawn.story.Childhood;
-                            b2.Text($"Current: {currentBackstory.TitleCapFor(pawn.gender)}".Colorize(ColoredText
-                                .SubtleGrayColor));
-                            b2.Text($"New: {newBackstory}");
-                        }, new StyleOverride { display = TaffyDisplay.Block });
-                    }));
-            else Messages.Message($"This pawn can not have an {slot} story.", MessageTypeDefOf.RejectInput);
-        };
-        button.OnHover = onHover;
-        button.Disabled = backstory == null;
+        b.Button(buttonLabel, onHover: onHover, disabled: backstory == null,
+            onClick: _ => OpenTable(pawn, slot));
     }
 
-    private static Table<BackstoryDef> GetBackstoryTable(Pawn pawn, BackstorySlot slot)
+    /// <summary>
+    ///     The title and the description, as shown in a tooltip.
+    /// </summary>
+    private static string DescribeBackstory(BackstoryDef backstory, Pawn pawn)
     {
-        return new Table<BackstoryDef>(
-            null,
-            [
-                Col.Create<PawnContext>(
-                    TrackSizingFunction.Fr(),
-                    (grid, def, ctx) => grid.Text(def.TitleCapFor(ctx.Value.gender)),
-                    "Title",
-                    (a, b) => string.Compare(
-                        a.TitleCapFor(pawn.gender),
-                        b.TitleCapFor(pawn.gender),
-                        StringComparison.CurrentCultureIgnoreCase)
-                ),
-                Col.CreateText(
-                    TrackSizingFunction.Px(150f),
-                    def => def.modContentPack?.Name ?? "",
-                    "Source",
-                    ColoredText.SubtleGrayColor
-                ),
-                Col.CreateText(
-                    TrackSizingFunction.Fr(),
-                    def => string.Join(", ", def.spawnCategories),
-                    "Spawn categories",
-                    ColoredText.SubtleGrayColor
-                )
-            ],
-            onRowHover: (rowRect, rowBackstory, ctx) =>
+        var title = backstory.TitleCapFor(pawn.gender).Colorize(ColoredText.TipSectionTitleColor);
+        return title + "\n\n" + backstory.FullDescriptionFor(pawn).Resolve();
+    }
+
+    private static void OpenTable(Pawn pawn, BackstorySlot slot)
+    {
+        Find.WindowStack.Add(new Window_Table<BackstoryDef>(
+            [.. DefDatabase<BackstoryDef>.AllDefs.Where(def => def.slot == slot)],
+            GetColumns(pawn),
+            Find.WindowStack.WindowOfType<Window_Editor>(),
+            GetFilters(),
+            def => def.TitleCapFor(pawn.gender),
+            def => SetBackstory(pawn, slot, def),
+            (b, selected) =>
             {
-                if (ctx is not PawnContext pawnCtx) return;
-                var tip = rowBackstory.TitleCapFor(pawnCtx.Value.gender)
-                    .Colorize(ColoredText.TipSectionTitleColor) + "\n\n";
-                var desc = rowBackstory.FullDescriptionFor(pawn).Resolve();
-                TooltipHandler.TipRegion(rowRect, tip + desc);
+                var current = slot == BackstorySlot.Adulthood ? pawn.story.Adulthood : pawn.story.Childhood;
+                var currentTitle = current?.TitleCapFor(pawn.gender) ?? "None";
+                var newTitle = selected != null
+                    ? selected.TitleCapFor(pawn.gender)
+                    : "None".Colorize(ColoredText.SubtleGrayColor);
+
+                b.Div(slotBuilder =>
+                {
+                    slotBuilder.Text($"Current: {currentTitle}".Colorize(ColoredText.SubtleGrayColor));
+                    slotBuilder.Text($"New: {newTitle}");
+                }, style: SlotStyle);
             },
-            context: new PawnContext(pawn),
-            searchProjection: def => def.TitleCapFor(pawn.gender)
-        );
+            (rect, def) => TooltipHandler.TipRegion(rect, DescribeBackstory(def, pawn))));
+    }
+
+    private static IReadOnlyList<RowFilter<BackstoryDef>> GetFilters()
+    {
+        return [new RowFilter_DefContentSource<BackstoryDef>(), new RowFilter_SpawnCategory()];
+    }
+
+    private static IReadOnlyList<TableColumn<BackstoryDef>> GetColumns(Pawn pawn)
+    {
+        return
+        [
+            TableColumn<BackstoryDef>.Text("Title", def => def.TitleCapFor(pawn.gender),
+                comparison: StringComparison.CurrentCultureIgnoreCase),
+            TableColumn<BackstoryDef>.Text("Source", def => def.modContentPack?.Name ?? "",
+                TableColumnWidth.Fixed(150f), ColoredText.SubtleGrayColor),
+            TableColumn<BackstoryDef>.Text("Spawn categories", def => string.Join(", ", def.spawnCategories),
+                color: ColoredText.SubtleGrayColor)
+        ];
+    }
+
+    private static void SetBackstory(Pawn pawn, BackstorySlot slot, BackstoryDef backstory)
+    {
+        if (slot == BackstorySlot.Adulthood) pawn.story.Adulthood = backstory;
+        else pawn.story.Childhood = backstory;
+
+        // Backstories can disable work types and skills.
+        pawn.Notify_DisabledWorkTypesChanged();
+        pawn.skills?.Notify_SkillDisablesChanged();
     }
 }
