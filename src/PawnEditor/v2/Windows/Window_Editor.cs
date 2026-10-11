@@ -34,6 +34,8 @@ class Window_Editor : Window
     /// </summary>
     private TabWorker? _activeTabWorker;
 
+    public override float Margin => 0f;
+
     /// <summary>
     /// Current selected context. Can be any type. WeakRef ensures no errors in the situation that it is dropped by the GC.
     /// </summary>
@@ -90,23 +92,35 @@ class Window_Editor : Window
             */
 
             // Tabs
+            _ctx.TryGetTarget(out var innerCtx);
             b.Div(b2 =>
             {
+                if (innerCtx is Thing t)
+                    b.Text(AdjustedLabelFor(t), style: new Style { fontSize = GameFont.Medium, margin = new TaffyEdges(16f,0f,8f,16f) });
+
                 // DrawTabs draws above
                 b2.Div(draw: r => TabDrawer.DrawTabs(r with { y = r.yMax }, _allTabRecords), style: new Style { height = Dimension.Px(TabDrawer.TabHeight), width = Dimension.Percent(1f), minHeight = Dimension.Px(TabDrawer.TabHeight) });
 
                 // Provide context
-                _ctx.TryGetTarget(out var innerCtx);
                 b2.Provide("ctx", innerCtx, b3 =>
                 {
-                    b3.Div(b4 => _activeTabWorker?.DoTabContents(b4), draw: Verse.Widgets.DrawMenuSection, style: new Style { flexGrow = 1f, flexDirection = TaffyFlexDirection.Column, padding = new TaffyEdges(Dimension.Px(GenUI.Gap)) });
+                    b3.Div(b4 => _activeTabWorker?.DoTabContents(b4), style: new Style { flexGrow = 1f, flexDirection = TaffyFlexDirection.Column, padding = new TaffyEdges(Dimension.Px(GenUI.Gap)) });
                 });
 
             }, style: new Style { width = Dimension.Percent(1f), display = TaffyDisplay.Flex, flexDirection = TaffyFlexDirection.Column });
 
-        }, style: new Style { width = Dimension.Percent(1f), height = Dimension.Percent(1f), display = TaffyDisplay.Flex, gap = new TaffyAxes(Dimension.Px(GenUI.Gap)) });
+        }, style: new Style { width = Dimension.Percent(1f), height = Dimension.Percent(1f), display = TaffyDisplay.Flex, gap = new TaffyAxes(GenUI.Gap)});
         _tree.Draw(inRect);
     }
+
+    private static string AdjustedLabelFor(Thing thing)
+    {
+        // The rect is only used to potentially clamp the text, but this is already handled by taffy text as well,
+        // so we can just pass a dummy rect.
+        var r = new Rect(0, 0, 999, 0);
+        return InspectPaneUtility.AdjustedLabelFor([thing], r);
+    }
+
 
     public bool Select(object item)
     {

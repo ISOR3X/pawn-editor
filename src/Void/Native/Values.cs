@@ -18,6 +18,7 @@ public partial struct TaffyDimension : IEquatable<TaffyDimension>
     public override int GetHashCode() => HashCode.Combine(value, unit);
     public static bool operator ==(TaffyDimension a, TaffyDimension b) => a.Equals(b);
     public static bool operator !=(TaffyDimension a, TaffyDimension b) => !a.Equals(b);
+    public static implicit operator TaffyDimension(float f) => new(f, TaffyUnit.Length);
 }
 
 public partial struct TaffyTrackSizingFunction : IEquatable<TaffyTrackSizingFunction>

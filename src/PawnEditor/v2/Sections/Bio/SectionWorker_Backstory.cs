@@ -9,19 +9,7 @@ namespace PawnEditor.v2;
 public class SectionWorker_Backstory : SectionWorker<Pawn>
 {
     private static readonly Style SlotStyle = new() { display = TaffyDisplay.Block };
-
-    private static readonly Style TitleStyle = new() { color = ColoredText.TipSectionTitleColor };
-
-    private static readonly Style LabelStyle = new() { width = Dimension.Px(100f) };
     private static readonly Style ButtonStyle = new() { width = Dimension.Px(180f) };
-
-    private static readonly Style RowStyle = new()
-    {
-        display = TaffyDisplay.Flex,
-        flexDirection = TaffyFlexDirection.Row,
-        alignItems = TaffyAlignItems.Center,
-        gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall))
-    };
 
     /// <summary>
     ///     Only pawns with a story have backstories. Animals and mechs, for one, do not.
@@ -38,7 +26,7 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
         {
             DoBackstoryItem(b2, pawn, BackstorySlot.Childhood);
             DoBackstoryItem(b2, pawn, BackstorySlot.Adulthood);
-        }, style: new Style { display = TaffyDisplay.Flex, flexWrap = TaffyFlexWrap.Wrap, gap = new TaffyAxes(Dimension.Px(16f), Dimension.Px(8f)) });
+        }, style: new Style { display = TaffyDisplay.Flex, flexWrap = TaffyFlexWrap.Wrap, gap = new TaffyAxes(16f, 8f) });
     }
 
     private static void DoBackstoryItem(UIBranch b, Pawn pawn, BackstorySlot slot)
@@ -50,13 +38,8 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
         if (backstory != null)
             onHover = r => TooltipHandler.TipRegion(r, DescribeBackstory(backstory, pawn));
 
-        // Both rows come from this call site, so they are told apart by their order.
-        b.Div(row =>
-        {
-            row.Text(slot.ToString(), LabelStyle);
-            row.Button(buttonLabel, onHover: onHover, disabled: backstory == null,
-                onClick: _ => OpenTable(pawn, slot), style: ButtonStyle);
-        }, style: RowStyle);
+        b.LabeledWidget(slot.ToString(), b2 => b2.Button(buttonLabel, onHover: onHover, disabled: backstory == null,
+            onClick: _ => OpenTable(pawn, slot), style: ButtonStyle));
     }
 
     /// <summary>

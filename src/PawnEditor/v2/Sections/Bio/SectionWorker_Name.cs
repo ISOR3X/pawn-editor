@@ -8,9 +8,9 @@ public class SectionWorker_Name : SectionWorker<Pawn>
 {
     public override bool ShowFor(object obj) => base.ShowFor(obj) && obj is Pawn { Faction: not null, Name: not null };
 
+    // TODO: Title renaming?
     public override void DoSectionContents(UIBranch b, Pawn pawn)
     {
-        // TODO: Title renaming?
         b.SectionLabel("Name");
 
         b.Div(b2 =>
@@ -39,6 +39,13 @@ public class SectionWorker_Name : SectionWorker<Pawn>
                     b2.Text(pawn.Name.ToStringFull);
                     break;
             }
+
+            b2.Button(icon: TexButton.Rename, variant: Void.Native.Components.ButtonVariant.Ghost, onClick: r =>
+            {
+                Messages.Message("Not implemented yet", MessageTypeDefOf.RejectInput);
+                // FloatWindow.ToggleState(r, () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
+            });
+
         }, style: new Style
         {
             display = TaffyDisplay.Flex,
@@ -47,16 +54,10 @@ public class SectionWorker_Name : SectionWorker<Pawn>
             gap = new TaffyAxes(Dimension.Px(GenUI.GapTiny))
         });
 
-        b.Button(icon: TexButton.Rename, variant: Void.Native.Components.ButtonVariant.Ghost, onClick: r =>
-        {
-            Messages.Message("Not implemented yet", MessageTypeDefOf.RejectInput);
-            // FloatWindow.ToggleState(r, () => new FloatWindow_NamePawn(r, pawn, Find.WindowStack.WindowOfType<Window_Editor>()));
-        });
-
         return;
 
         /// <summary>
-        /// Convinience setter for a name. Void inputs must write directly in order to work.
+        /// Convenience setter for a name. Void inputs must write directly in order to work.
         /// </summary>
         void SetName(string? first = null, string? nick = null, string? last = null)
         {

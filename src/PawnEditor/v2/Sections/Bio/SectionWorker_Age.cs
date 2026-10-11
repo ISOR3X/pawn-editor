@@ -14,15 +14,9 @@ public class SectionWorker_Age : SectionWorker<Pawn>
 
         b.Div(b2 =>
         {
-            b2.Text("Biological");
-            b2.InputNumber(tracker.AgeBiologicalYears, t => SetAge(bio: t), style: new Style { margin = new TaffyEdges(Dimension.Px(0f), Dimension.Px(GenUI.Gap), Dimension.Px(0f), Dimension.Px(0f)) });
-        });
-
-        b.Div(b2 =>
-        {
-            b2.Text("Chronological");
-            b2.InputNumber(tracker.AgeChronologicalYears, t => SetAge(chrono: t));
-        });
+            b2.LabeledWidget("Biological", b3 => b3.InputNumber(tracker.AgeBiologicalYears, t => SetAge(bio: t)));
+            b2.LabeledWidget("Chronological", b3 => b3.InputNumber(tracker.AgeChronologicalYears, t => SetAge(chrono: t)));
+        }, style: new Style { display = TaffyDisplay.Flex, flexWrap = TaffyFlexWrap.Wrap, gap = new TaffyAxes(16f, 8f) });
 
         void SetAge(int? bio = null, int? chrono = null)
         {
