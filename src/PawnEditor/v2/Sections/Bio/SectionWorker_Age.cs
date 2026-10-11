@@ -12,12 +12,17 @@ public class SectionWorker_Age : SectionWorker<Pawn>
         b.SectionLabel("Age");
         var tracker = pawn.ageTracker;
 
-        b.Text("Biological");
-        b.InputNumber(tracker.AgeBiologicalYears, t => SetAge(bio: t), style: new Style { margin = new TaffyEdges(Dimension.Px(0f), Dimension.Px(GenUI.Gap), Dimension.Px(0f), Dimension.Px(0f)) });
+        b.Div(b2 =>
+        {
+            b2.Text("Biological");
+            b2.InputNumber(tracker.AgeBiologicalYears, t => SetAge(bio: t), style: new Style { margin = new TaffyEdges(Dimension.Px(0f), Dimension.Px(GenUI.Gap), Dimension.Px(0f), Dimension.Px(0f)) });
+        });
 
-        b.Text("Chronological");
-        b.InputNumber(tracker.AgeChronologicalYears, t => SetAge(chrono: t));
-
+        b.Div(b2 =>
+        {
+            b2.Text("Chronological");
+            b2.InputNumber(tracker.AgeChronologicalYears, t => SetAge(chrono: t));
+        });
         void SetAge(int? bio = null, int? chrono = null)
         {
             if (bio is { } b)

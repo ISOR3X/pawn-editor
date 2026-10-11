@@ -16,6 +16,16 @@ public static partial class Components
     private const float DefaultInputWidth = 128f;
 
     /// <summary>
+    ///     The text of a text input as of the last edit. The tree is built once per frame, but IMGUI sends several
+    ///     events in a frame (a key press, then the repaint) and the caller's value only changes in the next build.
+    ///     Without this, the repaint draws the old text with the new cursor, and the typed character ends up after it.
+    /// </summary>
+    private sealed class InputState
+    {
+        public string Text = "";
+    }
+
+    /// <summary>
     ///     Locked GUIStyle: all state backgrounds/colors match normal so that spurious focus transfers (e.g. button
     ///     clicks inside the field rect) produce no visual change. Used when the field is not genuinely focused.
     /// </summary>
@@ -110,6 +120,10 @@ public static partial class Components
             var key = UIBranch.ResolveKey(id, file, line);
             var controlName = $"VoidInput_{key}";
 
+            // The caller's value is the source of truth at every build; what is typed in between lives in the state.
+            var state = branch.UpsertState(key, () => new InputState { Text = value });
+            if (state.Text != value) state.Text = value;
+
             var baseStyle = InputStyles.Get(size);
             var mergedStyle = style == null ? baseStyle : style.Merge(baseStyle);
             var color = mergedStyle.color ?? Color.white;
@@ -122,28 +136,29 @@ public static partial class Components
                 // Resolved before the field draws so the locked style applies on the click frame.
                 var (isFocused, effectivelyFocused) = GetFocusState(controlName, r);
 
-                var next = value;
+                var next = state.Text;
                 using (new TextBlock(InputMetrics(size)))
                 using (new GUIColor(disabled ? color with { a = color.a * 0.5f } : color))
                 {
                     var inputStyle = ResolveTextFieldStyle(variant, effectivelyFocused);
                     if (disabled)
                     {
-                        GUI.Label(r, value, inputStyle);
+                        GUI.Label(r, state.Text, inputStyle);
                     }
                     else
                     {
                         GUI.SetNextControlName(controlName);
-                        next = GUI.TextField(r, value, inputStyle);
+                        next = GUI.TextField(r, state.Text, inputStyle);
                     }
                 }
 
                 if (disabled) return;
                 if (isFocused && !effectivelyFocused) Unfocus();
 
-                if (next == value) return;
+                if (next == state.Text) return;
                 if (maxLength.HasValue && next.Length > maxLength.Value) return;
                 if (pattern != null && !pattern.IsMatch(next)) return;
+                state.Text = next;
                 onChange(next);
             }, style: mergedStyle, id: key);
         }

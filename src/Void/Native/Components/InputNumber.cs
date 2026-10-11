@@ -13,6 +13,14 @@ public static partial class Components
     private sealed class InputNumberState
     {
         public string Buffer = "";
+
+        /// <summary>
+        ///     The value the buffer was last synced to. Only when the caller's value differs from this did it change
+        ///     from outside; a buffer that differs from the value is just being typed in, until it is committed.
+        /// </summary>
+        public int Seen;
+
+        public bool Initialized;
     }
 
     private static string FilterNumeric(string input, bool allowNegative)
@@ -47,9 +55,14 @@ public static partial class Components
             var controlName = $"VoidInputNumber_{key}";
             var state = branch.UpsertState(key, () => new InputNumberState());
 
-            // If the value is not equal to the buffer, that means it has changed externally.
-            // Reset the buffer in this case.
-            if (value.ToString() != state.Buffer) state.Buffer = value.ToString();
+            // Follow the value when it changed from outside. Comparing it to the buffer instead would wipe whatever is
+            // being typed at the next build, since a typed number is only committed on blur.
+            if (!state.Initialized || state.Seen != value)
+            {
+                state.Initialized = true;
+                state.Seen = value;
+                state.Buffer = value.ToString();
+            }
 
             var baseStyle = InputStyles.Get(size);
             var mergedStyle = style == null ? baseStyle : style.Merge(baseStyle);
@@ -124,8 +137,9 @@ public static partial class Components
                 state.Buffer = clamped.ToString();
                 if (clamped == value) return;
                 value = clamped;
-                // If the caller ignores onChange, its value will differ next frame and the widget reverts, which is
-                // the correct outcome for a rejected commit.
+                state.Seen = clamped;
+                // If the caller ignores onChange, its value will differ from Seen next frame and the widget reverts,
+                // which is the correct outcome for a rejected commit.
                 onChange(clamped);
             }
         }

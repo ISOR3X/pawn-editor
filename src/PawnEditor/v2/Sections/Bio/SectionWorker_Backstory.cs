@@ -13,6 +13,7 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
     private static readonly Style TitleStyle = new() { color = ColoredText.TipSectionTitleColor };
 
     private static readonly Style LabelStyle = new() { width = Dimension.Px(100f) };
+    private static readonly Style ButtonStyle = new() { width = Dimension.Px(180f) };
 
     private static readonly Style RowStyle = new()
     {
@@ -32,9 +33,12 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
 
     public override void DoSectionContents(UIBranch b, Pawn pawn)
     {
-        b.Text("Backstory", TitleStyle);
-        DoBackstoryItem(b, pawn, BackstorySlot.Childhood);
-        DoBackstoryItem(b, pawn, BackstorySlot.Adulthood);
+        b.SectionLabel("Backstory");
+        b.Div(b2 =>
+        {
+            DoBackstoryItem(b2, pawn, BackstorySlot.Childhood);
+            DoBackstoryItem(b2, pawn, BackstorySlot.Adulthood);
+        }, style: new Style { display = TaffyDisplay.Flex, flexWrap = TaffyFlexWrap.Wrap, gap = new TaffyAxes(Dimension.Px(16f), Dimension.Px(8f)) });
     }
 
     private static void DoBackstoryItem(UIBranch b, Pawn pawn, BackstorySlot slot)
@@ -51,7 +55,7 @@ public class SectionWorker_Backstory : SectionWorker<Pawn>
         {
             row.Text(slot.ToString(), LabelStyle);
             row.Button(buttonLabel, onHover: onHover, disabled: backstory == null,
-                onClick: _ => OpenTable(pawn, slot));
+                onClick: _ => OpenTable(pawn, slot), style: ButtonStyle);
         }, style: RowStyle);
     }
 
