@@ -19,8 +19,6 @@ public static partial class Components
         ///     from outside; a buffer that differs from the value is just being typed in, until it is committed.
         /// </summary>
         public int Seen;
-
-        public bool Initialized;
     }
 
     private static string FilterNumeric(string input, bool allowNegative)
@@ -53,13 +51,12 @@ public static partial class Components
         {
             var key = UIBranch.ResolveKey(id, file, line);
             var controlName = $"VoidInputNumber_{key}";
-            var state = branch.UpsertState(key, () => new InputNumberState());
+            var state = branch.UpsertState(key, () => new InputNumberState { Seen = value, Buffer = value.ToString() });
 
             // Follow the value when it changed from outside. Comparing it to the buffer instead would wipe whatever is
             // being typed at the next build, since a typed number is only committed on blur.
-            if (!state.Initialized || state.Seen != value)
+            if (state.Seen != value)
             {
-                state.Initialized = true;
                 state.Seen = value;
                 state.Buffer = value.ToString();
             }
@@ -104,6 +101,7 @@ public static partial class Components
                     var inputStyle = ResolveTextFieldStyle(variant, effectivelyFocused);
                     if (disabled)
                     {
+                        TakeControlId();
                         GUI.Label(r, state.Buffer, inputStyle);
                     }
                     else

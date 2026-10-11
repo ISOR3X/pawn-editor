@@ -16,16 +16,6 @@ public static partial class Components
     private const float DefaultInputWidth = 128f;
 
     /// <summary>
-    ///     The text of a text input as of the last edit. The tree is built once per frame, but IMGUI sends several
-    ///     events in a frame (a key press, then the repaint) and the caller's value only changes in the next build.
-    ///     Without this, the repaint draws the old text with the new cursor, and the typed character ends up after it.
-    /// </summary>
-    private sealed class InputState
-    {
-        public string Text = "";
-    }
-
-    /// <summary>
     ///     Locked GUIStyle: all state backgrounds/colors match normal so that spurious focus transfers (e.g. button
     ///     clicks inside the field rect) produce no visual change. Used when the field is not genuinely focused.
     /// </summary>
@@ -43,6 +33,16 @@ public static partial class Components
         flexShrink = 0f,
         fontSize = InputMetrics(size)
     });
+
+    /// <summary>
+    ///     Makes a disabled field use up a control id like an enabled one does. IMGUI hands them out in call order and
+    ///     keyboard focus is one of them, so when a field is enabled and starts taking an id, every field after it would
+    ///     get the next one, and the focus would move to the field before the one that had it.
+    /// </summary>
+    private static void TakeControlId()
+    {
+        GUIUtility.GetControlID(FocusType.Passive);
+    }
 
     /// <summary>Clears keyboard focus. Can be called from any draw callback.</summary>
     private static void Unfocus()
@@ -78,10 +78,10 @@ public static partial class Components
         if (LockedTextFields.TryGetValue(font, out var locked)) return locked;
         locked = new GUIStyle(Verse.Text.CurTextFieldStyle);
         locked.focused = new GUIStyleState
-            { background = locked.normal.background, textColor = locked.normal.textColor };
+        { background = locked.normal.background, textColor = locked.normal.textColor };
         locked.hover = new GUIStyleState { background = locked.normal.background, textColor = locked.normal.textColor };
         locked.active = new GUIStyleState
-            { background = locked.normal.background, textColor = locked.normal.textColor };
+        { background = locked.normal.background, textColor = locked.normal.textColor };
         return LockedTextFields[font] = locked;
     }
 
@@ -120,10 +120,6 @@ public static partial class Components
             var key = UIBranch.ResolveKey(id, file, line);
             var controlName = $"VoidInput_{key}";
 
-            // The caller's value is the source of truth at every build; what is typed in between lives in the state.
-            var state = branch.UpsertState(key, () => new InputState { Text = value });
-            if (state.Text != value) state.Text = value;
-
             var baseStyle = InputStyles.Get(size);
             var mergedStyle = style == null ? baseStyle : style.Merge(baseStyle);
             var color = mergedStyle.color ?? Color.white;
@@ -136,29 +132,29 @@ public static partial class Components
                 // Resolved before the field draws so the locked style applies on the click frame.
                 var (isFocused, effectivelyFocused) = GetFocusState(controlName, r);
 
-                var next = state.Text;
+                var next = value;
                 using (new TextBlock(InputMetrics(size)))
                 using (new GUIColor(disabled ? color with { a = color.a * 0.5f } : color))
                 {
                     var inputStyle = ResolveTextFieldStyle(variant, effectivelyFocused);
                     if (disabled)
                     {
-                        GUI.Label(r, state.Text, inputStyle);
+                        GUIUtility.GetControlID(FocusType.Passive);
+                        GUI.Label(r, value, inputStyle);
                     }
                     else
                     {
                         GUI.SetNextControlName(controlName);
-                        next = GUI.TextField(r, state.Text, inputStyle);
+                        next = GUI.TextField(r, value, inputStyle);
                     }
                 }
 
                 if (disabled) return;
                 if (isFocused && !effectivelyFocused) Unfocus();
 
-                if (next == state.Text) return;
+                if (next == value) return;
                 if (maxLength.HasValue && next.Length > maxLength.Value) return;
                 if (pattern != null && !pattern.IsMatch(next)) return;
-                state.Text = next;
                 onChange(next);
             }, style: mergedStyle, id: key);
         }

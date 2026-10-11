@@ -37,7 +37,17 @@ public unsafe class UITree : IDisposable
     /// <summary>The frame (<see cref="Time.frameCount" />) the tree was last built in.</summary>
     private int _builtFrame = -1;
 
+    /// <summary>How many times the tree was built, so a rebuild within a frame is not mistaken for the same build.</summary>
+    private int _buildCount;
+
     private bool _disposed;
+
+    /// <summary>
+    ///     Whether an input event was handled since the last build. IMGUI sends several events in a frame (Layout, input,
+    ///     Repaint) but a build is only repeated within a frame after one of these: the callbacks of a build hold the
+    ///     values it was given, which an input event can change, so the events after it need a fresh build.
+    /// </summary>
+    private bool _inputSinceBuild;
 
     /// <summary>The area and build the layouts in <see cref="Frame" /> were computed for, to reuse them if neither changed.</summary>
     private (Rect rect, float availableHeight, int build)? _laidOutFor;
@@ -61,7 +71,8 @@ public unsafe class UITree : IDisposable
 
     public void Build(Action<UIBranch> builder, Style? style = null)
     {
-        if (_disposed || _builtFrame == Time.frameCount) return;
+        // Once per frame, unless an input event came in since: see _inputSinceBuild.
+        if (_disposed || (_builtFrame == Time.frameCount && !_inputSinceBuild)) return;
 
         Frame.Clear();
         Keys.BeginFrame();
@@ -80,6 +91,8 @@ public unsafe class UITree : IDisposable
 
         Frame.Close(root);
         _builtFrame = Time.frameCount;
+        _buildCount++;
+        _inputSinceBuild = false;
     }
 
     public void Draw(Rect rect)
@@ -98,12 +111,27 @@ public unsafe class UITree : IDisposable
 
     private float LayOutAndDraw(Rect rect, float availableHeight)
     {
-        if (_disposed || Frame.Count == 0 || Event.current.type == EventType.Layout) return _rootHeight;
+        // Read before drawing: a callback can mark the event as used.
+        var type = Event.current.type;
+        if (_disposed || Frame.Count == 0 || type == EventType.Layout) return _rootHeight;
 
-        if (_laidOutFor != (rect, availableHeight, _builtFrame)) LayOut(rect, availableHeight);
+        if (_laidOutFor != (rect, availableHeight, _buildCount)) LayOut(rect, availableHeight);
 
         DrawNodes();
+
+        if (CanChangeState(type)) _inputSinceBuild = true;
         return _rootHeight;
+    }
+
+    /// <summary>
+    ///     Whether handling an event can change what the caller's values are, as opposed to events that only measure or
+    ///     paint. Everything else counts: if a kind of event were missing from a list of inputs, its changes would not
+    ///     show until the next frame.
+    /// </summary>
+    private static bool CanChangeState(EventType type)
+    {
+        return type is not (EventType.Layout or EventType.Repaint or EventType.MouseMove or EventType.Used
+            or EventType.Ignore);
     }
 
     private void LayOut(Rect rect, float availableHeight)
@@ -116,7 +144,7 @@ public unsafe class UITree : IDisposable
                 layouts, &result), nameof(void_frame));
         }
 
-        _laidOutFor = (rect, availableHeight, _builtFrame);
+        _laidOutFor = (rect, availableHeight, _buildCount);
         _rootHeight = result.root_height;
         LastFrameLaidOut = result.laid_out != 0;
         if (result.removed_count > 0) ReleaseRemovedNodes();

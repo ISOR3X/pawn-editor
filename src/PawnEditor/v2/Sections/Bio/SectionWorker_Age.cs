@@ -23,6 +23,7 @@ public class SectionWorker_Age : SectionWorker<Pawn>
             b2.Text("Chronological");
             b2.InputNumber(tracker.AgeChronologicalYears, t => SetAge(chrono: t));
         });
+
         void SetAge(int? bio = null, int? chrono = null)
         {
             if (bio is { } b)
