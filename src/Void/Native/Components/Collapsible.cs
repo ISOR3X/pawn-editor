@@ -13,8 +13,6 @@ public static partial class Components
 
     private static readonly Style CollapsibleHeaderStyle = new()
     {
-        justifyContent = TaffyAlignContent.SpaceBetween,
-        gap = new TaffyAxes(Dimension.Px(GenUI.GapSmall)),
         padding = new TaffyEdges(Dimension.Px(0f), Dimension.Px(GenUI.GapTiny), Dimension.Px(0f),
             Dimension.Px(GenUI.GapTiny))
     };
@@ -48,12 +46,12 @@ public static partial class Components
             {
                 b.Div(inner =>
                     {
-                        inner.Text(title, style: new Style { fontSize = GameFont.Tiny });
-                        inner.Icon(open ? TexUI.ArrowDown : TexUI.ArrowLeft,
-                            size: ComponentSize.Small);
+                        inner.Icon(open ? TexButton.Reveal : TexButton.Collapse);
+                        inner.Text(title);
                     }, draw: r =>
                     {
                         Verse.Widgets.DrawHighlightIfMouseover(r);
+                        Verse.Widgets.DrawLineHorizontal(r.x, r.yMax, r.width, PawnTable.BorderColor);
                         if (Verse.Widgets.ButtonInvisible(r)) onToggle(!open);
                     },
                     style: CollapsibleHeaderStyle);

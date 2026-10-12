@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <!-- Pawn: Gear has three sections, so it shows as an expandable group in the sidebar -->
+    <Editor.SectionDef>
+        <defName>Pawn_Basics</defName>
+        <category>Pawn_Overview</category>
+        <label>Faction</label>
+        <order>10</order>
+        <workerClass>Editor.Section_PawnBasics</workerClass>
+    </Editor.SectionDef>
+    <Editor.SectionDef>
+        <defName>Pawn_Equipment</defName>
+        <category>Pawn_Gear</category>
+        <label>Equipment</label>
+        <order>10</order>
+        <workerClass>Editor.Section_PawnEquipment</workerClass>
+    </Editor.SectionDef>
+    <Editor.SectionDef>
+        <defName>Pawn_Apparel</defName>
+        <category>Pawn_Gear</category>
+        <label>Apparel</label>
+        <order>20</order>
+        <workerClass>Editor.Section_PawnApparel</workerClass>
+    </Editor.SectionDef>
+    <Editor.SectionDef>
+        <defName>Pawn_Inventory</defName>
+        <category>Pawn_Gear</category>
+        <label>Inventory</label>
+        <order>30</order>
+        <workerClass>Editor.Section_PawnInventory</workerClass>
+    </Editor.SectionDef>
+    <Editor.SectionDef>
+        <defName>Pawn_Relations</defName>
+        <category>Pawn_Social</category>
+        <label>Relations</label>
+        <order>10</order>
+        <workerClass>Editor.Section_PawnRelations</workerClass>
+    </Editor.SectionDef>
+
+    <!-- Faction -->
+    <Editor.SectionDef>
+        <defName>Faction_Leader</defName>
+        <category>Faction_Overview</category>
+        <label>Leader</label>
+        <order>10</order>
+        <workerClass>Editor.Section_FactionLeader</workerClass>
+    </Editor.SectionDef>
+    <Editor.SectionDef>
+        <defName>Faction_Pawns</defName>
+        <category>Faction_Members</category>
+        <label>Pawns</label>
+        <order>10</order>
+        <workerClass>Editor.Section_FactionPawns</workerClass>
+    </Editor.SectionDef>
+
+    <!-- Thing -->
+    <Editor.SectionDef>
+        <defName>Thing_Holder</defName>
+        <category>Thing_Overview</category>
+        <label>Held by</label>
+        <order>10</order>
+        <workerClass>Editor.Section_ThingHolder</workerClass>
+    </Editor.SectionDef>
+
+</Defs>

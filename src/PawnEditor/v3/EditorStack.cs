@@ -11,6 +11,24 @@ public class EditorEntry(string label, object obj) : IEquatable<EditorEntry>
     private readonly System.WeakReference<object> reference = new(obj);
     public object? Target => reference.TryGetTarget(out var t) ? t : null;
     public bool Equals(EditorEntry? other) => other is not null && ReferenceEquals(Target, other.Target);
+
+    /// <summary>Selected category, by def name. Null means the first visible one.</summary>
+    public string? Category { get; private set; }
+
+    /// <summary>Section chosen in the sidebar, by def name, for highlighting and later scroll-to.</summary>
+    public string? Section { get; private set; }
+
+    public void SelectCategory(string category)
+    {
+        Category = category;
+        Section = null;
+    }
+
+    public void SelectSection(string category, string section)
+    {
+        Category = category;
+        Section = section;
+    }
 }
 
 
@@ -42,7 +60,14 @@ public class EditorState
     }
 
 
-    public object? CurrentTarget => entryStack.Count > 0 ? entryStack[^1].Target : null;
+    /// <summary>
+    ///     Categories the user expanded in the sidebar, by def name. Category names are unique per target type, so
+    ///     this is effectively remembered per type and survives switching between entries.
+    /// </summary>
+    public HashSet<string> ExpandedCategories { get; } = [];
+
+    public EditorEntry? CurrentEntry => entryStack.Count > 0 ? entryStack[^1] : null;
+    public object? CurrentTarget => CurrentEntry?.Target;
     public IReadOnlyList<EditorEntry> Entries => entryStack;
 }
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <!-- Pawn -->
+    <Editor.CategoryDef>
+        <defName>Pawn_Overview</defName>
+        <entity>Verse.Pawn</entity>
+        <label>Overview</label>
+        <order>10</order>
+    </Editor.CategoryDef>
+    <Editor.CategoryDef>
+        <defName>Pawn_Gear</defName>
+        <entity>Verse.Pawn</entity>
+        <label>Gear</label>
+        <order>20</order>
+    </Editor.CategoryDef>
+    <Editor.CategoryDef>
+        <defName>Pawn_Social</defName>
+        <entity>Verse.Pawn</entity>
+        <label>Social</label>
+        <order>30</order>
+    </Editor.CategoryDef>
+
+    <!-- Faction -->
+    <Editor.CategoryDef>
+        <defName>Faction_Overview</defName>
+        <entity>RimWorld.Faction</entity>
+        <label>Overview</label>
+        <order>10</order>
+    </Editor.CategoryDef>
+    <Editor.CategoryDef>
+        <defName>Faction_Members</defName>
+        <entity>RimWorld.Faction</entity>
+        <label>Members</label>
+        <order>20</order>
+    </Editor.CategoryDef>
+
+    <!-- Thing (anything that is not a pawn and has no categories of its own) -->
+    <Editor.CategoryDef>
+        <defName>Thing_Overview</defName>
+        <entity>Verse.Thing</entity>
+        <label>Overview</label>
+        <order>10</order>
+    </Editor.CategoryDef>
+
+</Defs>

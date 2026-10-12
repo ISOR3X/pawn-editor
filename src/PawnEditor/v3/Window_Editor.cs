@@ -7,13 +7,11 @@ using Void.Native;
 namespace Editor;
 
 /// <summary>
-///     Test window for the stack using live game data: World -> factions -> pawns -> gear/things.
-///     Every entity links back to what holds or owns it, so cycles are easy to produce.
+///     Editor window: breadcrumb over a sidebar of the target's categories and a content pane of its sections.
+///     Categories and sections come from defs (see <see cref="EditorRegistry" />).
 /// </summary>
 public class Window_Editor : Window
 {
-    private const int MaxLinksPerGroup = 40; // no scrolling in this mock
-
     private readonly EditorState editorState = GameComponent_EditorStack.StateForCurrentGame();
     private readonly UITree tree = new();
 
@@ -33,60 +31,71 @@ public class Window_Editor : Window
         // resizeable = true;
     }
 
-    private static string LabelFor(object target) => target switch
-    {
-        Pawn pawn => pawn.LabelShortCap,
-        Thing thing => thing.LabelCap,
-        Faction faction => faction.Name,
-        _ => target.ToString()
-    };
+    private static string LabelFor(object target) => Window_Editor_Utility.LabelFor(target);
 
-    /// <summary>Groups of things the target links to. Order matters for the button ids.</summary>
-    private static List<(string group, List<object> targets)> LinksOf(object? target)
+    private void DrawCategory(UIBranch b, EditorEntry entry, VisibleCategory visible, bool isSelected)
     {
-        var groups = new List<(string, List<object>)>();
+        var def = visible.Def;
+        var expanded = editorState.ExpandedCategories.Contains(def.defName);
 
-        void Add(string name, IEnumerable<object?> items)
+        b.Div(b2 =>
         {
-            var list = items.OfType<object>().ToList();
-            if (list.Count > 0) groups.Add((name, list));
+            b2.Button(icon: expanded ? TexButton.Collapse : TexButton.Reveal, onClick: _ =>
+            {
+                if (!expanded) editorState.ExpandedCategories.Add(def.defName);
+                else editorState.ExpandedCategories.Remove(def.defName);
+                if (!isSelected) entry.SelectCategory(def.defName);
+            }, variant: Components.ButtonVariant.Ghost, style: new Style { padding = new TaffyEdges(0f) });
+            b2.Button(def.Title, onClick: _ => { if (!isSelected) entry.SelectCategory(def.defName); }, variant: Components.ButtonVariant.Ghost, style: new Style { padding = new TaffyEdges(4f), width = Dimension.Percent(1f), justifyContent = TaffyAlignContent.Start });
+        }, draw: r => { if (expanded) Widgets.DrawLineHorizontal(r.x, r.yMax, r.width, PawnTable.BorderColor); });
+
+        if (!expanded) return;
+
+        foreach (var section in visible.Sections)
+        {
+            var isCurrent = isSelected && entry.Section == section.defName;
+            var t = section.Title;
+            if (isCurrent) t = "> " + t; // Workaround until we figure out a neat way to style the background of buttons.
+            b.Button(t, onClick: _ => entry.SelectSection(def.defName, section.defName),
+                block: true, variant: Components.ButtonVariant.Ghost, style: new Style { padding = new TaffyEdges(4f, 0f, 0f, 32f), width = Dimension.Percent(1f), justifyContent = TaffyAlignContent.Start });
         }
 
-        switch (target)
-        {
-            case null: // root: all factions
-                Add("Factions", Find.FactionManager?.AllFactionsVisible.Cast<object>() ?? []);
-                break;
-            case Faction faction:
-                Add("Leader", [faction.leader]);
-                Add("Pawns", PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead.Where(p => p.Faction == faction));
-                break;
-            case Pawn pawn:
-                Add("Faction", [pawn.Faction]);
-                Add("Equipment", pawn.equipment?.AllEquipmentListForReading ?? []);
-                Add("Apparel", pawn.apparel?.WornApparel ?? []);
-                Add("Inventory", pawn.inventory?.innerContainer ?? []);
-                Add("Relations", pawn.relations?.DirectRelations.Select(r => r.otherPawn) ?? []);
-                break;
-            case Thing thing:
-                Add("Held by", [HolderPawnOf(thing)]);
-                break;
-        }
-
-        return groups;
+        // b.Collapsible(editorState.ExpandedCategories.Contains(def.defName), open =>
+        // {
+        //     if (open) editorState.ExpandedCategories.Add(def.defName);
+        //     else editorState.ExpandedCategories.Remove(def.defName);
+        //     if (!isSelected) entry.SelectCategory(def.defName);
+        // }, def.Title, content =>
+        // {
+        //     foreach (var section in visible.Sections)
+        //     {
+        //         var isCurrent = isSelected && entry.Section == section.defName;
+        //         content.Button(section.Title, onClick: _ => entry.SelectSection(def.defName, section.defName),
+        //             block: true, size: Components.ComponentSize.Small,
+        //             variant: isCurrent ? Components.ButtonVariant.Solid : Components.ButtonVariant.Ghost,
+        //             id: $"sec-{section.defName}");
+        //     }
+        // }, id: $"cat-{def.defName}");
     }
 
-    /// <summary>Walks up through trackers and containers to the pawn carrying the thing, if any.</summary>
-    private static Pawn? HolderPawnOf(Thing thing)
+    private void Select(EditorEntry entry, CategoryDef def)
     {
-        var holder = thing.ParentHolder;
-        while (holder != null && holder is not Pawn) holder = holder.ParentHolder;
-        return holder as Pawn;
+        entry.SelectCategory(def.defName);
+        editorState.ExpandedCategories.Add(def.defName);
     }
 
-    private void AddOpenButton(UIBranch branch, object target, string id) =>
-        branch.Button(LabelFor(target), onClick: _ => editorState.Push(new EditorEntry(LabelFor(target), target)),
-            id: id);
+    /// <summary>The root view stands in for the browser: all visible factions.</summary>
+    private void DrawRoot(UIBranch b)
+    {
+        var factions = Find.FactionManager?.AllFactionsVisible.ToList() ?? [];
+        b.Text($"Factions ({factions.Count})", id: "factions");
+        for (var i = 0; i < factions.Count; i++)
+        {
+            var faction = factions[i];
+            b.Button(LabelFor(faction), onClick: _ => editorState.Push(new EditorEntry(LabelFor(faction), faction)),
+                id: $"faction-{i}");
+        }
+    }
 
     public override void DoWindowContents(Rect inRect)
     {
@@ -129,27 +138,56 @@ public class Window_Editor : Window
 
             }, style: new Style { flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(8f), margin = new TaffyEdges(0f, 0f, 16f, 0f) });
 
+            var entry = editorState.CurrentEntry;
+            var visible = target != null ? EditorRegistry.VisibleFor(target) : [];
+            var selected = visible.FirstOrDefault(v => v.Def.defName == entry?.Category) ?? visible.FirstOrDefault();
+
             b.Div(b2 =>
             {
-
-                b2.Div(b3 =>
-                {
-                    b3.Text("List items");
-                }, draw: Widgets.DrawMenuSection, style: new Style { width = 196f, height = Dimension.Percent(1f) });
-
-                // Content
-                b2.Div(b3 =>
-                {
-                    b3.Text(target == null ? "World" : $"Editing {LabelFor(target ?? "(gone)")}", id: "title");
-                    if (target != null) b3.Button("Back", onClick: _ => editorState.Pop(), id: "back");
-
-                    foreach (var (group, targets) in LinksOf(target))
+                // Sidebar: categories of the target's type, with their sections when expanded.
+                // Hidden when the target has none, so the content pane gets the full width.
+                if (visible.Count > 0)
+                    b2.Div(b3 =>
                     {
-                        b3.Text($"{group} ({targets.Count})", id: $"group-{group}");
-                        for (var i = 0; i < Math.Min(targets.Count, MaxLinksPerGroup); i++)
-                            AddOpenButton(b3, targets[i], $"{group}-{i}");
-                    }
-                }, style: new Style { flexDirection = TaffyFlexDirection.Column, flexGrow = 1f });
+                        foreach (var category in visible)
+                            DrawCategory(b3, entry!, category, category == selected);
+                    },
+                    style: new Style
+                    {
+                        width = 196f,
+                        height = Dimension.Percent(1f),
+                        flexShrink = 0f,
+                        flexDirection = TaffyFlexDirection.Column,
+                        overflowY = TaffyOverflow.Scroll,
+                        padding = new TaffyEdges(4f)
+                    });
+
+                // Content: every section of the selected category, stacked
+                b2.Div(b3 =>
+                {
+                    if (target == null) DrawRoot(b3);
+                    else if (selected == null) b3.Text("Nothing to edit for this type.", id: "empty");
+                    else
+                        foreach (var section in selected.Sections)
+                        {
+                            b3.SectionHeading(section.Title);
+                            b3.Div(b4 =>
+                            {
+                                section.Worker.Build(b4, target, editorState);
+                            }, id: $"section-{section.defName}",
+                            style: new Style
+                            {
+                                flexDirection = TaffyFlexDirection.Column,
+                                gap = new TaffyAxes(4f),
+                                margin = new TaffyEdges(4f, 0f, 16f, 8f)
+                            });
+                        }
+                }, style: new Style
+                {
+                    flexDirection = TaffyFlexDirection.Column,
+                    flexGrow = 1f,
+                    overflowY = TaffyOverflow.Scroll
+                });
 
             }, style: new Style { flexDirection = TaffyFlexDirection.Row, height = Dimension.Percent(1f), gap = new TaffyAxes(16f) });
 

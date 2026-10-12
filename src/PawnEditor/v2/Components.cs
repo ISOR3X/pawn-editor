@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using RimWorld;
 using Verse;
 using Void.Native;
 
@@ -29,6 +30,17 @@ public static class PawnEditorComponents
                 b.Text(label, style: _widgetLabelStyle);
                 builder(b);
             }, style: mergedStyle);
+        }
+
+        public UINode SectionHeading(string label, string? id = null, [CallerFilePath] string? file = null,
+        [CallerLineNumber] int line = 0)
+        {
+            var key = UIBranch.ResolveKey(id, file, line);
+
+            return branch.Div(b =>
+            {
+                b.Text(label, style: new Style {color = ColoredText.SubtleGrayColor});
+            }, draw: r => Verse.Widgets.DrawLineHorizontal(r.x, r.yMax, r.width, PawnTable.BorderColor));
         }
     }
 }
