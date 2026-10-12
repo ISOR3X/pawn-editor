@@ -127,24 +127,33 @@ public class Window_Editor : Window
                     }
                 }, style: new Style { flexDirection = TaffyFlexDirection.Row, alignItems = TaffyAlignItems.Center });
 
-            }, style: new Style { flexDirection = TaffyFlexDirection.Column,gap = new TaffyAxes(8f), margin = new TaffyEdges(0f, 0f, 16f, 0f) });
+            }, style: new Style { flexDirection = TaffyFlexDirection.Column, gap = new TaffyAxes(8f), margin = new TaffyEdges(0f, 0f, 16f, 0f) });
 
-
-
-            // Body: the links of the top entry, or the factions at the root
             b.Div(b2 =>
             {
-                b2.Text(target == null ? "World" : $"Editing {LabelFor(target ?? "(gone)")}", id: "title");
-                if (target != null) b2.Button("Back", onClick: _ => editorState.Pop(), id: "back");
 
-                foreach (var (group, targets) in LinksOf(target))
+                b2.Div(b3 =>
                 {
-                    b2.Text($"{group} ({targets.Count})", id: $"group-{group}");
-                    for (var i = 0; i < Math.Min(targets.Count, MaxLinksPerGroup); i++)
-                        AddOpenButton(b2, targets[i], $"{group}-{i}");
-                }
-            }, style: new Style { flexDirection = TaffyFlexDirection.Column });
-        }, style: new Style { flexDirection = TaffyFlexDirection.Column });
+                    b3.Text("List items");
+                }, draw: Widgets.DrawMenuSection, style: new Style { width = 196f, height = Dimension.Percent(1f) });
+
+                // Content
+                b2.Div(b3 =>
+                {
+                    b3.Text(target == null ? "World" : $"Editing {LabelFor(target ?? "(gone)")}", id: "title");
+                    if (target != null) b3.Button("Back", onClick: _ => editorState.Pop(), id: "back");
+
+                    foreach (var (group, targets) in LinksOf(target))
+                    {
+                        b3.Text($"{group} ({targets.Count})", id: $"group-{group}");
+                        for (var i = 0; i < Math.Min(targets.Count, MaxLinksPerGroup); i++)
+                            AddOpenButton(b3, targets[i], $"{group}-{i}");
+                    }
+                }, style: new Style { flexDirection = TaffyFlexDirection.Column, flexGrow = 1f });
+
+            }, style: new Style { flexDirection = TaffyFlexDirection.Row, height = Dimension.Percent(1f), gap = new TaffyAxes(16f) });
+
+        }, style: new Style { flexDirection = TaffyFlexDirection.Column, width = Dimension.Percent(1f), height = Dimension.Percent(1f) });
         tree.Draw(inRect);
     }
 }
